@@ -84,7 +84,7 @@ PILLAR_J_EPOCHS = 2  # contaminated unversioned history plus the clean v2 epoch 
 FINDING_KIND = 18
 # Cardinality follows `len(hydrate.INPUT_OWNER)`; the test below the catalogue re-derives it so adding an
 # input cannot silently leave this declaration stale.
-INPUT = 13
+INPUT = 14
 # Assistant's chat taxonomy (pillars/ai.py). Declared at 8 x 8 = 64 to leave room for product additions
 # without an unplanned series jump. Estate-wide ONLY; the per-stack cross product is a view.
 CATEGORY = 8

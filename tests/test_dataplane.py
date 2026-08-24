@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import unittest
+from unittest import mock
 
 from collector.sources import dataplane
 
@@ -156,6 +158,27 @@ class RecommendationCoverageTest(unittest.TestCase):
 
         self.assertFalse(out["recommendations_available"])
         self.assertFalse(out["series_counts_complete"])
+
+
+class ConnectRpcTest(unittest.TestCase):
+    def test_read_payload_is_sent_without_relaxing_the_path_guard(self):
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = b'{"names":[]}'
+        with mock.patch("urllib.request.urlopen", return_value=response) as open_url:
+            out = dataplane._connect_rpc(
+                "https://profiles.example/querier.v1.QuerierService/LabelValues",
+                "123", "cap", payload={"name": "service_name", "start": 1, "end": 2},
+            )
+        self.assertEqual(out, {"names": []})
+        request = open_url.call_args.args[0]
+        self.assertEqual(request.method, "POST")
+        self.assertEqual(json.loads(request.data), {"name": "service_name", "start": 1, "end": 2})
+
+        with self.assertRaises(ValueError):
+            dataplane._connect_rpc(
+                "https://profiles.example/write.v1.WriterService/Push", "123", "cap",
+                payload={"series": []},
+            )
 
 
 if __name__ == "__main__":

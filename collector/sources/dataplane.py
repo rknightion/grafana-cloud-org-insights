@@ -24,7 +24,7 @@ import json
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Callable
+from typing import Any, Callable, Mapping
 
 from collector.coverage import Coverage
 from collector.httpclient import ReadOnlyClient
@@ -48,16 +48,25 @@ def auth_for(stack: dict[str, Any], signal: str, cap: str) -> tuple[str, str]:
     return (str(value), cap)
 
 
-def _connect_rpc(url: str, user: str, cap: str, timeout: float = 30.0) -> Any:
+def _connect_rpc(
+    url: str,
+    user: str,
+    cap: str,
+    timeout: float = 30.0,
+    *,
+    payload: Mapping[str, Any] | None = None,
+) -> Any:
     """One narrowly-scoped POST for Connect-RPC list calls (Fleet Management, Pyroscope).
 
     Deliberately NOT part of `ReadOnlyClient`: that class refuses non-GET on purpose and must stay that
-    way. This helper only ever sends `{}` to a `*Service/List*` path, so it cannot mutate anything.
+    way. This helper reaches only `*Service/List*` and `QuerierService` paths. The latter accepts a
+    bounded read-query payload for Pyroscope label values; the path guard remains the mutation barrier.
     """
     if "Service/List" not in url and "QuerierService" not in url:
         raise ValueError(f"refusing non-list Connect-RPC call: {url}")
     token = base64.b64encode(f"{user}:{cap}".encode()).decode()
-    req = urllib.request.Request(url, data=b"{}", method="POST")
+    data = json.dumps(dict(payload or {}), separators=(",", ":")).encode()
+    req = urllib.request.Request(url, data=data, method="POST")
     req.add_header("Authorization", f"Basic {token}")
     req.add_header("Content-Type", "application/json")
     try:

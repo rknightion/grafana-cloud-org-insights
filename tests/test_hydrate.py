@@ -248,6 +248,9 @@ class WithholdingTest(unittest.TestCase):
             hydrate.VIEW_INPUTS.get("risk_alert_routing_findings"), frozenset({"alert_routing"})
         )
 
+    def test_signal_inventory_is_owned_by_t2(self):
+        self.assertEqual(hydrate.INPUT_OWNER.get("signal_inventory"), "t2")
+
     def test_every_declared_view_input_is_a_real_hydratable_input(self):
         """A typo here would withhold a view for ever, since the name could never be satisfied."""
         for view, needed in hydrate.VIEW_INPUTS.items():

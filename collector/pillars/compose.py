@@ -74,6 +74,8 @@ def build_all(
     org_members: dict[str, Any] | None = None,
     dashboard_inventory: dict[str, Any] | None = None,
     datasource_query_cost: dict[str, Any] | None = None,
+    # Gathered and hydrated in GCI-0008.04; consumed by the single Pillar K wiring pass in .05.
+    signal_inventory: dict[str, Any] | None = None,
     now: dt.datetime | None = None,
 ) -> tuple[Metrics, Views]:
     """Compose every pillar, then gate labels and duplicates before anything can be emitted."""

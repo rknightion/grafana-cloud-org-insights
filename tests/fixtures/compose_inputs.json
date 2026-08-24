@@ -31370,6 +31370,7 @@
  },
  "dashboard_inventory": {},
  "datasource_query_cost": {},
+ "signal_inventory": {},
  "org_members": {
   "state": "ok",
   "members": [

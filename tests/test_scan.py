@@ -390,6 +390,21 @@ class T2SourceHealthTest(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertIs(probe.call_args.kwargs["client"], client)
 
+    def test_signal_inventory_uses_the_org_cap_and_shared_client(self):
+        client = object()
+        stacks = [{"slug": "alpha", "status": "active"}]
+        cfg = SimpleNamespace(concurrency=2, cap="org-cap")
+        with mock.patch.object(scan.signal_inventory_src, "probe_all", return_value={
+            "alpha": {"available": True, "metric_names": [], "log_services": [],
+                      "trace_services": [], "profile_services": []},
+        }) as probe:
+            data, errors = scan.gather_signal_inventory(client, cfg, stacks)
+
+        self.assertTrue(data["alpha"]["available"])
+        self.assertEqual(errors, [])
+        self.assertEqual(probe.call_args.args, (client, stacks, "org-cap"))
+        self.assertEqual(probe.call_args.kwargs["concurrency"], 2)
+
     def test_every_secondary_source_failing_marks_the_scan_unhealthy(self):
         stacks = [{"slug": "alpha", "status": "active"}]
 
@@ -422,6 +437,7 @@ class T2SourceHealthTest(unittest.TestCase):
             mock.patch.object(scan, "gather_adaptive_logs", return_value=unavailable),
             mock.patch.object(scan, "gather_public_dashboards", return_value=unavailable),
             mock.patch.object(scan, "gather_alert_routing", return_value=unavailable),
+            mock.patch.object(scan, "gather_signal_inventory", return_value=unavailable),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=hydrate_own),
             mock.patch.object(scan.compose, "build_all", return_value=([], {})),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
@@ -436,7 +452,7 @@ class T2SourceHealthTest(unittest.TestCase):
         self.assertEqual(
             set(result["meta"]["source_failures"]),
             {"service_accounts", "assistant", "insights", "adaptive_logs", "public_dashboards",
-             "alert_routing", "dashboard_inventory", "datasource_query_cost"},
+             "alert_routing", "dashboard_inventory", "datasource_query_cost", "signal_inventory"},
         )
         for name in result["meta"]["source_failures"]:
             with self.subTest(source=name):
@@ -541,6 +557,7 @@ class T2SourceHealthTest(unittest.TestCase):
             mock.patch.object(scan, "gather_adaptive_logs", return_value=(healthy, [])),
             mock.patch.object(scan, "gather_public_dashboards", return_value=(healthy, [])),
             mock.patch.object(scan, "gather_alert_routing", return_value=(healthy, [])),
+            mock.patch.object(scan, "gather_signal_inventory", return_value=(healthy, [])),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=local_hydrate),
             mock.patch.object(scan.compose, "build_all", side_effect=compose),
             mock.patch.object(scan, "assistant_gaps", return_value={}) as assistant_gaps,
@@ -812,14 +829,17 @@ class RateCardLoadingTest(unittest.TestCase):
             mock.patch.object(scan, "gather_adaptive_logs", return_value=available),
             mock.patch.object(scan, "gather_public_dashboards", return_value=available),
             mock.patch.object(scan, "gather_alert_routing", return_value=available),
+            mock.patch.object(scan, "gather_signal_inventory", return_value=available),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=lambda _t, own, **_kw: (own, hydrate.Provenance())),
             mock.patch.object(scan.compose, "build_all", side_effect=compose),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
             mock.patch.object(scan, "load_ratecard", return_value=card),
         ):
-            scan.run_t2(FakeClient(), cfg_for())
+            result = scan.run_t2(FakeClient(), cfg_for())
 
         self.assertIs(seen.get("ratecard"), card)
+        self.assertIs(seen.get("signal_inventory"), available[0])
+        self.assertIs(result["data"].get("signal_inventory"), available[0])
 
     def test_a_malformed_present_card_is_an_honest_configuration_error(self):
         args = type("Args", (), {"out": None})()

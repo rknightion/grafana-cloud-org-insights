@@ -37,6 +37,7 @@ from collector.sources import stack_catalog
 from collector.sources import assistant as assistant_src
 from collector.sources import fleet as fleet_src
 from collector.sources import serviceaccounts as sa_src
+from collector.sources import signal_inventory as signal_inventory_src
 from collector.sources import usage_insights, dataplane, gcom
 
 TIERS = ("t1", "t2", "t3", "t4")
@@ -497,6 +498,29 @@ def gather_insights(
     return data, errors
 
 
+def gather_signal_inventory(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[str]]:
+    """Daily atomic label inventory across all four signal databases using the org CAP."""
+    errors: list[str] = []
+    data = signal_inventory_src.probe_all(
+        client, stacks, cfg.cap, concurrency=cfg.concurrency,
+        on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
+    )
+    available = [record for record in data.values() if record.get("available")]
+    reasons: dict[str, int] = {}
+    for record in data.values():
+        if not record.get("available"):
+            reason = str(record.get("reason") or "unknown")
+            reasons[reason] = reasons.get(reason, 0) + 1
+    console_log(
+        "warn" if errors or len(available) < len(data) else "info",
+        f"signal inventory: {len(available)}/{len(data)} stacks measured"
+        + (f", not available: {reasons}" if reasons else ""),
+    )
+    return data, errors
+
+
 def gather_dashboard_inventory(
     client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], list[str]]:
@@ -794,6 +818,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     errors += pubdash_errors
     alert_routing, alert_routing_errors = gather_alert_routing(client, cfg, selected)
     errors += alert_routing_errors
+    signal_inventory, signal_inventory_errors = gather_signal_inventory(client, cfg, selected)
+    errors += signal_inventory_errors
 
     # Decide publication eligibility BEFORE hydration or composition. A non-empty per-stack mapping is
     # not an available estate input: 1 success plus 268 failures is partial, not a tiny but valid total.
@@ -808,6 +834,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "adaptive_logs": adaptive_logs,
         "public_dashboards": pubdash,
         "alert_routing": alert_routing,
+        "signal_inventory": signal_inventory,
     }
     sources = {
         "stack_detail": source_report(expected, detail, available=lambda _r: True),
@@ -846,6 +873,10 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "alert_routing": source_report(
             expected, alert_routing, available=lambda r: bool(r.get("available")),
             errors=alert_routing_errors,
+        ),
+        "signal_inventory": source_report(
+            expected, signal_inventory, available=lambda r: bool(r.get("available")),
+            errors=signal_inventory_errors,
         ),
     }
     source_failures = sorted(name for name, report in sources.items() if not report["healthy"])

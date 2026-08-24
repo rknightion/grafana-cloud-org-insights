@@ -113,6 +113,9 @@ INPUT_OWNER: dict[str, str] = {
     # usage-insights observation; neither emits metric labels for dashboard or datasource identity.
     "dashboard_inventory": "t2",
     "datasource_query_cost": "t2",
+    # Daily, atomic four-signal label inventory. Names stay in the hydrated S3 input and never become
+    # metric labels; Pillar K derives only bounded counts and enums from it.
+    "signal_inventory": "t2",
 }
 
 # What each view actually needs, beyond inventory.
