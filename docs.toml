@@ -22,7 +22,7 @@ exclude = [
 ]
 
 # The hub injects shared/social/<slug>.{png,svg} at these paths. Naming them
-# here is what puts a real og:image on every page — without it the tag falls
+# here is what puts a real og:image on every page - without it the tag falls
 # back to the site URL and every share preview is blank.
 [assets]
 social_image = "assets/social-card.png"

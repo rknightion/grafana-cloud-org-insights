@@ -46,7 +46,7 @@ Optional, and read from `config/ratecard.csv` in the deployment bucket by the ta
 
 `ratecard.example.csv` in the repository is the format reference.
 
-Ten dimensions can be priced. `price()` returns `None`, never `0.0`, when a dimension is not priced — an unpriced dimension must read as unknown, not free. A deployment may price only some dimensions, but the UI discloses which components are omitted and must not present the subtotal as a complete estate total.
+Ten dimensions can be priced. `price()` returns `None`, never `0.0`, when a dimension is not priced - an unpriced dimension must read as unknown, not free. A deployment may price only some dimensions, but the UI discloses which components are omitted and must not present the subtotal as a complete estate total.
 
 Configuration errors, all rejected rather than coerced:
 
@@ -62,7 +62,7 @@ Currency and billing period come from the card. Metrics-series pricing is per 1,
 
 ## Optional Firehose logs
 
-The collector writes its own structured Loki records, but it cannot report an image-pull failure, bootstrap error, early traceback or OOM kill — by the time any of those happen there is no collector to do the writing. The optional Firehose path forwards ECS CloudWatch logs to Loki and is **off by default**.
+The collector writes its own structured Loki records, but it cannot report an image-pull failure, bootstrap error, early traceback or OOM kill - by the time any of those happen there is no collector to do the writing. The optional Firehose path forwards ECS CloudWatch logs to Loki and is **off by default**.
 
 Enable it in three stages, in this order:
 

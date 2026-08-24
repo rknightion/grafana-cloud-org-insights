@@ -2,7 +2,7 @@
 
 `terraform/` is a reusable module with no provider block. `terraform/examples/standalone/` is the copy-and-edit root. It works on OpenTofu and Terraform, and needs the AWS provider v6.
 
-The module provisions the platform. It does **not** provision the Grafana dashboards — those are published separately by `bin/dashboards.py`, described in [Dashboards and alerts](dashboards.md).
+The module provisions the platform. It does **not** provision the Grafana dashboards - those are published separately by `bin/dashboards.py`, described in [Dashboards and alerts](dashboards.md).
 
 ## What it creates
 
@@ -12,7 +12,7 @@ The module provisions the platform. It does **not** provision the Grafana dashbo
 | ECS | Fargate cluster, one task definition per tier, CloudWatch log group |
 | EventBridge Scheduler | one schedule per enabled tier |
 | IAM | execution role, task role, scheduler role, and a `views/`-only reader for the Grafana datasource |
-| Secrets Manager | the container for the Grafana Cloud tokens — **values are never managed here** |
+| Secrets Manager | the container for the Grafana Cloud tokens - **values are never managed here** |
 | ECR | optional repository for the collector image |
 | Data Firehose | optional, default-off ECS-log delivery to the same Loki target, with failed-record S3 backup |
 
@@ -20,8 +20,8 @@ The module provisions the platform. It does **not** provision the Grafana dashbo
 
 The collector wants two tokens, and the split is the security property rather than tidiness.
 
-- **Reader** — org realm, read-only scopes, reaches every stack in the org.
-- **Writer** — *stack* realm covering the one publishing target, with `metrics:write` and `logs:write`.
+- **Reader** - org realm, read-only scopes, reaches every stack in the org.
+- **Writer** - *stack* realm covering the one publishing target, with `metrics:write` and `logs:write`.
 
 The writer cannot touch any other stack because the realm forbids it, not because a scope check says so. A single combined credential able to both scan the estate and write to it would be strictly more dangerous than the pair.
 
@@ -33,7 +33,7 @@ Doing these out of order gives four tasks an hour failing to start, and the firs
 
 1. `terraform apply` with `schedules_enabled = false`. Everything exists; nothing fires.
 2. Write the tokens into the secret. The shape is in `secrets.tf`.
-3. Build and push the image. **It must match `task_architecture`** — the default is ARM64, and an x86 image on an ARM64 task definition fails at runtime with `exec format error`, not at plan time.
+3. Build and push the image. **It must match `task_architecture`** - the default is ARM64, and an x86 image on an ARM64 task definition fails at runtime with `exec format error`, not at plan time.
 4. Run one tier by hand (`terraform output run_task_command`) and read its logs.
 5. Mint the access key for the views reader and wire the Grafana Infinity datasource to it.
 6. Set `schedules_enabled = true` and apply again.
@@ -96,6 +96,6 @@ A new target is not a dashboard-only change.
 3. Run the provisioner teardown against recorded role, service-account and token ids.
 4. Revoke only this project's three access-policy tokens, and delete only its policies.
 5. Destroy Terraform-managed AWS resources.
-6. Handle adopted resources separately — they are deliberately outside Terraform ownership.
+6. Handle adopted resources separately - they are deliberately outside Terraform ownership.
 
 Teardown and repair use recorded ids, never a name pattern. Report any material deletion and whether the source object or state record allows recovery.

@@ -4,7 +4,7 @@ The quickest useful thing is a dry-run inventory scan against your own org. It m
 
 ## Requirements
 
-- Python 3.13 or a container runtime. The collector is stdlib-only — no third-party runtime dependencies.
+- Python 3.13 or a container runtime. The collector is stdlib-only - no third-party runtime dependencies.
 - A Grafana Cloud access policy token with the **org realm** and the read scopes in `collector.config.READER_SCOPES`. [Credentials and permissions](credentials.md) lists them and what each one reaches.
 - Your numeric org id.
 - For anything beyond a dry run: one nominated write stack, its Mimir and Loki endpoints and tenant ids, and an S3 bucket.
@@ -52,13 +52,13 @@ A run limited with `--stack` or `--limit` cannot publish. That is deliberate: a 
 | `1` | more than 10% of scannable stacks failed |
 | `2` | configuration |
 | `3` | the scan gathered everything but could not publish |
-| `4` | lock collision — another scan holds the lock |
+| `4` | lock collision - another scan holds the lock |
 
 `3` is separate on purpose. "The estate is unreachable" and "we cannot write to the target stack" need different responses. `4` is not a failed scan; see [Running scans](operations.md).
 
 ## Build the dashboards without deploying anything
 
-The dashboard builder needs published views, because Infinity's backend parser needs an explicit column spec — an empty one returns HTTP 500 for the whole panel. It reads views from S3, or from a local directory. Composing them from the committed synthetic fixture is the quickest way to see what a dashboard looks like before anything is provisioned.
+The dashboard builder needs published views, because Infinity's backend parser needs an explicit column spec - an empty one returns HTTP 500 for the whole panel. It reads views from S3, or from a local directory. Composing them from the committed synthetic fixture is the quickest way to see what a dashboard looks like before anything is provisioned.
 
 ```bash
 ./bin/make_local_views.py                    # compose views from the committed fixture
@@ -81,6 +81,6 @@ No AWS credentials, no network, no live estate. `testdata/` holds a synthetic es
 
 ## Next
 
-- [Architecture](architecture.md) — how the tiers compose, and why a missing input withholds output rather than publishing zero.
-- [Configuration](configuration.md) — every environment variable, the optional rate card, and the optional Firehose log path.
-- [Deployment](deployment.md) — Terraform, the signed image, and digest pinning.
+- [Architecture](architecture.md) - how the tiers compose, and why a missing input withholds output rather than publishing zero.
+- [Configuration](configuration.md) - every environment variable, the optional rate card, and the optional Firehose log path.
+- [Deployment](deployment.md) - Terraform, the signed image, and digest pinning.

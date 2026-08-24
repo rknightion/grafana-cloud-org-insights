@@ -12,8 +12,8 @@ Ten surfaces, published as ordinary Grafana dashboards on the nominated write st
 | `maturity` | D | a composite maturity score, with every dimension's contribution in a table |
 | `risk` | E | admin share, plugin version drift, service accounts and tokens, alert routing, org membership, configured public dashboards |
 | `value` | F | business value and unit economics, priced where a rate card is supplied |
-| `operations` | — | panels only, over `grafanacloud-usage` |
-| `commercial` | — | panels only, over `grafanacloud-usage` |
+| `operations` | - | panels only, over `grafanacloud-usage` |
+| `commercial` | - | panels only, over `grafanacloud-usage` |
 | `ai` | I | Assistant adoption, tenant configuration, token outliers and credential coverage |
 | `dashboards` | J | what people actually open, and which datasource types panels actually query |
 
@@ -40,7 +40,7 @@ python3 bin/dashboards.py --publish all
 
 Publish one dashboard or `all`, read it back, and verify the v2 query, viz and link envelopes.
 
-A newly implemented view must be published by its owning tier before a table panel references it. Legitimately empty finding views use explicit schemas; a never-published view remains a build failure, which is the point — it separates "this table is correctly empty" from "this table was never wired up".
+A newly implemented view must be published by its owning tier before a table panel references it. Legitimately empty finding views use explicit schemas; a never-published view remains a build failure, which is the point - it separates "this table is correctly empty" from "this table was never wired up".
 
 ## Coverage gates
 

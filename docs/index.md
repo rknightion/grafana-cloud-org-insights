@@ -32,7 +32,7 @@ Results land in three places, each chosen for what it is good at. Mimir takes bo
 
 `estate`, `cost`, `usage`, `maturity`, `risk`, `value`, `operations`, `commercial`, `ai`, `dashboards`.
 
-Two of them — `operations` and `commercial` — are panels only. They read `grafanacloud-usage`, a Prometheus datasource already provisioned on every Grafana Cloud stack, so they need no collector code, no credential and no series at all.
+Two of them - `operations` and `commercial` - are panels only. They read `grafanacloud-usage`, a Prometheus datasource already provisioned on every Grafana Cloud stack, so they need no collector code, no credential and no series at all.
 
 That is the general rule this project keeps relearning: if the data is already a datasource on the target stack, a panel beats a pipeline. The collector is for what no datasource exposes.
 
@@ -40,10 +40,10 @@ See [Dashboards and alerts](dashboards.md) for what each surface answers and how
 
 ## Start here
 
-- [Getting started](getting-started.md) — run a scan against your own org and build the dashboards from a synthetic fixture.
-- [Credentials and permissions](credentials.md) — every identity, what it reaches, and what it is deliberately refused.
-- [Deployment](deployment.md) — the Terraform module, the signed container image, and how a customer deployment pins it.
-- [Operations](operations.md) — manual scans, the provisioner, rotation, rollback and teardown.
+- [Getting started](getting-started.md) - run a scan against your own org and build the dashboards from a synthetic fixture.
+- [Credentials and permissions](credentials.md) - every identity, what it reaches, and what it is deliberately refused.
+- [Deployment](deployment.md) - the Terraform module, the signed container image, and how a customer deployment pins it.
+- [Operations](operations.md) - manual scans, the provisioner, rotation, rollback and teardown.
 
 ## Licence
 

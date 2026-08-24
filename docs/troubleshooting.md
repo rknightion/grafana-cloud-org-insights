@@ -30,7 +30,7 @@ An unknown action or a missing before/after pair makes the aggregate unavailable
 
 ## Currency missing from a value panel
 
-Absence is correct when the card or that dimension is unpriced — `price()` returns `None`, never `0.0`. Inspect the disclosure: a partially priced card names the omitted components and must not present its subtotal as a complete estate total.
+Absence is correct when the card or that dimension is unpriced - `price()` returns `None`, never `0.0`. Inspect the disclosure: a partially priced card names the omitted components and must not present its subtotal as a complete estate total.
 
 ## A per-stack sweep comes back empty
 
@@ -48,7 +48,7 @@ Compare measured populations before calling it estate movement. A change in how 
 
 ## Exit code 4
 
-A lock collision — another scan holds the lock. It is not a failed scan, and disabling a schedule is not the fix.
+A lock collision - another scan holds the lock. It is not a failed scan, and disabling a schedule is not the fix.
 
 ## Coverage never reaches 100%
 

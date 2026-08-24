@@ -6,7 +6,7 @@ Endpoint availability varies by plan, region and product rollout, so a deploymen
 
 ## The org-realm reader
 
-`collector.config.READER_SCOPES` is authoritative. One org-realm token reaches all four signal databases in every region of the estate — the region hint in the token payload does not constrain the data plane.
+`collector.config.READER_SCOPES` is authoritative. One org-realm token reaches all four signal databases in every region of the estate - the region hint in the token payload does not constrain the data plane.
 
 | Scope | Reaches | Basic-auth user |
 |---|---|---|
@@ -28,7 +28,7 @@ Endpoint availability varies by plan, region and product rollout, so a deploymen
 
 The basic-auth user differs per signal and comes from `dataplane.AUTH_FIELD`. Fleet Management and the Alertmanager are the two that do not use a signal instance id.
 
-Fleet calls use POST because that is the RPC transport. The scope and the methods remain reads, and they live outside the collector's HTTP client — which rejects every method except GET.
+Fleet calls use POST because that is the RPC transport. The scope and the methods remain reads, and they live outside the collector's HTTP client - which rejects every method except GET.
 
 Grafana.com is paced at six requests per second. Paused stacks are skipped when the control plane answers with its paused-stack conflict response.
 
@@ -92,7 +92,7 @@ The working read route is the Adaptive Logs plugin proxy. Frontend app resource 
 
 ### Assistant
 
-The working route is the Assistant app's plugin-resource proxy, and usage endpoints take epoch milliseconds. Tenant-scoped objects are readable. User-scoped objects are invisible to every other identity and cannot be counted as estate inventory — that is a product boundary, not a reason to widen the role.
+The working route is the Assistant app's plugin-resource proxy, and usage endpoints take epoch milliseconds. Tenant-scoped objects are readable. User-scoped objects are invisible to every other identity and cannot be counted as estate inventory - that is a product boundary, not a reason to widen the role.
 
 ### Public dashboards
 

@@ -29,13 +29,13 @@ Firing alert instances carry full customer label sets. They are counted, never c
 
 The Infinity reader principal is allowed on `views/*` and denied on `scans/*` and `locks/*`. Prove it with IAM policy simulation rather than by inspecting the policy document.
 
-For `ssm:GetParametersByPath`, simulate the bare path ARN as well as a child ARN — the API authorises the path itself, so a child-only simulation can pass while the real call is denied.
+For `ssm:GetParametersByPath`, simulate the bare path ARN as well as a child ARN - the API authorises the path itself, so a child-only simulation can pass while the real call is denied.
 
 Raw scans expire by lifecycle policy. `views/` is permanent; long-term history lives in Mimir, not in the archive.
 
 ## Alert rules publish inert
 
-New rules publish **paused and unrouted**. Activation requires naming a receiver, because an unpaused rule with no `notification_settings` inherits the write stack's notification policy — and that stack is a real stack whose policy may route hundreds of rules that are not yours, some to production ticketing.
+New rules publish **paused and unrouted**. Activation requires naming a receiver, because an unpaused rule with no `notification_settings` inherits the write stack's notification policy - and that stack is a real stack whose policy may route hundreds of rules that are not yours, some to production ticketing.
 
 ## Credential handling
 
@@ -49,7 +49,7 @@ Rotation is an explicit provisioner operation: confirm the new SSM value works b
 
 ## Supply chain
 
-Release images are signed with Sigstore keyless signing and carry GitHub build provenance plus SPDX and CycloneDX SBOMs. A deployment resolves a reviewed tag to its immutable manifest digest and pins the digest — a moving tag does not change an existing task definition, and neither does a Git push.
+Release images are signed with Sigstore keyless signing and carry GitHub build provenance plus SPDX and CycloneDX SBOMs. A deployment resolves a reviewed tag to its immutable manifest digest and pins the digest - a moving tag does not change an existing task definition, and neither does a Git push.
 
 ## Fixtures
 
