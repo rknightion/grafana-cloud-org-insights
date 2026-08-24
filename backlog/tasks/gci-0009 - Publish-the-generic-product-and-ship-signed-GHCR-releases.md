@@ -1,11 +1,11 @@
 ---
 id: GCI-0009
 title: Publish the generic product and ship signed GHCR releases
-status: Parked
+status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-08-24 15:15'
-updated_date: '2026-08-24 16:35'
+updated_date: '2026-08-24 16:45'
 labels: []
 dependencies: []
 priority: high
@@ -88,4 +88,12 @@ Post-rewrite GitHub ref audit:
 - repository visibility was immediately returned to PRIVATE so that residual PR ref is no longer publicly exposed.
 - GitHub documentation requires Support to dereference affected pull requests, remove cached views and run garbage collection. Do not return the repository to public until Support confirms that purge and a ref audit passes.
 - no customer deployment, image tag, ECS task definition, schedule, dashboard, alert, token, role, policy, or S3 object changed.
+
+Repository recreation authorised by Rob and completed:
+- deleted the old public GHCR package (75 versions) and old private repository id 1340542270; neither was used by the live customer deployment;
+- created a new PUBLIC repository with numeric id 1345184231 and pushed only clean root 9cba9a0d5fba016b8686c28dec67daca475b7198 plus handoff commit f64d073aa70d572320d38a2a1e03fcf08441c5ae;
+- restored the three Actions values, security settings, workflow permissions, standard main ruleset, merge settings and OpenBao role binding to the new repository id;
+- fresh-clone ref audit found two commits, zero refs/pull entries and no replacement/export-only workflow;
+- external customer-pattern tree and full-history scan passed; pristine detect-secrets found the 12 previously audited example/test keyword false positives and no credential;
+- Actions remains disabled until this evidence commit lands, then hosted CI and GHCR recreation are the final gates.
 <!-- SECTION:NOTES:END -->
