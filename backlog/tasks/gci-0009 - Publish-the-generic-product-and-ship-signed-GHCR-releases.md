@@ -1,11 +1,11 @@
 ---
 id: GCI-0009
 title: Publish the generic product and ship signed GHCR releases
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-08-24 15:15'
-updated_date: '2026-08-24 16:45'
+updated_date: '2026-08-24 16:58'
 labels: []
 dependencies: []
 priority: high
@@ -24,10 +24,10 @@ Make the customer-neutral generic product repository public only after a working
 - [x] #1 Repository visibility is public only after the privacy gate passes
 - [x] #2 CI uses the standard SHA-pinned rknightion shared workflows and retains the complete product test and identifier gates
 - [x] #3 Release Please uses a short-lived repository-scoped GitHub App token from OpenBao and no durable PAT
-- [ ] #4 GHCR publishes linux/amd64 and linux/arm64 images with immutable revision and release tags, provenance, SBOM and signing
+- [x] #4 GHCR publishes linux/amd64 and linux/arm64 images with immutable revision and release tags, provenance, SBOM and signing
 - [x] #5 Local workflow, container and product validation passes and hosted runs are inspected without treating billing failure as code failure
 - [x] #6 Documentation states how an ECS consumer pins a public GHCR digest, and any deployment repository edit is limited to a reviewed immutable source or image pin with no live apply
-- [ ] #7 The full repository and reachable Git history contain no customer identifiers, customer-specific configuration, credentials or secret material according to the externally supplied pattern gate and independent scans
+- [x] #7 The full repository and reachable Git history contain no customer identifiers, customer-specific configuration, credentials or secret material according to the externally supplied pattern gate and independent scans
 <!-- AC:END -->
 
 ## Definition of Done
@@ -96,4 +96,19 @@ Repository recreation authorised by Rob and completed:
 - fresh-clone ref audit found two commits, zero refs/pull entries and no replacement/export-only workflow;
 - external customer-pattern tree and full-history scan passed; pristine detect-secrets found the 12 previously audited example/test keyword false positives and no credential;
 - Actions remains disabled until this evidence commit lands, then hosted CI and GHCR recreation are the final gates.
+
+Hosted publication evidence after repository recreation:
+- CI run 32752723465 passed all required jobs. Pytest: 1,339 passed, 2 skipped and 6,570 subtests passed in 115.27 seconds. Identifier/history, shipped-text, module and standalone OpenTofu validation, formatting and ci-success all passed.
+- Release Please run 32752726665 proved the Tailscale WIF to OpenBao broker path and repository-scoped GitHub App token, then published a signed edge image. Docker Security run 32752731684 passed Trivy filesystem and Hadolint gates.
+- Release PR 1 was authored by app/rknightion-token-broker; its CI, identifier/history gate, actionlint, zizmor, dependency review and CodeQL checks all passed before merge.
+- Release Please run 32753484975 created GitHub Release v0.1.0 at d544e84dfa0b5ab6714050521c7471bb67ef7d4b and published the stable image. Manifest digest: sha256:6d83dab050b269cb29dd4e843897be52ad36d7447a9d02e3aad3b0c8fe7e5008. Children: linux/amd64 sha256:001afc8c115faeb3c199922a10e7d2c047323987926dccfe49552c10ebc8439c; linux/arm64 sha256:438ff1043fbd1d495e4440ae13a1883baa7f25776e361f2535cd46ad5ec0647b.
+- The package is public and linked to recreated repository id 1345184231. Anonymous registry manifest/config/blob reads succeeded. OCI revision is d544e84dfa0b5ab6714050521c7471bb67ef7d4b. GitHub SLSA verification passed against that source revision with a Rekor transparency-log timestamp. Cosign signing, SPDX/CycloneDX generation and attachment, and image Trivy all passed in the hosted workflow.
+- Release assets: grafana-cloud-org-insights.spdx.json sha256:c59ed4131d61540ba4b6eefeaa58fc318bfc875a018e8db857f0b304bbd842df; grafana-cloud-org-insights.cdx.json sha256:e43ef5937e8969249b437771274ca7948e994bf7b8ba7eede81eb96adafd1e93.
+- No live deployment, runtime image, infrastructure apply, schedule, dashboard, alert, credential, access policy or object-store data changed.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Recreated the public product repository from a sanitized clean root, restored standard security and ruleset settings, moved the sensitive identifier pattern outside Git, restored short-lived OpenBao-backed Release Please authentication, and published the signed multi-architecture v0.1.0 GHCR release with provenance, SBOMs and security scanning. The public repository and all reachable refs passed the external identifier/history gate. Customer deployment remains unchanged and separately pinned to its validated source revision pending explicit go-live approval.
+<!-- SECTION:FINAL_SUMMARY:END -->
