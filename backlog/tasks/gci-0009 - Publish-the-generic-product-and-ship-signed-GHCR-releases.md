@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@codex'
 created_date: '2026-08-24 15:15'
-updated_date: '2026-08-24 16:28'
+updated_date: '2026-08-24 16:35'
 labels: []
 dependencies: []
 priority: high
@@ -80,4 +80,12 @@ Publication review found that the committed customer identifier denylist disclos
 CodeRabbit found one valid fail-open case: recursive grep errors were treated like no matches. The gate now accepts status 1 only as clean and fails closed on invalid patterns, read errors, or any other grep failure. Its task wording was also corrected so the public repository does not claim to ship a denylist.
 
 Correction after acceptance-criterion reordering: the historical note about missing GHCR artifacts refers to criterion 4. Criterion 5 remains complete.
+
+Post-rewrite GitHub ref audit:
+- main is a clean root at 9cba9a0d5fba016b8686c28dec67daca475b7198; the committed denylist path is absent.
+- all normal old branches and tags were overwritten or deleted.
+- GitHub-owned refs/pull/1/head is read-only and its ancestry fails the external customer-pattern history gate. The REST delete attempt returned HTTP 422 refs/pull/* is read-only.
+- repository visibility was immediately returned to PRIVATE so that residual PR ref is no longer publicly exposed.
+- GitHub documentation requires Support to dereference affected pull requests, remove cached views and run garbage collection. Do not return the repository to public until Support confirms that purge and a ref audit passes.
+- no customer deployment, image tag, ECS task definition, schedule, dashboard, alert, token, role, policy, or S3 object changed.
 <!-- SECTION:NOTES:END -->
