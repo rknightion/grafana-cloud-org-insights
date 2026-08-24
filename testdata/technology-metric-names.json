@@ -1,0 +1,29 @@
+{
+  "_note": "synthetic metric-name inventory for the technology registry contract",
+  "metric_names": [
+    "alloy_build_info",
+    "akuity_managed_platform_cluster_agenthealthstatus_bool",
+    "aws_ec2_cpuutilization_average",
+    "cnpg_collector_up",
+    "container_cpu_usage_seconds_total",
+    "coredns_build_info",
+    "DCGM_FI_DEV_GPU_UTIL",
+    "gha_assigned_jobs",
+    "github_apps_installation",
+    "gitlab_runner_concurrent",
+    "go_build_info",
+    "karpenter_nodes_created_total",
+    "kube_pod_info",
+    "node_cpu_seconds_total",
+    "node_uname_info",
+    "nomad_client_allocated_cpu",
+    "ondemand_exporter_build_info",
+    "pg_up",
+    "probe_success",
+    "prometheus_build_info",
+    "rest_client_requests_total",
+    "slurm_cpus_total",
+    "vm_app_version",
+    "weka_drives"
+  ]
+}

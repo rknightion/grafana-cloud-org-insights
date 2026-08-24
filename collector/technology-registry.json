@@ -1,0 +1,26 @@
+{
+  "version": "1",
+  "technologies": [
+    {"key": "kubernetes", "name": "Kubernetes", "match": {"exact": "kube_pod_info"}},
+    {"key": "linux", "name": "Linux node exporter", "match": {"exact": "node_uname_info"}},
+    {"key": "cadvisor", "name": "cAdvisor", "match": {"exact": "container_cpu_usage_seconds_total"}},
+    {"key": "postgresql", "name": "PostgreSQL", "match": {"exact": "pg_up"}},
+    {"key": "coredns", "name": "CoreDNS", "match": {"exact": "coredns_build_info"}},
+    {"key": "karpenter", "name": "Karpenter", "match": {"exact": "karpenter_nodes_created_total"}},
+    {"key": "alloy", "name": "Grafana Alloy", "match": {"exact": "alloy_build_info"}},
+    {"key": "prometheus", "name": "Prometheus", "match": {"exact": "prometheus_build_info"}},
+    {"key": "aws_cloudwatch", "name": "AWS CloudWatch", "match": {"exact": "aws_ec2_cpuutilization_average"}},
+    {"key": "slurm", "name": "Slurm workload manager", "match": {"exact": "slurm_cpus_total"}},
+    {"key": "weka", "name": "WEKA parallel filesystem", "match": {"exact": "weka_drives"}},
+    {"key": "nvidia_dcgm", "name": "NVIDIA DCGM exporter", "match": {"exact": "DCGM_FI_DEV_GPU_UTIL"}},
+    {"key": "open_ondemand", "name": "Open OnDemand", "match": {"exact": "ondemand_exporter_build_info"}},
+    {"key": "akuity", "name": "Akuity managed Argo CD", "match": {"pattern": {"prefix": "akuity_", "suffix": "_cluster_agenthealthstatus_bool"}}},
+    {"key": "nomad", "name": "HashiCorp Nomad", "match": {"exact": "nomad_client_allocated_cpu"}},
+    {"key": "cloudnativepg", "name": "CloudNativePG", "match": {"exact": "cnpg_collector_up"}},
+    {"key": "victoriametrics", "name": "VictoriaMetrics", "match": {"exact": "vm_app_version"}},
+    {"key": "gitlab_runner", "name": "GitLab Runner", "match": {"exact": "gitlab_runner_concurrent"}},
+    {"key": "github_apps", "name": "GitHub Apps", "match": {"exact": "github_apps_installation"}},
+    {"key": "github_actions", "name": "GitHub Actions runners", "match": {"exact": "gha_assigned_jobs"}},
+    {"key": "blackbox_exporter", "name": "Prometheus blackbox exporter", "match": {"exact": "probe_success"}}
+  ]
+}
