@@ -1,0 +1,58 @@
+[site]
+name = "grafana-cloud-org-insights"
+description = "Estate-wide cost, adoption, governance and risk insight for a large Grafana Cloud organisation, published as ordinary Grafana dashboards"
+author = "Rob Knight"
+keywords = [
+  "grafana cloud",
+  "observability",
+  "finops",
+  "cardinality",
+  "adaptive metrics",
+  "mimir",
+  "loki",
+  "ecs fargate",
+  "terraform",
+]
+
+# Written as instructions to an agent working in the repository, not as
+# documentation for a reader of the site. Kept in the repo, kept off the site.
+exclude = [
+  "traps.md",
+  "ratecard.example.csv",
+]
+
+# The hub injects shared/social/<slug>.{png,svg} at these paths. Naming them
+# here is what puts a real og:image on every page — without it the tag falls
+# back to the site URL and every share preview is blank.
+[assets]
+social_image = "assets/social-card.png"
+social_image_alt = "grafana-cloud-org-insights documentation social preview card"
+
+[[site.nav]]
+Home = "index.md"
+
+[[site.nav]]
+"Getting Started" = "getting-started.md"
+
+[[site.nav]]
+Architecture = "architecture.md"
+
+[[site.nav]]
+Configuration = "configuration.md"
+
+[[site.nav]]
+Deployment = "deployment.md"
+
+[[site.nav]]
+Operations = [
+  { "Running Scans" = "operations.md" },
+  { "Dashboards and Alerts" = "dashboards.md" },
+  { Troubleshooting = "troubleshooting.md" },
+]
+
+[[site.nav]]
+Reference = [
+  { "Credentials and Permissions" = "credentials.md" },
+  { "Series Budget" = "series-budget.md" },
+  { Security = "security.md" },
+]
