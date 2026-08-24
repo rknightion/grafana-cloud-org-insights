@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Metric": "Stacks measured (window 24h)",
+      "Value": "39 of 44"
+    },
+    {
+      " Metric": "Dashboard views",
+      "Value": 216
+    },
+    {
+      " Metric": "Distinct viewers (summed per stack, not deduplicated across the org)",
+      "Value": 44
+    },
+    {
+      " Metric": "Dashboards opened at least once",
+      "Value": 87
+    },
+    {
+      " Metric": "Dashboards provisioned across measured stacks",
+      "Value": 1404
+    },
+    {
+      " Metric": "Share of provisioned dashboards opened at least once %",
+      "Value": 6.2
+    },
+    {
+      " Metric": "Distinct public dashboards observed in use",
+      "Value": 0
+    },
+    {
+      " Metric": "Anonymous dashboard views",
+      "Value": 0
+    },
+    {
+      " Metric": "Data requests",
+      "Value": 5822
+    },
+    {
+      " Metric": "Data requests with dashboard and panel ids",
+      "Value": 323
+    },
+    {
+      " Metric": "Panel identity coverage %",
+      "Value": 5.5
+    },
+    {
+      " Metric": "Data-request errors",
+      "Value": 74
+    },
+    {
+      " Metric": "Cache hit % across measured stacks",
+      "Value": 0
+    }
+  ]
+}

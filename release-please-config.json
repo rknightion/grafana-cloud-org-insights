@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "simple",
+  "include-v-in-tag": true,
+  "include-component-in-tag": false,
+  "initial-version": "0.1.0",
+  "bump-minor-pre-major": true,
+  "packages": {
+    ".": {
+      "package-name": "grafana-cloud-org-insights",
+      "changelog-path": "CHANGELOG.md"
+    }
+  },
+  "changelog-sections": [
+    { "type": "feat", "section": "Features" },
+    { "type": "fix", "section": "Bug Fixes" },
+    { "type": "perf", "section": "Performance" },
+    { "type": "refactor", "section": "Refactoring" },
+    { "type": "ci", "section": "Build and CI" },
+    { "type": "build", "section": "Build and CI" },
+    { "type": "docs", "section": "Documentation" },
+    { "type": "test", "section": "Testing", "hidden": true },
+    { "type": "chore", "section": "Miscellaneous" }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rknightion/grafana-cloud-org-insights/consumer/manifest.schema.json",
+  "title": "Grafana Cloud Org Insights deployment manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generic_source",
+    "overlay_digest",
+    "runtime_projection_digests",
+    "runtime",
+    "aws",
+    "policy"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "generic_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "overlay_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "runtime_projection_digests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scan", "provisioner", "dashboards", "alerts"],
+      "properties": {
+        "scan": {"$ref": "#/$defs/digest"},
+        "provisioner": {"$ref": "#/$defs/digest"},
+        "dashboards": {"$ref": "#/$defs/digest"},
+        "alerts": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scan", "provisioner", "dashboards", "alerts"],
+      "properties": {
+        "scan": {"$ref": "#/$defs/stringMap"},
+        "provisioner": {"$ref": "#/$defs/stringMap"},
+        "dashboards": {"$ref": "#/$defs/stringMap"},
+        "alerts": {"$ref": "#/$defs/stringMap"}
+      }
+    },
+    "aws": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name_prefix", "bucket_name", "secret_name", "reader_secret_key",
+        "writer_secret_key", "provisioner_secret_key", "create_bucket", "create_secret",
+        "create_views_reader_user", "create_provisioner", "firehose_logs_enabled",
+        "firehose_log_subscription_enabled", "assign_public_ip", "schedules_enabled",
+        "provisioner_enabled", "schedule_timezone", "t1_schedule", "t2_schedule",
+        "t3_schedule", "t4_schedule", "provisioner_schedule", "task_architecture",
+        "cost_namespace", "purpose_tag"
+      ],
+      "properties": {
+        "name_prefix": {"type": "string"},
+        "bucket_name": {"type": "string"},
+        "secret_name": {"type": "string"},
+        "reader_secret_key": {"type": "string"},
+        "writer_secret_key": {"type": "string"},
+        "provisioner_secret_key": {"type": "string"},
+        "create_bucket": {"type": "boolean"},
+        "create_secret": {"type": "boolean"},
+        "create_views_reader_user": {"type": "boolean"},
+        "create_provisioner": {"type": "boolean"},
+        "firehose_logs_enabled": {"type": "boolean"},
+        "firehose_log_subscription_enabled": {"type": "boolean"},
+        "assign_public_ip": {"type": "boolean"},
+        "schedules_enabled": {"type": "boolean"},
+        "provisioner_enabled": {"type": "boolean"},
+        "schedule_timezone": {"type": "string"},
+        "t1_schedule": {"type": "string"},
+        "t2_schedule": {"type": "string"},
+        "t3_schedule": {"type": "string"},
+        "t4_schedule": {"type": "string"},
+        "provisioner_schedule": {"type": "string"},
+        "task_architecture": {"enum": ["ARM64", "X86_64"]},
+        "cost_namespace": {"type": "string"},
+        "purpose_tag": {"type": "string"}
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reader_policy_id", "writer_policy_id", "reader_policy_name", "writer_policy_name",
+        "provisioner_policy_name", "declared_reader_permission_pairs",
+        "datasource_query_scope", "rate_card_present", "rate_card_s3_key",
+        "rate_card_semantics", "public_dashboards_target", "pii_storage"
+      ],
+      "properties": {
+        "reader_policy_id": {"type": "string"},
+        "writer_policy_id": {"type": "string"},
+        "reader_policy_name": {"type": "string"},
+        "writer_policy_name": {"type": "string"},
+        "provisioner_policy_name": {"type": "string"},
+        "declared_reader_permission_pairs": {"type": "integer", "minimum": 0},
+        "datasource_query_scope": {"const": "datasources:uid:grafanacloud-usage-insights"},
+        "rate_card_present": {"type": "boolean"},
+        "rate_card_s3_key": {"type": "string"},
+        "rate_card_semantics": {"enum": ["base_rate_only", "dpm_aware"]},
+        "public_dashboards_target": {"type": "integer", "minimum": 0},
+        "pii_storage": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "stringMap": {
+      "type": "object",
+      "propertyNames": {"pattern": "^GCINSIGHT_[A-Z0-9_]+$"},
+      "additionalProperties": {"type": "string"}
+    }
+  }
+}

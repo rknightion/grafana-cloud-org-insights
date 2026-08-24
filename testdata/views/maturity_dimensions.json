@@ -1,0 +1,3622 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack158",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack158",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "727 rules / 67 dashboards = 10.85",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack158",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 708 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack158",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 77.8,
+      "Raw": "7/12 daily = 0.58",
+      "Contribution": 11.67,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack158",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 75.8,
+      "Raw": "4/12 admins = 33%",
+      "Contribution": 7.58,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack158",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "5,236 values / 128,779 series = 0.041",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack158",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "67/12 = 5.6 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack158",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 40,
+      "Raw": "2 datasource types",
+      "Contribution": 2,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack158",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "8 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack145",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack145",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 23 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack145",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack145",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "1/1 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack145",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "0 admins of 1 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack145",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack145",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "23/1 = 23.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack145",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 40,
+      "Raw": "2 datasource types",
+      "Contribution": 2,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack145",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack177",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack177",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack177",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 58 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack177",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1/4 daily = 0.25",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack177",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "3 admins of 4 users",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack177",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 94.7,
+      "Raw": "398 values / 5,390 series = 0.074",
+      "Contribution": 9.47,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack177",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/4 = 4.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack177",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack177",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack125",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack125",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack125",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack125",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 66.7,
+      "Raw": "1/2 daily = 0.50",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack125",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "1 admins of 2 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack125",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack125",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/2 = 8.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack125",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 20,
+      "Raw": "1 datasource types",
+      "Contribution": 1,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack125",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack001",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack001",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 66.7,
+      "Raw": "1/2 daily = 0.50",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "1 admins of 2 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack001",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/2 = 8.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 31,
+      "Raw": "764 rules / 107 dashboards = 7.14",
+      "Contribution": 4.65,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 2144 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 62.2,
+      "Raw": "7/15 daily = 0.47",
+      "Contribution": 9.33,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 39.4,
+      "Raw": "8/15 admins = 53%",
+      "Contribution": 3.94,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 75.7,
+      "Raw": "10,538 values / 66,141 series = 0.159",
+      "Contribution": 7.57,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "107/15 = 7.1 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "7 collectors, 5 pipelines",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001c",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001c",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001c",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack001c",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "1/1 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001c",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "0 admins of 1 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001c",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack001c",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/1 = 16.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001c",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001c",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack001a",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001a",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001a",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack001a",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "1/1 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001a",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "0 admins of 1 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001a",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack001a",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/1 = 16.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001a",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack001a",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "45 rules / 27 dashboards = 1.67",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 50 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "6/8 daily = 0.75",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "7/8 admins = 88%",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 92.4,
+      "Raw": "468 values / 5,568 series = 0.084",
+      "Contribution": 9.24,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "27/8 = 3.4 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "7 collectors, 6 pipelines",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack049",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack049",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 32.4,
+      "Raw": "127 rules / 18 dashboards = 7.06",
+      "Contribution": 4.86,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack049",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 99 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack049",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 66.7,
+      "Raw": "1/2 daily = 0.50",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack049",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "1 admins of 2 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack049",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 69.9,
+      "Raw": "10,550 values / 56,868 series = 0.186",
+      "Contribution": 6.99,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack049",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "18/2 = 9.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack049",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack049",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "6 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack110",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack110",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 17 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack110",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack110",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "1/1 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack110",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "0 admins of 1 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack110",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack110",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "17/1 = 17.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack110",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack110",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "116 rules / 106 dashboards = 1.09",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 47 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 37,
+      "Raw": "10/36 daily = 0.28",
+      "Contribution": 5.56,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 85.9,
+      "Raw": "10/36 admins = 28%",
+      "Contribution": 8.59,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 93.5,
+      "Raw": "3,161 values / 39,860 series = 0.079",
+      "Contribution": 9.35,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "106/36 = 2.9 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "5 datasource types",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "2 collectors, 9 pipelines",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 81.2,
+      "Raw": "396 rules / 96 dashboards = 4.12",
+      "Contribution": 12.19,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 29,
+      "Raw": "213 applied / 521 pending",
+      "Contribution": 4.35,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 60.6,
+      "Raw": "5/11 daily = 0.45",
+      "Contribution": 9.09,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "10/11 admins = 91%",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 82.2,
+      "Raw": "36,302 values / 278,835 series = 0.130",
+      "Contribution": 8.22,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "96/11 = 8.7 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "5 datasource types",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "1 collectors, 7 pipelines",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 55.8,
+      "Raw": "667 rules / 118 dashboards = 5.65",
+      "Contribution": 8.37,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 10.3,
+      "Raw": "28 applied / 243 pending",
+      "Contribution": 1.55,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 48.5,
+      "Raw": "4/11 daily = 0.36",
+      "Contribution": 7.27,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "10/11 admins = 91%",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "3,546 values / 6,242 series = 0.568",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "118/11 = 10.7 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 80,
+      "Raw": "4 datasource types",
+      "Contribution": 4,
+      "Applicable": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "1 collectors, 8 pipelines",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "12 rules / 32 dashboards = 0.38",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 145 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 66.7,
+      "Raw": "2/4 daily = 0.50",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "2 admins of 4 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 99.2,
+      "Raw": "5,083 values / 95,158 series = 0.053",
+      "Contribution": 9.92,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "32/4 = 8.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 40,
+      "Raw": "2 datasource types",
+      "Contribution": 2,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "157 collectors, 10 pipelines",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 58.1,
+      "Raw": "5 rules / 43 dashboards = 0.12",
+      "Contribution": 8.72,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 610 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "5/6 daily = 0.83",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "5/6 admins = 83%",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "5,390 values / 235,765 series = 0.023",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "43/6 = 7.2 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 60,
+      "Raw": "3 datasource types",
+      "Contribution": 3,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "8 collectors, 3 pipelines",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "36 rules / 37 dashboards = 0.97",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 2 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 44.4,
+      "Raw": "5/15 daily = 0.33",
+      "Contribution": 6.67,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "2/15 admins = 13%",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "37/15 = 2.5 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 80,
+      "Raw": "4 datasource types",
+      "Contribution": 4,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack070",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack070",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack070",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack070",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "1/1 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack070",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "0 admins of 1 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack070",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack070",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/1 = 16.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack070",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 20,
+      "Raw": "1 datasource types",
+      "Contribution": 1,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack070",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack037",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack037",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "32 rules / 60 dashboards = 0.53",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack037",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 37.1,
+      "Raw": "91 applied / 154 pending",
+      "Contribution": 5.57,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack037",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 22.2,
+      "Raw": "1/6 daily = 0.17",
+      "Contribution": 3.33,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack037",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 15.2,
+      "Raw": "4/6 admins = 67%",
+      "Contribution": 1.52,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack037",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 89.1,
+      "Raw": "2,358 values / 23,773 series = 0.099",
+      "Contribution": 8.91,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack037",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "60/6 = 10.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack037",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "5 datasource types",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack037",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "26 collectors, 6 pipelines",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 35.7,
+      "Raw": "2 rules / 28 dashboards = 0.07",
+      "Contribution": 5.36,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 44.4,
+      "Raw": "4/12 daily = 0.33",
+      "Contribution": 6.67,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 75.8,
+      "Raw": "4/12 admins = 33%",
+      "Contribution": 7.58,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "28/12 = 2.3 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 60,
+      "Raw": "3 datasource types",
+      "Contribution": 3,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "5 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 30 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 3 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "3/4 daily = 0.75",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "3 admins of 4 users",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "30/4 = 7.5 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 60,
+      "Raw": "3 datasource types",
+      "Contribution": 3,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "8 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack112",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack112",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack112",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack112",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "2/2 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack112",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "1 admins of 2 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack112",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack112",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/2 = 8.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack112",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack112",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack051",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack051",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack051",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack051",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "1/1 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack051",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "0 admins of 1 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack051",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack051",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/1 = 16.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack051",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack051",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack146",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack146",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 64.4,
+      "Raw": "185 rules / 36 dashboards = 5.14",
+      "Contribution": 9.65,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack146",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack146",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1/4 daily = 0.25",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack146",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "3 admins of 4 users",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack146",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack146",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "36/4 = 9.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack146",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack146",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "5 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack147",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack147",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 26.5,
+      "Raw": "126 rules / 17 dashboards = 7.41",
+      "Contribution": 3.97,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack147",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack147",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "1/1 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack147",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "0 admins of 1 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack147",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack147",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "17/1 = 17.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack147",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack147",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 63.6,
+      "Raw": "228 rules / 44 dashboards = 5.18",
+      "Contribution": 9.55,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 66 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 30.8,
+      "Raw": "3/13 daily = 0.23",
+      "Contribution": 4.62,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "12/13 admins = 92%",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 71.2,
+      "Raw": "17,217 values / 95,970 series = 0.179",
+      "Contribution": 7.12,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "44/13 = 3.4 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 20,
+      "Raw": "1 datasource types",
+      "Contribution": 1,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "10 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "24 rules / 40 dashboards = 0.60",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 301 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 80,
+      "Raw": "3/5 daily = 0.60",
+      "Contribution": 12,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 27.3,
+      "Raw": "3/5 admins = 60%",
+      "Contribution": 2.73,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 74.1,
+      "Raw": "6,384 values / 38,321 series = 0.167",
+      "Contribution": 7.41,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "40/5 = 8.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 20,
+      "Raw": "1 datasource types",
+      "Contribution": 1,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "4 collectors, 5 pipelines",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "40 rules / 35 dashboards = 1.14",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 105 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "2/2 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "1 admins of 2 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 58.1,
+      "Raw": "5,047 values / 21,141 series = 0.239",
+      "Contribution": 5.81,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "35/2 = 17.5 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 40,
+      "Raw": "2 datasource types",
+      "Contribution": 2,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "5 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack054",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack054",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack054",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack054",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 66.7,
+      "Raw": "1/2 daily = 0.50",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack054",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "1 admins of 2 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack054",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack054",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/2 = 8.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack054",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 20,
+      "Raw": "1 datasource types",
+      "Contribution": 1,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack054",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "5 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack148",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack148",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack148",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack148",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "1/1 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack148",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "0 admins of 1 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack148",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack148",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/1 = 16.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack148",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack148",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 88.9,
+      "Raw": "2/3 daily = 0.67",
+      "Contribution": 13.33,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "2 admins of 3 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/3 = 5.3 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 100,
+      "Raw": "1 collectors, 0 pipelines",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack002",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack002",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack002",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack002",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "1/1 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack002",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "0 admins of 1 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack002",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack002",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/1 = 16.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack002",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack002",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "5 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "28 rules / 33 dashboards = 0.85",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 1 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 47.1,
+      "Raw": "6/17 daily = 0.35",
+      "Contribution": 7.06,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "3/17 admins = 18%",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 97.1,
+      "Raw": "33/17 = 1.9 per user",
+      "Contribution": 9.71,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "8 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack097",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack097",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 57.7,
+      "Raw": "3 rules / 26 dashboards = 0.12",
+      "Contribution": 8.65,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack097",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack097",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 38.1,
+      "Raw": "2/7 daily = 0.29",
+      "Contribution": 5.71,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack097",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "6/7 admins = 86%",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack097",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack097",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "26/7 = 3.7 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack097",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 40,
+      "Raw": "2 datasource types",
+      "Contribution": 2,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack097",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "6 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "131 rules / 103 dashboards = 1.27",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 758 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "3/4 daily = 0.75",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "3 admins of 4 users",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 91.5,
+      "Raw": "27,053 values / 306,601 series = 0.088",
+      "Contribution": 9.15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 98.5,
+      "Raw": "103/4 = 25.8 per user",
+      "Contribution": 9.85,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 20,
+      "Raw": "1 datasource types",
+      "Contribution": 1,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "6 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 20 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 25 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "2/2 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "1 admins of 2 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "20/2 = 10.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 20,
+      "Raw": "1 datasource types",
+      "Contribution": 1,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack193",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack193",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "10 rules / 25 dashboards = 0.40",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack193",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 12 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack193",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 26.7,
+      "Raw": "1/5 daily = 0.20",
+      "Contribution": 4,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack193",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "4/5 admins = 80%",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack193",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack193",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "25/5 = 5.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack193",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 20,
+      "Raw": "1 datasource types",
+      "Contribution": 1,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack193",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "6 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack170",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 33.3,
+      "Raw": "1 of 5 signals above floor",
+      "Contribution": 5,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack170",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 18 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack170",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 applied / 174 pending",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack170",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "1/1 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack170",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "0 admins of 1 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack170",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": 90.4,
+      "Raw": "822 values / 8,840 series = 0.093",
+      "Contribution": 9.04,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack170",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "18/1 = 18.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack170",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack170",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack201",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack201",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack201",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack201",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "4/4 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack201",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 0,
+      "Raw": "3 admins of 4 users",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack201",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack201",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/4 = 4.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack201",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack201",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack149",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack149",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 16 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack149",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack149",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": 100,
+      "Raw": "1/1 daily = 1.00",
+      "Contribution": 15,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack149",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "0 admins of 1 users",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack149",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "stack149",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": 100,
+      "Raw": "16/1 = 16.0 per user",
+      "Contribution": 10,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack149",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "stack149",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "5 pipelines, 0 collectors registered",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "testsrobot002",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "testsrobot002",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 13 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "testsrobot002",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "testsrobot002",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "testsrobot002",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "testsrobot002",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "testsrobot002",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "testsrobot002",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "testsrobot002",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack004",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "teststack004",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 13 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "teststack004",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack004",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack004",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack004",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack004",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack004",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "teststack004",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack017",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "teststack017",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 13 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "teststack017",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack017",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack017",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack017",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack017",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack017",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "teststack017",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack018",
+      "Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 of 5 signals above floor",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "teststack018",
+      "Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "Score": 0,
+      "Raw": "0 rules / 13 dashboards = 0.00",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "teststack018",
+      "Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack018",
+      "Dimension": "engagement",
+      "Weight": 0.15,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack018",
+      "Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack018",
+      "Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack018",
+      "Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    },
+    {
+      " Stack": "teststack018",
+      "Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "Score": 0,
+      "Raw": "0 datasource types",
+      "Contribution": 0,
+      "Applicable": true
+    },
+    {
+      " Stack": "teststack018",
+      "Dimension": "collector_health",
+      "Weight": 0.05,
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
+    }
+  ]
+}

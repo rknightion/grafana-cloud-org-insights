@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Metric": "Stacks scored",
+      "Value": "13 of 40 scannable (44 total)"
+    },
+    {
+      " Metric": "Not scored, and why",
+      "Value": "paused: 4, too_few_users: 18, no_signal_above_floor: 9"
+    },
+    {
+      " Metric": "Eligibility bar",
+      "Value": ">= 3 active users, at least one signal above 1000 units, and >= 80% of the rubric applicable. Near-empty stacks would otherwise top the leaderboard."
+    },
+    {
+      " Metric": "Median score",
+      "Value": 56.7
+    },
+    {
+      " Metric": "p90 score",
+      "Value": 63.5
+    },
+    {
+      " Metric": "Worst score",
+      "Value": 31
+    },
+    {
+      " Metric": "Scored on all dimensions",
+      "Value": 14
+    },
+    {
+      " Metric": "Rubric version",
+      "Value": "1"
+    }
+  ]
+}

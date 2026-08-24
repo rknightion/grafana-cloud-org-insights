@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "obs-hub-dev",
+      "kind": "integrations",
+      "name": "Acme Confluence",
+      "enabled": true,
+      "scope": "tenant",
+      "type": "mcp",
+      "authenticationFailed": false,
+      "createdBy": "sa-17@serviceaccount.grafana",
+      "created": "2026-07-31T13:30:52.412Z",
+      "modified": "2026-08-20T10:55:57.916Z"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "kind": "rules",
+      "name": "Acme first",
+      "enabled": true,
+      "scope": "tenant",
+      "type": null,
+      "authenticationFailed": null,
+      "createdBy": "sa-17@serviceaccount.grafana",
+      "created": "2026-07-31T13:30:52.473Z",
+      "modified": "2026-07-31T13:30:52.473Z"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "kind": "skills",
+      "name": "Acme Grafana Cloud Onboarding Assistant",
+      "enabled": null,
+      "scope": "tenant",
+      "type": null,
+      "authenticationFailed": null,
+      "createdBy": "sa-17@serviceaccount.grafana",
+      "created": "2026-07-31T13:30:52.435Z",
+      "modified": "2026-07-31T13:30:52.435Z"
+    },
+    {
+      " Stack": "stack001b",
+      "kind": "skills",
+      "name": "Comprehensive system health check",
+      "enabled": null,
+      "scope": "tenant",
+      "type": null,
+      "authenticationFailed": null,
+      "createdBy": "hugo.larsen33@grafana.com",
+      "created": "2026-06-22T10:22:47.242Z",
+      "modified": "2026-06-22T10:22:47.242Z"
+    },
+    {
+      " Stack": "stack019",
+      "kind": "integrations",
+      "name": "Acme Confluence",
+      "enabled": true,
+      "scope": "tenant",
+      "type": "mcp",
+      "authenticationFailed": false,
+      "createdBy": "sa-15@serviceaccount.grafana",
+      "created": "2026-07-31T13:55:26.625Z",
+      "modified": "2026-08-20T10:56:44.221Z"
+    },
+    {
+      " Stack": "stack019",
+      "kind": "rules",
+      "name": "Acme first",
+      "enabled": true,
+      "scope": "tenant",
+      "type": null,
+      "authenticationFailed": null,
+      "createdBy": "sa-15@serviceaccount.grafana",
+      "created": "2026-07-31T13:55:26.694Z",
+      "modified": "2026-07-31T14:45:39.597Z"
+    },
+    {
+      " Stack": "stack019",
+      "kind": "skills",
+      "name": "Acme Grafana Cloud Onboarding Assistant",
+      "enabled": null,
+      "scope": "tenant",
+      "type": null,
+      "authenticationFailed": null,
+      "createdBy": "sa-15@serviceaccount.grafana",
+      "created": "2026-07-31T13:55:26.64Z",
+      "modified": "2026-07-31T14:45:40.33Z"
+    }
+  ]
+}

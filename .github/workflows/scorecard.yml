@@ -1,0 +1,16 @@
+name: Scorecard
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "43 5 * * 1"
+
+permissions: {}
+
+jobs:
+  scorecard:
+    permissions:
+      security-events: write # upload Scorecard results
+      id-token: write        # publish signed results to OpenSSF
+    uses: rknightion/.github/.github/workflows/scorecard.yml@8c1e89103d1a86179c2e94356b85bedd7c543a42 # v1.9.3

@@ -1,0 +1,594 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack035",
+      "Attribute": "collector.version",
+      "Value": "v1.11.3",
+      "Active collectors": 118,
+      "Distinct values": 8,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack037",
+      "Attribute": "collector.version",
+      "Value": "v1.11.3",
+      "Active collectors": 11,
+      "Distinct values": 4,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack036",
+      "Attribute": "collector.version",
+      "Value": "v1.10.0",
+      "Active collectors": 8,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack001b",
+      "Attribute": "collector.version",
+      "Value": "v1.10.1",
+      "Active collectors": 7,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack019",
+      "Attribute": "collector.version",
+      "Value": "v1.14.2",
+      "Active collectors": 7,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack037",
+      "Attribute": "collector.version",
+      "Value": "v1.10.2",
+      "Active collectors": 7,
+      "Distinct values": 4,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack037",
+      "Attribute": "collector.version",
+      "Value": "v1.12.1",
+      "Active collectors": 7,
+      "Distinct values": 4,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack035",
+      "Attribute": "collector.version",
+      "Value": "v1.10.2",
+      "Active collectors": 6,
+      "Distinct values": 8,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack035",
+      "Attribute": "collector.version",
+      "Value": "v1.10.1",
+      "Active collectors": 4,
+      "Distinct values": 8,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack035",
+      "Attribute": "collector.version",
+      "Value": "v1.16.0",
+      "Active collectors": 4,
+      "Distinct values": 8,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack035",
+      "Attribute": "collector.version",
+      "Value": "v1.16.2",
+      "Active collectors": 3,
+      "Distinct values": 8,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack020",
+      "Attribute": "collector.version",
+      "Value": "v1.12.2",
+      "Active collectors": 2,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack035",
+      "Attribute": "collector.version",
+      "Value": "v1.15.1",
+      "Active collectors": 2,
+      "Distinct values": 8,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack035",
+      "Attribute": "collector.version",
+      "Value": "v1.16.1",
+      "Active collectors": 2,
+      "Distinct values": 8,
+      "Truncated": false
+    },
+    {
+      " Stack": "obs-hub",
+      "Attribute": "collector.version",
+      "Value": "v1.18.0",
+      "Active collectors": 1,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Attribute": "collector.version",
+      "Value": "v1.16.2",
+      "Active collectors": 1,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack035",
+      "Attribute": "collector.version",
+      "Value": "v1.13.2",
+      "Active collectors": 1,
+      "Distinct values": 8,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack037",
+      "Attribute": "collector.version",
+      "Value": "v1.12.0",
+      "Active collectors": 1,
+      "Distinct values": 4,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack052",
+      "Attribute": "collector.version",
+      "Value": "v1.10.2",
+      "Active collectors": 1,
+      "Distinct values": 4,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack052",
+      "Attribute": "collector.version",
+      "Value": "v1.17.1",
+      "Active collectors": 1,
+      "Distinct values": 4,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack052",
+      "Attribute": "collector.version",
+      "Value": "v1.7.5",
+      "Active collectors": 1,
+      "Distinct values": 4,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack052",
+      "Attribute": "collector.version",
+      "Value": "v1.8.1",
+      "Active collectors": 1,
+      "Distinct values": 4,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack035",
+      "Attribute": "collectorType",
+      "Value": "COLLECTOR_TYPE_ALLOY",
+      "Active collectors": 140,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack035",
+      "Attribute": "platform",
+      "Value": "unknown",
+      "Active collectors": 140,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack035",
+      "Attribute": "source",
+      "Value": "unknown",
+      "Active collectors": 140,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack035",
+      "Attribute": "sourceVersion",
+      "Value": "unknown",
+      "Active collectors": 140,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack035",
+      "Attribute": "collector.os",
+      "Value": "windows",
+      "Active collectors": 140,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack037",
+      "Attribute": "collectorType",
+      "Value": "COLLECTOR_TYPE_ALLOY",
+      "Active collectors": 26,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack037",
+      "Attribute": "collector.os",
+      "Value": "linux",
+      "Active collectors": 26,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack037",
+      "Attribute": "platform",
+      "Value": "unknown",
+      "Active collectors": 26,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack037",
+      "Attribute": "source",
+      "Value": "unknown",
+      "Active collectors": 26,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack037",
+      "Attribute": "sourceVersion",
+      "Value": "unknown",
+      "Active collectors": 26,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack036",
+      "Attribute": "collectorType",
+      "Value": "COLLECTOR_TYPE_ALLOY",
+      "Active collectors": 8,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack036",
+      "Attribute": "collector.os",
+      "Value": "linux",
+      "Active collectors": 8,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack036",
+      "Attribute": "platform",
+      "Value": "stack036",
+      "Active collectors": 8,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack036",
+      "Attribute": "source",
+      "Value": "unknown",
+      "Active collectors": 8,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack036",
+      "Attribute": "sourceVersion",
+      "Value": "unknown",
+      "Active collectors": 8,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack001b",
+      "Attribute": "sourceVersion",
+      "Value": "3.8.7",
+      "Active collectors": 7,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack001b",
+      "Attribute": "collectorType",
+      "Value": "COLLECTOR_TYPE_ALLOY",
+      "Active collectors": 7,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack001b",
+      "Attribute": "source",
+      "Value": "k8s-monitoring",
+      "Active collectors": 7,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack001b",
+      "Attribute": "platform",
+      "Value": "kubernetes",
+      "Active collectors": 7,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack001b",
+      "Attribute": "collector.os",
+      "Value": "linux",
+      "Active collectors": 7,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack019",
+      "Attribute": "collectorType",
+      "Value": "COLLECTOR_TYPE_ALLOY",
+      "Active collectors": 7,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack019",
+      "Attribute": "collector.os",
+      "Value": "linux",
+      "Active collectors": 7,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack019",
+      "Attribute": "platform",
+      "Value": "unknown",
+      "Active collectors": 7,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack019",
+      "Attribute": "source",
+      "Value": "unknown",
+      "Active collectors": 7,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack019",
+      "Attribute": "sourceVersion",
+      "Value": "unknown",
+      "Active collectors": 7,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack052",
+      "Attribute": "collectorType",
+      "Value": "COLLECTOR_TYPE_ALLOY",
+      "Active collectors": 4,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack052",
+      "Attribute": "collector.os",
+      "Value": "linux",
+      "Active collectors": 4,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack052",
+      "Attribute": "platform",
+      "Value": "unknown",
+      "Active collectors": 4,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack052",
+      "Attribute": "source",
+      "Value": "unknown",
+      "Active collectors": 4,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack052",
+      "Attribute": "sourceVersion",
+      "Value": "unknown",
+      "Active collectors": 4,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack020",
+      "Attribute": "collectorType",
+      "Value": "COLLECTOR_TYPE_ALLOY",
+      "Active collectors": 2,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack020",
+      "Attribute": "collector.os",
+      "Value": "linux",
+      "Active collectors": 2,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack020",
+      "Attribute": "platform",
+      "Value": "unknown",
+      "Active collectors": 2,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack020",
+      "Attribute": "source",
+      "Value": "unknown",
+      "Active collectors": 2,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "stack020",
+      "Attribute": "sourceVersion",
+      "Value": "unknown",
+      "Active collectors": 2,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "obs-hub",
+      "Attribute": "collectorType",
+      "Value": "COLLECTOR_TYPE_ALLOY",
+      "Active collectors": 1,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "obs-hub",
+      "Attribute": "collector.os",
+      "Value": "linux",
+      "Active collectors": 1,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "obs-hub",
+      "Attribute": "platform",
+      "Value": "unknown",
+      "Active collectors": 1,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "obs-hub",
+      "Attribute": "source",
+      "Value": "unknown",
+      "Active collectors": 1,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "obs-hub",
+      "Attribute": "sourceVersion",
+      "Value": "unknown",
+      "Active collectors": 1,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Attribute": "collectorType",
+      "Value": "COLLECTOR_TYPE_ALLOY",
+      "Active collectors": 1,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Attribute": "collector.os",
+      "Value": "linux",
+      "Active collectors": 1,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Attribute": "platform",
+      "Value": "unknown",
+      "Active collectors": 1,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Attribute": "source",
+      "Value": "unknown",
+      "Active collectors": 1,
+      "Distinct values": 1,
+      "Truncated": false
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Attribute": "sourceVersion",
+      "Value": "unknown",
+      "Active collectors": 1,
+      "Distinct values": 1,
+      "Truncated": false
+    }
+  ]
+}

@@ -1,0 +1,408 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "obs-hub-dev",
+      "Dashboard": "Dashboard 029",
+      "Folder": "Folder 014",
+      "Dashboard uid": "dash029",
+      "Views": 13
+    },
+    {
+      " Stack": "stack001b",
+      "Dashboard": "Dashboard 002",
+      "Folder": "Folder 002",
+      "Dashboard uid": "dash002",
+      "Views": 12
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dashboard": "Dashboard 030",
+      "Folder": "Folder 015",
+      "Dashboard uid": "dash030",
+      "Views": 10
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dashboard": "Dashboard 026",
+      "Folder": "Folder 015",
+      "Dashboard uid": "dash026",
+      "Views": 8
+    },
+    {
+      " Stack": "stack111",
+      "Dashboard": "Dashboard 038",
+      "Folder": "Folder 017",
+      "Dashboard uid": "dash038",
+      "Views": 8
+    },
+    {
+      " Stack": "stack071",
+      "Dashboard": "Dashboard 041",
+      "Folder": "Folder 019",
+      "Dashboard uid": "dash041",
+      "Views": 7
+    },
+    {
+      " Stack": "stack020",
+      "Dashboard": "Dashboard 014",
+      "Folder": "Folder 007",
+      "Dashboard uid": "dash014",
+      "Views": 6
+    },
+    {
+      " Stack": "obs-hub",
+      "Dashboard": "Dashboard 011",
+      "Folder": "Folder 006",
+      "Dashboard uid": "dash011",
+      "Views": 6
+    },
+    {
+      " Stack": "stack111",
+      "Dashboard": "Dashboard 039",
+      "Folder": "(General)",
+      "Dashboard uid": "dash039",
+      "Views": 5
+    },
+    {
+      " Stack": "stack113",
+      "Dashboard": "Dashboard 054",
+      "Folder": "(General)",
+      "Dashboard uid": "dash055",
+      "Views": 5
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dashboard": "Dashboard 011",
+      "Folder": "Folder 006",
+      "Dashboard uid": "dash011",
+      "Views": 4
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dashboard": "Dashboard 031",
+      "Folder": "Folder 014",
+      "Dashboard uid": "dash031",
+      "Views": 4
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dashboard": "Dashboard 032",
+      "Folder": "Folder 014",
+      "Dashboard uid": "dash032",
+      "Views": 4
+    },
+    {
+      " Stack": "stack071",
+      "Dashboard": "Dashboard 017",
+      "Folder": "Folder 019",
+      "Dashboard uid": "dash017",
+      "Views": 4
+    },
+    {
+      " Stack": "stack001b",
+      "Dashboard": "Dashboard 003",
+      "Folder": "Folder 003",
+      "Dashboard uid": "dash003",
+      "Views": 3
+    },
+    {
+      " Stack": "stack001b",
+      "Dashboard": "Dashboard 004",
+      "Folder": "(General)",
+      "Dashboard uid": "dash004",
+      "Views": 3
+    },
+    {
+      " Stack": "stack020",
+      "Dashboard": "Dashboard 011",
+      "Folder": "Folder 006",
+      "Dashboard uid": "dash011",
+      "Views": 3
+    },
+    {
+      " Stack": "stack020",
+      "Dashboard": "Dashboard 015",
+      "Folder": "Folder 008",
+      "Dashboard uid": "dash015",
+      "Views": 3
+    },
+    {
+      " Stack": "obs-hub",
+      "Dashboard": "Dashboard 023",
+      "Folder": "(General)",
+      "Dashboard uid": "dash023",
+      "Views": 3
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dashboard": "Dashboard 033",
+      "Folder": "Folder 014",
+      "Dashboard uid": "dash033",
+      "Views": 3
+    },
+    {
+      " Stack": "stack050",
+      "Dashboard": "Dashboard 043",
+      "Folder": "Folder 022",
+      "Dashboard uid": "dash044",
+      "Views": 3
+    },
+    {
+      " Stack": "stack038",
+      "Dashboard": "Dashboard 011",
+      "Folder": "Folder 006",
+      "Dashboard uid": "dash011",
+      "Views": 3
+    },
+    {
+      " Stack": "stack158",
+      "Dashboard": "Dashboard 001",
+      "Folder": "Folder 001",
+      "Dashboard uid": "dash001",
+      "Views": 2
+    },
+    {
+      " Stack": "stack001b",
+      "Dashboard": "Dashboard 005",
+      "Folder": "Folder 003",
+      "Dashboard uid": "dash005",
+      "Views": 2
+    },
+    {
+      " Stack": "stack001b",
+      "Dashboard": "Dashboard 006",
+      "Folder": "Folder 004",
+      "Dashboard uid": "dash006",
+      "Views": 2
+    },
+    {
+      " Stack": "stack019",
+      "Dashboard": "Dashboard 012",
+      "Folder": "(General)",
+      "Dashboard uid": "dash012",
+      "Views": 2
+    },
+    {
+      " Stack": "stack020",
+      "Dashboard": "Dashboard 016",
+      "Folder": "Folder 009",
+      "Dashboard uid": "dash016",
+      "Views": 2
+    },
+    {
+      " Stack": "stack020",
+      "Dashboard": "Dashboard 017",
+      "Folder": "(General)",
+      "Dashboard uid": "dash017",
+      "Views": 2
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dashboard": "Dashboard 034",
+      "Folder": "Folder 014",
+      "Dashboard uid": "dash034",
+      "Views": 2
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dashboard": "Dashboard 035",
+      "Folder": "Folder 014",
+      "Dashboard uid": "dash035",
+      "Views": 2
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dashboard": "Dashboard 036",
+      "Folder": "Folder 014",
+      "Dashboard uid": "dash036",
+      "Views": 2
+    },
+    {
+      " Stack": "stack111",
+      "Dashboard": "Dashboard 011",
+      "Folder": "Folder 006",
+      "Dashboard uid": "dash011",
+      "Views": 2
+    },
+    {
+      " Stack": "stack111",
+      "Dashboard": "Dashboard 040",
+      "Folder": "Folder 018",
+      "Dashboard uid": "dash040",
+      "Views": 2
+    },
+    {
+      " Stack": "stack050",
+      "Dashboard": "Dashboard 044",
+      "Folder": "Folder 023",
+      "Dashboard uid": "dash045",
+      "Views": 2
+    },
+    {
+      " Stack": "stack126",
+      "Dashboard": "Dashboard 053",
+      "Folder": "Folder 027",
+      "Dashboard uid": "dash054",
+      "Views": 2
+    },
+    {
+      " Stack": "stack113",
+      "Dashboard": "Dashboard 011",
+      "Folder": "Folder 006",
+      "Dashboard uid": "dash011",
+      "Views": 2
+    },
+    {
+      " Stack": "stack113",
+      "Dashboard": "Dashboard 055",
+      "Folder": "(General)",
+      "Dashboard uid": "dash056",
+      "Views": 2
+    },
+    {
+      " Stack": "stack113",
+      "Dashboard": "Dashboard 056",
+      "Folder": "(General)",
+      "Dashboard uid": "dash057",
+      "Views": 2
+    },
+    {
+      " Stack": "stack001b",
+      "Dashboard": "Dashboard 007",
+      "Folder": "Folder 003",
+      "Dashboard uid": "dash007",
+      "Views": 1
+    },
+    {
+      " Stack": "stack001b",
+      "Dashboard": "Dashboard 008",
+      "Folder": "Folder 005",
+      "Dashboard uid": "dash008",
+      "Views": 1
+    },
+    {
+      " Stack": "stack001b",
+      "Dashboard": "Dashboard 009",
+      "Folder": "Folder 002",
+      "Dashboard uid": "dash009",
+      "Views": 1
+    },
+    {
+      " Stack": "stack001b",
+      "Dashboard": "Dashboard 010",
+      "Folder": "Folder 002",
+      "Dashboard uid": "dash010",
+      "Views": 1
+    },
+    {
+      " Stack": "stack001b",
+      "Dashboard": "Dashboard 011",
+      "Folder": "Folder 006",
+      "Dashboard uid": "dash011",
+      "Views": 1
+    },
+    {
+      " Stack": "stack019",
+      "Dashboard": "Dashboard 013",
+      "Folder": "(General)",
+      "Dashboard uid": "dash013",
+      "Views": 1
+    },
+    {
+      " Stack": "stack019",
+      "Dashboard": "Dashboard 011",
+      "Folder": "Folder 006",
+      "Dashboard uid": "dash011",
+      "Views": 1
+    },
+    {
+      " Stack": "stack020",
+      "Dashboard": "Dashboard 018",
+      "Folder": "Folder 009",
+      "Dashboard uid": "dash018",
+      "Views": 1
+    },
+    {
+      " Stack": "stack020",
+      "Dashboard": "Dashboard 019",
+      "Folder": "Folder 010",
+      "Dashboard uid": "dash019",
+      "Views": 1
+    },
+    {
+      " Stack": "stack020",
+      "Dashboard": "Dashboard 020",
+      "Folder": "Folder 011",
+      "Dashboard uid": "dash020",
+      "Views": 1
+    },
+    {
+      " Stack": "stack020",
+      "Dashboard": "Dashboard 021",
+      "Folder": "Folder 011",
+      "Dashboard uid": "dash021",
+      "Views": 1
+    },
+    {
+      " Stack": "stack020",
+      "Dashboard": "Dashboard 022",
+      "Folder": "Folder 009",
+      "Dashboard uid": "dash022",
+      "Views": 1
+    }
+  ]
+}

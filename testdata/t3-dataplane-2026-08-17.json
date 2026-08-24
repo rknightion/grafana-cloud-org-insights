@@ -1,0 +1,6143 @@
+{
+  "stack049": {
+    "slug": "stack049",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 134,
+      "label_values_count_total": 10475,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 99,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack110": {
+    "slug": "stack110",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack019": {
+    "slug": "stack019",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 45,
+      "label_values_count_total": 468,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 52,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 7,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack145": {
+    "slug": "stack145",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack020": {
+    "slug": "stack020",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 84,
+      "label_values_count_total": 3105,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 47,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 2,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack158": {
+    "slug": "stack158",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 242,
+      "label_values_count_total": 4942,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 690,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack177": {
+    "slug": "stack177",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 66,
+      "label_values_count_total": 388,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 58,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "obs-hub-dev": {
+    "slug": "obs-hub-dev",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 154,
+      "label_values_count_total": 2369,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 28,
+      "recommendations_pending": 179,
+      "adopted": true,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 1,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack111": {
+    "slug": "stack111",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 93,
+      "label_values_count_total": 196,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 2,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack036": {
+    "slug": "stack036",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 145,
+      "label_values_count_total": 5000,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 613,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 8,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "obs-hub": {
+    "slug": "obs-hub",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 260,
+      "label_values_count_total": 33527,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 213,
+      "recommendations_pending": 524,
+      "adopted": true,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 1,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack071": {
+    "slug": "stack071",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack112": {
+    "slug": "stack112",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack125": {
+    "slug": "stack125",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack051": {
+    "slug": "stack051",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack146": {
+    "slug": "stack146",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack147": {
+    "slug": "stack147",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack038": {
+    "slug": "stack038",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 165,
+      "label_values_count_total": 15261,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 66,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack035": {
+    "slug": "stack035",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 88,
+      "label_values_count_total": 5074,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 145,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 157,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack001a": {
+    "slug": "stack001a",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack001": {
+    "slug": "stack001",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack001c": {
+    "slug": "stack001c",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack054": {
+    "slug": "stack054",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack053": {
+    "slug": "stack053",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 162,
+      "label_values_count_total": 5069,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 105,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack148": {
+    "slug": "stack148",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack126": {
+    "slug": "stack126",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack097": {
+    "slug": "stack097",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 12,
+      "label_values_count_total": 20,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack002": {
+    "slug": "stack002",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack070": {
+    "slug": "stack070",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack072": {
+    "slug": "stack072",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 259,
+      "label_values_count_total": 21119,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 760,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack001b": {
+    "slug": "stack001b",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 315,
+      "label_values_count_total": 8730,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 2108,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 7,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack037": {
+    "slug": "stack037",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 122,
+      "label_values_count_total": 2355,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 91,
+      "recommendations_pending": 154,
+      "adopted": true,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 26,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack193": {
+    "slug": "stack193",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 20,
+      "label_values_count_total": 137,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 12,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack159": {
+    "slug": "stack159",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 66,
+      "label_values_count_total": 194,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 3,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack022": {
+    "slug": "stack022",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack199": {
+    "slug": "stack199",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 84,
+      "label_values_count_total": 551,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 43,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack050": {
+    "slug": "stack050",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 22,
+      "label_values_count_total": 68,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack149": {
+    "slug": "stack149",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack003": {
+    "slug": "stack003",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 130,
+      "label_values_count_total": 4247,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 3714,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack151": {
+    "slug": "stack151",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack023": {
+    "slug": "stack023",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 178,
+      "label_values_count_total": 21238,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 25,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 63,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack178": {
+    "slug": "stack178",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 60,
+      "label_values_count_total": 779,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 100,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack052": {
+    "slug": "stack052",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 250,
+      "label_values_count_total": 6248,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 179,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 4,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack004": {
+    "slug": "stack004",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack171": {
+    "slug": "stack171",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 104,
+      "label_values_count_total": 518,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 16,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack150": {
+    "slug": "stack150",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack184": {
+    "slug": "stack184",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 220,
+      "label_values_count_total": 47331,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 1109,
+      "recommendations_pending": 465,
+      "adopted": true,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack172": {
+    "slug": "stack172",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 22,
+      "label_values_count_total": 251,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 3,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack162": {
+    "slug": "stack162",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 92,
+      "label_values_count_total": 1560,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 20,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack194": {
+    "slug": "stack194",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 42,
+      "label_values_count_total": 598,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 22,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack113": {
+    "slug": "stack113",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 20,
+      "label_values_count_total": 76,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack039": {
+    "slug": "stack039",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack055": {
+    "slug": "stack055",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 20,
+      "label_values_count_total": 104,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 25,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack152a": {
+    "slug": "stack152a",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 38,
+      "label_values_count_total": 195,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 29,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 1,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack074": {
+    "slug": "stack074",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 17,
+      "label_values_count_total": 98,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 12,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack115": {
+    "slug": "stack115",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 1,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack170": {
+    "slug": "stack170",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 58,
+      "label_values_count_total": 849,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 161,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack114": {
+    "slug": "stack114",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 69,
+      "label_values_count_total": 3745,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 8,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack127": {
+    "slug": "stack127",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 36,
+      "label_values_count_total": 211,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 47,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 5,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack075": {
+    "slug": "stack075",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 53,
+      "label_values_count_total": 405,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 27,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack128": {
+    "slug": "stack128",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 33,
+      "label_values_count_total": 196,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 11,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack099": {
+    "slug": "stack099",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 55,
+      "label_values_count_total": 2366,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 70,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 15,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack024": {
+    "slug": "stack024",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 223,
+      "label_values_count_total": 8295,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 648,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack100": {
+    "slug": "stack100",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 290,
+      "label_values_count_total": 5147,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 320,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 20,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack076": {
+    "slug": "stack076",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 215,
+      "label_values_count_total": 6981,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 308,
+      "recommendations_pending": 367,
+      "adopted": true,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 46,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack077": {
+    "slug": "stack077",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 286,
+      "label_values_count_total": 11127,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 317,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack073": {
+    "slug": "stack073",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack129": {
+    "slug": "stack129",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 252,
+      "label_values_count_total": 4171,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 326,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack078": {
+    "slug": "stack078",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 38,
+      "label_values_count_total": 229,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 30,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 3,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack116": {
+    "slug": "stack116",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack079": {
+    "slug": "stack079",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 70,
+      "label_values_count_total": 23410,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 34,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack006": {
+    "slug": "stack006",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 30,
+      "label_values_count_total": 946,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 15,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack080": {
+    "slug": "stack080",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack007": {
+    "slug": "stack007",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 106,
+      "label_values_count_total": 2287,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 56,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack163": {
+    "slug": "stack163",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 147,
+      "label_values_count_total": 9319,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 206,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack005": {
+    "slug": "stack005",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack056": {
+    "slug": "stack056",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack152": {
+    "slug": "stack152",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 62,
+      "label_values_count_total": 2139,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 24,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 3,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack164": {
+    "slug": "stack164",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 56,
+      "label_values_count_total": 1462,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 59,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack026": {
+    "slug": "stack026",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack081": {
+    "slug": "stack081",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack082": {
+    "slug": "stack082",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 14,
+      "label_values_count_total": 490,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 3,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack180": {
+    "slug": "stack180",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack098": {
+    "slug": "stack098",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 36,
+      "label_values_count_total": 140,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 21,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack181": {
+    "slug": "stack181",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 41,
+      "label_values_count_total": 292,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 35,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 1,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack185": {
+    "slug": "stack185",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack190": {
+    "slug": "stack190",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack182": {
+    "slug": "stack182",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 53,
+      "label_values_count_total": 2080,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 116,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 1,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack182a": {
+    "slug": "stack182a",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 38,
+      "label_values_count_total": 1175,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 2,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack008": {
+    "slug": "stack008",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 19,
+      "label_values_count_total": 46,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack101": {
+    "slug": "stack101",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 166,
+      "label_values_count_total": 11635,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 98,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 23,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack173": {
+    "slug": "stack173",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 81,
+      "label_values_count_total": 1032,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 181,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack025": {
+    "slug": "stack025",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 76,
+      "label_values_count_total": 406,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 23,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack040": {
+    "slug": "stack040",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 48,
+      "label_values_count_total": 728,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 37,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack197": {
+    "slug": "stack197",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack117": {
+    "slug": "stack117",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 34,
+      "label_values_count_total": 286,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 8,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack179": {
+    "slug": "stack179",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 324,
+      "label_values_count_total": 7678,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 617,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 6,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack118": {
+    "slug": "stack118",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack009": {
+    "slug": "stack009",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 21,
+      "label_values_count_total": 97,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 14,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack119": {
+    "slug": "stack119",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack120": {
+    "slug": "stack120",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 7,
+      "label_values_count_total": 11,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack057": {
+    "slug": "stack057",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 20,
+      "label_values_count_total": 6093,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack042": {
+    "slug": "stack042",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack027": {
+    "slug": "stack027",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack010": {
+    "slug": "stack010",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack010a": {
+    "slug": "stack010a",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack041": {
+    "slug": "stack041",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack130": {
+    "slug": "stack130",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 433,
+      "label_values_count_total": 56117,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 586,
+      "recommendations_pending": 745,
+      "adopted": true,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack011": {
+    "slug": "stack011",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack131": {
+    "slug": "stack131",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack132": {
+    "slug": "stack132",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack058": {
+    "slug": "stack058",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack028": {
+    "slug": "stack028",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 92,
+      "label_values_count_total": 1715,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 2,
+      "recommendations_pending": 26,
+      "adopted": true,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack102": {
+    "slug": "stack102",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 11,
+      "label_values_count_total": 15,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack103": {
+    "slug": "stack103",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 20,
+      "label_values_count_total": 61,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack012": {
+    "slug": "stack012",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 12,
+      "label_values_count_total": 69,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 4,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack043": {
+    "slug": "stack043",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 35,
+      "label_values_count_total": 147,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 30,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack160": {
+    "slug": "stack160",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack186": {
+    "slug": "stack186",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack183": {
+    "slug": "stack183",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 20,
+      "label_values_count_total": 61,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack059": {
+    "slug": "stack059",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 48,
+      "label_values_count_total": 353,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 20,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 1,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack029": {
+    "slug": "stack029",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack153": {
+    "slug": "stack153",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 44,
+      "label_values_count_total": 283,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 9,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 2,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack060": {
+    "slug": "stack060",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 84,
+      "label_values_count_total": 1195,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 37,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack134": {
+    "slug": "stack134",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack165": {
+    "slug": "stack165",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack083": {
+    "slug": "stack083",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack154": {
+    "slug": "stack154",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 43,
+      "label_values_count_total": 504,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 20,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack174": {
+    "slug": "stack174",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack085": {
+    "slug": "stack085",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 61,
+      "label_values_count_total": 408,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 172,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 5,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack121": {
+    "slug": "stack121",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 99,
+      "label_values_count_total": 793,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 116,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack200": {
+    "slug": "stack200",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 161,
+      "label_values_count_total": 4001,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 117,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 6,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack189": {
+    "slug": "stack189",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 133,
+      "label_values_count_total": 8360,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 150,
+      "recommendations_pending": 143,
+      "adopted": true,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack198": {
+    "slug": "stack198",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 139,
+      "label_values_count_total": 2374,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 369,
+      "recommendations_pending": 369,
+      "adopted": true,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack133": {
+    "slug": "stack133",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 202,
+      "label_values_count_total": 4827,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 1723,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 26,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack084": {
+    "slug": "stack084",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 197,
+      "label_values_count_total": 398773,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 150,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack013": {
+    "slug": "stack013",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 252,
+      "label_values_count_total": 10570,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 154,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack161": {
+    "slug": "stack161",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 32,
+      "label_values_count_total": 122,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 12,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack061": {
+    "slug": "stack061",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 91,
+      "label_values_count_total": 2006,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 150,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack195": {
+    "slug": "stack195",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack087": {
+    "slug": "stack087",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack086": {
+    "slug": "stack086",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 6,
+      "label_values_count_total": 8,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack135": {
+    "slug": "stack135",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack187": {
+    "slug": "stack187",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack155": {
+    "slug": "stack155",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 47,
+      "label_values_count_total": 373,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 106,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack167": {
+    "slug": "stack167",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack044": {
+    "slug": "stack044",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 147,
+      "label_values_count_total": 8946,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 419,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 99,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack191": {
+    "slug": "stack191",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack045": {
+    "slug": "stack045",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 30,
+      "label_values_count_total": 220,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 19,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack106": {
+    "slug": "stack106",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 40,
+      "label_values_count_total": 168,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 14,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack166": {
+    "slug": "stack166",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack090": {
+    "slug": "stack090",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 28,
+      "label_values_count_total": 103,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 20,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack089": {
+    "slug": "stack089",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 32,
+      "label_values_count_total": 117,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 24,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack030": {
+    "slug": "stack030",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack107": {
+    "slug": "stack107",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack104": {
+    "slug": "stack104",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 10,
+      "label_values_count_total": 15,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack122": {
+    "slug": "stack122",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 46,
+      "label_values_count_total": 921,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 45,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack091": {
+    "slug": "stack091",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 95,
+      "label_values_count_total": 1024,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 114,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 19,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack062": {
+    "slug": "stack062",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack105": {
+    "slug": "stack105",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack088": {
+    "slug": "stack088",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack014": {
+    "slug": "stack014",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 82,
+      "label_values_count_total": 2067,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 386,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack175": {
+    "slug": "stack175",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 158,
+      "label_values_count_total": 23194,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 190,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 4,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack137": {
+    "slug": "stack137",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015o": {
+    "slug": "stack015o",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack064": {
+    "slug": "stack064",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack108": {
+    "slug": "stack108",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 117,
+      "label_values_count_total": 2064,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 191,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 1,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015s": {
+    "slug": "stack015s",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 77,
+      "label_values_count_total": 697,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 157,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 1,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack136": {
+    "slug": "stack136",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015f": {
+    "slug": "stack015f",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack015i": {
+    "slug": "stack015i",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 115,
+      "label_values_count_total": 7685,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 920,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack015p": {
+    "slug": "stack015p",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015t": {
+    "slug": "stack015t",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 13,
+      "label_values_count_total": 69,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack015u": {
+    "slug": "stack015u",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 10,
+      "label_values_count_total": 783,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 2,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack015q": {
+    "slug": "stack015q",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack031": {
+    "slug": "stack031",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015r": {
+    "slug": "stack015r",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 53,
+      "label_values_count_total": 271,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 33,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack168": {
+    "slug": "stack168",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015a": {
+    "slug": "stack015a",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 279,
+      "label_values_count_total": 7626,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 1370,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack015c": {
+    "slug": "stack015c",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 24,
+      "label_values_count_total": 97,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 12,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 1,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015k": {
+    "slug": "stack015k",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015l": {
+    "slug": "stack015l",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 49,
+      "label_values_count_total": 267,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 10,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015d": {
+    "slug": "stack015d",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015g": {
+    "slug": "stack015g",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 219,
+      "label_values_count_total": 20169,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 307,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 29,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015h": {
+    "slug": "stack015h",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 20,
+      "label_values_count_total": 672,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack015j": {
+    "slug": "stack015j",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 345,
+      "label_values_count_total": 46454,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 346,
+      "recommendations_pending": 492,
+      "adopted": true,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack015m": {
+    "slug": "stack015m",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 177,
+      "label_values_count_total": 3725,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 471,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack123": {
+    "slug": "stack123",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 21,
+      "label_values_count_total": 64,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015e": {
+    "slug": "stack015e",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 102,
+      "label_values_count_total": 11382,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 8857,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 20,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack138": {
+    "slug": "stack138",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack156": {
+    "slug": "stack156",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 21,
+      "label_values_count_total": 75,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 16,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack063": {
+    "slug": "stack063",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 18,
+      "label_values_count_total": 492,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 20,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack015b": {
+    "slug": "stack015b",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 10,
+      "label_values_count_total": 29,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 5,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack032": {
+    "slug": "stack032",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack033": {
+    "slug": "stack033",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack046": {
+    "slug": "stack046",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack176": {
+    "slug": "stack176",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 89,
+      "label_values_count_total": 1446,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 201,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 5,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack140": {
+    "slug": "stack140",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack192": {
+    "slug": "stack192",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack093": {
+    "slug": "stack093",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 14,
+      "label_values_count_total": 2015,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack095": {
+    "slug": "stack095",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 163,
+      "label_values_count_total": 1511,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 315,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack196": {
+    "slug": "stack196",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 14,
+      "label_values_count_total": 115,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack066": {
+    "slug": "stack066",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 202,
+      "label_values_count_total": 8145,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 314,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 76,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack157": {
+    "slug": "stack157",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack067": {
+    "slug": "stack067",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack139": {
+    "slug": "stack139",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack142": {
+    "slug": "stack142",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack065": {
+    "slug": "stack065",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack109": {
+    "slug": "stack109",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 20,
+      "label_values_count_total": 65,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 1,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 1,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack092": {
+    "slug": "stack092",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "test002": {
+    "slug": "test002",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack094": {
+    "slug": "stack094",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 157,
+      "label_values_count_total": 34724,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 433,
+      "recommendations_pending": 507,
+      "adopted": true,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 415,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack124": {
+    "slug": "stack124",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack047": {
+    "slug": "stack047",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack015n": {
+    "slug": "stack015n",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 168,
+      "label_values_count_total": 32374,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 158,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 864,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack001": {
+    "slug": "teststack001",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack141": {
+    "slug": "stack141",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 91,
+      "label_values_count_total": 576,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 108,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack068": {
+    "slug": "stack068",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 24,
+      "label_values_count_total": 86,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 1,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack002": {
+    "slug": "teststack002",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack003": {
+    "slug": "teststack003",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "testsrobot001": {
+    "slug": "testsrobot001",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 91,
+      "label_values_count_total": 705,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 114,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack005": {
+    "slug": "teststack005",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "testlab001": {
+    "slug": "testlab001",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 115,
+      "label_values_count_total": 2592,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 332,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 16,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "testsrobot003": {
+    "slug": "testsrobot003",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "test001": {
+    "slug": "test001",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack006": {
+    "slug": "teststack006",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack007": {
+    "slug": "teststack007",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "testsrobot004": {
+    "slug": "testsrobot004",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack008": {
+    "slug": "teststack008",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "testsrobotdelete002": {
+    "slug": "testsrobotdelete002",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "testsrobotdelete001": {
+    "slug": "testsrobotdelete001",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack009": {
+    "slug": "teststack009",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack010": {
+    "slug": "teststack010",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack011": {
+    "slug": "teststack011",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack012": {
+    "slug": "teststack012",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack013": {
+    "slug": "teststack013",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack014": {
+    "slug": "teststack014",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack019": {
+    "slug": "teststack019",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack016": {
+    "slug": "teststack016",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack015": {
+    "slug": "teststack015",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "testsrobotdelete004": {
+    "slug": "testsrobotdelete004",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack020": {
+    "slug": "teststack020",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack021": {
+    "slug": "teststack021",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack022": {
+    "slug": "teststack022",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack023": {
+    "slug": "teststack023",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "testsrobotdelete003": {
+    "slug": "testsrobotdelete003",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack024": {
+    "slug": "teststack024",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack025": {
+    "slug": "teststack025",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack026": {
+    "slug": "teststack026",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack027": {
+    "slug": "teststack027",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack029": {
+    "slug": "teststack029",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack028": {
+    "slug": "teststack028",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack030": {
+    "slug": "teststack030",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack031": {
+    "slug": "teststack031",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "teststack032": {
+    "slug": "teststack032",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 0,
+      "label_values_count_total": 0,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack016": {
+    "slug": "stack016",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 170,
+      "label_values_count_total": 8064,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 106,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 1,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack069": {
+    "slug": "stack069",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack188": {
+    "slug": "stack188",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 11,
+      "label_values_count_total": 13,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack015": {
+    "slug": "stack015",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack143": {
+    "slug": "stack143",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 23,
+      "label_values_count_total": 198,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 29,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack034": {
+    "slug": "stack034",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack017": {
+    "slug": "stack017",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 34,
+      "label_values_count_total": 102,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack169": {
+    "slug": "stack169",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 1,
+      "provisioned_but_empty": true,
+      "collector_versions": []
+    }
+  },
+  "stack018": {
+    "slug": "stack018",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack144": {
+    "slug": "stack144",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 4,
+      "label_values_count_total": 5,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 0,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack096": {
+    "slug": "stack096",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 170,
+      "label_values_count_total": 12517,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 329,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 0,
+      "pipelines": 0,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  },
+  "stack048": {
+    "slug": "stack048",
+    "cardinality": {
+      "available": true,
+      "label_names_count": 215,
+      "label_values_count_total": 35412,
+      "top_labels": []
+    },
+    "adaptive_metrics": {
+      "available": true,
+      "rules_applied": 0,
+      "recommendations_pending": 201,
+      "adopted": false,
+      "sample_recommendations": []
+    },
+    "fleet": {
+      "available": true,
+      "collectors": 26,
+      "pipelines": 1,
+      "provisioned_but_empty": false,
+      "collector_versions": []
+    }
+  }
+}

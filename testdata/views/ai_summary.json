@@ -1,0 +1,118 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Metric": "Stacks with Assistant data measured",
+      "Value": "40 of 40 scannable"
+    },
+    {
+      " Metric": "Stacks with any Assistant activity",
+      "Value": "17 (42%)"
+    },
+    {
+      " Metric": "Stacks with any tenant Assistant configuration",
+      "Value": "3 (8%)"
+    },
+    {
+      " Metric": "Assistant messages (30d)",
+      "Value": 1764
+    },
+    {
+      " Metric": "Of which categorised",
+      "Value": "318 (18%) - the rest carry no category, so no category chart may be normalised to total messages"
+    },
+    {
+      " Metric": "Assistant tokens (30d)",
+      "Value": 452587371
+    },
+    {
+      " Metric": "Assistant active users (sum of per-stack figures)",
+      "Value": 43
+    },
+    {
+      " Metric": "Tenant skills / rules / automations / MCP integrations",
+      "Value": "3 / 2 / 0 / 2"
+    },
+    {
+      " Metric": "Investigations created (Assistant / user)",
+      "Value": "0 / 0"
+    },
+    {
+      " Metric": "Category x surface combinations in use",
+      "Value": 17
+    },
+    {
+      " Metric": "Stacks awaiting a credential",
+      "Value": "0 - provisioned nightly at 03:35 UTC; see the coverage table"
+    },
+    {
+      " Metric": "Watcher agents",
+      "Value": "NOT MEASURABLE. /api/v1/watcher-agents 403s `authenticated user identity does not match request user` for a full Admin service account. Product-blocked for service-account identities, not a permission gap."
+    },
+    {
+      " Metric": "Investigation inventory",
+      "Value": "NOT MEASURABLE. /api/v2/investigations returns total 0 for a service account, which owns no investigation and is in no Grafana team. Counts are collectable; the list is not."
+    },
+    {
+      " Metric": "User-scoped skills and rules",
+      "Value": "NOT MEASURABLE. User-scoped (\"Just me\") skills and rules are invisible to every identity but their owner, including a full Admin, and pagination.total reads 0 - not even countable."
+    },
+    {
+      " Metric": "Prompts, transcripts, skill bodies, MCP URLs and headers",
+      "Value": "NOT COLLECTED, by design. Aggregates and metadata only (PLAN 17D)."
+    }
+  ]
+}

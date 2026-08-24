@@ -1,0 +1,51 @@
+# Copy to terraform.tfvars and fill in. No credentials go in this file - the two Grafana Cloud tokens
+# are written straight into Secrets Manager, never through Terraform.
+
+region      = "eu-west-1"
+name_prefix = "estate-insights"
+
+# --- Grafana Cloud -------------------------------------------------------------------------------
+#
+# Where to find each value:
+#
+#   grafana_org_id    the number in the Grafana Cloud portal URL, or `id` from GET /api/orgs/<slug>
+#   write_stack_slug  the stack's slug - the subdomain, which may differ from its display name.
+#   mimir_write_url   the stack's Prometheus datasource URL with the /api/prom path removed
+#   mimir_tenant      `hmInstancePromId` from GET /api/instances/<slug>. It is also the "User" shown
+#                     on the stack's Prometheus "Send metrics" panel.
+#   loki_write_url    the stack's Loki datasource URL with the path removed
+#   loki_tenant       `hlInstanceId` from the same instance record
+#
+# The two tenant ids are NOT the stack id. Using the stack id fails as a 401, which reads as a bad
+# token rather than a wrong tenant and has cost real debugging time.
+
+grafana_org_id   = "replace-me-org-id"
+write_stack_slug = "replace-me-write-stack"
+mimir_write_url  = "https://prometheus-prod-XX-prod-region-N.grafana.net"
+mimir_tenant     = "replace-me-hm-instance-prom-id"
+loki_write_url   = "https://logs-prod-XXX.grafana.net"
+loki_tenant      = "replace-me-hl-instance-id"
+
+# --- Network -------------------------------------------------------------------------------------
+#
+# Private subnets with a NAT path are the normal choice. Public subnets work but need
+# assign_public_ip = true, because a Fargate task with no public IP and no NAT cannot pull its image
+# and fails with a ResourceInitializationError that does not mention networking.
+
+subnet_ids       = ["subnet-aaaaaaaa", "subnet-bbbbbbbb"]
+assign_public_ip = false
+
+# Leave false until the secret has values, the image is pushed, and one tier has been run by hand.
+schedules_enabled = false
+
+# --- Optional ECS task logs through Data Firehose -----------------------------------------------
+#
+# Stage 1 creates and tests the stream without connecting the live CloudWatch log group. The adopted
+# secret is dedicated to Firehose and its SecretString is
+# {"api_key":"<loki_tenant>:<logs-write-token>"}; do not point at the collector's differently shaped
+# multi-key secret. After a deliberate test record reaches Loki, enable stage 2.
+
+firehose_logs_enabled             = false
+firehose_log_subscription_enabled = false
+# firehose_access_key_secret_arn  = "arn:aws:secretsmanager:eu-west-1:<aws-account-id>:secret:<secret-name>"
+# firehose_access_key_secret_kms_key_arn = "arn:aws:kms:eu-west-1:<aws-account-id>:key/<key-id>"

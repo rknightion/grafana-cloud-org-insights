@@ -1,0 +1,378 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "obs-hub",
+      "Label values": 36302,
+      "Label names": 256,
+      "Active series": 278835,
+      "Worst label": "name",
+      "Worst label values": 13719
+    },
+    {
+      " Stack": "stack072",
+      "Label values": 27053,
+      "Label names": 259,
+      "Active series": 306601,
+      "Worst label": "address",
+      "Worst label values": 5158
+    },
+    {
+      " Stack": "stack038",
+      "Label values": 17217,
+      "Label names": 165,
+      "Active series": 95970,
+      "Worst label": "name",
+      "Worst label values": 2026
+    },
+    {
+      " Stack": "stack049",
+      "Label values": 10550,
+      "Label names": 134,
+      "Active series": 56868,
+      "Worst label": "persistentvolume",
+      "Worst label values": 1160
+    },
+    {
+      " Stack": "stack001b",
+      "Label values": 10538,
+      "Label names": 360,
+      "Active series": 66141,
+      "Worst label": "__name__",
+      "Worst label values": 3504
+    },
+    {
+      " Stack": "stack052",
+      "Label values": 6384,
+      "Label names": 269,
+      "Active series": 38321,
+      "Worst label": "__name__",
+      "Worst label values": 887
+    },
+    {
+      " Stack": "stack036",
+      "Label values": 5390,
+      "Label names": 145,
+      "Active series": 235765,
+      "Worst label": "method",
+      "Worst label values": 1376
+    },
+    {
+      " Stack": "stack158",
+      "Label values": 5236,
+      "Label names": 244,
+      "Active series": 128779,
+      "Worst label": "__name__",
+      "Worst label values": 1506
+    },
+    {
+      " Stack": "stack035",
+      "Label values": 5083,
+      "Label names": 89,
+      "Active series": 95158,
+      "Worst label": "vdi_uuid",
+      "Worst label values": 776
+    },
+    {
+      " Stack": "stack053",
+      "Label values": 5047,
+      "Label names": 168,
+      "Active series": 21141,
+      "Worst label": "id",
+      "Worst label values": 1108
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Label values": 3546,
+      "Label names": 173,
+      "Active series": 6242,
+      "Worst label": "__name__",
+      "Worst label values": 1125
+    },
+    {
+      " Stack": "stack020",
+      "Label values": 3161,
+      "Label names": 83,
+      "Active series": 39860,
+      "Worst label": "config_version",
+      "Worst label values": 955
+    },
+    {
+      " Stack": "stack037",
+      "Label values": 2358,
+      "Label names": 122,
+      "Active series": 23773,
+      "Worst label": "__name__",
+      "Worst label values": 415
+    },
+    {
+      " Stack": "stack170",
+      "Label values": 822,
+      "Label names": 59,
+      "Active series": 8840,
+      "Worst label": "__name__",
+      "Worst label values": 190
+    },
+    {
+      " Stack": "stack019",
+      "Label values": 468,
+      "Label names": 45,
+      "Active series": 5568,
+      "Worst label": "__name__",
+      "Worst label values": 203
+    },
+    {
+      " Stack": "stack177",
+      "Label values": 398,
+      "Label names": 66,
+      "Active series": 5390,
+      "Worst label": "device",
+      "Worst label values": 84
+    },
+    {
+      " Stack": "stack111",
+      "Label values": 200,
+      "Label names": 93,
+      "Active series": 162,
+      "Worst label": "__name__",
+      "Worst label values": 50
+    },
+    {
+      " Stack": "stack193",
+      "Label values": 137,
+      "Label names": 20,
+      "Active series": 392,
+      "Worst label": "__name__",
+      "Worst label values": 58
+    },
+    {
+      " Stack": "stack055",
+      "Label values": 104,
+      "Label names": 20,
+      "Active series": 711,
+      "Worst label": "__name__",
+      "Worst label values": 27
+    },
+    {
+      " Stack": "stack050",
+      "Label values": 90,
+      "Label names": 27,
+      "Active series": 80,
+      "Worst label": "__name__",
+      "Worst label values": 36
+    },
+    {
+      " Stack": "stack113",
+      "Label values": 62,
+      "Label names": 20,
+      "Active series": 10,
+      "Worst label": "alertname",
+      "Worst label values": 8
+    },
+    {
+      " Stack": "stack097",
+      "Label values": 20,
+      "Label names": 12,
+      "Active series": 5,
+      "Worst label": "__name__",
+      "Worst label values": 3
+    },
+    {
+      " Stack": "stack145",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack125",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack001",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack001c",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack001a",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack110",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack070",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack071",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack112",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack051",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack146",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack147",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack054",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack148",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack126",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack002",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack201",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    },
+    {
+      " Stack": "stack149",
+      "Label values": 5,
+      "Label names": 4,
+      "Active series": 2,
+      "Worst label": "__name__",
+      "Worst label values": 2
+    }
+  ]
+}

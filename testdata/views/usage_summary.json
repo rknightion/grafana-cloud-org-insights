@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Metric": "Stacks with user detail",
+      "Value": "44 of 40 scannable"
+    },
+    {
+      " Metric": "Stickiness (daily / active users, estate)",
+      "Value": 0.459
+    },
+    {
+      " Metric": "Active users",
+      "Value": 231
+    },
+    {
+      " Metric": "Daily users",
+      "Value": 106
+    },
+    {
+      " Metric": "Datasource types in use (excl. auto-provisioned)",
+      "Value": 16
+    },
+    {
+      " Metric": "Stacks with users but zero daily activity",
+      "Value": 0
+    },
+    {
+      " Metric": "Per-dashboard and per-panel view analytics",
+      "Value": "Live - see Dashboard usage; coverage is measured by the per-stack reader sweep."
+    }
+  ]
+}

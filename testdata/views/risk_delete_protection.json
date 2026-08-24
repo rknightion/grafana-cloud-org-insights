@@ -1,0 +1,138 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack072",
+      "Region": "eu",
+      "Users (active)": 4,
+      "Admins": 3,
+      "Admin share %": 75,
+      "Delete protection": false,
+      "Alert rules": 131,
+      "Active series": 306601
+    },
+    {
+      " Stack": "obs-hub",
+      "Region": "prod-eu-west-2",
+      "Users (active)": 11,
+      "Admins": 10,
+      "Admin share %": 90.9,
+      "Delete protection": false,
+      "Alert rules": 396,
+      "Active series": 278835
+    },
+    {
+      " Stack": "stack036",
+      "Region": "prod-eu-west-2",
+      "Users (active)": 6,
+      "Admins": 5,
+      "Admin share %": 83.3,
+      "Delete protection": false,
+      "Alert rules": 5,
+      "Active series": 235765
+    },
+    {
+      " Stack": "stack158",
+      "Region": "prod-eu-west-2",
+      "Users (active)": 12,
+      "Admins": 4,
+      "Admin share %": 33.3,
+      "Delete protection": false,
+      "Alert rules": 727,
+      "Active series": 128779
+    },
+    {
+      " Stack": "stack038",
+      "Region": "prod-eu-west-2",
+      "Users (active)": 13,
+      "Admins": 12,
+      "Admin share %": 92.3,
+      "Delete protection": false,
+      "Alert rules": 228,
+      "Active series": 95970
+    },
+    {
+      " Stack": "stack035",
+      "Region": "prod-us-east-0",
+      "Users (active)": 4,
+      "Admins": 2,
+      "Admin share %": 50,
+      "Delete protection": false,
+      "Alert rules": 12,
+      "Active series": 95158
+    },
+    {
+      " Stack": "stack001b",
+      "Region": "prod-us-west-0",
+      "Users (active)": 15,
+      "Admins": 8,
+      "Admin share %": 53.3,
+      "Delete protection": false,
+      "Alert rules": 764,
+      "Active series": 66141
+    },
+    {
+      " Stack": "stack049",
+      "Region": "prod-eu-west-2",
+      "Users (active)": 2,
+      "Admins": 1,
+      "Admin share %": 50,
+      "Delete protection": false,
+      "Alert rules": 127,
+      "Active series": 56868
+    }
+  ]
+}

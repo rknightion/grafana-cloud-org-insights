@@ -1,0 +1,1258 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Policy": "policy014",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "logs:read, metrics:read, stacks:read, adaptive-metrics-rules:read, adaptive-metrics-config:read, adaptive-metrics-recommendations:read, adaptive-metrics-rules:write, adaptive-logs:admin",
+      "Scope count": 8,
+      "Org-wide write": true,
+      "Created": "2026-05-18T11:29:06Z"
+    },
+    {
+      " Policy": "policy001",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "accesspolicies:read, stacks:read, accesspolicies:write, stacks:write, stack-service-accounts:write, accesspolicies:delete, stacks:delete",
+      "Scope count": 7,
+      "Org-wide write": true,
+      "Created": "2024-05-07T18:52:09Z"
+    },
+    {
+      " Policy": "policy009",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "metrics:read, logs:read, traces:read, metrics:write, logs:write, traces:write, metrics:import",
+      "Scope count": 7,
+      "Org-wide write": true,
+      "Created": "2025-12-29T13:34:18Z"
+    },
+    {
+      " Policy": "policy002",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "stacks:read, stacks:write, stack-service-accounts:write, stacks:delete",
+      "Scope count": 4,
+      "Org-wide write": true,
+      "Created": "2024-06-10T15:35:12Z"
+    },
+    {
+      " Policy": "policy013",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "alerts:read, stacks:read, stack-api-keys:write, stack-service-accounts:write",
+      "Scope count": 4,
+      "Org-wide write": true,
+      "Created": "2026-05-15T14:38:47Z"
+    },
+    {
+      " Policy": "policy010",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "accesspolicies:read, stacks:read, accesspolicies:write",
+      "Scope count": 3,
+      "Org-wide write": true,
+      "Created": "2026-03-31T08:22:21Z"
+    },
+    {
+      " Policy": "policy008",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "logs:read, logs:write",
+      "Scope count": 2,
+      "Org-wide write": true,
+      "Created": "2025-08-28T13:15:46Z"
+    },
+    {
+      " Policy": "policy017",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "stacks:read, stack-service-accounts:write",
+      "Scope count": 2,
+      "Org-wide write": true,
+      "Created": "2026-08-20T08:53:06Z"
+    },
+    {
+      " Policy": "policy005",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "set:cloud-admin",
+      "Scope count": 1,
+      "Org-wide write": true,
+      "Created": "2025-07-24T14:22:47Z"
+    },
+    {
+      " Policy": "policy007",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "logs:write",
+      "Scope count": 1,
+      "Org-wide write": true,
+      "Created": "2025-08-28T08:19:36Z"
+    },
+    {
+      " Policy": "policy004",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "metrics:read, logs:read, traces:read, profiles:read, alerts:read, rules:read, accesspolicies:read, api-keys:read, billing-metrics:read, org-billing-info:read, org-billing-rate:read, subscription-usage-configs:read, subscriptions:read, stacks:read, stack-users:read, stack-oauth:read, stack-dashboards:read, stack-plugins:read, sso-configs:read, adaptive-metrics-config:read, adaptive-metrics-exemptions:read, adaptive-metrics-recommendations:read, adaptive-metrics-rules:read, agentmanagement:read, alert-state-history:read, credit-cards:read, dashboards:read, datasources:read, fleet-management:read, frontend-observability:read, insight-logs:read, integration-management:read, invites:read, invoices:read, mlops:read, license-tokens:read, oauth-clients:read, licenses:read, support-tickets:read, oauth-codes:read, oauth-tokens:read, org-members:read, org-referral-codes:read, orgs:read, pdc:read, pdc-aws-resources:read, plugin-submissions:read, plugins-catalog-grafana-cloud:read, profiles-ad-hoc:read, profiles-config:read, provisioned-plugins:read, relabel-rules:read, repository-tokens:read, service-model:read, slos:read, sourcemaps:read",
+      "Scope count": 56,
+      "Org-wide write": false,
+      "Created": "2025-05-13T12:36:52Z"
+    },
+    {
+      " Policy": "policy107",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "accesspolicies:read, alerts:read, logs:read, metrics:read, rules:read, traces:read, profiles:read, adaptive-metrics-config:read, adaptive-metrics-exemptions:read, accesspolicies:write, alerts:write, logs:write, metrics:write, rules:write, traces:write, profiles:write, adaptive-metrics-config:write, adaptive-metrics-exemptions:write",
+      "Scope count": 18,
+      "Org-wide write": false,
+      "Created": "2024-07-18T17:11:42Z"
+    },
+    {
+      " Policy": "policy113",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "accesspolicies:read, alerts:read, logs:read, metrics:read, rules:read, traces:read, profiles:read, accesspolicies:write, alerts:write, logs:write, metrics:write, rules:write, traces:write, profiles:write",
+      "Scope count": 14,
+      "Org-wide write": false,
+      "Created": "2024-10-24T17:52:41Z"
+    },
+    {
+      " Policy": "policy119",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:read, logs:read, traces:read, profiles:read, alerts:read, rules:read, accesspolicies:read, metrics:write, logs:write, traces:write, profiles:write, alerts:write, rules:write, accesspolicies:write",
+      "Scope count": 14,
+      "Org-wide write": false,
+      "Created": "2025-01-27T18:45:33Z"
+    },
+    {
+      " Policy": "policy085",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "alerts:read, logs:read, metrics:read, rules:read, traces:read, stack-dashboards:read, alerts:write, logs:write, rules:write, stack-dashboards:write, logs:delete, stack-dashboards:delete",
+      "Scope count": 12,
+      "Org-wide write": false,
+      "Created": "2026-06-25T10:32:53Z"
+    },
+    {
+      " Policy": "policy016",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "stacks:read, stack-users:read, stack-plugins:read, org-members:read, accesspolicies:read, metrics:read, adaptive-metrics-rules:read, adaptive-metrics-recommendations:read, fleet-management:read",
+      "Scope count": 9,
+      "Org-wide write": false,
+      "Created": "2026-08-17T20:50:00Z"
+    },
+    {
+      " Policy": "policy006",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "metrics:read, logs:read, traces:read, profiles:read, alerts:read, rules:read, accesspolicies:read, stacks:read",
+      "Scope count": 8,
+      "Org-wide write": false,
+      "Created": "2025-08-27T10:42:09Z"
+    },
+    {
+      " Policy": "policy035",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, profiles:write, alerts:write, rules:write, accesspolicies:write",
+      "Scope count": 7,
+      "Org-wide write": false,
+      "Created": "2026-04-30T14:19:13Z"
+    },
+    {
+      " Policy": "policy106",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "accesspolicies:read, alerts:read, logs:read, metrics:read, rules:read, traces:read, profiles:read",
+      "Scope count": 7,
+      "Org-wide write": false,
+      "Created": "2024-07-18T16:31:37Z"
+    },
+    {
+      " Policy": "policy018",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "alerts:read, metrics:read, rules:read, alerts:write, rules:write, set:alloy-data-write",
+      "Scope count": 6,
+      "Org-wide write": false,
+      "Created": "2024-11-17T21:08:23Z"
+    },
+    {
+      " Policy": "policy049",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "logs:read, metrics:read, fleet-management:read, logs:write, metrics:write, fleet-management:write",
+      "Scope count": 6,
+      "Org-wide write": false,
+      "Created": "2025-08-18T15:59:48Z"
+    },
+    {
+      " Policy": "policy076",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, profiles:write, alerts:write, rules:write",
+      "Scope count": 6,
+      "Org-wide write": false,
+      "Created": "2026-04-28T06:28:09Z"
+    },
+    {
+      " Policy": "policy044",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "alerts:write, logs:write, metrics:write, traces:write, set:pdc-signing",
+      "Scope count": 5,
+      "Org-wide write": false,
+      "Created": "2025-05-28T08:11:11Z"
+    },
+    {
+      " Policy": "policy098",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, alerts:write, rules:write",
+      "Scope count": 5,
+      "Org-wide write": false,
+      "Created": "2026-08-10T07:19:15Z"
+    },
+    {
+      " Policy": "policy105",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "alerts:read, logs:read, metrics:read, rules:read, rules:write",
+      "Scope count": 5,
+      "Org-wide write": false,
+      "Created": "2024-06-26T18:53:01Z"
+    },
+    {
+      " Policy": "policy012",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "alerts:read, org-members:read, stacks:read, stack-users:read",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2026-05-12T11:37:13Z"
+    },
+    {
+      " Policy": "policy026",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, profiles:write",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2025-09-19T10:07:11Z"
+    },
+    {
+      " Policy": "policy029",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, profiles:write",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2025-09-24T15:53:50Z"
+    },
+    {
+      " Policy": "policy033",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, profiles:write",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2026-04-08T18:04:26Z"
+    },
+    {
+      " Policy": "policy034",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:read, rules:read, metrics:write, rules:write",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2026-04-24T12:25:29Z"
+    },
+    {
+      " Policy": "policy056",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, profiles:write",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2025-12-01T09:35:42Z"
+    },
+    {
+      " Policy": "policy062",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, profiles:write",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2026-01-23T20:27:53Z"
+    },
+    {
+      " Policy": "policy092",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, profiles:write",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2026-07-20T14:18:41Z"
+    },
+    {
+      " Policy": "policy108",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "accesspolicies:read, metrics:write, logs:write, traces:write",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2024-07-29T17:08:53Z"
+    },
+    {
+      " Policy": "policy110",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, metrics:read",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2024-07-29T17:26:33Z"
+    },
+    {
+      " Policy": "policy111",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, metrics:read",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2024-07-30T14:28:48Z"
+    },
+    {
+      " Policy": "policy118",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, profiles:write",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2024-12-13T11:55:04Z"
+    },
+    {
+      " Policy": "policy120",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write, profiles:write",
+      "Scope count": 4,
+      "Org-wide write": false,
+      "Created": "2025-02-04T12:42:20Z"
+    },
+    {
+      " Policy": "policy027",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write, logs:write, traces:write",
+      "Scope count": 3,
+      "Org-wide write": false,
+      "Created": "2025-09-19T13:06:34Z"
+    },
+    {
+      " Policy": "policy067",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "logs:write, metrics:write, traces:write",
+      "Scope count": 3,
+      "Org-wide write": false,
+      "Created": "2026-03-05T13:19:48Z"
+    },
+    {
+      " Policy": "policy071",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "logs:write, metrics:write, traces:write",
+      "Scope count": 3,
+      "Org-wide write": false,
+      "Created": "2026-03-31T13:08:19Z"
+    },
+    {
+      " Policy": "policy102",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "alerts:write, rules:write, set:alloy-data-write",
+      "Scope count": 3,
+      "Org-wide write": false,
+      "Created": "2024-06-19T02:30:46Z"
+    },
+    {
+      " Policy": "policy024",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "logs:write, metrics:write",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2025-09-01T12:10:29Z"
+    },
+    {
+      " Policy": "policy028",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write, stacks:read",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2025-09-19T16:04:41Z"
+    },
+    {
+      " Policy": "policy031",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write, stacks:read",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2025-12-05T13:08:53Z"
+    },
+    {
+      " Policy": "policy032",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write, stacks:read",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-04-08T17:48:26Z"
+    },
+    {
+      " Policy": "policy037",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:read, set:alloy-data-write",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-06-26T10:25:45Z"
+    },
+    {
+      " Policy": "policy038",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write, stacks:read",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-07-06T07:58:25Z"
+    },
+    {
+      " Policy": "policy039",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:read, set:alloy-data-write",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-07-15T13:52:54Z"
+    },
+    {
+      " Policy": "policy046",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write, stacks:read",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2025-06-19T04:41:48Z"
+    },
+    {
+      " Policy": "policy053",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write, stacks:read",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2025-09-12T13:25:18Z"
+    },
+    {
+      " Policy": "policy060",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write, stacks:read",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-01-09T17:17:45Z"
+    },
+    {
+      " Policy": "policy061",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write, stacks:read",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-01-13T18:54:02Z"
+    },
+    {
+      " Policy": "policy065",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write, stacks:read",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-02-05T17:41:23Z"
+    },
+    {
+      " Policy": "policy072",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write, stacks:read",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-04-24T07:28:22Z"
+    },
+    {
+      " Policy": "policy073",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "cloud-migrations:read, cloud-migrations:write",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-04-24T16:59:52Z"
+    },
+    {
+      " Policy": "policy074",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "fleet-management:read, fleet-management:write",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-04-24T18:20:04Z"
+    },
+    {
+      " Policy": "policy075",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write, stacks:read",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-04-24T18:25:37Z"
+    },
+    {
+      " Policy": "policy080",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:read, set:alloy-data-write",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-06-02T21:07:41Z"
+    },
+    {
+      " Policy": "policy086",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "fleet-management:read, fleet-management:write",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-07-02T09:07:39Z"
+    },
+    {
+      " Policy": "policy087",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:read, set:alloy-data-write",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-07-06T12:46:41Z"
+    },
+    {
+      " Policy": "policy088",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:read, set:alloy-data-write",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-07-06T13:03:35Z"
+    },
+    {
+      " Policy": "policy093",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "fleet-management:read, fleet-management:write",
+      "Scope count": 2,
+      "Org-wide write": false,
+      "Created": "2026-07-23T13:51:21Z"
+    },
+    {
+      " Policy": "policy003",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "stack-users:read",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-05-09T08:37:13Z"
+    },
+    {
+      " Policy": "policy011",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "metrics:read",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-04-15T07:01:25Z"
+    },
+    {
+      " Policy": "policy015",
+      "Region": "us",
+      "Realm types": "org",
+      "Stack-scoped": false,
+      "Scopes": "insight-logs:read",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-05-26T15:52:31Z"
+    },
+    {
+      " Policy": "policy019",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2024-11-17T22:01:17Z"
+    },
+    {
+      " Policy": "policy020",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-03-21T10:59:09Z"
+    },
+    {
+      " Policy": "policy021",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:read",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-04-25T10:11:20Z"
+    },
+    {
+      " Policy": "policy022",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-08-20T13:54:32Z"
+    },
+    {
+      " Policy": "policy023",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-08-22T08:13:58Z"
+    },
+    {
+      " Policy": "policy025",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-09-02T13:16:28Z"
+    },
+    {
+      " Policy": "policy030",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-11-06T06:59:40Z"
+    },
+    {
+      " Policy": "policy036",
+      "Region": "eu",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-05-01T18:12:34Z"
+    },
+    {
+      " Policy": "policy040",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2024-10-30T16:58:32Z"
+    },
+    {
+      " Policy": "policy041",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2024-12-13T16:56:09Z"
+    },
+    {
+      " Policy": "policy042",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-01-07T18:59:41Z"
+    },
+    {
+      " Policy": "policy043",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-04-01T09:23:55Z"
+    },
+    {
+      " Policy": "policy045",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:read",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-06-10T15:06:45Z"
+    },
+    {
+      " Policy": "policy047",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-07-23T10:56:06Z"
+    },
+    {
+      " Policy": "policy048",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-08-18T15:22:11Z"
+    },
+    {
+      " Policy": "policy050",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-08-18T16:26:40Z"
+    },
+    {
+      " Policy": "policy051",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "logs:write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-08-18T16:27:34Z"
+    },
+    {
+      " Policy": "policy052",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-08-27T11:47:48Z"
+    },
+    {
+      " Policy": "policy054",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "logs:write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-11-10T08:47:34Z"
+    },
+    {
+      " Policy": "policy055",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "logs:write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-12-01T09:33:37Z"
+    },
+    {
+      " Policy": "policy057",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "logs:read",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-12-03T10:54:45Z"
+    },
+    {
+      " Policy": "policy058",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2025-12-09T21:17:45Z"
+    },
+    {
+      " Policy": "policy059",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-01-09T17:02:55Z"
+    },
+    {
+      " Policy": "policy063",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-02-03T22:07:48Z"
+    },
+    {
+      " Policy": "policy064",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-02-03T22:11:22Z"
+    },
+    {
+      " Policy": "policy066",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-03-05T11:18:04Z"
+    },
+    {
+      " Policy": "policy068",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-03-05T21:26:42Z"
+    },
+    {
+      " Policy": "policy069",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-03-29T03:21:51Z"
+    },
+    {
+      " Policy": "policy070",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "logs:write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-03-29T04:32:05Z"
+    },
+    {
+      " Policy": "policy077",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-04-29T09:08:10Z"
+    },
+    {
+      " Policy": "policy078",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-05-04T11:17:48Z"
+    },
+    {
+      " Policy": "policy079",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-05-11T14:50:58Z"
+    },
+    {
+      " Policy": "policy081",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-06-08T11:13:53Z"
+    },
+    {
+      " Policy": "policy082",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-06-17T15:37:32Z"
+    },
+    {
+      " Policy": "policy083",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-06-24T14:41:18Z"
+    },
+    {
+      " Policy": "policy084",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-06-25T08:15:10Z"
+    },
+    {
+      " Policy": "policy089",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-07-13T15:46:23Z"
+    },
+    {
+      " Policy": "policy090",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "metrics:write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-07-14T07:37:09Z"
+    },
+    {
+      " Policy": "policy091",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-07-14T17:30:43Z"
+    },
+    {
+      " Policy": "policy094",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-07-23T16:20:54Z"
+    },
+    {
+      " Policy": "policy095",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "logs:write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-07-28T08:41:39Z"
+    },
+    {
+      " Policy": "policy096",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "traces:write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-07-28T08:48:13Z"
+    },
+    {
+      " Policy": "policy097",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-07-30T05:33:59Z"
+    },
+    {
+      " Policy": "policy099",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:otel-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-08-10T07:41:00Z"
+    },
+    {
+      " Policy": "policy100",
+      "Region": "prod-us-east-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2026-08-19T18:58:56Z"
+    },
+    {
+      " Policy": "policy101",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2024-06-19T02:13:54Z"
+    },
+    {
+      " Policy": "policy103",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2024-06-20T17:54:24Z"
+    },
+    {
+      " Policy": "policy104",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2024-06-20T18:16:14Z"
+    },
+    {
+      " Policy": "policy109",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2024-07-29T17:22:37Z"
+    },
+    {
+      " Policy": "policy112",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2024-07-30T19:29:49Z"
+    },
+    {
+      " Policy": "policy114",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2024-10-28T10:38:47Z"
+    },
+    {
+      " Policy": "policy115",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2024-10-28T10:40:27Z"
+    },
+    {
+      " Policy": "policy116",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:alloy-data-write",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2024-12-05T13:16:54Z"
+    },
+    {
+      " Policy": "policy117",
+      "Region": "prod-us-west-0",
+      "Realm types": "stack",
+      "Stack-scoped": true,
+      "Scopes": "set:pdc-signing",
+      "Scope count": 1,
+      "Org-wide write": false,
+      "Created": "2024-12-12T22:45:54Z"
+    }
+  ]
+}

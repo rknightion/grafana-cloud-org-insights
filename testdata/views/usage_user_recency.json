@@ -1,0 +1,3562 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack020",
+      "User": "sam.dvorak27@contractors.example.com",
+      "Name": "Sam Dvorak27",
+      "Role": "Viewer",
+      "Last seen (days)": 739.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "gia.korhonen93@partner.example.com",
+      "Name": "Gia Korhonen93",
+      "Role": "Viewer",
+      "Last seen (days)": 738.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "dan.vlasic40@example.com",
+      "Name": "Dan Vlasic40",
+      "Role": "Viewer",
+      "Last seen (days)": 709.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "kira.kovac66@example.com",
+      "Name": "Kira Kovac66",
+      "Role": "Viewer",
+      "Last seen (days)": 697.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "alex.kaplan49@example.com",
+      "Name": "Alex Kaplan49",
+      "Role": "Viewer",
+      "Last seen (days)": 697.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack038",
+      "User": "hugocosta98",
+      "Name": "Hugo Costa98",
+      "Role": "Admin",
+      "Last seen (days)": 680,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack072",
+      "User": "wescosta76",
+      "Name": "Wes Costa76",
+      "Role": "Admin",
+      "Last seen (days)": 662.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack052",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 645.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "gia.petrov82@example.com",
+      "Name": "Gia Petrov82",
+      "Role": "Viewer",
+      "Last seen (days)": 632.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack052",
+      "User": "danmoreau60",
+      "Name": "Dan Moreau60",
+      "Role": "Admin",
+      "Last seen (days)": 623.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "niko.vlasic73@example.com",
+      "Name": "Niko Vlasic73",
+      "Role": "Viewer",
+      "Last seen (days)": 622.9,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "pavel.korhonen48@example.com",
+      "Name": "Pavel Korhonen48",
+      "Role": "Viewer",
+      "Last seen (days)": 622,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack038",
+      "User": "wescosta76",
+      "Name": "Wes Costa76",
+      "Role": "Admin",
+      "Last seen (days)": 611.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "wescosta76",
+      "Name": "Wes Costa76",
+      "Role": "Admin",
+      "Last seen (days)": 582.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "rita.nilsen63@example.com",
+      "Name": "Rita Nilsen63",
+      "Role": "Viewer",
+      "Last seen (days)": 546.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 540,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack052",
+      "User": "maja.fischer70@example.com",
+      "Name": "Maja Fischer70",
+      "Role": "Admin",
+      "Last seen (days)": 527.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "tara.horvat07@contractors.example.com",
+      "Name": "Tara Horvat07",
+      "Role": "None",
+      "Last seen (days)": 522.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "umar.marek44@example.com",
+      "Name": "Umar Marek44",
+      "Role": "None",
+      "Last seen (days)": 513.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "yara.demir37@example.com",
+      "Name": "Yara Demir37",
+      "Role": "None",
+      "Last seen (days)": 513.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "alex.costa65@contractors.example.com",
+      "Name": "Alex Costa65",
+      "Role": "None",
+      "Last seen (days)": 512.7,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "umar.larsen39@example.com",
+      "Name": "Umar Larsen39",
+      "Role": "Viewer",
+      "Last seen (days)": 493.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack052",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 485.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack038",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 485.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack097",
+      "User": "wescosta76",
+      "Name": "Wes Costa76",
+      "Role": "Admin",
+      "Last seen (days)": 470.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "wescosta76",
+      "Name": "Wes Costa76",
+      "Role": "Admin",
+      "Last seen (days)": 469.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack072",
+      "User": "danmoreau60",
+      "Name": "Dan Moreau60",
+      "Role": "Admin",
+      "Last seen (days)": 466.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "zane.vlasic82@example.com",
+      "Name": "Zane Vlasic82",
+      "Role": "Viewer",
+      "Last seen (days)": 449.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "finn.lewandowski64@example.com",
+      "Name": "Finn Lewandowski64",
+      "Role": "Viewer",
+      "Last seen (days)": 444.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "rita.lewandowski68@contractors.example.com",
+      "Name": "Rita Lewandowski68",
+      "Role": "Viewer",
+      "Last seen (days)": 422.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "olga.rossi51@example.com",
+      "Name": "Olga Rossi51",
+      "Role": "Viewer",
+      "Last seen (days)": 394.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "pavel.schmidt68@example.com",
+      "Name": "Pavel Schmidt68",
+      "Role": "Admin",
+      "Last seen (days)": 375.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "tara.schmidt16@example.com",
+      "Name": "Tara Schmidt16",
+      "Role": "Admin",
+      "Last seen (days)": 372.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "umar.vlasic78@example.com",
+      "Name": "Umar Vlasic78",
+      "Role": "Admin",
+      "Last seen (days)": 364.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack111",
+      "User": "sam.schmidt20@example.com",
+      "Name": "Sam Schmidt20",
+      "Role": "Viewer",
+      "Last seen (days)": 352,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 317.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "umar.larsen86@contractors.example.com",
+      "Name": "Umar Larsen86",
+      "Role": "Viewer",
+      "Last seen (days)": 316.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "maja.moreau66@contractors.example.com",
+      "Name": "Maja Moreau66",
+      "Role": "Viewer",
+      "Last seen (days)": 316.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "ana.larsen83@example.com",
+      "Name": "Ana Larsen83",
+      "Role": "Viewer",
+      "Last seen (days)": 309.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "cara.conti04@example.com",
+      "Name": "Cara Conti04",
+      "Role": "Viewer",
+      "Last seen (days)": 309.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "tara.marek31@example.net",
+      "Name": "Tara Marek31",
+      "Role": "Viewer",
+      "Last seen (days)": 308.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "pavel.conti29@example.com",
+      "Name": "Pavel Conti29",
+      "Role": "Editor",
+      "Last seen (days)": 304.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "lena.schmidt35@example.com",
+      "Name": "Lena Schmidt35",
+      "Role": "Viewer",
+      "Last seen (days)": 298.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 297.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack111",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 297.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "hugokovac61",
+      "Name": "Hugo Kovac61",
+      "Role": "Admin",
+      "Last seen (days)": 296.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "eva.costa76@example.com",
+      "Name": "Eva Costa76",
+      "Role": "Viewer",
+      "Last seen (days)": 290.7,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack193",
+      "User": "jonas.ivanov69@contractors.example.com",
+      "Name": "Jonas Ivanov69",
+      "Role": "Editor",
+      "Last seen (days)": 288,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack052",
+      "User": "wescosta76",
+      "Name": "Wes Costa76",
+      "Role": "Admin",
+      "Last seen (days)": 287.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "danmoreau60",
+      "Name": "Dan Moreau60",
+      "Role": "Admin",
+      "Last seen (days)": 281.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "danmoreau60",
+      "Name": "Dan Moreau60",
+      "Role": "Admin",
+      "Last seen (days)": 281.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "jonas.bauer91@partner.example.com",
+      "Name": "Jonas Bauer91",
+      "Role": "Admin",
+      "Last seen (days)": 281.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack111",
+      "User": "danmoreau60",
+      "Name": "Dan Moreau60",
+      "Role": "Admin",
+      "Last seen (days)": 281.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack193",
+      "User": "wescosta76",
+      "Name": "Wes Costa76",
+      "Role": "Admin",
+      "Last seen (days)": 277.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "hugocosta98",
+      "Name": "Hugo Costa98",
+      "Role": "Admin",
+      "Last seen (days)": 267,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack055",
+      "User": "kira.nowak76@external.example.net",
+      "Name": "Kira Nowak76",
+      "Role": "Admin",
+      "Last seen (days)": 261.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "finn.popa48@partner.example.com",
+      "Name": "Finn Popa48",
+      "Role": "Admin",
+      "Last seen (days)": 260.8,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack002",
+      "User": "finn.horvat91@example.com",
+      "Name": "Finn Horvat91",
+      "Role": "Admin",
+      "Last seen (days)": 251.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "alex.nilsen79@example.com",
+      "Name": "Alex Nilsen79",
+      "Role": "Editor",
+      "Last seen (days)": 249.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "ananovak15",
+      "Name": "Ana Novak15",
+      "Role": "Admin",
+      "Last seen (days)": 247.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "dan.kaplan01@example.com",
+      "Name": "Dan Kaplan01",
+      "Role": "Admin",
+      "Last seen (days)": 224.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "pavel.ionescu15@partner.example.com",
+      "Name": "Pavel Ionescu15",
+      "Role": "Admin",
+      "Last seen (days)": 224.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack049",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 221.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack053",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 217.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack193",
+      "User": "sam.schmidt88@contractors.example.com",
+      "Name": "Sam Schmidt88",
+      "Role": "Editor",
+      "Last seen (days)": 217.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack038",
+      "User": "noalewandowski13",
+      "Name": "Noa Lewandowski13",
+      "Role": "Admin",
+      "Last seen (days)": 211.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack158",
+      "User": "finn.weber41@contractors.example.com",
+      "Name": "Finn Weber41",
+      "Role": "Editor",
+      "Last seen (days)": 204.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "jonas.bauer96@partner.example.com",
+      "Name": "Jonas Bauer96",
+      "Role": "Admin",
+      "Last seen (days)": 203.8,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack071",
+      "User": "ben.nilsen33@contractors.example.com",
+      "Name": "Ben Nilsen33",
+      "Role": "Admin",
+      "Last seen (days)": 203.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack193",
+      "User": "pavelnowak34",
+      "Name": "Pavel Nowak34",
+      "Role": "Admin",
+      "Last seen (days)": 199.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "wescosta76",
+      "Name": "Wes Costa76",
+      "Role": "Admin",
+      "Last seen (days)": 196.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack055",
+      "User": "eva.weber25@external.example.net",
+      "Name": "Eva Weber25",
+      "Role": "Admin",
+      "Last seen (days)": 196.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "umar.moreau48@external.example.com",
+      "Name": "Umar Moreau48",
+      "Role": "Admin",
+      "Last seen (days)": 189.6,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack072",
+      "User": "zane.vlasic65@example.com",
+      "Name": "Zane Vlasic65",
+      "Role": "Viewer",
+      "Last seen (days)": 185.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack111",
+      "User": "zane.novak96@external.example.com",
+      "Name": "Zane Novak96",
+      "Role": "Viewer",
+      "Last seen (days)": 185.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack072",
+      "User": "kira.vlasic30@example.com",
+      "Name": "Kira Vlasic30",
+      "Role": "Admin",
+      "Last seen (days)": 185.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "ben.bauer62@external.example.com",
+      "Name": "Ben Bauer62",
+      "Role": "Viewer",
+      "Last seen (days)": 184.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "pavelnowak34",
+      "Name": "Pavel Nowak34",
+      "Role": "Admin",
+      "Last seen (days)": 183.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack158",
+      "User": "maja.novak96@contractors.example.com",
+      "Name": "Maja Novak96",
+      "Role": "Editor",
+      "Last seen (days)": 179.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack053",
+      "User": "pavelnowak34",
+      "Name": "Pavel Nowak34",
+      "Role": "Admin",
+      "Last seen (days)": 179.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack147",
+      "User": "pavelnowak34",
+      "Name": "Pavel Nowak34",
+      "Role": "Admin",
+      "Last seen (days)": 179.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "niko.larsen61@external.example.com",
+      "Name": "Niko Larsen61",
+      "Role": "Admin",
+      "Last seen (days)": 179,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack071",
+      "User": "zane.petrov95@contractors.example.com",
+      "Name": "Zane Petrov95",
+      "Role": "Viewer",
+      "Last seen (days)": 177.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack147",
+      "User": "gia.ionescu46@example.com",
+      "Name": "Gia Ionescu46",
+      "Role": "Admin",
+      "Last seen (days)": 177.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack071",
+      "User": "umar.bauer83@contractors.example.com",
+      "Name": "Umar Bauer83",
+      "Role": "Viewer",
+      "Last seen (days)": 176.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack072",
+      "User": "maja.horvat39@example.com",
+      "Name": "Maja Horvat39",
+      "Role": "Viewer",
+      "Last seen (days)": 175.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack146",
+      "User": "noalewandowski13",
+      "Name": "Noa Lewandowski13",
+      "Role": "Admin",
+      "Last seen (days)": 173,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack177",
+      "User": "ana.larsen55@example.com",
+      "Name": "Ana Larsen55",
+      "Role": "Admin",
+      "Last seen (days)": 172.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "ben.korhonen45@external.example.com",
+      "Name": "Ben Korhonen45",
+      "Role": "Viewer",
+      "Last seen (days)": 171.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack177",
+      "User": "danmoreau60",
+      "Name": "Dan Moreau60",
+      "Role": "Admin",
+      "Last seen (days)": 171.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "emil.silva33@partner.example.com",
+      "Name": "Emil Silva33",
+      "Role": "Admin",
+      "Last seen (days)": 169.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack158",
+      "User": "emil.ivanov48@contractors.example.com",
+      "Name": "Emil Ivanov48",
+      "Role": "Editor",
+      "Last seen (days)": 168.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "emil.silva33@partner.example.com",
+      "Name": "Emil Silva33",
+      "Role": "Admin",
+      "Last seen (days)": 168.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "rita.vlasic37@example.com",
+      "Name": "Rita Vlasic37",
+      "Role": "Admin",
+      "Last seen (days)": 168.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack111",
+      "User": "wescosta76",
+      "Name": "Wes Costa76",
+      "Role": "Admin",
+      "Last seen (days)": 164.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "User": "eva.rossi23@example.com",
+      "Name": "Eva Rossi23",
+      "Role": "Editor",
+      "Last seen (days)": 164.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack145",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 161.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack145",
+      "User": "tara.korhonen89@contractors.example.com",
+      "Name": "Tara Korhonen89",
+      "Role": "Editor",
+      "Last seen (days)": 161.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack158",
+      "User": "alex.marek68@contractors.example.com",
+      "Name": "Alex Marek68",
+      "Role": "Admin",
+      "Last seen (days)": 155.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "olga.dvorak38@contractors.example.com",
+      "Name": "Olga Dvorak38",
+      "Role": "Viewer",
+      "Last seen (days)": 155.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "liam.larsen73@contractors.example.com",
+      "Name": "Liam Larsen73",
+      "Role": "Viewer",
+      "Last seen (days)": 155.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "niko.ivanov35@external.example.com",
+      "Name": "Niko Ivanov35",
+      "Role": "Viewer",
+      "Last seen (days)": 151.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "niko.moreau86@contractors.example.com",
+      "Name": "Niko Moreau86",
+      "Role": "Viewer",
+      "Last seen (days)": 150.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack147",
+      "User": "alex.costa00@example.net",
+      "Name": "Alex Costa00",
+      "Role": "Admin",
+      "Last seen (days)": 149.9,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "pavelnowak34",
+      "Name": "Pavel Nowak34",
+      "Role": "Admin",
+      "Last seen (days)": 149.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack158",
+      "User": "pavelnowak34",
+      "Name": "Pavel Nowak34",
+      "Role": "Admin",
+      "Last seen (days)": 149.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack146",
+      "User": "yara.novak16@example.com",
+      "Name": "Yara Novak16",
+      "Role": "Admin",
+      "Last seen (days)": 148.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack147",
+      "User": "yara.novak16@example.com",
+      "Name": "Yara Novak16",
+      "Role": "Admin",
+      "Last seen (days)": 148.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack146",
+      "User": "alex.costa00@example.net",
+      "Name": "Alex Costa00",
+      "Role": "Admin",
+      "Last seen (days)": 146.8,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack072",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 141.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack052",
+      "User": "tara.ivanov51@example.net",
+      "Name": "Tara Ivanov51",
+      "Role": "Viewer",
+      "Last seen (days)": 128,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "finn.novak73@external.example.com",
+      "Name": "Finn Novak73",
+      "Role": "Admin",
+      "Last seen (days)": 127.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "lena.nowak92@example.com",
+      "Name": "Lena Nowak92",
+      "Role": "Viewer",
+      "Last seen (days)": 127.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack036",
+      "User": "zane.marek27@example.com",
+      "Name": "Zane Marek27",
+      "Role": "Viewer",
+      "Last seen (days)": 127.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack158",
+      "User": "danmoreau60",
+      "Name": "Dan Moreau60",
+      "Role": "Admin",
+      "Last seen (days)": 120.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack049",
+      "User": "danmoreau60",
+      "Name": "Dan Moreau60",
+      "Role": "Admin",
+      "Last seen (days)": 117,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack113",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 116.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack113",
+      "User": "cara.demir10@external.example.net",
+      "Name": "Cara Demir10",
+      "Role": "Viewer",
+      "Last seen (days)": 116.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack146",
+      "User": "alex.schmidt50@example.com",
+      "Name": "Alex Schmidt50",
+      "Role": "Admin",
+      "Last seen (days)": 115.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack147",
+      "User": "vera.lang14@example.com",
+      "Name": "Vera Lang14",
+      "Role": "Admin",
+      "Last seen (days)": 115.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "yara.nowak85@external.example.com",
+      "Name": "Yara Nowak85",
+      "Role": "Admin",
+      "Last seen (days)": 115.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack145",
+      "User": "noalewandowski13",
+      "Name": "Noa Lewandowski13",
+      "Role": "Admin",
+      "Last seen (days)": 114.5,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack071",
+      "User": "ben.popa46@contractors.example.com",
+      "Name": "Ben Popa46",
+      "Role": "Viewer",
+      "Last seen (days)": 113.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack072",
+      "User": "ana.dubois80@example.com",
+      "Name": "Ana Dubois80",
+      "Role": "Viewer",
+      "Last seen (days)": 113.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "tara.ivanov74@external.example.com",
+      "Name": "Tara Ivanov74",
+      "Role": "Viewer",
+      "Last seen (days)": 113.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "lena.dubois43@external.example.com",
+      "Name": "Lena Dubois43",
+      "Role": "Viewer",
+      "Last seen (days)": 113.1,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "wes.conti13@example.com",
+      "Name": "Wes Conti13",
+      "Role": "Admin",
+      "Last seen (days)": 112,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack055",
+      "User": "sam.dubois47@external.example.net",
+      "Name": "Sam Dubois47",
+      "Role": "Admin",
+      "Last seen (days)": 109.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack158",
+      "User": "ana.larsen77@contractors.example.com",
+      "Name": "Ana Larsen77",
+      "Role": "Editor",
+      "Last seen (days)": 109.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack113",
+      "User": "tara.horvat88@external.example.net",
+      "Name": "Tara Horvat88",
+      "Role": "Editor",
+      "Last seen (days)": 109,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack158",
+      "User": "iris.conti48@contractors.example.com",
+      "Name": "Iris Conti48",
+      "Role": "Editor",
+      "Last seen (days)": 108.4,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack193",
+      "User": "zane.kovac83@example.com",
+      "Name": "Zane Kovac83",
+      "Role": "Admin",
+      "Last seen (days)": 106.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack097",
+      "User": "ben.moreau96@external.example.com",
+      "Name": "Ben Moreau96",
+      "Role": "Admin",
+      "Last seen (days)": 105.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack097",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 105.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "dan.marek90@external.example.com",
+      "Name": "Dan Marek90",
+      "Role": "Viewer",
+      "Last seen (days)": 101.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack037",
+      "User": "pavel.petrov10@example.com",
+      "Name": "Pavel Petrov10",
+      "Role": "Admin",
+      "Last seen (days)": 101.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack158",
+      "User": "cara.kovac22@example.com",
+      "Name": "Cara Kovac22",
+      "Role": "Admin",
+      "Last seen (days)": 100.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack111",
+      "User": "lena.moreau12@contractors.example.com",
+      "Name": "Lena Moreau12",
+      "Role": "Viewer",
+      "Last seen (days)": 99.9,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "iris.novak76@example.com",
+      "Name": "Iris Novak76",
+      "Role": "Viewer",
+      "Last seen (days)": 99.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "eva.rossi70@example.com",
+      "Name": "Eva Rossi70",
+      "Role": "Viewer",
+      "Last seen (days)": 98.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack158",
+      "User": "ana.kaplan41@contractors.example.com",
+      "Name": "Ana Kaplan41",
+      "Role": "Editor",
+      "Last seen (days)": 94.3,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack149",
+      "User": "niko.kovac54@example.com",
+      "Name": "Niko Kovac54",
+      "Role": "Editor",
+      "Last seen (days)": 93.2,
+      "Recency": "older"
+    },
+    {
+      " Stack": "stack020",
+      "User": "eva.weber04@external.example.com",
+      "Name": "Eva Weber04",
+      "Role": "Admin",
+      "Last seen (days)": 87.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack072",
+      "User": "yara.kaplan96@example.com",
+      "Name": "Yara Kaplan96",
+      "Role": "Editor",
+      "Last seen (days)": 87.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack055",
+      "User": "sam.lewandowski72@external.example.net",
+      "Name": "Sam Lewandowski72",
+      "Role": "Admin",
+      "Last seen (days)": 86.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "emil.nilsen39@contractors.example.com",
+      "Name": "Emil Nilsen39",
+      "Role": "Editor",
+      "Last seen (days)": 84.9,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 80.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack037",
+      "User": "sam.virta43@partner.example.com",
+      "Name": "Sam Virta43",
+      "Role": "Admin",
+      "Last seen (days)": 80,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack145",
+      "User": "lena.horvat61@contractors.example.com",
+      "Name": "Lena Horvat61",
+      "Role": "Admin",
+      "Last seen (days)": 79.5,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack170",
+      "User": "pavelnowak34",
+      "Name": "Pavel Nowak34",
+      "Role": "Admin",
+      "Last seen (days)": 78.2,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "kira.silva67@partner.example.com",
+      "Name": "Kira Silva67",
+      "Role": "Viewer",
+      "Last seen (days)": 77,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "ana.lewandowski16@example.com",
+      "Name": "Ana Lewandowski16",
+      "Role": "Admin",
+      "Last seen (days)": 74.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack053",
+      "User": "maja.lang00@example.com",
+      "Name": "Maja Lang00",
+      "Role": "Admin",
+      "Last seen (days)": 73.5,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack035",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 72.2,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "tara.lang91@contractors.example.com",
+      "Name": "Tara Lang91",
+      "Role": "Viewer",
+      "Last seen (days)": 69.8,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "danmoreau60",
+      "Name": "Dan Moreau60",
+      "Role": "Admin",
+      "Last seen (days)": 67.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "kira.korhonen65@contractors.example.com",
+      "Name": "Kira Korhonen65",
+      "Role": "Viewer",
+      "Last seen (days)": 67.2,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "testsrobot002",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 67.1,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack037",
+      "User": "finn.bauer12@example.com",
+      "Name": "Finn Bauer12",
+      "Role": "Viewer",
+      "Last seen (days)": 66.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack001",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 66.2,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "hugo.nowak40@example.com",
+      "Name": "Hugo Nowak40",
+      "Role": "Admin",
+      "Last seen (days)": 66,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack049",
+      "User": "umar.silva78@contractors.example.com",
+      "Name": "Umar Silva78",
+      "Role": "Admin",
+      "Last seen (days)": 64.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "eva.costa03@example.com",
+      "Name": "Eva Costa03",
+      "Role": "Viewer",
+      "Last seen (days)": 64.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack001",
+      "User": "gia.kovac20@example.net",
+      "Name": "Gia Kovac20",
+      "Role": "Admin",
+      "Last seen (days)": 63.2,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack148",
+      "User": "umar.costa88@example.com",
+      "Name": "Umar Costa88",
+      "Role": "Admin",
+      "Last seen (days)": 59.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack170",
+      "User": "lena.petrov98@external.example.net",
+      "Name": "Lena Petrov98",
+      "Role": "Admin",
+      "Last seen (days)": 59.1,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "ana.schmidt84@contractors.example.com",
+      "Name": "Ana Schmidt84",
+      "Role": "Editor",
+      "Last seen (days)": 58.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "niko.weber76@example.com",
+      "Name": "Niko Weber76",
+      "Role": "Viewer",
+      "Last seen (days)": 58.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "wes.dvorak27@contractors.example.com",
+      "Name": "Wes Dvorak27",
+      "Role": "Editor",
+      "Last seen (days)": 58.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack036",
+      "User": "eva.bauer77@example.com",
+      "Name": "Eva Bauer77",
+      "Role": "Viewer",
+      "Last seen (days)": 56.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "pavel.nilsen47@external.example.net",
+      "Name": "Pavel Nilsen47",
+      "Role": "Editor",
+      "Last seen (days)": 56.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "xenia.nilsen91@example.net",
+      "Name": "Xenia Nilsen91",
+      "Role": "Admin",
+      "Last seen (days)": 56.2,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack149",
+      "User": "yara.dvorak55@example.com",
+      "Name": "Yara Dvorak55",
+      "Role": "Admin",
+      "Last seen (days)": 55.2,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "iris.silva06@example.net",
+      "Name": "Iris Silva06",
+      "Role": "Admin",
+      "Last seen (days)": 53,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack055",
+      "User": "kira.petrov69@external.example.net",
+      "Name": "Kira Petrov69",
+      "Role": "Admin",
+      "Last seen (days)": 52.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "pavel.marek47@external.example.net",
+      "Name": "Pavel Marek47",
+      "Role": "Admin",
+      "Last seen (days)": 52,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 51.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "lena.conti17@external.example.com",
+      "Name": "Lena Conti17",
+      "Role": "Admin",
+      "Last seen (days)": 50.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "jonas.costa25@external.example.com",
+      "Name": "Jonas Costa25",
+      "Role": "Viewer",
+      "Last seen (days)": 49.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "lena.nowak97@external.example.com",
+      "Name": "Lena Nowak97",
+      "Role": "Viewer",
+      "Last seen (days)": 49.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack036",
+      "User": "finn.costa84@example.com",
+      "Name": "Finn Costa84",
+      "Role": "Viewer",
+      "Last seen (days)": 49.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack037",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 49.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "tara.silva44@contractors.example.com",
+      "Name": "Tara Silva44",
+      "Role": "Admin",
+      "Last seen (days)": 46.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack037",
+      "User": "tara.demir19@example.com",
+      "Name": "Tara Demir19",
+      "Role": "Admin",
+      "Last seen (days)": 46.1,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack037",
+      "User": "hugo.nowak46@partner.example.com",
+      "Name": "Hugo Nowak46",
+      "Role": "Viewer",
+      "Last seen (days)": 45.5,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack049",
+      "User": "pavel.horvat37@contractors.example.com",
+      "Name": "Pavel Horvat37",
+      "Role": "Admin",
+      "Last seen (days)": 45.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack019",
+      "User": "noalewandowski13",
+      "Name": "Noa Lewandowski13",
+      "Role": "Admin",
+      "Last seen (days)": 44.5,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack001c",
+      "User": "wescosta76",
+      "Name": "Wes Costa76",
+      "Role": "Admin",
+      "Last seen (days)": 44.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "ben.virta20@example.com",
+      "Name": "Ben Virta20",
+      "Role": "Admin",
+      "Last seen (days)": 44.1,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "emil.dvorak03@contractors.example.com",
+      "Name": "Emil Dvorak03",
+      "Role": "Viewer",
+      "Last seen (days)": 43.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "zane.rossi30@contractors.example.com",
+      "Name": "Zane Rossi30",
+      "Role": "Viewer",
+      "Last seen (days)": 42.5,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack036",
+      "User": "dan.novak85@example.com",
+      "Name": "Dan Novak85",
+      "Role": "Admin",
+      "Last seen (days)": 42.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack072",
+      "User": "jonas.lewandowski74@example.com",
+      "Name": "Jonas Lewandowski74",
+      "Role": "Viewer",
+      "Last seen (days)": 42.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "alex.conti77@external.example.com",
+      "Name": "Alex Conti77",
+      "Role": "Viewer",
+      "Last seen (days)": 41.6,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "wes.popa11@external.example.com",
+      "Name": "Wes Popa11",
+      "Role": "Viewer",
+      "Last seen (days)": 40.1,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "yara.petrov86@example.com",
+      "Name": "Yara Petrov86",
+      "Role": "Admin",
+      "Last seen (days)": 39.5,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 39.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack054",
+      "User": "yara.fischer88@example.com",
+      "Name": "Yara Fischer88",
+      "Role": "Admin",
+      "Last seen (days)": 39.1,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "wescosta76",
+      "Name": "Wes Costa76",
+      "Role": "Admin",
+      "Last seen (days)": 39.1,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack126",
+      "User": "cara.vlasic70@contractors.example.com",
+      "Name": "Cara Vlasic70",
+      "Role": "Admin",
+      "Last seen (days)": 38.5,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack097",
+      "User": "alex.kovac11@external.example.com",
+      "Name": "Alex Kovac11",
+      "Role": "Admin",
+      "Last seen (days)": 38.2,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "niko.virta77@example.net",
+      "Name": "Niko Virta77",
+      "Role": "Editor",
+      "Last seen (days)": 37.9,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack170",
+      "User": "sam.marek02@external.example.net",
+      "Name": "Sam Marek02",
+      "Role": "Admin",
+      "Last seen (days)": 37.8,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack070",
+      "User": "umar.silva27@external.example.net",
+      "Name": "Umar Silva27",
+      "Role": "Admin",
+      "Last seen (days)": 36.9,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "olga.korhonen60@contractors.example.com",
+      "Name": "Olga Korhonen60",
+      "Role": "Viewer",
+      "Last seen (days)": 36.4,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack052",
+      "User": "lena.kovac72@example.net",
+      "Name": "Lena Kovac72",
+      "Role": "Admin",
+      "Last seen (days)": 35.1,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "finn.lewandowski37@example.net",
+      "Name": "Finn Lewandowski37",
+      "Role": "Viewer",
+      "Last seen (days)": 34.9,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "lena.costa12@external.example.net",
+      "Name": "Lena Costa12",
+      "Role": "Editor",
+      "Last seen (days)": 34.9,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "alex.nowak00@contractors.example.com",
+      "Name": "Alex Nowak00",
+      "Role": "Editor",
+      "Last seen (days)": 33.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack097",
+      "User": "emil.kovac68@external.example.com",
+      "Name": "Emil Kovac68",
+      "Role": "Admin",
+      "Last seen (days)": 32.5,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "cara.demir17@example.net",
+      "Name": "Cara Demir17",
+      "Role": "Viewer",
+      "Last seen (days)": 32.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack049",
+      "User": "cara.nilsen08@contractors.example.com",
+      "Name": "Cara Nilsen08",
+      "Role": "Admin",
+      "Last seen (days)": 32.2,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "eva.novak33@external.example.net",
+      "Name": "Eva Novak33",
+      "Role": "Editor",
+      "Last seen (days)": 31.2,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "pavel.silva33@external.example.com",
+      "Name": "Pavel Silva33",
+      "Role": "Viewer",
+      "Last seen (days)": 31.2,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "kira.moreau03@example.net",
+      "Name": "Kira Moreau03",
+      "Role": "Admin",
+      "Last seen (days)": 30.8,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack001",
+      "User": "kirahorvat84",
+      "Name": "Kira Horvat84",
+      "Role": "Admin",
+      "Last seen (days)": 30.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack177",
+      "User": "kirahorvat84",
+      "Name": "Kira Horvat84",
+      "Role": "Admin",
+      "Last seen (days)": 30.3,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "iris.costa08@external.example.net",
+      "Name": "Iris Costa08",
+      "Role": "Editor",
+      "Last seen (days)": 30.1,
+      "Recency": "90d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "alex.schmidt50@example.com",
+      "Name": "Alex Schmidt50",
+      "Role": "Admin",
+      "Last seen (days)": 29.3,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "cara.conti28@external.example.com",
+      "Name": "Cara Conti28",
+      "Role": "None",
+      "Last seen (days)": 28.6,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "vera.korhonen49@external.example.com",
+      "Name": "Vera Korhonen49",
+      "Role": "Viewer",
+      "Last seen (days)": 25.9,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "olga.ionescu80@contractors.example.com",
+      "Name": "Olga Ionescu80",
+      "Role": "Editor",
+      "Last seen (days)": 25.5,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "tara.silva00@external.example.com",
+      "Name": "Tara Silva00",
+      "Role": "Viewer",
+      "Last seen (days)": 25.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "niko.silva89@contractors.example.com",
+      "Name": "Niko Silva89",
+      "Role": "Admin",
+      "Last seen (days)": 25.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "jonas.schmidt09@example.net",
+      "Name": "Jonas Schmidt09",
+      "Role": "Admin",
+      "Last seen (days)": 25,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "User": "wescosta76",
+      "Name": "Wes Costa76",
+      "Role": "Admin",
+      "Last seen (days)": 24.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack054",
+      "User": "yara.conti75@external.example.com",
+      "Name": "Yara Conti75",
+      "Role": "Admin",
+      "Last seen (days)": 24,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "olga.rossi13@external.example.net",
+      "Name": "Olga Rossi13",
+      "Role": "Editor",
+      "Last seen (days)": 23.3,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "tara.lang93@example.com",
+      "Name": "Tara Lang93",
+      "Role": "Admin",
+      "Last seen (days)": 23,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack035",
+      "User": "hugo.nowak71@example.com",
+      "Name": "Hugo Nowak71",
+      "Role": "Admin",
+      "Last seen (days)": 22.9,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "sam.nowak28@external.example.net",
+      "Name": "Sam Nowak28",
+      "Role": "Viewer",
+      "Last seen (days)": 22.9,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "olga.lang00@external.example.net",
+      "Name": "Olga Lang00",
+      "Role": "Admin",
+      "Last seen (days)": 22.3,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "yara.fischer49@external.example.net",
+      "Name": "Yara Fischer49",
+      "Role": "Editor",
+      "Last seen (days)": 22.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack193",
+      "User": "hugo.nowak87@example.com",
+      "Name": "Hugo Nowak87",
+      "Role": "Admin",
+      "Last seen (days)": 22.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "yara.nowak73@external.example.com",
+      "Name": "Yara Nowak73",
+      "Role": "None",
+      "Last seen (days)": 21.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "xenia.korhonen46@contractors.example.com",
+      "Name": "Xenia Korhonen46",
+      "Role": "Viewer",
+      "Last seen (days)": 21.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack019",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 21.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "User": "tara.lang93@example.com",
+      "Name": "Tara Lang93",
+      "Role": "Admin",
+      "Last seen (days)": 19.8,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "User": "kirahorvat84",
+      "Name": "Kira Horvat84",
+      "Role": "Admin",
+      "Last seen (days)": 18.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 18.3,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "alex.virta82@external.example.com",
+      "Name": "Alex Virta82",
+      "Role": "Viewer",
+      "Last seen (days)": 18.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "emil.schmidt95@example.com",
+      "Name": "Emil Schmidt95",
+      "Role": "Viewer",
+      "Last seen (days)": 17,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack193",
+      "User": "xenia.dubois27@example.com",
+      "Name": "Xenia Dubois27",
+      "Role": "Admin",
+      "Last seen (days)": 16.8,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "alex.marek93@external.example.com",
+      "Name": "Alex Marek93",
+      "Role": "Viewer",
+      "Last seen (days)": 16.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "umar.bauer40@contractors.example.com",
+      "Name": "Umar Bauer40",
+      "Role": "Admin",
+      "Last seen (days)": 16.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack146",
+      "User": "vera.lang14@example.com",
+      "Name": "Vera Lang14",
+      "Role": "Admin",
+      "Last seen (days)": 16.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "hugo.lewandowski63@external.example.com",
+      "Name": "Hugo Lewandowski63",
+      "Role": "Viewer",
+      "Last seen (days)": 16.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "zane.nilsen00@external.example.com",
+      "Name": "Zane Nilsen00",
+      "Role": "Viewer",
+      "Last seen (days)": 16,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "zane.virta49@external.example.com",
+      "Name": "Zane Virta49",
+      "Role": "Viewer",
+      "Last seen (days)": 15.7,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "tara.costa07@contractors.example.com",
+      "Name": "Tara Costa07",
+      "Role": "Editor",
+      "Last seen (days)": 15.6,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "gia.bauer03@external.example.com",
+      "Name": "Gia Bauer03",
+      "Role": "None",
+      "Last seen (days)": 15.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "finn.nilsen95@example.com",
+      "Name": "Finn Nilsen95",
+      "Role": "Admin",
+      "Last seen (days)": 15.3,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "pavel.nilsen86@example.com",
+      "Name": "Pavel Nilsen86",
+      "Role": "Viewer",
+      "Last seen (days)": 15.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack146",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 14.3,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack036",
+      "User": "lena.dvorak53@contractors.example.com",
+      "Name": "Lena Dvorak53",
+      "Role": "Admin",
+      "Last seen (days)": 14.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack037",
+      "User": "gia.costa12@external.example.com",
+      "Name": "Gia Costa12",
+      "Role": "Admin",
+      "Last seen (days)": 14.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "emil.bauer40@external.example.net",
+      "Name": "Emil Bauer40",
+      "Role": "Editor",
+      "Last seen (days)": 14.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "lena.ionescu67@example.com",
+      "Name": "Lena Ionescu67",
+      "Role": "Admin",
+      "Last seen (days)": 14.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack019",
+      "User": "pavel.petrov44@contractors.example.com",
+      "Name": "Pavel Petrov44",
+      "Role": "Admin",
+      "Last seen (days)": 11.6,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "danmoreau60",
+      "Name": "Dan Moreau60",
+      "Role": "Admin",
+      "Last seen (days)": 11.5,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack193",
+      "User": "hugo.weber72@example.com",
+      "Name": "Hugo Weber72",
+      "Role": "Admin",
+      "Last seen (days)": 11.3,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 11.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "eva.novak82@external.example.com",
+      "Name": "Eva Novak82",
+      "Role": "Viewer",
+      "Last seen (days)": 11.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "liam.virta78@external.example.net",
+      "Name": "Liam Virta78",
+      "Role": "Admin",
+      "Last seen (days)": 11.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "kira.silva53@contractors.example.com",
+      "Name": "Kira Silva53",
+      "Role": "Admin",
+      "Last seen (days)": 10.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "vera.lang14@example.com",
+      "Name": "Vera Lang14",
+      "Role": "Admin",
+      "Last seen (days)": 10.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack072",
+      "User": "alex.fischer38@contractors.example.com",
+      "Name": "Alex Fischer38",
+      "Role": "Admin",
+      "Last seen (days)": 10.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "umar.nilsen46@external.example.com",
+      "Name": "Umar Nilsen46",
+      "Role": "Viewer",
+      "Last seen (days)": 10.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "vera.marek94@external.example.com",
+      "Name": "Vera Marek94",
+      "Role": "Viewer",
+      "Last seen (days)": 10.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack177",
+      "User": "noa.lang00@contractors.example.com",
+      "Name": "Noa Lang00",
+      "Role": "Admin",
+      "Last seen (days)": 10,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "iris.lang85@external.example.net",
+      "Name": "Iris Lang85",
+      "Role": "Viewer",
+      "Last seen (days)": 9.6,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "hugokovac61",
+      "Name": "Hugo Kovac61",
+      "Role": "Admin",
+      "Last seen (days)": 9.3,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "kira.weber32@example.com",
+      "Name": "Kira Weber32",
+      "Role": "Admin",
+      "Last seen (days)": 9.3,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack035",
+      "User": "olga.lang75@example.com",
+      "Name": "Olga Lang75",
+      "Role": "Admin",
+      "Last seen (days)": 9.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack097",
+      "User": "wes.moreau58@external.example.com",
+      "Name": "Wes Moreau58",
+      "Role": "Admin",
+      "Last seen (days)": 9.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack050",
+      "User": "zane.petrov26@example.net",
+      "Name": "Zane Petrov26",
+      "Role": "Admin",
+      "Last seen (days)": 8.6,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 8.5,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 8.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "kirahorvat84",
+      "Name": "Kira Horvat84",
+      "Role": "Admin",
+      "Last seen (days)": 8.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack097",
+      "User": "liam.weber17@external.example.com",
+      "Name": "Liam Weber17",
+      "Role": "Admin",
+      "Last seen (days)": 8.4,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "umar.fischer49@example.com",
+      "Name": "Umar Fischer49",
+      "Role": "Viewer",
+      "Last seen (days)": 8.3,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "pavel.lang51@contractors.example.com",
+      "Name": "Pavel Lang51",
+      "Role": "Editor",
+      "Last seen (days)": 8.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "olga.petrov81@example.com",
+      "Name": "Olga Petrov81",
+      "Role": "Admin",
+      "Last seen (days)": 8.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "hugo.bauer35@external.example.com",
+      "Name": "Hugo Bauer35",
+      "Role": "Editor",
+      "Last seen (days)": 8.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "pavel.nilsen80@external.example.com",
+      "Name": "Pavel Nilsen80",
+      "Role": "Viewer",
+      "Last seen (days)": 8.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack097",
+      "User": "vera.popa02@example.com",
+      "Name": "Vera Popa02",
+      "Role": "Admin",
+      "Last seen (days)": 8.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "emil.larsen01@external.example.com",
+      "Name": "Emil Larsen01",
+      "Role": "Viewer",
+      "Last seen (days)": 8,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "wes.silva73@contractors.example.com",
+      "Name": "Wes Silva73",
+      "Role": "Editor",
+      "Last seen (days)": 8,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "alex.silva26@external.example.com",
+      "Name": "Alex Silva26",
+      "Role": "Viewer",
+      "Last seen (days)": 7.7,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "gia.kovac20@example.net",
+      "Name": "Gia Kovac20",
+      "Role": "Admin",
+      "Last seen (days)": 7.6,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 7.3,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "umar.moreau60@example.net",
+      "Name": "Umar Moreau60",
+      "Role": "Editor",
+      "Last seen (days)": 7.2,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "gia.fischer96@external.example.com",
+      "Name": "Gia Fischer96",
+      "Role": "Viewer",
+      "Last seen (days)": 7.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack037",
+      "User": "maja.novak30@external.example.com",
+      "Name": "Maja Novak30",
+      "Role": "Admin",
+      "Last seen (days)": 7.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "olga.weber62@example.net",
+      "Name": "Olga Weber62",
+      "Role": "Admin",
+      "Last seen (days)": 7.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "yara.novak16@example.com",
+      "Name": "Yara Novak16",
+      "Role": "Admin",
+      "Last seen (days)": 7.1,
+      "Recency": "30d"
+    },
+    {
+      " Stack": "stack125",
+      "User": "emil.novak72@external.example.net",
+      "Name": "Emil Novak72",
+      "Role": "Admin",
+      "Last seen (days)": 6.8,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "olga.moreau76@example.com",
+      "Name": "Olga Moreau76",
+      "Role": "Viewer",
+      "Last seen (days)": 6.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "dan.dubois42@external.example.com",
+      "Name": "Dan Dubois42",
+      "Role": "Viewer",
+      "Last seen (days)": 6.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "emil.silva88@external.example.com",
+      "Name": "Emil Silva88",
+      "Role": "Viewer",
+      "Last seen (days)": 4.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "wes.novak76@external.example.com",
+      "Name": "Wes Novak76",
+      "Role": "Viewer",
+      "Last seen (days)": 4.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "alex.fischer19@external.example.com",
+      "Name": "Alex Fischer19",
+      "Role": "Editor",
+      "Last seen (days)": 4.1,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack037",
+      "User": "ben.novak10@external.example.com",
+      "Name": "Ben Novak10",
+      "Role": "Admin",
+      "Last seen (days)": 4.1,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "iris.kovac91@external.example.com",
+      "Name": "Iris Kovac91",
+      "Role": "Editor",
+      "Last seen (days)": 4.1,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "alex.vlasic96@external.example.com",
+      "Name": "Alex Vlasic96",
+      "Role": "Viewer",
+      "Last seen (days)": 4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "dan.dubois57@external.example.net",
+      "Name": "Dan Dubois57",
+      "Role": "Editor",
+      "Last seen (days)": 3.5,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "hugo.lang34@example.com",
+      "Name": "Hugo Lang34",
+      "Role": "Admin",
+      "Last seen (days)": 3.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "tara.lewandowski80@external.example.com",
+      "Name": "Tara Lewandowski80",
+      "Role": "Admin",
+      "Last seen (days)": 3.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack126",
+      "User": "hugolewandowski09",
+      "Name": "Hugo Lewandowski09",
+      "Role": "Admin",
+      "Last seen (days)": 3.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack097",
+      "User": "dan.demir02@external.example.com",
+      "Name": "Dan Demir02",
+      "Role": "Admin",
+      "Last seen (days)": 3.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "finn.kaplan93@external.example.com",
+      "Name": "Finn Kaplan93",
+      "Role": "Viewer",
+      "Last seen (days)": 3.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack146",
+      "User": "gia.ionescu46@example.com",
+      "Name": "Gia Ionescu46",
+      "Role": "Admin",
+      "Last seen (days)": 3.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "jonas.lang79@external.example.com",
+      "Name": "Jonas Lang79",
+      "Role": "Viewer",
+      "Last seen (days)": 3.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "gia.ionescu46@example.com",
+      "Name": "Gia Ionescu46",
+      "Role": "Admin",
+      "Last seen (days)": 3.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "pavel.fischer92@example.com",
+      "Name": "Pavel Fischer92",
+      "Role": "Admin",
+      "Last seen (days)": 3.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "umar.kaplan25@external.example.com",
+      "Name": "Umar Kaplan25",
+      "Role": "Viewer",
+      "Last seen (days)": 3.2,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "emil.bauer87@external.example.com",
+      "Name": "Emil Bauer87",
+      "Role": "Viewer",
+      "Last seen (days)": 3.1,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack052",
+      "User": "tara.vlasic60@example.net",
+      "Name": "Tara Vlasic60",
+      "Role": "Editor",
+      "Last seen (days)": 3.1,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "User": "kira.silva53@contractors.example.com",
+      "Name": "Kira Silva53",
+      "Role": "Admin",
+      "Last seen (days)": 3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack052",
+      "User": "ben.fischer11@external.example.net",
+      "Name": "Ben Fischer11",
+      "Role": "Admin",
+      "Last seen (days)": 3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "eva.lewandowski27@external.example.com",
+      "Name": "Eva Lewandowski27",
+      "Role": "Viewer",
+      "Last seen (days)": 2.8,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "cara.ionescu27@external.example.com",
+      "Name": "Cara Ionescu27",
+      "Role": "Viewer",
+      "Last seen (days)": 2.7,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "emil.kaplan32@external.example.com",
+      "Name": "Emil Kaplan32",
+      "Role": "Admin",
+      "Last seen (days)": 2.5,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "noa.marek23@external.example.com",
+      "Name": "Noa Marek23",
+      "Role": "Admin",
+      "Last seen (days)": 2.5,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack037",
+      "User": "emil.kaplan32@external.example.com",
+      "Name": "Emil Kaplan32",
+      "Role": "Admin",
+      "Last seen (days)": 2.5,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 2.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "ana.petrov67@external.example.com",
+      "Name": "Ana Petrov67",
+      "Role": "Admin",
+      "Last seen (days)": 2.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack037",
+      "User": "wes.costa46@external.example.com",
+      "Name": "Wes Costa46",
+      "Role": "Viewer",
+      "Last seen (days)": 2.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "gia.fischer31@external.example.com",
+      "Name": "Gia Fischer31",
+      "Role": "Viewer",
+      "Last seen (days)": 2.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack201",
+      "User": "pavelnowak34",
+      "Name": "Pavel Nowak34",
+      "Role": "Admin",
+      "Last seen (days)": 2.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "vera.marek82@external.example.com",
+      "Name": "Vera Marek82",
+      "Role": "Admin",
+      "Last seen (days)": 2.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack112",
+      "User": "finn.petrov39@contractors.example.com",
+      "Name": "Finn Petrov39",
+      "Role": "Admin",
+      "Last seen (days)": 2.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "vera.marek08@example.com",
+      "Name": "Vera Marek08",
+      "Role": "Viewer",
+      "Last seen (days)": 2.2,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack036",
+      "User": "umar.petrov85@external.example.com",
+      "Name": "Umar Petrov85",
+      "Role": "Admin",
+      "Last seen (days)": 2.2,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "User": "hugoionescu86",
+      "Name": "Hugo Ionescu86",
+      "Role": "Admin",
+      "Last seen (days)": 2.2,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "olga.schmidt29@contractors.example.com",
+      "Name": "Olga Schmidt29",
+      "Role": "Editor",
+      "Last seen (days)": 2.2,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack019",
+      "User": "pavel.horvat42@external.example.com",
+      "Name": "Pavel Horvat42",
+      "Role": "Admin",
+      "Last seen (days)": 2.2,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "xenia.horvat77@external.example.com",
+      "Name": "Xenia Horvat77",
+      "Role": "Viewer",
+      "Last seen (days)": 2.2,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "hugo.kovac87@contractors.example.com",
+      "Name": "Hugo Kovac87",
+      "Role": "Editor",
+      "Last seen (days)": 2.1,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack035",
+      "User": "umar.dubois45@example.com",
+      "Name": "Umar Dubois45",
+      "Role": "Viewer",
+      "Last seen (days)": 2,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "emil.nilsen04@external.example.com",
+      "Name": "Emil Nilsen04",
+      "Role": "Admin",
+      "Last seen (days)": 1.9,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "zane.kovac71@external.example.net",
+      "Name": "Zane Kovac71",
+      "Role": "Viewer",
+      "Last seen (days)": 1.9,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "kira.conti78@external.example.net",
+      "Name": "Kira Conti78",
+      "Role": "Admin",
+      "Last seen (days)": 1.9,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "olga.lang34@external.example.net",
+      "Name": "Olga Lang34",
+      "Role": "Editor",
+      "Last seen (days)": 1.8,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "cara.nowak81@external.example.com",
+      "Name": "Cara Nowak81",
+      "Role": "Viewer",
+      "Last seen (days)": 1.7,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack055",
+      "User": "umar.nowak07@external.example.net",
+      "Name": "Umar Nowak07",
+      "Role": "Admin",
+      "Last seen (days)": 1.6,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "hugo.ivanov24@example.net",
+      "Name": "Hugo Ivanov24",
+      "Role": "Admin",
+      "Last seen (days)": 1.6,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "iris.kovac15@external.example.com",
+      "Name": "Iris Kovac15",
+      "Role": "Editor",
+      "Last seen (days)": 1.5,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "finn.moreau43@external.example.com",
+      "Name": "Finn Moreau43",
+      "Role": "Viewer",
+      "Last seen (days)": 1.5,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "eva.larsen97@external.example.com",
+      "Name": "Eva Larsen97",
+      "Role": "Admin",
+      "Last seen (days)": 1.5,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack019",
+      "User": "gia.horvat68@contractors.example.com",
+      "Name": "Gia Horvat68",
+      "Role": "Admin",
+      "Last seen (days)": 1.5,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "maja.conti59@contractors.example.com",
+      "Name": "Maja Conti59",
+      "Role": "Viewer",
+      "Last seen (days)": 1.5,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack097",
+      "User": "jonas.nilsen12@external.example.com",
+      "Name": "Jonas Nilsen12",
+      "Role": "Admin",
+      "Last seen (days)": 1.5,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack072",
+      "User": "xenia.larsen23@contractors.example.com",
+      "Name": "Xenia Larsen23",
+      "Role": "Admin",
+      "Last seen (days)": 1.5,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack201",
+      "User": "kira.larsen03@example.com",
+      "Name": "Kira Larsen03",
+      "Role": "Admin",
+      "Last seen (days)": 1.5,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack053",
+      "User": "zane.bauer28@example.com",
+      "Name": "Zane Bauer28",
+      "Role": "Admin",
+      "Last seen (days)": 1.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "anahorvat97",
+      "Name": "Ana Horvat97",
+      "Role": "Admin",
+      "Last seen (days)": 1.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "alex.horvat95@external.example.net",
+      "Name": "Alex Horvat95",
+      "Role": "Admin",
+      "Last seen (days)": 1.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "carapopa32",
+      "Name": "Cara Popa32",
+      "Role": "Admin",
+      "Last seen (days)": 1.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack072",
+      "User": "hugo.lang90@contractors.example.com",
+      "Name": "Hugo Lang90",
+      "Role": "Admin",
+      "Last seen (days)": 1.4,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack001",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack001c",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack125",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack049",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "yara.larsen55@external.example.com",
+      "Name": "Yara Larsen55",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "vera.weber87@external.example.com",
+      "Name": "Vera Weber87",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "ben.novak10@external.example.com",
+      "Name": "Ben Novak10",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack020",
+      "User": "gia.bauer03@external.example.com",
+      "Name": "Gia Bauer03",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "finn.rossi49@external.example.net",
+      "Name": "Finn Rossi49",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "eva.horvat66@external.example.net",
+      "Name": "Eva Horvat66",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "maja.kaplan11@external.example.net",
+      "Name": "Maja Kaplan11",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "ana.schmidt91@external.example.com",
+      "Name": "Ana Schmidt91",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack001b",
+      "User": "tara.larsen23@external.example.com",
+      "Name": "Tara Larsen23",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack036",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack036",
+      "User": "dan.conti32@example.com",
+      "Name": "Dan Conti32",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack036",
+      "User": "finn.kovac19@contractors.example.com",
+      "Name": "Finn Kovac19",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack036",
+      "User": "emil.lewandowski43@example.com",
+      "Name": "Emil Lewandowski43",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "User": "weshorvat06",
+      "Name": "Wes Horvat06",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "User": "danmoreau60",
+      "Name": "Dan Moreau60",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "User": "pavelnowak34",
+      "Name": "Pavel Nowak34",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "sam.conti08@contractors.example.com",
+      "Name": "Sam Conti08",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "iris.nilsen80@contractors.example.com",
+      "Name": "Iris Nilsen80",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack071",
+      "User": "tara.kaplan21@contractors.example.com",
+      "Name": "Tara Kaplan21",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "dan.bauer56@contractors.example.com",
+      "Name": "Dan Bauer56",
+      "Role": "Editor",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack158",
+      "User": "cara.korhonen03@external.example.com",
+      "Name": "Cara Korhonen03",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack177",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack112",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack145",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack019",
+      "User": "ana.larsen02@external.example.com",
+      "Name": "Ana Larsen02",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack019",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack019",
+      "User": "xenia.horvat94@contractors.example.com",
+      "Name": "Xenia Horvat94",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack019",
+      "User": "emil.ionescu88@contractors.example.com",
+      "Name": "Emil Ionescu88",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack001a",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack070",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack037",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack053",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack110",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack050",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack050",
+      "User": "xenia.novak08@external.example.net",
+      "Name": "Xenia Novak08",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack050",
+      "User": "eva.dvorak18@external.example.net",
+      "Name": "Eva Dvorak18",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack146",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack147",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack052",
+      "User": "finn.korhonen67@external.example.net",
+      "Name": "Finn Korhonen67",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack052",
+      "User": "zane.dvorak27@external.example.net",
+      "Name": "Zane Dvorak27",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack052",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack126",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack126",
+      "User": "olga.kaplan72@external.example.com",
+      "Name": "Olga Kaplan72",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack051",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack035",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack054",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack148",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "danmoreau60",
+      "Name": "Dan Moreau60",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "weshorvat06",
+      "Name": "Wes Horvat06",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "pavelnowak34",
+      "Name": "Pavel Nowak34",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "obs-hub",
+      "User": "hugoionescu86",
+      "Name": "Hugo Ionescu86",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "rita.petrov31@external.example.net",
+      "Name": "Rita Petrov31",
+      "Role": "Editor",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack113",
+      "User": "sam.nilsen91@external.example.net",
+      "Name": "Sam Nilsen91",
+      "Role": "Editor",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack193",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack002",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "liam.lang82@external.example.com",
+      "Name": "Liam Lang82",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack111",
+      "User": "pavel.kaplan61@external.example.com",
+      "Name": "Pavel Kaplan61",
+      "Role": "Editor",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack055",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "alex.costa00@example.net",
+      "Name": "Alex Costa00",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack038",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack170",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack097",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack149",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack072",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack201",
+      "User": "wes.ionescu89@external.example.com",
+      "Name": "Wes Ionescu89",
+      "Role": "Admin",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    },
+    {
+      " Stack": "stack201",
+      "User": "hugo.dvorak26@robots.example.com",
+      "Name": "Hugo Dvorak26",
+      "Role": "Viewer",
+      "Last seen (days)": 1.3,
+      "Recency": "7d"
+    }
+  ]
+}

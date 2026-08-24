@@ -1,0 +1,454 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "obs-hub",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack001",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack001a",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack001b",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack001c",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack002",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack019",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack020",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack035",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack036",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack037",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack038",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack049",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack050",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack051",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack052",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack053",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack054",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack055",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack070",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack071",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack072",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack097",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack110",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack111",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack112",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack113",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack125",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack126",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack145",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack146",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack147",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack148",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack149",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack158",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack170",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack177",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack193",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "stack201",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "testsrobot002",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "teststack004",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "teststack017",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    },
+    {
+      " Stack": "teststack018",
+      "Dashboard": "(inventory unavailable)",
+      "Folder": "",
+      "Dashboard uid": "",
+      "State": "unknown",
+      "Views (31d)": null,
+      "Coverage detail": "inventory unavailable"
+    }
+  ]
+}

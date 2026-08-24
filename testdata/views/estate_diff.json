@@ -1,0 +1,146 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Metric": "COMPARISON WINDOW",
+      "Now": "2026-08-21T18:08:49.212573+00:00",
+      "Then": "2026-08-14T18:08:49.212573+00:00",
+      "Change": "7.0 days",
+      "Change %": null,
+      "Note": "week over week - on target (7d)"
+    },
+    {
+      " Metric": "Stacks",
+      "Now": 44.0,
+      "Then": 42.0,
+      "Change": 2.0,
+      "Change %": 4.76,
+      "Note": null
+    },
+    {
+      " Metric": "Active series",
+      "Now": 1414648.0,
+      "Then": 1414648.0,
+      "Change": 0.0,
+      "Change %": 0.0,
+      "Note": null
+    },
+    {
+      " Metric": "Billed users",
+      "Now": 205.0,
+      "Then": 205.0,
+      "Change": 0.0,
+      "Change %": 0.0,
+      "Note": null
+    },
+    {
+      " Metric": "Active users",
+      "Now": 231.0,
+      "Then": 231.0,
+      "Change": 0.0,
+      "Change %": 0.0,
+      "Note": null
+    },
+    {
+      " Metric": "Dashboards",
+      "Now": 1482.0,
+      "Then": 1456.0,
+      "Change": 26.0,
+      "Change %": 1.79,
+      "Note": null
+    },
+    {
+      " Metric": "Alert rules",
+      "Now": 3704.0,
+      "Then": 3704.0,
+      "Change": 0.0,
+      "Change %": 0.0,
+      "Note": null
+    },
+    {
+      " Metric": "Adaptive recommendations pending",
+      "Now": 6226.0,
+      "Then": 6226.0,
+      "Change": 0.0,
+      "Change %": 0.0,
+      "Note": null
+    },
+    {
+      " Metric": "Adaptive rules applied",
+      "Now": 332.0,
+      "Then": 332.0,
+      "Change": 0.0,
+      "Change %": 0.0,
+      "Note": null
+    },
+    {
+      " Metric": "Fleet collectors",
+      "Now": 214.0,
+      "Then": 214.0,
+      "Change": 0.0,
+      "Change %": 0.0,
+      "Note": null
+    },
+    {
+      " Metric": "Label values (total)",
+      "Now": 140256.0,
+      "Then": 140256.0,
+      "Change": 0.0,
+      "Change %": 0.0,
+      "Note": null
+    }
+  ]
+}

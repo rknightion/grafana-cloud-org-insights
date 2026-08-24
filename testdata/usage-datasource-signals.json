@@ -1,0 +1,1405 @@
+{
+  "generated_by": "python3 bin/probe_usage_signals.py",
+  "window": "24h",
+  "source": {
+    "datasource": "grafanacloud-usage",
+    "stack_context": "obs-hub-dev",
+    "note": "Org-wide billing/usage series for org 900001, provisioned on every stack. Read DIRECTLY by dashboard panels \u2014 no collector, no service account, no series of ours. 317 metric names available. Every metric carries a `stack_id` label, and `grafanacloud_grafana_instance_info` (272 series, one per stack) carries `stack_id` AND `slug`, so a panel joins to a stack NAME with `* on(stack_id) group_left(slug) grafanacloud_grafana_instance_info`. Range queries only, never instant.",
+    "cardinality_trap": "`id` is the per-SIGNAL instance id, not the stack. `grafanacloud_instance_queries_per_second` carries 459 ids against 230 stacks, so `count(<metric> > 0)` counts label combinations and overstates. Aggregate `sum by(stack_id)` / `count by(stack_id)` first. See `label_cardinality` for which metrics are genuinely 1:1 per stack.",
+    "unit_trap": "`grafanacloud_traces_instance_percentage_complete_traces_flushed` and `..._percentage_traces_with_root_spans_flushed` are RATIOS 0-1 despite the word percentage (measured max 1.0). But `..._spans_more_than_5m_in_past_percent` IS a real percent 0-100 (measured max 66.7). Two families, same word, different units. Thresholding the ratio at `< 90` matches every stack that reports and reads as a 26-stack outage that is not happening.",
+    "window_trap": "Rate-shaped series are momentary. Comparing one to zero asks 'is this happening right now', not 'does this stack have a problem'. See `instant_vs_window`."
+  },
+  "data_loss": {
+    "stacks_discarding_metric_samples_defect_reasons": 26.0,
+    "stacks_discarding_metric_samples_any_reason": 27.0,
+    "stacks_discarding_log_bytes": 23.0,
+    "stacks_per_discard_reason": {
+      "aggregator-sample-too-old": 4.0,
+      "label_invalid": 1.0,
+      "new-value-for-timestamp": 12.0,
+      "otlp_parse_error": 2.0,
+      "sample-too-new-for-aggregation": 1.0,
+      "sample_duplicate_timestamp": 9.0,
+      "sample_timestamp_too_old": 5.0,
+      "too_far_in_future": 1.0
+    },
+    "worst_stacks": [
+      {
+        "slug": "stack015u",
+        "value": 276.92496972247454
+      },
+      {
+        "slug": "stack036",
+        "value": 105.42916666666667
+      },
+      {
+        "slug": "obs-hub",
+        "value": 89.2958758336904
+      },
+      {
+        "slug": "stack084",
+        "value": 68.80026761197202
+      },
+      {
+        "slug": "stack035",
+        "value": 21.641666666666666
+      },
+      {
+        "slug": "stack122",
+        "value": 21.506716944444445
+      },
+      {
+        "slug": "stack198",
+        "value": 21.083373264720795
+      },
+      {
+        "slug": "stack184",
+        "value": 14.85330733710592
+      },
+      {
+        "slug": "stack143",
+        "value": 14.300562222222224
+      },
+      {
+        "slug": "obs-hub-dev",
+        "value": 6.811127312502604
+      },
+      {
+        "slug": "stack108",
+        "value": 6.662794715743592
+      },
+      {
+        "slug": "stack163",
+        "value": 6.170833333333333
+      },
+      {
+        "slug": "stack130",
+        "value": 5.716668958371818
+      },
+      {
+        "slug": "stack095",
+        "value": 4.583333333333333
+      },
+      {
+        "slug": "stack179",
+        "value": 4.075
+      }
+    ],
+    "reason_taxonomy": {
+      "deliberate": [
+        "requested-by-configuration"
+      ],
+      "sender_defect": [
+        "sample_duplicate_timestamp",
+        "new-value-for-timestamp",
+        "sample_timestamp_too_old",
+        "too_far_in_future",
+        "otlp_parse_error",
+        "label_invalid",
+        "aggregator-sample-too-old",
+        "sample-too-new-for-aggregation",
+        "aggregator-histogram-too-old"
+      ],
+      "limit_breach": [
+        "aggregator-too-many-raw-series",
+        "aggregator-too-many-aggregated-series",
+        "aggregator-histogram-unsupported-aggregation"
+      ]
+    },
+    "excluded_on_purpose": "`requested-by-configuration` is Adaptive Metrics dropping what it was told to drop. Counting it would report a stack as broken for adopting the lever the cost dashboard recommends."
+  },
+  "trace_quality": {
+    "stacks_reporting_completeness": 23.0,
+    "max_ratio_observed": 1.0,
+    "min_ratio_observed": 0.0,
+    "stacks_below_090_complete_24h_low": 14.0,
+    "stacks_below_090_complete_instant": 6.0,
+    "stacks_below_090_root_spans_24h_low": 13.0,
+    "stacks_over_5pct_spans_late_by_5m": 1.0,
+    "worst_stacks": [
+      {
+        "slug": "stack082",
+        "value": 0.0
+      },
+      {
+        "slug": "stack056",
+        "value": 0.0
+      },
+      {
+        "slug": "stack198",
+        "value": 0.0
+      },
+      {
+        "slug": "testsrobot001",
+        "value": 0.21876263647391847
+      },
+      {
+        "slug": "stack001b",
+        "value": 0.384180790960452
+      },
+      {
+        "slug": "stack015a",
+        "value": 0.40000012500101556
+      },
+      {
+        "slug": "stack025",
+        "value": 0.5
+      },
+      {
+        "slug": "stack078",
+        "value": 0.6666666666666667
+      },
+      {
+        "slug": "stack177",
+        "value": 0.8186813186813187
+      },
+      {
+        "slug": "stack130",
+        "value": 0.8415841584158416
+      }
+    ]
+  },
+  "alerting_health": {
+    "stacks_with_failing_notifications": 17.0,
+    "stacks_with_rules_fetching_zero_series": 44.0,
+    "stacks_with_rule_evaluation_failures": 70.0,
+    "stacks_with_invalid_alertmanager_config": null,
+    "worst_notification_failures": [
+      {
+        "slug": "stack023",
+        "value": 0.25833406250607643
+      },
+      {
+        "slug": "stack012",
+        "value": 0.0875
+      },
+      {
+        "slug": "stack015j",
+        "value": 0.08333333333333333
+      },
+      {
+        "slug": "stack037",
+        "value": 0.045833541669270866
+      },
+      {
+        "slug": "stack076",
+        "value": 0.037500000000000006
+      },
+      {
+        "slug": "stack130",
+        "value": 0.03333333333333333
+      },
+      {
+        "slug": "stack060",
+        "value": 0.03333333333333333
+      },
+      {
+        "slug": "stack038",
+        "value": 0.029166666666666664
+      },
+      {
+        "slug": "stack020",
+        "value": 0.025
+      },
+      {
+        "slug": "stack176",
+        "value": 0.024999999999999998
+      }
+    ],
+    "worst_dead_rules": [
+      {
+        "slug": "stack130",
+        "value": 9.075
+      },
+      {
+        "slug": "stack171",
+        "value": 6.658333333333333
+      },
+      {
+        "slug": "stack015j",
+        "value": 3.225
+      },
+      {
+        "slug": "stack038",
+        "value": 2.1791666666666667
+      },
+      {
+        "slug": "stack077",
+        "value": 2.1295261296296295
+      },
+      {
+        "slug": "stack052",
+        "value": 2.0453145
+      },
+      {
+        "slug": "stack120",
+        "value": 1.991671388928241
+      },
+      {
+        "slug": "stack086",
+        "value": 1.9541666666666666
+      },
+      {
+        "slug": "stack001b",
+        "value": 1.9375
+      },
+      {
+        "slug": "stack128",
+        "value": 1.9375
+      },
+      {
+        "slug": "stack096",
+        "value": 1.9375
+      }
+    ],
+    "not_a_panel": "`grafanacloud_instance_alertmanager_invalid_config` and both config-reload counters are empty estate-wide, so a panel would read 0 for ever. Recheck here before assuming it still holds."
+  },
+  "unread_telemetry": {
+    "note": "'Ingested and never queried' \u2014 IDEAS.md's highest-value and hardest number. Measured over a full day it splits and only the LOGS half survives. The `and` requiring active ingest is load-bearing: without it this counts empty stacks and becomes the inventory again.",
+    "logs_stacks_ingesting": 269.0,
+    "logs_stacks_ingesting_but_unread": 25.0,
+    "logs_unread_bytes_per_second": 2126654.1945936466,
+    "logs_total_bytes_per_second": 49504887.917935684,
+    "logs_worst_stacks": [
+      {
+        "slug": "stack053",
+        "value": 1506045.3902680841
+      },
+      {
+        "slug": "stack023",
+        "value": 328395.70470087026
+      },
+      {
+        "slug": "stack093",
+        "value": 217693.79176313424
+      },
+      {
+        "slug": "testlab001",
+        "value": 28608.641666666666
+      },
+      {
+        "slug": "stack038",
+        "value": 27374.286243354512
+      },
+      {
+        "slug": "stack043",
+        "value": 11393.9356275
+      },
+      {
+        "slug": "stack072",
+        "value": 9788.516666666666
+      },
+      {
+        "slug": "stack117",
+        "value": 2796.05
+      },
+      {
+        "slug": "stack016",
+        "value": 1319.8541666666667
+      },
+      {
+        "slug": "stack089",
+        "value": 584.4747665416667
+      },
+      {
+        "slug": "stack061",
+        "value": 334.97502920163225
+      },
+      {
+        "slug": "stack068",
+        "value": 328.47499999999997
+      },
+      {
+        "slug": "stack050",
+        "value": 326.00014927109055
+      },
+      {
+        "slug": "stack063",
+        "value": 257.3375
+      },
+      {
+        "slug": "stack059",
+        "value": 181.1827556959098
+      },
+      {
+        "slug": "stack012",
+        "value": 139.23333333333332
+      },
+      {
+        "slug": "stack022",
+        "value": 138.03945263412277
+      },
+      {
+        "slug": "stack057",
+        "value": 137.05242803485677
+      },
+      {
+        "slug": "stack086",
+        "value": 136.09583333333333
+      }
+    ],
+    "metrics_stacks_ingesting": 231.0,
+    "metrics_stacks_ingesting_but_unread": null,
+    "metrics_verdict": "NEGATIVE RESULT \u2014 there is no metrics write-only finding and no panel for it. Every stack that ingests metrics gets queried within 24h bar one, and no stack over 10,000 series went unqueried. The instantaneous form claimed 60 stacks and 4 large ones; both were artifacts of asking 'was anyone querying in this 5-minute window'. The metric-quiet stacks hold no series at all, i.e. the test leftovers `estate_leftovers_idle` already reports. Do not re-add it."
+  },
+  "adaptive_savings": {
+    "estimated_savings_series_available": 3888360.0,
+    "estate_active_series": 11310531.25,
+    "savings_as_fraction_of_estate": 0.34378226044864163,
+    "stacks_with_savings_available": 119.0,
+    "stacks_actually_aggregating": 30.0,
+    "raw_series_feeding_aggregation": 3279976.0,
+    "aggregated_series_out": 308483.0,
+    "top_stacks": [
+      {
+        "slug": "stack094",
+        "value": 511326.0
+      },
+      {
+        "slug": "stack015a",
+        "value": 507529.0
+      },
+      {
+        "slug": "stack184",
+        "value": 294466.0
+      },
+      {
+        "slug": "stack084",
+        "value": 234769.0
+      },
+      {
+        "slug": "stack179",
+        "value": 226633.0
+      },
+      {
+        "slug": "stack036",
+        "value": 203145.0
+      },
+      {
+        "slug": "stack016",
+        "value": 186597.0
+      },
+      {
+        "slug": "stack072",
+        "value": 166254.0
+      },
+      {
+        "slug": "stack015n",
+        "value": 157373.0
+      },
+      {
+        "slug": "stack015i",
+        "value": 101947.0
+      },
+      {
+        "slug": "stack024",
+        "value": 92943.0
+      },
+      {
+        "slug": "stack076",
+        "value": 92418.0
+      },
+      {
+        "slug": "stack079",
+        "value": 80455.0
+      },
+      {
+        "slug": "stack035",
+        "value": 71074.0
+      },
+      {
+        "slug": "stack163",
+        "value": 70774.0
+      },
+      {
+        "slug": "stack014",
+        "value": 66849.0
+      }
+    ],
+    "closes": "collector/pillars/cost.py states that converting Adaptive Metrics recommendations into a saving needs a per-recommendation series count it cannot obtain, so it reports rule COUNTS and says volume is the honest unit. This metric is that missing number. It is still not currency \u2014 that needs Acme's contract."
+  },
+  "irm_in_use": {
+    "oncall_alert_groups_total": 11825.0,
+    "oncall_alert_groups_by_state": {
+      "acknowledged": 15.0,
+      "firing": 193.0,
+      "resolved": 11615.0,
+      "silenced": 2.0
+    },
+    "stacks_with_oncall_provisioned": 58.0,
+    "stacks_with_oncall_alert_groups": 20.0,
+    "distinct_oncall_teams": 107.0,
+    "users_notified_of_alert_groups": 2990.0,
+    "irm_billable_users": 29.0,
+    "stacks_by_oncall_groups": [
+      {
+        "slug": "obs-hub-dev",
+        "value": 3421.0
+      },
+      {
+        "slug": "stack152",
+        "value": 2778.0
+      },
+      {
+        "slug": "obs-hub",
+        "value": 2008.0
+      },
+      {
+        "slug": "stack117",
+        "value": 1422.0
+      },
+      {
+        "slug": "stack035",
+        "value": 680.0
+      },
+      {
+        "slug": "stack016",
+        "value": 419.0
+      },
+      {
+        "slug": "stack171",
+        "value": 298.0
+      },
+      {
+        "slug": "stack007",
+        "value": 185.0
+      },
+      {
+        "slug": "stack130",
+        "value": 149.0
+      },
+      {
+        "slug": "stack079",
+        "value": 116.0
+      },
+      {
+        "slug": "stack168",
+        "value": 114.0
+      },
+      {
+        "slug": "stack179",
+        "value": 58.0
+      },
+      {
+        "slug": "stack090",
+        "value": 47.0
+      },
+      {
+        "slug": "stack163",
+        "value": 41.0
+      },
+      {
+        "slug": "stack015e",
+        "value": 40.0
+      },
+      {
+        "slug": "stack111",
+        "value": 31.0
+      },
+      {
+        "slug": "stack020",
+        "value": 12.0
+      },
+      {
+        "slug": "stack153",
+        "value": 3.0
+      },
+      {
+        "slug": "stack200",
+        "value": 2.0
+      },
+      {
+        "slug": "stack076",
+        "value": 1.0
+      }
+    ],
+    "native_labels": "This metric is the exception on this datasource: it already carries `slug`, `team`, `service_name`, `integration` and `state`, so no join is needed unless an aggregation discards them. `..._response_time_seconds` and `..._resolution_time_seconds` give real MTTA/MTTR per team \u2014 measured but deliberately not built, see IDEAS.md.",
+    "correction": "gcom reports `incident: 0` and `billingOnCallActiveUsers: 0` on EVERY stack listed here. gcom's `incident` field is the standalone Grafana Incident product, NOT IRM or OnCall. Reading stack015_insight_estate_feature_stacks{kind=\"incident\"} == 0 as 'incident response is unused' is WRONG and this is the disproof."
+  },
+  "instant_vs_window": {
+    "note": "Why every rate-shaped expression on these dashboards is wrapped in max_over_time. `instant` is what a momentary compare returns, `window` the same question over 24h. The instant form UNDERSTATES intermittent faults and grossly OVERSTATES absence of activity, and it is unstable: the write-only count read 60 then 33 within 40 minutes on 2026-08-18, which on its own disqualifies it. tests/test_dashboards.py enforces the windowing.",
+    "metric_discards": {
+      "instant": 17.0,
+      "window": 26.0
+    },
+    "log_discards": {
+      "instant": 7.0,
+      "window": 23.0
+    },
+    "incomplete_traces": {
+      "instant": 6.0,
+      "window": 14.0
+    },
+    "failing_notifications": {
+      "instant": 15.0,
+      "window": 17.0
+    },
+    "rule_evaluation_failures": {
+      "instant": 9.0,
+      "window": 70.0,
+      "comment": "The largest gap measured. 9 against 41."
+    },
+    "dead_rules": {
+      "instant": 44.0,
+      "window": 44.0,
+      "comment": "Identical both ways \u2014 a persistent condition, not an event. The control case."
+    },
+    "metrics_write_only": {
+      "instant": 112.0,
+      "window": null,
+      "comment": "The one that dissolved a finding entirely."
+    }
+  },
+  "operations": {
+    "note": "Pillar G \u2014 outcomes, not inventory. TWO POPULATIONS: `alert_groups_total` spans 58 stacks, the response histogram only 8. Any ratio must restrict the denominator with `and on(stack_id)` or it is a ~15x error. A missing histogram observation means no acknowledgement was RECORDED \u2014 the metric cannot prove intent, so never phrase it as 'nobody looked'.",
+    "bucket_note": "Buckets are 60/300/600/3600.0/+Inf, so histogram_quantile SATURATES above the median: p90 and p99 both return exactly 3600.0, meaning 'at least an hour'. Only p50 is real; the tail must be a COUNT above the top finite bucket. And `le` values carry a decimal point \u2014 le=\"3600\" matches nothing.",
+    "alert_groups_estate": 11825.0,
+    "alert_groups_by_state": {
+      "acknowledged": 15.0,
+      "firing": 193.0,
+      "resolved": 11615.0,
+      "silenced": 2.0
+    },
+    "stacks_with_oncall": 58.0,
+    "stacks_reporting_timing": 8.0,
+    "acknowledged": 1076.0,
+    "raised_on_timing_stacks": 8833.0,
+    "engagement_rate": 0.12181591758179554,
+    "mtta_median_seconds": 874.5098039215686,
+    "mttr_median_seconds": 1062.3655913978496,
+    "mtta_mean_seconds": 28137.132700320613,
+    "ack_cumulative_buckets": {
+      "+Inf": 1076.0,
+      "300.0": 391.0,
+      "3600.0": 816.0,
+      "60.0": 107.0,
+      "600.0": 510.0
+    },
+    "acknowledged_after_an_hour": 260.0,
+    "unowned_share_of_all": 0.48972515856236787,
+    "unowned_share_of_acknowledged": 0.3299256505576208,
+    "no_service_share": 0.6259619450317124,
+    "team_engagement_rate": {
+      "No team": 0.061302020376446206,
+      "app_observability": 0.11663902708678828,
+      "dpps-aem-admins": 0.7586206896551724
+    },
+    "distinct_teams": 107.0,
+    "top_integrations": {
+      "Chat Alerts from e-mails": 2768.0,
+      "Default": 298.0,
+      "SNOW-IN": 119.0,
+      "SNOW_webhook Integration": 123.0,
+      "ServiceNowIIS": 294.0,
+      "Servicenow_webhook": 680.0,
+      "converge": 149.0,
+      "gitlab-avm-pipelines": 1759.0,
+      "gitlab-integration": 214.0,
+      "grafana-integration": 3229.0,
+      "grafana-statuspage": 142.0,
+      "on_call_alert1": 1422.0
+    },
+    "top_services": {
+      "No service": 7402.0,
+      "aws-infrastructure": 554.0,
+      "demo": 34.0,
+      "gitlab": 1829.0,
+      "grafana-cloud-dpm": 168.0,
+      "integrations/cloudflare": 75.0,
+      "platform-integrations": 1072.0,
+      "synthetic-monitoring": 605.0
+    }
+  },
+  "capability_adoption": {
+    "note": "DENOMINATORS DECIDE THE CONCLUSION, and they must be windowed like the numerators. Read instantaneously the trace population is 39 stacks; over 24h it is 230, because trace ingest is bursty. Using 39 made span metrics look like 46% adoption \u2014 'a success, not a gap' \u2014 when the honest figure is 10%. That error was made and caught on 2026-08-19.",
+    "stacks_ingesting_metrics": 231.0,
+    "stacks_ingesting_traces": 230.0,
+    "stacks_ingesting_traces_INSTANT_do_not_use": 32.0,
+    "native_histograms": 3.0,
+    "exemplars": 29.0,
+    "span_metrics": 23.0,
+    "service_graphs": 21.0,
+    "pdc": 19.0,
+    "adaptive_logs": 5.0,
+    "adaptive_traces": 2.0,
+    "product_activation": {
+      "app_o11y": 106.0,
+      "db_o11y": 5.0,
+      "hosto11y": 2.0,
+      "k8s_o11y": 38.0,
+      "knowledge_graph": 9.0
+    },
+    "rejected_unidentifiable_targets": {
+      "stacks": 229.0,
+      "total_series": 1038.0,
+      "verdict": "On ~229 stacks and looks like an un-attributed-junk signal, but the total is ~1,111 series \u2014 0.0% of the estate. Noise, not a finding. Deliberately no panel."
+    }
+  },
+  "workload": {
+    "pods_monitored": 24193.0,
+    "hosts_monitored": 2098.0,
+    "integration_series": 2948329.0,
+    "integration_share_of_estate": 0.26067113337404024,
+    "stacks_monitoring_k8s": 26.0,
+    "stacks_monitoring_hosts": 31.0,
+    "stacks_using_integrations": 229.0,
+    "assistant_users": 172.0,
+    "ai_tokens_total": 1193271484.0,
+    "note": "`*_info` series are one per object, so their SUM is an object count \u2014 the most concrete 'what is in there' figure the platform produces, and it needs no per-stack credential."
+  },
+  "assistant_ai": {
+    "window_contract": "grafanacloud_ai_tokens_total_tokens is the CURRENT MONTHLY BILLING-PERIOD aggregate and resets. grafanacloud_ai_tokens_user_total_tokens is cumulative by identity. Never present the aggregate as lifetime or the identity ranking as current-period spend.",
+    "identity_label_trap": "user_type=service is a billing-series category, NOT proof of a service account. Live rows include human-shaped emails as well as sa-* identities.",
+    "self_managed_attribution": "Grafana docs say self-managed Assistant uses the connected Cloud stack's backend, limits and billing. The metrics carry only that Cloud stack_id and no originating-instance/source label, so OSS traffic is folded into the connected Cloud stack and cannot be split here. The live unmatched_stack_ids checks below are evidence about identifier shape, NOT zero OSS usage.",
+    "org_assistant_users": 172.0,
+    "assistant_active_user_memberships": 183.0,
+    "assistant_contract_user_units": 172.0,
+    "stacks_with_assistant_activity": 66.0,
+    "org_ai_token_active_users": {
+      "service": 0.0,
+      "user": 171.0
+    },
+    "ai_token_user_memberships": {
+      "service": 0.0,
+      "user": 182.0
+    },
+    "current_billing_period_tokens": 1193271484.0,
+    "current_user_token_total": 1193271484.0,
+    "current_service_token_total": 0.0,
+    "current_sum_of_identity_counters": 1193271484.0,
+    "stacks_with_current_tokens": 65.0,
+    "assistant_run_rate": 2408.0,
+    "assistant_run_rate_stack_sum": 2408.0,
+    "ai_token_run_rate": 0.0,
+    "ai_token_run_rate_stack_sum": 0.0,
+    "included_assistant_users": 0.0,
+    "additional_ai_tokens": 0.0,
+    "included_additional_ai_tokens": 0.0,
+    "unmatched_stack_ids": {
+      "grafanacloud_assistant_active_users": 0.0,
+      "grafanacloud_assistant_users": 0.0,
+      "grafanacloud_assistant_overage": 0.0,
+      "grafanacloud_ai_tokens_active_users": 0.0,
+      "grafanacloud_ai_tokens_total_tokens": 0.0,
+      "grafanacloud_ai_tokens_user_total_tokens": 0.0,
+      "grafanacloud_ai_tokens_overage": 0.0
+    },
+    "top_100_stacks_by_assistant_users": [
+      {
+        "slug": "stack183",
+        "value": 60.0
+      },
+      {
+        "slug": "stack015j",
+        "value": 11.0
+      },
+      {
+        "slug": "stack038",
+        "value": 5.0
+      },
+      {
+        "slug": "stack015n",
+        "value": 5.0
+      },
+      {
+        "slug": "stack158",
+        "value": 4.0
+      },
+      {
+        "slug": "stack020",
+        "value": 4.0
+      },
+      {
+        "slug": "obs-hub",
+        "value": 4.0
+      },
+      {
+        "slug": "stack185",
+        "value": 4.0
+      },
+      {
+        "slug": "stack200",
+        "value": 4.0
+      },
+      {
+        "slug": "stack001b",
+        "value": 3.0
+      },
+      {
+        "slug": "obs-hub-dev",
+        "value": 3.0
+      },
+      {
+        "slug": "stack152a",
+        "value": 3.0
+      },
+      {
+        "slug": "stack076",
+        "value": 3.0
+      },
+      {
+        "slug": "stack007",
+        "value": 3.0
+      },
+      {
+        "slug": "stack019",
+        "value": 2.0
+      },
+      {
+        "slug": "stack146",
+        "value": 2.0
+      },
+      {
+        "slug": "stack072",
+        "value": 2.0
+      },
+      {
+        "slug": "stack152",
+        "value": 2.0
+      },
+      {
+        "slug": "stack039",
+        "value": 2.0
+      },
+      {
+        "slug": "stack130",
+        "value": 2.0
+      },
+      {
+        "slug": "stack084",
+        "value": 2.0
+      },
+      {
+        "slug": "stack187",
+        "value": 2.0
+      },
+      {
+        "slug": "stack045",
+        "value": 2.0
+      },
+      {
+        "slug": "stack015c",
+        "value": 2.0
+      },
+      {
+        "slug": "stack015m",
+        "value": 2.0
+      },
+      {
+        "slug": "stack176",
+        "value": 2.0
+      },
+      {
+        "slug": "stack094",
+        "value": 2.0
+      },
+      {
+        "slug": "stack095",
+        "value": 2.0
+      },
+      {
+        "slug": "stack196",
+        "value": 2.0
+      },
+      {
+        "slug": "stack125",
+        "value": 1.0
+      },
+      {
+        "slug": "stack111",
+        "value": 1.0
+      },
+      {
+        "slug": "stack037",
+        "value": 1.0
+      },
+      {
+        "slug": "stack071",
+        "value": 1.0
+      },
+      {
+        "slug": "stack050",
+        "value": 1.0
+      },
+      {
+        "slug": "stack052",
+        "value": 1.0
+      },
+      {
+        "slug": "stack172",
+        "value": 1.0
+      },
+      {
+        "slug": "stack099",
+        "value": 1.0
+      },
+      {
+        "slug": "stack024",
+        "value": 1.0
+      },
+      {
+        "slug": "stack100",
+        "value": 1.0
+      },
+      {
+        "slug": "stack079",
+        "value": 1.0
+      },
+      {
+        "slug": "stack006",
+        "value": 1.0
+      },
+      {
+        "slug": "stack179",
+        "value": 1.0
+      },
+      {
+        "slug": "stack163",
+        "value": 1.0
+      },
+      {
+        "slug": "stack008",
+        "value": 1.0
+      },
+      {
+        "slug": "stack009",
+        "value": 1.0
+      },
+      {
+        "slug": "stack119",
+        "value": 1.0
+      },
+      {
+        "slug": "stack085",
+        "value": 1.0
+      },
+      {
+        "slug": "stack154",
+        "value": 1.0
+      },
+      {
+        "slug": "stack061",
+        "value": 1.0
+      },
+      {
+        "slug": "stack161",
+        "value": 1.0
+      },
+      {
+        "slug": "stack088",
+        "value": 1.0
+      },
+      {
+        "slug": "stack136",
+        "value": 1.0
+      },
+      {
+        "slug": "stack044",
+        "value": 1.0
+      },
+      {
+        "slug": "stack168",
+        "value": 1.0
+      },
+      {
+        "slug": "stack062",
+        "value": 1.0
+      },
+      {
+        "slug": "stack156",
+        "value": 1.0
+      },
+      {
+        "slug": "stack175",
+        "value": 1.0
+      },
+      {
+        "slug": "stack108",
+        "value": 1.0
+      },
+      {
+        "slug": "stack015o",
+        "value": 1.0
+      },
+      {
+        "slug": "stack015i",
+        "value": 1.0
+      },
+      {
+        "slug": "stack015h",
+        "value": 1.0
+      },
+      {
+        "slug": "stack032",
+        "value": 1.0
+      },
+      {
+        "slug": "stack066",
+        "value": 1.0
+      },
+      {
+        "slug": "stack068",
+        "value": 1.0
+      },
+      {
+        "slug": "testlab001",
+        "value": 1.0
+      },
+      {
+        "slug": "testsrobot001",
+        "value": 1.0
+      }
+    ],
+    "top_100_stacks_by_current_tokens": [
+      {
+        "slug": "stack183",
+        "value": 379680594.0
+      },
+      {
+        "slug": "stack020",
+        "value": 219707196.0
+      },
+      {
+        "slug": "stack061",
+        "value": 76605774.0
+      },
+      {
+        "slug": "stack039",
+        "value": 73912159.0
+      },
+      {
+        "slug": "stack152",
+        "value": 48069983.0
+      },
+      {
+        "slug": "stack015j",
+        "value": 45833876.0
+      },
+      {
+        "slug": "stack176",
+        "value": 32035859.0
+      },
+      {
+        "slug": "stack019",
+        "value": 31032478.0
+      },
+      {
+        "slug": "stack185",
+        "value": 26760956.0
+      },
+      {
+        "slug": "stack111",
+        "value": 22525659.0
+      },
+      {
+        "slug": "stack094",
+        "value": 21316421.0
+      },
+      {
+        "slug": "stack187",
+        "value": 20837642.0
+      },
+      {
+        "slug": "stack179",
+        "value": 20111082.0
+      },
+      {
+        "slug": "stack001b",
+        "value": 17955215.0
+      },
+      {
+        "slug": "stack066",
+        "value": 17429028.0
+      },
+      {
+        "slug": "stack196",
+        "value": 15332618.0
+      },
+      {
+        "slug": "stack200",
+        "value": 11065835.0
+      },
+      {
+        "slug": "stack152a",
+        "value": 10275027.0
+      },
+      {
+        "slug": "stack168",
+        "value": 9411255.0
+      },
+      {
+        "slug": "obs-hub-dev",
+        "value": 8610789.0
+      },
+      {
+        "slug": "stack079",
+        "value": 8181263.0
+      },
+      {
+        "slug": "stack045",
+        "value": 7577456.0
+      },
+      {
+        "slug": "stack024",
+        "value": 7482859.0
+      },
+      {
+        "slug": "obs-hub",
+        "value": 7449330.0
+      },
+      {
+        "slug": "stack052",
+        "value": 7293667.0
+      },
+      {
+        "slug": "stack007",
+        "value": 6536212.0
+      },
+      {
+        "slug": "testlab001",
+        "value": 6404874.0
+      },
+      {
+        "slug": "stack163",
+        "value": 3673177.0
+      },
+      {
+        "slug": "stack037",
+        "value": 2715308.0
+      },
+      {
+        "slug": "stack044",
+        "value": 2690084.0
+      },
+      {
+        "slug": "stack015m",
+        "value": 2215973.0
+      },
+      {
+        "slug": "stack008",
+        "value": 1895891.0
+      },
+      {
+        "slug": "stack088",
+        "value": 1772266.0
+      },
+      {
+        "slug": "stack108",
+        "value": 1739199.0
+      },
+      {
+        "slug": "stack158",
+        "value": 1672430.0
+      },
+      {
+        "slug": "stack099",
+        "value": 1579831.0
+      },
+      {
+        "slug": "stack095",
+        "value": 1516324.0
+      },
+      {
+        "slug": "stack068",
+        "value": 1263254.0
+      },
+      {
+        "slug": "stack015n",
+        "value": 1075043.0
+      },
+      {
+        "slug": "stack136",
+        "value": 902248.0
+      },
+      {
+        "slug": "stack072",
+        "value": 804966.0
+      },
+      {
+        "slug": "stack130",
+        "value": 777979.0
+      },
+      {
+        "slug": "stack015c",
+        "value": 768601.0
+      },
+      {
+        "slug": "stack125",
+        "value": 661998.0
+      },
+      {
+        "slug": "stack038",
+        "value": 657357.0
+      },
+      {
+        "slug": "stack076",
+        "value": 619707.0
+      },
+      {
+        "slug": "stack015i",
+        "value": 539405.0
+      },
+      {
+        "slug": "testsrobot001",
+        "value": 531339.0
+      },
+      {
+        "slug": "stack084",
+        "value": 447593.0
+      },
+      {
+        "slug": "stack009",
+        "value": 445214.0
+      },
+      {
+        "slug": "stack062",
+        "value": 437823.0
+      },
+      {
+        "slug": "stack050",
+        "value": 341717.0
+      },
+      {
+        "slug": "stack154",
+        "value": 306114.0
+      },
+      {
+        "slug": "stack015h",
+        "value": 271321.0
+      },
+      {
+        "slug": "stack071",
+        "value": 251719.0
+      },
+      {
+        "slug": "stack119",
+        "value": 228046.0
+      },
+      {
+        "slug": "stack015o",
+        "value": 217246.0
+      },
+      {
+        "slug": "stack006",
+        "value": 194748.0
+      },
+      {
+        "slug": "stack100",
+        "value": 169255.0
+      },
+      {
+        "slug": "stack172",
+        "value": 145658.0
+      },
+      {
+        "slug": "stack156",
+        "value": 133219.0
+      },
+      {
+        "slug": "stack175",
+        "value": 80866.0
+      },
+      {
+        "slug": "stack161",
+        "value": 58198.0
+      },
+      {
+        "slug": "stack146",
+        "value": 31015.0
+      },
+      {
+        "slug": "stack032",
+        "value": 4245.0
+      }
+    ],
+    "top_2_token_share": 0.5023063050084586,
+    "top_10_token_share": 0.8012967265377139
+  },
+  "commercial": {
+    "unit_derivation": "NOTHING here declares a currency or a period. The unit is DERIVED from an identity the metrics satisfy: balance / total_overage vs the independent forecast_months_remaining (below). They agree to ~0.3%, which only holds if total_overage is a MONTHLY run-rate against the same commitment the balance draws from. Rob's decision 2026-08-19: label panels USD/month and mark the unit derived. RE-DERIVE rather than trust this if the two figures ever diverge.",
+    "included_volumes_are_zero": "metrics/logs/grafana `_included_*` all read 0 while billable is ~11.95M series / ~12,486 units / 553 users. Pure spend-commit contract with no bundled allowance, so `total_overage` is the WHOLE charge for the period, NOT an excess over a plan. Never present it as money spent above plan.",
+    "commitment_total": 3173148.34,
+    "commitment_balance": 2771164.6,
+    "commitment_consumed": 401983.73999999976,
+    "commitment_consumed_share": 0.12668293345529502,
+    "run_rate_per_month": 76766.24,
+    "run_rate_by_product": {
+      "metrics": 40272.45,
+      "grafana_users": 11907.0,
+      "logs": 3592.4,
+      "assistant": 2408.0,
+      "traces": 126.7,
+      "profiles": 1.05
+    },
+    "metrics_share_of_run_rate": 0.5246114698336143,
+    "contract_start_epoch": 1769904000.0,
+    "contract_end_epoch": 1864512000.0,
+    "term_elapsed_share": 0.18257229832572297,
+    "months_to_contract_end": 29.40484012264564,
+    "forecast_months_remaining_metric": 36.144280021578325,
+    "balance_over_run_rate_months": 36.09874080064362,
+    "not_on_the_dashboard": "At the current run rate the commitment outlives the contract by ~7 months, i.e. roughly 540k of the 3.17M would go unconsumed by the term end; on the slower since-inception average burn it is ~963k. Rob chose 'burn chart only, no conclusion' on 2026-08-19, so this projection lives here and in his notes and appears in NO panel description. A test enforces that."
+  },
+  "label_cardinality": {
+    "note": "`series` vs `distinct_stack_id`. Equal means one series per stack and a bare `count()` is honest; greater means several signal instances or label values per stack, so a panel MUST collapse `sum by(stack_id)`/`count by(stack_id)` first or it counts series and overstates. tests/test_dashboards.py reads this to decide which bare counts are legitimate.",
+    "grafanacloud_traces_instance_percentage_complete_traces_flushed": {
+      "series": 23,
+      "distinct_stack_id": 23,
+      "distinct_id": 23,
+      "labels": [
+        "__name__",
+        "cluster",
+        "id",
+        "org_id",
+        "stack_id"
+      ]
+    },
+    "grafanacloud_traces_instance_percentage_traces_with_root_spans_flushed": {
+      "series": 22,
+      "distinct_stack_id": 22,
+      "distinct_id": 22,
+      "labels": [
+        "__name__",
+        "cluster",
+        "id",
+        "org_id",
+        "stack_id"
+      ]
+    },
+    "grafanacloud_instance_ruler_queries_zero_fetched_series_total:rate5m": {
+      "series": 44,
+      "distinct_stack_id": 44,
+      "distinct_id": 44,
+      "labels": [
+        "__name__",
+        "cluster",
+        "id",
+        "org_id",
+        "stack_id"
+      ]
+    },
+    "grafanacloud_instance_alertmanager_notifications_failed_per_second": {
+      "series": 299,
+      "distinct_stack_id": 269,
+      "distinct_id": 299,
+      "labels": [
+        "__name__",
+        "cluster",
+        "id",
+        "org_id",
+        "stack_id"
+      ]
+    },
+    "grafanacloud_grafana_instance_info": {
+      "series": 273,
+      "distinct_stack_id": 273,
+      "distinct_id": 273,
+      "labels": [
+        "__name__",
+        "cluster",
+        "cluster_slug",
+        "id",
+        "name",
+        "org_contract_type",
+        "org_grafana_cloud",
+        "org_id",
+        "org_name",
+        "plan",
+        "slug",
+        "stack_id",
+        "url"
+      ]
+    },
+    "grafanacloud_instance_recommendations_estimated_savings_series": {
+      "series": 230,
+      "distinct_stack_id": 230,
+      "distinct_id": 230,
+      "labels": [
+        "__name__",
+        "cluster",
+        "id",
+        "org_id",
+        "stack_id"
+      ]
+    },
+    "grafanacloud_oncall_instance_alert_groups_total": {
+      "series": 728,
+      "distinct_stack_id": 58,
+      "distinct_id": 58,
+      "labels": [
+        "__name__",
+        "cluster",
+        "id",
+        "integration",
+        "org_id",
+        "service_name",
+        "slug",
+        "stack_id",
+        "state",
+        "team"
+      ]
+    },
+    "grafanacloud_instance_samples_discarded_per_second": {
+      "series": 197,
+      "distinct_stack_id": 49,
+      "distinct_id": 49,
+      "labels": [
+        "__name__",
+        "cluster",
+        "id",
+        "org_id",
+        "reason",
+        "stack_id"
+      ]
+    },
+    "grafanacloud_instance_active_otlp_series": {
+      "series": 230,
+      "distinct_stack_id": 230,
+      "distinct_id": 230,
+      "labels": [
+        "__name__",
+        "cluster",
+        "id",
+        "org_id",
+        "stack_id"
+      ]
+    },
+    "grafanacloud_instance_active_series": {
+      "series": 233,
+      "distinct_stack_id": 231,
+      "distinct_id": 233,
+      "labels": [
+        "__name__",
+        "cluster",
+        "id",
+        "org_id",
+        "stack_id"
+      ]
+    },
+    "grafanacloud_instance_queries_per_second": {
+      "series": 459,
+      "distinct_stack_id": 230,
+      "distinct_id": 459,
+      "labels": [
+        "__name__",
+        "cluster",
+        "id",
+        "org_id",
+        "stack_id"
+      ]
+    },
+    "grafanacloud_logs_instance_discarded_bytes_per_second": {
+      "series": 42,
+      "distinct_stack_id": 33,
+      "distinct_id": 33,
+      "labels": [
+        "__name__",
+        "cluster",
+        "id",
+        "org_id",
+        "reason",
+        "stack_id"
+      ]
+    }
+  }
+}

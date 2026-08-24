@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Dimension": "active_series",
+      "Stacks with data": 44,
+      "Median": 5,
+      "p90": 95970,
+      "Worst": 306601
+    },
+    {
+      " Dimension": "series_per_billed_user",
+      "Stacks with data": 40,
+      "Median": 11.571,
+      "p90": 31719.333,
+      "Worst": 76650.25
+    },
+    {
+      " Dimension": "dashboards_per_user",
+      "Stacks with data": 40,
+      "Median": 8,
+      "p90": 17.5,
+      "Worst": 25.75
+    },
+    {
+      " Dimension": "stickiness",
+      "Stacks with data": 40,
+      "Median": 0.667,
+      "p90": 1,
+      "Worst": 1
+    },
+    {
+      " Dimension": "alert_rules",
+      "Stacks with data": 44,
+      "Median": 0,
+      "p90": 228,
+      "Worst": 764
+    },
+    {
+      " Dimension": "admin_share",
+      "Stacks with data": 40,
+      "Median": 50,
+      "p90": 87.5,
+      "Worst": 92.308
+    },
+    {
+      " Dimension": "datasource_types",
+      "Stacks with data": 44,
+      "Median": 1,
+      "p90": 5,
+      "Worst": 6
+    },
+    {
+      " Dimension": "signals_in_use",
+      "Stacks with data": 44,
+      "Median": 3,
+      "p90": 3,
+      "Worst": 4
+    },
+    {
+      " Dimension": "maturity_score",
+      "Stacks with data": 13,
+      "Median": 56.7,
+      "p90": 63.5,
+      "Worst": 66.9
+    },
+    {
+      " Dimension": "adaptive_adoption",
+      "Stacks with data": 21,
+      "Median": 0,
+      "p90": 10.332,
+      "Worst": 37.143
+    }
+  ]
+}

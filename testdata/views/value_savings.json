@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Metric": "Savings basis (series volume)",
+      "Value": "VOLUME, not currency, because this deployment has no rate card. The series reduction below is real and measured: it is the sum of positive marginal reductions for Adaptive Metrics `add` and `update` actions; `keep` and `remove` are not new savings. To see it as money, upload your contracted rates to `config/ratecard.csv` in the deployment bucket - see docs/ratecard.example.csv. Rates are never inferred."
+    },
+    {
+      " Metric": "Review-free subset basis (series volume)",
+      "Value": "same gap as the row above"
+    },
+    {
+      " Metric": "Remediable series, applying every recommendation",
+      "Value": 62100
+    },
+    {
+      " Metric": "Remediable series observed unused in the API window",
+      "Value": 31050
+    },
+    {
+      " Metric": "Share of org active series that is remediable %",
+      "Value": 4.4
+    },
+    {
+      " Metric": "Stacks with pending recommendations and zero rules applied",
+      "Value": 18
+    },
+    {
+      " Metric": "Stacks with complete recommendation series counts",
+      "Value": "40 of 40 in scope"
+    },
+    {
+      " Metric": "Savings-bearing add/update records with marginal series counts",
+      "Value": "6210 of 6210"
+    },
+    {
+      " Metric": "Savings-bearing add/update records missing marginal series counts",
+      "Value": 0
+    },
+    {
+      " Metric": "All recommendation records (including keep/remove)",
+      "Value": 6210
+    }
+  ]
+}

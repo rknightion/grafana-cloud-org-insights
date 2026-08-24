@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Signal": "metrics",
+      "Current usage": 1451268,
+      "Billing usage": 1120880,
+      "Stacks above floor (current)": 16,
+      "Stacks above floor (billing)": 16
+    },
+    {
+      " Signal": "logs",
+      "Current usage": 7.500796099494033,
+      "Billing usage": 2542.8349222083134,
+      "Stacks above floor (current)": 0,
+      "Stacks above floor (billing)": 1
+    },
+    {
+      " Signal": "traces",
+      "Current usage": 0.3550108215658974,
+      "Billing usage": 131.22069313033734,
+      "Stacks above floor (current)": 0,
+      "Stacks above floor (billing)": 0
+    },
+    {
+      " Signal": "profiles",
+      "Current usage": 0,
+      "Billing usage": 3.890872991643846,
+      "Stacks above floor (current)": 0,
+      "Stacks above floor (billing)": 0
+    },
+    {
+      " Signal": "graphite",
+      "Current usage": 64,
+      "Billing usage": 67,
+      "Stacks above floor (current)": 0,
+      "Stacks above floor (billing)": 0
+    }
+  ]
+}

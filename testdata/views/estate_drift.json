@@ -1,0 +1,218 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack001",
+      "Region": "prod-us-west-0",
+      "Cluster": "prod-us-west-0",
+      "Status": "active",
+      "Dashboards": 16,
+      "Alert rules": 0,
+      "Users (active)": 2,
+      "Users (billed)": 1,
+      "Users (daily)": 1,
+      "Admin share %": 50,
+      "Active series": 2,
+      "Age (days)": 92.2,
+      "Idle (days)": 21.4,
+      "Version drift": true,
+      "Delete protection": false,
+      "Test leftover": false,
+      "Created by": null,
+      "Updated by": "stack015"
+    },
+    {
+      " Stack": "stack019",
+      "Region": "prod-eu-west-2",
+      "Cluster": "prod-eu-west-4",
+      "Status": "active",
+      "Dashboards": 27,
+      "Alert rules": 45,
+      "Users (active)": 8,
+      "Users (billed)": 7,
+      "Users (daily)": 6,
+      "Admin share %": 87.5,
+      "Active series": 5568,
+      "Age (days)": 93.4,
+      "Idle (days)": 21.4,
+      "Version drift": true,
+      "Delete protection": false,
+      "Test leftover": false,
+      "Created by": null,
+      "Updated by": "stack015"
+    },
+    {
+      " Stack": "stack020",
+      "Region": "prod-eu-west-2",
+      "Cluster": "prod-eu-west-2",
+      "Status": "active",
+      "Dashboards": 106,
+      "Alert rules": 116,
+      "Users (active)": 36,
+      "Users (billed)": 34,
+      "Users (daily)": 10,
+      "Admin share %": 27.8,
+      "Active series": 39860,
+      "Age (days)": 792.2,
+      "Idle (days)": 21.4,
+      "Version drift": true,
+      "Delete protection": false,
+      "Test leftover": false,
+      "Created by": "stack015",
+      "Updated by": "stack015"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Region": "prod-eu-west-2",
+      "Cluster": "prod-eu-west-4",
+      "Status": "active",
+      "Dashboards": 118,
+      "Alert rules": 667,
+      "Users (active)": 11,
+      "Users (billed)": 10,
+      "Users (daily)": 4,
+      "Admin share %": 90.9,
+      "Active series": 6242,
+      "Age (days)": 197.2,
+      "Idle (days)": 21.4,
+      "Version drift": true,
+      "Delete protection": false,
+      "Test leftover": false,
+      "Created by": "stack015",
+      "Updated by": "stack015"
+    },
+    {
+      " Stack": "testsrobot002",
+      "Region": "prod-us-west-0",
+      "Cluster": "prod-us-west-0",
+      "Status": "paused",
+      "Dashboards": 13,
+      "Alert rules": 0,
+      "Users (active)": 0,
+      "Users (billed)": 0,
+      "Users (daily)": 0,
+      "Admin share %": null,
+      "Active series": 0,
+      "Age (days)": 88.4,
+      "Idle (days)": 12.5,
+      "Version drift": true,
+      "Delete protection": false,
+      "Test leftover": true,
+      "Created by": null,
+      "Updated by": "umarmarek70"
+    },
+    {
+      " Stack": "teststack004",
+      "Region": "prod-eu-west-2",
+      "Cluster": "prod-eu-west-4",
+      "Status": "paused",
+      "Dashboards": 13,
+      "Alert rules": 0,
+      "Users (active)": 0,
+      "Users (billed)": 0,
+      "Users (daily)": 0,
+      "Admin share %": null,
+      "Active series": 0,
+      "Age (days)": 71.3,
+      "Idle (days)": 12.5,
+      "Version drift": true,
+      "Delete protection": false,
+      "Test leftover": true,
+      "Created by": null,
+      "Updated by": "umarmarek70"
+    },
+    {
+      " Stack": "teststack017",
+      "Region": "prod-eu-west-2",
+      "Cluster": "prod-eu-west-4",
+      "Status": "paused",
+      "Dashboards": 13,
+      "Alert rules": 0,
+      "Users (active)": 0,
+      "Users (billed)": 0,
+      "Users (daily)": 0,
+      "Admin share %": null,
+      "Active series": 0,
+      "Age (days)": 35.1,
+      "Idle (days)": 12.6,
+      "Version drift": true,
+      "Delete protection": true,
+      "Test leftover": true,
+      "Created by": null,
+      "Updated by": "umarmarek70"
+    },
+    {
+      " Stack": "teststack018",
+      "Region": "prod-eu-west-2",
+      "Cluster": "prod-eu-west-4",
+      "Status": "paused",
+      "Dashboards": 13,
+      "Alert rules": 0,
+      "Users (active)": 0,
+      "Users (billed)": 0,
+      "Users (daily)": 0,
+      "Admin share %": null,
+      "Active series": 0,
+      "Age (days)": 35.1,
+      "Idle (days)": 12.6,
+      "Version drift": true,
+      "Delete protection": true,
+      "Test leftover": true,
+      "Created by": null,
+      "Updated by": "umarmarek70"
+    }
+  ]
+}

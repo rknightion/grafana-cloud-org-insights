@@ -1,0 +1,11 @@
+# The image is the collector, not the repo. Everything here either has no business in a registry or
+# would bust the layer cache on every doc edit.
+tests/
+testdata/
+terraform/
+*.md
+.env
+.git
+__pycache__/
+**/__pycache__/
+*.pyc

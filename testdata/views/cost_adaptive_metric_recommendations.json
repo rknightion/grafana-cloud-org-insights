@@ -1,0 +1,1546 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "obs-hub",
+      "Metric": "probe_all_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub",
+      "Metric": "probe_browser_data_received",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub",
+      "Metric": "probe_browser_data_sent",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub",
+      "Metric": "probe_browser_http_req_duration",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub",
+      "Metric": "probe_browser_http_req_failed",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub",
+      "Metric": "probe_check_success_rate",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub",
+      "Metric": "probe_checks_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub",
+      "Metric": "probe_http_error_code",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub",
+      "Metric": "probe_http_ssl",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub",
+      "Metric": "probe_http_version",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Metric": "aws_usage_resource_count_average",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Metric": "aws_usage_resource_count_maximum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Metric": "aws_usage_resource_count_minimum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Metric": "aws_usage_resource_count_sample_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Metric": "aws_usage_resource_count_sum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Metric": "probe_all_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Metric": "probe_check_success_rate",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Metric": "probe_http_error_code",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Metric": "probe_http_ssl",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Metric": "probe_http_version",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack001b",
+      "Metric": "alloy_component_dependencies_wait_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack001b",
+      "Metric": "alloy_component_evaluation_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack001b",
+      "Metric": "aws_usage_call_count_average",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack001b",
+      "Metric": "aws_usage_call_count_maximum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack001b",
+      "Metric": "aws_usage_call_count_minimum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack001b",
+      "Metric": "aws_usage_call_count_sample_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack001b",
+      "Metric": "langsmith_completion_tokens",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack001b",
+      "Metric": "langsmith_error_rate",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack001b",
+      "Metric": "langsmith_prompt_tokens",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack001b",
+      "Metric": "langsmith_streaming_rate",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack019",
+      "Metric": "alloy_component_controller_running_components",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack019",
+      "Metric": "alloy_component_dependencies_wait_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack019",
+      "Metric": "alloy_component_evaluation_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack019",
+      "Metric": "alloy_component_evaluation_seconds_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack019",
+      "Metric": "alloy_component_evaluation_seconds_sum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack019",
+      "Metric": "instance_device:node_disk_io_time_seconds:rate5m",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack019",
+      "Metric": "instance_device:node_disk_io_time_weighted_seconds:rate5m",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack019",
+      "Metric": "prometheus_remote_storage_sent_batch_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack019",
+      "Metric": "remotecfg_hash",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack019",
+      "Metric": "remotecfg_request_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack020",
+      "Metric": "probe_all_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack020",
+      "Metric": "probe_dns_lookup_time_seconds",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack020",
+      "Metric": "probe_failed_due_to_regex",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack020",
+      "Metric": "probe_http_all_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack020",
+      "Metric": "probe_http_content_length",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack020",
+      "Metric": "probe_http_redirects",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack020",
+      "Metric": "probe_http_ssl",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack020",
+      "Metric": "probe_http_version",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack020",
+      "Metric": "probe_ip_addr_hash",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack020",
+      "Metric": "probe_ip_protocol",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack035",
+      "Metric": "alloy_component_dependencies_wait_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack035",
+      "Metric": "alloy_component_evaluation_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack035",
+      "Metric": "prometheus_remote_storage_sent_batch_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack035",
+      "Metric": "windows_diskdrive_status",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack035",
+      "Metric": "windows_exporter_collector_duration_seconds",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack035",
+      "Metric": "windows_exporter_collector_success",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack035",
+      "Metric": "windows_exporter_collector_timeout",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack035",
+      "Metric": "windows_net_nic_operation_status",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack035",
+      "Metric": "windows_service_start_mode",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack035",
+      "Metric": "xcp_vm_cpu_core_usage",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack036",
+      "Metric": "alloy_component_dependencies_wait_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack036",
+      "Metric": "alloy_component_evaluation_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack036",
+      "Metric": "loki_write_request_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack036",
+      "Metric": "net_conntrack_dialer_conn_failed_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack036",
+      "Metric": "node_nfsd_requests_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack036",
+      "Metric": "node_scrape_collector_duration_seconds",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack036",
+      "Metric": "node_scrape_collector_success",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack036",
+      "Metric": "prometheus_fanout_latency_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack036",
+      "Metric": "time_to_status_seconds_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack036",
+      "Metric": "time_to_status_seconds_sum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack037",
+      "Metric": "alloy_component_dependencies_wait_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack037",
+      "Metric": "node_disk_device_mapper_info",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack037",
+      "Metric": "node_disk_filesystem_info",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack037",
+      "Metric": "node_disk_info",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack037",
+      "Metric": "node_nfs_requests_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack037",
+      "Metric": "node_nfsd_requests_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack037",
+      "Metric": "node_processes_threads_state",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack037",
+      "Metric": "node_softnet_backlog_len",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack037",
+      "Metric": "node_softnet_cpu_collision_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack037",
+      "Metric": "node_time_clocksource_available_info",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack038",
+      "Metric": "alloy_component_dependencies_wait_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack038",
+      "Metric": "alloy_component_evaluation_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack038",
+      "Metric": "kube_configmap_info",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack038",
+      "Metric": "kube_configmap_metadata_resource_version",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack038",
+      "Metric": "kube_pod_restart_policy",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack038",
+      "Metric": "kube_secret_metadata_resource_version",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack038",
+      "Metric": "kubelet_cgroup_manager_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack038",
+      "Metric": "kubelet_pod_start_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack038",
+      "Metric": "kubelet_runtime_operations_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack038",
+      "Metric": "storage_operation_duration_seconds_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack049",
+      "Metric": "container_memory_usage_bytes",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack049",
+      "Metric": "container_network_receive_packets_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack049",
+      "Metric": "kube_pod_init_container_resource_limits",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack049",
+      "Metric": "kubelet_cgroup_manager_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack049",
+      "Metric": "kubelet_pod_start_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack049",
+      "Metric": "node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack049",
+      "Metric": "node_namespace_pod_container:container_memory_cache",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack049",
+      "Metric": "node_namespace_pod_container:container_memory_rss",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack049",
+      "Metric": "node_namespace_pod_container:container_memory_swap",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack049",
+      "Metric": "storage_operation_duration_seconds_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack050",
+      "Metric": "probe_all_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack050",
+      "Metric": "probe_checks_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack050",
+      "Metric": "probe_http_duration_seconds",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack052",
+      "Metric": "alloy_component_dependencies_wait_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack052",
+      "Metric": "alloy_component_evaluation_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack052",
+      "Metric": "connect_http_response_size_bytes_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack052",
+      "Metric": "kube_secret_metadata_resource_version",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack052",
+      "Metric": "kubelet_cgroup_manager_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack052",
+      "Metric": "kubelet_pod_start_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack052",
+      "Metric": "kubelet_runtime_operations_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack052",
+      "Metric": "loki_write_request_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack052",
+      "Metric": "node_nfs_requests_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack052",
+      "Metric": "storage_operation_duration_seconds_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack053",
+      "Metric": "alloy_component_dependencies_wait_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack053",
+      "Metric": "alloy_component_evaluation_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack053",
+      "Metric": "container_network_receive_packets_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack053",
+      "Metric": "container_network_transmit_packets_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack053",
+      "Metric": "kube_secret_metadata_resource_version",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack053",
+      "Metric": "kubelet_cgroup_manager_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack053",
+      "Metric": "kubelet_pod_start_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack053",
+      "Metric": "kubelet_runtime_operations_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack053",
+      "Metric": "loki_write_request_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack053",
+      "Metric": "storage_operation_duration_seconds_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack055",
+      "Metric": "probe_all_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack055",
+      "Metric": "probe_all_duration_seconds_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack055",
+      "Metric": "probe_all_duration_seconds_sum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack055",
+      "Metric": "probe_all_success_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack055",
+      "Metric": "probe_all_success_sum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack055",
+      "Metric": "probe_dns_lookup_time_seconds",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack055",
+      "Metric": "probe_duration_seconds",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack055",
+      "Metric": "probe_failed_due_to_regex",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack055",
+      "Metric": "probe_http_content_length",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack055",
+      "Metric": "probe_http_duration_seconds",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack072",
+      "Metric": "gitlab_runner_api_request_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack072",
+      "Metric": "gitlab_runner_job_queue_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack072",
+      "Metric": "maas_http_request_latency_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack072",
+      "Metric": "maas_http_request_query_latency_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack072",
+      "Metric": "maas_http_response_size_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack072",
+      "Metric": "maas_websocket_call_latency_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack072",
+      "Metric": "node_cpu_guest_seconds_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack072",
+      "Metric": "node_cpu_scaling_governor",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack072",
+      "Metric": "node_scrape_collector_duration_seconds",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack072",
+      "Metric": "node_scrape_collector_success",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack111",
+      "Metric": "probe_all_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack111",
+      "Metric": "probe_checks_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack113",
+      "Metric": "grafanacloud_feo11y_app_info",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack158",
+      "Metric": "django_http_requests_latency_seconds_by_view_method_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack158",
+      "Metric": "http_server_request_duration_seconds_sum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack158",
+      "Metric": "http_server_requests_max_seconds",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack158",
+      "Metric": "http_server_requests_seconds_sum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack158",
+      "Metric": "kafka_consumer_incoming_byte_rate",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack158",
+      "Metric": "kafka_consumer_incoming_byte_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack158",
+      "Metric": "kafka_consumer_outgoing_byte_rate",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack158",
+      "Metric": "kafka_consumer_outgoing_byte_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack158",
+      "Metric": "kafka_consumer_response_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack158",
+      "Metric": "redis_commands_latencies_usec_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack170",
+      "Metric": "http_client_requests_milliseconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack170",
+      "Metric": "http_client_requests_milliseconds_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack170",
+      "Metric": "http_server_requests_active_milliseconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack170",
+      "Metric": "http_server_requests_active_milliseconds_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack170",
+      "Metric": "http_server_requests_active_milliseconds_sum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack170",
+      "Metric": "http_server_requests_milliseconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack170",
+      "Metric": "http_server_requests_milliseconds_sum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack170",
+      "Metric": "spring_data_repository_invocations_milliseconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack170",
+      "Metric": "spring_data_repository_invocations_milliseconds_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack170",
+      "Metric": "spring_data_repository_invocations_milliseconds_sum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack177",
+      "Metric": "db_client_connections_use_time_milliseconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack177",
+      "Metric": "http_client_request_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack177",
+      "Metric": "http_server_request_duration_seconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack177",
+      "Metric": "system_disk_io_bytes_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack177",
+      "Metric": "system_disk_io_time_seconds_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack177",
+      "Metric": "system_disk_merged_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack177",
+      "Metric": "system_disk_operation_time_seconds_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack177",
+      "Metric": "system_disk_operations_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack177",
+      "Metric": "system_disk_pending_operations",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack177",
+      "Metric": "system_disk_weighted_io_time_seconds_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack193",
+      "Metric": "temporal_long_request_failure_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack193",
+      "Metric": "temporal_long_request_latency_milliseconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack193",
+      "Metric": "temporal_long_request_latency_milliseconds_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack193",
+      "Metric": "temporal_long_request_latency_milliseconds_sum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack193",
+      "Metric": "temporal_long_request_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack193",
+      "Metric": "temporal_request_latency_milliseconds_bucket",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack193",
+      "Metric": "temporal_request_latency_milliseconds_count",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack193",
+      "Metric": "temporal_request_latency_milliseconds_sum",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack193",
+      "Metric": "temporal_request_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    },
+    {
+      " Stack": "stack193",
+      "Metric": "temporal_worker_start_total",
+      "Current series": null,
+      "Recommended series": null,
+      "Removable series": null,
+      "Dependencies": null
+    }
+  ]
+}

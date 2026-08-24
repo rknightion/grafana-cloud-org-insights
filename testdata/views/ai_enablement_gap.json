@@ -1,0 +1,139 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack020",
+      "Region": "prod-eu-west-2",
+      "Users (active)": 36,
+      "Measured": true,
+      "Why not": null,
+      "Detail": "",
+      "Assistant users": 4,
+      "Days active of 30": 24,
+      "Messages": 684,
+      "Messages categorised": 142,
+      "Messages uncategorised": 542,
+      "Categorised exceeds total": false,
+      "Machine share of categorised": 0.3521,
+      "Tokens": 280041118,
+      "Chat tokens": 280041118,
+      "Investigation tokens": 0,
+      "Tokens per Assistant user": 70010279.5,
+      "Investigations created": 0,
+      "Investigations by Assistant": null,
+      "Investigations by user": null,
+      "Tenant skills": 0,
+      "Tenant rules": 0,
+      "Tenant automations": 0,
+      "Tenant MCP integrations": 0,
+      "Tenant objects": 0
+    },
+    {
+      " Stack": "stack072",
+      "Region": "eu",
+      "Users (active)": 4,
+      "Measured": true,
+      "Why not": null,
+      "Detail": "",
+      "Assistant users": 2,
+      "Days active of 30": 14,
+      "Messages": 328,
+      "Messages categorised": 3,
+      "Messages uncategorised": 325,
+      "Categorised exceeds total": false,
+      "Machine share of categorised": 0,
+      "Tokens": 1959737,
+      "Chat tokens": 1959737,
+      "Investigation tokens": 0,
+      "Tokens per Assistant user": 979868.5,
+      "Investigations created": 0,
+      "Investigations by Assistant": null,
+      "Investigations by user": null,
+      "Tenant skills": 0,
+      "Tenant rules": 0,
+      "Tenant automations": 0,
+      "Tenant MCP integrations": 0,
+      "Tenant objects": 0
+    },
+    {
+      " Stack": "stack111",
+      "Region": "prod-eu-west-2",
+      "Users (active)": 15,
+      "Measured": true,
+      "Why not": null,
+      "Detail": "",
+      "Assistant users": 1,
+      "Days active of 30": 10,
+      "Messages": 118,
+      "Messages categorised": 14,
+      "Messages uncategorised": 104,
+      "Categorised exceeds total": false,
+      "Machine share of categorised": 0,
+      "Tokens": 35839588,
+      "Chat tokens": 35839588,
+      "Investigation tokens": 0,
+      "Tokens per Assistant user": 35839588,
+      "Investigations created": 0,
+      "Investigations by Assistant": null,
+      "Investigations by user": null,
+      "Tenant skills": 0,
+      "Tenant rules": 0,
+      "Tenant automations": 0,
+      "Tenant MCP integrations": 0,
+      "Tenant objects": 0
+    }
+  ]
+}

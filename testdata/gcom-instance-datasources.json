@@ -1,0 +1,415 @@
+{
+  "items": [
+    {
+      "id": 20001,
+      "instanceId": 30001,
+      "name": "grafanacloud-obs-hub-dev-alert-state-history",
+      "type": "loki",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "https://insight-logs-prod-eu-west-4.grafana.net",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 1,
+      "basicAuthUser": "5000014",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {
+        "manageAlerts": false,
+        "streamingEnabled": {
+          "search": true
+        },
+        "timeout": "300"
+      },
+      "version": 1,
+      "editable": 0,
+      "delete": 0,
+      "createdAt": "2026-02-05T12:55:08.111624Z",
+      "updatedAt": "2026-02-25T07:20:18.703271Z"
+    },
+    {
+      "id": 20002,
+      "instanceId": 30001,
+      "name": "grafanacloud-obs-hub-dev-cardinality-management",
+      "type": "grafanacloud-cardinality-datasource",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "https://insights-prod-eu-west-2.grafana.net/usage/v1/metrics/6500198",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 1,
+      "basicAuthUser": "6000028",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {
+        "streamingEnabled": {
+          "search": true
+        },
+        "unusedMetrics": {
+          "metricsDataSourceUid": "grafanacloud-prom",
+          "proxyType": "insights"
+        }
+      },
+      "version": 0,
+      "editable": 0,
+      "delete": 0,
+      "createdAt": "2026-02-05T12:55:08.115575Z",
+      "updatedAt": null
+    },
+    {
+      "id": 20003,
+      "instanceId": 30001,
+      "name": "grafanacloud-obs-hub-dev-ngalertmanager",
+      "type": "alertmanager",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "https://alertmanager-prod-eu-west-2.grafana.net",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 1,
+      "basicAuthUser": "9000014",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {
+        "implementation": "mimir",
+        "streamingEnabled": {
+          "search": true
+        }
+      },
+      "version": 0,
+      "editable": 1,
+      "delete": 0,
+      "createdAt": "2026-02-05T12:55:08.119537Z",
+      "updatedAt": null
+    },
+    {
+      "id": 20004,
+      "instanceId": 30001,
+      "name": "grafanacloud-obs-hub-dev-graphite",
+      "type": "graphite",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "https://graphite-prod-65-prod-eu-west-2.grafana.net/graphite",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 1,
+      "basicAuthUser": "6000029",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {
+        "streamingEnabled": {
+          "search": true
+        }
+      },
+      "version": 0,
+      "editable": 1,
+      "delete": 0,
+      "createdAt": "2026-02-05T12:55:08.123417Z",
+      "updatedAt": null
+    },
+    {
+      "id": 20005,
+      "instanceId": 30001,
+      "name": "grafanacloud-k6",
+      "type": "k6-datasource",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "proxy",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 0,
+      "basicAuthUser": "",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {
+        "backendUrl": "https://k6.io",
+        "environment": "production",
+        "gcomApiUrl": "https://grafana.com/api",
+        "orgId": 900001,
+        "stackId": 5000014
+      },
+      "version": 0,
+      "editable": 0,
+      "delete": 0,
+      "createdAt": "2026-02-05T12:55:08.127606Z",
+      "updatedAt": null
+    },
+    {
+      "id": 20006,
+      "instanceId": 30001,
+      "name": "grafanacloud-obs-hub-dev-logs",
+      "type": "loki",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "https://logs-prod-012.grafana.net",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 1,
+      "basicAuthUser": "7000014",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {
+        "derivedFields": [
+          {
+            "datasourceUid": "grafanacloud-traces",
+            "matcherRegex": "[tT]race_?[iI][dD]\"?[:=]\"?(\\w+)",
+            "matcherType": "regex",
+            "name": "traceID",
+            "url": "$${__value.raw}"
+          },
+          {
+            "datasourceUid": "grafanacloud-traces",
+            "matcherRegex": "[tT]race_?[iI][dD]",
+            "matcherType": "label",
+            "name": "traceID (field)",
+            "url": "$${__value.raw}"
+          }
+        ],
+        "streamingEnabled": {
+          "search": true
+        },
+        "timeout": "300"
+      },
+      "version": 1,
+      "editable": 1,
+      "delete": 0,
+      "createdAt": "2026-02-05T12:55:08.131596Z",
+      "updatedAt": "2026-02-17T07:53:23.668717Z"
+    },
+    {
+      "id": 20007,
+      "instanceId": 30001,
+      "name": "grafanacloud-obs-hub-dev-prom",
+      "type": "prometheus",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "https://prometheus-prod-65-prod-eu-west-2.grafana.net/api/prom",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 1,
+      "basicAuthUser": "6000028",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {
+        "exemplarTraceIdDestinations": [
+          {
+            "datasourceUid": "grafanacloud-traces",
+            "name": "traceID"
+          }
+        ],
+        "prometheusType": "Mimir",
+        "prometheusVersion": "2.15.0",
+        "streamingEnabled": {
+          "search": true
+        },
+        "timeInterval": "60s",
+        "timeout": "150"
+      },
+      "version": 1,
+      "editable": 1,
+      "delete": 0,
+      "createdAt": "2026-02-05T12:55:08.135575Z",
+      "updatedAt": "2026-02-17T07:53:23.685326Z"
+    },
+    {
+      "id": 20008,
+      "instanceId": 30001,
+      "name": "grafanacloud-obs-hub-dev-profiles",
+      "type": "phlare",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "https://profiles-prod-002.grafana.net",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 1,
+      "basicAuthUser": "5000014",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {
+        "keepCookies": [
+          "GitSession",
+          "pyroscope_git_session"
+        ],
+        "overridesDefault": true,
+        "streamingEnabled": {
+          "search": true
+        }
+      },
+      "version": 0,
+      "editable": 1,
+      "delete": 0,
+      "createdAt": "2026-02-05T12:55:08.139484Z",
+      "updatedAt": null
+    },
+    {
+      "id": 20009,
+      "instanceId": 30001,
+      "name": "grafanacloud-obs-hub-dev-traces",
+      "type": "tempo",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "https://tempo-prod-10-prod-eu-west-2.grafana.net/tempo",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 1,
+      "basicAuthUser": "8000014",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {
+        "serviceMap": {
+          "datasourceUid": "grafanacloud-prom"
+        },
+        "streamingEnabled": {
+          "search": true
+        },
+        "tracesToLogs": {
+          "datasourceUid": "grafanacloud-logs",
+          "spanEndTimeShift": "2s",
+          "spanStartTimeShift": "-2s"
+        },
+        "tracesToLogsV2": {
+          "customQuery": false,
+          "datasourceUid": "grafanacloud-logs",
+          "filterBySpanID": true,
+          "filterByTraceID": true,
+          "spanEndTimeShift": "1h",
+          "spanStartTimeShift": "-1h",
+          "tags": [
+            {
+              "key": "service.name",
+              "value": "service_name"
+            }
+          ]
+        },
+        "tracesToMetrics": {
+          "datasourceUid": "grafanacloud-prom"
+        },
+        "tracesToProfiles": {
+          "datasourceUid": "grafanacloud-profiles",
+          "profileTypeId": "process_cpu:cpu:nanoseconds:cpu:nanoseconds"
+        }
+      },
+      "version": 29,
+      "editable": 1,
+      "delete": 0,
+      "createdAt": "2026-02-05T12:55:08.143575Z",
+      "updatedAt": "2026-06-12T12:24:40.824318Z"
+    },
+    {
+      "id": 20010,
+      "instanceId": 30001,
+      "name": "grafanacloud-usage",
+      "type": "prometheus",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "https://billing.grafana.net/api/prom",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 1,
+      "basicAuthUser": "900001",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {
+        "manageAlerts": false,
+        "prometheusType": "Mimir",
+        "prometheusVersion": "2.15.0",
+        "streamingEnabled": {
+          "search": true
+        },
+        "timeInterval": "60s",
+        "timeout": "150"
+      },
+      "version": 1,
+      "editable": 1,
+      "delete": 0,
+      "createdAt": "2026-02-05T12:55:08.147534Z",
+      "updatedAt": "2026-02-25T07:20:18.731591Z"
+    },
+    {
+      "id": 20011,
+      "instanceId": 30001,
+      "name": "grafanacloud-obs-hub-dev-usage-insights",
+      "type": "loki",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "https://insight-logs-prod-eu-west-4.grafana.net",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 1,
+      "basicAuthUser": "900001",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {
+        "manageAlerts": false,
+        "streamingEnabled": {
+          "search": true
+        },
+        "timeout": "300"
+      },
+      "version": 1,
+      "editable": 1,
+      "delete": 0,
+      "createdAt": "2026-02-05T12:55:08.15139Z",
+      "updatedAt": "2026-02-25T07:20:18.752682Z"
+    },
+    {
+      "id": 20012,
+      "instanceId": 30001,
+      "name": "grafanacloud-infinity",
+      "type": "yesoreyeram-infinity-datasource",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 0,
+      "basicAuthUser": "",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {},
+      "version": 0,
+      "editable": 1,
+      "delete": 0,
+      "createdAt": "2026-04-09T11:40:23.115518Z",
+      "updatedAt": null
+    },
+    {
+      "id": 20013,
+      "instanceId": 30001,
+      "name": "grafanacloud-obs-hub-dev-knowledgegraph",
+      "type": "grafana-knowledgegraph-datasource",
+      "access": "proxy",
+      "grafanaOrgId": 1,
+      "url": "",
+      "password": "",
+      "user": "",
+      "database": "",
+      "basicAuth": 0,
+      "basicAuthUser": "",
+      "withCredentials": 0,
+      "isDefault": 0,
+      "jsonData": {
+        "backendUrl": "https://asserts-prod-eu-west-2.grafana.net",
+        "basicAuthUser": "5000014",
+        "linkedPromDSUID": "grafanacloud-prom"
+      },
+      "version": 0,
+      "editable": 0,
+      "delete": 0,
+      "createdAt": "2026-04-30T21:25:12.052784Z",
+      "updatedAt": null
+    }
+  ]
+}

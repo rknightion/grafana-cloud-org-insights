@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# Refuse identifiers inherited from the product's original customer source.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+HISTORY=0
+TARGET="$ROOT"
+PATTERNS_FILE=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --history) HISTORY=1; shift ;;
+    --patterns-file)
+      if [ "$#" -lt 2 ]; then
+        echo "error: --patterns-file requires a path" >&2
+        exit 2
+      fi
+      PATTERNS_FILE="$2"
+      shift 2
+      ;;
+    -h|--help)
+      echo "usage: bin/check-customer-identifiers [--history] [--patterns-file path] [target]"
+      exit 0
+      ;;
+    *) TARGET="$1"; shift ;;
+  esac
+done
+
+if [ -n "$PATTERNS_FILE" ]; then
+  if [ ! -f "$PATTERNS_FILE" ]; then
+    echo "error: identifier pattern file does not exist" >&2
+    exit 2
+  fi
+  PATTERNS="$(sed '/^[[:space:]]*$/d' "$PATTERNS_FILE" | paste -sd '|' -)"
+else
+  PATTERNS="${GCINSIGHT_CUSTOMER_IDENTIFIER_PATTERN:-}"
+fi
+if [ -z "$PATTERNS" ]; then
+  echo "error: provide --patterns-file or GCINSIGHT_CUSTOMER_IDENTIFIER_PATTERN" >&2
+  exit 2
+fi
+
+set +e
+hits="$(grep -rInoE "$PATTERNS" "$TARGET" \
+  --exclude-dir=.git \
+  --exclude-dir=__pycache__ \
+  --exclude-dir=.pytest_cache \
+  --exclude-dir=.terraform)"
+status=$?
+set -e
+if [ "$status" -ne 0 ] && [ "$status" -ne 1 ]; then
+  echo "error: unable to scan customer identifiers" >&2
+  exit 2
+fi
+if test -n "$hits"; then
+  printf '%s\n' "$hits" >&2
+  echo "error: customer identifiers present" >&2
+  exit 1
+fi
+echo "customer identifiers: clean"
+
+if [ "$HISTORY" -eq 1 ]; then
+  if ! git -C "$ROOT" rev-parse --git-dir >/dev/null 2>&1; then
+    echo "error: --history requires a Git checkout" >&2
+    exit 2
+  fi
+
+  history_hits=""
+  while IFS= read -r commit; do
+    set +e
+    commit_hits="$(git -C "$ROOT" grep -I -l -i -E "$PATTERNS" "$commit" -- . 2>/dev/null)"
+    status=$?
+    set -e
+    if [ "$status" -eq 0 ]; then
+      history_hits="${history_hits}${commit}: historical file content
+"
+    elif [ "$status" -ne 1 ]; then
+      echo "error: unable to scan commit ${commit}" >&2
+      exit 2
+    fi
+
+    metadata="$(git -C "$ROOT" show -s \
+      --format='%an%n%ae%n%cn%n%ce%n%B' "$commit")"
+    if printf '%s\n' "$metadata" | grep -qiE "$PATTERNS"; then
+      history_hits="${history_hits}${commit}: commit metadata
+"
+    fi
+
+    tree_paths="$(git -C "$ROOT" ls-tree -r --name-only "$commit")"
+    if printf '%s\n' "$tree_paths" | grep -qiE "$PATTERNS"; then
+      history_hits="${history_hits}${commit}: historical path name
+"
+    fi
+  done < <(git -C "$ROOT" rev-list --all)
+
+  if [ -n "$history_hits" ]; then
+    printf '%s' "$history_hits" >&2
+    echo "error: customer identifiers present in reachable Git history" >&2
+    exit 1
+  fi
+  echo "customer identifier history: clean"
+fi

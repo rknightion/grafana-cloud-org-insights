@@ -1,0 +1,184 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack036",
+      "Recommendations": 9,
+      "Pending": 9,
+      "Applied": 0,
+      "Pending GB": 204.519326,
+      "Pending GB (unqueried)": 21.15511,
+      "Levels": "error, info, trace, unknown"
+    },
+    {
+      " Stack": "stack037",
+      "Recommendations": 538,
+      "Pending": 121,
+      "Applied": 417,
+      "Pending GB": 174.167377,
+      "Pending GB (unqueried)": 174.167377,
+      "Levels": "debug, error, unknown"
+    },
+    {
+      " Stack": "stack001b",
+      "Recommendations": 24,
+      "Pending": 24,
+      "Applied": 0,
+      "Pending GB": 75.82252,
+      "Pending GB (unqueried)": 65.530344,
+      "Levels": "error, info, unknown"
+    },
+    {
+      " Stack": "stack158",
+      "Recommendations": 14,
+      "Pending": 14,
+      "Applied": 0,
+      "Pending GB": 61.839864,
+      "Pending GB (unqueried)": 60.881829,
+      "Levels": "error, info, warn"
+    },
+    {
+      " Stack": "stack052",
+      "Recommendations": 24,
+      "Pending": 24,
+      "Applied": 0,
+      "Pending GB": 20.87354,
+      "Pending GB (unqueried)": 19.399642,
+      "Levels": "unknown"
+    },
+    {
+      " Stack": "stack053",
+      "Recommendations": 2,
+      "Pending": 2,
+      "Applied": 0,
+      "Pending GB": 10.353514,
+      "Pending GB (unqueried)": 10.353514,
+      "Levels": "unknown"
+    },
+    {
+      " Stack": "stack071",
+      "Recommendations": 5,
+      "Pending": 5,
+      "Applied": 0,
+      "Pending GB": 9.618812,
+      "Pending GB (unqueried)": 9.618812,
+      "Levels": "error, info, trace, unknown"
+    },
+    {
+      " Stack": "stack038",
+      "Recommendations": 3,
+      "Pending": 3,
+      "Applied": 0,
+      "Pending GB": 6.958695,
+      "Pending GB (unqueried)": 0.989271,
+      "Levels": "unknown"
+    },
+    {
+      " Stack": "obs-hub",
+      "Recommendations": 9,
+      "Pending": 9,
+      "Applied": 0,
+      "Pending GB": 4.139676,
+      "Pending GB (unqueried)": 4.139676,
+      "Levels": "info, unknown, warn"
+    },
+    {
+      " Stack": "stack049",
+      "Recommendations": 2,
+      "Pending": 2,
+      "Applied": 0,
+      "Pending GB": 3.433044,
+      "Pending GB (unqueried)": 3.433044,
+      "Levels": "info"
+    },
+    {
+      " Stack": "stack072",
+      "Recommendations": 1,
+      "Pending": 1,
+      "Applied": 0,
+      "Pending GB": 3.125137,
+      "Pending GB (unqueried)": 3.125137,
+      "Levels": "unknown"
+    },
+    {
+      " Stack": "stack019",
+      "Recommendations": 2,
+      "Pending": 2,
+      "Applied": 0,
+      "Pending GB": 1.393576,
+      "Pending GB (unqueried)": 1.393576,
+      "Levels": "info"
+    },
+    {
+      " Stack": "stack055",
+      "Recommendations": 1,
+      "Pending": 1,
+      "Applied": 0,
+      "Pending GB": 0.679151,
+      "Pending GB (unqueried)": 0.679151,
+      "Levels": "debug"
+    },
+    {
+      " Stack": "stack145",
+      "Recommendations": 1,
+      "Pending": 1,
+      "Applied": 0,
+      "Pending GB": 0.451505,
+      "Pending GB (unqueried)": 0.451505,
+      "Levels": "debug"
+    }
+  ]
+}

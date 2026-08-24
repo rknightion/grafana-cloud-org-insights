@@ -1,0 +1,513 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack020",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 30,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Dashboard",
+      "Surface": "web",
+      "Messages": 29,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Observe",
+      "Surface": "a2a",
+      "Messages": 24,
+      "Human driven": false
+    },
+    {
+      " Stack": "obs-hub",
+      "Category": "Observe",
+      "Surface": "automation",
+      "Messages": 23,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Observe",
+      "Surface": "web",
+      "Messages": 20,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Learn",
+      "Surface": "web",
+      "Messages": 12,
+      "Human driven": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Category": "Learn",
+      "Surface": "cli",
+      "Messages": 11,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack001b",
+      "Category": "Learn",
+      "Surface": "web",
+      "Messages": 11,
+      "Human driven": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Category": "Learn",
+      "Surface": "a2a",
+      "Messages": 9,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Observe",
+      "Surface": "cli",
+      "Messages": 9,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack001b",
+      "Category": "Dashboard",
+      "Surface": "web",
+      "Messages": 7,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack111",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 7,
+      "Human driven": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Category": "Learn",
+      "Surface": "web",
+      "Messages": 6,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack001b",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 6,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack111",
+      "Category": "Dashboard",
+      "Surface": "web",
+      "Messages": 6,
+      "Human driven": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Category": "Investigate",
+      "Surface": "a2a",
+      "Messages": 5,
+      "Human driven": false
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Category": "Investigate",
+      "Surface": "cli",
+      "Messages": 5,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack019",
+      "Category": "Learn",
+      "Surface": "web",
+      "Messages": 5,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Learn",
+      "Surface": "a2a",
+      "Messages": 5,
+      "Human driven": false
+    },
+    {
+      " Stack": "obs-hub",
+      "Category": "Dashboard",
+      "Surface": "web",
+      "Messages": 4,
+      "Human driven": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 4,
+      "Human driven": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Category": "Observe",
+      "Surface": "a2a",
+      "Messages": 4,
+      "Human driven": false
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Category": "Observe",
+      "Surface": "cli",
+      "Messages": 4,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack052",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 4,
+      "Human driven": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Category": "Learn",
+      "Surface": "web",
+      "Messages": 3,
+      "Human driven": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Category": "Dashboard",
+      "Surface": "web",
+      "Messages": 3,
+      "Human driven": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 3,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack019",
+      "Category": "Other",
+      "Surface": "web",
+      "Messages": 3,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Learn",
+      "Surface": "cli",
+      "Messages": 3,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack037",
+      "Category": "Dashboard",
+      "Surface": "web",
+      "Messages": 3,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack050",
+      "Category": "Learn",
+      "Surface": "web",
+      "Messages": 3,
+      "Human driven": true
+    },
+    {
+      " Stack": "obs-hub",
+      "Category": "Investigate",
+      "Surface": "a2a",
+      "Messages": 2,
+      "Human driven": false
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Category": "Learn",
+      "Surface": "a2a",
+      "Messages": 2,
+      "Human driven": false
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Category": "Learn",
+      "Surface": "cli",
+      "Messages": 2,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack019",
+      "Category": "Dashboard",
+      "Surface": "web",
+      "Messages": 2,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Investigate",
+      "Surface": "a2a",
+      "Messages": 2,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Investigate",
+      "Surface": "cli",
+      "Messages": 2,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Other",
+      "Surface": "a2a",
+      "Messages": 2,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack038",
+      "Category": "Learn",
+      "Surface": "web",
+      "Messages": 2,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack052",
+      "Category": "Dashboard",
+      "Surface": "web",
+      "Messages": 2,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack071",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 2,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack072",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 2,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack125",
+      "Category": "Learn",
+      "Surface": "web",
+      "Messages": 2,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack158",
+      "Category": "Other",
+      "Surface": "web",
+      "Messages": 2,
+      "Human driven": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Category": "Observe",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Category": "Other",
+      "Surface": "a2a",
+      "Messages": 1,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack001b",
+      "Category": "Other",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack019",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack019",
+      "Category": "Observe",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Dashboard",
+      "Surface": "a2a",
+      "Messages": 1,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Dashboard",
+      "Surface": "cli",
+      "Messages": 1,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Other",
+      "Surface": "cli",
+      "Messages": 1,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack020",
+      "Category": "Other",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack036",
+      "Category": "Observe",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack037",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack038",
+      "Category": "Observe",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack053",
+      "Category": "Dashboard",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack053",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack072",
+      "Category": "Learn",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack111",
+      "Category": "Learn",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack146",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack158",
+      "Category": "Investigate",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack158",
+      "Category": "Learn",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    },
+    {
+      " Stack": "stack158",
+      "Category": "Observe",
+      "Surface": "slack",
+      "Messages": 1,
+      "Human driven": false
+    },
+    {
+      " Stack": "stack158",
+      "Category": "Observe",
+      "Surface": "web",
+      "Messages": 1,
+      "Human driven": true
+    }
+  ]
+}

@@ -1,0 +1,366 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "obs-hub",
+      "Admins": 12,
+      "Owner candidates": "Ana Horvat97, Cara Popa32, Dan Moreau60, Hugo Ionescu86, Hugo Kovac61, Hugo Lewandowski09, Kira Horvat84, Kira Silva53, Pavel Nowak34, Tara Lang93, Wes Costa76, Wes Horvat06",
+      "Owner emails": "ana.nilsen05@example.com, hugo.nilsen23@contractors.example.com, kira.silva53@contractors.example.com, lena.korhonen01@example.com, liam.lang75@contractors.example.com, niko.nilsen46@contractors.example.com, noa.costa39@contractors.example.com, pavel.ivanov88@example.com, rita.nilsen43@external.example.com, tara.lang93@example.com, vera.ionescu47@contractors.example.com, yara.bauer62@external.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Admins": 10,
+      "Owner candidates": "Cara Popa32, Dan Moreau60, Hugo Ionescu86, Hugo Lewandowski09, Kira Horvat84, Kira Silva53, Pavel Nowak34, Tara Lang93, Wes Costa76, Wes Horvat06",
+      "Owner emails": "ana.nilsen05@example.com, hugo.nilsen23@contractors.example.com, kira.silva53@contractors.example.com, lena.korhonen01@example.com, liam.lang75@contractors.example.com, niko.nilsen46@contractors.example.com, noa.costa39@contractors.example.com, tara.lang93@example.com, vera.ionescu47@contractors.example.com, yara.bauer62@external.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack001",
+      "Admins": 3,
+      "Owner candidates": "Cara Popa32, Gia Kovac20, Kira Horvat84",
+      "Owner emails": "ana.nilsen05@example.com, gia.kovac20@example.net, niko.nilsen46@contractors.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack001a",
+      "Admins": 0,
+      "Owner candidates": null,
+      "Owner emails": null,
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack001b",
+      "Admins": 14,
+      "Owner candidates": "Ana Schmidt91, Cara Popa32, Finn Rossi49, Gia Kovac20, Iris Silva06, Jonas Schmidt09, Kira Moreau03, Lena Ionescu67, Liam Virta78, Olga Lang00, Pavel Marek47, Pavel Nowak34, Wes Conti13, Xenia Nilsen91",
+      "Owner emails": "ana.schmidt91@external.example.com, finn.rossi49@external.example.net, gia.kovac20@example.net, iris.silva06@example.net, jonas.schmidt09@example.net, kira.moreau03@example.net, lena.ionescu67@example.com, liam.virta78@external.example.net, niko.nilsen46@contractors.example.com, olga.lang00@external.example.net, pavel.marek47@external.example.net, wes.conti13@example.com, xenia.nilsen91@example.net, yara.bauer62@external.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack001c",
+      "Admins": 1,
+      "Owner candidates": "Wes Costa76",
+      "Owner emails": "noa.costa39@contractors.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack002",
+      "Admins": 1,
+      "Owner candidates": "Finn Horvat91",
+      "Owner emails": "finn.horvat91@example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack019",
+      "Admins": 8,
+      "Owner candidates": "Ana Larsen02, Emil Ionescu88, Gia Horvat68, Hugo Lewandowski09, Noa Lewandowski13, Pavel Horvat42, Pavel Petrov44, Xenia Horvat94",
+      "Owner emails": "ana.larsen02@external.example.com, emil.ionescu88@contractors.example.com, gia.horvat68@contractors.example.com, kira.silva53@contractors.example.com, lena.korhonen01@example.com, pavel.horvat42@external.example.com, pavel.petrov44@contractors.example.com, xenia.horvat94@contractors.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack020",
+      "Admins": 26,
+      "Owner candidates": "Ana Novak15, Ben Novak10, Cara Popa32, Dan Kaplan01, Dan Moreau60, Emil Kaplan32, Emil Nilsen04, Emil Silva33, Eva Larsen97, Eva Weber04, Finn Novak73, Gia Bauer03, Hugo Costa98, Hugo Kovac61, Hugo Lang34, Hugo Lewandowski09, Lena Conti17, Olga Petrov81, Pavel Nowak34, Pavel Schmidt68, Tara Lewandowski80, Tara Schmidt16, Umar Moreau48, Umar Vlasic78, Vera Weber87, Wes Costa76",
+      "Owner emails": "ben.novak10@external.example.com, dan.kaplan01@example.com, emil.kaplan32@external.example.com, emil.nilsen04@external.example.com, emil.silva33@partner.example.com, eva.larsen97@external.example.com, eva.weber04@external.example.com, finn.novak73@external.example.com, gia.bauer03@external.example.com, hugo.lang34@example.com, hugo.nilsen23@contractors.example.com, lena.conti17@external.example.com, lena.korhonen01@example.com, niko.nilsen46@contractors.example.com, noa.costa39@contractors.example.com, olga.korhonen74@example.com, olga.petrov81@example.com, pavel.ivanov88@example.com, pavel.schmidt68@example.com, tara.lang93@example.com, tara.lewandowski80@external.example.com, tara.schmidt16@example.com, umar.moreau48@external.example.com, umar.vlasic78@example.com, vera.weber87@external.example.com, yara.bauer62@external.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack035",
+      "Admins": 3,
+      "Owner candidates": "Cara Popa32, Hugo Nowak71, Olga Lang75",
+      "Owner emails": "hugo.nowak71@example.com, niko.nilsen46@contractors.example.com, olga.lang75@example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack036",
+      "Admins": 10,
+      "Owner candidates": "Cara Popa32, Dan Conti32, Dan Moreau60, Dan Novak85, Emil Lewandowski43, Finn Kovac19, Hugo Lewandowski09, Lena Dvorak53, Umar Petrov85, Wes Costa76",
+      "Owner emails": "dan.conti32@example.com, dan.novak85@example.com, emil.lewandowski43@example.com, finn.kovac19@contractors.example.com, hugo.nilsen23@contractors.example.com, lena.dvorak53@contractors.example.com, lena.korhonen01@example.com, niko.nilsen46@contractors.example.com, noa.costa39@contractors.example.com, umar.petrov85@external.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack037",
+      "Admins": 19,
+      "Owner candidates": "Ben Novak10, Cara Popa32, Dan Moreau60, Emil Kaplan32, Emil Silva33, Finn Popa48, Gia Costa12, Hugo Lewandowski09, Jonas Bauer91, Jonas Bauer96, Maja Novak30, Niko Larsen61, Pavel Ionescu15, Pavel Petrov10, Rita Vlasic37, Sam Virta43, Tara Demir19, Wes Costa76, Yara Nowak85",
+      "Owner emails": "ben.novak10@external.example.com, emil.kaplan32@external.example.com, emil.silva33@partner.example.com, finn.popa48@partner.example.com, gia.costa12@external.example.com, hugo.nilsen23@contractors.example.com, jonas.bauer91@partner.example.com, jonas.bauer96@partner.example.com, lena.korhonen01@example.com, maja.novak30@external.example.com, niko.larsen61@external.example.com, niko.nilsen46@contractors.example.com, noa.costa39@contractors.example.com, pavel.ionescu15@partner.example.com, pavel.petrov10@example.com, rita.vlasic37@example.com, sam.virta43@partner.example.com, tara.demir19@example.com, yara.nowak85@external.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack038",
+      "Admins": 18,
+      "Owner candidates": "Alex Costa00, Alex Schmidt50, Ana Lewandowski16, Cara Popa32, Dan Moreau60, Finn Nilsen95, Gia Ionescu46, Hugo Costa98, Hugo Ivanov24, Hugo Lewandowski09, Hugo Nowak40, Kira Weber32, Noa Lewandowski13, Pavel Fischer92, Vera Lang14, Wes Costa76, Yara Novak16, Yara Petrov86",
+      "Owner emails": "alex.costa00@example.net, alex.schmidt50@example.com, ana.lewandowski16@example.com, finn.nilsen95@example.com, gia.ionescu46@example.com, hugo.ivanov24@example.net, hugo.nilsen23@contractors.example.com, hugo.nowak40@example.com, kira.silva53@contractors.example.com, kira.weber32@example.com, lena.korhonen01@example.com, niko.nilsen46@contractors.example.com, noa.costa39@contractors.example.com, pavel.fischer92@example.com, tara.lang93@example.com, vera.lang14@example.com, yara.novak16@example.com, yara.petrov86@example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack049",
+      "Admins": 5,
+      "Owner candidates": "Cara Nilsen08, Cara Popa32, Dan Moreau60, Pavel Horvat37, Umar Silva78",
+      "Owner emails": "cara.nilsen08@contractors.example.com, hugo.nilsen23@contractors.example.com, niko.nilsen46@contractors.example.com, pavel.horvat37@contractors.example.com, umar.silva78@contractors.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack050",
+      "Admins": 3,
+      "Owner candidates": "Eva Dvorak18, Xenia Novak08, Zane Petrov26",
+      "Owner emails": "eva.dvorak18@external.example.net, xenia.novak08@external.example.net, zane.petrov26@example.net",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack051",
+      "Admins": 0,
+      "Owner candidates": null,
+      "Owner emails": null,
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack052",
+      "Admins": 9,
+      "Owner candidates": "Ben Fischer11, Cara Popa32, Dan Moreau60, Finn Korhonen67, Hugo Lewandowski09, Lena Kovac72, Maja Fischer70, Wes Costa76, Zane Dvorak27",
+      "Owner emails": "ben.fischer11@external.example.net, finn.korhonen67@external.example.net, hugo.nilsen23@contractors.example.com, lena.korhonen01@example.com, lena.kovac72@example.net, maja.fischer70@example.com, niko.nilsen46@contractors.example.com, noa.costa39@contractors.example.com, zane.dvorak27@external.example.net",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack053",
+      "Admins": 4,
+      "Owner candidates": "Hugo Lewandowski09, Maja Lang00, Pavel Nowak34, Zane Bauer28",
+      "Owner emails": "lena.korhonen01@example.com, maja.lang00@example.com, yara.bauer62@external.example.com, zane.bauer28@example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack054",
+      "Admins": 2,
+      "Owner candidates": "Yara Conti75, Yara Fischer88",
+      "Owner emails": "yara.conti75@external.example.com, yara.fischer88@example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack055",
+      "Admins": 6,
+      "Owner candidates": "Eva Weber25, Kira Nowak76, Kira Petrov69, Sam Dubois47, Sam Lewandowski72, Umar Nowak07",
+      "Owner emails": "eva.weber25@external.example.net, kira.nowak76@external.example.net, kira.petrov69@external.example.net, sam.dubois47@external.example.net, sam.lewandowski72@external.example.net, umar.nowak07@external.example.net",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack070",
+      "Admins": 1,
+      "Owner candidates": "Umar Silva27",
+      "Owner emails": "umar.silva27@external.example.net",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack071",
+      "Admins": 5,
+      "Owner candidates": "Ben Nilsen33, Niko Silva89, Noa Marek23, Sam Conti08, Tara Kaplan21",
+      "Owner emails": "ben.nilsen33@contractors.example.com, niko.silva89@contractors.example.com, noa.marek23@external.example.com, sam.conti08@contractors.example.com, tara.kaplan21@contractors.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack072",
+      "Admins": 7,
+      "Owner candidates": "Alex Fischer38, Dan Moreau60, Hugo Lang90, Hugo Lewandowski09, Kira Vlasic30, Wes Costa76, Xenia Larsen23",
+      "Owner emails": "alex.fischer38@contractors.example.com, hugo.lang90@contractors.example.com, hugo.nilsen23@contractors.example.com, kira.vlasic30@example.com, lena.korhonen01@example.com, noa.costa39@contractors.example.com, xenia.larsen23@contractors.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack097",
+      "Admins": 10,
+      "Owner candidates": "Alex Kovac11, Ben Moreau96, Cara Popa32, Dan Demir02, Emil Kovac68, Jonas Nilsen12, Liam Weber17, Vera Popa02, Wes Costa76, Wes Moreau58",
+      "Owner emails": "alex.kovac11@external.example.com, ben.moreau96@external.example.com, dan.demir02@external.example.com, emil.kovac68@external.example.com, jonas.nilsen12@external.example.com, liam.weber17@external.example.com, niko.nilsen46@contractors.example.com, noa.costa39@contractors.example.com, vera.popa02@example.com, wes.moreau58@external.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack110",
+      "Admins": 0,
+      "Owner candidates": null,
+      "Owner emails": null,
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack111",
+      "Admins": 6,
+      "Owner candidates": "Cara Popa32, Dan Moreau60, Hugo Lewandowski09, Liam Lang82, Tara Silva44, Wes Costa76",
+      "Owner emails": "hugo.nilsen23@contractors.example.com, lena.korhonen01@example.com, liam.lang82@external.example.com, niko.nilsen46@contractors.example.com, noa.costa39@contractors.example.com, tara.silva44@contractors.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack112",
+      "Admins": 1,
+      "Owner candidates": "Finn Petrov39",
+      "Owner emails": "finn.petrov39@contractors.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack113",
+      "Admins": 5,
+      "Owner candidates": "Alex Horvat95, Ben Virta20, Hugo Lewandowski09, Kira Conti78, Olga Weber62",
+      "Owner emails": "alex.horvat95@external.example.net, ben.virta20@example.com, kira.conti78@external.example.net, lena.korhonen01@example.com, olga.weber62@example.net",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack125",
+      "Admins": 1,
+      "Owner candidates": "Emil Novak72",
+      "Owner emails": "emil.novak72@external.example.net",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack126",
+      "Admins": 3,
+      "Owner candidates": "Cara Vlasic70, Hugo Lewandowski09, Olga Kaplan72",
+      "Owner emails": "cara.vlasic70@contractors.example.com, lena.korhonen01@example.com, olga.kaplan72@external.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack145",
+      "Admins": 3,
+      "Owner candidates": "Hugo Lewandowski09, Lena Horvat61, Noa Lewandowski13",
+      "Owner emails": "kira.silva53@contractors.example.com, lena.horvat61@contractors.example.com, lena.korhonen01@example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack146",
+      "Admins": 7,
+      "Owner candidates": "Alex Costa00, Alex Schmidt50, Gia Ionescu46, Hugo Lewandowski09, Noa Lewandowski13, Vera Lang14, Yara Novak16",
+      "Owner emails": "alex.costa00@example.net, alex.schmidt50@example.com, gia.ionescu46@example.com, kira.silva53@contractors.example.com, lena.korhonen01@example.com, vera.lang14@example.com, yara.novak16@example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack147",
+      "Admins": 5,
+      "Owner candidates": "Alex Costa00, Gia Ionescu46, Pavel Nowak34, Vera Lang14, Yara Novak16",
+      "Owner emails": "alex.costa00@example.net, gia.ionescu46@example.com, vera.lang14@example.com, yara.bauer62@external.example.com, yara.novak16@example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack148",
+      "Admins": 1,
+      "Owner candidates": "Umar Costa88",
+      "Owner emails": "umar.costa88@example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack149",
+      "Admins": 1,
+      "Owner candidates": "Yara Dvorak55",
+      "Owner emails": "yara.dvorak55@example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack158",
+      "Admins": 9,
+      "Owner candidates": "Alex Marek68, Ana Petrov67, Cara Korhonen03, Cara Kovac22, Dan Moreau60, Hugo Lewandowski09, Pavel Nowak34, Umar Bauer40, Vera Marek82",
+      "Owner emails": "alex.marek68@contractors.example.com, ana.petrov67@external.example.com, cara.korhonen03@external.example.com, cara.kovac22@example.com, hugo.nilsen23@contractors.example.com, lena.korhonen01@example.com, umar.bauer40@contractors.example.com, vera.marek82@external.example.com, yara.bauer62@external.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack170",
+      "Admins": 3,
+      "Owner candidates": "Lena Petrov98, Pavel Nowak34, Sam Marek02",
+      "Owner emails": "lena.petrov98@external.example.net, sam.marek02@external.example.net, yara.bauer62@external.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack177",
+      "Admins": 4,
+      "Owner candidates": "Ana Larsen55, Dan Moreau60, Kira Horvat84, Noa Lang00",
+      "Owner emails": "ana.larsen55@example.com, ana.nilsen05@example.com, hugo.nilsen23@contractors.example.com, noa.lang00@contractors.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack193",
+      "Admins": 6,
+      "Owner candidates": "Hugo Nowak87, Hugo Weber72, Pavel Nowak34, Wes Costa76, Xenia Dubois27, Zane Kovac83",
+      "Owner emails": "hugo.nowak87@example.com, hugo.weber72@example.com, noa.costa39@contractors.example.com, xenia.dubois27@example.com, yara.bauer62@external.example.com, zane.kovac83@example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "stack201",
+      "Admins": 3,
+      "Owner candidates": "Kira Larsen03, Pavel Nowak34, Wes Ionescu89",
+      "Owner emails": "kira.larsen03@example.com, wes.ionescu89@external.example.com, yara.bauer62@external.example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "testsrobot002",
+      "Admins": 1,
+      "Owner candidates": "Hugo Lewandowski09",
+      "Owner emails": "lena.korhonen01@example.com",
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "teststack004",
+      "Admins": 0,
+      "Owner candidates": null,
+      "Owner emails": null,
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "teststack017",
+      "Admins": 0,
+      "Owner candidates": null,
+      "Owner emails": null,
+      "Staff admins excluded": 0
+    },
+    {
+      " Stack": "teststack018",
+      "Admins": 0,
+      "Owner candidates": null,
+      "Owner emails": null,
+      "Staff admins excluded": 0
+    }
+  ]
+}

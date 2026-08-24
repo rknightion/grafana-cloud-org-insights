@@ -1,0 +1,22 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "19 3 * * 6"
+
+permissions: {}
+
+jobs:
+  codeql:
+    permissions:
+      security-events: write # upload CodeQL results
+      packages: read         # resolve private action packages if required
+      actions: read          # inspect workflow metadata
+      contents: read
+    uses: rknightion/.github/.github/workflows/codeql.yml@8c1e89103d1a86179c2e94356b85bedd7c543a42 # v1.9.3
+    with:
+      languages: '[{"language":"python","build-mode":"none"},{"language":"actions","build-mode":"none"}]'

@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Metric": "Stacks measured for Adaptive",
+      "Value": "40 of 40 scannable (44 total)"
+    },
+    {
+      " Metric": "Adaptive recommendations pending (measured stacks)",
+      "Value": 6226
+    },
+    {
+      " Metric": "Adaptive rules applied",
+      "Value": 332
+    },
+    {
+      " Metric": "Stacks with recommendations and zero rules applied",
+      "Value": 18
+    },
+    {
+      " Metric": "Active series on those stacks",
+      "Value": 1105757
+    },
+    {
+      " Metric": "Their share of org series %",
+      "Value": 78.2
+    },
+    {
+      " Metric": "Series per billed user (estate)",
+      "Value": 6900.7
+    },
+    {
+      " Metric": "Savings in currency",
+      "Value": "not available - needs per-recommendation series reduction and the contracted rate card (SPEC \u00a711.3). Volume is the honest unit until then."
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+name: auto-rc
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: auto-rc
+  cancel-in-progress: false
+
+jobs:
+  rc:
+    permissions:
+      contents: write     # create the RC tag and GitHub prerelease
+      pull-requests: read # find the open release PR
+      checks: read        # wait for ci-success on this commit
+    uses: rknightion/.github/.github/workflows/auto-rc.yml@8c1e89103d1a86179c2e94356b85bedd7c543a42 # v1.9.3
+    with:
+      image-ref: ghcr.io/rknightion/grafana-cloud-org-insights
+
+  publish:
+    needs: rc
+    if: needs.rc.outputs.tag != ''
+    permissions:
+      contents: write        # attach SBOMs to the prerelease
+      packages: write        # push the RC image to GHCR
+      id-token: write        # obtain keyless signing credentials
+      attestations: write    # publish build provenance
+      security-events: write # upload the Trivy SARIF report
+    uses: ./.github/workflows/publish.yml
+    with:
+      release-tag: ${{ needs.rc.outputs.tag }}

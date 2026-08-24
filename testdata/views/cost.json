@@ -1,0 +1,586 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack072",
+      "Region": "eu",
+      "Active series": 306601,
+      "Users (billed)": 4,
+      "Series per billed user": 76650.2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 758,
+      "Adaptive adopted": false,
+      "Label values": 27053,
+      "Label names": 259
+    },
+    {
+      " Stack": "obs-hub",
+      "Region": "prod-eu-west-2",
+      "Active series": 278835,
+      "Users (billed)": 12,
+      "Series per billed user": 23236.2,
+      "Adaptive rules applied": 213,
+      "Adaptive recs pending": 521,
+      "Adaptive adopted": true,
+      "Label values": 36302,
+      "Label names": 256
+    },
+    {
+      " Stack": "stack036",
+      "Region": "prod-eu-west-2",
+      "Active series": 235765,
+      "Users (billed)": 6,
+      "Series per billed user": 39294.2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 610,
+      "Adaptive adopted": false,
+      "Label values": 5390,
+      "Label names": 145
+    },
+    {
+      " Stack": "stack158",
+      "Region": "prod-eu-west-2",
+      "Active series": 128779,
+      "Users (billed)": 13,
+      "Series per billed user": 9906.1,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 708,
+      "Adaptive adopted": false,
+      "Label values": 5236,
+      "Label names": 244
+    },
+    {
+      " Stack": "stack038",
+      "Region": "prod-eu-west-2",
+      "Active series": 95970,
+      "Users (billed)": 12,
+      "Series per billed user": 7997.5,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 66,
+      "Adaptive adopted": false,
+      "Label values": 17217,
+      "Label names": 165
+    },
+    {
+      " Stack": "stack035",
+      "Region": "prod-us-east-0",
+      "Active series": 95158,
+      "Users (billed)": 3,
+      "Series per billed user": 31719.3,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 145,
+      "Adaptive adopted": false,
+      "Label values": 5083,
+      "Label names": 89
+    },
+    {
+      " Stack": "stack001b",
+      "Region": "prod-us-west-0",
+      "Active series": 66141,
+      "Users (billed)": 12,
+      "Series per billed user": 5511.8,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 2144,
+      "Adaptive adopted": false,
+      "Label values": 10538,
+      "Label names": 360
+    },
+    {
+      " Stack": "stack049",
+      "Region": "prod-eu-west-2",
+      "Active series": 56868,
+      "Users (billed)": 1,
+      "Series per billed user": 56868,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 99,
+      "Adaptive adopted": false,
+      "Label values": 10550,
+      "Label names": 134
+    },
+    {
+      " Stack": "stack020",
+      "Region": "prod-eu-west-2",
+      "Active series": 39860,
+      "Users (billed)": 34,
+      "Series per billed user": 1172.4,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 47,
+      "Adaptive adopted": false,
+      "Label values": 3161,
+      "Label names": 83
+    },
+    {
+      " Stack": "stack052",
+      "Region": "prod-us-west-0",
+      "Active series": 38321,
+      "Users (billed)": 5,
+      "Series per billed user": 7664.2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 301,
+      "Adaptive adopted": false,
+      "Label values": 6384,
+      "Label names": 269
+    },
+    {
+      " Stack": "stack037",
+      "Region": "prod-us-west-0",
+      "Active series": 23773,
+      "Users (billed)": 6,
+      "Series per billed user": 3962.2,
+      "Adaptive rules applied": 91,
+      "Adaptive recs pending": 154,
+      "Adaptive adopted": true,
+      "Label values": 2358,
+      "Label names": 122
+    },
+    {
+      " Stack": "stack053",
+      "Region": "prod-eu-west-2",
+      "Active series": 21141,
+      "Users (billed)": 1,
+      "Series per billed user": 21141,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 105,
+      "Adaptive adopted": false,
+      "Label values": 5047,
+      "Label names": 168
+    },
+    {
+      " Stack": "stack170",
+      "Region": "prod-us-west-0",
+      "Active series": 8840,
+      "Users (billed)": 1,
+      "Series per billed user": 8840,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 174,
+      "Adaptive adopted": false,
+      "Label values": 822,
+      "Label names": 59
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Region": "prod-eu-west-2",
+      "Active series": 6242,
+      "Users (billed)": 10,
+      "Series per billed user": 624.2,
+      "Adaptive rules applied": 28,
+      "Adaptive recs pending": 243,
+      "Adaptive adopted": true,
+      "Label values": 3546,
+      "Label names": 173
+    },
+    {
+      " Stack": "stack019",
+      "Region": "prod-eu-west-2",
+      "Active series": 5568,
+      "Users (billed)": 7,
+      "Series per billed user": 795.4,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 50,
+      "Adaptive adopted": false,
+      "Label values": 468,
+      "Label names": 45
+    },
+    {
+      " Stack": "stack177",
+      "Region": "prod-eu-west-2",
+      "Active series": 5390,
+      "Users (billed)": 2,
+      "Series per billed user": 2695,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 58,
+      "Adaptive adopted": false,
+      "Label values": 398,
+      "Label names": 66
+    },
+    {
+      " Stack": "stack055",
+      "Region": "prod-us-west-0",
+      "Active series": 711,
+      "Users (billed)": 2,
+      "Series per billed user": 355.5,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 25,
+      "Adaptive adopted": false,
+      "Label values": 104,
+      "Label names": 20
+    },
+    {
+      " Stack": "stack193",
+      "Region": "prod-eu-west-2",
+      "Active series": 392,
+      "Users (billed)": 3,
+      "Series per billed user": 130.7,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 12,
+      "Adaptive adopted": false,
+      "Label values": 137,
+      "Label names": 20
+    },
+    {
+      " Stack": "stack111",
+      "Region": "prod-eu-west-2",
+      "Active series": 162,
+      "Users (billed)": 14,
+      "Series per billed user": 11.6,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 2,
+      "Adaptive adopted": false,
+      "Label values": 200,
+      "Label names": 93
+    },
+    {
+      " Stack": "stack050",
+      "Region": "prod-us-west-0",
+      "Active series": 80,
+      "Users (billed)": 4,
+      "Series per billed user": 20,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 3,
+      "Adaptive adopted": false,
+      "Label values": 90,
+      "Label names": 27
+    },
+    {
+      " Stack": "stack113",
+      "Region": "prod-us-west-0",
+      "Active series": 10,
+      "Users (billed)": 9,
+      "Series per billed user": 1.1,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 1,
+      "Adaptive adopted": false,
+      "Label values": 62,
+      "Label names": 20
+    },
+    {
+      " Stack": "stack097",
+      "Region": "prod-eu-west-2",
+      "Active series": 5,
+      "Users (billed)": 7,
+      "Series per billed user": 0.7,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 20,
+      "Label names": 12
+    },
+    {
+      " Stack": "stack145",
+      "Region": "prod-eu-west-2",
+      "Active series": 2,
+      "Users (billed)": 1,
+      "Series per billed user": 2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack125",
+      "Region": "prod-us-east-0",
+      "Active series": 2,
+      "Users (billed)": 2,
+      "Series per billed user": 1,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack001",
+      "Region": "prod-us-west-0",
+      "Active series": 2,
+      "Users (billed)": 1,
+      "Series per billed user": 2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack001c",
+      "Region": "prod-us-west-0",
+      "Active series": 2,
+      "Users (billed)": 1,
+      "Series per billed user": 2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack001a",
+      "Region": "prod-us-west-0",
+      "Active series": 2,
+      "Users (billed)": 1,
+      "Series per billed user": 2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack110",
+      "Region": "prod-eu-west-2",
+      "Active series": 2,
+      "Users (billed)": 1,
+      "Series per billed user": 2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack070",
+      "Region": "prod-us-west-0",
+      "Active series": 2,
+      "Users (billed)": 1,
+      "Series per billed user": 2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack071",
+      "Region": "prod-eu-west-2",
+      "Active series": 2,
+      "Users (billed)": 8,
+      "Series per billed user": 0.2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack112",
+      "Region": "prod-eu-west-2",
+      "Active series": 2,
+      "Users (billed)": 2,
+      "Series per billed user": 1,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack051",
+      "Region": "prod-eu-west-2",
+      "Active series": 2,
+      "Users (billed)": 1,
+      "Series per billed user": 2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack146",
+      "Region": "prod-eu-west-2",
+      "Active series": 2,
+      "Users (billed)": 5,
+      "Series per billed user": 0.4,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack147",
+      "Region": "prod-eu-west-2",
+      "Active series": 2,
+      "Users (billed)": 2,
+      "Series per billed user": 1,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack054",
+      "Region": "prod-eu-west-2",
+      "Active series": 2,
+      "Users (billed)": 1,
+      "Series per billed user": 2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack148",
+      "Region": "prod-eu-west-2",
+      "Active series": 2,
+      "Users (billed)": 1,
+      "Series per billed user": 2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack126",
+      "Region": "prod-eu-west-2",
+      "Active series": 2,
+      "Users (billed)": 3,
+      "Series per billed user": 0.7,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack002",
+      "Region": "eu",
+      "Active series": 2,
+      "Users (billed)": 1,
+      "Series per billed user": 2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack201",
+      "Region": "prod-eu-west-2",
+      "Active series": 2,
+      "Users (billed)": 4,
+      "Series per billed user": 0.5,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "stack149",
+      "Region": "prod-eu-central-0",
+      "Active series": 2,
+      "Users (billed)": 1,
+      "Series per billed user": 2,
+      "Adaptive rules applied": 0,
+      "Adaptive recs pending": 0,
+      "Adaptive adopted": false,
+      "Label values": 5,
+      "Label names": 4
+    },
+    {
+      " Stack": "testsrobot002",
+      "Region": "prod-us-west-0",
+      "Active series": 0,
+      "Users (billed)": 0,
+      "Series per billed user": null,
+      "Adaptive rules applied": null,
+      "Adaptive recs pending": null,
+      "Adaptive adopted": null,
+      "Label values": null,
+      "Label names": null
+    },
+    {
+      " Stack": "teststack004",
+      "Region": "prod-eu-west-2",
+      "Active series": 0,
+      "Users (billed)": 0,
+      "Series per billed user": null,
+      "Adaptive rules applied": null,
+      "Adaptive recs pending": null,
+      "Adaptive adopted": null,
+      "Label values": null,
+      "Label names": null
+    },
+    {
+      " Stack": "teststack017",
+      "Region": "prod-eu-west-2",
+      "Active series": 0,
+      "Users (billed)": 0,
+      "Series per billed user": null,
+      "Adaptive rules applied": null,
+      "Adaptive recs pending": null,
+      "Adaptive adopted": null,
+      "Label values": null,
+      "Label names": null
+    },
+    {
+      " Stack": "teststack018",
+      "Region": "prod-eu-west-2",
+      "Active series": 0,
+      "Users (billed)": 0,
+      "Series per billed user": null,
+      "Adaptive rules applied": null,
+      "Adaptive recs pending": null,
+      "Adaptive adopted": null,
+      "Label values": null,
+      "Label names": null
+    }
+  ]
+}

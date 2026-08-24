@@ -1,0 +1,118 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Dimension": "signal_breadth",
+      "Weight": 0.15,
+      "What it measures": "Signals genuinely in use",
+      "How it is scored": "share of 5 signals above the 1000-unit floor"
+    },
+    {
+      " Dimension": "alerting_proportionality",
+      "Weight": 0.15,
+      "What it measures": "Alerting neither absent nor sprawling",
+      "How it is scored": "alert rules per dashboard, ideal 0.2-3.0; both extremes score 0"
+    },
+    {
+      " Dimension": "adaptive_adoption",
+      "Weight": 0.15,
+      "What it measures": "Adaptive Metrics recommendations acted on",
+      "How it is scored": "applied rules as a share of applied + pending; not scored where there is no headroom"
+    },
+    {
+      " Dimension": "engagement",
+      "Weight": 0.15,
+      "What it measures": "People actually log in",
+      "How it is scored": "daily users / active users, 100 at 0.75"
+    },
+    {
+      " Dimension": "access_hygiene",
+      "Weight": 0.1,
+      "What it measures": "Admin rights not handed to everyone",
+      "How it is scored": "admin share, 100 at <=20% and 0 at >=75%; under 5 users scored on absolute count (<=2)"
+    },
+    {
+      " Dimension": "cardinality_discipline",
+      "Weight": 0.1,
+      "What it measures": "Label values proportionate to volume",
+      "How it is scored": "label values / series, 100 at <=0.05; only scored above 5,000 series"
+    },
+    {
+      " Dimension": "dashboard_utilisation",
+      "Weight": 0.1,
+      "What it measures": "Dashboards proportionate to the audience",
+      "How it is scored": "dashboards per active user, ideal 2.0-25.0"
+    },
+    {
+      " Dimension": "datasource_breadth",
+      "Weight": 0.05,
+      "What it measures": "More than one thing plugged in",
+      "How it is scored": "distinct datasource types, 100 at 5+, excluding the auto-provisioned one"
+    },
+    {
+      " Dimension": "collector_health",
+      "Weight": 0.05,
+      "What it measures": "Fleet Management collectors actually connected",
+      "How it is scored": "0 where pipelines exist with no collectors; not scored where FM is unused"
+    },
+    {
+      " Dimension": "RUBRIC VERSION",
+      "Weight": null,
+      "What it measures": "1",
+      "How it is scored": "emitted as gcinsight_maturity_score{version} so a rubric change starts a new series rather than rewriting history"
+    }
+  ]
+}

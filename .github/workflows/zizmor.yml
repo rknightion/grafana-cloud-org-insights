@@ -1,0 +1,17 @@
+name: zizmor
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  zizmor:
+    permissions:
+      contents: read
+      security-events: write # upload zizmor results
+      actions: read          # inspect workflow metadata
+    uses: rknightion/.github/.github/workflows/zizmor.yml@8c1e89103d1a86179c2e94356b85bedd7c543a42 # v1.9.3

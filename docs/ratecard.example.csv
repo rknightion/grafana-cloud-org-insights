@@ -1,0 +1,28 @@
+# Example rate card. COPY THIS, replace the rates with your own contracted positive prices, delete
+# dimensions the contract does not price, and upload it to your deployment bucket as
+# `config/ratecard.csv`. Every zero below is a deliberately invalid placeholder, not a price: the
+# loader refuses this file unchanged so it cannot publish a confident zero-currency estate.
+#
+# Without a card the platform reports remediable VOLUME and every currency panel says so. That is the
+# honest default: a contracted rate is not something this code can infer.
+#
+#   dimension  one of the fixed names below. Only dimensions this platform measures are accepted.
+#   rate       positive price per `per` units, in `currency`; omit unpriced/free dimensions.
+#   per        the divisor. `3.37` per `1000` series, so you never pre-divide.
+#   unit       must match the dimension's own unit. A mismatch is refused, not coerced.
+#   included   allowance before anything is chargeable, same unit. Usually 0 on a spend-commit deal.
+#   period     must be `month`; annual and unnamed-window rates are refused.
+#   billing_basis  `dpm_aware` or `base_rate_only` for metrics_series; `quantity` otherwise.
+#   included_dpm   only for `dpm_aware`; blank defaults to 1, or set the contracted divisor (often 1 or 4).
+#   notes      free text. Put the billing-page label here so the card can be checked by eye.
+dimension,rate,per,unit,included,currency,period,billing_basis,included_dpm,notes
+metrics_series,0.00,1000,series,0,USD,month,dpm_aware,1,"billing line: Metrics; standard DPM-aware contract"
+graphite_series,0.00,1,series,0,USD,month,quantity,,"billing line: Metrics (Graphite)"
+logs_ingest_gb,0.00,1,GB,0,USD,month,quantity,,"billing line: Logs Write (Ingest)"
+logs_retain_gb_month,0.00,1,GB-mo,0,USD,month,quantity,,"billing line: Logs Retain"
+traces_ingest_gb,0.00,1,GB,0,USD,month,quantity,,"billing line: Traces Write (Ingest)"
+profiles_ingest_gb,0.00,1,GB,0,USD,month,quantity,,"billing line: Profiles Write (Ingest)"
+grafana_users,0.00,1,user,0,USD,month,quantity,,"billing line: Grafana Users"
+irm_users,0.00,1,user,0,USD,month,quantity,,"billing line: Incident Response & Management (IRM) Users"
+assistant_users,0.00,1,user,0,USD,month,quantity,,"billing line: Assistant"
+ai_tokens,0.00,1000000,tokens,0,USD,month,quantity,,"billing line: AI Tokens"

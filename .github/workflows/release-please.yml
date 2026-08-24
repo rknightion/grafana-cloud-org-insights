@@ -1,0 +1,69 @@
+name: release-please
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions: {}
+
+concurrency:
+  group: release-please-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: maintain release PR or cut release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write      # create release commits, tags and GitHub Releases
+      pull-requests: write # create and update the release PR
+      id-token: write      # exchange GitHub OIDC for a short-lived broker token
+    outputs:
+      release-created: ${{ steps.release.outputs.release_created }}
+      tag-name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Mint a repository-scoped release token
+        id: bao
+        uses: rknightion/.github/.github/actions/broker-token@8c1e89103d1a86179c2e94356b85bedd7c543a42 # v1.9.3
+        with:
+          permission-set: release-please-grafana-cloud-org-insights
+          role: release-please-grafana-cloud-org-insights
+          tailscale-client-id: ${{ secrets.TS_WIF_CLIENT_ID }}
+          tailscale-audience: ${{ secrets.TS_WIF_AUDIENCE }}
+
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ steps.bao.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  release-image:
+    name: publish stable image
+    needs: release-please
+    if: needs.release-please.outputs.release-created == 'true'
+    permissions:
+      contents: write        # attach SBOMs to the GitHub Release
+      packages: write        # push the image to GHCR
+      id-token: write        # obtain keyless signing credentials
+      attestations: write    # publish build provenance
+      security-events: write # upload the Trivy SARIF report
+    uses: ./.github/workflows/publish.yml
+    with:
+      release-tag: ${{ needs.release-please.outputs.tag-name }}
+
+  edge-image:
+    name: publish edge image
+    needs: release-please
+    if: needs.release-please.outputs.release-created != 'true'
+    permissions:
+      contents: write        # attach release artifacts if applicable
+      packages: write        # push the edge image to GHCR
+      id-token: write        # obtain keyless signing credentials
+      attestations: write    # publish build provenance
+      security-events: write # upload the Trivy SARIF report
+    uses: ./.github/workflows/publish.yml
+    with:
+      release-tag: ""

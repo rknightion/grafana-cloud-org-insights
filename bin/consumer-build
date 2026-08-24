@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Build and verify a local immutable consumer candidate. This command never pushes.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+MANIFEST=""
+DEPLOYMENT_ROOT=""
+TERRAFORM=""
+TAG="local/gcinsight-consumer:validation"
+PLATFORM="linux/arm64"
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --manifest) MANIFEST="$2"; shift 2 ;;
+    --deployment-root) DEPLOYMENT_ROOT="$2"; shift 2 ;;
+    --terraform) TERRAFORM="$2"; shift 2 ;;
+    --tag) TAG="$2"; shift 2 ;;
+    --platform) PLATFORM="$2"; shift 2 ;;
+    -h|--help)
+      echo "usage: $0 --manifest PATH --deployment-root PATH --terraform PATH [--tag IMAGE] [--platform PLATFORM]"
+      exit 0 ;;
+    *) echo "error: unknown argument $1" >&2; exit 2 ;;
+  esac
+done
+test -n "$MANIFEST" && test -n "$DEPLOYMENT_ROOT" && test -n "$TERRAFORM" || {
+  echo "error: --manifest, --deployment-root, and --terraform are required" >&2
+  exit 2
+}
+
+python3 "$ROOT/bin/consumer_manifest.py" check \
+  --manifest "$MANIFEST" --generic-source "$ROOT" \
+  --deployment-root "$DEPLOYMENT_ROOT" --terraform "$TERRAFORM" \
+  --require-committed-deployment
+
+revision="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["generic_source"]["revision"])' "$MANIFEST")"
+repository="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["generic_source"]["repository"].removesuffix(".git"))' "$MANIFEST")"
+overlay_digest="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["overlay_digest"])' "$MANIFEST")"
+consumer_revision="$(git -C "$DEPLOYMENT_ROOT" rev-parse HEAD)"
+
+docker build --platform "$PLATFORM" \
+  --build-arg "GCINSIGHT_SOURCE_URL=${repository}" \
+  --build-arg "GCINSIGHT_SOURCE_REVISION=${revision}" \
+  --build-arg "GCINSIGHT_OVERLAY_DIGEST=sha256:${overlay_digest}" \
+  --build-arg "GCINSIGHT_CONSUMER_REVISION=${consumer_revision}" \
+  -t "$TAG" "$ROOT"
+
+labels="$(docker image inspect "$TAG" --format '{{json .Config.Labels}}')"
+python3 - "$labels" "$repository" "$revision" "$overlay_digest" "$consumer_revision" <<'PY'
+import json, sys
+labels = json.loads(sys.argv[1])
+assert labels["org.opencontainers.image.source"] == sys.argv[2]
+assert labels["org.opencontainers.image.revision"] == sys.argv[3]
+assert labels["io.grafana.gcinsight.overlay.digest"] == "sha256:" + sys.argv[4]
+assert labels["io.grafana.gcinsight.consumer.revision"] == sys.argv[5]
+PY
+
+docker image inspect "$TAG" --format 'image={{.Id}} os={{.Os}} arch={{.Architecture}} user={{.Config.User}} entrypoint={{json .Config.Entrypoint}}'
+docker run --rm --platform "$PLATFORM" --entrypoint aws "$TAG" --version
+
+for kind in scan provisioner dashboards alerts; do
+  docker_env=()
+  while IFS= read -r pair; do
+    docker_env+=(--env "$pair")
+  done < <(python3 "$ROOT/bin/consumer_manifest.py" env --manifest "$MANIFEST" "$kind")
+  docker run --rm --platform "$PLATFORM" "${docker_env[@]}" --entrypoint python3 "$TAG" \
+    -c "from collector import identity; print(identity.verify_runtime_projection('$kind'))"
+done
+
+echo "consumer build: local only; no registry login, push, or tag movement performed"

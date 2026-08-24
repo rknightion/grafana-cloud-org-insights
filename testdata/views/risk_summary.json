@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Metric": "Stacks in this table",
+      "Value": "44 of 44 in the estate (40 reachable by a live scan, 4 paused)"
+    },
+    {
+      " Metric": "Stacks with service-account detail",
+      "Value": "40 of 44 scanned. NOT MEASURED on the rest: 4 not gathered (the tier that reads it has not run)."
+    },
+    {
+      " Metric": "Stacks with over 50% admins",
+      "Value": 16
+    },
+    {
+      " Metric": "Median admin share %",
+      "Value": 50
+    },
+    {
+      " Metric": "Fleet Management: pipelines configured, zero collectors",
+      "Value": 14
+    },
+    {
+      " Metric": "Collectors registered org-wide",
+      "Value": 214
+    },
+    {
+      " Metric": "Stacks without delete protection",
+      "Value": 42
+    },
+    {
+      " Metric": "Configured public dashboards",
+      "Value": "See the Public dashboards tab for the configured count, enabled subset, measured-stack denominator and observed usage. Compare the inventory with the deployment's public-sharing policy."
+    },
+    {
+      " Metric": "Access policies on the org",
+      "Value": 120
+    }
+  ]
+}

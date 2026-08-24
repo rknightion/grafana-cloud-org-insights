@@ -1,0 +1,56 @@
+name: publish
+
+on:
+  workflow_call:
+    inputs:
+      release-tag:
+        description: "Release tag (vX.Y.Z); empty publishes an edge image"
+        required: false
+        type: string
+        default: ""
+  workflow_dispatch:
+    inputs:
+      release-tag:
+        description: "Release tag to republish; empty publishes an edge image"
+        required: false
+        type: string
+        default: ""
+
+permissions: {}
+
+concurrency:
+  group: publish-${{ github.workflow }}-${{ github.ref }}-${{ inputs.release-tag }}
+  cancel-in-progress: ${{ inputs.release-tag == '' }}
+
+jobs:
+  source:
+    name: resolve source revision
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      revision: ${{ steps.revision.outputs.value }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.release-tag || github.ref }}
+          persist-credentials: false
+      - id: revision
+        run: echo "value=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  image:
+    name: build and publish
+    needs: source
+    permissions:
+      contents: write        # attach SBOMs to a GitHub Release
+      packages: write        # push the image to GHCR
+      id-token: write        # obtain keyless signing credentials
+      attestations: write    # publish build provenance
+      security-events: write # upload the Trivy SARIF report
+    uses: rknightion/.github/.github/workflows/container-publish.yml@8c1e89103d1a86179c2e94356b85bedd7c543a42 # v1.9.3
+    with:
+      release-tag: ${{ inputs.release-tag || '' }}
+      build-args: |
+        GCINSIGHT_SOURCE_URL=https://github.com/${{ github.repository }}
+        GCINSIGHT_SOURCE_REVISION=${{ needs.source.outputs.revision }}

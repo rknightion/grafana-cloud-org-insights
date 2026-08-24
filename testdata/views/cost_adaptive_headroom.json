@@ -1,0 +1,184 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack072",
+      "Active series": 306601,
+      "Recs pending": 758,
+      "Rules applied": 0,
+      "Share of org series %": 21.67
+    },
+    {
+      " Stack": "stack036",
+      "Active series": 235765,
+      "Recs pending": 610,
+      "Rules applied": 0,
+      "Share of org series %": 16.67
+    },
+    {
+      " Stack": "stack158",
+      "Active series": 128779,
+      "Recs pending": 708,
+      "Rules applied": 0,
+      "Share of org series %": 9.1
+    },
+    {
+      " Stack": "stack038",
+      "Active series": 95970,
+      "Recs pending": 66,
+      "Rules applied": 0,
+      "Share of org series %": 6.78
+    },
+    {
+      " Stack": "stack035",
+      "Active series": 95158,
+      "Recs pending": 145,
+      "Rules applied": 0,
+      "Share of org series %": 6.73
+    },
+    {
+      " Stack": "stack001b",
+      "Active series": 66141,
+      "Recs pending": 2144,
+      "Rules applied": 0,
+      "Share of org series %": 4.68
+    },
+    {
+      " Stack": "stack049",
+      "Active series": 56868,
+      "Recs pending": 99,
+      "Rules applied": 0,
+      "Share of org series %": 4.02
+    },
+    {
+      " Stack": "stack020",
+      "Active series": 39860,
+      "Recs pending": 47,
+      "Rules applied": 0,
+      "Share of org series %": 2.82
+    },
+    {
+      " Stack": "stack052",
+      "Active series": 38321,
+      "Recs pending": 301,
+      "Rules applied": 0,
+      "Share of org series %": 2.71
+    },
+    {
+      " Stack": "stack053",
+      "Active series": 21141,
+      "Recs pending": 105,
+      "Rules applied": 0,
+      "Share of org series %": 1.49
+    },
+    {
+      " Stack": "stack170",
+      "Active series": 8840,
+      "Recs pending": 174,
+      "Rules applied": 0,
+      "Share of org series %": 0.62
+    },
+    {
+      " Stack": "stack019",
+      "Active series": 5568,
+      "Recs pending": 50,
+      "Rules applied": 0,
+      "Share of org series %": 0.39
+    },
+    {
+      " Stack": "stack177",
+      "Active series": 5390,
+      "Recs pending": 58,
+      "Rules applied": 0,
+      "Share of org series %": 0.38
+    },
+    {
+      " Stack": "stack055",
+      "Active series": 711,
+      "Recs pending": 25,
+      "Rules applied": 0,
+      "Share of org series %": 0.05
+    },
+    {
+      " Stack": "stack193",
+      "Active series": 392,
+      "Recs pending": 12,
+      "Rules applied": 0,
+      "Share of org series %": 0.03
+    },
+    {
+      " Stack": "stack111",
+      "Active series": 162,
+      "Recs pending": 2,
+      "Rules applied": 0,
+      "Share of org series %": 0.01
+    },
+    {
+      " Stack": "stack050",
+      "Active series": 80,
+      "Recs pending": 3,
+      "Rules applied": 0,
+      "Share of org series %": 0.01
+    },
+    {
+      " Stack": "stack113",
+      "Active series": 10,
+      "Recs pending": 1,
+      "Rules applied": 0,
+      "Share of org series %": 0
+    }
+  ]
+}

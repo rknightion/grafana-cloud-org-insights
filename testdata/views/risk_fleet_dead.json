@@ -1,0 +1,240 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack038",
+      "Region": "prod-eu-west-2",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 10,
+      "Pipelines (enabled)": 9,
+      "FM dead": true,
+      "Alert rules": 228,
+      "Active series": 95970
+    },
+    {
+      " Stack": "stack158",
+      "Region": "prod-eu-west-2",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 8,
+      "Pipelines (enabled)": 8,
+      "FM dead": true,
+      "Alert rules": 727,
+      "Active series": 128779
+    },
+    {
+      " Stack": "stack050",
+      "Region": "prod-us-west-0",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 8,
+      "Pipelines (enabled)": 8,
+      "FM dead": true,
+      "Alert rules": 0,
+      "Active series": 80
+    },
+    {
+      " Stack": "stack113",
+      "Region": "prod-us-west-0",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 8,
+      "Pipelines (enabled)": 8,
+      "FM dead": true,
+      "Alert rules": 28,
+      "Active series": 10
+    },
+    {
+      " Stack": "stack049",
+      "Region": "prod-eu-west-2",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 6,
+      "Pipelines (enabled)": 6,
+      "FM dead": true,
+      "Alert rules": 127,
+      "Active series": 56868
+    },
+    {
+      " Stack": "stack097",
+      "Region": "prod-eu-west-2",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 6,
+      "Pipelines (enabled)": 6,
+      "FM dead": true,
+      "Alert rules": 3,
+      "Active series": 5
+    },
+    {
+      " Stack": "stack072",
+      "Region": "eu",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 6,
+      "Pipelines (enabled)": 6,
+      "FM dead": true,
+      "Alert rules": 131,
+      "Active series": 306601
+    },
+    {
+      " Stack": "stack193",
+      "Region": "prod-eu-west-2",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 6,
+      "Pipelines (enabled)": 6,
+      "FM dead": true,
+      "Alert rules": 10,
+      "Active series": 392
+    },
+    {
+      " Stack": "stack071",
+      "Region": "prod-eu-west-2",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 5,
+      "Pipelines (enabled)": 5,
+      "FM dead": true,
+      "Alert rules": 2,
+      "Active series": 2
+    },
+    {
+      " Stack": "stack146",
+      "Region": "prod-eu-west-2",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 5,
+      "Pipelines (enabled)": 5,
+      "FM dead": true,
+      "Alert rules": 185,
+      "Active series": 2
+    },
+    {
+      " Stack": "stack053",
+      "Region": "prod-eu-west-2",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 5,
+      "Pipelines (enabled)": 5,
+      "FM dead": true,
+      "Alert rules": 40,
+      "Active series": 21141
+    },
+    {
+      " Stack": "stack054",
+      "Region": "prod-eu-west-2",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 5,
+      "Pipelines (enabled)": 5,
+      "FM dead": true,
+      "Alert rules": 0,
+      "Active series": 2
+    },
+    {
+      " Stack": "stack002",
+      "Region": "eu",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 5,
+      "Pipelines (enabled)": 5,
+      "FM dead": true,
+      "Alert rules": 0,
+      "Active series": 2
+    },
+    {
+      " Stack": "stack149",
+      "Region": "prod-eu-central-0",
+      "Collectors": 0,
+      "Collectors (active)": 0,
+      "Collectors (inactive)": 0,
+      "Inactive %": null,
+      "Pipelines": 5,
+      "Pipelines (enabled)": 5,
+      "FM dead": true,
+      "Alert rules": 0,
+      "Active series": 2
+    }
+  ]
+}

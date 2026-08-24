@@ -1,0 +1,1171 @@
+{
+  "measured_at": "2026-08-18T13:00:00Z",
+  "source": {
+    "datasource": "grafanacloud-usage",
+    "stack_context": "obs-hub-dev",
+    "metric": "grafanacloud_instance_active_otlp_series",
+    "command": "gcx metrics query 'grafanacloud_instance_active_otlp_series' --context obs-hub-dev -d grafanacloud-usage --from now-3h --to now --step 1h -o json",
+    "note": "Range query, never instant. The `id` label is the metrics instance id (hmInstancePromId), NOT the stack id \u2014 joined to slugs via the committed inventory."
+  },
+  "summary": {
+    "stacks_reporting": 230,
+    "estate_total": 271,
+    "at_the_synthetic_floor_of_2": 182,
+    "reporting_zero": 0,
+    "above_1000": 28,
+    "between_3_and_1000": 20,
+    "why_the_threshold": "Thresholding at >0 would report 230 of 271 stacks (85%) as OTLP adopters. The real figure is 28 (10%): 182 stacks sit on a synthetic floor of exactly 2 series with no real OTLP use, and nothing reports 0 at all \u2014 so >0 is satisfied by every stack that reports anything."
+  },
+  "stacks": [
+    {
+      "metrics_instance_id": "6000382",
+      "slug": "stack015m",
+      "otlp_active_series": 84646.0
+    },
+    {
+      "metrics_instance_id": "6000244",
+      "slug": "stack133",
+      "otlp_active_series": 59185.0
+    },
+    {
+      "metrics_instance_id": "6000012",
+      "slug": "stack001b",
+      "otlp_active_series": 40498.0
+    },
+    {
+      "metrics_instance_id": "6000086",
+      "slug": "stack003",
+      "otlp_active_series": 37370.0
+    },
+    {
+      "metrics_instance_id": "6000338",
+      "slug": "stack108",
+      "otlp_active_series": 30832.0
+    },
+    {
+      "metrics_instance_id": "6000350",
+      "slug": "stack015i",
+      "otlp_active_series": 23246.0
+    },
+    {
+      "metrics_instance_id": "6000298",
+      "slug": "stack044",
+      "otlp_active_series": 17863.0
+    },
+    {
+      "metrics_instance_id": "6000182",
+      "slug": "stack082",
+      "otlp_active_series": 17584.0
+    },
+    {
+      "metrics_instance_id": "6000232",
+      "slug": "stack028",
+      "otlp_active_series": 15213.0
+    },
+    {
+      "metrics_instance_id": "6000076",
+      "slug": "stack170",
+      "otlp_active_series": 14056.0
+    },
+    {
+      "metrics_instance_id": "6000310",
+      "slug": "stack045",
+      "otlp_active_series": 10494.0
+    },
+    {
+      "metrics_instance_id": "6000136",
+      "slug": "stack100",
+      "otlp_active_series": 10097.0
+    },
+    {
+      "metrics_instance_id": "6000106",
+      "slug": "stack171",
+      "otlp_active_series": 4289.0
+    },
+    {
+      "metrics_instance_id": "6000360",
+      "slug": "stack015r",
+      "otlp_active_series": 4218.0
+    },
+    {
+      "metrics_instance_id": "6000276",
+      "slug": "stack121",
+      "otlp_active_series": 4006.0
+    },
+    {
+      "metrics_instance_id": "6000286",
+      "slug": "stack061",
+      "otlp_active_series": 3994.0
+    },
+    {
+      "metrics_instance_id": "6000026",
+      "slug": "obs-hub",
+      "otlp_active_series": 3984.0
+    },
+    {
+      "metrics_instance_id": "6000380",
+      "slug": "stack015h",
+      "otlp_active_series": 3843.0
+    },
+    {
+      "metrics_instance_id": "6000006",
+      "slug": "stack177",
+      "otlp_active_series": 3772.0
+    },
+    {
+      "metrics_instance_id": "6000438",
+      "slug": "testsrobot001",
+      "otlp_active_series": 3530.0
+    },
+    {
+      "metrics_instance_id": "6000054",
+      "slug": "stack052",
+      "otlp_active_series": 3275.0
+    },
+    {
+      "metrics_instance_id": "6000028",
+      "slug": "obs-hub-dev",
+      "otlp_active_series": 2512.0
+    },
+    {
+      "metrics_instance_id": "6000194",
+      "slug": "stack182",
+      "otlp_active_series": 1794.0
+    },
+    {
+      "metrics_instance_id": "6000416",
+      "slug": "stack066",
+      "otlp_active_series": 1368.0
+    },
+    {
+      "metrics_instance_id": "6000262",
+      "slug": "stack060",
+      "otlp_active_series": 1325.0
+    },
+    {
+      "metrics_instance_id": "6000414",
+      "slug": "stack095",
+      "otlp_active_series": 1287.0
+    },
+    {
+      "metrics_instance_id": "6000326",
+      "slug": "stack122",
+      "otlp_active_series": 1227.0
+    },
+    {
+      "metrics_instance_id": "6000250",
+      "slug": "stack198",
+      "otlp_active_series": 1028.0
+    },
+    {
+      "metrics_instance_id": "6000522",
+      "slug": "stack016",
+      "otlp_active_series": 773.0
+    },
+    {
+      "metrics_instance_id": "6000196",
+      "slug": "stack182a",
+      "otlp_active_series": 587.0
+    },
+    {
+      "metrics_instance_id": "6000080",
+      "slug": "stack159",
+      "otlp_active_series": 520.0
+    },
+    {
+      "metrics_instance_id": "6000520",
+      "slug": "stack143",
+      "otlp_active_series": 478.0
+    },
+    {
+      "metrics_instance_id": "6000356",
+      "slug": "stack015u",
+      "otlp_active_series": 424.0
+    },
+    {
+      "metrics_instance_id": "6000074",
+      "slug": "stack193",
+      "otlp_active_series": 392.0
+    },
+    {
+      "metrics_instance_id": "6000164",
+      "slug": "stack025",
+      "otlp_active_series": 372.0
+    },
+    {
+      "metrics_instance_id": "6000370",
+      "slug": "stack015l",
+      "otlp_active_series": 259.0
+    },
+    {
+      "metrics_instance_id": "6000144",
+      "slug": "stack078",
+      "otlp_active_series": 152.0
+    },
+    {
+      "metrics_instance_id": "6000344",
+      "slug": "stack015o",
+      "otlp_active_series": 117.0
+    },
+    {
+      "metrics_instance_id": "6000128",
+      "slug": "stack075",
+      "otlp_active_series": 34.0
+    },
+    {
+      "metrics_instance_id": "6000152",
+      "slug": "stack007",
+      "otlp_active_series": 24.0
+    },
+    {
+      "metrics_instance_id": "6000240",
+      "slug": "stack043",
+      "otlp_active_series": 13.0
+    },
+    {
+      "metrics_instance_id": "6000362",
+      "slug": "stack015a",
+      "otlp_active_series": 5.0
+    },
+    {
+      "metrics_instance_id": "6000334",
+      "slug": "stack014",
+      "otlp_active_series": 4.0
+    },
+    {
+      "metrics_instance_id": "6000186",
+      "slug": "stack008",
+      "otlp_active_series": 4.0
+    },
+    {
+      "metrics_instance_id": "6000066",
+      "slug": "stack113",
+      "otlp_active_series": 4.0
+    },
+    {
+      "metrics_instance_id": "6000002",
+      "slug": "stack158",
+      "otlp_active_series": 3.0
+    },
+    {
+      "metrics_instance_id": "6000300",
+      "slug": "stack155",
+      "otlp_active_series": 3.0
+    },
+    {
+      "metrics_instance_id": "6000530",
+      "slug": "stack017",
+      "otlp_active_series": 3.0
+    },
+    {
+      "metrics_instance_id": "6000358",
+      "slug": "stack015q",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000538",
+      "slug": "stack188",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000078",
+      "slug": "stack149",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000346",
+      "slug": "stack015s",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000400",
+      "slug": "stack033",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000200",
+      "slug": "stack009",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000348",
+      "slug": "stack015f",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000398",
+      "slug": "stack032",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000306",
+      "slug": "stack191",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000256",
+      "slug": "stack029",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000180",
+      "slug": "stack180",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000114",
+      "slug": "stack152a",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000342",
+      "slug": "stack064",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000340",
+      "slug": "stack031",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000070",
+      "slug": "stack072",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000322",
+      "slug": "stack107",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000158",
+      "slug": "stack163",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000064",
+      "slug": "stack002",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000542",
+      "slug": "stack015",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000390",
+      "slug": "stack123",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000104",
+      "slug": "stack184",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000320",
+      "slug": "stack030",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000120",
+      "slug": "stack114",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000024",
+      "slug": "stack020",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000094",
+      "slug": "stack023",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000032",
+      "slug": "stack036",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000130",
+      "slug": "stack099",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000432",
+      "slug": "stack109",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000052",
+      "slug": "stack038",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000138",
+      "slug": "stack076",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000208",
+      "slug": "stack120",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000168",
+      "slug": "stack164",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000410",
+      "slug": "stack140",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000282",
+      "slug": "stack189",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000230",
+      "slug": "stack058",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000290",
+      "slug": "stack161",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000408",
+      "slug": "stack046",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000132",
+      "slug": "stack128",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000238",
+      "slug": "stack012",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000108",
+      "slug": "stack172",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000084",
+      "slug": "stack022",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000402",
+      "slug": "stack176",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000304",
+      "slug": "stack167",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000176",
+      "slug": "stack026",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000040",
+      "slug": "stack071",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000022",
+      "slug": "stack110",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000260",
+      "slug": "stack153",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000124",
+      "slug": "stack127",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000374",
+      "slug": "stack015d",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000324",
+      "slug": "stack091",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000068",
+      "slug": "stack097",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000082",
+      "slug": "stack199",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000368",
+      "slug": "stack015k",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000376",
+      "slug": "stack015j",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000210",
+      "slug": "stack042",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000314",
+      "slug": "stack089",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000056",
+      "slug": "stack053",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000212",
+      "slug": "stack057",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000318",
+      "slug": "stack090",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000258",
+      "slug": "stack059",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000034",
+      "slug": "stack111",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000246",
+      "slug": "stack186",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000004",
+      "slug": "stack145",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000096",
+      "slug": "stack151",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000134",
+      "slug": "stack024",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000160",
+      "slug": "stack056",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000234",
+      "slug": "stack102",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000270",
+      "slug": "stack154",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000216",
+      "slug": "stack027",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000048",
+      "slug": "stack146",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000050",
+      "slug": "stack147",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000202",
+      "slug": "stack197",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000422",
+      "slug": "stack067",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000190",
+      "slug": "stack185",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000150",
+      "slug": "stack006",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000272",
+      "slug": "stack174",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000020",
+      "slug": "stack049",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000312",
+      "slug": "stack106",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000188",
+      "slug": "stack181",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000148",
+      "slug": "stack079",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000110",
+      "slug": "stack194",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000288",
+      "slug": "stack013",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000236",
+      "slug": "stack103",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000280",
+      "slug": "stack200",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000226",
+      "slug": "stack131",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000140",
+      "slug": "stack077",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000142",
+      "slug": "stack129",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000242",
+      "slug": "stack160",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000100",
+      "slug": "stack178",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000122",
+      "slug": "stack115",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000220",
+      "slug": "stack010a",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000268",
+      "slug": "stack165",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000412",
+      "slug": "stack192",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000218",
+      "slug": "stack010",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000154",
+      "slug": "stack080",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000418",
+      "slug": "stack196",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000102",
+      "slug": "stack004",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000354",
+      "slug": "stack015p",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000336",
+      "slug": "stack175",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000252",
+      "slug": "stack183",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000392",
+      "slug": "stack138",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000328",
+      "slug": "stack062",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000302",
+      "slug": "stack187",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000372",
+      "slug": "stack015g",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000378",
+      "slug": "stack015e",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000536",
+      "slug": "stack069",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000352",
+      "slug": "stack015t",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000018",
+      "slug": "stack019",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000060",
+      "slug": "stack148",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000204",
+      "slug": "stack119",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000192",
+      "slug": "stack190",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000116",
+      "slug": "stack039",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000146",
+      "slug": "stack116",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000058",
+      "slug": "stack054",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000062",
+      "slug": "stack126",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000178",
+      "slug": "stack081",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000044",
+      "slug": "stack112",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000046",
+      "slug": "stack051",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000366",
+      "slug": "stack015c",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000426",
+      "slug": "stack142",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000228",
+      "slug": "stack132",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000222",
+      "slug": "stack011",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000264",
+      "slug": "stack134",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000292",
+      "slug": "stack088",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000294",
+      "slug": "stack105",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000266",
+      "slug": "stack135",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000404",
+      "slug": "stack094",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000090",
+      "slug": "stack162",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000088",
+      "slug": "stack150",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000198",
+      "slug": "stack041",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000364",
+      "slug": "stack015b",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000284",
+      "slug": "stack166",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000394",
+      "slug": "stack157",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000030",
+      "slug": "stack035",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000396",
+      "slug": "stack139",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000112",
+      "slug": "stack152",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000428",
+      "slug": "stack047",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000388",
+      "slug": "stack093",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000528",
+      "slug": "stack169",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000098",
+      "slug": "stack074",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000540",
+      "slug": "stack018",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000420",
+      "slug": "stack124",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000184",
+      "slug": "stack101",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000406",
+      "slug": "stack065",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000274",
+      "slug": "stack087",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000118",
+      "slug": "stack005",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000316",
+      "slug": "stack137",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000008",
+      "slug": "stack125",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000524",
+      "slug": "stack034",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000162",
+      "slug": "stack173",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000170",
+      "slug": "stack130",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000172",
+      "slug": "stack117",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000386",
+      "slug": "stack092",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000278",
+      "slug": "stack104",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000072",
+      "slug": "stack055",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000038",
+      "slug": "stack037",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000254",
+      "slug": "stack086",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000036",
+      "slug": "stack070",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000384",
+      "slug": "stack015n",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000126",
+      "slug": "stack098",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000532",
+      "slug": "stack144",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000526",
+      "slug": "stack096",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000534",
+      "slug": "stack048",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000332",
+      "slug": "stack063",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000430",
+      "slug": "stack068",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000330",
+      "slug": "stack156",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000308",
+      "slug": "stack168",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000296",
+      "slug": "stack136",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000166",
+      "slug": "stack040",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000174",
+      "slug": "stack118",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000010",
+      "slug": "stack001",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000248",
+      "slug": "stack195",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000214",
+      "slug": "stack084",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000156",
+      "slug": "stack179",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000014",
+      "slug": "stack001c",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000016",
+      "slug": "stack001a",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000042",
+      "slug": "stack050",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000224",
+      "slug": "stack085",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000424",
+      "slug": "stack141",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000206",
+      "slug": "stack083",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6000092",
+      "slug": "stack073",
+      "otlp_active_series": 2.0
+    },
+    {
+      "metrics_instance_id": "6500281",
+      "slug": null,
+      "otlp_active_series": 2.0
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Datasource type": "loki",
+      "Data requests": 1377,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 12
+    },
+    {
+      " Datasource type": "datasource",
+      "Data requests": 682,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 18
+    },
+    {
+      " Datasource type": "prometheus",
+      "Data requests": 2563,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 12
+    },
+    {
+      " Datasource type": "__expr__",
+      "Data requests": 10,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 1
+    },
+    {
+      " Datasource type": "cloudwatch",
+      "Data requests": 126,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 2
+    },
+    {
+      " Datasource type": "yesoreyeram-infinity-datasource",
+      "Data requests": 281,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 3
+    },
+    {
+      " Datasource type": "influxdb",
+      "Data requests": 297,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 1
+    },
+    {
+      " Datasource type": "elasticsearch",
+      "Data requests": 307,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 3
+    },
+    {
+      " Datasource type": "__history_api_ds_pluginId__",
+      "Data requests": 17,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 2
+    },
+    {
+      " Datasource type": "grafana-googlesheets-datasource",
+      "Data requests": 11,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 1
+    },
+    {
+      " Datasource type": "wrapped-loki-ds",
+      "Data requests": 91,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 1
+    },
+    {
+      " Datasource type": "grafana-knowledgegraph-datasource",
+      "Data requests": 27,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 3
+    },
+    {
+      " Datasource type": "usage-analytics",
+      "Data requests": 2,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 1
+    },
+    {
+      " Datasource type": "tempo",
+      "Data requests": 31,
+      "Cumulative duration (ms)": 0,
+      "Request errors": 0,
+      "Stacks": 2
+    }
+  ]
+}

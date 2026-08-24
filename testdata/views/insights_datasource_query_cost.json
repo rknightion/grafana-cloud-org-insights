@@ -1,0 +1,498 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "obs-hub",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack001",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack001a",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack001b",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack001c",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack002",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack019",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack020",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack035",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack036",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack037",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack038",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack049",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack050",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack051",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack052",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack053",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack054",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack055",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack070",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack071",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack072",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack097",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack110",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack111",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack112",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack113",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack125",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack126",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack145",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack146",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack147",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack148",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack149",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack158",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack170",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack177",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack193",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "stack201",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "testsrobot002",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "teststack004",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "teststack017",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    },
+    {
+      " Stack": "teststack018",
+      "Datasource": "(query cost unavailable)",
+      "Datasource uid": "",
+      "Datasource type": "",
+      "State": "unknown",
+      "Cumulative duration (ms)": null,
+      "Cache hit %": null,
+      "Coverage detail": "query cost unavailable"
+    }
+  ]
+}

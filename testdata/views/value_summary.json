@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Metric": "Stacks in scope",
+      "Value": "44 total, 40 scannable, 13 maturity-ranked"
+    },
+    {
+      " Metric": "Billed users (the only figure valid for money)",
+      "Value": 205
+    },
+    {
+      " Metric": "Active users (adoption, NOT money)",
+      "Value": 231
+    },
+    {
+      " Metric": "Active series org-wide",
+      "Value": 1414648
+    },
+    {
+      " Metric": "Series per billed user",
+      "Value": 6900.7
+    },
+    {
+      " Metric": "Median maturity score",
+      "Value": 56.7
+    },
+    {
+      " Metric": "Rubric version",
+      "Value": "1"
+    }
+  ]
+}
