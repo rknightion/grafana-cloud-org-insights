@@ -281,6 +281,46 @@ K8S_STACKS = _stacks_with("grafanacloud_instance_active_kube_pod_info_series")
 HOST_STACKS = _stacks_with("grafanacloud_instance_active_node_uname_info_series")
 INTEGRATION_STACKS = _stacks_with("grafanacloud_instance_active_integration_series")
 
+# Phase 1 of Pillar K is deliberately panel-only: these counts already exist on the write stack's
+# provisioned usage datasource, so copying them through the collector would add credentials, failure
+# modes and series without adding information. Keep different metric generations separate rather than
+# summing them into a total whose populations may overlap.
+OBSERVED_OBJECT_COUNTS = (
+    ("sum(grafanacloud_app_observability_service_entity_count)", "App O11y services"),
+    ("sum(grafanacloud_app_observability_hostless_service_entity_count)",
+     "App O11y hostless services"),
+    ("sum(grafanacloud_asserts_instance_active_entities)", "active entity-graph entities"),
+    ("sum(grafanacloud_asserts_instance_total_entities)", "entity-graph entities"),
+    ("sum(grafanacloud_instance_active_target_info_series)", "OTel service instances"),
+    ("sum(grafanacloud_instance_active_kube_node_info_series)", "Kubernetes nodes"),
+    ("sum(grafanacloud_instance_active_kube_pod_container_info_series)", "containers"),
+    ("sum(grafanacloud_logs_instance_active_streams)", "log streams"),
+    ("sum(grafanacloud_instance_active_caas_targets_series)", "CaaS targets"),
+    ("sum(grafanacloud_instance_active_faas_targets_series)", "serverless targets"),
+)
+APP_HOST_COUNTS = (
+    ("sum(grafanacloud_instance_app_o11y_host_count)", "App O11y host count"),
+    ("sum(grafanacloud_instance_app_o11y_host_count_v2)", "App O11y host count v2"),
+    ("sum(grafanacloud_instance_app_o11y_host_count_v3)", "App O11y host count v3"),
+)
+APP_SERVICES_BY_STACK = build.usage_by_slug(
+    "topk(15, sum by(stack_id)(grafanacloud_app_observability_service_entity_count))"
+)
+INTEGRATIONS_BY_SERIES = (
+    "topk(20, sum by(integration)(grafanacloud_instance_active_integration_series))"
+)
+INTEGRATIONS_BY_HOST_SERIES = (
+    "topk(20, sum by(integration)(grafanacloud_instance_active_integration_host_series))"
+)
+PROFILE_USAGE_GROUPS = (
+    "topk(15, sum by(usage_group)(max_over_time("
+    f"grafanacloud_profiles_instance_usage_group_bytes_received_per_second[{WINDOW}])))"
+)
+FE_SESSION_RATE = (
+    "max_over_time(sum(grafanacloud_frontend_observability_instance_sessions_per_second)"
+    f"[{WINDOW}:5m])"
+)
+
 # --- Pillar H: commercial (Tier 3) ------------------------------------------------------------------
 # Commercial presentation constraints, enforced by tests:
 # * Money is labelled **USD per month, marked as DERIVED** - the datasource states no currency.
@@ -1267,6 +1307,67 @@ def d_usage(ds: str):
                         "live ratio over a moving estate. Worth both readings: a real "
                         "adoption success, and also where a quarter of the metrics bill sits, which makes "
                         "it the first place to point Adaptive Metrics."),
+        "b_asset_counts": build.barchart_series_panel(
+            "Observed objects across the estate", OBSERVED_OBJECT_COUNTS,
+            ds_uid=build.USAGE_UID, sort="desc",
+            description="Affirmative inventory from counters already present on the write stack. Each "
+                        "bar keeps its source metric's population intact; service, entity and target "
+                        "counts are not added together into a synthetic total."),
+        "b_observed_objects": build.barchart_panel(
+            "App Observability services by stack", APP_SERVICES_BY_STACK,
+            legend="{{slug}}", ds_uid=build.USAGE_UID, limit=15,
+            description="Named with the datasource's stack_id-to-slug lookup. The join multiplies by "
+                        "the one-series-per-stack info metric so the observed-service count is unchanged."),
+        "b_integrations": build.barchart_panel(
+            "Observed technologies from Grafana Integrations", INTEGRATIONS_BY_SERIES,
+            legend="{{integration}}", ds_uid=build.USAGE_UID, limit=20,
+            description="Active series grouped by Grafana Cloud's live `integration` label. There is no "
+                        "maintained technology list: a newly observed integration appears on its own."),
+        "b_integration_hosts": build.barchart_panel(
+            "Integration host series by technology", INTEGRATIONS_BY_HOST_SERIES,
+            legend="{{integration}}", ds_uid=build.USAGE_UID, limit=20,
+            description="The host-shaped half of the same discovered integration catalogue, kept "
+                        "separate from all active integration series so the two meanings stay legible."),
+        "b_profiles": build.barchart_panel(
+            "Profile ingestion by usage group (24h peak)", PROFILE_USAGE_GROUPS,
+            legend="{{usage_group}}", ds_uid=build.USAGE_UID, unit="Bps", limit=15,
+            description="Profile bytes received per second, grouped by the live usage_group label and "
+                        "windowed over the dashboard's operational day. An empty chart is measured "
+                        "absence in this datasource, not a configured list with no matches."),
+        "b_app_hosts": build.barchart_series_panel(
+            "App Observability hosts by reporting metric", APP_HOST_COUNTS,
+            ds_uid=build.USAGE_UID, sort="desc",
+            description="The three reporting generations stay separate because their populations may "
+                        "overlap. Adding them would manufacture a host total the datasource does not "
+                        "declare."),
+        "n_infra_host_hours": build.stat_panel(
+            "Infrastructure host-hours observed",
+            "sum(grafanacloud_org_infra_o11y_billable_host_hours)",
+            ds_uid=build.USAGE_UID, unit="h",
+            description="Billing-side host-hours attributed to Infrastructure Observability in the "
+                        "datasource's current accounting period."),
+        "n_infra_container_hours": build.stat_panel(
+            "Infrastructure container-hours observed",
+            "sum(grafanacloud_org_infra_o11y_billable_container_hours)",
+            ds_uid=build.USAGE_UID, unit="h",
+            description="Billing-side container-hours attributed to Infrastructure Observability in "
+                        "the datasource's current accounting period."),
+        "n_db_host_hours": build.stat_panel(
+            "Database host-hours observed", "sum(grafanacloud_org_db_o11y_billable_host_hours)",
+            ds_uid=build.USAGE_UID, unit="h",
+            description="Billing-side database host-hours observed in the datasource's current "
+                        "accounting period."),
+        "n_fe_sessions": build.stat_panel(
+            "Frontend sessions observed", "sum(grafanacloud_org_fe_o11y_billable_sessions)",
+            ds_uid=build.USAGE_UID,
+            description="Billing-side frontend sessions observed in the datasource's current "
+                        "accounting period."),
+        "n_fe_session_rate": build.stat_panel(
+            "Frontend session rate (24h peak)", FE_SESSION_RATE,
+            ds_uid=build.USAGE_UID, unit="ops",
+            description="The time-aligned estate session rate at its highest point in the operational "
+                        "window. The aggregate is windowed before comparison; it is not an instantaneous "
+                        "sample or a sum of unrelated per-stack peaks."),
         "t_workload": build.timeseries_panel(
             "How many stacks monitor what",
             [(K8S_STACKS, "Kubernetes"), (HOST_STACKS, "hosts"),
@@ -1306,8 +1407,20 @@ def d_usage(ds: str):
         build.tab("Protocol adoption", ["n_otlp", "n_otlp_floor", "t_otlp"]),
         build.tab("Unread telemetry", ["n_logs_unread", "n_logs_unread_bytes",
                                        "b_logs_unread", "t_logs_unread"]),
-        build.tab("Workload", ["n_pods", "n_hosts", "n_intseries", "n_intshare",
-                               "t_workload", "n_assistant", "n_aitokens"]),
+        build.rows_tab("Workload", [
+            build.row("Headline", ["n_pods", "n_hosts", "n_intseries", "n_intshare"],
+                      max_columns=4, row_height="short"),
+            build.row("Observed objects", ["b_asset_counts", "b_observed_objects"], max_columns=2),
+            build.row("Technologies and profiles",
+                      ["b_integrations", "b_integration_hosts", "b_profiles"], max_columns=3),
+            build.row("App Observability hosts", ["b_app_hosts"], max_columns=1),
+            build.row("Billing-side observed activity",
+                      ["n_infra_host_hours", "n_infra_container_hours", "n_db_host_hours",
+                       "n_fe_sessions", "n_fe_session_rate"], max_columns=5, row_height="short"),
+            build.row("Estate reach", ["t_workload"], max_columns=1),
+            build.row("Adjacent product use", ["n_assistant", "n_aitokens"],
+                      max_columns=2, row_height="short"),
+        ]),
     ]
     return "gcinsight-usage", "Grafana Cloud Org Insights - Consumer behaviour", \
         ("Pillar C: what stack consumers actually do. Per-dashboard view analytics now lives on the "
@@ -2554,6 +2667,13 @@ def d_operations(ds: str):
             description="Lifetime alert-group volume by team across every OnCall stack reporting the "
                         "counter. This has broader coverage than the timing-based engagement panels, so "
                         "use it to rank workload, not as their denominator."),
+        "b_service_owner": build.barchart_panel(
+            "Observed services and their owning teams",
+            f"topk(20, sum by(service_name, team)({GROUPS}))",
+            legend="{{service_name}} · {{team}}", ds_uid=build.USAGE_UID, limit=20,
+            description="A named service-and-owner catalogue read directly from OnCall's live labels. "
+                        "The volume ranks the register; `No service` and `No team` remain visible rather "
+                        "than being filtered away, because they state the unmatched share."),
 
         # --- Alert flow -------------------------------------------------------------------------------
         "n_groups": build.stat_panel(
@@ -2635,6 +2755,7 @@ def d_operations(ds: str):
             build.row("Headline", ["n_unowned_all", "n_unowned_acked", "n_unowned_svc"],
                       max_columns=3, row_height="short"),
             build.row("Team detail", ["b_teamtail", "b_teamvol"], max_columns=2),
+            build.row("Named service register", ["b_service_owner"], max_columns=1),
         ]),
         build.tab("Alert flow", ["n_groups", "n_notified", "n_state_history_failures",
                                  "b_state_history_failures", "b_integration", "b_service", "t_state",

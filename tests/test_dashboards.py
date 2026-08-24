@@ -489,7 +489,11 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
                  "n_notiffail", "n_deadrules", "n_evalfail",
                  "b_deadrules", "b_notif", "t_alerting"),
         "usage": ("n_otlp", "n_otlp_floor", "t_otlp", "n_logs_unread", "n_logs_unread_bytes",
-                  "b_logs_unread", "t_logs_unread"),
+                  "b_logs_unread", "t_logs_unread", "n_pods", "n_hosts", "n_intseries",
+                  "n_intshare", "b_asset_counts", "b_observed_objects", "b_integrations",
+                  "b_integration_hosts", "b_profiles",
+                  "b_app_hosts", "n_infra_host_hours", "n_infra_container_hours",
+                  "n_db_host_hours", "n_fe_sessions", "n_fe_session_rate", "t_workload"),
         "cost": ("n_savings", "n_savings_pct", "n_savings_stacks", "n_aggregating",
                  "b_savings", "t_savings"),
         "value": ("n_oncall", "b_oncall", "n_activated", "b_activation", "n_nativehist",
@@ -498,8 +502,8 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
         "operations": ("n_engagement", "n_engaged", "n_engaged_denom", "b_teamengage", "t_engagement",
                        "n_mtta", "n_mttr", "n_mtta_mean", "n_tail", "n_tail_share", "b_ackdist",
                        "t_response", "n_unowned_all", "n_unowned_acked", "n_unowned_svc",
-                       "b_teamtail", "b_teamvol", "n_groups", "n_notified", "b_integration",
-                       "b_service", "t_state"),
+                       "b_teamtail", "b_teamvol", "b_service_owner", "n_groups", "n_notified",
+                       "b_integration", "b_service", "t_state"),
         "commercial": ("n_commit", "n_consumed", "n_consumed_share", "n_balance", "n_term_elapsed",
                        "n_months_metric", "n_months_contract", "n_runrate", "b_runrate", "t_runrate",
                        "t_metrics_share", "t_burn", "t_balance"),
@@ -838,6 +842,62 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
                           f"{const} is an instantaneous count and will not match the numerators")
         for expr in self._exprs("value", "t_capability"):
             self.assertIn("max_over_time", expr)
+
+    def test_phase_one_observed_footprint_reads_every_declared_usage_counter(self):
+        """The panel-only phase is useful by itself only if it exposes the already-provisioned asset
+        counters instead of leaving the affirmative inventory behind later collector work."""
+        expressions = " ".join(
+            expr for key in self.USAGE_KEYS["usage"] for expr in self._exprs("usage", key)
+        )
+        required = (
+            "grafanacloud_instance_active_integration_series",
+            "grafanacloud_instance_active_integration_host_series",
+            "grafanacloud_app_observability_service_entity_count",
+            "grafanacloud_app_observability_hostless_service_entity_count",
+            "grafanacloud_asserts_instance_active_entities",
+            "grafanacloud_asserts_instance_total_entities",
+            "grafanacloud_instance_active_target_info_series",
+            "grafanacloud_instance_active_kube_node_info_series",
+            "grafanacloud_instance_active_kube_pod_container_info_series",
+            "grafanacloud_logs_instance_active_streams",
+            "grafanacloud_instance_active_caas_targets_series",
+            "grafanacloud_instance_active_faas_targets_series",
+            "grafanacloud_instance_app_o11y_host_count",
+            "grafanacloud_instance_app_o11y_host_count_v2",
+            "grafanacloud_instance_app_o11y_host_count_v3",
+            "grafanacloud_org_infra_o11y_billable_host_hours",
+            "grafanacloud_org_infra_o11y_billable_container_hours",
+            "grafanacloud_org_db_o11y_billable_host_hours",
+            "grafanacloud_org_fe_o11y_billable_sessions",
+            "grafanacloud_frontend_observability_instance_sessions_per_second",
+            "grafanacloud_profiles_instance_usage_group_bytes_received_per_second",
+        )
+        for metric in required:
+            self.assertIn(metric, expressions, f"Phase 1 does not render {metric}")
+
+    def test_integration_inventory_is_discovered_from_the_integration_label(self):
+        expr = self._exprs("usage", "b_integrations")[0]
+        self.assertIn("sum by(integration)", expr)
+        self.assertNotRegex(expr, r'integration\s*[!=]=?\s*"',
+                            "the technology inventory is filtering a maintained integration list")
+
+    def test_named_oncall_catalogue_keeps_service_and_owner_together(self):
+        expr = self._exprs("operations", "b_service_owner")[0]
+        self.assertIn("sum by(service_name, team)", expr)
+        legend = self._queries("operations", "b_service_owner")[0]["spec"]["query"]["spec"]["legendFormat"]
+        self.assertIn("{{service_name}}", legend)
+        self.assertIn("{{team}}", legend)
+
+    def test_phase_one_rate_shaped_asset_queries_are_windowed(self):
+        for key in ("n_fe_session_rate", "b_profiles"):
+            for expr in self._exprs("usage", key):
+                self.assertIn("max_over_time", expr, f"usage.{key} is an instantaneous rate")
+
+    def test_phase_one_named_stack_inventory_uses_the_multiplicative_slug_join(self):
+        expr = self._exprs("usage", "b_observed_objects")[0]
+        self.assertIn("sum by(stack_id)", expr)
+        self.assertIn("* on(stack_id) group_left(slug)", expr)
+        self.assertNotIn("+ on(stack_id)", expr)
 
     def test_the_operations_dashboard_is_registered_everywhere(self):
         """Three registries must agree or the dashboard either fails to build or loses its cross-links."""
