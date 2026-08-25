@@ -1,9 +1,11 @@
 ---
 id: GCI-0012
 title: Filter non-service identities out of the observed service register
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-08-25 12:57'
+updated_date: '2026-08-25 15:05'
 labels:
   - pillar-k
   - coverage
@@ -62,3 +64,66 @@ The register already discloses discovered versus retained honestly in `coverage_
 - [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
 - [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Inspect the current synthetic identity conventions and add decision tests for application, platform, and infrastructure-unit classification without estate-specific names.
+2. Classify every discovered identity from its live name, keep all populations visible, and restrict service/depth/score aggregates to application rows.
+3. Publish bounded population counts and expose population in the service register and Coverage headline.
+4. Regenerate BUDGET.md, run the full item gate and CodeRabbit, finalize, commit to main, and push.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+TWO CLASSIFICATION DECISIONS, both previously unstated. These are authoritative; implement them as written.
+
+DECISION 1 - the platform synthetic-probe pattern is the prefix `k6-synthetic-` and nothing looser.
+
+Measured shape: this platform deploys one k6 health-check probe per stack, and its identity is
+`k6-synthetic-<stack-slug>`, with `job` and `service_name` carrying the same value and exactly one
+series per stack. Reach was 230 stacks with a companion health-check metric on 231.
+
+Implement as a literal prefix match on the identity, casefolded, anchored at the start. Do NOT match a
+bare `k6` substring: k6 is also a legitimate customer load-testing tool, and a substring rule would
+reclassify real customer k6 workloads as platform noise. Do NOT encode any stack slug or customer
+string - the slug is the variable part and must never appear in this repository.
+
+Where the pipeline has both `job` and `service_name` for an identity, ALSO record the structural
+signal that the two are equal. That equality is estate-agnostic and stronger than any name prefix, so
+it is the better long-term test; the prefix is what is implementable today. If the register pipeline
+only carries `service_name`, ship the prefix alone and leave a comment saying why.
+
+Classify these as population `platform`, count them, and publish the count. They must be visible as a
+named population rather than silently dropped - a reader needs to see that this platform is itself the
+largest single contributor to the identity count, and a silent filter would hide a future change in
+our own probe naming.
+
+DECISION 2 - do NOT classify by identity length. There is no three-character rule, and no length rule
+of any kind.
+
+Length is the wrong instrument and this project has already measured it being wrong. On the
+dashboard-matching work, requiring two or more tokens as a generic-name guard killed 45 TRUE positives
+while removing 18 false ones. Short names in a real estate include genuine services, and the same
+failure mode applies here: a rule that throws away every identity of three characters or fewer throws
+away real applications to tidy up a metric.
+
+Classify on EVIDENCE instead, which the register already holds:
+
+- the structural patterns in this task already name the machine-generated class - systemd unit
+  suffixes, session and user prefixes, embedded run ids, uuids;
+- the platform prefix from decision 1;
+- signal depth and breadth, which are already computed. An identity carrying metrics or traces, or
+  more than one signal, is a service whatever its length.
+
+An identity that matches no rule stays in the application population and is NOT reclassified on the
+strength of being short. If a short-identity population turns out to be large and genuinely junk,
+that is a new finding needing its own measurement and its own decision - bring it back rather than
+inventing a threshold.
+
+WHY BOTH DECISIONS LEAN THE SAME WAY: this pillar publishes a coverage denominator. Over-filtering
+inflates coverage by shrinking the denominator, which is the same class of defect as the unscoring bug
+GCI-0016 just fixed, only pointed the other way and harder to spot. Prefer a named, counted, visible
+population over a silent drop every time.
+<!-- SECTION:NOTES:END -->
