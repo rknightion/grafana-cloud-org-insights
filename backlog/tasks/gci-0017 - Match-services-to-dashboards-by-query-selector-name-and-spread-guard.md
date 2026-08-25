@@ -4,6 +4,7 @@ title: 'Match services to dashboards by query selector, name and spread guard'
 status: To Do
 assignee: []
 created_date: '2026-08-25 13:11'
+updated_date: '2026-08-25 13:21'
 labels:
   - pillar-k
   - coverage
@@ -98,3 +99,19 @@ The SLO read is already complete. On a stack with 27 SLOs all carrying a service
 - [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
 - [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+DECISION on stock integration dashboards, taken by the product owner: a stock integration dashboard DOES count as coverage evidence, on the conjunction "the dashboard is deployed AND that technology is detected in the telemetry". Rationale: if a dashboard for a technology is present and the technology metrics are arriving, the org is monitoring that technology in some form, and claiming otherwise would understate real coverage.
+
+Implementation consequence: tier 3 becomes the primary resolution for technology-named services rather than a fallback that merely recovers spread-guard casualties. Require BOTH conditions:
+1. the service name resolves to a technology-registry key, and
+2. that technology is detected on the SAME stack by its registry sentinel in the same run.
+
+This is strictly stronger than either signal alone and it converts all ten of the measured spread-guard casualties into true positives, since every one of them is a registry key.
+
+Known edge, to be handled rather than ignored: the conjunction is only as sound as the sentinel. For Grafana own components the metric families can arrive from Grafana Cloud self-monitoring rather than from a customer deployment, so a service named after one could satisfy the conjunction without a real deployment behind it. This is safe TODAY only because the registry deliberately carries no self-hosted Grafana, Loki, Mimir, Tempo or Pyroscope entries - they are pending sentinel capture in the lab. When those entries land, the conjunction must additionally require the sentinel to be a metric a customer deployment emits and Grafana Cloud does not, or those four technologies must be excluded from tier 3.
+
+Record the evidence tier as `technology_and_dashboard` so a consumer can still distinguish it from a literal query-selector match.
+<!-- SECTION:NOTES:END -->

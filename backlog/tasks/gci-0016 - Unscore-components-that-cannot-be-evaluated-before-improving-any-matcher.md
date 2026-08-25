@@ -4,6 +4,7 @@ title: 'Unscore components that cannot be evaluated, before improving any matche
 status: To Do
 assignee: []
 created_date: '2026-08-25 13:11'
+updated_date: '2026-08-25 13:21'
 labels:
   - pillar-k
   - coverage
@@ -95,3 +96,26 @@ Measured: 425 of 3,566 published rows (11.9%), and 12,459 of 18,376 in the full 
 - [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
 - [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+VERIFIED against independent sources after the product owner challenged the profiles and SLO figures. Both hold, and both mean the products are barely used - which is the point of unscoring them rather than scoring them as failures.
+
+Profiles, three independent measurements agreeing:
+- our collector: 1 service carries a profiles identity across the whole estate
+- billing datasource, non-zero profiles usage over 24h: 1 stack
+- billing datasource, Pyroscope instance PROVISIONED: 274 stacks
+
+So 269 of 270 measured stacks have zero profiling data while every stack has the instance provisioned. That gap is itself a finding of the same shape the estate pillar already publishes for other provisioned-but-unused capabilities, and it belongs on the surface alongside the unscored reason.
+
+SLOs, two independent measurements agreeing:
+- the estate metric-name sweep: 4 of 270 stacks carry any `grafana_slo_*` metric
+- the SLO API census: 4 stacks own any SLO
+
+So 266 of 270 stacks own no SLO. `grafanacloud_slo_*` does not exist as a metric family; do not look for it.
+
+For scale, over the same 24h window: 269 stacks ingest logs and 232 ingest traces. Profiles at 1 and SLOs at 4 are the outliers by three orders of magnitude, not a measurement artefact.
+
+Wording rule for whoever implements this: state these as "N stacks have NO profiles" or "M stacks own zero SLOs". A bare "269/270" next to the word profiles reads as the opposite of what it means and was misread once already.
+<!-- SECTION:NOTES:END -->
