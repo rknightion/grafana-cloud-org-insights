@@ -421,8 +421,21 @@ class CoverageBuildTest(unittest.TestCase):
         self.assertGreater(views[coverage.SUMMARY_VIEW][0]["Services discovered"], coverage.MAX_SERVICES)
 
     def test_declared_view_schemas_are_derived_from_real_rows(self):
+        stacks = [
+            {**stack, "id": index + 1, "status": "active", "hpInstanceId": index + 11,
+             "htInstanceId": index + 21, "k6OrgId": index + 31,
+             "hmInstancePromCurrentActiveSeries": 100 - index}
+            for index, stack in enumerate(STACKS)
+        ]
+        adoption = {
+            "available": True, "window_end": "2026-08-25T00:00:00+00:00",
+            "values": {
+                key: {"1": 0.0} for key in coverage.ADOPTION_USAGE_KEYS
+            },
+        }
         _metrics, views = coverage.build(
-            STACKS, SIGNALS, dashboard_inventory=DASHBOARDS, alert_routing=ALERTS,
+            stacks, SIGNALS, dashboard_inventory=DASHBOARDS, alert_routing=ALERTS,
+            capability_adoption=adoption,
         )
         self.assertEqual(set(views), set(coverage.VIEW_SCHEMAS))
         for name, schema in coverage.VIEW_SCHEMAS.items():

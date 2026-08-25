@@ -53,6 +53,9 @@ resource "aws_ecs_task_definition" "provisioner" {
 
       environment = [
         { name = "GCINSIGHT_ORG_ID", value = var.grafana_org_id },
+        # Only this stack's reader receives the second exact datasource query scope needed by the
+        # capability-adoption collector input. Every other stack stays usage-insights-only.
+        { name = "GCINSIGHT_WRITE_STACK", value = var.write_stack_slug },
         # The credential store's region, read by bin/provision.py. Distinct from the bucket region
         # variable so the two can diverge without a code change.
         { name = "GCINSIGHT_SSM_REGION", value = data.aws_region.current.region },

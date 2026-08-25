@@ -1,0 +1,574 @@
+{
+  "meta": {
+    "generated_at": "2026-08-25T16:32:39.633272+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack072",
+      "Capability": "Traces",
+      "Active series": 306601,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack072",
+      "Capability": "k6",
+      "Active series": 306601,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "obs-hub",
+      "Capability": "Traces",
+      "Active series": 278835,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "obs-hub",
+      "Capability": "k6",
+      "Active series": 278835,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack036",
+      "Capability": "Traces",
+      "Active series": 235765,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack158",
+      "Capability": "Continuous profiling",
+      "Active series": 128779,
+      "Opportunity": "Enable continuous profiling on a high-telemetry application stack",
+      "Population basis": "Pyroscope instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack158",
+      "Capability": "Exemplars",
+      "Active series": 128779,
+      "Opportunity": "Add exemplar propagation from metrics to traces",
+      "Population basis": "Stacks ingesting metrics in the same 24-hour window",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack158",
+      "Capability": "Frontend Observability",
+      "Active series": 128779,
+      "Opportunity": "Instrument a customer-facing frontend for real-user monitoring",
+      "Population basis": "Stacks reporting the provisioned frontend usage series",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack158",
+      "Capability": "IRM / OnCall",
+      "Active series": 128779,
+      "Opportunity": "Onboard a service and its owning team to IRM / OnCall",
+      "Population basis": "Stacks reporting the provisioned OnCall counter",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack158",
+      "Capability": "Native histograms",
+      "Active series": 128779,
+      "Opportunity": "Migrate a high-series histogram workload to native histograms",
+      "Population basis": "Stacks ingesting metrics in the same 24-hour window",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack158",
+      "Capability": "Service graphs",
+      "Active series": 128779,
+      "Opportunity": "Enable Tempo service graphs for dependency visibility",
+      "Population basis": "Stacks ingesting traces in the same 24-hour window",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack158",
+      "Capability": "Span metrics",
+      "Active series": 128779,
+      "Opportunity": "Enable Tempo metrics-generator span metrics",
+      "Population basis": "Stacks ingesting traces in the same 24-hour window",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack158",
+      "Capability": "k6",
+      "Active series": 128779,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack038",
+      "Capability": "Traces",
+      "Active series": 95970,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack038",
+      "Capability": "k6",
+      "Active series": 95970,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack035",
+      "Capability": "Traces",
+      "Active series": 95158,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack035",
+      "Capability": "k6",
+      "Active series": 95158,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack001b",
+      "Capability": "Traces",
+      "Active series": 66141,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack049",
+      "Capability": "Traces",
+      "Active series": 56868,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack020",
+      "Capability": "Traces",
+      "Active series": 39860,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack020",
+      "Capability": "k6",
+      "Active series": 39860,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack052",
+      "Capability": "Traces",
+      "Active series": 38321,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack052",
+      "Capability": "k6",
+      "Active series": 38321,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack037",
+      "Capability": "Traces",
+      "Active series": 23773,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack037",
+      "Capability": "k6",
+      "Active series": 23773,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack053",
+      "Capability": "Traces",
+      "Active series": 21141,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack053",
+      "Capability": "k6",
+      "Active series": 21141,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack170",
+      "Capability": "Traces",
+      "Active series": 8840,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Capability": "Traces",
+      "Active series": 6242,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Capability": "k6",
+      "Active series": 6242,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack019",
+      "Capability": "Traces",
+      "Active series": 5568,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack177",
+      "Capability": "Traces",
+      "Active series": 5390,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack055",
+      "Capability": "Traces",
+      "Active series": 711,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack055",
+      "Capability": "k6",
+      "Active series": 711,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack193",
+      "Capability": "Traces",
+      "Active series": 392,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack193",
+      "Capability": "k6",
+      "Active series": 392,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack111",
+      "Capability": "Traces",
+      "Active series": 162,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack111",
+      "Capability": "k6",
+      "Active series": 162,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack050",
+      "Capability": "Traces",
+      "Active series": 80,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack050",
+      "Capability": "k6",
+      "Active series": 80,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack113",
+      "Capability": "Traces",
+      "Active series": 10,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack097",
+      "Capability": "Traces",
+      "Active series": 5,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack001",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack001a",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack001c",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack002",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack051",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack054",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack070",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack071",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack110",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack112",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack125",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack126",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack145",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack146",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack147",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack148",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack149",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack201",
+      "Capability": "Traces",
+      "Active series": 2,
+      "Opportunity": "Fund trace instrumentation for an application already sending metrics",
+      "Population basis": "Tempo instance provisioned",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack070",
+      "Capability": "k6",
+      "Active series": 2,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack071",
+      "Capability": "k6",
+      "Active series": 2,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      " Stack": "stack146",
+      "Capability": "k6",
+      "Active series": 2,
+      "Opportunity": "Fund a first performance-test workload",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    }
+  ]
+}

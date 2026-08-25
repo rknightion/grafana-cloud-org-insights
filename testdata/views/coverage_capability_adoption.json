@@ -1,0 +1,180 @@
+{
+  "meta": {
+    "generated_at": "2026-08-25T16:32:39.633272+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      "Capability": "Continuous profiling",
+      "Population basis": "Pyroscope instance provisioned",
+      "Population stacks": 1,
+      "Stacks using capability": 0,
+      "Opportunity stacks": 1,
+      "Finding": "1 stack has no profiles",
+      "Fundable next step": "Enable continuous profiling on a high-telemetry application stack",
+      "Window": "24h",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      "Capability": "SLOs",
+      "Population basis": "Successfully measured stacks where SLOs are available",
+      "Population stacks": 1,
+      "Stacks using capability": 1,
+      "Opportunity stacks": 0,
+      "Finding": "0 stacks own zero SLOs",
+      "Fundable next step": "Create a first service-level objective for a business-critical service",
+      "Window": "24h",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      "Capability": "Traces",
+      "Population basis": "Tempo instance provisioned",
+      "Population stacks": 40,
+      "Stacks using capability": 1,
+      "Opportunity stacks": 39,
+      "Finding": "39 stacks show no Traces use",
+      "Fundable next step": "Fund trace instrumentation for an application already sending metrics",
+      "Window": "24h",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      "Capability": "Span metrics",
+      "Population basis": "Stacks ingesting traces in the same 24-hour window",
+      "Population stacks": 1,
+      "Stacks using capability": 0,
+      "Opportunity stacks": 1,
+      "Finding": "1 stack shows no Span metrics use",
+      "Fundable next step": "Enable Tempo metrics-generator span metrics",
+      "Window": "24h",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      "Capability": "Service graphs",
+      "Population basis": "Stacks ingesting traces in the same 24-hour window",
+      "Population stacks": 1,
+      "Stacks using capability": 0,
+      "Opportunity stacks": 1,
+      "Finding": "1 stack shows no Service graphs use",
+      "Fundable next step": "Enable Tempo service graphs for dependency visibility",
+      "Window": "24h",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      "Capability": "Native histograms",
+      "Population basis": "Stacks ingesting metrics in the same 24-hour window",
+      "Population stacks": 1,
+      "Stacks using capability": 0,
+      "Opportunity stacks": 1,
+      "Finding": "1 stack shows no Native histograms use",
+      "Fundable next step": "Migrate a high-series histogram workload to native histograms",
+      "Window": "24h",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      "Capability": "Exemplars",
+      "Population basis": "Stacks ingesting metrics in the same 24-hour window",
+      "Population stacks": 1,
+      "Stacks using capability": 0,
+      "Opportunity stacks": 1,
+      "Finding": "1 stack shows no Exemplars use",
+      "Fundable next step": "Add exemplar propagation from metrics to traces",
+      "Window": "24h",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      "Capability": "IRM / OnCall",
+      "Population basis": "Stacks reporting the provisioned OnCall counter",
+      "Population stacks": 1,
+      "Stacks using capability": 0,
+      "Opportunity stacks": 1,
+      "Finding": "1 stack shows no IRM / OnCall use",
+      "Fundable next step": "Onboard a service and its owning team to IRM / OnCall",
+      "Window": "cumulative alert-group counter",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      "Capability": "k6",
+      "Population basis": "Stacks carrying a provisioned k6 organisation id",
+      "Population stacks": 17,
+      "Stacks using capability": 0,
+      "Opportunity stacks": 17,
+      "Finding": "17 stacks show no k6 use",
+      "Fundable next step": "Fund a first performance-test workload",
+      "Window": "current billing period",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    },
+    {
+      "Capability": "Frontend Observability",
+      "Population basis": "Stacks reporting the provisioned frontend usage series",
+      "Population stacks": 1,
+      "Stacks using capability": 0,
+      "Opportunity stacks": 1,
+      "Finding": "1 stack shows no Frontend Observability use",
+      "Fundable next step": "Instrument a customer-facing frontend for real-user monitoring",
+      "Window": "24h",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    }
+  ]
+}

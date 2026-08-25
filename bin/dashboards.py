@@ -285,10 +285,10 @@ K8S_STACKS = _stacks_with("grafanacloud_instance_active_kube_pod_info_series")
 HOST_STACKS = _stacks_with("grafanacloud_instance_active_node_uname_info_series")
 INTEGRATION_STACKS = _stacks_with("grafanacloud_instance_active_integration_series")
 
-# Phase 1 of Pillar K is deliberately panel-only: these counts already exist on the write stack's
-# provisioned usage datasource, so copying them through the collector would add credentials, failure
-# modes and series without adding information. Keep different metric generations separate rather than
-# summing them into a total whose populations may overlap.
+# Phase 1 of Pillar K remains panel-only: these object counts need no durable named workflow. GCI-0019
+# deliberately copies only the bounded capability-adoption projection because its S3 call list and
+# trendable gap series unlock outreach and closure tracking that a live panel cannot provide.
+# Keep different metric generations separate rather than summing overlapping populations.
 OBSERVED_OBJECT_COUNTS = (
     ("sum(grafanacloud_app_observability_service_entity_count)", "App O11y services"),
     ("sum(grafanacloud_app_observability_hostless_service_entity_count)",
@@ -3201,6 +3201,12 @@ def d_coverage(ds: str):
             description="Every canonical identity is counted once as application, platform or "
                         "infrastructure_unit. Non-application identities remain visible so a classifier "
                         "or probe-naming change cannot silently shrink the coverage denominator."),
+        "b_adoption_gap": build.barchart_panel(
+            "Stacks with no measured capability use",
+            "gcinsight_coverage_capability_gap", legend="{{kind}}", sort="desc",
+            description="Each bar states how many stacks in that capability's explicit population "
+                        "show no use. A measured zero is deliberately published here because closing "
+                        "the opportunity is the finding; the table beside it states every denominator."),
         "b_technology": build.barchart_panel(
             "Observed technologies ranked by measured stacks",
             "topk(20, gcinsight_coverage_technology_stacks > 0)", legend="{{kind}}", limit=20,
@@ -3253,9 +3259,23 @@ def d_coverage(ds: str):
             "Live OnCall service and owning-team catalogue",
             f"topk(20, sum by(service_name, team)({GROUPS}))",
             legend="{{service_name}} · {{team}}", ds_uid=build.USAGE_UID, limit=20,
-            description="A separate live catalogue from grafanacloud-usage. It is not merged into the "
-                        "S3 service register because doing so would widen the frozen reader scope. "
-                        "Unattributed service and team values remain visible as the unmatched share."),
+            description="A separate live catalogue from grafanacloud-usage. Identity-bearing label "
+                        "values stay live and are never copied into collector output. Unattributed "
+                        "service and team values remain visible as the unmatched share."),
+
+        "tbl_adoption": build.table_panel(
+            "Capability populations, current use and opportunity",
+            coverage_pillar.ADOPTION_VIEW, ds,
+            schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.ADOPTION_VIEW],
+            description="One row per capability with its population basis, measured use, opportunity "
+                        "count and a specific next step. Provisioned and population-eligible do not "
+                        "mean entitled, paid for or wasted."),
+        "tbl_adoption_targets": build.table_panel(
+            "Named capability enablement call list",
+            coverage_pillar.ADOPTION_TARGET_VIEW, ds,
+            schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.ADOPTION_TARGET_VIEW],
+            description="Stacks showing no use inside the stated capability population, ranked by "
+                        "active series so the largest existing telemetry footprints lead the queue."),
 
         "tbl_services": build.table_panel(
             "Named service observability completeness register", coverage_pillar.SERVICE_VIEW, ds,
@@ -3411,6 +3431,12 @@ def d_coverage(ds: str):
             build.row("Identity evidence", ["n_legacy", "b_identity"], max_columns=2),
             build.row("Where the assets sit", ["b_stack_services", "b_stack_technologies",
                                                 "b_stack_clusters"], max_columns=3),
+        ]),
+        build.rows_tab("Adoption opportunities", [
+            build.row("Opportunity counts", ["b_adoption_gap"], max_columns=1),
+            build.row("Population and fundable next step", ["tbl_adoption"], max_columns=1),
+            build.row("Named call list, largest telemetry footprint first",
+                      ["tbl_adoption_targets"], max_columns=1, row_height="tall"),
         ]),
         build.rows_tab("Outcome value", [
             build.row("Recorded response", ["n_value_groups", "n_value_acknowledged",

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "generated_at": "2026-08-25T16:14:25.714079+00:00",
     "tier": "t3",
     "stacks_total": 44,
     "stacks_scannable": 40,
@@ -50,10 +50,31 @@
       "alert_routing": {
         "source": "local",
         "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
       }
     }
   },
   "rows": [
+    {
+      " Stack": "stack158",
+      "Dashboard": "Synthetic service dashboard",
+      "Folder": "Synthetic",
+      "Dashboard uid": "coverage-fixture",
+      "State": "unopened",
+      "Views (31d)": 0,
+      "Coverage detail": ""
+    },
     {
       " Stack": "obs-hub",
       "Dashboard": "(inventory unavailable)",
@@ -362,15 +383,6 @@
     },
     {
       " Stack": "stack149",
-      "Dashboard": "(inventory unavailable)",
-      "Folder": "",
-      "Dashboard uid": "",
-      "State": "unknown",
-      "Views (31d)": null,
-      "Coverage detail": "inventory unavailable"
-    },
-    {
-      " Stack": "stack158",
       "Dashboard": "(inventory unavailable)",
       "Folder": "",
       "Dashboard uid": "",

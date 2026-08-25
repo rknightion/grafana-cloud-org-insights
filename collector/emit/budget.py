@@ -84,7 +84,7 @@ PILLAR_J_EPOCHS = 2  # contaminated unversioned history plus the clean v2 epoch 
 FINDING_KIND = 18
 # Cardinality follows `len(hydrate.INPUT_OWNER)`; the test below the catalogue re-derives it so adding an
 # input cannot silently leave this declaration stale.
-INPUT = 14
+INPUT = 15
 # Assistant's chat taxonomy (pillars/ai.py). Declared at 8 x 8 = 64 to leave room for product additions
 # without an unplanned series jump. Estate-wide ONLY; the per-stack cross product is a view.
 CATEGORY = 8
@@ -538,6 +538,9 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                note="mean over non-ephemeral services with at least four applicable components"),
     MetricSpec("gcinsight_coverage_service_applicable_components_mean", "K", {"version": 2},
                note="mean score denominator over exactly the same services as completeness"),
+    MetricSpec("gcinsight_coverage_capability_gap", "K", {"kind": 10},
+               note="provisioned or population-eligible stacks with no measured use, by a fixed "
+                    "capability enum. Deliberately emits measured zero gaps on the adoption surface"),
     MetricSpec("coverage_service_register", "K", {"stack": STACK}, store="view",
                note="top-N named services with signal depth and explicit alert/dashboard metadata"),
     MetricSpec("coverage_technology_register", "K", {"stack": STACK, "kind": TECHNOLOGY}, store="view",
@@ -550,6 +553,10 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                note="generic Mimir service values retained separately as legacy identity evidence"),
     MetricSpec("coverage_summary", "K", {"stack": STACK}, store="view",
                note="per-stack counts, registry version, truncation and unmatched-name backlog"),
+    MetricSpec("coverage_capability_adoption", "K", {"kind": 10}, store="view",
+               note="population, used and opportunity counts with the denominator basis and next step"),
+    MetricSpec("coverage_capability_opportunities", "K", {"stack": STACK, "kind": 10}, store="view",
+               note="named call list ranked by active series; stack identity never becomes a new metric"),
 )
 
 

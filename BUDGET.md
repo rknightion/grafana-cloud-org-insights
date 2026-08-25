@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **8,793** |
-| Phase 1 only | 8,792 |
+| **Declared (all phases)** | **8,811** |
+| Phase 1 only | 8,810 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -27,9 +27,9 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | F | 21 |
 | I | 895 |
 | J | 4,368 |
-| K | 957 |
-| scan | 210 |
-| **Total** | **8,793** |
+| K | 967 |
+| scan | 218 |
+| **Total** | **8,811** |
 
 ## Metrics
 
@@ -57,14 +57,15 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_stack_collectors_active` | E | `stack`(271) | 271 | 1 | the per-stack half; use it to find registration concentration and churn |
 | `gcinsight_ai_estate_messages` | I | `category`(8), `surface`(8) | 64 | 1 | estate-wide category x surface, NO `stack` label  -  the per-stack cross product belongs in the existing `ai_category_surface` view |
 | `gcinsight_coverage_technology_stacks` | K | `kind`(63) | 63 | 1 | one bounded registry enum per technology; value is measured stacks present |
+| `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(15) | 60 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
+| `gcinsight_input_available` | scan | `tier`(4), `input`(15) | 60 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
 | `gcinsight_coverage_unscored` | K | `component`(8), `reason`(7) | 56 | 1 | bounded component/reason counts; product absence and unavailable evidence are excluded from the score rather than published as failed coverage |
-| `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(14) | 56 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
-| `gcinsight_input_available` | scan | `tier`(4), `input`(14) | 56 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
 | `gcinsight_usage_plugin_adoption` | C | `kind`(50) | 50 | 1 | bounded headroom for datasource types; excludes grafana-knowledgegraph-datasource because it is auto-provisioned rather than an adoption decision |
 | `gcinsight_scan_stacks_failed` | scan | `tier`(4), `reason`(8) | 32 | 1 | reason is a closed failure vocabulary: http_429, http_5xx, timeout, auth, ... |
 | `gcinsight_findings` | scan | `kind`(18) | 18 | 1 | count per finding kind, derived from the pillar views by pillars/findings.py. A kind the running tier cannot compute is ABSENT, never 0 |
 | `gcinsight_maturity_dimension_mean` | D | `dimension`(9), `version`(2) | 18 | 1 | estate mean per rubric dimension  -  answers 'which dimension is the estate weakest on', which the per-stack view cannot trend without a stack-by-dimension cross product. Mean is over the stacks that SCORED that dimension, excluding the four unscored reasons |
 | `gcinsight_scan_stacks_skipped` | scan | `tier`(4), `reason`(3) | 12 | 1 | paused, unresolvable, out_of_scope |
+| `gcinsight_coverage_capability_gap` | K | `kind`(10) | 10 | 1 | provisioned or population-eligible stacks with no measured use, by a fixed capability enum. Deliberately emits measured zero gaps on the adoption surface |
 | `gcinsight_value_benchmark` | F | `kind`(10) | 10 | 1 | internal benchmarking: median/p90/worst across the dimensions that have data |
 | `gcinsight_estate_stacks_by_region` | A | `region`(8) | 8 | 1 |  |
 | `gcinsight_maturity_stacks_by_tier` | D | `kind`(4), `version`(2) | 8 | 1 |  |
@@ -188,6 +189,8 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `ai_token_outliers` | I | 1 | 1 |  |
 | `cost_adaptive_metric_recommendations` | B | 1 | 1 | bounded top-ten-per-stack Adaptive Metrics action queue; metric names stay out of labels |
 | `cost_cardinality_outliers` | B | 271 | 1 | point-in-time stack and label-name drill-down for cardinality outliers |
+| `coverage_capability_adoption` | K | 10 | 1 | population, used and opportunity counts with the denominator basis and next step |
+| `coverage_capability_opportunities` | K | 2,710 | 1 | named call list ranked by active series; stack identity never becomes a new metric |
 | `coverage_cluster_register` | K | 271 | 1 | named observed clusters; names never become labels |
 | `coverage_legacy_service_register` | K | 271 | 1 | generic Mimir service values retained separately as legacy identity evidence |
 | `coverage_metric_name_register` | K | 271 | 1 | metric names and their registry classification; names never become labels |

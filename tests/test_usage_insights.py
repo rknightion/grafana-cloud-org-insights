@@ -576,6 +576,10 @@ class EnvelopePersistenceTest(unittest.TestCase):
             mock.patch.object(scan, "gather_alert_routing", return_value=available),
             mock.patch.object(scan, "gather_signal_inventory", return_value=available),
             mock.patch.object(
+                scan, "gather_capability_adoption",
+                return_value=({"available": True, "values": {}}, []),
+            ),
+            mock.patch.object(
                 scan.hydrate, "hydrate",
                 side_effect=lambda _tier, own, **_kwargs: (dict(own), hydrate.Provenance()),
             ),

@@ -300,6 +300,10 @@ class FrozenSeamTest(unittest.TestCase):
         on every run for ever - a transient Admin identity per stack per run, permanently.
         """
         self.assertEqual(pr.DESIRED_PAIRS & pr.RETIRED_PAIRS, frozenset())
+        self.assertEqual(
+            pr.permission_pairs(pr.desired_permissions(write_stack=True)) & pr.RETIRED_PAIRS,
+            frozenset(),
+        )
 
     def test_adaptive_traces_mutations_are_explicitly_refused(self):
         refused = {
@@ -318,13 +322,17 @@ class FrozenSeamTest(unittest.TestCase):
         which is their production data. `datasources:*` on READ only LISTS them. So the list is
         estate-wide and the query right stays pinned to one Grafana-provisioned telemetry datasource.
         """
-        scopes = {p["action"]: p.get("scope") for p in pr.DESIRED_PERMISSIONS
-                  if p["action"].startswith("datasources")}
-        self.assertEqual(scopes["datasources:query"],
-                         f"datasources:uid:{pr.USAGE_INSIGHTS_DS_UID}")
-        self.assertNotIn("*", scopes["datasources:query"])
-        self.assertEqual(scopes["datasources:read"], "datasources:*")
-        self.assertEqual(scopes["datasources.caching:read"], "datasources:*")
+        ordinary = pr.desired_permissions(write_stack=False)
+        write_stack = pr.desired_permissions(write_stack=True)
+        ordinary_query = {p.get("scope") for p in ordinary
+                          if p["action"] == "datasources:query"}
+        write_query = {p.get("scope") for p in write_stack
+                       if p["action"] == "datasources:query"}
+        self.assertEqual(ordinary_query, {f"datasources:uid:{pr.USAGE_INSIGHTS_DS_UID}"})
+        self.assertEqual(write_query, ordinary_query | {f"datasources:uid:{pr.USAGE_DS_UID}"})
+        self.assertTrue(all(scope != "datasources:*" for scope in write_query))
+        self.assertIn({"action": "datasources:read", "scope": "datasources:*"}, ordinary)
+        self.assertIn({"action": "datasources.caching:read", "scope": "datasources:*"}, ordinary)
 
     def test_dashboards_read_is_scoped_to_dashboards_not_folders(self):
         """A dashboard in the General location sits in no folder, so a folder-scoped grant misses it -

@@ -163,7 +163,8 @@ class SsmStoreFailClosedTest(unittest.TestCase):
                                         "url": "https://authoritative-a.example"}]}
 
         with mock.patch.dict(cli.os.environ, {"GCINSIGHT_PROVISION_TOKEN": "x",
-                                              "GCINSIGHT_ORG_ID": "900001"}, clear=False), \
+                                              "GCINSIGHT_ORG_ID": "900001",
+                                              "GCINSIGHT_WRITE_STACK": "a"}, clear=False), \
              mock.patch.object(cli, "Gcom", InventoryOnlyGcom), \
              mock.patch.object(cli, "ssm_load_all", side_effect=cli.SsmStoreUnreadable("denied")), \
              mock.patch.object(cli, "list_sas") as list_sas, \
@@ -192,6 +193,23 @@ class _RoleStack:
 
 
 class EnsureRoleScopeTest(unittest.TestCase):
+    def test_only_the_write_stack_role_accepts_and_adds_the_usage_datasource_scope(self):
+        """The exact grant follows the nominated write stack and is removed from its predecessor."""
+        ordinary = _RoleStack([dict(p) for p in pr.DESIRED_PERMISSIONS])
+        ok, _, _ = cli.ensure_role(ordinary, write_stack=True)
+        self.assertTrue(ok)
+        pairs = {(p["action"], p.get("scope") or "")
+                 for p in ordinary.puts[0][1]["permissions"]}
+        self.assertIn(("datasources:query", f"datasources:uid:{pr.USAGE_DS_UID}"), pairs)
+
+        unexpected = _RoleStack([dict(p) for p in pr.desired_permissions(write_stack=True)])
+        ok, _, note = cli.ensure_role(unexpected, write_stack=False)
+        self.assertTrue(ok)
+        self.assertIn("patched", note)
+        pairs = {(p["action"], p.get("scope") or "")
+                 for p in unexpected.puts[0][1]["permissions"]}
+        self.assertNotIn(pr.WRITE_STACK_PAIR, pairs)
+
     def test_a_query_action_at_the_wrong_scope_is_refused_before_any_write(self):
         permissions = [
             dict(p) for p in pr.DESIRED_PERMISSIONS
@@ -478,6 +496,22 @@ class MainExitStatusTest(unittest.TestCase):
             self.assertEqual(cli.main(["--dry-run"]), 2)
         gcom.assert_not_called()
 
+    def test_unknown_write_stack_is_refused_before_credentials_or_repairs(self):
+        class InventoryGcom:
+            def __init__(self, *_args, **_kwargs):
+                self.reads = self.writes = 0
+
+            def get(self, _path):
+                return 200, {"items": [{"slug": "a", "status": "active"}]}
+
+        with mock.patch.dict(cli.os.environ, {
+            "GCINSIGHT_PROVISION_TOKEN": "x", "GCINSIGHT_ORG_ID": "900001",
+            "GCINSIGHT_WRITE_STACK": "missing",
+        }, clear=True), mock.patch.object(cli, "Gcom", InventoryGcom), \
+                mock.patch.object(cli, "ssm_load_all") as load:
+            self.assertEqual(cli.main(["--dry-run"]), 2)
+        load.assert_not_called()
+
     def _run_with(self, outcome):
         class OneStackGcom:
             def __init__(self, *_args, **_kwargs):
@@ -490,7 +524,8 @@ class MainExitStatusTest(unittest.TestCase):
 
         presence = pr.Presence(False, False)
         with mock.patch.dict(cli.os.environ, {"GCINSIGHT_PROVISION_TOKEN": "x",
-                                              "GCINSIGHT_ORG_ID": "900001"}, clear=False), \
+                                              "GCINSIGHT_ORG_ID": "900001",
+                                              "GCINSIGHT_WRITE_STACK": "a"}, clear=False), \
              mock.patch.object(cli, "Gcom", OneStackGcom), \
              mock.patch.object(cli, "ssm_load_all", return_value={}), \
              mock.patch.object(cli, "list_sas", return_value=(200, [])), \

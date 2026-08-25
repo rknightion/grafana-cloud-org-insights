@@ -38,6 +38,7 @@ from collector.sources import assistant as assistant_src
 from collector.sources import fleet as fleet_src
 from collector.sources import serviceaccounts as sa_src
 from collector.sources import signal_inventory as signal_inventory_src
+from collector.sources import capability_adoption as capability_adoption_src
 from collector.sources import usage_insights, dataplane, gcom
 
 TIERS = ("t1", "t2", "t3", "t4")
@@ -521,6 +522,33 @@ def gather_signal_inventory(
     return data, errors
 
 
+def gather_capability_adoption(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[str]]:
+    """One bounded org-usage read through the write stack's narrowly scoped reader."""
+    try:
+        creds = credentials.load_all()
+    except credentials.StoreUnavailable as exc:
+        console_log(
+            "error",
+            f"capability adoption: credential store unreadable - {exc}. The opportunity views are "
+            f"WITHHELD rather than published as an estate of zero.",
+        )
+        return {}, [f"credential store: {exc}"]
+    record = capability_adoption_src.probe(
+        client, stacks, creds, write_stack=cfg.write_stack,
+    )
+    errors = [] if record.get("available") else [
+        f"{record.get('reason')}: {record.get('detail', '')}".strip()
+    ]
+    console_log(
+        "info" if record.get("available") else "error",
+        "capability adoption: org usage input available"
+        if record.get("available") else f"capability adoption: unavailable - {errors[0]}",
+    )
+    return record, errors
+
+
 def gather_dashboard_inventory(
     client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], list[str]]:
@@ -821,6 +849,13 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     errors += alert_routing_errors
     signal_inventory, signal_inventory_errors = gather_signal_inventory(client, cfg, selected)
     errors += signal_inventory_errors
+    capability_adoption, capability_adoption_errors = gather_capability_adoption(
+        # The datasource exists on the write stack even when a diagnostic --stack/--limit selects a
+        # different target. The source still discovers that host from the full live inventory; compose
+        # then left-joins the result only to the selected diagnostic population.
+        client, cfg, stacks,
+    )
+    errors += capability_adoption_errors
 
     # Decide publication eligibility BEFORE hydration or composition. A non-empty per-stack mapping is
     # not an available estate input: 1 success plus 268 failures is partial, not a tiny but valid total.
@@ -836,6 +871,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "public_dashboards": pubdash,
         "alert_routing": alert_routing,
         "signal_inventory": signal_inventory,
+        "capability_adoption": capability_adoption,
     }
     sources = {
         "stack_detail": source_report(expected, detail, available=lambda _r: True),
@@ -879,6 +915,14 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
             expected, signal_inventory, available=lambda r: bool(r.get("available")),
             errors=signal_inventory_errors,
         ),
+        "capability_adoption": {
+            **source_report(
+                1, {"org": capability_adoption},
+                available=lambda r: bool(r.get("available")),
+                errors=capability_adoption_errors,
+            ),
+            "unit": "org usage response",
+        },
     }
     source_failures = sorted(name for name, report in sources.items() if not report["healthy"])
     publishable_inputs, unavailable_inputs = publication_inputs(gathered_inputs, sources)

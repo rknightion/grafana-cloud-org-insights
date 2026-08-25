@@ -926,7 +926,7 @@ DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     "ai": ("assistant",),
     # Pillar K combines the daily signal-label sweep with the existing dashboard and alert inventories.
     # The live usage panels carry datasource-native freshness and are called out separately in the banner.
-    "coverage": ("alert_routing", "dashboard_inventory", "signal_inventory"),
+    "coverage": ("alert_routing", "capability_adoption", "dashboard_inventory", "signal_inventory"),
 }
 
 # Inputs used by metric panels but not by an S3 view on the same dashboard. Most dashboard input
@@ -1037,6 +1037,7 @@ INPUT_LABELS = {
     "service_accounts": "Service-account inventory",
     "org_members": "Organisation membership",
     "signal_inventory": "Signal label inventory",
+    "capability_adoption": "Capability adoption sweep",
 }
 
 INPUT_DESCRIPTIONS = {
@@ -1079,6 +1080,9 @@ INPUT_DESCRIPTIONS = {
     "signal_inventory": "Age of the explicitly-windowed Mimir, Loki, Tempo and Pyroscope label sweep "
                         "behind the observed service, technology and cluster registers. Gathered daily; "
                         "a failed stack contributes no row or per-stack metric rather than a zero.",
+    "capability_adoption": "Age of the bounded org-usage sweep behind capability opportunity counts. "
+                           "Rate-shaped signals and their populations share one 24-hour window; the "
+                           "named target view is withheld if this input or signal inventory is stale.",
 }
 
 

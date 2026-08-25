@@ -76,6 +76,7 @@ def build_all(
     datasource_query_cost: dict[str, Any] | None = None,
     # Gathered and hydrated in GCI-0008.04; consumed by the single Pillar K wiring pass in .05.
     signal_inventory: dict[str, Any] | None = None,
+    capability_adoption: dict[str, Any] | None = None,
     score_weights: dict[str, float] | None = None,
     now: dt.datetime | None = None,
 ) -> tuple[Metrics, Views]:
@@ -103,6 +104,7 @@ def build_all(
             stacks, signal_inventory,
             dashboard_inventory=dashboard_inventory,
             alert_routing=alert_routing,
+            capability_adoption=capability_adoption,
             score_weights=score_weights,
         ),
     ):

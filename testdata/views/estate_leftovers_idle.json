@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "generated_at": "2026-08-25T16:14:25.714079+00:00",
     "tier": "t3",
     "stacks_total": 44,
     "stacks_scannable": 40,
@@ -50,6 +50,18 @@
       "alert_routing": {
         "source": "local",
         "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
       }
     }
   },
@@ -66,8 +78,8 @@
       "Users (daily)": 0,
       "Admin share %": null,
       "Active series": 0,
-      "Age (days)": 88.4,
-      "Idle (days)": 12.5,
+      "Age (days)": 92.3,
+      "Idle (days)": 16.4,
       "Version drift": true,
       "Delete protection": false,
       "Test leftover": true,
@@ -86,8 +98,8 @@
       "Users (daily)": 0,
       "Admin share %": null,
       "Active series": 0,
-      "Age (days)": 71.3,
-      "Idle (days)": 12.5,
+      "Age (days)": 75.2,
+      "Idle (days)": 16.4,
       "Version drift": true,
       "Delete protection": false,
       "Test leftover": true,
@@ -106,8 +118,8 @@
       "Users (daily)": 0,
       "Admin share %": null,
       "Active series": 0,
-      "Age (days)": 35.1,
-      "Idle (days)": 12.6,
+      "Age (days)": 39.1,
+      "Idle (days)": 16.5,
       "Version drift": true,
       "Delete protection": true,
       "Test leftover": true,
@@ -126,8 +138,8 @@
       "Users (daily)": 0,
       "Admin share %": null,
       "Active series": 0,
-      "Age (days)": 35.1,
-      "Idle (days)": 12.6,
+      "Age (days)": 39.1,
+      "Idle (days)": 16.5,
       "Version drift": true,
       "Delete protection": true,
       "Test leftover": true,

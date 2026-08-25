@@ -235,7 +235,8 @@ After changing the role:
 
 - compare action/scope pairs, not action names;
 - allow for partial RBAC propagation before testing the existing token;
-- verify `datasources:query` remains uid-scoped;
+- verify `datasources:query` remains uid-scoped: usage-insights everywhere and the usage datasource on
+  the nominated write stack only;
 - prove writes remain refused with harmless write requests against test endpoints;
 - confirm basic role is still `None` and `chats:access` is absent.
 

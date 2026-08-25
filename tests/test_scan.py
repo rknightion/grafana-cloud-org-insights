@@ -438,6 +438,7 @@ class T2SourceHealthTest(unittest.TestCase):
             mock.patch.object(scan, "gather_public_dashboards", return_value=unavailable),
             mock.patch.object(scan, "gather_alert_routing", return_value=unavailable),
             mock.patch.object(scan, "gather_signal_inventory", return_value=unavailable),
+            mock.patch.object(scan, "gather_capability_adoption", return_value=unavailable),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=hydrate_own),
             mock.patch.object(scan.compose, "build_all", return_value=([], {})),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
@@ -452,7 +453,8 @@ class T2SourceHealthTest(unittest.TestCase):
         self.assertEqual(
             set(result["meta"]["source_failures"]),
             {"service_accounts", "assistant", "insights", "adaptive_logs", "public_dashboards",
-             "alert_routing", "dashboard_inventory", "datasource_query_cost", "signal_inventory"},
+             "alert_routing", "dashboard_inventory", "datasource_query_cost", "signal_inventory",
+             "capability_adoption"},
         )
         for name in result["meta"]["source_failures"]:
             with self.subTest(source=name):
@@ -558,6 +560,10 @@ class T2SourceHealthTest(unittest.TestCase):
             mock.patch.object(scan, "gather_public_dashboards", return_value=(healthy, [])),
             mock.patch.object(scan, "gather_alert_routing", return_value=(healthy, [])),
             mock.patch.object(scan, "gather_signal_inventory", return_value=(healthy, [])),
+            mock.patch.object(
+                scan, "gather_capability_adoption",
+                return_value=({"available": True, "values": {}}, []),
+            ),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=local_hydrate),
             mock.patch.object(scan.compose, "build_all", side_effect=compose),
             mock.patch.object(scan, "assistant_gaps", return_value={}) as assistant_gaps,
@@ -830,6 +836,10 @@ class RateCardLoadingTest(unittest.TestCase):
             mock.patch.object(scan, "gather_public_dashboards", return_value=available),
             mock.patch.object(scan, "gather_alert_routing", return_value=available),
             mock.patch.object(scan, "gather_signal_inventory", return_value=available),
+            mock.patch.object(
+                scan, "gather_capability_adoption",
+                return_value=({"available": True, "values": {}}, []),
+            ),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=lambda _t, own, **_kw: (own, hydrate.Provenance())),
             mock.patch.object(scan.compose, "build_all", side_effect=compose),
             mock.patch.object(scan, "assistant_gaps", return_value={}),

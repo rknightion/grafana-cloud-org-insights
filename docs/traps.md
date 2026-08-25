@@ -127,8 +127,9 @@ is already a datasource on the target stack, a panel beats a pipeline.**
  plugin scopes, and Grafana adds its own pseudo-folder grants. A name-only comparison can call a role
  complete while one source remains unreadable.
 - **`datasources:read` and `datasources:query` are separate.** Wide metadata read does not permit
- querying customer datasources. Keep query scoped to
- `datasources:uid:grafanacloud-usage-insights`.
+ querying customer datasources. Ordinary readers query only
+ `datasources:uid:grafanacloud-usage-insights`; the write-stack reader additionally queries exact uid
+ `grafanacloud-usage` for the bounded adoption input. Never use `datasources:*` on query.
 - **Several list endpoints return 200 with permission-filtered results.** Search, folders, datasources
  and public-dashboard inventory can all return a plausible zero or short list without the matching
  action. Verify the role pair before trusting the count.

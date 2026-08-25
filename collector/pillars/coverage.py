@@ -24,6 +24,45 @@ METRIC_VIEW = "coverage_metric_name_register"
 CLUSTER_VIEW = "coverage_cluster_register"
 LEGACY_SERVICE_VIEW = "coverage_legacy_service_register"
 SUMMARY_VIEW = "coverage_summary"
+ADOPTION_VIEW = "coverage_capability_adoption"
+ADOPTION_TARGET_VIEW = "coverage_capability_opportunities"
+
+ADOPTION_CAPABILITIES = (
+    "profiles", "slos", "traces", "span_metrics", "service_graphs",
+    "native_histograms", "exemplars", "irm_oncall", "k6", "frontend_observability",
+)
+ADOPTION_USAGE_KEYS = ("metrics",) + ADOPTION_CAPABILITIES
+
+ADOPTION_DISPLAY = {
+    "profiles": ("Continuous profiling", "Pyroscope instance provisioned",
+                 "Enable continuous profiling on a high-telemetry application stack"),
+    "slos": ("SLOs", "Successfully measured stacks where SLOs are available",
+             "Create a first service-level objective for a business-critical service"),
+    "traces": ("Traces", "Tempo instance provisioned",
+               "Fund trace instrumentation for an application already sending metrics"),
+    "span_metrics": ("Span metrics", "Stacks ingesting traces in the same 24-hour window",
+                     "Enable Tempo metrics-generator span metrics"),
+    "service_graphs": ("Service graphs", "Stacks ingesting traces in the same 24-hour window",
+                       "Enable Tempo service graphs for dependency visibility"),
+    "native_histograms": ("Native histograms", "Stacks ingesting metrics in the same 24-hour window",
+                          "Migrate a high-series histogram workload to native histograms"),
+    "exemplars": ("Exemplars", "Stacks ingesting metrics in the same 24-hour window",
+                  "Add exemplar propagation from metrics to traces"),
+    "irm_oncall": ("IRM / OnCall", "Stacks reporting the provisioned OnCall counter",
+                   "Onboard a service and its owning team to IRM / OnCall"),
+    "k6": ("k6", "Stacks carrying a provisioned k6 organisation id",
+           "Fund a first performance-test workload"),
+    "frontend_observability": (
+        "Frontend Observability", "Stacks reporting the provisioned frontend usage series",
+        "Instrument a customer-facing frontend for real-user monitoring",
+    ),
+}
+
+ADOPTION_WINDOW = {
+    **{key: "24h" for key in ADOPTION_CAPABILITIES},
+    "irm_oncall": "cumulative alert-group counter",
+    "k6": "current billing period",
+}
 
 INFRASTRUCTURE_IDENTITY = re.compile(
     r"(?:\.(?:scope|service|slice|socket|mount|timer|target|device)$|"
@@ -78,6 +117,16 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
         ("Unmatched metric names", "number"),
         ("Legacy-only services", "number"), ("Legacy-only service share %", "number"),
         ("Registry version", "string"), ("Last seen", "time"),
+    ),
+    ADOPTION_VIEW: (
+        ("Capability", "string"), ("Population basis", "string"),
+        ("Population stacks", "number"), ("Stacks using capability", "number"),
+        ("Opportunity stacks", "number"), ("Finding", "string"),
+        ("Fundable next step", "string"), ("Window", "string"), ("Last seen", "time"),
+    ),
+    ADOPTION_TARGET_VIEW: (
+        (" Stack", "string"), ("Capability", "string"), ("Active series", "number"),
+        ("Opportunity", "string"), ("Population basis", "string"), ("Last seen", "time"),
     ),
 }
 
@@ -143,6 +192,140 @@ def _slo_product_in_use(record: Mapping[str, Any], slos: set[str]) -> bool:
     )
 
 
+def _score_product_use(record: Mapping[str, Any], by_signal: Mapping[str, set[str]]) -> dict[str, bool]:
+    """One product-use decision shared by scoring and the affirmative opportunity surface."""
+    slos = _names(record, "slo_services")
+    return {
+        "profiles": bool(by_signal["profiles"]),
+        "slos": _slo_product_in_use(record, slos),
+    }
+
+
+def _usage_map(capability_adoption: Mapping[str, Any], key: str) -> Mapping[str, Any]:
+    values = capability_adoption.get("values")
+    if not isinstance(values, Mapping):
+        return {}
+    found = values.get(key)
+    return found if isinstance(found, Mapping) else {}
+
+
+def _finding(key: str, count: int) -> str:
+    subject = "stack" if count == 1 else "stacks"
+    if key == "profiles":
+        return f"{count} {subject} {'has' if count == 1 else 'have'} no profiles"
+    if key == "slos":
+        return f"{count} {subject} {'owns' if count == 1 else 'own'} zero SLOs"
+    display = ADOPTION_DISPLAY[key][0]
+    return f"{count} {subject} {'shows' if count == 1 else 'show'} no {display} use"
+
+
+def _adoption_surface(
+    stacks: Sequence[Mapping[str, Any]],
+    signal_inventory: Mapping[str, Mapping[str, Any]],
+    capability_adoption: Mapping[str, Any],
+    score_use: Mapping[str, Mapping[str, bool]],
+) -> tuple[Metrics, dict[str, list[dict[str, Any]]]]:
+    """Build population-matched gaps by left-joining usage to the current live estate."""
+    if not capability_adoption.get("available"):
+        return [], {}
+
+    usage = {key: _usage_map(capability_adoption, key) for key in ADOPTION_USAGE_KEYS}
+    population: dict[str, set[str]] = {key: set() for key in ADOPTION_CAPABILITIES}
+    used: dict[str, set[str]] = {key: set() for key in ADOPTION_CAPABILITIES}
+    evidence_seen: dict[str, list[str]] = {"profiles": [], "slos": []}
+    last_seen = str(capability_adoption.get("window_end") or "")
+    stack_by_slug: dict[str, Mapping[str, Any]] = {}
+
+    for stack in stacks:
+        slug = str(stack.get("slug") or "")
+        if not slug or stack.get("status") == "paused":
+            continue
+        stack_by_slug[slug] = stack
+        stack_id = str(stack.get("id") or "")
+        signal_record = signal_inventory.get(slug) or {}
+        signal_measured = bool(signal_record.get("available"))
+        if signal_measured and stack.get("hpInstanceId"):
+            population["profiles"].add(slug)
+            if signal_record.get("window_end"):
+                evidence_seen["profiles"].append(str(signal_record["window_end"]))
+            if (score_use.get(slug) or {}).get("profiles"):
+                used["profiles"].add(slug)
+        if signal_measured:
+            population["slos"].add(slug)
+            if signal_record.get("window_end"):
+                evidence_seen["slos"].append(str(signal_record["window_end"]))
+            if (score_use.get(slug) or {}).get("slos"):
+                used["slos"].add(slug)
+
+        metrics_used = bool((usage["metrics"].get(stack_id) or 0) > 0)
+        traces_used = bool((usage["traces"].get(stack_id) or 0) > 0)
+        if stack.get("htInstanceId"):
+            population["traces"].add(slug)
+            if traces_used:
+                used["traces"].add(slug)
+        for key in ("span_metrics", "service_graphs"):
+            if traces_used:
+                population[key].add(slug)
+                if (usage[key].get(stack_id) or 0) > 0:
+                    used[key].add(slug)
+        for key in ("native_histograms", "exemplars"):
+            if metrics_used:
+                population[key].add(slug)
+                if (usage[key].get(stack_id) or 0) > 0:
+                    used[key].add(slug)
+        if stack_id in usage["irm_oncall"]:
+            population["irm_oncall"].add(slug)
+            if (usage["irm_oncall"].get(stack_id) or 0) > 0:
+                used["irm_oncall"].add(slug)
+        if stack.get("k6OrgId"):
+            population["k6"].add(slug)
+            if (usage["k6"].get(stack_id) or 0) > 0:
+                used["k6"].add(slug)
+        if stack_id in usage["frontend_observability"]:
+            population["frontend_observability"].add(slug)
+            if (usage["frontend_observability"].get(stack_id) or 0) > 0:
+                used["frontend_observability"].add(slug)
+
+    metrics: Metrics = []
+    rows: list[dict[str, Any]] = []
+    targets: list[dict[str, Any]] = []
+    for key in ADOPTION_CAPABILITIES:
+        display, basis, next_step = ADOPTION_DISPLAY[key]
+        gap = population[key] - used[key]
+        summary_last_seen = (
+            min(evidence_seen[key]) if key in evidence_seen and evidence_seen[key] else last_seen
+        )
+        # DELIBERATE EXCEPTION TO absent-not-zero: this source measured the whole population and a zero
+        # gap is the positive finding. Omitting it would make "no opportunity remains" look unavailable.
+        metrics.append(("gcinsight_coverage_capability_gap", {"kind": key}, float(len(gap))))
+        rows.append({
+            "Capability": display,
+            "Population basis": basis,
+            "Population stacks": len(population[key]),
+            "Stacks using capability": len(used[key]),
+            "Opportunity stacks": len(gap),
+            "Finding": _finding(key, len(gap)),
+            "Fundable next step": next_step,
+            "Window": ADOPTION_WINDOW[key],
+            "Last seen": summary_last_seen,
+        })
+        for slug in gap:
+            stack = stack_by_slug[slug]
+            targets.append({
+                " Stack": slug,
+                "Capability": display,
+                "Active series": stack.get("hmInstancePromCurrentActiveSeries") or 0,
+                "Opportunity": next_step,
+                "Population basis": basis,
+                "Last seen": (
+                    str((signal_inventory.get(slug) or {}).get("window_end") or "")
+                    if key in {"profiles", "slos"} else last_seen
+                ),
+            })
+    targets.sort(key=lambda row: (-int(row["Active series"] or 0), row["Capability"], row[" Stack"]))
+    return metrics, {ADOPTION_VIEW: rows, ADOPTION_TARGET_VIEW: targets}
+
+
 def _population(service: str, signals: Sequence[str]) -> str:
     """Classify from live identity evidence without a configured name or length threshold.
 
@@ -173,6 +356,7 @@ def build(
     *,
     dashboard_inventory: Mapping[str, Mapping[str, Any]] | None = None,
     alert_routing: Mapping[str, Mapping[str, Any]] | None = None,
+    capability_adoption: Mapping[str, Any] | None = None,
     score_weights: Mapping[str, float] | None = None,
 ) -> tuple[Metrics, Views]:
     if signal_inventory is None:
@@ -196,6 +380,7 @@ def build(
     unscored_counts: Counter[tuple[str, str]] = Counter()
     scored_percentages: list[float] = []
     scored_denominators: list[int] = []
+    score_product_use: dict[str, dict[str, bool]] = {}
     measured = 0
 
     for stack in stacks:
@@ -223,8 +408,10 @@ def build(
         alert_record = (alert_routing or {}).get(slug) or {}
         dashboards = _dashboard_services(dashboard_record)
         alerts, routed = _alert_services(alert_record)
-        profiles_in_use = bool(by_signal["profiles"])
-        slo_in_use = _slo_product_in_use(record, slos)
+        product_use = _score_product_use(record, by_signal)
+        score_product_use[slug] = product_use
+        profiles_in_use = product_use["profiles"]
+        slo_in_use = product_use["slos"]
         alert_available = bool(alert_record.get("available"))
         rules_total = alert_record.get("rules_total")
         alert_in_use = (
@@ -437,9 +624,13 @@ def build(
              round(sum(scored_percentages) / len(scored_percentages), 1)),
             ("gcinsight_coverage_service_applicable_components_mean",
              {"version": observability_score.VERSION},
-             round(sum(scored_denominators) / len(scored_denominators), 2)),
+            round(sum(scored_denominators) / len(scored_denominators), 2)),
         ])
-    return metrics, {
+    adoption_metrics, adoption_views = _adoption_surface(
+        stacks, signal_inventory, capability_adoption or {}, score_product_use,
+    )
+    metrics.extend(adoption_metrics)
+    views = {
         SERVICE_VIEW: service_rows,
         TECHNOLOGY_VIEW: sorted(technology_rows, key=lambda row: (row["Technology"], row[" Stack"])),
         METRIC_VIEW: metric_rows,
@@ -447,3 +638,5 @@ def build(
         LEGACY_SERVICE_VIEW: legacy_rows,
         SUMMARY_VIEW: summary_rows,
     }
+    views.update(adoption_views)
+    return metrics, views

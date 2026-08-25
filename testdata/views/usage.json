@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "generated_at": "2026-08-25T16:14:25.714079+00:00",
     "tier": "t3",
     "stacks_total": 44,
     "stacks_scannable": 40,
@@ -50,6 +50,18 @@
       "alert_routing": {
         "source": "local",
         "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
       }
     }
   },
@@ -68,7 +80,7 @@
       "Datasource types": 5,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 792.2
+      "Age (days)": 796.1
     },
     {
       " Stack": "stack113",
@@ -84,7 +96,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 177
+      "Age (days)": 180.9
     },
     {
       " Stack": "stack001b",
@@ -100,7 +112,7 @@
       "Datasource types": 0,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 191.9
+      "Age (days)": 195.9
     },
     {
       " Stack": "stack111",
@@ -116,7 +128,7 @@
       "Datasource types": 4,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 387.3
+      "Age (days)": 391.2
     },
     {
       " Stack": "stack038",
@@ -132,7 +144,7 @@
       "Datasource types": 1,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 696.4
+      "Age (days)": 700.4
     },
     {
       " Stack": "stack158",
@@ -148,7 +160,7 @@
       "Datasource types": 2,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 318.3
+      "Age (days)": 322.2
     },
     {
       " Stack": "stack071",
@@ -164,7 +176,7 @@
       "Datasource types": 3,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 541.2
+      "Age (days)": 545.1
     },
     {
       " Stack": "obs-hub",
@@ -180,7 +192,7 @@
       "Datasource types": 5,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 819
+      "Age (days)": 822.9
     },
     {
       " Stack": "obs-hub-dev",
@@ -196,7 +208,7 @@
       "Datasource types": 4,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 197.2
+      "Age (days)": 201.1
     },
     {
       " Stack": "stack019",
@@ -212,7 +224,7 @@
       "Datasource types": 0,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 93.4
+      "Age (days)": 97.4
     },
     {
       " Stack": "stack097",
@@ -228,7 +240,7 @@
       "Datasource types": 2,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 471.1
+      "Age (days)": 475
     },
     {
       " Stack": "stack036",
@@ -244,7 +256,7 @@
       "Datasource types": 3,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 743.4
+      "Age (days)": 747.3
     },
     {
       " Stack": "stack037",
@@ -260,7 +272,7 @@
       "Datasource types": 5,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 533.1
+      "Age (days)": 537.1
     },
     {
       " Stack": "stack052",
@@ -276,7 +288,7 @@
       "Datasource types": 1,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 756.3
+      "Age (days)": 760.2
     },
     {
       " Stack": "stack193",
@@ -292,7 +304,7 @@
       "Datasource types": 1,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 444.4
+      "Age (days)": 448.3
     },
     {
       " Stack": "stack177",
@@ -308,7 +320,7 @@
       "Datasource types": 0,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 226.4
+      "Age (days)": 230.3
     },
     {
       " Stack": "stack035",
@@ -324,7 +336,7 @@
       "Datasource types": 2,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 400.5
+      "Age (days)": 404.4
     },
     {
       " Stack": "stack050",
@@ -340,7 +352,7 @@
       "Datasource types": 3,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 58.3
+      "Age (days)": 62.2
     },
     {
       " Stack": "stack146",
@@ -356,7 +368,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 270.2
+      "Age (days)": 274.1
     },
     {
       " Stack": "stack072",
@@ -372,7 +384,7 @@
       "Datasource types": 1,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 708.2
+      "Age (days)": 712.1
     },
     {
       " Stack": "stack201",
@@ -388,7 +400,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 3.2
+      "Age (days)": 7.1
     },
     {
       " Stack": "stack126",
@@ -404,7 +416,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 51.2
+      "Age (days)": 55.1
     },
     {
       " Stack": "stack125",
@@ -420,7 +432,7 @@
       "Datasource types": 1,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 25.3
+      "Age (days)": 29.2
     },
     {
       " Stack": "stack001",
@@ -436,7 +448,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 92.2
+      "Age (days)": 96.1
     },
     {
       " Stack": "stack049",
@@ -452,7 +464,7 @@
       "Datasource types": 0,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 226.4
+      "Age (days)": 230.3
     },
     {
       " Stack": "stack112",
@@ -468,7 +480,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 46.3
+      "Age (days)": 50.2
     },
     {
       " Stack": "stack053",
@@ -484,7 +496,7 @@
       "Datasource types": 2,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 402.4
+      "Age (days)": 406.3
     },
     {
       " Stack": "stack054",
@@ -500,7 +512,7 @@
       "Datasource types": 1,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 52.2
+      "Age (days)": 56.1
     },
     {
       " Stack": "stack055",
@@ -516,7 +528,7 @@
       "Datasource types": 1,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 571.3
+      "Age (days)": 575.3
     },
     {
       " Stack": "stack145",
@@ -532,7 +544,7 @@
       "Datasource types": 2,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 357.3
+      "Age (days)": 361.3
     },
     {
       " Stack": "stack001c",
@@ -548,7 +560,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 63.4
+      "Age (days)": 67.3
     },
     {
       " Stack": "stack001a",
@@ -564,7 +576,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 63.4
+      "Age (days)": 67.3
     },
     {
       " Stack": "stack110",
@@ -580,7 +592,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 539.2
+      "Age (days)": 543.1
     },
     {
       " Stack": "stack070",
@@ -596,7 +608,7 @@
       "Datasource types": 1,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 336.3
+      "Age (days)": 340.2
     },
     {
       " Stack": "stack051",
@@ -612,7 +624,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 46.3
+      "Age (days)": 50.2
     },
     {
       " Stack": "stack147",
@@ -628,7 +640,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 270.2
+      "Age (days)": 274.1
     },
     {
       " Stack": "stack148",
@@ -644,7 +656,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 81.3
+      "Age (days)": 85.2
     },
     {
       " Stack": "stack002",
@@ -660,7 +672,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 289.1
+      "Age (days)": 293
     },
     {
       " Stack": "stack170",
@@ -676,7 +688,7 @@
       "Datasource types": 0,
       "Signals in use": 1,
       "Signals": "metrics",
-      "Age (days)": 105.3
+      "Age (days)": 109.2
     },
     {
       " Stack": "stack149",
@@ -692,7 +704,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 161.3
+      "Age (days)": 165.3
     },
     {
       " Stack": "testsrobot002",
@@ -708,7 +720,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 88.4
+      "Age (days)": 92.3
     },
     {
       " Stack": "teststack004",
@@ -724,7 +736,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 71.3
+      "Age (days)": 75.2
     },
     {
       " Stack": "teststack017",
@@ -740,7 +752,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 35.1
+      "Age (days)": 39.1
     },
     {
       " Stack": "teststack018",
@@ -756,7 +768,7 @@
       "Datasource types": 0,
       "Signals in use": 0,
       "Signals": null,
-      "Age (days)": 35.1
+      "Age (days)": 39.1
     }
   ]
 }

@@ -107,12 +107,14 @@ The role can read:
 - folders, dashboards, public dashboards and snapshots;
 - teams, team permissions, team roles, user roles and custom-role metadata;
 - alert-rule and receiver inventory without receiver secrets;
-- the datasource proxy for exactly `grafanacloud-usage-insights`.
+- the datasource proxy for exactly `grafanacloud-usage-insights` on every stack;
+- the datasource proxy for exactly `grafanacloud-usage` on the nominated write stack only.
 
 `datasources:read` uses `datasources:*` because it lists metadata.
-`datasources:query` is separately pinned to
-`datasources:uid:grafanacloud-usage-insights`. The reader cannot query arbitrary production
-datasources.
+`datasources:query` is separately uid-pinned. Ordinary readers receive only
+`datasources:uid:grafanacloud-usage-insights`; the write-stack reader additionally receives
+`datasources:uid:grafanacloud-usage` for the bounded capability-adoption input. No reader can query
+arbitrary production datasources.
 
 The declaration explicitly refuses decrypted alert secrets, secure values, user session tokens,
 Grafana auth settings, support bundles, provisioning writes and Adaptive Traces mutation actions.

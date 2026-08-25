@@ -87,6 +87,7 @@ ASSISTANT_ACTIONS = (
 # `datasources:query` and FALSE of `datasources:read`, which only LISTS. So the list is estate-wide and
 # the query right stays pinned to one Grafana-provisioned telemetry datasource.
 USAGE_INSIGHTS_DS_UID = "grafanacloud-usage-insights"
+USAGE_DS_UID = "grafanacloud-usage"
 
 # The Adaptive Logs plugin. Its recommendations carry `projected_savings` outright, which the metrics
 # equivalent does not - there we compute the saving ourselves from series counts.
@@ -169,6 +170,22 @@ DESIRED_PERMISSIONS: tuple[dict[str, str], ...] = (
     # proxy. The read is covered by the estate-wide grant above; the QUERY stays uid-pinned.
     {"action": "datasources:query", "scope": f"datasources:uid:{USAGE_INSIGHTS_DS_UID}"},
 )
+
+WRITE_STACK_PERMISSION = {
+    "action": "datasources:query", "scope": f"datasources:uid:{USAGE_DS_UID}",
+}
+WRITE_STACK_PAIR = (WRITE_STACK_PERMISSION["action"], WRITE_STACK_PERMISSION["scope"])
+
+
+def desired_permissions(*, write_stack: bool) -> tuple[dict[str, str], ...]:
+    """The write stack alone can query the org usage datasource; every other role stays unchanged."""
+    if not write_stack:
+        return DESIRED_PERMISSIONS
+    return DESIRED_PERMISSIONS + (WRITE_STACK_PERMISSION,)
+
+
+def permission_pairs(permissions: Iterable[Mapping[str, str]]) -> frozenset[tuple[str, str]]:
+    return frozenset((p["action"], p.get("scope", "")) for p in permissions)
 
 # Never granted, and each for a stated reason. A future "we just need one more read" lands here first.
 REFUSED_ACTIONS: dict[str, str] = {
@@ -318,6 +335,7 @@ def role_drift(current, desired: Iterable[tuple[str, str]] = DESIRED_PAIRS) -> b
 
 def dangerous_extra_pairs(
     current, desired: Iterable[tuple[str, str]] = DESIRED_PAIRS,
+    removable: Iterable[tuple[str, str]] = RETIRED_PAIRS,
 ) -> frozenset[tuple[str, str]]:
     """Unexpected grants that invalidate the standing reader's read-only blast-radius claim.
 
@@ -327,13 +345,14 @@ def dangerous_extra_pairs(
     """
     held = held_pairs(current)
     wanted = frozenset(desired)
+    removable_pairs = frozenset(removable)
     if not pairs_are_scoped(current):
         # A scope-blind response cannot prove a query action is still uid-pinned. Missing scopes are
         # already visible through `missing_pairs`; avoid inventing scope facts here.
         return frozenset()
 
     def dangerous(action: str, scope: str) -> bool:
-        if (action, scope) in wanted or (action, scope) in RETIRED_PAIRS:
+        if (action, scope) in wanted or (action, scope) in removable_pairs:
             return False
         if action in REFUSED_ACTIONS or action == "chats:access":
             return True
@@ -356,7 +375,7 @@ def missing_pairs(current, desired: Iterable[tuple[str, str]] = DESIRED_PAIRS
     return frozenset(p for p in desired if p not in held)
 
 
-def needs_repair(p: Presence) -> bool:
+def needs_repair(p: Presence, desired: Iterable[tuple[str, str]] = DESIRED_PAIRS) -> bool:
     """Phase-1 verdict, from READ-ONLY facts only.
 
     The run is two-phase on purpose. Phase 1 asks "is this stack fine?" using nothing but a service
@@ -373,10 +392,10 @@ def needs_repair(p: Presence) -> bool:
     if p.basic_role is not None and p.basic_role != "None":
         return True
     # 200 means the credential works AND carries every declared action. Anything else needs a look.
-    return p.token_status != 200 or role_drift(p.role_actions)
+    return p.token_status != 200 or role_drift(p.role_actions, desired)
 
 
-def plan_action(p: Presence) -> str:
+def plan_action(p: Presence, desired: Iterable[tuple[str, str]] = DESIRED_PAIRS) -> str:
     """The single next repair for one stack. Ordered by what unblocks the rest.
 
     Returns one action, not a list: each repair changes what the next probe would see, so the caller
@@ -386,7 +405,7 @@ def plan_action(p: Presence) -> str:
         return CREATE_SA
     if not p.role_exists:
         return ENSURE_ROLE
-    if role_drift(p.role_actions):
+    if role_drift(p.role_actions, desired):
         return PATCH_ROLE
     # A Viewer/Admin basic role would silently break the "provably read-only" property we told the organisation
     # about, so it is corrected before anything that depends on the credential working.

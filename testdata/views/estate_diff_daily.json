@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "generated_at": "2026-08-25T16:14:25.714079+00:00",
     "tier": "t3",
     "stacks_total": 44,
     "stacks_scannable": 40,
@@ -50,14 +50,26 @@
       "alert_routing": {
         "source": "local",
         "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
       }
     }
   },
   "rows": [
     {
       " Metric": "COMPARISON WINDOW",
-      "Now": "2026-08-21T18:08:49.212573+00:00",
-      "Then": "2026-08-20T18:08:49.212573+00:00",
+      "Now": "2026-08-25T16:14:25.714096+00:00",
+      "Then": "2026-08-24T16:14:25.714096+00:00",
       "Change": "1.0 days",
       "Change %": null,
       "Note": "day over day - on target (1d)"

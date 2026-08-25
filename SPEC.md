@@ -30,12 +30,13 @@ Deliberately out of scope:
 | Grafana.com control plane: stack inventory, users, plugins, org members and access policies | org-realm read token | collector |
 | Per-stack data plane: Mimir cardinality, Adaptive Metrics and Fleet Management | org-realm read token with signal-instance basic auth | collector |
 | Each stack's Grafana API and datasource proxy: Assistant, service accounts, usage insights, Adaptive Logs, public dashboards, dashboard/folder/team/role inventory and alert routing | stack-local reader token | collector |
-| `grafanacloud-usage` on the write stack | already-provisioned datasource | dashboard panels only |
+| `grafanacloud-usage` on the write stack | write-stack reader, exact datasource query scope | live panels plus bounded capability-adoption collector input |
 | Optional `config/ratecard.csv` in S3 | task-role read of that single object | collector pricing seam |
 | Mimir, Loki and S3 on the nominated write stack/account | stack-realm writer token and AWS task role | emit path |
 
-If data is already present in `grafanacloud-usage`, a panel is preferred to a pipeline. It costs no
-collector calls, credential lifecycle or emitted series.
+If data is already present in `grafanacloud-usage`, a panel is preferred unless a durable named view or
+trendable bounded series unlocks a separate workflow. Capability adoption is the deliberate exception:
+its S3 call list and gap trend support enablement outreach and closure tracking.
 
 ## 4. Credential and permission model
 
@@ -49,8 +50,9 @@ collector calls, credential lifecycle or emitted series.
    configured prefix.
 
 The custom role is compared as `(action, scope)` pairs. `datasources:read` may list datasource
-metadata; `datasources:query` is scoped only to
-`datasources:uid:grafanacloud-usage-insights`. It is never widened to `datasources:*`.
+metadata. Every reader can query exactly `datasources:uid:grafanacloud-usage-insights`; the write-stack
+reader alone also receives `datasources:uid:grafanacloud-usage`. Query is never widened to
+`datasources:*`.
 Mutation and secret-bearing actions remain absent. A healthy reconciliation performs reads only and
 does not mint a replacement token.
 
@@ -65,7 +67,7 @@ Every tier has its own task definition because Scheduler does not support contai
 | Tier | Default cadence | Owns |
 |---|---|---|
 | T1 | hourly | fresh inventory, access policies, org members and Fleet Management |
-| T2 | daily | stack detail, service accounts, Assistant, usage insights, Adaptive Logs, public dashboards, alert routing, dashboard inventory and datasource query cost |
+| T2 | daily | stack detail, service accounts, Assistant, usage insights, capability adoption, Adaptive Logs, public dashboards, alert routing, dashboard inventory and datasource query cost |
 | T3 | every 6 hours | Mimir cardinality and Adaptive Metrics |
 | T4 | daily | independent one-day and seven-day estate diffs from S3 |
 | provisioner | daily | per-stack reader reconciliation |

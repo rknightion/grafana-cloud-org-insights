@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-25T07:11:14.036775+00:00",
+    "generated_at": "2026-08-25T16:14:25.714079+00:00",
     "tier": "t3",
     "stacks_total": 44,
     "stacks_scannable": 40,
@@ -58,6 +58,10 @@
       "signal_inventory": {
         "source": "local",
         "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
       }
     }
   },
@@ -67,7 +71,7 @@
       "Technology": "Kubernetes",
       "Technology key": "kubernetes",
       "Matched metric names": 1,
-      "Registry version": "1",
+      "Registry version": "6",
       "Last seen": "2026-08-25T00:00:00+00:00"
     }
   ]

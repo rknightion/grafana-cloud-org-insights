@@ -116,6 +116,9 @@ INPUT_OWNER: dict[str, str] = {
     # Daily, atomic four-signal label inventory. Names stay in the hydrated S3 input and never become
     # metric labels; Pillar K derives only bounded counts and enums from it.
     "signal_inventory": "t2",
+    # One org-usage query through the write-stack reader. It is separate from signal_inventory because
+    # either source can fail independently; the opportunity views need both and are withheld on either.
+    "capability_adoption": "t2",
 }
 
 # What each view actually needs, beyond inventory.
@@ -148,6 +151,8 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     "coverage_cluster_register": frozenset({"signal_inventory"}),
     "coverage_legacy_service_register": frozenset({"signal_inventory"}),
     "coverage_summary": frozenset({"signal_inventory"}),
+    "coverage_capability_adoption": frozenset({"signal_inventory", "capability_adoption"}),
+    "coverage_capability_opportunities": frozenset({"signal_inventory", "capability_adoption"}),
     "cost": frozenset({"dataplane"}),
     "cost_adaptive_headroom": frozenset({"dataplane"}),
     "cost_adaptive_metric_recommendations": frozenset({"dataplane"}),

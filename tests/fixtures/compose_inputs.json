@@ -31409,6 +31409,22 @@
    "clusters": ["synthetic-cluster"]
   }
  },
+ "capability_adoption": {
+  "available": true,
+  "window_start": "2026-08-24T00:00:00+00:00",
+  "window_end": "2026-08-25T00:00:00+00:00",
+  "values": {
+   "metrics": {"5000001": 128779},
+   "traces": {"5000001": 1},
+   "span_metrics": {"5000001": 0},
+   "service_graphs": {"5000001": 0},
+   "native_histograms": {"5000001": 0},
+   "exemplars": {"5000001": 0},
+   "irm_oncall": {"5000001": 0},
+   "k6": {"5000001": 0},
+   "frontend_observability": {"5000001": 0}
+  }
+ },
  "org_members": {
   "state": "ok",
   "members": [
