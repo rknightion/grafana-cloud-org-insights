@@ -242,7 +242,9 @@ def probe_stack(
         rpc_status = profiles.get("_http")
         if isinstance(rpc_status, int):
             return _failure(slug, "profiles", _http_reason(rpc_status), http=rpc_status)
-        profile_services = _strings(profiles.get("names"))
+        # Connect/Protobuf omits an empty repeated field, so an empty response object is the wire
+        # form of `names: []`. Other objects without `names` remain malformed.
+        profile_services = _strings(profiles.get("names", [] if not profiles else None))
         if profile_services is None:
             return _failure(slug, "profiles", "invalid_response")
     except Exception as exc:  # noqa: BLE001 - one signal failure becomes a closed stack record

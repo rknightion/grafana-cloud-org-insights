@@ -157,6 +157,13 @@ class SignalInventoryWindowTest(unittest.TestCase):
         ):
             self.assertEqual(out[key], [])
 
+    def test_empty_connect_object_is_measured_profile_absence(self):
+        with mock.patch.object(source.dataplane, "_connect_rpc", return_value={}):
+            out = source.probe_stack(Client(responses()), STACK, "cap", now=NOW)
+
+        self.assertEqual(out["available"], True)
+        self.assertEqual(out["profile_services"], [])
+
     def test_failed_slo_lookup_withholds_the_atomic_stack_record(self):
         failed = responses()
         failed["https://metrics.example/api/prom/api/v1/label/service_name/values?slo"] = (
