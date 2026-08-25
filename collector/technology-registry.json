@@ -1,5 +1,5 @@
 {
-  "version": "2",
+  "version": "3",
   "technologies": [
     {"key": "airflow", "name": "Apache Airflow", "match": {"exact": "airflow_task_tries"}},
     {"key": "akuity", "name": "Akuity managed Argo CD", "match": {"pattern": {"prefix": "akuity_", "suffix": "_cluster_agenthealthstatus_bool"}}},
@@ -12,9 +12,11 @@
     {"key": "cloudnativepg", "name": "CloudNativePG", "match": {"exact": "cnpg_collector_up"}},
     {"key": "controller_runtime", "name": "controller-runtime operator", "match": {"exact": "controller_runtime_active_workers"}},
     {"key": "coredns", "name": "CoreDNS", "match": {"exact": "coredns_build_info"}},
+    {"key": "crossplane", "name": "Crossplane", "match": {"exact": "crossplane_managed_resource_exists"}},
     {"key": "elasticsearch", "name": "Elasticsearch", "match": {"exact": "elasticsearch_os_load1"}},
     {"key": "envoy", "name": "Envoy", "match": {"exact": "envoy_server_live"}},
     {"key": "etcd", "name": "etcd", "match": {"exact": "etcd_requests_total"}},
+    {"key": "external_dns", "name": "external-dns", "match": {"exact": "external_dns_registry_endpoints_total"}},
     {"key": "frontend_observability", "name": "Grafana Frontend Observability", "match": {"exact": "grafanacloud_feo11y_app_info"}},
     {"key": "gcp_stackdriver", "name": "Google Cloud monitoring exporter", "match": {"exact": "stackdriver_monitoring_scrapes_total"}},
     {"key": "github_actions", "name": "GitHub Actions runners", "match": {"exact": "gha_assigned_jobs"}},

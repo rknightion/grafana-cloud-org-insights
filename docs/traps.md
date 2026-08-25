@@ -364,6 +364,18 @@ shape. Read the schema at `/openapi/v3/apis/dashboard.grafana.app/v2` rather tha
 
 - **Tempo needs the `/tempo` path prefix.**
 - **Fleet Management's basic-auth user is the stack id**, not a signal instance id.
+- **`ListCollectors` returns a bare `{}` for a stack with no collectors**, not `{"collectors":[]}`.
+ Read it with a defaulting accessor or a stack with nothing registered raises instead of counting zero.
+- **`markedInactiveAt` alone understates dead Fleet registrations.** One live stack carried 26
+ collectors with no `markedInactiveAt` whose `updatedAt` was eleven months old, and four of
+ twenty-four sampled stacks had a newest `updatedAt` over ninety days. Recency of `updatedAt` is the
+ stronger liveness test.
+- **`remotecfg_*` is NOT a Fleet Management sentinel.** Measured against `ListCollectors` ground truth
+ it has recall 0.47 under both a has-collectors and a checked-in-recently definition: it misses more
+ than half of the stacks genuinely using Fleet Management, and it fires on stacks with no
+ registrations at all. What it actually tracks is Alloy scrape breadth - the k8s-monitoring chart
+ ships an eleven-name `alloy_*` keep-list that excludes `remotecfg_*`, so its presence is a property
+ of the metrics pipeline, not of the product. Fleet adoption comes from the API, never from a metric.
 - **The Alertmanager's basic-auth user is `amInstanceId`**, which is its own instance id and matches no
  signal. `{amInstanceUrl}/alertmanager/api/v2/status` also returns the stack's RAW Alertmanager
  configuration in `config.original`, `http_config` included, so on a stack whose contact points live in
@@ -383,6 +395,12 @@ shape. Read the schema at `/openapi/v3/apis/dashboard.grafana.app/v2` rather tha
 - **A usage-insights endpoint can answer 200 to a labels call and then return zero streams** from
  `query_range` for the same credential. It needs a stack service-account token through the datasource
  proxy, not an org token.
+- **`grafanacloud_grafana_instance_custom_datasource_count` has a floor of ONE, not zero**, and on the
+ 150 of 274 stacks sitting at that floor the single datasource is the auto-provisioned
+ knowledge-graph one. `> 0` therefore claims universal adoption of nothing; threshold at `> 1`. The
+ metric also equals `sum(datasourceCnts.values())` from the gcom inventory exactly, on every stack,
+ so it is a lossier projection of a payload the collector already fetches - gcom carries the
+ per-TYPE breakdown the billing datasource does not expose at all.
 - **`grafana-knowledgegraph-datasource` is auto-provisioned everywhere.** Counted, it is the
  most-adopted plugin in the estate and means nothing. Exclude it from any adoption count.
 - **Synthetic Monitoring rejects an org-realm token and 500s even from an Admin service account.**
@@ -409,6 +427,11 @@ the collector already uses for cardinality: `<per-signal instance id>:<CAP>`, th
 - **One org-realm CAP reads all four signal databases across every region.** Verified on a live estate
  spanning eight Mimir regions: Mimir, Loki, Tempo and Pyroscope each answered 200 in all of them under
  a single region-`us` policy. The region hint in the token payload does not constrain the data plane.
+- **A metric covered by an Adaptive Metrics rule answers HTTP 422 to a bare selector.** The body
+ names the aggregated labels and says to use an aggregation function. Measured on two live stacks
+ against a metric whose `collector_id`, `instance` and `job` labels were aggregated away. A panel or
+ collector using the bare selector therefore errors on exactly the stacks that adopted the cost
+ lever hardest. Wrap any selector that might be aggregated in `count(...)` or `sum(...)`.
 - **`metrics:read` covers the whole Prometheus query API**, not only the cardinality endpoint.
  `label/<name>/values`, `series` and `query` all answer 200 under it.
 - **`hmInstancePromUrl` carries no `/api/prom` suffix.** Every Mimir path is
