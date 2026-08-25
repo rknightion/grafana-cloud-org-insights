@@ -14,6 +14,7 @@ from collector.sources import signal_inventory as source
 NOW = dt.datetime(2026, 8, 24, 12, 34, 56, tzinfo=dt.timezone.utc)
 START_SECONDS = int((NOW - dt.timedelta(hours=24)).timestamp())
 END_SECONDS = int(NOW.timestamp())
+SLO_MATCHER = '{grafana_slo_uuid!="",service_name!=""}'
 
 
 class Client:
@@ -23,7 +24,8 @@ class Client:
 
     def get(self, url: str, *, params: dict[str, object], basic: tuple[str, str]) -> Response:
         self.calls.append((url, params, basic))
-        lookup = f"{url}?slo" if params.get("match[]") else url
+        matcher = params.get("match[]")
+        lookup = f"{url}?{matcher}" if matcher else url
         status, body = self.responses[lookup]
         return Response(status, json.dumps(body).encode(), url)
 
@@ -53,8 +55,14 @@ def responses(*, logs: object | None = None) -> dict[str, tuple[int, object]]:
         "https://metrics.example/api/prom/api/v1/label/service_name/values": (
             200, {"status": "success", "data": ["checkout"]},
         ),
-        "https://metrics.example/api/prom/api/v1/label/service_name/values?slo": (
+        f"https://metrics.example/api/prom/api/v1/label/service_name/values?{SLO_MATCHER}": (
             200, {"status": "success", "data": ["checkout"]},
+        ),
+        'https://metrics.example/api/prom/api/v1/label/telemetry_sdk_name/values?'
+        '{__name__="target_info"}': (
+            200, {"status": "success", "data": [
+                "beyla", "io.micrometer", "opentelemetry", "other",
+            ]},
         ),
         "https://metrics.example/api/prom/api/v1/label/service/values": (
             200, {"status": "success", "data": ["legacy-api"]},
@@ -86,6 +94,12 @@ class SignalInventoryWindowTest(unittest.TestCase):
         self.assertEqual(out["slo_services"], ["checkout"])
         self.assertEqual(out["legacy_metric_services"], ["legacy-api"])
         self.assertEqual(out["clusters"], ["compute-a"])
+        self.assertEqual(out["technology_label_matches"], ["otel_sdk"])
+        self.assertEqual(
+            out["instrumentation_label_evidence"], ["beyla_ebpf", "micrometer_otlp", "sdk"]
+        )
+        self.assertNotIn("telemetry_sdk_name", json.dumps(out),
+                         "raw label names and values must not survive the source boundary")
         self.assertEqual(out["log_services"], [])
         self.assertEqual(out["trace_services"], ["checkout"])
         self.assertEqual(out["profile_services"], [])
@@ -110,15 +124,24 @@ class SignalInventoryWindowTest(unittest.TestCase):
             self.assertEqual(basic, ("11", "cap"))
         slo_params, slo_basic = by_call[(
             "https://metrics.example/api/prom/api/v1/label/service_name/values",
-            '{grafana_slo_uuid!="",service_name!=""}',
+            SLO_MATCHER,
         )]
         self.assertEqual(slo_params, {
             "start": START_SECONDS,
             "end": END_SECONDS,
             "limit": source.LABEL_VALUE_LIMIT,
-            "match[]": '{grafana_slo_uuid!="",service_name!=""}',
+            "match[]": SLO_MATCHER,
         })
         self.assertEqual(slo_basic, ("11", "cap"))
+        sdk_params, sdk_basic = by_call[(
+            "https://metrics.example/api/prom/api/v1/label/telemetry_sdk_name/values",
+            '{__name__="target_info"}',
+        )]
+        self.assertEqual(sdk_params, {
+            "start": START_SECONDS, "end": END_SECONDS, "limit": source.LABEL_VALUE_LIMIT,
+            "match[]": '{__name__="target_info"}',
+        })
+        self.assertEqual(sdk_basic, ("11", "cap"))
         self.assertEqual(
             by_url["https://logs.example/loki/api/v1/label/service_name/values"],
             ({"start": START_SECONDS * 1_000_000_000, "end": END_SECONDS * 1_000_000_000},
@@ -142,9 +165,13 @@ class SignalInventoryWindowTest(unittest.TestCase):
         empty["https://metrics.example/api/prom/api/v1/label/__name__/values"] = (
             200, {"status": "success", "data": []},
         )
-        empty["https://metrics.example/api/prom/api/v1/label/service_name/values?slo"] = (
+        empty[f"https://metrics.example/api/prom/api/v1/label/service_name/values?{SLO_MATCHER}"] = (
             200, {"status": "success", "data": []},
         )
+        empty[
+            'https://metrics.example/api/prom/api/v1/label/telemetry_sdk_name/values?'
+            '{__name__="target_info"}'
+        ] = (200, {"status": "success", "data": []})
         empty[
             "https://traces.example/tempo/api/v2/search/tag/resource.service.name/values"
         ] = (200, {"tagValues": []})
@@ -156,6 +183,8 @@ class SignalInventoryWindowTest(unittest.TestCase):
             "metric_names", "slo_services", "log_services", "trace_services", "profile_services",
         ):
             self.assertEqual(out[key], [])
+        self.assertEqual(out["technology_label_matches"], [])
+        self.assertEqual(out["instrumentation_label_evidence"], [])
 
     def test_empty_connect_object_is_measured_profile_absence(self):
         with mock.patch.object(source.dataplane, "_connect_rpc", return_value={}):
@@ -166,7 +195,7 @@ class SignalInventoryWindowTest(unittest.TestCase):
 
     def test_failed_slo_lookup_withholds_the_atomic_stack_record(self):
         failed = responses()
-        failed["https://metrics.example/api/prom/api/v1/label/service_name/values?slo"] = (
+        failed[f"https://metrics.example/api/prom/api/v1/label/service_name/values?{SLO_MATCHER}"] = (
             503, {"status": "error"},
         )
         with mock.patch.object(source.dataplane, "_connect_rpc") as rpc:

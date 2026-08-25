@@ -56,7 +56,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_stack_billed_users` | B | `stack`(271) | 271 | 1 | billingActiveUsers, NEVER currentActiveUsers. Named `stack_` not `cost_` so it cannot collide with the estate rollup of the same quantity |
 | `gcinsight_stack_collectors_active` | E | `stack`(271) | 271 | 1 | the per-stack half; use it to find registration concentration and churn |
 | `gcinsight_ai_estate_messages` | I | `category`(8), `surface`(8) | 64 | 1 | estate-wide category x surface, NO `stack` label  -  the per-stack cross product belongs in the existing `ai_category_surface` view |
-| `gcinsight_coverage_technology_stacks` | K | `kind`(63) | 63 | 1 | one bounded registry enum per technology; value is measured stacks present |
+| `gcinsight_coverage_technology_stacks` | K | `kind`(61) | 61 | 1 | one bounded registry enum per technology; value is measured stacks present |
 | `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(15) | 60 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
 | `gcinsight_input_available` | scan | `tier`(4), `input`(15) | 60 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
 | `gcinsight_coverage_unscored` | K | `component`(8), `reason`(7) | 56 | 1 | bounded component/reason counts; product absence and unavailable evidence are excluded from the score rather than published as failed coverage |
@@ -96,6 +96,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_estate_stacks` | A | `status`(3) | 3 | 1 |  |
 | `gcinsight_estate_users_by_role` | A | `role`(3) | 3 | 1 |  |
 | `gcinsight_ai_estate_investigations` | I | `kind`(2) | 2 | 1 | created by assistant vs by user. The INVENTORY is not collectable; these counts are |
+| `gcinsight_coverage_instrumentation_stacks` | K | `kind`(2) | 2 | 1 | official SDK and deduplicated SDK-equivalent stack counts; protocol adoption stays live on grafanacloud-usage |
 | `gcinsight_coverage_metric_names` | K | `kind`(2) | 2 | 1 | matched vs unmatched metric-name evidence; unmatched is a registry backlog, never a coverage share |
 | `gcinsight_coverage_service_applicable_components_mean` | K | `version`(2) | 2 | 1 | mean score denominator over exactly the same services as completeness |
 | `gcinsight_coverage_service_completeness_mean` | K | `version`(2) | 2 | 1 | mean over non-ephemeral services with at least four applicable components |
@@ -197,7 +198,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `coverage_metric_name_register` | K | 271 | 1 | metric names and their registry classification; names never become labels |
 | `coverage_service_register` | K | 271 | 1 | top-N named services with signal depth and explicit alert/dashboard metadata |
 | `coverage_summary` | K | 271 | 1 | per-stack counts, registry version, truncation and unmatched-name backlog |
-| `coverage_technology_register` | K | 17,073 | 1 | stack x technology is current-state identity detail, not a time series |
+| `coverage_technology_register` | K | 16,531 | 1 | stack x technology is current-state identity detail, not a time series |
 | `estate` | A | 271 | 1 | wide per-stack inventory: region, cluster, status, dashboards, alert rules, users by role, admin share, age, idle, drift, delete protection, leftover, created/updated by |
 | `estate_leftovers_billing` | A | 1 | 1 | billing-active leftover candidates; row count is deployment-specific |
 | `estate_leftovers_idle` | A | 1 | 1 | idle non-billing stack candidates; row count is deployment-specific |

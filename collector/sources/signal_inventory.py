@@ -15,6 +15,7 @@ from collections.abc import Mapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable
 
+from collector import technology_registry
 from collector.httpclient import DeadlineExceeded, ReadOnlyClient, Response
 from collector.sources import dataplane
 
@@ -26,6 +27,11 @@ FAILURE_REASONS = frozenset({
     "auth", "http_429", "http_5xx", "timeout", "invalid_response", "missing_endpoint",
     "http_other", "truncated", "unknown",
 })
+INSTRUMENTATION_LABEL_VALUES = {
+    "opentelemetry": "sdk",
+    "beyla": "beyla_ebpf",
+    "io.micrometer": "micrometer_otlp",
+}
 
 
 def _failure(slug: str, signal: str, reason: str, *, http: int | None = None) -> dict[str, Any]:
@@ -164,6 +170,31 @@ def probe_stack(
         if metric_names is None:
             return _list_failure(slug, "metrics", status, reason)
 
+        technology_label_matches: set[str] = set()
+        instrumentation_label_evidence: set[str] = set()
+        for query in technology_registry.label_queries():
+            label_values, status, reason = _get_list(
+                client, f"{base}/api/prom/api/v1/label/{query.label_key}/values",
+                params={
+                    "start": start_seconds, "end": end_seconds, "limit": LABEL_VALUE_LIMIT,
+                    "match[]": f'{{__name__="{query.metric_name}"}}',
+                },
+                basic=auth, field="data",
+            )
+            if label_values is None:
+                return _list_failure(slug, "metrics", status, reason)
+            technology_label_matches.update(technology_registry.match_label_values(
+                query.metric_name, query.label_key, label_values
+            ))
+            # These are closed evidence enums, never the values themselves. The documented values
+            # distinguish an official OTel SDK, Beyla and Micrometer's OTLP registry without widening
+            # the source label into the raw scan, logs, views or emitted metric labels.
+            if query.metric_name == "target_info" and query.label_key == "telemetry_sdk_name":
+                instrumentation_label_evidence.update(
+                    evidence for value, evidence in INSTRUMENTATION_LABEL_VALUES.items()
+                    if value in label_values
+                )
+
         metric_services, status, reason = _get_list(
             client, f"{base}/api/prom/api/v1/label/service_name/values",
             params={"start": start_seconds, "end": end_seconds, "limit": LABEL_VALUE_LIMIT},
@@ -256,6 +287,8 @@ def probe_stack(
         "window_start": start.isoformat(),
         "window_end": end.isoformat(),
         "metric_names": metric_names,
+        "technology_label_matches": sorted(technology_label_matches),
+        "instrumentation_label_evidence": sorted(instrumentation_label_evidence),
         "metric_services": metric_services,
         "slo_services": slo_services,
         "legacy_metric_services": legacy_metric_services,

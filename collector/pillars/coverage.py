@@ -373,6 +373,7 @@ def build(
     depth_counts = {depth: 0 for depth in range(1, 5)}
     signal_counts = {signal: 0 for signal in ("metrics", "logs", "traces", "profiles")}
     technology_stacks = {entry.key: 0 for entry in technology_registry.REGISTRY.entries}
+    instrumentation_stacks = {"sdk": 0, "sdk_equivalent": 0}
     technology_count_distribution = {kind: 0 for kind in ("0", "1", "2-4", "5+")}
     classified_counts = {"matched": 0, "unmatched": 0}
     identity_counts = {"canonical": 0, "legacy_only": 0, "overlap": 0}
@@ -513,7 +514,10 @@ def build(
         ))
         service_rows.extend(rows[:MAX_SERVICES])
 
-        classification = technology_registry.classify(record.get("metric_names") or [])
+        classification = technology_registry.classify(
+            record.get("metric_names") or [],
+            label_matches=record.get("technology_label_matches") or [],
+        )
         technology_count_distribution[
             _technology_count_bucket(len(classification["technologies"]))
         ] += 1
@@ -530,6 +534,15 @@ def build(
                 "Registry version": classification["registry_version"],
                 "Last seen": last_seen,
             })
+        technology_keys = {row["key"] for row in classification["technologies"]}
+        label_evidence = set(record.get("instrumentation_label_evidence") or [])
+        if "otel_sdk" in technology_keys:
+            instrumentation_stacks["sdk"] += 1
+        if (
+            "otel_http" in technology_keys
+            or {"sdk", "beyla_ebpf", "micrometer_otlp"}.intersection(label_evidence)
+        ):
+            instrumentation_stacks["sdk_equivalent"] += 1
         classified_counts["matched"] += classification["matched_metric_name_count"]
         classified_counts["unmatched"] += classification["unmatched_metric_name_count"]
         for metric_name in sorted(record.get("metric_names") or []):
@@ -595,6 +608,10 @@ def build(
         ("gcinsight_coverage_technology_stacks", {"kind": entry.key},
          float(technology_stacks[entry.key]))
         for entry in technology_registry.REGISTRY.entries
+    )
+    metrics.extend(
+        ("gcinsight_coverage_instrumentation_stacks", {"kind": kind}, float(count))
+        for kind, count in instrumentation_stacks.items()
     )
     metrics.extend(
         ("gcinsight_coverage_stacks_by_technology_count", {"kind": kind}, float(count))

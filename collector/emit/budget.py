@@ -526,6 +526,9 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                note="service assets carrying canonical metrics, logs, traces or profiles identity"),
     MetricSpec("gcinsight_coverage_technology_stacks", "K", {"kind": TECHNOLOGY},
                note="one bounded registry enum per technology; value is measured stacks present"),
+    MetricSpec("gcinsight_coverage_instrumentation_stacks", "K", {"kind": 2},
+               note="official SDK and deduplicated SDK-equivalent stack counts; protocol adoption "
+                    "stays live on grafanacloud-usage"),
     MetricSpec("gcinsight_coverage_stacks_by_technology_count", "K", {"kind": 4},
                note="measured stacks detecting 0, 1, 2-4 or 5+ registry technologies"),
     MetricSpec("gcinsight_coverage_metric_names", "K", {"kind": 2},

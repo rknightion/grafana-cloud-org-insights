@@ -1,5 +1,6 @@
 {
   "_note": "synthetic metric-name inventory for the technology registry contract",
+  "technology_label_matches": ["otel_sdk"],
   "metric_names": [
     "DCGM_FI_DEV_GPU_UTIL",
     "airflow_task_tries",
@@ -58,6 +59,7 @@
     "sm_check_info",
     "stackdriver_monitoring_scrapes_total",
     "system_cpu_count",
+    "target_info",
     "temporal_num_pollers",
     "tomcat_sessions_alive_max_seconds",
     "traces_service_graph_request_total",

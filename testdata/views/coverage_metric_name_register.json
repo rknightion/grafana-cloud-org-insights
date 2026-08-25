@@ -70,14 +70,14 @@
       " Stack": "stack158",
       "Metric name": "kube_pod_info",
       "Technology": "Kubernetes",
-      "Registry version": "6",
+      "Registry version": "7",
       "Last seen": "2026-08-25T00:00:00+00:00"
     },
     {
       " Stack": "stack158",
       "Metric name": "synthetic_unmatched_metric",
       "Technology": "(unmatched)",
-      "Registry version": "6",
+      "Registry version": "7",
       "Last seen": "2026-08-25T00:00:00+00:00"
     }
   ]

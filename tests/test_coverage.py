@@ -125,6 +125,8 @@ SIGNALS = {
         "available": True,
         "window_end": "2026-08-25T00:00:00+00:00",
         "metric_names": ["kube_pod_info", "unknown_metric"],
+        "technology_label_matches": [],
+        "instrumentation_label_evidence": [],
         "metric_services": [" Checkout ", "inventory"],
         "legacy_metric_services": ["legacy-api"],
         "log_services": ["checkout", "log-only"],
@@ -379,6 +381,7 @@ class CoverageBuildTest(unittest.TestCase):
                 "metric_names": sentinels[:count],
                 "metric_services": [], "legacy_metric_services": [], "log_services": [],
                 "trace_services": [], "profile_services": [], "slo_services": [], "clusters": [],
+                "technology_label_matches": [], "instrumentation_label_evidence": [],
             }
         metrics, _views = coverage.build(stacks, records)
         distribution = {
@@ -386,6 +389,30 @@ class CoverageBuildTest(unittest.TestCase):
             if name == "gcinsight_coverage_stacks_by_technology_count"
         }
         self.assertEqual(distribution, {"0": 1, "1": 1, "2-4": 1, "5+": 1})
+
+    def test_instrumentation_counts_deduplicate_evidence_per_stack(self):
+        """SDK-equivalent is a stack union, not one count per matching sentinel."""
+        stacks = [{"slug": "sdk"}, {"slug": "semconv"}, {"slug": "equivalent"}]
+        base = {
+            "available": True, "window_end": "2026-08-25T00:00:00+00:00",
+            "metric_services": [], "legacy_metric_services": [], "log_services": [],
+            "trace_services": [], "profile_services": [], "slo_services": [], "clusters": [],
+        }
+        records = {
+            "sdk": {**base, "metric_names": ["target_info", "http_server_request_duration_seconds_count"],
+                    "technology_label_matches": ["otel_sdk"],
+                    "instrumentation_label_evidence": ["sdk"]},
+            "semconv": {**base, "metric_names": ["http_client_duration_milliseconds_count"],
+                        "technology_label_matches": [], "instrumentation_label_evidence": []},
+            "equivalent": {**base, "metric_names": [], "technology_label_matches": [],
+                           "instrumentation_label_evidence": ["micrometer_otlp"]},
+        }
+        metrics, _views = coverage.build(stacks, records)
+        counts = {
+            labels["kind"]: value for name, labels, value in metrics
+            if name == "gcinsight_coverage_instrumentation_stacks"
+        }
+        self.assertEqual(counts, {"sdk": 1, "sdk_equivalent": 3})
 
     def test_summary_keeps_unmatched_count_without_publishing_a_share(self):
         """Unmatched names are a registry backlog, not a classification-confidence denominator."""

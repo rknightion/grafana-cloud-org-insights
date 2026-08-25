@@ -3236,6 +3236,28 @@ def d_coverage(ds: str):
             "gcinsight_coverage_stacks_by_technology_count", legend="{{kind}} technologies", sort=None,
             description="A bounded distribution over the measured-stack population. The registry is a "
                         "presence detector, so its denominator is stacks rather than every metric name."),
+        "n_otel_sdk": build.stat_panel(
+            "Stacks with official OpenTelemetry SDK evidence",
+            'gcinsight_coverage_instrumentation_stacks{kind="sdk"}',
+            description="Measured stacks where target_info carries the semantic-convention reserved "
+                        "telemetry_sdk_name value for the official OpenTelemetry SDK. Bare target_info "
+                        "presence is never counted, and the label values are discarded at collection."),
+        "n_otel_sdk_equivalent": build.stat_panel(
+            "Stacks with SDK-equivalent application instrumentation",
+            'gcinsight_coverage_instrumentation_stacks{kind="sdk_equivalent"}',
+            description="A deduplicated stack union of official SDK evidence, the four HTTP semantic-"
+                        "convention counters, and scoped SDK-name evidence for Beyla zero-code "
+                        "instrumentation and Micrometer's OTLP registry. Several matches on one stack "
+                        "still count once."),
+        "n_otel_protocol": build.stat_panel(
+            "Stacks above the OTLP protocol floor (24h)",
+            f"count(max by(stack_id)(max_over_time("
+            f"grafanacloud_instance_active_otlp_series[{WINDOW}])) > {cost_pillar.USAGE_FLOOR})",
+            ds_uid=build.USAGE_UID,
+            description="The independent transport-adoption figure: stacks whose active OTLP series "
+                        "rose above the committed synthetic-floor threshold in 24 hours. It does not "
+                        "claim an SDK or instrumentation flavour and remains estate-wide under Stack "
+                        "selection because this datasource is keyed by metrics instance id."),
         "n_no_technology": build.stat_panel(
             "Stacks with no technology detected",
             'gcinsight_coverage_stacks_by_technology_count{kind="0"}',
@@ -3504,6 +3526,9 @@ def d_coverage(ds: str):
             build.row("Identity populations", ["b_population"], max_columns=1),
             build.row("Coverage depth per service", ["b_depth"], max_columns=1, row_height="tall"),
             build.row("Services by signal", ["b_signal"], max_columns=1),
+            build.row("Application instrumentation and protocol reach",
+                      ["n_otel_sdk", "n_otel_sdk_equivalent", "n_otel_protocol"],
+                      max_columns=3, row_height="short"),
             build.row("Technology presence", ["b_technology_presence", "n_no_technology",
                                                 "b_technology"], max_columns=3),
             build.row("Identity evidence", ["n_legacy", "b_identity"], max_columns=2),

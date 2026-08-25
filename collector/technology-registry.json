@@ -1,5 +1,5 @@
 {
-  "version": "6",
+  "version": "7",
   "technologies": [
     {"key": "airflow", "name": "Apache Airflow", "match": {"exact": "airflow_task_tries"}},
     {"key": "akuity", "name": "Akuity managed Argo CD", "match": {"pattern": {"prefix": "akuity_", "suffix": "_cluster_agenthealthstatus_bool"}}},
@@ -43,10 +43,8 @@
     {"key": "otel_collector", "name": "OpenTelemetry Collector", "match": {"exact": "otelcol_processor_batch_metadata_cardinality"}},
     {"key": "otel_db_client", "name": "OTel database client instrumentation", "match": {"exact": "db_client_connections_usage"}},
     {"key": "otel_hostmetrics", "name": "OTel host metrics receiver", "match": {"exact": "system_cpu_count"}},
-    {"key": "otel_http", "name": "OTel HTTP server instrumentation (semconv, seconds)", "match": {"exact": "http_server_request_duration_seconds_count"}},
-    {"key": "otel_http_client", "name": "OTel HTTP client instrumentation (semconv, seconds)", "match": {"exact": "http_client_request_duration_seconds_count"}},
-    {"key": "otel_http_client_ms", "name": "OTel HTTP client instrumentation (semconv, milliseconds)", "match": {"exact": "http_client_duration_milliseconds_count"}},
-    {"key": "otel_http_server_ms", "name": "OTel HTTP server instrumentation (semconv, milliseconds)", "match": {"exact": "http_server_duration_milliseconds_count"}},
+    {"key": "otel_http", "name": "OTel HTTP application instrumentation (semconv)", "match": {"any_of": ["http_server_request_duration_seconds_count", "http_client_request_duration_seconds_count", "http_client_duration_milliseconds_count", "http_server_duration_milliseconds_count"]}},
+    {"key": "otel_sdk", "name": "OpenTelemetry SDK", "match": {"label": {"metric": "target_info", "key": "telemetry_sdk_name", "values": ["opentelemetry"]}}},
     {"key": "postgresql", "name": "PostgreSQL", "match": {"exact": "pg_up"}},
     {"key": "probe_checks", "name": "Probe checks (Synthetic Monitoring or blackbox exporter)", "match": {"exact": "probe_success"}},
     {"key": "prometheus", "name": "Prometheus", "match": {"exact": "prometheus_build_info"}},
