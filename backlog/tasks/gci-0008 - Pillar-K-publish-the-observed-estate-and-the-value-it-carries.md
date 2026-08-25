@@ -1,9 +1,10 @@
 ---
 id: GCI-0008
 title: Pillar K - publish the observed estate and the value it carries
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-08-24 15:06'
+updated_date: '2026-08-25 10:49'
 labels:
   - pillar-k
   - coverage
@@ -55,17 +56,35 @@ Both are needed. Neither substitutes for the other.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The dashboard banner quotes the origin question and the surface answers both of its halves
-- [ ] #2 Observed-estate figures are discovered every run with no configured stack, service or technology list
-- [ ] #3 Every classification publishes its unmatched share
-- [ ] #4 No service, metric or technology name reaches a metric label
-- [ ] #5 A failed per-stack label read yields an absent row, never a zero row
-- [ ] #6 Phase 1 ships independently and is useful with no collector change
+- [x] #1 The dashboard banner quotes the origin question and the surface answers both of its halves
+- [x] #2 Observed-estate figures are discovered every run with no configured stack, service or technology list
+- [x] #3 Every classification publishes its unmatched share
+- [x] #4 No service, metric or technology name reaches a metric label
+- [x] #5 A failed per-stack label read yields an absent row, never a zero row
+- [x] #6 Phase 1 ships independently and is useful with no collector change
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 python3 -m pytest tests -q
-- [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
-- [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
+- [x] #1 python3 -m pytest tests -q
+- [x] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
+- [x] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Deliver in dependency order through the eight tracked subtasks: ship datasource-only observed footprint first; add the bounded technology registry and explicitly-windowed four-signal inventory independently; wire the coverage composer, S3 views, bounded metrics and generated budget; build the Coverage dashboard and outcome/unit-economics surface; then validate source reconciliation and empty/absent behavior in an authorised deployment before promotion.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+All eight subtasks are complete. The final surface uses observed/observability-completeness language rather than implying protection. Names remain confined to S3 views, registry presence is discovered against each fresh estate, every classification publishes unmatched share, and failed per-stack signal reads remain absent. The banner carries the origin question verbatim. Grafana-published usage and billing metrics are read directly in dashboard panels; the collector adds only defensible bounded series and S3 registers.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Implemented and validated Pillar K as the observed-estate asset register, per-service observability-completeness surface, outcome-value view and flipped-denominator unit economics. Every child task is complete, the generated dashboard and collector contracts passed the full public gate, and live development plus billing-capable promotion checks reconciled the rendered results to their existing datasources without credential or scope changes.
+<!-- SECTION:FINAL_SUMMARY:END -->
