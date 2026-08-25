@@ -18,6 +18,8 @@ from __future__ import annotations
 import re
 from typing import Iterable, Mapping
 
+from collector import observability_score
+
 # Label keys any metric may carry. Adding to this list is a deliberate cardinality decision.
 ALLOWED_LABELS = frozenset({
     "stack",      # 271 values, the primary key
@@ -32,6 +34,7 @@ ALLOWED_LABELS = frozenset({
     "kind",
     "version",    # the maturity-rubric version, NOT a Grafana build string
     "dimension",  # 9, the maturity RUBRIC keys - a closed set defined in code, not from the estate
+    "component",  # 8, the seven coverage-score components plus the row-level eligibility decision
     "input",      # 4, emit/hydrate.py INPUT_OWNER - a closed set defined in code
     # Assistant's own chat taxonomy, and ONLY on the estate-wide rollup that carries no `stack` label
     # (pillars/ai.py). Observed 2026-08-20: 6 categories x 6 surfaces in 21 real combinations, declared
@@ -46,6 +49,7 @@ ALLOWED_LABELS = frozenset({
 _EMAIL = re.compile(r"[^@\s]+@[^@\s]+")
 _LOOKS_LIKE_BUILD = re.compile(r"^\d+\.\d+\.\d+-\d{6,}")
 MAX_LABEL_VALUE_LEN = 64
+COVERAGE_COMPONENTS = frozenset((*observability_score.COMPONENTS, "row"))
 
 
 class UnboundedLabel(ValueError):
@@ -62,6 +66,10 @@ def check(name: str, labels: Mapping[str, str]) -> None:
         text = str(value)
         if len(text) > MAX_LABEL_VALUE_LEN:
             raise UnboundedLabel(f"{name}: label {key!r} value is {len(text)} chars - unbounded")
+        if key == "component" and text not in COVERAGE_COMPONENTS:
+            raise UnboundedLabel(
+                f"{name}: component {text!r} is outside the closed coverage-score vocabulary"
+            )
         if _EMAIL.search(text):
             raise UnboundedLabel(f"{name}: label {key!r} looks like an email address")
         if _LOOKS_LIKE_BUILD.match(text):

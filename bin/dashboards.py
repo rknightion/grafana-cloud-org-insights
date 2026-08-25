@@ -26,7 +26,7 @@ from typing import Any
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from collector import identity
+from collector import identity, observability_score
 from collector import ratecard as ratecard_model
 from collector.dashboards import build
 from collector.pillars import (
@@ -3168,6 +3168,28 @@ def d_coverage(ds: str):
             description="Named services grouped by how many canonical signals carry the same exact "
                         "identity. Greater depth means more ways to investigate the service; shallower "
                         "depth is the adjacent upside without recasting the asset itself as a gap."),
+        "n_completeness_mean": build.stat_panel(
+            "Mean service observability completeness",
+            f'gcinsight_coverage_service_completeness_mean{{version="{observability_score.VERSION}"}}',
+            unit="percent", decimals=1,
+            description="Mean over non-ephemeral service rows with at least four applicable components. "
+                        "Read it only with the mean denominator beside it: a smaller applicable rubric "
+                        "can raise this number without any new coverage."),
+        "n_applicable_mean": build.stat_panel(
+            "Mean applicable components per scored service",
+            f'gcinsight_coverage_service_applicable_components_mean'
+            f'{{version="{observability_score.VERSION}"}}',
+            decimals=2,
+            description="The population-matched denominator for mean completeness. Profiles, SLO, "
+                        "alerting or dashboard evidence is excluded only for the explicit bounded "
+                        "reasons in the panel below."),
+        "b_unscored": build.barchart_panel(
+            "Services unscored where a component cannot be evaluated",
+            "gcinsight_coverage_unscored > 0", legend="{{component}} · {{reason}}", sort="desc",
+            description="Counts the service-component decisions behind the score denominator. The row "
+                        "entry counts visible machine-generated identities excluded from aggregates; "
+                        "the other entries state which product or evidence absence made a component "
+                        "inapplicable instead of failed."),
         "b_signal": build.barchart_panel(
             "Named services observed by signal", service_signal, legend="{{kind}}", sort=None,
             description="Canonical service identities present in each explicitly-windowed signal "
@@ -3224,11 +3246,11 @@ def d_coverage(ds: str):
         "tbl_services": build.table_panel(
             "Named service observability completeness register", coverage_pillar.SERVICE_VIEW, ds,
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.SERVICE_VIEW],
-            description="The primary asset register: seven visible components - metrics, logs, traces, "
-                        "profiles, an explicit service dashboard tag, alert label and SLO label - plus "
-                        "the deployment-configurable weighted observability completeness score. Active "
-                        "direct routing stays separate because it must not double-weight alerting. Rows "
-                        "are prioritised by completeness and bounded per stack for legibility."),
+            description="The primary asset register: seven configurable weighted components plus the "
+                        "applicable denominator and explicit unscored reasons. Metrics, logs and traces "
+                        "always remain applicable; unused products and unavailable evidence do not "
+                        "become failed coverage. Active direct routing stays separate because it must "
+                        "not double-weight alerting. Rows are bounded per stack for legibility."),
 
         # What observation has done. Every ratio over the alert-group counter is restricted to stacks
         # that report the response-time histogram; otherwise its numerator and denominator are different
@@ -3362,6 +3384,9 @@ def d_coverage(ds: str):
             build.row("Direction of travel", ["t_live_assets"], max_columns=1),
         ]),
         build.rows_tab("Coverage depth", [
+            build.row("Score and its denominator", ["n_completeness_mean", "n_applicable_mean"],
+                      max_columns=2, row_height="short"),
+            build.row("Why components are not scored", ["b_unscored"], max_columns=1),
             build.row("Coverage depth per service", ["b_depth"], max_columns=1, row_height="tall"),
             build.row("Signals and technology", ["b_signal", "b_technology"], max_columns=2),
             build.row("Classification confidence", ["n_unmatched", "n_legacy", "b_identity"],

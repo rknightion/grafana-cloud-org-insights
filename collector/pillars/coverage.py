@@ -7,6 +7,8 @@ successful atomic signal read; a failed stack is absent rather than represented 
 
 from __future__ import annotations
 
+import re
+from collections import Counter
 from collections.abc import Mapping, Sequence
 from typing import Any
 
@@ -23,6 +25,20 @@ CLUSTER_VIEW = "coverage_cluster_register"
 LEGACY_SERVICE_VIEW = "coverage_legacy_service_register"
 SUMMARY_VIEW = "coverage_summary"
 
+EPHEMERAL_IDENTITY = re.compile(
+    r"(?:\.(?:scope|service|slice|socket|mount|timer|target|device)$|"
+    r"^session-\d+|^user-\d+|\d{8,}|[0-9a-f]{8}-[0-9a-f]{4}-)"
+)
+UNSCORED_PAIRS = (
+    ("profiles", "signal_not_in_use"),
+    ("slo", "product_not_in_use"),
+    ("alert", "product_not_in_use"),
+    ("alert", "inventory_unavailable"),
+    ("dashboard", "inventory_unavailable"),
+    ("dashboard", "evidence_unavailable"),
+    ("row", "ephemeral_identity"),
+)
+
 VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
     SERVICE_VIEW: (
         (" Stack", "string"), ("Service", "string"),
@@ -30,6 +46,7 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
         ("Metrics", "string"), ("Logs", "string"), ("Traces", "string"),
         ("Profiles", "string"), ("Has dashboard", "string"), ("Has alert", "string"),
         ("Has SLO", "string"), ("Has routed active alert", "string"),
+        ("Applicable components", "number"), ("Unscored reason", "string"),
         ("Score numerator", "number"), ("Score maximum", "number"),
         ("Score version", "string"),
         ("Last seen", "time"),
@@ -108,6 +125,24 @@ def _alert_services(record: Mapping[str, Any]) -> tuple[set[str], set[str]]:
     return alerts, routed
 
 
+def _component_state(value: bool | None, reason: str | None) -> str:
+    if reason:
+        return f"unscored: {reason}"
+    return "yes" if value else "no"
+
+
+def _slo_product_in_use(record: Mapping[str, Any], slos: set[str]) -> bool:
+    """Use the same explicitly-windowed metric inventory that agreed with the SLO API census."""
+    return bool(slos) or any(
+        isinstance(name, str) and name.casefold().startswith("grafana_slo_")
+        for name in record.get("metric_names") or []
+    )
+
+
+def _ephemeral(service: str) -> bool:
+    return EPHEMERAL_IDENTITY.search(service) is not None
+
+
 def build(
     stacks: Sequence[Mapping[str, Any]],
     signal_inventory: Mapping[str, Mapping[str, Any]] | None,
@@ -132,6 +167,9 @@ def build(
     technology_stacks = {entry.key: 0 for entry in technology_registry.REGISTRY.entries}
     classified_counts = {"matched": 0, "unmatched": 0}
     identity_counts = {"canonical": 0, "legacy_only": 0, "overlap": 0}
+    unscored_counts: Counter[tuple[str, str]] = Counter()
+    scored_percentages: list[float] = []
+    scored_denominators: list[int] = []
     measured = 0
 
     for stack in stacks:
@@ -147,8 +185,6 @@ def build(
             "traces": _names(record, "trace_services"),
             "profiles": _names(record, "profile_services"),
         }
-        for signal, names in by_signal.items():
-            signal_counts[signal] += len(names)
         canonical = set().union(*by_signal.values())
         legacy = _names(record, "legacy_metric_services")
         slos = _names(record, "slo_services")
@@ -157,26 +193,69 @@ def build(
         identity_counts["legacy_only"] += len(legacy_only)
         identity_counts["overlap"] += len(legacy & canonical)
 
-        dashboards = _dashboard_services((dashboard_inventory or {}).get(slug) or {})
-        alerts, routed = _alert_services((alert_routing or {}).get(slug) or {})
+        dashboard_record = (dashboard_inventory or {}).get(slug) or {}
+        alert_record = (alert_routing or {}).get(slug) or {}
+        dashboards = _dashboard_services(dashboard_record)
+        alerts, routed = _alert_services(alert_record)
+        profiles_in_use = bool(by_signal["profiles"])
+        slo_in_use = _slo_product_in_use(record, slos)
+        alert_available = bool(alert_record.get("available"))
+        rules_total = alert_record.get("rules_total")
+        alert_in_use = (
+            alert_available and isinstance(rules_total, int)
+            and not isinstance(rules_total, bool) and rules_total > 0
+        )
+        dashboard_available = bool(dashboard_record.get("available"))
+        dashboard_evidence_available = dashboard_record.get("detail_available") is not False
+        eligible_services = {service for service in canonical if not _ephemeral(service)}
+        for signal, names in by_signal.items():
+            signal_counts[signal] += len(names & eligible_services)
         rows = []
         for service in canonical:
             signals = [signal for signal, names in by_signal.items() if service in names]
             depth = len(signals)
-            depth_counts[depth] += 1
-            components = {
+            row_unscored = "ephemeral_identity" if _ephemeral(service) else None
+            if row_unscored is None:
+                depth_counts[depth] += 1
+            components: dict[str, bool | None] = {
                 "metrics": service in by_signal["metrics"],
                 "logs": service in by_signal["logs"],
                 "traces": service in by_signal["traces"],
-                "profiles": service in by_signal["profiles"],
-                "dashboard": service in dashboards,
-                "alert": service in alerts,
-                "slo": service in slos,
+                "profiles": service in by_signal["profiles"] if profiles_in_use else None,
+                "dashboard": (
+                    service in dashboards
+                    if dashboard_available and dashboard_evidence_available else None
+                ),
+                "alert": service in alerts if alert_in_use else None,
+                "slo": service in slos if slo_in_use else None,
             }
+            reasons: dict[str, str] = {}
+            if not profiles_in_use:
+                reasons["profiles"] = "signal_not_in_use"
+            if not slo_in_use:
+                reasons["slo"] = "product_not_in_use"
+            if not alert_available:
+                reasons["alert"] = "inventory_unavailable"
+            elif not alert_in_use:
+                reasons["alert"] = "product_not_in_use"
+            if not dashboard_available:
+                reasons["dashboard"] = "inventory_unavailable"
+            elif not dashboard_evidence_available:
+                reasons["dashboard"] = "evidence_unavailable"
+            applicable_count = sum(isinstance(value, bool) for value in components.values())
             score = observability_score.calculate(components, weights)
             if score is None:
                 continue
             numerator, maximum, percentage = score
+            if row_unscored:
+                unscored_counts[("row", row_unscored)] += 1
+                percentage = None
+            else:
+                for component, reason in reasons.items():
+                    unscored_counts[(component, reason)] += 1
+                if percentage is not None:
+                    scored_percentages.append(percentage)
+                    scored_denominators.append(applicable_count)
             rows.append({
                 " Stack": slug,
                 "Service": service,
@@ -185,17 +264,24 @@ def build(
                 "Metrics": "yes" if components["metrics"] else "no",
                 "Logs": "yes" if components["logs"] else "no",
                 "Traces": "yes" if components["traces"] else "no",
-                "Profiles": "yes" if components["profiles"] else "no",
-                "Has dashboard": "yes" if components["dashboard"] else "no",
-                "Has alert": "yes" if components["alert"] else "no",
-                "Has SLO": "yes" if components["slo"] else "no",
+                "Profiles": _component_state(components["profiles"], reasons.get("profiles")),
+                "Has dashboard": _component_state(
+                    components["dashboard"], reasons.get("dashboard")
+                ),
+                "Has alert": _component_state(components["alert"], reasons.get("alert")),
+                "Has SLO": _component_state(components["slo"], reasons.get("slo")),
                 "Has routed active alert": "yes" if service in routed else "no",
+                "Applicable components": applicable_count,
+                "Unscored reason": row_unscored or "",
                 "Score numerator": numerator,
                 "Score maximum": maximum,
                 "Score version": observability_score.VERSION,
                 "Last seen": last_seen,
             })
-        rows.sort(key=lambda row: (-row["Observability completeness %"], row["Service"]))
+        rows.sort(key=lambda row: (
+            row["Observability completeness %"] is None,
+            -(row["Observability completeness %"] or 0), row["Service"],
+        ))
         service_rows.extend(rows[:MAX_SERVICES])
 
         classification = technology_registry.classify(record.get("metric_names") or [])
@@ -254,7 +340,7 @@ def build(
             "Last seen": last_seen,
         })
         metrics.extend([
-            ("gcinsight_coverage_stack_services", {"stack": slug}, float(len(canonical))),
+            ("gcinsight_coverage_stack_services", {"stack": slug}, float(len(eligible_services))),
             ("gcinsight_coverage_stack_technologies", {"stack": slug},
              float(len(classification["technologies"]))),
             ("gcinsight_coverage_stack_clusters", {"stack": slug}, float(len(clusters))),
@@ -282,6 +368,20 @@ def build(
         ("gcinsight_coverage_service_identity", {"kind": kind}, float(value))
         for kind, value in identity_counts.items()
     )
+    metrics.extend(
+        ("gcinsight_coverage_unscored", {"component": component, "reason": reason},
+         float(unscored_counts[(component, reason)]))
+        for component, reason in UNSCORED_PAIRS
+    )
+    if scored_percentages:
+        metrics.extend([
+            ("gcinsight_coverage_service_completeness_mean",
+             {"version": observability_score.VERSION},
+             round(sum(scored_percentages) / len(scored_percentages), 1)),
+            ("gcinsight_coverage_service_applicable_components_mean",
+             {"version": observability_score.VERSION},
+             round(sum(scored_denominators) / len(scored_denominators), 2)),
+        ])
     return metrics, {
         SERVICE_VIEW: service_rows,
         TECHNOLOGY_VIEW: sorted(technology_rows, key=lambda row: (row["Technology"], row[" Stack"])),

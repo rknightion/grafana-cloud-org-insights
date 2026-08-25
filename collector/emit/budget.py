@@ -524,6 +524,13 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("gcinsight_coverage_service_identity", "K", {"kind": 3},
                note="canonical, legacy-only and overlap counts; generic service is never silently "
                     "promoted to service_name"),
+    MetricSpec("gcinsight_coverage_unscored", "K", {"component": 8, "reason": 5},
+               note="bounded component/reason counts; product absence and unavailable evidence are "
+                    "excluded from the score rather than published as failed coverage"),
+    MetricSpec("gcinsight_coverage_service_completeness_mean", "K", {"version": 2},
+               note="mean over non-ephemeral services with at least four applicable components"),
+    MetricSpec("gcinsight_coverage_service_applicable_components_mean", "K", {"version": 2},
+               note="mean score denominator over exactly the same services as completeness"),
     MetricSpec("coverage_service_register", "K", {"stack": STACK}, store="view",
                note="top-N named services with signal depth and explicit alert/dashboard metadata"),
     MetricSpec("coverage_technology_register", "K", {"stack": STACK, "kind": TECHNOLOGY}, store="view",

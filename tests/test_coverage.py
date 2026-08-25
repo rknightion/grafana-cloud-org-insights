@@ -148,6 +148,7 @@ DASHBOARDS = {
 ALERTS = {
     "alpha": {
         "available": True,
+        "rules_total": 2,
         "service_routes": [
             {"service_name": "checkout", "identity_label": "service_name", "paused": False,
              "routing": "direct", "receiver_state": "provisioned"},
@@ -159,6 +160,100 @@ ALERTS = {
 
 
 class CoverageBuildTest(unittest.TestCase):
+    def test_structurally_absent_products_are_unscored_with_the_reason(self):
+        """Product absence is an adoption opportunity, not failed service coverage."""
+        record = dict(SIGNALS["alpha"])
+        record.update({
+            "metric_services": ["app"],
+            "log_services": ["app"],
+            "trace_services": ["app"],
+            "profile_services": [],
+            "slo_services": [],
+            "metric_names": ["application_metric"],
+        })
+        metrics, views = coverage.build(
+            [{"slug": "alpha"}], {"alpha": record},
+            dashboard_inventory={"alpha": {"available": False}},
+            alert_routing={"alpha": {"available": True, "rules_total": 0}},
+        )
+
+        row = views[coverage.SERVICE_VIEW][0]
+        self.assertEqual(row["Metrics"], "yes")
+        self.assertEqual(row["Logs"], "yes")
+        self.assertEqual(row["Traces"], "yes")
+        self.assertEqual(row["Profiles"], "unscored: signal_not_in_use")
+        self.assertEqual(row["Has SLO"], "unscored: product_not_in_use")
+        self.assertEqual(row["Has alert"], "unscored: product_not_in_use")
+        self.assertEqual(row["Has dashboard"], "unscored: inventory_unavailable")
+        self.assertEqual(row["Applicable components"], 3)
+        self.assertIsNone(row["Observability completeness %"])
+
+        unscored = {
+            (labels["component"], labels["reason"]): value
+            for name, labels, value in metrics
+            if name == "gcinsight_coverage_unscored"
+        }
+        self.assertEqual(unscored[("profiles", "signal_not_in_use")], 1)
+        self.assertEqual(unscored[("slo", "product_not_in_use")], 1)
+        self.assertEqual(unscored[("alert", "product_not_in_use")], 1)
+        self.assertEqual(unscored[("dashboard", "inventory_unavailable")], 1)
+
+    def test_zero_dashboards_is_scored_no_when_the_inventory_succeeded(self):
+        """An empty successful dashboard inventory is evidence, not an unavailable input."""
+        _metrics, views = coverage.build(
+            STACKS, SIGNALS,
+            dashboard_inventory={"alpha": {"available": True, "dashboards": []}},
+            alert_routing=ALERTS,
+        )
+        row = next(row for row in views[coverage.SERVICE_VIEW] if row["Service"] == "checkout")
+        self.assertEqual(row["Has dashboard"], "no")
+        self.assertEqual(row["Applicable components"], 7)
+
+    def test_unavailable_alert_inventory_and_dashboard_evidence_are_not_zero(self):
+        """A failed evidence read must not be converted into an evaluated component with value no."""
+        _metrics, views = coverage.build(
+            STACKS, SIGNALS,
+            dashboard_inventory={
+                "alpha": {"available": True, "detail_available": False, "dashboards": []},
+            },
+            alert_routing={"alpha": {"available": False}},
+        )
+        row = next(row for row in views[coverage.SERVICE_VIEW] if row["Service"] == "checkout")
+        self.assertEqual(row["Has alert"], "unscored: inventory_unavailable")
+        self.assertEqual(row["Has dashboard"], "unscored: evidence_unavailable")
+        self.assertEqual(row["Applicable components"], 5)
+
+    def test_ephemeral_identity_stays_visible_but_is_excluded_from_aggregates(self):
+        """The heuristic can false-positive, so rows remain inspectable while headlines exclude them."""
+        record = dict(SIGNALS["alpha"])
+        record.update({
+            "metric_services": [], "log_services": ["app", "worker.service"],
+            "trace_services": [], "profile_services": [], "slo_services": [],
+            "metric_names": ["application_metric"],
+        })
+        metrics, views = coverage.build(
+            [{"slug": "alpha"}], {"alpha": record},
+            dashboard_inventory={"alpha": {"available": True, "dashboards": []}},
+            alert_routing={"alpha": {"available": True, "rules_total": 0}},
+        )
+        rows = {row["Service"]: row for row in views[coverage.SERVICE_VIEW]}
+        self.assertEqual(rows["worker.service"]["Unscored reason"], "ephemeral_identity")
+        self.assertIsNone(rows["worker.service"]["Observability completeness %"])
+
+        values = {
+            (name, tuple(sorted(labels.items()))): value for name, labels, value in metrics
+        }
+        self.assertEqual(values[("gcinsight_coverage_stack_services", (("stack", "alpha"),))], 1)
+        self.assertEqual(
+            values[("gcinsight_coverage_services_by_depth", (("kind", "1"),))], 1,
+        )
+        self.assertEqual(
+            values[("gcinsight_coverage_unscored", (
+                ("component", "row"), ("reason", "ephemeral_identity"),
+            ))],
+            1,
+        )
+
     def test_service_depth_uses_canonical_exact_normalized_identity(self):
         metrics, views = coverage.build(
             STACKS, SIGNALS, dashboard_inventory=DASHBOARDS, alert_routing=ALERTS,
@@ -303,6 +398,24 @@ class ObservabilityScoreConfigTest(unittest.TestCase):
             with self.subTest(raw=raw):
                 with self.assertRaises(observability_score.InvalidWeights):
                     observability_score.parse_weights(raw)
+
+    def test_score_uses_only_applicable_components(self):
+        """A product that is not in use must not remain in the score denominator."""
+        states = {component: None for component in observability_score.COMPONENTS}
+        states.update({"metrics": True, "logs": False, "traces": True, "dashboard": False})
+        self.assertEqual(
+            observability_score.calculate(states, observability_score.parse_weights("")),
+            (2.0, 4.0, 50.0),
+        )
+
+    def test_percentage_is_withheld_below_four_applicable_components(self):
+        """A thin score looks precise while resting on too little of the declared rubric."""
+        states = {component: None for component in observability_score.COMPONENTS}
+        states.update({"metrics": True, "logs": False, "traces": True})
+        self.assertEqual(
+            observability_score.calculate(states, observability_score.parse_weights("")),
+            (2.0, 3.0, None),
+        )
 
 
 if __name__ == "__main__":

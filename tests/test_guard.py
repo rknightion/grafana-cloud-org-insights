@@ -33,6 +33,13 @@ class GuardTest(unittest.TestCase):
     def test_short_rubric_version_is_allowed(self):
         check("gcinsight_maturity_score", {"stack": "a", "version": "1"})
 
+    def test_coverage_component_is_a_closed_enum(self):
+        """Allowing the key without its fixed values would make the new dimension unbounded."""
+        check("gcinsight_coverage_unscored", {"component": "profiles", "reason": "not_in_use"})
+        check("gcinsight_coverage_unscored", {"component": "row", "reason": "ephemeral"})
+        with self.assertRaises(UnboundedLabel):
+            check("gcinsight_coverage_unscored", {"component": "tenant-authored", "reason": "x"})
+
     def test_overlong_value_is_refused(self):
         with self.assertRaises(UnboundedLabel):
             check("gcinsight_x", {"kind": "k" * 65})

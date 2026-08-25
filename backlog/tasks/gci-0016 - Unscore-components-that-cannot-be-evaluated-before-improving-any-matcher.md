@@ -1,10 +1,11 @@
 ---
 id: GCI-0016
 title: 'Unscore components that cannot be evaluated, before improving any matcher'
-status: To Do
-assignee: []
+status: Done
+assignee:
+  - '@codex'
 created_date: '2026-08-25 13:11'
-updated_date: '2026-08-25 13:21'
+updated_date: '2026-08-25 14:52'
 labels:
   - pillar-k
   - coverage
@@ -81,21 +82,31 @@ Measured: 425 of 3,566 published rows (11.9%), and 12,459 of 18,376 in the full 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 profiles, slo and alert unscore on measured product absence with a bounded reason enum
-- [ ] #2 metrics, logs and traces never unscore
-- [ ] #3 denominator is the applicable-component count, and the row percentage is withheld below four
-- [ ] #4 machine-generated identities are row-unscored, excluded from aggregates, still visible in the view
-- [ ] #5 coverage_unscored{component,reason} declared in CATALOGUE and rendered
-- [ ] #6 mean completeness is never rendered without mean denominator beside it
-- [ ] #7 Score version bumped
+- [x] #1 profiles, slo and alert unscore on measured product absence with a bounded reason enum
+- [x] #2 metrics, logs and traces never unscore
+- [x] #3 denominator is the applicable-component count, and the row percentage is withheld below four
+- [x] #4 machine-generated identities are row-unscored, excluded from aggregates, still visible in the view
+- [x] #5 coverage_unscored{component,reason} declared in CATALOGUE and rendered
+- [x] #6 mean completeness is never rendered without mean denominator beside it
+- [x] #7 Score version bumped
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 python3 -m pytest tests -q
-- [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
-- [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
+- [x] #1 python3 -m pytest tests -q
+- [x] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
+- [x] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Add decision tests for per-component applicability, the four-component score floor, and ephemeral row visibility/exclusion.
+2. Make the score calculator version 2 and compute weighted scores only across applicable components while retaining numerator/maximum evidence.
+3. Derive profile, SLO, alert, dashboard, and row-level unscored reasons from the existing left-joined inputs; emit bounded unscored and mean score/denominator metrics and expose reasons in the service/summary views.
+4. Rebuild the Coverage dashboard around a paired mean-completeness/mean-denominator disclosure and render the unscored reason counts.
+5. Regenerate BUDGET.md, run targeted tests, the full item gate, CodeRabbit, review the diff, then finalize, commit to main, and push.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
@@ -118,4 +129,14 @@ So 266 of 270 stacks own no SLO. `grafanacloud_slo_*` does not exist as a metric
 For scale, over the same 24h window: 269 stacks ingest logs and 232 ingest traces. Profiles at 1 and SLOs at 4 are the outliers by three orders of magnitude, not a measurement artefact.
 
 Wording rule for whoever implements this: state these as "N stacks have NO profiles" or "M stacks own zero SLOs". A bare "269/270" next to the word profiles reads as the opposite of what it means and was misread once already.
+
+Implemented score version 2 with explicit applicability, a four-component percentage floor, bounded component/reason counts, paired mean score and denominator metrics, and visible-but-aggregate-excluded ephemeral identities. Targeted coverage, dashboard, budget, guard, compose, and hydration checks pass; the dependency derivation remained unchanged.
+
+Final verification: 1398 passed, 2 skipped, 6614 subtests; OpenTofu formatting and both module validations passed; customer-identifier working tree and history scans passed; shipped-text check passed; CodeRabbit re-review completed with zero findings.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Made coverage score version 2 defensible by scoring only applicable components, withholding thin percentages, excluding visible ephemeral identities from aggregates, and publishing bounded unscored reasons with a population-matched mean denominator. Verified through the full offline suite, dashboard/view coverage gates, generated budget, Terraform validation, privacy/text gates, and a zero-finding CodeRabbit re-review.
+<!-- SECTION:FINAL_SUMMARY:END -->

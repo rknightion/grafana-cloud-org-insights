@@ -8,7 +8,8 @@ from collections.abc import Mapping
 from typing import Any
 
 COMPONENTS = ("metrics", "logs", "traces", "profiles", "dashboard", "alert", "slo")
-VERSION = "1"
+MIN_COMPONENTS_COVERED = 4
+VERSION = "2"
 
 
 class InvalidWeights(ValueError):
@@ -43,12 +44,15 @@ def parse_weights(raw: str) -> dict[str, float]:
 
 def calculate(
     states: Mapping[str, Any], weights: Mapping[str, float],
-) -> tuple[float, float, float] | None:
-    """Return numerator, maximum and percentage; unknown component state withholds the score."""
-    if any(not isinstance(states.get(component), bool) for component in COMPONENTS):
+) -> tuple[float, float, float | None] | None:
+    """Score applicable components and withhold percentages based on too little evidence."""
+    if any(states.get(component) is not None and not isinstance(states.get(component), bool)
+           for component in COMPONENTS):
         return None
-    maximum = sum(weights[component] for component in COMPONENTS)
-    if maximum <= 0:
-        raise InvalidWeights("at least one coverage weight must be above zero")
-    numerator = sum(weights[component] for component in COMPONENTS if states[component])
-    return numerator, maximum, round(numerator / maximum * 100, 1)
+    applicable = [component for component in COMPONENTS if isinstance(states.get(component), bool)]
+    maximum = sum(weights[component] for component in applicable)
+    numerator = sum(weights[component] for component in applicable if states[component])
+    percentage = None
+    if len(applicable) >= MIN_COMPONENTS_COVERED and maximum > 0:
+        percentage = round(numerator / maximum * 100, 1)
+    return numerator, maximum, percentage
