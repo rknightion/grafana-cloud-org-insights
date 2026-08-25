@@ -1,9 +1,11 @@
 ---
 id: GCI-0015
 title: Give the technology registry label-aware and name-set matchers
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-08-25 13:05'
+updated_date: '2026-08-25 17:40'
 labels:
   - pillar-k
   - registry
@@ -70,3 +72,9 @@ Once `any_of` exists, collapse the four HTTP semconv entries into one. Once `lab
 - [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
 - [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Implement any_of first with failing overlap and classification tests. Measure the named-metric label-value query expansion before adopting label matching. Then add label matching with value-aware ambiguity validation, collapse the four OTel HTTP sentinels, publish SDK / SDK-equivalent / any-OTLP distinctions, and run the full repository gates.
+<!-- SECTION:PLAN:END -->

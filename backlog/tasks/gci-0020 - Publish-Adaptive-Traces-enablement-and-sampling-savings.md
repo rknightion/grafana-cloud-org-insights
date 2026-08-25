@@ -1,11 +1,11 @@
 ---
 id: GCI-0020
 title: Publish Adaptive Traces enablement and sampling savings
-status: In Progress
+status: Parked
 assignee:
   - '@codex'
 created_date: '2026-08-25 14:11'
-updated_date: '2026-08-25 17:04'
+updated_date: '2026-08-25 17:40'
 labels:
   - cost
   - value
@@ -105,4 +105,6 @@ Adaptive Profiles. The estate has one stack with any profiling data at all, so t
 PANEL-FIRST CHECKPOINT. The Coverage surface now reads Adaptive Traces directly from grafanacloud-usage: a 24-hour enabled-stack count beside the identically windowed trace-ingesting denominator; time-integrated dropped bytes divided only by received bytes on the reporting population; discarded spans as a separate 24-hour average rate; and a live per-policy sampled-span table. The policy label is rendered only from the live datasource and is not copied into collector output. The panel descriptions explicitly reject an estate-wide saving interpretation and name a funded rollout to one high-volume trace-ingesting stack as the next step.
 
 This checkpoint changes dashboard configuration only. No collector source, credential, permission, emitted metric or S3 view was added. Dashboard coverage gate: 158 passed, 2 skipped, 106 subtests.
+
+ROUTE-DISCOVERY CHECKPOINT. Public Grafana documentation verifies the direct hosted Tempo GET routes for policies, individual policies and recommendations, plus the four read-only plugin actions already granted. It does not document the stack-local plugin-proxy path, a proxy health endpoint or the config/status route. The direct API requires a separate tenant Basic-auth access-policy token with adaptive-traces:admin in the published example, so it is not adopted under the existing least-privilege reader seam. Collector work is parked until the plugin-proxy contract is verified; the shipped datasource-only panels remain valid.
 <!-- SECTION:NOTES:END -->
