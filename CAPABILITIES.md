@@ -24,7 +24,9 @@ turning an unavailable source into zero.
 | `adaptive-metrics-rules:read` | `/aggregations/rules` | `hmInstancePromId` |
 | `adaptive-metrics-recommendations:read` | `/aggregations/recommendations?verbose=true` | `hmInstancePromId` |
 | `adaptive-metrics-config:read` | `/aggregations/recommendations/config` | `hmInstancePromId` |
-| `adaptive-metrics-exemptions:read` | **none found** | - |
+| `adaptive-metrics-rules:read` (segments) | `/aggregations/rules/segments`, `/aggregations/rules?segment=<id>` | `hmInstancePromId` |
+| `adaptive-metrics-recommendations:read` (segments) | `/aggregations/recommendations?segment=<id>` | `hmInstancePromId` |
+| `adaptive-metrics-exemptions:read` | **none found on any reachable surface** | - |
 | `fleet-management:read` | Fleet Management Connect-RPC list methods | stack `id` |
 
 One org-realm token reaches all four signal databases in every region of the estate. The region hint in
@@ -39,9 +41,41 @@ answers with its paused-stack conflict response.
 There is no `stack-service-accounts:read` org scope. Only the write scope exists, so it is not
 given to the collector. Service-account inventory is reachable through each stack's local reader.
 
-`adaptive-metrics-exemptions:read` is declared to match the deployed policy, but no path has answered
-200. Eight candidates under `/aggregations` were tried and all 404. Treat the scope as reserved, not as
-a capability, until a route is verified.
+`adaptive-metrics-exemptions:read` has no reachable route and the scope should be dropped rather than
+carried. Over forty candidate paths have now been probed across two independent stacks, every one
+answering a plain-text `404 page not found` byte-identical to deliberate control paths that cannot
+exist. Crucially the probe was repeated on a stack with **316 applied rules, `auto_apply` enabled and a
+configured segment**, which rules out "the route appears only once there is data". The Grafana plugin
+proxy cannot settle it either: every `resources/*` path returns `500 plugin.requestFailureError`,
+including a control path and including a path that answers 200 on the Mimir host.
+
+A scope existing is not evidence a route does. Grafana mints scope families per resource type, so an
+unexposed or plugin-internal resource still gets a public scope name.
+
+**Resolved: exemptions are a STACK-LEVEL PLUGIN RBAC resource, not an org access-policy scope.** The
+org scope name was the wrong mechanism, which is why no route answers it. A live stack exposes these
+Adaptive Metrics plugin roles, and their underlying actions are what actually gate the data:
+
+| Plugin role | Actions |
+|---|---|
+| `plugins:grafana-adaptive-metrics-app:exemptions-reader` | `grafana-adaptive-metrics-app.exemptions:read`, `.plugin:access` |
+| `plugins:grafana-adaptive-metrics-app:rules-reader` | `.rules:read`, `.recommendations:read`, `.plugin:access` |
+| `plugins:grafana-adaptive-metrics-app:segments-reader` | `.segments:read`, `.config:read`, `.plugin:access` |
+| `plugins:grafana-adaptive-metrics-app:config-reader` | `.config:read`, `.plugin:access` |
+| `plugins:grafana-adaptive-metrics-app:plugin-access` | `.plugin:access`, `plugins.app:access` scoped `plugins:id:grafana-adaptive-metrics-app` |
+
+Enumerate them on any stack with
+`GET /api/access-control/roles?includeHidden=true`, filtering names prefixed `plugins:`.
+
+So reading exemptions means adding `grafana-adaptive-metrics-app.exemptions:read` and the
+`plugins.app:access` pair to the per-stack reader's custom role - the same shape the project already
+uses for Adaptive Logs - not widening the org credential. The rules, recommendations, segments and
+config data all remain reachable on the Mimir host with the org token and need no plugin role.
+
+**Segments are a real and previously unrecorded surface.** A segment scopes a rule set to a selector,
+so a stack with segments has rules that are not estate-wide and its savings arithmetic must be read
+per segment rather than globally. Both segment routes above were verified 200 with a live segment
+present.
 
 ### The two scopes that reach beyond inventory
 

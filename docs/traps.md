@@ -396,6 +396,25 @@ shape. Read the schema at `/openapi/v3/apis/dashboard.grafana.app/v2` rather tha
  missing route, and it is the same behaviour already recorded for Adaptive Logs frontend resource
  paths. Always include a control path that cannot exist: without one this reads as a specific
  endpoint being absent.
+- **Adaptive Metrics is SEGMENT-aware and the collector does not know it.** `/aggregations/rules/segments`
+ lists segments, each carrying an id, a name and a PromQL selector, and both `/aggregations/rules` and
+ `/aggregations/recommendations` accept `?segment=<id>`. A stack with a segment has rules scoped to a
+ selector rather than applying estate-wide, so summing its recommendations as if they were global
+ misstates the saving. `/aggregations/rules/segments/<id>` is NOT a route - only the list and the query
+ parameter are.
+- **An org access-policy scope and a stack plugin RBAC action are different mechanisms, and the Adaptive
+ Metrics surface uses both.** Rules, recommendations, segments and config are on the Mimir host and
+ answer to the org token. Exemptions are served by the plugin backend and gated by the stack action
+ `grafana-adaptive-metrics-app.exemptions:read`, so the org scope `adaptive-metrics-exemptions:read`
+ reaches nothing however many paths you try - over forty 404, including on a stack with 316 applied
+ rules, `auto_apply` on and a live segment. A scope name existing is not evidence of a route: the scope
+ namespace mirrors resource families whether or not a public host route exists. Enumerate the real
+ gates with `GET /api/access-control/roles?includeHidden=true` and filter for `plugins:`.
+- **The plugin resource proxy can be broken stack-wide, not path-wide.** On one stack every
+ `/api/plugins/<id>/resources/...` path returned `500 plugin.requestFailureError` for BOTH the Adaptive
+ Metrics and Adaptive Logs apps, including `/resources/health` and the bare `/resources/`. A 500 on a
+ path you invented therefore proves nothing about that path. Probe `/resources/health` first: if that
+ 500s, the proxy is down on that stack and no route conclusion can be drawn from it.
 - **Adaptive Metrics config is `/aggregations/recommendations/config`.** `/aggregations/config` 404s,
  and no `/aggregations` exemptions path has answered 200 across eight tried variants.
 - **Pyroscope's Connect-RPC returns 400 without a time range.**

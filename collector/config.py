@@ -84,7 +84,10 @@ READER_SCOPES = (
     "adaptive-metrics-rules:read",            # /aggregations/rules
     "adaptive-metrics-recommendations:read",  # /aggregations/recommendations
     "adaptive-metrics-config:read",           # /aggregations/recommendations/config
-    "adaptive-metrics-exemptions:read",       # declared; no read route has answered 200 yet
+    # adaptive-metrics-exemptions:read is DELIBERATELY ABSENT. Over forty candidate paths 404 across two
+    # stacks, including one carrying 316 applied rules, auto_apply enabled and a live segment, so it is
+    # not a route that appears once there is data. See CAPABILITIES.md; the exemption data itself is
+    # most likely `keep_labels` on the config route, which adaptive-metrics-config:read already reaches.
     "fleet-management:read",                  # Connect-RPC List*  -  a read scope covers the POST verb
 )
 
