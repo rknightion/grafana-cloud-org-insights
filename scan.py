@@ -730,6 +730,7 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         stacks, coverage,
         gap_first_seen=assistant_gaps(cfg, stacks, inputs.get("assistant"), gathered=False),
         ratecard=rate_card,
+        score_weights=getattr(cfg, "coverage_score_weights", None),
         **inputs,
     )
     scan_inputs = prov
@@ -901,6 +902,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
             gathered=not source_failures and "assistant" in publishable_inputs,
         ),
         ratecard=rate_card,
+        score_weights=getattr(cfg, "coverage_score_weights", None),
         **inputs,
     )
     scan_inputs = prov
@@ -950,6 +952,7 @@ def run_t3(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         stacks, coverage,
         gap_first_seen=assistant_gaps(cfg, stacks, inputs.get("assistant"), gathered=False),
         ratecard=rate_card,
+        score_weights=getattr(cfg, "coverage_score_weights", None),
         **inputs,
     )
     scan_inputs = prov

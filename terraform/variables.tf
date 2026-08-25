@@ -122,6 +122,36 @@ variable "scan_retention_days" {
   default     = 90
 }
 
+variable "coverage_score_weights" {
+  description = "Relative weights for the seven visible service observability-completeness components. Zero excludes a component from the score but not from the S3 evidence columns."
+  type = object({
+    metrics   = number
+    logs      = number
+    traces    = number
+    profiles  = number
+    dashboard = number
+    alert     = number
+    slo       = number
+  })
+  default = {
+    metrics   = 1
+    logs      = 1
+    traces    = 1
+    profiles  = 1
+    dashboard = 1
+    alert     = 1
+    slo       = 1
+  }
+
+  validation {
+    condition = (
+      alltrue([for weight in values(var.coverage_score_weights) : weight >= 0]) &&
+      sum(values(var.coverage_score_weights)) > 0
+    )
+    error_message = "coverage_score_weights must be non-negative and at least one weight must be above zero."
+  }
+}
+
 # --- Credentials -----------------------------------------------------------------------------------
 
 variable "create_secret" {

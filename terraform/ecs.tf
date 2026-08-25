@@ -117,6 +117,7 @@ resource "aws_ecs_task_definition" "scan" {
         { name = "GCINSIGHT_LOKI_JOB", value = var.loki_job },
         { name = "GCINSIGHT_USER_AGENT", value = var.collector_user_agent },
         { name = "GCINSIGHT_OPT_OUT", value = join(",", var.provision_opt_out) },
+        { name = "GCINSIGHT_COVERAGE_SCORE_WEIGHTS", value = jsonencode(var.coverage_score_weights) },
         { name = "GCINSIGHT_RUNTIME_CONFIG_DIGEST", value = var.scan_runtime_config_digest },
         { name = "GCINSIGHT_REQUIRE_EXPLICIT_CONFIG", value = var.require_explicit_consumer_config ? "1" : "0" },
         # The bundled AWS CLI needs a region; without it every S3 call fails with a

@@ -57,6 +57,28 @@ variable "schedules_enabled" {
   default     = false
 }
 
+variable "coverage_score_weights" {
+  description = "Relative weights for metrics, logs, traces, profiles, dashboard, alert and SLO service completeness."
+  type = object({
+    metrics   = number
+    logs      = number
+    traces    = number
+    profiles  = number
+    dashboard = number
+    alert     = number
+    slo       = number
+  })
+  default = {
+    metrics   = 1
+    logs      = 1
+    traces    = 1
+    profiles  = 1
+    dashboard = 1
+    alert     = 1
+    slo       = 1
+  }
+}
+
 variable "firehose_logs_enabled" {
   description = "Create the optional ECS-log Firehose stream without yet wiring the live CloudWatch log group."
   type        = bool

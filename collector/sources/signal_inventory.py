@@ -171,6 +171,18 @@ def probe_stack(
         )
         if metric_services is None:
             return _list_failure(slug, "metrics", status, reason)
+        slo_services, status, reason = _get_list(
+            client, f"{base}/api/prom/api/v1/label/service_name/values",
+            params={
+                "start": start_seconds,
+                "end": end_seconds,
+                "limit": LABEL_VALUE_LIMIT,
+                "match[]": '{grafana_slo_uuid!="",service_name!=""}',
+            },
+            basic=auth, field="data",
+        )
+        if slo_services is None:
+            return _list_failure(slug, "metrics", status, reason)
         legacy_metric_services, status, reason = _get_list(
             client, f"{base}/api/prom/api/v1/label/service/values",
             params={"start": start_seconds, "end": end_seconds, "limit": LABEL_VALUE_LIMIT},
@@ -243,6 +255,7 @@ def probe_stack(
         "window_end": end.isoformat(),
         "metric_names": metric_names,
         "metric_services": metric_services,
+        "slo_services": slo_services,
         "legacy_metric_services": legacy_metric_services,
         "clusters": clusters,
         "log_services": log_services,

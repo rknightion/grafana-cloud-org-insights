@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
-from collector import identity
+from collector import identity, observability_score
 
 GCOM = "https://grafana.com/api"
 
@@ -131,6 +131,7 @@ class Config:
     loki_url: str
     loki_tenant: str
     opt_out: tuple[str, ...] = ()
+    coverage_score_weights: dict[str, float] | None = None
 
     @property
     def redacted(self) -> dict[str, object]:
@@ -151,6 +152,7 @@ class Config:
             "write_token": f"…{self.write_token[-6:]}" if self.write_token else None,
             "credentials_split": self.write_token != self.cap,
             "opt_out": list(self.opt_out),
+            "coverage_score_weights": self.coverage_score_weights,
         }
 
 
@@ -171,6 +173,12 @@ def load(
             "(e.g. `export GCINSIGHT_READ_TOKEN=$(grep ^GCINSIGHT_READ_TOKEN= ../.env | cut -d= -f2-)`); "
             "in deployment it comes from AWS Secrets Manager."
         )
+    try:
+        score_weights = observability_score.parse_weights(
+            os.environ.get("GCINSIGHT_COVERAGE_SCORE_WEIGHTS", "")
+        )
+    except observability_score.InvalidWeights as exc:
+        raise MissingConfig(f"GCINSIGHT_COVERAGE_SCORE_WEIGHTS is invalid ({exc})") from exc
     return Config(
         cap=cap,
         # Falls back to the read credential so a one-token interactive run still works. Deployment sets
@@ -192,4 +200,5 @@ def load(
         loki_url=_require(*REQUIRED_ENV[4]),
         loki_tenant=_require(*REQUIRED_ENV[5]),
         opt_out=tuple(s.strip() for s in os.environ.get(OPT_OUT_ENV, "").split(",") if s.strip()),
+        coverage_score_weights=score_weights,
     )

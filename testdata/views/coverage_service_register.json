@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-25T07:11:14.036775+00:00",
+    "generated_at": "2026-08-25T08:35:24.968490+00:00",
     "tier": "t3",
     "stacks_total": 44,
     "stacks_scannable": 40,
@@ -65,21 +65,37 @@
     {
       " Stack": "stack158",
       "Service": "checkout",
-      "Signals": "metrics, logs, traces",
+      "Observability completeness %": 85.7,
       "Signals present": 3,
-      "Has alert": "yes",
+      "Metrics": "yes",
+      "Logs": "yes",
+      "Traces": "yes",
+      "Profiles": "no",
       "Has dashboard": "yes",
+      "Has alert": "yes",
+      "Has SLO": "yes",
       "Has routed active alert": "yes",
+      "Score numerator": 6,
+      "Score maximum": 7,
+      "Score version": "1",
       "Last seen": "2026-08-25T00:00:00+00:00"
     },
     {
       " Stack": "stack158",
       "Service": "logs-only",
-      "Signals": "logs",
+      "Observability completeness %": 14.3,
       "Signals present": 1,
-      "Has alert": "no",
+      "Metrics": "no",
+      "Logs": "yes",
+      "Traces": "no",
+      "Profiles": "no",
       "Has dashboard": "no",
+      "Has alert": "no",
+      "Has SLO": "no",
       "Has routed active alert": "no",
+      "Score numerator": 1,
+      "Score maximum": 7,
+      "Score version": "1",
       "Last seen": "2026-08-25T00:00:00+00:00"
     }
   ]

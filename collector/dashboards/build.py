@@ -237,7 +237,9 @@ def columns_for(view: dict[str, Any],
     return out
 
 
-def data_query(group: str, ds_uid: str, spec: dict[str, Any], ref_id: str) -> dict[str, Any]:
+def data_query(
+    group: str, ds_uid: str, spec: dict[str, Any], ref_id: str, *, hidden: bool = False,
+) -> dict[str, Any]:
     """Wrap a query in the v2 `DataQuery` envelope.
 
     **This shape is not guessable and getting it wrong renders "plugin not found" on the whole page.**
@@ -249,7 +251,7 @@ def data_query(group: str, ds_uid: str, spec: dict[str, Any], ref_id: str) -> di
         "kind": "PanelQuery",
         "spec": {
             "refId": ref_id,
-            "hidden": False,
+            "hidden": hidden,
             "query": {
                 "kind": "DataQuery",
                 "group": group,
@@ -298,7 +300,8 @@ def infinity_query(view_name: str, ds_uid: str, ref_id: str = "A", *,
 
 
 def prom_query(expr: str, ds_uid: str = PROM_UID, ref_id: str = "A", *,
-               legend: str = "__auto", instant: bool = False) -> dict[str, Any]:
+               legend: str = "__auto", instant: bool = False,
+               hidden: bool = False) -> dict[str, Any]:
     """A PromQL query against the stack's own metrics - where our 1,262 published series live.
 
     `$__interval`, never `$__auto`: the latter is not resolved on this path.
@@ -310,7 +313,14 @@ def prom_query(expr: str, ds_uid: str = PROM_UID, ref_id: str = "A", *,
         "instant": instant,
         "editorMode": "code",
         "interval": "",
-    }, ref_id)
+    }, ref_id, hidden=hidden)
+
+
+def expression_query(
+    spec: dict[str, Any], ref_id: str, *, hidden: bool = False,
+) -> dict[str, Any]:
+    """A Grafana server-side expression query in the v2 DataQuery envelope."""
+    return data_query("__expr__", "__expr__", {**spec, "refId": ref_id}, ref_id, hidden=hidden)
 
 
 def _panel(title: str, description: str, queries: list[dict[str, Any]],
@@ -498,6 +508,46 @@ def stat_panel(title: str, expr: str, *, description: str = "", unit: str = "sho
     if decimals is not None:
         defaults["decimals"] = decimals
     return _panel(title, description, [prom_query(expr, ds_uid)], viz("stat", {
+        "options": {
+            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": False},
+            "textMode": "auto", "colorMode": "none", "graphMode": "none",
+            "justifyMode": "auto", "orientation": "auto",
+        },
+        "fieldConfig": {"defaults": defaults, "overrides": []},
+    }))
+
+
+def cross_source_ratio_stat_panel(
+    title: str,
+    numerator: tuple[str, str],
+    denominator: tuple[str, str],
+    *,
+    description: str = "",
+    unit: str = "short",
+    decimals: int | None = None,
+) -> dict[str, Any]:
+    """Divide scalar reductions from two Prometheus datasources without copying either series.
+
+    Both inputs remain range queries. Each is reduced on the Grafana server before the final math so
+    daily collector samples and live usage samples do not need identical timestamps.
+    """
+    defaults: dict[str, Any] = {"unit": unit}
+    if decimals is not None:
+        defaults["decimals"] = decimals
+    queries = [
+        prom_query(numerator[0], numerator[1], ref_id="A", hidden=True),
+        prom_query(denominator[0], denominator[1], ref_id="B", hidden=True),
+        expression_query({
+            "type": "reduce", "expression": "$A", "reducer": "last",
+            "settings": {"mode": "dropNN"},
+        }, "C", hidden=True),
+        expression_query({
+            "type": "reduce", "expression": "$B", "reducer": "last",
+            "settings": {"mode": "dropNN"},
+        }, "D", hidden=True),
+        expression_query({"type": "math", "expression": "$C / $D"}, "E"),
+    ]
+    return _panel(title, description, queries, viz("stat", {
         "options": {
             "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": False},
             "textMode": "auto", "colorMode": "none", "graphMode": "none",

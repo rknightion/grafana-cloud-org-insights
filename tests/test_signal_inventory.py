@@ -23,7 +23,8 @@ class Client:
 
     def get(self, url: str, *, params: dict[str, object], basic: tuple[str, str]) -> Response:
         self.calls.append((url, params, basic))
-        status, body = self.responses[url]
+        lookup = f"{url}?slo" if params.get("match[]") else url
+        status, body = self.responses[lookup]
         return Response(status, json.dumps(body).encode(), url)
 
 
@@ -50,6 +51,9 @@ def responses(*, logs: object | None = None) -> dict[str, tuple[int, object]]:
             200, {"status": "success", "data": [] if logs is None else logs},
         ),
         "https://metrics.example/api/prom/api/v1/label/service_name/values": (
+            200, {"status": "success", "data": ["checkout"]},
+        ),
+        "https://metrics.example/api/prom/api/v1/label/service_name/values?slo": (
             200, {"status": "success", "data": ["checkout"]},
         ),
         "https://metrics.example/api/prom/api/v1/label/service/values": (
@@ -79,6 +83,7 @@ class SignalInventoryWindowTest(unittest.TestCase):
         self.assertTrue(out["available"])
         self.assertEqual(out["metric_names"], ["node_uname_info", "up"])
         self.assertEqual(out["metric_services"], ["checkout"])
+        self.assertEqual(out["slo_services"], ["checkout"])
         self.assertEqual(out["legacy_metric_services"], ["legacy-api"])
         self.assertEqual(out["clusters"], ["compute-a"])
         self.assertEqual(out["log_services"], [])
@@ -87,7 +92,9 @@ class SignalInventoryWindowTest(unittest.TestCase):
         self.assertEqual(out["window_start"], (NOW - dt.timedelta(hours=24)).isoformat())
         self.assertEqual(out["window_end"], NOW.isoformat())
 
-        by_url = {url: (params, basic) for url, params, basic in client.calls}
+        by_call = {(url, str(params.get("match[]") or "")): (params, basic)
+                   for url, params, basic in client.calls}
+        by_url = {url: value for (url, matcher), value in by_call.items() if not matcher}
         mimir = by_url["https://metrics.example/api/prom/api/v1/label/__name__/values"]
         self.assertEqual(mimir[0], {
             "start": START_SECONDS, "end": END_SECONDS, "limit": source.METRIC_NAME_LIMIT,
@@ -101,6 +108,17 @@ class SignalInventoryWindowTest(unittest.TestCase):
                 "start": START_SECONDS, "end": END_SECONDS, "limit": source.LABEL_VALUE_LIMIT,
             })
             self.assertEqual(basic, ("11", "cap"))
+        slo_params, slo_basic = by_call[(
+            "https://metrics.example/api/prom/api/v1/label/service_name/values",
+            '{grafana_slo_uuid!="",service_name!=""}',
+        )]
+        self.assertEqual(slo_params, {
+            "start": START_SECONDS,
+            "end": END_SECONDS,
+            "limit": source.LABEL_VALUE_LIMIT,
+            "match[]": '{grafana_slo_uuid!="",service_name!=""}',
+        })
+        self.assertEqual(slo_basic, ("11", "cap"))
         self.assertEqual(
             by_url["https://logs.example/loki/api/v1/label/service_name/values"],
             ({"start": START_SECONDS * 1_000_000_000, "end": END_SECONDS * 1_000_000_000},
@@ -124,6 +142,9 @@ class SignalInventoryWindowTest(unittest.TestCase):
         empty["https://metrics.example/api/prom/api/v1/label/__name__/values"] = (
             200, {"status": "success", "data": []},
         )
+        empty["https://metrics.example/api/prom/api/v1/label/service_name/values?slo"] = (
+            200, {"status": "success", "data": []},
+        )
         empty[
             "https://traces.example/tempo/api/v2/search/tag/resource.service.name/values"
         ] = (200, {"tagValues": []})
@@ -132,9 +153,22 @@ class SignalInventoryWindowTest(unittest.TestCase):
 
         self.assertEqual(out["available"], True)
         for key in (
-            "metric_names", "log_services", "trace_services", "profile_services",
+            "metric_names", "slo_services", "log_services", "trace_services", "profile_services",
         ):
             self.assertEqual(out[key], [])
+
+    def test_failed_slo_lookup_withholds_the_atomic_stack_record(self):
+        failed = responses()
+        failed["https://metrics.example/api/prom/api/v1/label/service_name/values?slo"] = (
+            503, {"status": "error"},
+        )
+        with mock.patch.object(source.dataplane, "_connect_rpc") as rpc:
+            out = source.probe_stack(Client(failed), STACK, "cap", now=NOW)
+        self.assertEqual(out, {
+            "slug": "example", "available": False, "signal": "metrics",
+            "reason": "http_5xx", "http": 503,
+        })
+        rpc.assert_not_called()
 
     def test_tempo_extracts_object_values_and_rejects_a_string_list(self):
         bad = responses()

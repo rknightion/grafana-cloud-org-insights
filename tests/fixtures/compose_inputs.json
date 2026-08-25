@@ -31401,6 +31401,7 @@
    "window_end": "2026-08-25T00:00:00+00:00",
    "metric_names": ["kube_pod_info", "synthetic_unmatched_metric"],
    "metric_services": ["checkout"],
+   "slo_services": ["checkout"],
    "legacy_metric_services": ["legacy-checkout"],
    "log_services": ["checkout", "logs-only"],
    "trace_services": ["checkout"],

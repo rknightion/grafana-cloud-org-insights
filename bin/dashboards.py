@@ -234,7 +234,10 @@ TEAM_VOLUME = f"topk(12, sum by(team)({GROUPS}))"
 UNOWNED_SHARE_ALL = (f'sum({GROUPS}{{team="No team"}} and on(stack_id) {TIMING_STACKS}) '
                      f'/ sum{GROUPS_ON_TIMING_STACKS}')
 UNOWNED_SHARE_ACKED = f'sum({ACK}_count{{team="No team"}}) / sum({ACK}_count)'
-UNOWNED_SERVICE_SHARE = f'sum({GROUPS}{{service_name="No service"}}) / sum({GROUPS})'
+UNOWNED_SERVICE_SHARE = (
+    f'sum({GROUPS}{{service_name="No service"}} and on(stack_id) {TIMING_STACKS}) '
+    f'/ sum{GROUPS_ON_TIMING_STACKS}'
+)
 ALL_GROUPS = f"sum({GROUPS})"
 
 # --- Capability adoption (Tier 2) -------------------------------------------------------------------
@@ -2649,9 +2652,12 @@ def d_operations(ds: str):
                         "it deliberately restricts its denominator to that same timing-stack population, "
                         "so their difference reflects engagement rather than coverage."),
         "n_unowned_svc": build.stat_panel(
-            "Alerts with no service attribution", UNOWNED_SERVICE_SHARE, unit="percentunit", decimals=1,
+            "Timing-stack alerts with no service attribution", UNOWNED_SERVICE_SHARE,
+            unit="percentunit", decimals=1,
             ds_uid=build.USAGE_UID,
-            description="Share of all OnCall alert groups labelled `service_name=\"No service\"`. The "
+            description="Share of OnCall alert groups on timing-reporting stacks labelled "
+                        "`service_name=\"No service\"`. The same population restriction as the team "
+                        "share prevents ownership differences being confused with measurement coverage. The "
                         "same governance gap as the "
                         "team field but wider, and it is what stops anyone answering 'which service "
                         "pages us most' - the by-service chart on the Alert flow tab is mostly a picture "
@@ -3157,7 +3163,7 @@ def d_coverage(ds: str):
         # Coverage depth is the reframe: the same distribution reads as both protected surface and room
         # to deepen observation. Keep it full-width and ahead of every classification detail.
         "b_depth": build.barchart_panel(
-            "Coverage depth per named service - the protected and uncovered surface",
+            "Telemetry depth per named service - observed strength and room to deepen",
             "gcinsight_coverage_services_by_depth", legend="{{kind}} signals", sort=None,
             description="Named services grouped by how many canonical signals carry the same exact "
                         "identity. Greater depth means more ways to investigate the service; shallower "
@@ -3216,11 +3222,108 @@ def d_coverage(ds: str):
                         "Unattributed service and team values remain visible as the unmatched share."),
 
         "tbl_services": build.table_panel(
-            "Named service coverage register", coverage_pillar.SERVICE_VIEW, ds,
+            "Named service observability completeness register", coverage_pillar.SERVICE_VIEW, ds,
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.SERVICE_VIEW],
-            description="The primary asset register: service identity, canonical signals, explicit "
-                        "alert and dashboard associations, routed active alert state and last seen. "
-                        "Rows are prioritised by coverage depth and bounded per stack for legibility."),
+            description="The primary asset register: seven visible components - metrics, logs, traces, "
+                        "profiles, an explicit service dashboard tag, alert label and SLO label - plus "
+                        "the deployment-configurable weighted observability completeness score. Active "
+                        "direct routing stays separate because it must not double-weight alerting. Rows "
+                        "are prioritised by completeness and bounded per stack for legibility."),
+
+        # What observation has done. Every ratio over the alert-group counter is restricted to stacks
+        # that report the response-time histogram; otherwise its numerator and denominator are different
+        # populations. A missing timing observation means no acknowledgement was recorded, not that no
+        # human looked.
+        "n_value_groups": build.stat_panel(
+            "Alert groups on timing-reporting stacks", f"sum{GROUPS_ON_TIMING_STACKS}",
+            ds_uid=build.USAGE_UID,
+            description="OnCall alert groups restricted to stacks that also report acknowledgement "
+                        "timing. This is the denominator for every response ratio on this tab."),
+        "n_value_acknowledged": build.stat_panel(
+            "Acknowledgements recorded", ENGAGED, ds_uid=build.USAGE_UID,
+            description="Response-time observations recorded by OnCall. A missing observation means no "
+                        "acknowledgement was recorded; it does not prove nobody looked."),
+        "n_value_engagement": build.stat_panel(
+            "Alert groups with a recorded acknowledgement", ENGAGEMENT_RATE,
+            unit="percentunit", decimals=1, ds_uid=build.USAGE_UID,
+            description="Acknowledgement observations divided only by alert groups on timing-reporting "
+                        "stacks. The explicit population restriction prevents a cross-estate ratio."),
+        "n_value_mtta": build.stat_panel(
+            "Median time to acknowledge", MTTA_MEDIAN, unit="s", decimals=1,
+            ds_uid=build.USAGE_UID,
+            description="p50 only. Higher quantiles saturate at the histogram's top finite bucket and "
+                        "would turn 'at least an hour' into a false exact duration."),
+        "n_value_mttr": build.stat_panel(
+            "Median time to resolve", MTTR_MEDIAN, unit="s", decimals=1,
+            ds_uid=build.USAGE_UID,
+            description="p50 only, for the same finite-bucket reason as acknowledgement time."),
+        "n_value_tail": build.stat_panel(
+            "Acknowledgements recorded after the top finite bucket", ACK_TAIL,
+            ds_uid=build.USAGE_UID,
+            description=f"Count above the histogram's `{TOP_BUCKET}` second finite bucket. A count is "
+                        "honest here; p90 and p99 would both saturate at the bucket boundary."),
+        "n_value_unowned_team": build.stat_panel(
+            "Timing-stack alert groups with no owning team", UNOWNED_SHARE_ALL,
+            unit="percentunit", decimals=1, ds_uid=build.USAGE_UID,
+            description="Share labelled `team=\"No team\"` within the timing-reporting stack population."),
+        "n_value_unowned_service": build.stat_panel(
+            "Timing-stack alert groups with no service attribution", UNOWNED_SERVICE_SHARE,
+            unit="percentunit", decimals=1, ds_uid=build.USAGE_UID,
+            description="Share labelled `service_name=\"No service\"` within the same timing-reporting "
+                        "stack population as the team share."),
+
+        # Unit economics use Grafana's own published currency series. No custom rate card participates
+        # in these panels; the card remains only for currency derived from a non-currency quantity.
+        "n_spend_app_service": build.stat_panel(
+            "Application Observability run rate per observed App O11y service",
+            "sum(grafanacloud_org_app_o11y_overage) / "
+            "sum(grafanacloud_app_observability_service_entity_count)",
+            unit="currencyUSD", decimals=2, ds_uid=build.USAGE_UID,
+            description="Application Observability's published monthly overage divided by its own "
+                        "published observed-service population. This is product-specific, not total spend."),
+        "n_spend_infra_host_hour": build.stat_panel(
+            "Infrastructure Observability run rate per billable host-hour",
+            "sum(grafanacloud_org_infra_o11y_host_overage) / "
+            "sum(grafanacloud_org_infra_o11y_billable_host_hours)",
+            unit="currencyUSD", decimals=4, ds_uid=build.USAGE_UID,
+            description="Infrastructure host overage divided by the matching published billable "
+                        "host-hours. Both numerator and denominator are Grafana billing metrics."),
+        "n_spend_infra_container_hour": build.stat_panel(
+            "Infrastructure Observability run rate per billable container-hour",
+            "sum(grafanacloud_org_infra_o11y_container_overage) / "
+            "sum(grafanacloud_org_infra_o11y_billable_container_hours)",
+            unit="currencyUSD", decimals=4, ds_uid=build.USAGE_UID,
+            description="Infrastructure container overage divided by the matching published billable "
+                        "container-hours. This is not a recomputed rate card."),
+        "n_spend_ack": build.stat_panel(
+            "Current monthly run rate per acknowledgement recorded", f"{RUN_RATE} / {ENGAGED}",
+            unit="currencyUSD", decimals=2, ds_uid=build.USAGE_UID,
+            description="Grafana-published total monthly run rate divided by response-time observations "
+                        "from the timing-reporting population. It is a flipped denominator, not a claim "
+                        "that every charge exists to handle OnCall pages."),
+        "n_spend_service": build.cross_source_ratio_stat_panel(
+            "Current monthly run rate per named observed service",
+            (RUN_RATE, build.USAGE_UID),
+            ("sum(gcinsight_coverage_stack_services)", build.PROM_UID),
+            unit="currencyUSD", decimals=2,
+            description="Grafana-published total monthly run rate divided by the atomic four-signal "
+                        "canonical service population. Grafana server-side expressions combine the two "
+                        "datasources; neither series is copied. No value is shown when the denominator "
+                        "is unavailable."),
+        "n_spend_billed_user": build.cross_source_ratio_stat_panel(
+            "Current monthly run rate per billed user",
+            (RUN_RATE, build.USAGE_UID), ("gcinsight_cost_billed_users", build.PROM_UID),
+            unit="currencyUSD", decimals=2,
+            description="Total published monthly run rate divided by billingActiveUsers. Active users "
+                        "are an adoption figure and are deliberately excluded from this money panel."),
+        "n_spend_viewer": build.cross_source_ratio_stat_panel(
+            "Current monthly run rate per distinct dashboard viewer observed in 24h",
+            (RUN_RATE, build.USAGE_UID),
+            ("sum(gcinsight_dashboards_viewers)", build.PROM_UID),
+            unit="currencyUSD", decimals=2,
+            description="Total published monthly run rate divided by Pillar J's distinct-viewer counts "
+                        "summed per stack over its explicit 24-hour window. A person using several stacks "
+                        "can appear several times, so this is not an org-wide unique-human count."),
         "tbl_technologies": build.table_panel(
             "Observed technology register", coverage_pillar.TECHNOLOGY_VIEW, ds,
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.TECHNOLOGY_VIEW],
@@ -3265,6 +3368,24 @@ def d_coverage(ds: str):
                       max_columns=3),
             build.row("Where the assets sit", ["b_stack_services", "b_stack_technologies",
                                                 "b_stack_clusters"], max_columns=3),
+        ]),
+        build.rows_tab("Outcome value", [
+            build.row("Recorded response", ["n_value_groups", "n_value_acknowledged",
+                                              "n_value_engagement"],
+                      max_columns=3, row_height="short"),
+            build.row("Time returned to people", ["n_value_mtta", "n_value_mttr", "n_value_tail"],
+                      max_columns=3, row_height="short"),
+            build.row("Ownership completeness", ["n_value_unowned_team",
+                                                   "n_value_unowned_service"],
+                      max_columns=2, row_height="short"),
+        ]),
+        build.rows_tab("Unit economics", [
+            build.row("Observation products", ["n_spend_app_service", "n_spend_infra_host_hour",
+                                                 "n_spend_infra_container_hour"],
+                      max_columns=3, row_height="short"),
+            build.row("Value denominators", ["n_spend_service", "n_spend_ack",
+                                               "n_spend_billed_user", "n_spend_viewer"],
+                      max_columns=4, row_height="short"),
         ]),
         build.rows_tab("Named service register", [
             build.row("Coverage register", ["tbl_services"], max_columns=1, row_height="tall"),

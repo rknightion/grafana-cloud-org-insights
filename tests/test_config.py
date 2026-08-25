@@ -63,6 +63,16 @@ class RequiredConfigTest(unittest.TestCase):
         self.assertEqual(cfg.org_id, "123456")
         self.assertEqual(cfg.write_stack, "obs-hub")
         self.assertEqual(cfg.mimir_tenant, "111111")
+        self.assertEqual(cfg.coverage_score_weights, {
+            component: 1.0 for component in config.observability_score.COMPONENTS
+        })
+
+    def test_invalid_coverage_weights_fail_configuration_loading(self):
+        with _Env(**dict(COMPLETE, GCINSIGHT_COVERAGE_SCORE_WEIGHTS='{"slo": -1}')):
+            with self.assertRaisesRegex(
+                config.MissingConfig, "GCINSIGHT_COVERAGE_SCORE_WEIGHTS"
+            ):
+                config.load(tier="t1")
 
     def test_every_required_variable_is_refused_when_absent(self):
         for missing in REQUIRED:

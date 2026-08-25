@@ -209,6 +209,25 @@ class NoInstantQueriesTest(unittest.TestCase):
         refs = [pq["spec"]["refId"] for pq in panel["spec"]["data"]["spec"]["queries"]]
         self.assertEqual(refs, ["A", "B", "C"])
 
+    def test_cross_datasource_ratio_reduces_each_range_before_math(self):
+        panel = build.cross_source_ratio_stat_panel(
+            "unit value", ("sum(spend)", build.USAGE_UID),
+            ("sum(gcinsight_assets)", build.PROM_UID),
+        )
+        queries = panel["spec"]["data"]["spec"]["queries"]
+        self.assertEqual([query["spec"]["refId"] for query in queries], ["A", "B", "C", "D", "E"])
+        self.assertEqual(
+            [query["spec"]["query"]["datasource"]["name"] for query in queries],
+            [build.USAGE_UID, build.PROM_UID, "__expr__", "__expr__", "__expr__"],
+        )
+        self.assertTrue(queries[0]["spec"]["query"]["spec"]["range"])
+        self.assertTrue(queries[1]["spec"]["query"]["spec"]["range"])
+        self.assertEqual(queries[2]["spec"]["query"]["spec"]["type"], "reduce")
+        self.assertEqual(queries[2]["spec"]["query"]["spec"]["reducer"], "last")
+        self.assertEqual(queries[3]["spec"]["query"]["spec"]["type"], "reduce")
+        self.assertEqual(queries[3]["spec"]["query"]["spec"]["reducer"], "last")
+        self.assertEqual(queries[4]["spec"]["query"]["spec"]["expression"], "$C / $D")
+
     def test_prometheus_table_reduces_sorts_and_renames_the_display_columns(self):
         panel = build.prometheus_table_panel(
             "Top 100", "topk(100, up)", legend="{{slug}}",
@@ -2001,6 +2020,51 @@ class RecentDashboardPresentationContractsTest(unittest.TestCase):
         for panel in (stat, chart):
             datasource = panel["data"]["spec"]["queries"][0]["spec"]["query"]["datasource"]["name"]
             self.assertEqual(datasource, build.USAGE_UID)
+
+
+class CoverageOutcomeValueTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        import bin.dashboards as dashboards
+        cls.dash = dashboards
+        cls.elements = dashboards.d_coverage("infinity-uid")[3]
+
+    def _exprs(self, key):
+        return [
+            query["spec"]["query"]["spec"].get("expr", "")
+            for query in self.elements[key]["spec"]["data"]["spec"]["queries"]
+        ]
+
+    def test_outcome_value_uses_only_p50_and_an_explicit_tail_count(self):
+        self.assertIn("histogram_quantile(0.5", self._exprs("n_value_mtta")[0])
+        self.assertIn("histogram_quantile(0.5", self._exprs("n_value_mttr")[0])
+        joined = " ".join(self._exprs("n_value_mtta") + self._exprs("n_value_mttr"))
+        self.assertNotIn("0.9", joined)
+        tail = self._exprs("n_value_tail")[0]
+        self.assertIn('le="+Inf"', tail)
+        self.assertIn(f'le="{self.dash.TOP_BUCKET}"', tail)
+
+    def test_oncall_ratios_use_only_the_timing_reporting_population(self):
+        for key in ("n_value_engagement", "n_value_unowned_team", "n_value_unowned_service"):
+            expr = self._exprs(key)[0]
+            self.assertIn("on(stack_id)", expr, f"{key} mixes OnCall populations")
+            self.assertIn(self.dash.ACK, expr, f"{key} does not identify timing-reporting stacks")
+
+    def test_unit_economics_use_published_spend_and_billed_users(self):
+        billed = " ".join(self._exprs("n_spend_billed_user"))
+        self.assertIn("grafanacloud_org_total_overage", billed)
+        self.assertIn("gcinsight_cost_billed_users", billed)
+        self.assertNotIn("gcinsight_estate_active_users", billed)
+        app = self._exprs("n_spend_app_service")[0]
+        self.assertIn("grafanacloud_org_app_o11y_overage", app)
+        self.assertIn("grafanacloud_app_observability_service_entity_count", app)
+
+    def test_service_register_names_completeness_without_claiming_protection(self):
+        spec = self.elements["tbl_services"]["spec"]
+        prose = f"{spec['title']} {spec['description']}".lower()
+        self.assertIn("observability completeness", prose)
+        self.assertIn("configurable", prose)
+        self.assertNotIn("protected", prose)
 
 
 class EveryPublishedViewIsRenderedSomewhereTest(unittest.TestCase):

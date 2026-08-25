@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import unittest
 
+from collector import observability_score
 from collector.pillars import coverage
 from collector.emit import hydrate
 from collector.coverage import Coverage, rollup
@@ -129,6 +130,7 @@ SIGNALS = {
         "log_services": ["checkout", "log-only"],
         "trace_services": ["CHECKOUT"],
         "profile_services": ["checkout"],
+        "slo_services": ["checkout"],
         "clusters": ["compute-a"],
     },
     "failed": {"available": False, "reason": "auth"},
@@ -164,14 +166,23 @@ class CoverageBuildTest(unittest.TestCase):
         rows = {row["Service"]: row for row in views[coverage.SERVICE_VIEW]}
         self.assertEqual(set(rows), {"checkout", "inventory", "log-only"})
         self.assertEqual(rows["checkout"]["Signals present"], 4)
-        self.assertEqual(rows["checkout"]["Signals"], "metrics, logs, traces, profiles")
+        self.assertEqual(
+            [rows["checkout"][field] for field in ("Metrics", "Logs", "Traces", "Profiles")],
+            ["yes", "yes", "yes", "yes"],
+        )
         self.assertEqual(rows["checkout"]["Has alert"], "yes")
         self.assertEqual(rows["checkout"]["Has dashboard"], "yes")
         self.assertEqual(rows["checkout"]["Has routed active alert"], "yes")
+        self.assertEqual(rows["checkout"]["Has SLO"], "yes")
+        self.assertEqual(rows["checkout"]["Observability completeness %"], 100.0)
+        self.assertEqual(rows["checkout"]["Score numerator"], 7)
+        self.assertEqual(rows["checkout"]["Score maximum"], 7)
+        self.assertEqual(rows["checkout"]["Score version"], observability_score.VERSION)
         self.assertEqual(rows["inventory"]["Has alert"], "yes")
         self.assertEqual(rows["inventory"]["Has dashboard"], "no",
                          "dashboard titles must never infer a service relationship")
         self.assertEqual(rows["inventory"]["Has routed active alert"], "no")
+        self.assertEqual(rows["inventory"]["Observability completeness %"], round(2 / 7 * 100, 1))
 
         by_metric = {}
         for name, labels, value in metrics:
@@ -184,6 +195,21 @@ class CoverageBuildTest(unittest.TestCase):
         self.assertEqual(by_metric[(by_signal, (("kind", "logs"),))], 2)
         self.assertEqual(by_metric[(by_signal, (("kind", "traces"),))], 1)
         self.assertEqual(by_metric[(by_signal, (("kind", "profiles"),))], 1)
+
+    def test_configurable_weights_change_only_the_score_not_component_evidence(self):
+        weights = observability_score.parse_weights(
+            '{"metrics": 4, "logs": 0, "traces": 0, "profiles": 0, '
+            '"dashboard": 1, "alert": 1, "slo": 1}'
+        )
+        _metrics, views = coverage.build(
+            STACKS, SIGNALS, dashboard_inventory=DASHBOARDS, alert_routing=ALERTS,
+            score_weights=weights,
+        )
+        row = next(row for row in views[coverage.SERVICE_VIEW] if row["Service"] == "inventory")
+        self.assertEqual(row["Metrics"], "yes")
+        self.assertEqual(row["Logs"], "no")
+        self.assertEqual(row["Has alert"], "yes")
+        self.assertEqual(row["Observability completeness %"], round(5 / 7 * 100, 1))
 
     def test_failed_stack_and_departed_payload_produce_no_rows_or_zero_metrics(self):
         metrics, views = coverage.build(STACKS, SIGNALS)
@@ -255,6 +281,28 @@ class CoverageBuildTest(unittest.TestCase):
             with self.subTest(view=name):
                 self.assertTrue(views[name], "fixture must exercise the schema instead of asserting it")
                 self.assertEqual(tuple(views[name][0]), tuple(column for column, _kind in schema))
+
+
+class ObservabilityScoreConfigTest(unittest.TestCase):
+    def test_defaults_weight_all_seven_visible_components_equally(self):
+        self.assertEqual(observability_score.parse_weights(""), {
+            component: 1.0 for component in observability_score.COMPONENTS
+        })
+
+    def test_invalid_weight_configuration_is_rejected(self):
+        cases = (
+            '{"unknown": 1}',
+            '{"metrics": -1}',
+            '{"metrics": "heavy"}',
+            '{"metrics": 0, "logs": 0, "traces": 0, "profiles": 0, '
+            '"dashboard": 0, "alert": 0, "slo": 0}',
+            '[]',
+            '{',
+        )
+        for raw in cases:
+            with self.subTest(raw=raw):
+                with self.assertRaises(observability_score.InvalidWeights):
+                    observability_score.parse_weights(raw)
 
 
 if __name__ == "__main__":

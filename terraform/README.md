@@ -43,6 +43,15 @@ CloudWatch bill rather than an error anyone reads.
 5. Mint the access key for the views reader and wire the Grafana Infinity datasource to it.
 6. Set `schedules_enabled = true` and apply again.
 
+## Service observability completeness weights
+
+`coverage_score_weights` controls the relative contribution of the seven visible components in the
+Pillar K service register: metrics, logs, traces, profiles, an explicit service dashboard tag, an alert
+label and an SLO label. They default to equal weight. Values must be non-negative and at least one must
+be above zero; setting a weight to zero removes that component from the arithmetic but not from the
+evidence columns. The weighted score remains in S3 rather than becoming a metric label, so deployment
+policy cannot expand Mimir cardinality.
+
 ## Optional ECS task logs through Data Firehose
 
 The collector already writes its structured application records to Loki. The optional Firehose path is

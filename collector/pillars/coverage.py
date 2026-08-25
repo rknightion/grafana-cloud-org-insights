@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from collector import technology_registry
+from collector import observability_score, technology_registry
 
 Metrics = list[tuple[str, dict[str, str], float]]
 Views = dict[str, list[dict[str, Any]]]
@@ -25,9 +25,13 @@ SUMMARY_VIEW = "coverage_summary"
 
 VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
     SERVICE_VIEW: (
-        (" Stack", "string"), ("Service", "string"), ("Signals", "string"),
-        ("Signals present", "number"), ("Has alert", "string"),
-        ("Has dashboard", "string"), ("Has routed active alert", "string"),
+        (" Stack", "string"), ("Service", "string"),
+        ("Observability completeness %", "number"), ("Signals present", "number"),
+        ("Metrics", "string"), ("Logs", "string"), ("Traces", "string"),
+        ("Profiles", "string"), ("Has dashboard", "string"), ("Has alert", "string"),
+        ("Has SLO", "string"), ("Has routed active alert", "string"),
+        ("Score numerator", "number"), ("Score maximum", "number"),
+        ("Score version", "string"),
         ("Last seen", "time"),
     ),
     TECHNOLOGY_VIEW: (
@@ -110,10 +114,12 @@ def build(
     *,
     dashboard_inventory: Mapping[str, Mapping[str, Any]] | None = None,
     alert_routing: Mapping[str, Mapping[str, Any]] | None = None,
+    score_weights: Mapping[str, float] | None = None,
 ) -> tuple[Metrics, Views]:
     if signal_inventory is None:
         return [], {}
 
+    weights = dict(score_weights or observability_score.parse_weights(""))
     metrics: Metrics = []
     service_rows: list[dict[str, Any]] = []
     technology_rows: list[dict[str, Any]] = []
@@ -145,6 +151,7 @@ def build(
             signal_counts[signal] += len(names)
         canonical = set().union(*by_signal.values())
         legacy = _names(record, "legacy_metric_services")
+        slos = _names(record, "slo_services")
         legacy_only = legacy - canonical
         identity_counts["canonical"] += len(canonical)
         identity_counts["legacy_only"] += len(legacy_only)
@@ -157,17 +164,38 @@ def build(
             signals = [signal for signal, names in by_signal.items() if service in names]
             depth = len(signals)
             depth_counts[depth] += 1
+            components = {
+                "metrics": service in by_signal["metrics"],
+                "logs": service in by_signal["logs"],
+                "traces": service in by_signal["traces"],
+                "profiles": service in by_signal["profiles"],
+                "dashboard": service in dashboards,
+                "alert": service in alerts,
+                "slo": service in slos,
+            }
+            score = observability_score.calculate(components, weights)
+            if score is None:
+                continue
+            numerator, maximum, percentage = score
             rows.append({
                 " Stack": slug,
                 "Service": service,
-                "Signals": ", ".join(signals),
+                "Observability completeness %": percentage,
                 "Signals present": depth,
-                "Has alert": "yes" if service in alerts else "no",
-                "Has dashboard": "yes" if service in dashboards else "no",
+                "Metrics": "yes" if components["metrics"] else "no",
+                "Logs": "yes" if components["logs"] else "no",
+                "Traces": "yes" if components["traces"] else "no",
+                "Profiles": "yes" if components["profiles"] else "no",
+                "Has dashboard": "yes" if components["dashboard"] else "no",
+                "Has alert": "yes" if components["alert"] else "no",
+                "Has SLO": "yes" if components["slo"] else "no",
                 "Has routed active alert": "yes" if service in routed else "no",
+                "Score numerator": numerator,
+                "Score maximum": maximum,
+                "Score version": observability_score.VERSION,
                 "Last seen": last_seen,
             })
-        rows.sort(key=lambda row: (-row["Signals present"], row["Service"]))
+        rows.sort(key=lambda row: (-row["Observability completeness %"], row["Service"]))
         service_rows.extend(rows[:MAX_SERVICES])
 
         classification = technology_registry.classify(record.get("metric_names") or [])
