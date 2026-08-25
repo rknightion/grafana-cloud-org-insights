@@ -1,11 +1,11 @@
 ---
 id: GCI-0012
 title: Filter non-service identities out of the observed service register
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-08-25 12:57'
-updated_date: '2026-08-25 15:05'
+updated_date: '2026-08-25 15:17'
 labels:
   - pillar-k
   - coverage
@@ -50,19 +50,19 @@ The register already discloses discovered versus retained honestly in `coverage_
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Discovered identities are classified into application, platform and infrastructure_unit populations
-- [ ] #2 All three population counts are published; none is silently filtered
-- [ ] #3 The headline asset figure counts the application population only
-- [ ] #4 Classification is pattern-based and derived every run, with no maintained name list
-- [ ] #5 No customer identity enters the repository, fixtures or tests
-- [ ] #6 Coverage-depth distribution is recomputed over the application population
+- [x] #1 Discovered identities are classified into application, platform and infrastructure_unit populations
+- [x] #2 All three population counts are published; none is silently filtered
+- [x] #3 The headline asset figure counts the application population only
+- [x] #4 Classification is pattern-based and derived every run, with no maintained name list
+- [x] #5 No customer identity enters the repository, fixtures or tests
+- [x] #6 Coverage-depth distribution is recomputed over the application population
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 python3 -m pytest tests -q
-- [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
-- [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
+- [x] #1 python3 -m pytest tests -q
+- [x] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
+- [x] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -126,4 +126,14 @@ WHY BOTH DECISIONS LEAN THE SAME WAY: this pillar publishes a coverage denominat
 inflates coverage by shrinking the denominator, which is the same class of defect as the unscoring bug
 GCI-0016 just fixed, only pointed the other way and harder to spot. Prefer a named, counted, visible
 population over a silent drop every time.
+
+Implemented the authoritative classifier with platform-prefix precedence, signal-evidence protection for real services, no length rule, and infrastructure classification only for remaining structural machine patterns. All identities remain visible and count exactly once; application alone feeds the headline, depth, signal, and score aggregates. Score version bumped to 3 because the aggregate population meaning changed.
+
+Final verification: `python3 -m pytest tests -q` passed (1400 passed, 2 skipped, 6614 subtests); `tofu fmt -check -recursive terraform` passed; `tofu init -backend=false` and `tofu validate` passed in `terraform/` and `terraform/examples/standalone/`; customer-identifier working-tree/history scans and the shipped-text gate passed; `git diff --check` passed; BUDGET.md was regenerated. CodeRabbit completed with one Minor observation that the historical description still mentions a minimum-length rule. Dismissed: these authoritative notes explicitly supersede that description, preserving the correction history, and the implementation contains no identity-length classification.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Classified every discovered identity into a visible application, platform, or infrastructure-unit population using live evidence and no configured names or length threshold. Application-only headline, depth, signal, and score aggregates now use the defensible denominator; all excluded populations remain published for reconciliation. Score semantics advanced to version 3 and the new bounded population metric is budgeted. Verified by the complete pytest, OpenTofu, identifier, shipped-text, generated-budget, diff, and CodeRabbit gates.
+<!-- SECTION:FINAL_SUMMARY:END -->

@@ -508,7 +508,8 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("gcinsight_coverage_stacks_measured", "K",
                note="stacks whose atomic four-signal inventory succeeded"),
     MetricSpec("gcinsight_coverage_stack_services", "K", {"stack": STACK},
-               note="canonical service_name union across metrics, logs, traces and profiles"),
+               note="application population from the canonical service_name union; full discovered "
+                    "count before the view's top-N bound"),
     MetricSpec("gcinsight_coverage_stack_technologies", "K", {"stack": STACK},
                note="technologies present through versioned sentinel matching"),
     MetricSpec("gcinsight_coverage_stack_clusters", "K", {"stack": STACK},
@@ -527,7 +528,10 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("gcinsight_coverage_service_identity", "K", {"kind": 3},
                note="canonical, legacy-only and overlap counts; generic service is never silently "
                     "promoted to service_name"),
-    MetricSpec("gcinsight_coverage_unscored", "K", {"component": 8, "reason": 5},
+    MetricSpec("gcinsight_coverage_service_population", "K", {"kind": 3},
+               note="application, platform and infrastructure-unit populations; every discovered "
+                    "identity is counted exactly once"),
+    MetricSpec("gcinsight_coverage_unscored", "K", {"component": 8, "reason": 7},
                note="bounded component/reason counts; product absence and unavailable evidence are "
                     "excluded from the score rather than published as failed coverage"),
     MetricSpec("gcinsight_coverage_service_completeness_mean", "K", {"version": 2},

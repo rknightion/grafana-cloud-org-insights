@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **8,774** |
-| Phase 1 only | 8,773 |
+| **Declared (all phases)** | **8,793** |
+| Phase 1 only | 8,792 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -27,9 +27,9 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | F | 21 |
 | I | 895 |
 | J | 4,368 |
-| K | 938 |
+| K | 957 |
 | scan | 210 |
-| **Total** | **8,774** |
+| **Total** | **8,793** |
 
 ## Metrics
 
@@ -50,17 +50,17 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_ai_tokens_per_active_user` | I | `stack`(271) | 271 | 1 | the outlier detector. ABSENT where there are no active users: the ratio is undefined, and a zero would rank a dormant stack as the most efficient |
 | `gcinsight_cost_adaptivelogs_pending_bytes` | B | `stack`(271) | 271 | 1 | per stack, only where recommendations exist; the view carries the breakdown |
 | `gcinsight_coverage_stack_clusters` | K | `stack`(271) | 271 | 1 | distinct explicitly-windowed Mimir cluster label values |
-| `gcinsight_coverage_stack_services` | K | `stack`(271) | 271 | 1 | canonical service_name union across metrics, logs, traces and profiles |
+| `gcinsight_coverage_stack_services` | K | `stack`(271) | 271 | 1 | application population from the canonical service_name union; full discovered count before the view's top-N bound |
 | `gcinsight_coverage_stack_technologies` | K | `stack`(271) | 271 | 1 | technologies present through versioned sentinel matching |
 | `gcinsight_stack_active_series` | A | `stack`(271) | 271 | 1 | the metrics cost driver; growth per stack is the platform team's core question |
 | `gcinsight_stack_billed_users` | B | `stack`(271) | 271 | 1 | billingActiveUsers, NEVER currentActiveUsers. Named `stack_` not `cost_` so it cannot collide with the estate rollup of the same quantity |
 | `gcinsight_stack_collectors_active` | E | `stack`(271) | 271 | 1 | the per-stack half; use it to find registration concentration and churn |
 | `gcinsight_ai_estate_messages` | I | `category`(8), `surface`(8) | 64 | 1 | estate-wide category x surface, NO `stack` label  -  the per-stack cross product belongs in the existing `ai_category_surface` view |
 | `gcinsight_coverage_technology_stacks` | K | `kind`(63) | 63 | 1 | one bounded registry enum per technology; value is measured stacks present |
+| `gcinsight_coverage_unscored` | K | `component`(8), `reason`(7) | 56 | 1 | bounded component/reason counts; product absence and unavailable evidence are excluded from the score rather than published as failed coverage |
 | `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(14) | 56 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
 | `gcinsight_input_available` | scan | `tier`(4), `input`(14) | 56 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
 | `gcinsight_usage_plugin_adoption` | C | `kind`(50) | 50 | 1 | bounded headroom for datasource types; excludes grafana-knowledgegraph-datasource because it is auto-provisioned rather than an adoption decision |
-| `gcinsight_coverage_unscored` | K | `component`(8), `reason`(5) | 40 | 1 | bounded component/reason counts; product absence and unavailable evidence are excluded from the score rather than published as failed coverage |
 | `gcinsight_scan_stacks_failed` | scan | `tier`(4), `reason`(8) | 32 | 1 | reason is a closed failure vocabulary: http_429, http_5xx, timeout, auth, ... |
 | `gcinsight_findings` | scan | `kind`(18) | 18 | 1 | count per finding kind, derived from the pillar views by pillars/findings.py. A kind the running tier cannot compute is ABSENT, never 0 |
 | `gcinsight_maturity_dimension_mean` | D | `dimension`(9), `version`(2) | 18 | 1 | estate mean per rubric dimension  -  answers 'which dimension is the estate weakest on', which the per-stack view cannot trend without a stack-by-dimension cross product. Mean is over the stacks that SCORED that dimension, excluding the four unscored reasons |
@@ -91,6 +91,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_scan_stacks_scanned` | scan | `tier`(4) | 4 | 1 |  |
 | `gcinsight_scan_stacks_total` | scan | `tier`(4) | 4 | 1 |  |
 | `gcinsight_coverage_service_identity` | K | `kind`(3) | 3 | 1 | canonical, legacy-only and overlap counts; generic service is never silently promoted to service_name |
+| `gcinsight_coverage_service_population` | K | `kind`(3) | 3 | 1 | application, platform and infrastructure-unit populations; every discovered identity is counted exactly once |
 | `gcinsight_estate_feature_stacks` | A | `kind`(3) | 3 | 1 | incident / machine_learning / k6  -  provisioned capability nobody switched on. Emits 0 deliberately: a MEASURED zero is the finding here, unlike a structural zero elsewhere. Proves the feature is off, NOT that it is paid for |
 | `gcinsight_estate_stacks` | A | `status`(3) | 3 | 1 |  |
 | `gcinsight_estate_users_by_role` | A | `role`(3) | 3 | 1 |  |

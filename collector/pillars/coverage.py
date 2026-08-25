@@ -25,7 +25,7 @@ CLUSTER_VIEW = "coverage_cluster_register"
 LEGACY_SERVICE_VIEW = "coverage_legacy_service_register"
 SUMMARY_VIEW = "coverage_summary"
 
-EPHEMERAL_IDENTITY = re.compile(
+INFRASTRUCTURE_IDENTITY = re.compile(
     r"(?:\.(?:scope|service|slice|socket|mount|timer|target|device)$|"
     r"^session-\d+|^user-\d+|\d{8,}|[0-9a-f]{8}-[0-9a-f]{4}-)"
 )
@@ -37,11 +37,13 @@ UNSCORED_PAIRS = (
     ("dashboard", "inventory_unavailable"),
     ("dashboard", "evidence_unavailable"),
     ("row", "ephemeral_identity"),
+    ("row", "platform_identity"),
+    ("row", "infrastructure_identity"),
 )
 
 VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
     SERVICE_VIEW: (
-        (" Stack", "string"), ("Service", "string"),
+        (" Stack", "string"), ("Service", "string"), ("Population", "string"),
         ("Observability completeness %", "number"), ("Signals present", "number"),
         ("Metrics", "string"), ("Logs", "string"), ("Traces", "string"),
         ("Profiles", "string"), ("Has dashboard", "string"), ("Has alert", "string"),
@@ -69,7 +71,9 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
     ),
     SUMMARY_VIEW: (
         (" Stack", "string"), ("Services discovered", "number"),
-        ("Services retained", "number"), ("Technologies", "number"),
+        ("Services retained", "number"), ("Application services", "number"),
+        ("Platform identities", "number"), ("Infrastructure units", "number"),
+        ("Technologies", "number"),
         ("Clusters", "number"), ("Metric names", "number"),
         ("Unmatched metric names", "number"),
         ("Legacy-only services", "number"), ("Legacy-only service share %", "number"),
@@ -139,8 +143,20 @@ def _slo_product_in_use(record: Mapping[str, Any], slos: set[str]) -> bool:
     )
 
 
-def _ephemeral(service: str) -> bool:
-    return EPHEMERAL_IDENTITY.search(service) is not None
+def _population(service: str, signals: Sequence[str]) -> str:
+    """Classify from live identity evidence without a configured name or length threshold.
+
+    The signal inventory currently carries only service_name values, not the job/service_name pairs
+    that would let the platform probe also use their structural equality. The anchored prefix is the
+    implementable evidence until that source boundary deliberately widens.
+    """
+    if service.startswith("k6-synthetic-"):
+        return "platform"
+    if "metrics" in signals or "traces" in signals or len(signals) > 1:
+        return "application"
+    if INFRASTRUCTURE_IDENTITY.search(service) is not None:
+        return "infrastructure_unit"
+    return "application"
 
 
 def _technology_count_bucket(count: int) -> str:
@@ -176,6 +192,7 @@ def build(
     technology_count_distribution = {kind: 0 for kind in ("0", "1", "2-4", "5+")}
     classified_counts = {"matched": 0, "unmatched": 0}
     identity_counts = {"canonical": 0, "legacy_only": 0, "overlap": 0}
+    population_counts = {kind: 0 for kind in ("application", "platform", "infrastructure_unit")}
     unscored_counts: Counter[tuple[str, str]] = Counter()
     scored_percentages: list[float] = []
     scored_denominators: list[int] = []
@@ -216,14 +233,29 @@ def build(
         )
         dashboard_available = bool(dashboard_record.get("available"))
         dashboard_evidence_available = dashboard_record.get("detail_available") is not False
-        eligible_services = {service for service in canonical if not _ephemeral(service)}
+        signals_by_service = {
+            service: [signal for signal, names in by_signal.items() if service in names]
+            for service in canonical
+        }
+        populations = {
+            service: _population(service, signals) for service, signals in signals_by_service.items()
+        }
+        for population in populations.values():
+            population_counts[population] += 1
+        application_services = {
+            service for service, population in populations.items() if population == "application"
+        }
         for signal, names in by_signal.items():
-            signal_counts[signal] += len(names & eligible_services)
+            signal_counts[signal] += len(names & application_services)
         rows = []
         for service in canonical:
-            signals = [signal for signal, names in by_signal.items() if service in names]
+            signals = signals_by_service[service]
             depth = len(signals)
-            row_unscored = "ephemeral_identity" if _ephemeral(service) else None
+            population = populations[service]
+            row_unscored = {
+                "platform": "platform_identity",
+                "infrastructure_unit": "infrastructure_identity",
+            }.get(population)
             if row_unscored is None:
                 depth_counts[depth] += 1
             components: dict[str, bool | None] = {
@@ -268,6 +300,7 @@ def build(
             rows.append({
                 " Stack": slug,
                 "Service": service,
+                "Population": population,
                 "Observability completeness %": percentage,
                 "Signals present": depth,
                 "Metrics": "yes" if components["metrics"] else "no",
@@ -336,6 +369,13 @@ def build(
             " Stack": slug,
             "Services discovered": len(canonical),
             "Services retained": min(len(canonical), MAX_SERVICES),
+            "Application services": len(application_services),
+            "Platform identities": sum(
+                population == "platform" for population in populations.values()
+            ),
+            "Infrastructure units": sum(
+                population == "infrastructure_unit" for population in populations.values()
+            ),
             "Technologies": len(classification["technologies"]),
             "Clusters": len(clusters),
             "Metric names": classification["total_metric_name_count"],
@@ -348,7 +388,8 @@ def build(
             "Last seen": last_seen,
         })
         metrics.extend([
-            ("gcinsight_coverage_stack_services", {"stack": slug}, float(len(eligible_services))),
+            ("gcinsight_coverage_stack_services", {"stack": slug},
+             float(len(application_services))),
             ("gcinsight_coverage_stack_technologies", {"stack": slug},
              float(len(classification["technologies"]))),
             ("gcinsight_coverage_stack_clusters", {"stack": slug}, float(len(clusters))),
@@ -379,6 +420,10 @@ def build(
     metrics.extend(
         ("gcinsight_coverage_service_identity", {"kind": kind}, float(value))
         for kind, value in identity_counts.items()
+    )
+    metrics.extend(
+        ("gcinsight_coverage_service_population", {"kind": kind}, float(value))
+        for kind, value in population_counts.items()
     )
     metrics.extend(
         ("gcinsight_coverage_unscored", {"component": component, "reason": reason},

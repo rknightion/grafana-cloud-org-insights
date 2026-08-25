@@ -3107,9 +3107,10 @@ def d_coverage(ds: str):
             description="Stacks whose explicitly-windowed reads succeeded across every signal. A failed "
                         "stack is absent from every register and count rather than written as zero."),
         "n_services": build.stat_panel(
-            "Named service assets", f"sum(gcinsight_coverage_stack_services{stack})",
-            description="Canonical service identities discovered across metrics, logs, traces and "
-                        "profiles. The selected stack scope applies; names remain in the S3 register."),
+            "Application service assets", f"sum(gcinsight_coverage_stack_services{stack})",
+            description="The application population from canonical service identities discovered "
+                        "across metrics, logs, traces and profiles. Platform probes and infrastructure "
+                        "units remain counted separately rather than inflating this headline."),
         "n_technologies": build.stat_panel(
             "Observed technology deployments", f"sum(gcinsight_coverage_stack_technologies{stack})",
             description="Versioned registry matches summed across the selected stacks. This is an "
@@ -3165,7 +3166,7 @@ def d_coverage(ds: str):
         "b_depth": build.barchart_panel(
             "Telemetry depth per named service - observed strength and room to deepen",
             "gcinsight_coverage_services_by_depth", legend="{{kind}} signals", sort=None,
-            description="Named services grouped by how many canonical signals carry the same exact "
+            description="Application services grouped by how many canonical signals carry the exact "
                         "identity. Greater depth means more ways to investigate the service; shallower "
                         "depth is the adjacent upside without recasting the asset itself as a gap."),
         "n_completeness_mean": build.stat_panel(
@@ -3191,9 +3192,15 @@ def d_coverage(ds: str):
                         "the other entries state which product or evidence absence made a component "
                         "inapplicable instead of failed."),
         "b_signal": build.barchart_panel(
-            "Named services observed by signal", service_signal, legend="{{kind}}", sort=None,
-            description="Canonical service identities present in each explicitly-windowed signal "
+            "Application services observed by signal", service_signal, legend="{{kind}}", sort=None,
+            description="Application service identities present in each explicitly-windowed signal "
                         "inventory. A service may appear in several bars, which is the coverage depth."),
+        "b_population": build.barchart_panel(
+            "Discovered identity populations",
+            "gcinsight_coverage_service_population", legend="{{kind}}", sort="desc",
+            description="Every canonical identity is counted once as application, platform or "
+                        "infrastructure_unit. Non-application identities remain visible so a classifier "
+                        "or probe-naming change cannot silently shrink the coverage denominator."),
         "b_technology": build.barchart_panel(
             "Observed technologies ranked by measured stacks",
             "topk(20, gcinsight_coverage_technology_stacks > 0)", legend="{{kind}}", limit=20,
@@ -3254,7 +3261,8 @@ def d_coverage(ds: str):
             "Named service observability completeness register", coverage_pillar.SERVICE_VIEW, ds,
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.SERVICE_VIEW],
             description="The primary asset register: seven configurable weighted components plus the "
-                        "applicable denominator and explicit unscored reasons. Metrics, logs and traces "
+                        "named population, applicable denominator and explicit unscored reasons. "
+                        "Metrics, logs and traces "
                         "always remain applicable; unused products and unavailable evidence do not "
                         "become failed coverage. Active direct routing stays separate because it must "
                         "not double-weight alerting. Rows are bounded per stack for legibility."),
@@ -3395,6 +3403,7 @@ def d_coverage(ds: str):
             build.row("Score and its denominator", ["n_completeness_mean", "n_applicable_mean"],
                       max_columns=2, row_height="short"),
             build.row("Why components are not scored", ["b_unscored"], max_columns=1),
+            build.row("Identity populations", ["b_population"], max_columns=1),
             build.row("Coverage depth per service", ["b_depth"], max_columns=1, row_height="tall"),
             build.row("Services by signal", ["b_signal"], max_columns=1),
             build.row("Technology presence", ["b_technology_presence", "n_no_technology",

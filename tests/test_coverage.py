@@ -223,11 +223,16 @@ class CoverageBuildTest(unittest.TestCase):
         self.assertEqual(row["Has dashboard"], "unscored: evidence_unavailable")
         self.assertEqual(row["Applicable components"], 5)
 
-    def test_ephemeral_identity_stays_visible_but_is_excluded_from_aggregates(self):
-        """The heuristic can false-positive, so rows remain inspectable while headlines exclude them."""
+    def test_non_application_populations_stay_visible_but_leave_application_aggregates(self):
+        """Named populations make exclusions auditable instead of silently shrinking the denominator."""
         record = dict(SIGNALS["alpha"])
         record.update({
-            "metric_services": [], "log_services": ["app", "worker.service"],
+            "metric_services": ["short", "worker.service", "K6-SYNTHETIC-stack"],
+            "log_services": [
+                "app", "api", "worker.service", "session-12", "batch-12345678",
+                "a1b2c3d4-1234-5678-9012-a1b2c3d4e5f6", "K6-SYNTHETIC-stack",
+                "load-k6-synthetic-tool",
+            ],
             "trace_services": [], "profile_services": [], "slo_services": [],
             "metric_names": ["application_metric"],
         })
@@ -237,22 +242,41 @@ class CoverageBuildTest(unittest.TestCase):
             alert_routing={"alpha": {"available": True, "rules_total": 0}},
         )
         rows = {row["Service"]: row for row in views[coverage.SERVICE_VIEW]}
-        self.assertEqual(rows["worker.service"]["Unscored reason"], "ephemeral_identity")
-        self.assertIsNone(rows["worker.service"]["Observability completeness %"])
+        self.assertEqual(rows["k6-synthetic-stack"]["Population"], "platform")
+        self.assertEqual(rows["worker.service"]["Population"], "application",
+                         "metrics evidence overrides a machine-shaped log identity")
+        self.assertEqual(rows["session-12"]["Population"], "infrastructure_unit")
+        self.assertEqual(rows["batch-12345678"]["Population"], "infrastructure_unit")
+        self.assertEqual(
+            rows["a1b2c3d4-1234-5678-9012-a1b2c3d4e5f6"]["Population"],
+            "infrastructure_unit",
+        )
+        self.assertEqual(rows["api"]["Population"], "application",
+                         "identity length is never classification evidence")
+        self.assertEqual(rows["load-k6-synthetic-tool"]["Population"], "application",
+                         "the platform prefix is anchored and never a loose k6 substring")
+        self.assertIsNone(rows["k6-synthetic-stack"]["Observability completeness %"])
 
         values = {
             (name, tuple(sorted(labels.items()))): value for name, labels, value in metrics
         }
-        self.assertEqual(values[("gcinsight_coverage_stack_services", (("stack", "alpha"),))], 1)
+        self.assertEqual(values[("gcinsight_coverage_stack_services", (("stack", "alpha"),))], 5)
         self.assertEqual(
-            values[("gcinsight_coverage_services_by_depth", (("kind", "1"),))], 1,
+            values[("gcinsight_coverage_services_by_depth", (("kind", "1"),))], 4,
         )
         self.assertEqual(
             values[("gcinsight_coverage_unscored", (
-                ("component", "row"), ("reason", "ephemeral_identity"),
+                ("component", "row"), ("reason", "platform_identity"),
             ))],
             1,
         )
+        populations = {
+            labels["kind"]: value for name, labels, value in metrics
+            if name == "gcinsight_coverage_service_population"
+        }
+        self.assertEqual(populations, {
+            "application": 5, "platform": 1, "infrastructure_unit": 3,
+        })
 
     def test_service_depth_uses_canonical_exact_normalized_identity(self):
         metrics, views = coverage.build(

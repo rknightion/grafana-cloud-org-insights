@@ -9,7 +9,7 @@ from typing import Any
 
 COMPONENTS = ("metrics", "logs", "traces", "profiles", "dashboard", "alert", "slo")
 MIN_COMPONENTS_COVERED = 4
-VERSION = "2"
+VERSION = "3"
 
 
 class InvalidWeights(ValueError):
