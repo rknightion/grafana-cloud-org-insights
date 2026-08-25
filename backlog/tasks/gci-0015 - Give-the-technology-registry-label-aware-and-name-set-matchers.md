@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-08-25 13:05'
-updated_date: '2026-08-25 17:40'
+updated_date: '2026-08-25 17:57'
 labels:
   - pillar-k
   - registry
@@ -78,3 +78,11 @@ Once `any_of` exists, collapse the four HTTP semconv entries into one. Once `lab
 <!-- SECTION:PLAN:BEGIN -->
 Implement any_of first with failing overlap and classification tests. Measure the named-metric label-value query expansion before adopting label matching. Then add label matching with value-aware ambiguity validation, collapse the four OTel HTTP sentinels, publish SDK / SDK-equivalent / any-OTLP distinctions, and run the full repository gates.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+PRE-ADOPTION READ COST AND SEMANTICS. The first label matcher adds one unique named-metric label-values GET per successfully scanned stack: telemetry_sdk_name values restricted with match[]={__name__="target_info"}, over the same explicit 24-hour window and 100,000-value truncation guard as the existing Mimir reads. The source currently makes five Mimir GETs per successful stack, so this changes that portion from five to six requests (+20%); across the measured 270-active-stack estate the deterministic daily cost is at most 270 additional GETs. Across the whole atomic signal sweep it changes eight remote reads to nine (+12.5%). Raw label values are minimized immediately to bounded registry evidence and are never stored, logged, emitted or copied into a view.
+
+The reporting meanings are deliberately separate. SDK means the OpenTelemetry semantic-convention reserved telemetry_sdk_name value opentelemetry. SDK-equivalent is a deduplicated application-instrumentation union of that SDK evidence, the four HTTP-semconv counters, the existing Beyla sentinel and Micrometer OTLP registry evidence using its documented io.micrometer identifier. Any OTLP remains the independent, explicitly-windowed grafanacloud_instance_active_otlp_series protocol measurement above the committed synthetic-floor threshold; transport adoption is not inferred from metric-name classification.
+<!-- SECTION:NOTES:END -->
