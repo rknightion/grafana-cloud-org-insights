@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.2.0...v0.2.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* preserve empty Pyroscope measurements ([1ecd814](https://github.com/rknightion/grafana-cloud-org-insights/commit/1ecd8146610695610c771b43c39c2ce77256866b))
+
+
+### Miscellaneous
+
+* Configure Renovate ([a7c036f](https://github.com/rknightion/grafana-cloud-org-insights/commit/a7c036fe62fbe24d38ad3df37b7f8666dd64a902))
+* **deps:** update actions/setup-python action to v7 ([#8](https://github.com/rknightion/grafana-cloud-org-insights/issues/8)) ([e48db3b](https://github.com/rknightion/grafana-cloud-org-insights/commit/e48db3bc5d2f2685abc1ac48d942207cd9c220f9))
+* **deps:** update dependency python to 3.14 ([#7](https://github.com/rknightion/grafana-cloud-org-insights/issues/7)) ([e0f113d](https://github.com/rknightion/grafana-cloud-org-insights/commit/e0f113d79acaaf4c2f33be59487a8ff12f3b897d))
+* **deps:** update opentofu/setup-opentofu action to v1.0.8 ([#5](https://github.com/rknightion/grafana-cloud-org-insights/issues/5)) ([1b283d6](https://github.com/rknightion/grafana-cloud-org-insights/commit/1b283d6d44e9027a3fecff56831e5f8471b28abf))
+
 ## [0.2.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.1.0...v0.2.0) (2026-08-25)
 
 
