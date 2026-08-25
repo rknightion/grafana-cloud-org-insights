@@ -1,5 +1,5 @@
 {
-  "version": "3",
+  "version": "4",
   "technologies": [
     {"key": "airflow", "name": "Apache Airflow", "match": {"exact": "airflow_task_tries"}},
     {"key": "akuity", "name": "Akuity managed Argo CD", "match": {"pattern": {"prefix": "akuity_", "suffix": "_cluster_agenthealthstatus_bool"}}},
@@ -24,7 +24,7 @@
     {"key": "gitlab_runner", "name": "GitLab Runner", "match": {"exact": "gitlab_runner_concurrent"}},
     {"key": "hikaricp", "name": "HikariCP connection pool", "match": {"exact": "hikaricp_connections"}},
     {"key": "jvm_micrometer", "name": "JVM (Micrometer)", "match": {"exact": "jvm_memory_used_bytes"}},
-    {"key": "k6_health_check", "name": "k6 health check", "match": {"exact": "k6_health_check_ratio"}},
+    {"key": "k6_health_check", "name": "k6 synthetic health check (platform-deployed)", "match": {"exact": "k6_health_check_ratio"}},
     {"key": "kafka_client", "name": "Apache Kafka (client)", "match": {"exact": "kafka_consumer_io_ratio"}},
     {"key": "karpenter", "name": "Karpenter", "match": {"exact": "karpenter_nodes_created_total"}},
     {"key": "kubelet", "name": "kubelet", "match": {"exact": "kubelet_node_name"}},
@@ -41,7 +41,10 @@
     {"key": "otel_collector", "name": "OpenTelemetry Collector", "match": {"exact": "otelcol_processor_batch_metadata_cardinality"}},
     {"key": "otel_db_client", "name": "OTel database client instrumentation", "match": {"exact": "db_client_connections_usage"}},
     {"key": "otel_hostmetrics", "name": "OTel host metrics receiver", "match": {"exact": "system_cpu_count"}},
-    {"key": "otel_http", "name": "OTel HTTP server instrumentation", "match": {"exact": "http_server_request_duration_seconds_count"}},
+    {"key": "otel_http", "name": "OTel HTTP server instrumentation (semconv, seconds)", "match": {"exact": "http_server_request_duration_seconds_count"}},
+    {"key": "otel_http_client", "name": "OTel HTTP client instrumentation (semconv, seconds)", "match": {"exact": "http_client_request_duration_seconds_count"}},
+    {"key": "otel_http_client_ms", "name": "OTel HTTP client instrumentation (semconv, milliseconds)", "match": {"exact": "http_client_duration_milliseconds_count"}},
+    {"key": "otel_http_server_ms", "name": "OTel HTTP server instrumentation (semconv, milliseconds)", "match": {"exact": "http_server_duration_milliseconds_count"}},
     {"key": "postgresql", "name": "PostgreSQL", "match": {"exact": "pg_up"}},
     {"key": "probe_checks", "name": "Probe checks (Synthetic Monitoring or blackbox exporter)", "match": {"exact": "probe_success"}},
     {"key": "prometheus", "name": "Prometheus", "match": {"exact": "prometheus_build_info"}},

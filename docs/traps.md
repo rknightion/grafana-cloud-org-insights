@@ -457,6 +457,25 @@ the collector already uses for cardinality: `<per-signal instance id>:<CAP>`, th
  sizing. Bound it with both `limit` and the window, and never carry the name list itself into a metric.
 - **Four label reads per stack complete in roughly one to four seconds**, so the whole estate at the
  collector's existing concurrency is a couple of minutes. This belongs in a daily tier, not a fast one.
+- **`target_info` is NOT a sentinel for OpenTelemetry instrumentation.** Measured on a 270-stack
+ estate it is present on 231 stacks, and on 190 of those the ONLY series is a single per-stack
+ synthetic health-check canary whose `job` and `service_name` are equal. Genuine OTel SDK resources
+ were 19 stacks; every OTLP-protocol application instrumentation including eBPF and a Micrometer OTLP
+ registry reached 26. The metric overstates by roughly nine times. What it actually means is 'an
+ OTLP-to-Prometheus conversion has happened here at least once', and in practice that is dominated by
+ synthetic probes, collector self-telemetry, and Collector infra receivers (postgres, hostmetrics,
+ prometheus, ECS, k8s) that contain no SDK at all. The honest name-only sentinels are the HTTP semconv
+ counters, which measured zero false positives.
+- **`jvm_memory_used_bytes` is not an OTel sentinel** - eight of its stacks were Micrometer or JMX
+ Prometheus exporters. It is a fine sentinel for a JVM, and a wrong one for instrumentation flavour.
+- **A sparse sentinel flaps under an instant query.** A canary writing every few minutes was measured
+ present on 40 stacks at one instant and 188 five minutes later, against 190 over an hour. Evaluate
+ every sentinel-presence check over a range window of at least ten minutes; an hour is safer.
+- **Metric labels in a customer estate can carry PII, and this platform must never widen it.** One live
+ estate had an agent CLI exporting `user_email` as a metric label - per-person identity in Mimir
+ labels at unbounded cardinality. Reading such a series is unavoidable when sweeping label values;
+ carrying it into a published view, a log line or a metric label is not. Treat any label that could
+ name a person as unpublishable, and report the finding to the estate owner rather than storing it.
 - **A first-token metric-name prefix is not a technology.** `node`, `go`, `http`, `container`,
  `process`, `cluster` and `rest` are generic and classify confidently wrong. Match one unambiguous
  sentinel metric name per technology instead, and publish the unmatched share alongside every
