@@ -9,6 +9,7 @@
     "argocd_info",
     "asserts_artifact_info",
     "aws_ec2_cpuutilization_average",
+    "beyla_internal_build_info",
     "certmanager_certificate_ready_status",
     "cnpg_collector_up",
     "container_cpu_usage_seconds_total",

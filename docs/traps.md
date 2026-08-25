@@ -387,6 +387,15 @@ shape. Read the schema at `/openapi/v3/apis/dashboard.grafana.app/v2` rather tha
  Unbounded and identity-bearing. Count them; never carry them into a metric label.
 - **Mimir's ruler config API is not at `config/v1/rules` on Grafana Cloud** - that 404s. Rule state is
  `{prom}/api/prom/api/v1/rules`.
+- **The Adaptive Metrics plugin resource proxy returns 500 for EVERY path, so it can never settle a
+ route question.** Measured on two independent stacks with a service-account token: every
+ `/api/plugins/grafana-adaptive-metrics-app/resources/...` path answered
+ `500 plugin.requestFailureError` - including a deliberately nonsensical control path AND the config
+ path that answers 200 on the Mimir host. `/api/plugins/grafana-adaptive-metrics-app/settings`
+ answers 200, so the plugin is installed and enabled. The 500 is the proxy failing uniformly, not a
+ missing route, and it is the same behaviour already recorded for Adaptive Logs frontend resource
+ paths. Always include a control path that cannot exist: without one this reads as a specific
+ endpoint being absent.
 - **Adaptive Metrics config is `/aggregations/recommendations/config`.** `/aggregations/config` 404s,
  and no `/aggregations` exemptions path has answered 200 across eight tried variants.
 - **Pyroscope's Connect-RPC returns 400 without a time range.**

@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **8,724** |
-| Phase 1 only | 8,723 |
+| **Declared (all phases)** | **8,725** |
+| Phase 1 only | 8,724 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -27,9 +27,9 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | F | 21 |
 | I | 895 |
 | J | 4,368 |
-| K | 888 |
+| K | 889 |
 | scan | 210 |
-| **Total** | **8,724** |
+| **Total** | **8,725** |
 
 ## Metrics
 
@@ -56,7 +56,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_stack_billed_users` | B | `stack`(271) | 271 | 1 | billingActiveUsers, NEVER currentActiveUsers. Named `stack_` not `cost_` so it cannot collide with the estate rollup of the same quantity |
 | `gcinsight_stack_collectors_active` | E | `stack`(271) | 271 | 1 | the per-stack half; use it to find registration concentration and churn |
 | `gcinsight_ai_estate_messages` | I | `category`(8), `surface`(8) | 64 | 1 | estate-wide category x surface, NO `stack` label  -  the per-stack cross product belongs in the existing `ai_category_surface` view |
-| `gcinsight_coverage_technology_stacks` | K | `kind`(61) | 61 | 1 | one bounded registry enum per technology; value is measured stacks present |
+| `gcinsight_coverage_technology_stacks` | K | `kind`(62) | 62 | 1 | one bounded registry enum per technology; value is measured stacks present |
 | `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(14) | 56 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
 | `gcinsight_input_available` | scan | `tier`(4), `input`(14) | 56 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
 | `gcinsight_usage_plugin_adoption` | C | `kind`(50) | 50 | 1 | bounded headroom for datasource types; excludes grafana-knowledgegraph-datasource because it is auto-provisioned rather than an adoption decision |
@@ -188,7 +188,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `coverage_metric_name_register` | K | 271 | 1 | metric names and their registry classification; names never become labels |
 | `coverage_service_register` | K | 271 | 1 | top-N named services with signal depth and explicit alert/dashboard metadata |
 | `coverage_summary` | K | 271 | 1 | per-stack counts, registry version, truncation and unmatched shares |
-| `coverage_technology_register` | K | 16,531 | 1 | stack x technology is current-state identity detail, not a time series |
+| `coverage_technology_register` | K | 16,802 | 1 | stack x technology is current-state identity detail, not a time series |
 | `estate` | A | 271 | 1 | wide per-stack inventory: region, cluster, status, dashboards, alert rules, users by role, admin share, age, idle, drift, delete protection, leftover, created/updated by |
 | `estate_leftovers_billing` | A | 1 | 1 | billing-active leftover candidates; row count is deployment-specific |
 | `estate_leftovers_idle` | A | 1 | 1 | idle non-billing stack candidates; row count is deployment-specific |

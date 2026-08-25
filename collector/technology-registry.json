@@ -1,5 +1,5 @@
 {
-  "version": "4",
+  "version": "5",
   "technologies": [
     {"key": "airflow", "name": "Apache Airflow", "match": {"exact": "airflow_task_tries"}},
     {"key": "akuity", "name": "Akuity managed Argo CD", "match": {"pattern": {"prefix": "akuity_", "suffix": "_cluster_agenthealthstatus_bool"}}},
@@ -7,6 +7,7 @@
     {"key": "argocd", "name": "Argo CD", "match": {"exact": "argocd_info"}},
     {"key": "asserts", "name": "Grafana Asserts", "match": {"exact": "asserts_artifact_info"}},
     {"key": "aws_cloudwatch", "name": "AWS CloudWatch", "match": {"exact": "aws_ec2_cpuutilization_average"}},
+    {"key": "beyla_ebpf", "name": "Grafana Beyla (eBPF zero-code instrumentation)", "match": {"exact": "beyla_internal_build_info"}},
     {"key": "cadvisor", "name": "cAdvisor", "match": {"exact": "container_cpu_usage_seconds_total"}},
     {"key": "cert_manager", "name": "cert-manager", "match": {"exact": "certmanager_certificate_ready_status"}},
     {"key": "cloudnativepg", "name": "CloudNativePG", "match": {"exact": "cnpg_collector_up"}},
