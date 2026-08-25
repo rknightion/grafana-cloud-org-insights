@@ -1,9 +1,11 @@
 ---
 id: GCI-0020
 title: Publish Adaptive Traces enablement and sampling savings
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-08-25 14:11'
+updated_date: '2026-08-25 17:04'
 labels:
   - cost
   - value
@@ -87,3 +89,20 @@ Adaptive Profiles. The estate has one stack with any profiling data at all, so t
 - [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
 - [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Ship and validate a dashboard-only Adaptive Traces surface first: matched 24-hour enablement denominator, enabled-population byte reduction, separate discarded-span rate and live per-policy table. Commit and push this no-collector slice while the task remains In Progress.
+2. Add the stack-reader source only after the panel commit, probing plugin health before config, policy and recommendation routes and withholding unavailable stacks rather than publishing zeros.
+3. Publish identity-bearing policy/recommendation detail only as S3 views, emit only bounded aggregate metrics if a trend is justified, derive VIEW_INPUTS and update capability/privacy documentation.
+4. Run the full gates and CodeRabbit for the collector slice, finalize Backlog, commit, push and continue to Phase 3.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+PANEL-FIRST CHECKPOINT. The Coverage surface now reads Adaptive Traces directly from grafanacloud-usage: a 24-hour enabled-stack count beside the identically windowed trace-ingesting denominator; time-integrated dropped bytes divided only by received bytes on the reporting population; discarded spans as a separate 24-hour average rate; and a live per-policy sampled-span table. The policy label is rendered only from the live datasource and is not copied into collector output. The panel descriptions explicitly reject an estate-wide saving interpretation and name a funded rollout to one high-volume trace-ingesting stack as the next step.
+
+This checkpoint changes dashboard configuration only. No collector source, credential, permission, emitted metric or S3 view was added. Dashboard coverage gate: 158 passed, 2 skipped, 106 subtests.
+<!-- SECTION:NOTES:END -->

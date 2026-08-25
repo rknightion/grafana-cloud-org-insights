@@ -272,7 +272,31 @@ SPANMETRIC_STACKS = _stacks_with("grafanacloud_instance_active_spanmetrics_serie
 SERVICEGRAPH_STACKS = _stacks_with("grafanacloud_instance_active_service_graph_series")
 PDC_STACKS = _stacks_with("grafanacloud_grafana_pdc_connected_agents")
 ADAPTIVE_LOGS_STACKS = _stacks_with("grafanacloud_logs_instance_adaptivelogs_bytes_dropped_per_second")
-ADAPTIVE_TRACES_STACKS = _stacks_with("grafanacloud_traces_instance_adaptivetraces_bytes_received_per_second")
+ADAPTIVE_TRACES_BYTES_RECEIVED = (
+    "grafanacloud_traces_instance_adaptivetraces_bytes_received_per_second"
+)
+ADAPTIVE_TRACES_BYTES_DROPPED = (
+    "grafanacloud_traces_instance_adaptivetraces_bytes_dropped_per_second"
+)
+ADAPTIVE_TRACES_DISCARDED_SPANS = (
+    "grafanacloud_traces_instance_adaptivetraces_discarded_spans_total:rate5m"
+)
+ADAPTIVE_TRACES_POLICY_SAMPLED_SPANS = (
+    "grafanacloud_traces_instance_adaptivetraces_policy_sampled_spans_total:rate5m"
+)
+ADAPTIVE_TRACES_STACKS = _stacks_with(ADAPTIVE_TRACES_BYTES_RECEIVED)
+# Integrate both rate-shaped sides over exactly the same window. The ratio is only the population
+# reporting Adaptive Traces, never the estate trace total; zero-valued reporters change neither sum.
+ADAPTIVE_TRACES_REDUCTION = (
+    f"sum(sum_over_time({ADAPTIVE_TRACES_BYTES_DROPPED}[{WINDOW}])) / "
+    f"sum(sum_over_time({ADAPTIVE_TRACES_BYTES_RECEIVED}[{WINDOW}]))"
+)
+ADAPTIVE_TRACES_DISCARDED_RATE = (
+    f"sum(avg_over_time({ADAPTIVE_TRACES_DISCARDED_SPANS}[{WINDOW}]))"
+)
+ADAPTIVE_TRACES_POLICY_RATE = (
+    f"sum by(policy)(avg_over_time({ADAPTIVE_TRACES_POLICY_SAMPLED_SPANS}[{WINDOW}]))"
+)
 
 # --- Workload composition (Tier 2) ------------------------------------------------------------------
 # `*_info` series are one-per-object, so their SUM is an object count: how many pods and hosts the organisation
@@ -3296,6 +3320,41 @@ def d_coverage(ds: str):
                         "type, then use this register to scope the stack owners and Pillar J to confirm "
                         "current demand."),
 
+        "n_at_enabled": build.stat_panel(
+            "Stacks reporting Adaptive Traces (24h)", ADAPTIVE_TRACES_STACKS,
+            ds_uid=build.USAGE_UID,
+            description="Stacks with non-zero Adaptive Traces received-byte reporting at any point in "
+                        "the same 24-hour window as the trace-ingest denominator beside it. Fundable "
+                        "next step: roll Adaptive Traces out to one high-volume trace-ingesting stack "
+                        "outside this enabled population and measure the change."),
+        "n_at_trace_population": build.stat_panel(
+            "Stacks ingesting traces (24h denominator)", TRACES_STACKS,
+            ds_uid=build.USAGE_UID,
+            description="The matched addressable population: stacks with non-zero trace ingest at any "
+                        "point in 24 hours. Trace ingest is bursty, so an instant count is not a valid "
+                        "denominator for Adaptive Traces enablement."),
+        "n_at_reduction": build.stat_panel(
+            "Trace bytes dropped on enabled stacks (24h)", ADAPTIVE_TRACES_REDUCTION,
+            unit="percentunit", decimals=1, ds_uid=build.USAGE_UID,
+            description="Dropped-byte rate integrated over 24 hours divided by received-byte rate over "
+                        "the identical window, only on stacks reporting Adaptive Traces. This is the "
+                        "achieved reduction on the enabled population, not an estate-wide trace saving."),
+        "n_at_discarded": build.stat_panel(
+            "Discarded spans per second on enabled stacks (24h average)",
+            ADAPTIVE_TRACES_DISCARDED_RATE, unit="ops", ds_uid=build.USAGE_UID,
+            description="Average Adaptive Traces discarded-span rate over 24 hours. Discards are shown "
+                        "separately from policy-sampled spans below and are never added to them: the two "
+                        "series describe different outcomes."),
+        "tbl_at_policy": build.prometheus_table_panel(
+            "Active Adaptive Traces policies by sampled-span rate (24h)",
+            ADAPTIVE_TRACES_POLICY_RATE, legend="{{policy}}", ds_uid=build.USAGE_UID,
+            label_column="Active policy identity", value_column="Policy-sampled spans/s", unit="ops",
+            description="Policies that fired in the window, ranked by their average sampled-span rate. "
+                        "The live policy label contains customer-authored text and a uuid: Grafana reads "
+                        "it directly for this panel, while the collector emits and stores none of these "
+                        "label values. Configured-but-inactive policies require the separate reader "
+                        "inventory that follows this panel-only release."),
+
         "tbl_services": build.table_panel(
             "Named service observability completeness register", coverage_pillar.SERVICE_VIEW, ds,
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.SERVICE_VIEW],
@@ -3462,6 +3521,16 @@ def d_coverage(ds: str):
                       ["tbl_datasource_provisioned", "tbl_datasource_queried"], max_columns=2),
             build.row("Named consolidation call list", ["tbl_datasource_inventory"],
                       max_columns=1, row_height="tall"),
+        ]),
+        build.rows_tab("Adaptive Traces", [
+            build.row("Enablement and its matched denominator",
+                      ["n_at_enabled", "n_at_trace_population"], max_columns=2,
+                      row_height="short"),
+            build.row("Achieved reduction and separate discard outcome",
+                      ["n_at_reduction", "n_at_discarded"], max_columns=2,
+                      row_height="short"),
+            build.row("Policies active in the window", ["tbl_at_policy"], max_columns=1,
+                      row_height="tall"),
         ]),
         build.rows_tab("Outcome value", [
             build.row("Recorded response", ["n_value_groups", "n_value_acknowledged",
