@@ -4,6 +4,17 @@ Four identities, each with the smallest scope that does its job. This page recor
 
 Endpoint availability varies by plan, region and product rollout, so a deployment records the actual HTTP status and coverage rather than turning an unavailable source into a zero.
 
+## Creating the policies: realm decides the region
+
+Access policies are regional objects, and `POST /api/v1/accesspolicies` takes the region as a query parameter. Which region is not a free choice, and picking the wrong one does not fail at creation - it fails later as a 404 or an empty list, which reads as a missing resource rather than a misplaced credential.
+
+- An **org-realm** policy belongs to the organisation's own region, which is **not necessarily the region its stacks are in**. An organisation whose stacks all live in one region can still hold its org-realm policies somewhere else entirely.
+- A **stack-realm** policy belongs to that stack's `regionSlug`, from `GET /api/orgs/<org-id>/instances`.
+
+List the organisation's existing policies before creating any, and put a new org-realm policy in whichever region the existing org-realm policies already use. That is the only reliable way to discover it.
+
+Region does not constrain what an org-realm token can then reach: it reaches every region's data plane. It only determines where the policy object lives.
+
 ## The org-realm reader
 
 `collector.config.READER_SCOPES` is authoritative. One org-realm token reaches all four signal databases in every region of the estate - the region hint in the token payload does not constrain the data plane.

@@ -42,6 +42,8 @@ Publish one dashboard or `all`, read it back, and verify the v2 query, viz and l
 
 A newly implemented view must be published by its owning tier before a table panel references it. Legitimately empty finding views use explicit schemas; a never-published view remains a build failure, which is the point - it separates "this table is correctly empty" from "this table was never wired up".
 
+**That separation is the intent and the implementation does not currently hold it up.** A zero-row view is not written to S3 at all, and the explicit schema has to be threaded to each call site by hand, which not every call site does - so on a small or clean estate a build fails on views that are correctly empty. See *Empty views on a small estate* in the runbook for which dashboards, and why the test suite never caught it.
+
 ## Coverage gates
 
 Every published view must be rendered, and every declared metric must be rendered or alerted. Table schemas cover legitimately empty finding views without turning a not-yet-published view into a silent blank panel.

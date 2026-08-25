@@ -31,14 +31,16 @@ Both live as JSON keys in one Secrets Manager secret and are injected by the ECS
 
 Doing these out of order gives four tasks an hour failing to start, and the first symptom is a CloudWatch bill rather than an error anyone reads.
 
-1. `terraform apply` with `schedules_enabled = false`. Everything exists; nothing fires.
+1. `terraform apply` with `schedules_enabled = false` and `provisioner_enabled = false`. Everything exists; nothing fires.
 2. Write the tokens into the secret. The shape is in `secrets.tf`.
-3. Build and push the image. **It must match `task_architecture`** - the default is ARM64, and an x86 image on an ARM64 task definition fails at runtime with `exec format error`, not at plan time.
-4. Run one tier by hand (`terraform output run_task_command`) and read its logs.
-5. Mint the access key for the views reader and wire the Grafana Infinity datasource to it.
-6. Set `schedules_enabled = true` and apply again.
+3. Build and push the image. **It must match `task_architecture`** - the default is ARM64, and an x86 image on an ARM64 task definition fails at runtime with `exec format error`, not at plan time. Pin the pushed digest and apply again.
+4. **Run the provisioner by hand, before any scan tier.** It writes one per-stack reader token to SSM, and T2 cannot pass without them: every stack-local source returns `no_credential`, coverage is `0.0`, and the tier exits `1` refusing all writes. That failure reads like a broken reader token and is not one.
+5. Run the tiers by hand (`terraform output run_task_command`), serially, T2 → T3 → T1 → T4, and read their logs.
+6. Mint the access key for the views reader and wire the Grafana Infinity datasource to it.
+7. Publish the dashboards, then the alert rules, which publish paused.
+8. Set `schedules_enabled = true`, and enable the provisioner schedule last - it is the only scheduled job that can write.
 
-[Running scans](operations.md) lists what else must be true before the first scheduled scan.
+The full procedure for a named organisation - which credentials to create in which region, the folder that must exist before a dashboard build, and what proves each phase finished - is *Standing up a new deployment* in the runbook. [Running scans](operations.md) lists what else must be true before the first scheduled scan.
 
 ## Building the image
 

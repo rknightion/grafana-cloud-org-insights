@@ -56,4 +56,20 @@ Coverage is a ratio against **scannable** stacks. Paused stacks answer the contr
 
 ## Tasks fail to start immediately after the first apply
 
-Almost always ordering. See [Deployment](deployment.md) for the six steps in order. The two that bite hardest: an x86 image on an ARM64 task definition fails at runtime with `exec format error` rather than at plan time, and schedules enabled before the secret is populated produce four failing tasks an hour whose first symptom is a CloudWatch bill.
+Almost always ordering. See [Deployment](deployment.md) for the steps in order. The two that bite hardest: an x86 image on an ARM64 task definition fails at runtime with `exec format error` rather than at plan time, and schedules enabled before the secret is populated produce four failing tasks an hour whose first symptom is a CloudWatch bill.
+
+## T2 exits 1 at coverage 0.0 on a brand-new deployment
+
+The provisioner has not run yet, and the reader token is fine.
+
+Every stack-local source - service accounts, Assistant, usage insights, dashboard inventory, datasource query cost, Adaptive Logs, public dashboards, alert routing - reports `no_credential` and `0 of N available`, so the tier refuses all S3, Mimir and Loki writes. Those sources authenticate as the per-stack reader the provisioner mints into SSM, not as the org-realm reader, so none of them can work before it has run once. Run the provisioner, confirm one SSM parameter per stack, and re-run T2.
+
+## `PutSubscriptionFilter` says the Firehose stream is not ACTIVE
+
+The stream is ACTIVE. The message is misleading: what actually failed is CloudWatch Logs assuming the subscription role, because it passes the **bare log-group ARN** as `aws:SourceArn` and the trust policy matches `<log-group-arn>:*`.
+
+This affects new deployments only - the condition is evaluated when the filter is created, so an existing filter keeps working and the problem stays invisible until the next deployment is stood up.
+
+## `--publish all` raises `EmptyView`
+
+A view with zero rows, on an estate small or clean enough to produce one. See *Empty views on a small estate* in the runbook: it is a current product limitation rather than a misconfiguration, and it cannot be worked around from a deployment.
