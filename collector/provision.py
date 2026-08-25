@@ -100,8 +100,25 @@ USAGE_INSIGHTS_DS_UID = "grafanacloud-usage-insights"
 # the customer's log drop rules.
 ADAPTIVE_LOGS_PLUGIN = "grafana-adaptivelogs-app"
 
-# Adaptive Traces is not collected yet. Keep its mutation actions explicitly refused, but grant no read
-# access until a consumer exists: capability without a caller is unnecessary standing authority.
+# The Adaptive Metrics plugin. Rules, recommendations, segments and config are all reachable on the
+# Mimir host with the ORG token and need none of these actions. EXEMPTIONS are different: they are
+# served by the plugin backend, so the org scope `adaptive-metrics-exemptions:read` reaches nothing and
+# has been removed from `config.READER_SCOPES`. An exemption is a metric or label a team deliberately
+# protected from aggregation, so it CAPS the achievable saving - a savings figure computed without it
+# overstates what can actually be applied.
+ADAPTIVE_METRICS_PLUGIN = "grafana-adaptive-metrics-app"
+
+# Adaptive Traces. **There is only ONE plugin role, `admin`**, and it bundles `config:write`,
+# `policies:write`, `policies:delete` and `recommendations:apply` with the reads. Never assign that
+# role: this project builds a custom role from action/scope pairs, so the read actions are granted
+# individually and the mutations stay refused below. Verified by enumerating the live role definition,
+# not from documentation.
+#
+# Most Adaptive Traces telemetry needs no stack credential at all: `grafanacloud-usage` carries eight
+# `..._adaptivetraces_*` series covering bytes received and dropped, spans and traces sampled per
+# policy, global sampling and discards. Prefer panels over these actions for anything that datasource
+# already answers; these actions exist for the POLICY INVENTORY, which the datasource does not carry -
+# it only names policies that were active in the window.
 ADAPTIVE_TRACES_PLUGIN = "grafana-adaptivetraces-app"
 
 DESIRED_PERMISSIONS: tuple[dict[str, str], ...] = (
@@ -109,6 +126,18 @@ DESIRED_PERMISSIONS: tuple[dict[str, str], ...] = (
     *({"action": f"grafana-assistant-app.{a}"} for a in ASSISTANT_ACTIONS),
     {"action": "plugins.app:access", "scope": f"plugins:id:{ADAPTIVE_LOGS_PLUGIN}"},
     {"action": f"{ADAPTIVE_LOGS_PLUGIN}.patterns:read"},
+    # Adaptive Metrics exemptions. Read-only actions only; the plugin also defines editor and admin
+    # roles which are never assigned.
+    {"action": "plugins.app:access", "scope": f"plugins:id:{ADAPTIVE_METRICS_PLUGIN}"},
+    {"action": f"{ADAPTIVE_METRICS_PLUGIN}.plugin:access"},
+    {"action": f"{ADAPTIVE_METRICS_PLUGIN}.exemptions:read"},
+    # Adaptive Traces policy and recommendation inventory. Cherry-picked reads: the plugin's only
+    # role bundles writes and deletes, so it is never assigned.
+    {"action": "plugins.app:access", "scope": f"plugins:id:{ADAPTIVE_TRACES_PLUGIN}"},
+    {"action": f"{ADAPTIVE_TRACES_PLUGIN}.plugin:access"},
+    {"action": f"{ADAPTIVE_TRACES_PLUGIN}.policies:read"},
+    {"action": f"{ADAPTIVE_TRACES_PLUGIN}.recommendations:read"},
+    {"action": f"{ADAPTIVE_TRACES_PLUGIN}.config:read"},
     # --- Inventory the org access policy cannot reach ------------------------------------------------
     # Each of these was verified by reading the required action off the endpoint's own 403 rather than
     # from the documentation, and each one closes a case where the API returns **200 with a
@@ -164,12 +193,13 @@ DESIRED_ACTIONS = frozenset(p["action"] for p in DESIRED_PERMISSIONS)
 # pseudo-folder and satisfies nothing we declared. A scopeless action is reported by the API as `['']`.
 DESIRED_PAIRS = frozenset((p["action"], p.get("scope", "")) for p in DESIRED_PERMISSIONS)
 # Permissions this project previously granted and now deliberately removes. All other extra pairs are
-# preserved: pruning arbitrary customer-added access is not reconciliation. Adaptive Traces has no
-# collector consumer yet, so these two grants are unnecessary standing authority.
-RETIRED_PAIRS = frozenset({
-    ("plugins.app:access", f"plugins:id:{ADAPTIVE_TRACES_PLUGIN}"),
-    (f"{ADAPTIVE_TRACES_PLUGIN}.recommendations:read", ""),
-})
+# preserved: pruning arbitrary customer-added access is not reconciliation.
+#
+# The two Adaptive Traces pairs that lived here are GONE from this set, deliberately. They are now in
+# `DESIRED_PERMISSIONS` because a consumer was approved. A pair must never appear in both: the
+# provisioner would grant it and then read it back as drift to remove, rewriting the role on every
+# stack every run for ever. A test asserts the two sets are disjoint.
+RETIRED_PAIRS: frozenset[tuple[str, str]] = frozenset()
 
 
 def held_pairs(permissions: Mapping[str, Iterable[str]] | Iterable[str]) -> frozenset[tuple[str, str]]:

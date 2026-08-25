@@ -50,6 +50,7 @@
     "pg_up",
     "probe_success",
     "prometheus_build_info",
+    "pyroscope_ebpf_active_targets",
     "rabbitmq_channels",
     "redis_up",
     "rest_client_requests_total",

@@ -206,7 +206,7 @@ class FrozenSeamTest(unittest.TestCase):
     #: The reviewed surface, action by action. A count alone would let one action be swapped for
     #: another without the test noticing, and every one is a grant on each provisioned stack.
     REVIEWED = {
-        "plugins.app:access": "the Assistant and Adaptive Logs plugin gateways",
+        "plugins.app:access": "the Assistant, Adaptive Logs, Metrics and Traces plugin gateways",
         "grafana-assistant-app.usage:read": "Assistant aggregate usage",
         "grafana-assistant-app.investigations:read": "investigation counts",
         "grafana-assistant-app.investigations.all:read": "tenant investigation coverage",
@@ -217,6 +217,19 @@ class FrozenSeamTest(unittest.TestCase):
         "grafana-assistant-app.rules.tenant:read": "tenant rule inventory",
         "grafana-assistant-app.watcher-agents:read": "watcher capability boundary checks",
         "grafana-adaptivelogs-app.patterns:read": "log patterns and drop-rate recommendations",
+        # Adaptive Metrics: rules, recommendations, segments and config are all reachable on the Mimir
+        # host with the ORG token. Only exemptions need a stack action, and an exemption caps the
+        # achievable saving, so a savings figure computed without it overstates what can be applied.
+        "grafana-adaptive-metrics-app.plugin:access": "the Adaptive Metrics plugin gateway",
+        "grafana-adaptive-metrics-app.exemptions:read": "metrics and labels deliberately protected from aggregation",
+        # Adaptive Traces. The plugin defines ONE role, admin, bundling writes and deletes with the
+        # reads, so these actions are cherry-picked and that role is never assigned. Most Adaptive
+        # Traces telemetry needs no credential at all - grafanacloud-usage carries eight
+        # ..._adaptivetraces_* series - so these exist for the policy INVENTORY the datasource lacks.
+        "grafana-adaptivetraces-app.plugin:access": "the Adaptive Traces plugin gateway",
+        "grafana-adaptivetraces-app.policies:read": "sampling policy inventory, including policies inactive in the window",
+        "grafana-adaptivetraces-app.recommendations:read": "sampling recommendations not yet applied",
+        "grafana-adaptivetraces-app.config:read": "Adaptive Traces enablement and configuration",
         "serviceaccounts:read": "the per-stack service-account inventory",
         "serviceaccounts.permissions:read": "what each service account can actually do",
         "datasources:read": "LIST datasources - not query them",
@@ -237,32 +250,56 @@ class FrozenSeamTest(unittest.TestCase):
     def test_the_declared_role_carries_exactly_the_reviewed_actions(self):
         """Adding an action must be a deliberate edit HERE, not a quiet drift in the provisioner.
 
-        A role rollout costs a transient Admin identity on every stack in the estate. Adaptive Traces
-        stays ungranted until there is a collector consumer for it.
+        A role rollout costs a transient Admin identity on every stack in the estate. Adaptive Metrics
+        exemptions and the Adaptive Traces read actions were added deliberately and are explicitly
+        approved; the Traces plugin's only role bundles writes, so the reads are cherry-picked and that
+        role is never assigned.
         """
         declared = set(pr.DESIRED_ACTIONS)
         self.assertEqual(declared, set(self.REVIEWED),
                          "the declared role no longer matches the reviewed surface")
-        self.assertEqual(len(pr.DESIRED_ACTIONS), 26)
+        self.assertEqual(len(pr.DESIRED_ACTIONS), 32)
 
-    def test_adaptive_traces_has_no_positive_grant_without_a_consumer(self):
-        actual = {
-            (action, scope)
-            for action, scope in pr.DESIRED_PAIRS
-            if "adaptivetraces" in action or "grafana-adaptivetraces-app" in scope
-        }
-        self.assertEqual(actual, set())
+    def test_adaptive_traces_grants_reads_and_never_the_bundled_admin_role(self):
+        """The plugin defines ONE role, admin, bundling writes and deletes with the reads.
 
-    def test_the_two_old_adaptive_traces_pairs_are_explicitly_retired(self):
-        expected = {
-            ("plugins.app:access", "plugins:id:grafana-adaptivetraces-app"),
-            ("grafana-adaptivetraces-app.recommendations:read", ""),
+        So the reads are cherry-picked into our own custom role. Any write, delete or apply action
+        reaching the declared set would be that bundle leaking in.
+        """
+        traces = {
+            action for action, _ in pr.DESIRED_PAIRS
+            if action.startswith("grafana-adaptivetraces-app.")
         }
-        self.assertEqual(set(pr.RETIRED_PAIRS), expected)
-        with_retired = self._complete()
-        for action, scope in expected:
-            with_retired.setdefault(action, []).append(scope)
-        self.assertTrue(pr.role_drift(with_retired))
+        self.assertEqual(traces, {
+            "grafana-adaptivetraces-app.plugin:access",
+            "grafana-adaptivetraces-app.policies:read",
+            "grafana-adaptivetraces-app.recommendations:read",
+            "grafana-adaptivetraces-app.config:read",
+        })
+        for action in traces:
+            self.assertTrue(action.endswith((":read", ":access")), action)
+
+    def test_adaptive_metrics_grants_only_exemptions_because_the_rest_is_org_reachable(self):
+        """Rules, recommendations, segments and config answer to the ORG token on the Mimir host.
+
+        Only exemptions are served by the plugin backend, so only exemptions justify a stack grant.
+        """
+        metrics = {
+            action for action, _ in pr.DESIRED_PAIRS
+            if action.startswith("grafana-adaptive-metrics-app.")
+        }
+        self.assertEqual(metrics, {
+            "grafana-adaptive-metrics-app.plugin:access",
+            "grafana-adaptive-metrics-app.exemptions:read",
+        })
+
+    def test_no_pair_is_both_desired_and_retired(self):
+        """A pair in both sets makes the provisioner fight itself.
+
+        It would grant the pair, read it back as drift, remove it, and rewrite the role on every stack
+        on every run for ever - a transient Admin identity per stack per run, permanently.
+        """
+        self.assertEqual(pr.DESIRED_PAIRS & pr.RETIRED_PAIRS, frozenset())
 
     def test_adaptive_traces_mutations_are_explicitly_refused(self):
         refused = {

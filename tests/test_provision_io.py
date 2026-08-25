@@ -235,21 +235,33 @@ class EnsureRoleScopeTest(unittest.TestCase):
         self.assertIn("dashboards:write", note)
         self.assertEqual(st.puts, [])
 
-    def test_only_the_explicitly_retired_adaptive_traces_pairs_are_removed(self):
-        permissions = [dict(p) for p in pr.DESIRED_PERMISSIONS] + [
-            {"action": "plugins.app:access", "scope": "plugins:id:grafana-adaptivetraces-app"},
-            {"action": "grafana-adaptivetraces-app.recommendations:read"},
-            {"action": "annotations:read", "scope": "annotations:*"},
-        ]
-        st = _RoleStack(permissions)
+    def test_a_rewrite_preserves_arbitrary_customer_added_permissions(self):
+        """Reconciliation adds what we declared. It does not prune what the customer added.
+
+        Pruning arbitrary access would make this project an authority on someone else's RBAC. The role
+        is rewritten here because one declared pair is missing, which is the only trigger.
+        """
+        incomplete = [dict(p) for p in pr.DESIRED_PERMISSIONS
+                      if p["action"] != "grafana-adaptivetraces-app.policies:read"]
+        st = _RoleStack(incomplete + [{"action": "annotations:read", "scope": "annotations:*"}])
 
         ok, _, _ = cli.ensure_role(st)
 
         self.assertTrue(ok)
-        sent = st.puts[0][1]["permissions"]
-        pairs = {(p["action"], p.get("scope") or "") for p in sent}
-        self.assertTrue(pr.RETIRED_PAIRS.isdisjoint(pairs))
+        pairs = {(p["action"], p.get("scope") or "") for p in st.puts[0][1]["permissions"]}
         self.assertIn(("annotations:read", "annotations:*"), pairs)
+        self.assertIn(("grafana-adaptivetraces-app.policies:read", ""), pairs)
+        self.assertTrue(pr.DESIRED_PAIRS <= pairs)
+
+    def test_a_role_already_carrying_every_declared_pair_is_not_rewritten(self):
+        """273 needless Admin identities per run would be the cost of rewriting a healthy role."""
+        st = _RoleStack([dict(p) for p in pr.DESIRED_PERMISSIONS]
+                        + [{"action": "annotations:read", "scope": "annotations:*"}])
+
+        ok, _, _ = cli.ensure_role(st)
+
+        self.assertTrue(ok)
+        self.assertEqual(st.puts, [])
 
     def test_a_failed_full_role_read_never_blindly_overwrites_the_role(self):
         st = _RoleStack([], full_status=500)

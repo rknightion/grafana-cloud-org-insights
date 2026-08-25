@@ -1,9 +1,10 @@
 {
-  "version": "5",
+  "version": "6",
   "technologies": [
     {"key": "airflow", "name": "Apache Airflow", "match": {"exact": "airflow_task_tries"}},
     {"key": "akuity", "name": "Akuity managed Argo CD", "match": {"pattern": {"prefix": "akuity_", "suffix": "_cluster_agenthealthstatus_bool"}}},
     {"key": "alloy", "name": "Grafana Alloy", "match": {"exact": "alloy_build_info"}},
+    {"key": "alloy_ebpf_profiling", "name": "Alloy eBPF continuous profiling", "match": {"exact": "pyroscope_ebpf_active_targets"}},
     {"key": "argocd", "name": "Argo CD", "match": {"exact": "argocd_info"}},
     {"key": "asserts", "name": "Grafana Asserts", "match": {"exact": "asserts_artifact_info"}},
     {"key": "aws_cloudwatch", "name": "AWS CloudWatch", "match": {"exact": "aws_ec2_cpuutilization_average"}},

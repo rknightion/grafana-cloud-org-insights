@@ -396,6 +396,19 @@ shape. Read the schema at `/openapi/v3/apis/dashboard.grafana.app/v2` rather tha
  missing route, and it is the same behaviour already recorded for Adaptive Logs frontend resource
  paths. Always include a control path that cannot exist: without one this reads as a specific
  endpoint being absent.
+- **Adaptive Traces is fully measurable from `grafanacloud-usage` with no credential.** Eight
+ `..._adaptivetraces_*` series cover bytes received and dropped, spans and traces sampled per policy,
+ global sampling and discards. Measured on one estate: two stacks of 270 report it at all, and on
+ those two it drops 63 per cent of the trace bytes it receives. Never divide dropped bytes by the
+ ESTATE trace total and call it an estate saving - the enabled population is the denominator and it
+ must be stated. Discarded spans and sampled-out spans are different things and must not be summed.
+- **The Adaptive Traces `policy` label is identity-bearing and semi-unbounded.** Its value is shaped
+ `<instance-id>.<human-authored name>/<uuid>`, so it carries customer text and a uuid. It is a view
+ column, never a metric label.
+- **Adaptive Traces defines exactly ONE plugin role, `admin`,** bundling `config:write`,
+ `policies:write`, `policies:delete` and `recommendations:apply` with the reads. There is no
+ read-only role to assign. Cherry-pick the read actions into your own custom role and never assign
+ the bundle. Adaptive Metrics by contrast ships granular reader roles per resource.
 - **Adaptive Metrics is SEGMENT-aware and the collector does not know it.** `/aggregations/rules/segments`
  lists segments, each carrying an id, a name and a PromQL selector, and both `/aggregations/rules` and
  `/aggregations/recommendations` accept `?segment=<id>`. A stack with a segment has rules scoped to a
