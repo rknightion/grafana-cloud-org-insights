@@ -515,6 +515,8 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                note="distinct explicitly-windowed Mimir cluster label values"),
     MetricSpec("gcinsight_coverage_services_by_depth", "K", {"kind": 4},
                note="service assets carrying exactly 1, 2, 3 or 4 canonical signals"),
+    MetricSpec("gcinsight_coverage_services_by_signal", "K", {"kind": 4},
+               note="service assets carrying canonical metrics, logs, traces or profiles identity"),
     MetricSpec("gcinsight_coverage_technology_stacks", "K", {"kind": TECHNOLOGY},
                note="one bounded registry enum per technology; value is measured stacks present"),
     MetricSpec("gcinsight_coverage_metric_names", "K", {"kind": 2},

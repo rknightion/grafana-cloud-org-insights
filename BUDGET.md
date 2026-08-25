@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **8,680** |
-| Phase 1 only | 8,679 |
+| **Declared (all phases)** | **8,684** |
+| Phase 1 only | 8,683 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -27,9 +27,9 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | F | 21 |
 | I | 895 |
 | J | 4,368 |
-| K | 844 |
+| K | 848 |
 | scan | 210 |
-| **Total** | **8,680** |
+| **Total** | **8,684** |
 
 ## Metrics
 
@@ -80,6 +80,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_carry_forward_dropped_absent` | scan | `tier`(4) | 4 | 1 | series NOT republished because their stack has left the estate. The estate is re-discovered every run, so this going non-zero means a stack was decommissioned between the last T3 and this T1  -  expected, and the proof the golden rule holds |
 | `gcinsight_carry_forward_series` | scan | `tier`(4) | 4 | 1 | PLAN 5.3  -  how many slower-tier series the hourly tier republished |
 | `gcinsight_coverage_services_by_depth` | K | `kind`(4) | 4 | 1 | service assets carrying exactly 1, 2, 3 or 4 canonical signals |
+| `gcinsight_coverage_services_by_signal` | K | `kind`(4) | 4 | 1 | service assets carrying canonical metrics, logs, traces or profiles identity |
 | `gcinsight_risk_org_members_staff_access` | E | `status`(4) | 4 | 1 | members by active / expired / none / unknown staff-access-window state. Identity and expiry timestamps remain in the S3 view, never labels |
 | `gcinsight_scan_completed_timestamp_seconds` | scan | `tier`(4) | 4 | 1 | PLAN 1.8  -  alerting is on ITS AGE, not on exit code |
 | `gcinsight_scan_coverage_ratio` | scan | `tier`(4) | 4 | 1 |  |

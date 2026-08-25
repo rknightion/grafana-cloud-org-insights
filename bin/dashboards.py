@@ -31,6 +31,7 @@ from collector import ratecard as ratecard_model
 from collector.dashboards import build
 from collector.pillars import (
     ai as ai_pillar,
+    coverage as coverage_pillar,
     cost as cost_pillar,
     estate as estate_pillar,
     findings,
@@ -3087,6 +3088,204 @@ def d_dashboards(ds: str):
          "Coverage tab is the denominator."), el, tabs
 
 
+def d_coverage(ds: str):
+    """Pillar K - the observed-estate asset register and the coverage depth it carries."""
+    stack = '{stack=~"$stack"}'
+    service_signal = "gcinsight_coverage_services_by_signal"
+    el = {
+        # The first screen deliberately mixes the best existing live object counters with the bounded
+        # collector counts that do not exist in grafanacloud-usage. Panel descriptions state which is
+        # which; neither source is copied into the other merely to make the layout uniform.
+        "n_measured": build.stat_panel(
+            "Stacks measured atomically", "gcinsight_coverage_stacks_measured",
+            description="Stacks whose explicitly-windowed reads succeeded across every signal. A failed "
+                        "stack is absent from every register and count rather than written as zero."),
+        "n_services": build.stat_panel(
+            "Named service assets", f"sum(gcinsight_coverage_stack_services{stack})",
+            description="Canonical service identities discovered across metrics, logs, traces and "
+                        "profiles. The selected stack scope applies; names remain in the S3 register."),
+        "n_technologies": build.stat_panel(
+            "Observed technology deployments", f"sum(gcinsight_coverage_stack_technologies{stack})",
+            description="Versioned registry matches summed across the selected stacks. This is an "
+                        "affirmative deployment count; the named technology register is below."),
+        "n_clusters": build.stat_panel(
+            "Observed clusters", f"sum(gcinsight_coverage_stack_clusters{stack})",
+            description="Distinct, explicitly-windowed Mimir cluster identities across the selected "
+                        "stacks. Cluster names stay in S3 and never become metric labels."),
+        "n_hosts": build.stat_panel(
+            "Hosts monitored", HOSTS_MONITORED, ds_uid=build.USAGE_UID,
+            description="Live from the usage datasource and derived from the one-series-per-host "
+                        "inventory metric. This panel remains estate-wide when Stack is selected."),
+        "n_pods": build.stat_panel(
+            "Kubernetes pods monitored", PODS_MONITORED, ds_uid=build.USAGE_UID,
+            description="Live from the usage datasource and derived from the one-series-per-pod "
+                        "inventory metric. This panel remains estate-wide when Stack is selected."),
+        "n_containers": build.stat_panel(
+            "Containers monitored",
+            "sum(grafanacloud_instance_active_kube_pod_container_info_series)",
+            ds_uid=build.USAGE_UID,
+            description="Live container inventory already present in grafanacloud-usage. It is not "
+                        "copied through the collector and remains estate-wide under Stack selection."),
+        "n_log_streams": build.stat_panel(
+            "Active log streams", "sum(grafanacloud_logs_instance_active_streams)",
+            ds_uid=build.USAGE_UID,
+            description="Live active-stream inventory from grafanacloud-usage. It is a current object "
+                        "count, not the number of named services discovered from Loki labels."),
+        "n_traced_services": build.stat_panel(
+            "Services observed in traces", f'{service_signal}{{kind="traces"}}',
+            description="Canonical resource.service.name identities returned by the explicitly-windowed "
+                        "Tempo inventory. Names remain in the S3 register."),
+        "n_profiled_services": build.stat_panel(
+            "Services observed in profiles", f'{service_signal}{{kind="profiles"}}',
+            description="Canonical service_name identities returned by the explicitly-windowed "
+                        "Pyroscope inventory. A successful empty result remains a measured absence."),
+        "n_integrations": build.stat_panel(
+            "Grafana Integrations observed",
+            "count(sum by(integration)(grafanacloud_instance_active_integration_series) > 0)",
+            ds_uid=build.USAGE_UID,
+            description="Distinct live integration label values with active series. The vocabulary is "
+                        "discovered from the datasource rather than maintained in this dashboard."),
+        "t_live_assets": build.timeseries_panel(
+            "Live infrastructure footprint over time",
+            [(HOSTS_MONITORED, "hosts"), (PODS_MONITORED, "pods"),
+             ("sum(grafanacloud_instance_active_kube_pod_container_info_series)", "containers"),
+             ("sum(grafanacloud_logs_instance_active_streams)", "log streams")],
+            ds_uid=build.USAGE_UID,
+            description="Live datasource-native infrastructure counters. Populations stay separate; "
+                        "the lines are not added into a synthetic estate total."),
+
+        # Coverage depth is the reframe: the same distribution reads as both protected surface and room
+        # to deepen observation. Keep it full-width and ahead of every classification detail.
+        "b_depth": build.barchart_panel(
+            "Coverage depth per named service - the protected and uncovered surface",
+            "gcinsight_coverage_services_by_depth", legend="{{kind}} signals", sort=None,
+            description="Named services grouped by how many canonical signals carry the same exact "
+                        "identity. Greater depth means more ways to investigate the service; shallower "
+                        "depth is the adjacent upside without recasting the asset itself as a gap."),
+        "b_signal": build.barchart_panel(
+            "Named services observed by signal", service_signal, legend="{{kind}}", sort=None,
+            description="Canonical service identities present in each explicitly-windowed signal "
+                        "inventory. A service may appear in several bars, which is the coverage depth."),
+        "b_technology": build.barchart_panel(
+            "Observed technologies ranked by measured stacks",
+            "topk(20, gcinsight_coverage_technology_stacks > 0)", legend="{{kind}}", limit=20,
+            description="Bounded technology-registry entries ranked by the stacks where a sentinel "
+                        "metric was observed. The unmatched share is stated beside this chart and the "
+                        "named evidence remains in S3."),
+        "n_unmatched": build.stat_panel(
+            "Metric names unmatched by the registry",
+            'gcinsight_coverage_metric_names{kind="unmatched"} / '
+            'scalar(sum(gcinsight_coverage_metric_names))',
+            unit="percentunit", decimals=1,
+            description="The published unmatched share of the classification population. It stays "
+                        "visible beside the technology ranking so registry confidence is never implied."),
+        "n_legacy": build.stat_panel(
+            "Service identities present only in legacy Mimir service",
+            'gcinsight_coverage_service_identity{kind="legacy_only"} / '
+            'scalar(sum(gcinsight_coverage_service_identity'
+            '{kind=~"canonical|legacy_only"}))',
+            unit="percentunit", decimals=1,
+            description="Legacy-only identities divided by canonical plus legacy-only identities. The "
+                        "generic service label is reported separately and never promoted silently."),
+        "b_identity": build.barchart_panel(
+            "Canonical and legacy service identity populations",
+            "gcinsight_coverage_service_identity", legend="{{kind}}", sort="desc",
+            description="Canonical, legacy-only and overlapping identity counts. Showing every enum "
+                        "keeps both the classified population and its unmatched legacy share visible."),
+        "b_stack_services": build.barchart_panel(
+            "Named service assets by stack",
+            f"topk(20, gcinsight_coverage_stack_services{stack})", legend="{{stack}}", limit=20,
+            description="Selected stacks ranked by their full canonical service count. The S3 register "
+                        "is bounded for legibility; this metric is calculated before that table bound."),
+        "b_stack_technologies": build.barchart_panel(
+            "Technology deployments by stack",
+            f"topk(20, gcinsight_coverage_stack_technologies{stack})", legend="{{stack}}", limit=20,
+            description="Selected stacks ranked by the number of versioned registry technologies "
+                        "present. Technology names remain in the register below."),
+        "b_stack_clusters": build.barchart_panel(
+            "Observed clusters by stack",
+            f"topk(20, gcinsight_coverage_stack_clusters{stack})", legend="{{stack}}", limit=20,
+            description="Selected stacks ranked by distinct explicitly-windowed cluster identities. "
+                        "The named cluster register is the exact drill-down."),
+        "b_oncall": build.barchart_panel(
+            "Live OnCall service and owning-team catalogue",
+            f"topk(20, sum by(service_name, team)({GROUPS}))",
+            legend="{{service_name}} · {{team}}", ds_uid=build.USAGE_UID, limit=20,
+            description="A separate live catalogue from grafanacloud-usage. It is not merged into the "
+                        "S3 service register because doing so would widen the frozen reader scope. "
+                        "Unattributed service and team values remain visible as the unmatched share."),
+
+        "tbl_services": build.table_panel(
+            "Named service coverage register", coverage_pillar.SERVICE_VIEW, ds,
+            schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.SERVICE_VIEW],
+            description="The primary asset register: service identity, canonical signals, explicit "
+                        "alert and dashboard associations, routed active alert state and last seen. "
+                        "Rows are prioritised by coverage depth and bounded per stack for legibility."),
+        "tbl_technologies": build.table_panel(
+            "Observed technology register", coverage_pillar.TECHNOLOGY_VIEW, ds,
+            schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.TECHNOLOGY_VIEW],
+            description="Named versioned-registry matches and their sentinel evidence count by stack."),
+        "tbl_clusters": build.table_panel(
+            "Observed cluster register", coverage_pillar.CLUSTER_VIEW, ds,
+            schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.CLUSTER_VIEW],
+            description="Named clusters from explicitly-windowed Mimir label inventory. Names are "
+                        "available here for action and excluded from metric labels."),
+        "tbl_metrics": build.table_panel(
+            "Metric-name classification register", coverage_pillar.METRIC_VIEW, ds,
+            schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.METRIC_VIEW],
+            description="The metric-name evidence behind the technology registry, including every "
+                        "unmatched name. This is the work queue for improving classification."),
+        "tbl_legacy": build.table_panel(
+            "Legacy Mimir service register", coverage_pillar.LEGACY_SERVICE_VIEW, ds,
+            schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.LEGACY_SERVICE_VIEW],
+            description="Generic Mimir service values reported without silently treating them as "
+                        "canonical service_name identities."),
+        "tbl_summary": build.table_panel(
+            "Coverage summary and registry version", coverage_pillar.SUMMARY_VIEW, ds,
+            schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.SUMMARY_VIEW],
+            description="Per-stack denominators, retained-row count, unmatched shares and the exact "
+                        "technology registry version used to classify this publication."),
+    }
+    tabs = [
+        build.rows_tab("Observed estate", [
+            build.row("Measured register", ["n_measured", "n_services", "n_technologies", "n_clusters"],
+                      max_columns=4, row_height="short"),
+            build.row("Infrastructure already observed", ["n_hosts", "n_pods", "n_containers",
+                                                         "n_log_streams"],
+                      max_columns=4, row_height="short"),
+            build.row("Signals and integrations", ["n_traced_services", "n_profiled_services",
+                                                     "n_integrations"],
+                      max_columns=3, row_height="short"),
+            build.row("Direction of travel", ["t_live_assets"], max_columns=1),
+        ]),
+        build.rows_tab("Coverage depth", [
+            build.row("Coverage depth per service", ["b_depth"], max_columns=1, row_height="tall"),
+            build.row("Signals and technology", ["b_signal", "b_technology"], max_columns=2),
+            build.row("Classification confidence", ["n_unmatched", "n_legacy", "b_identity"],
+                      max_columns=3),
+            build.row("Where the assets sit", ["b_stack_services", "b_stack_technologies",
+                                                "b_stack_clusters"], max_columns=3),
+        ]),
+        build.rows_tab("Named service register", [
+            build.row("Coverage register", ["tbl_services"], max_columns=1, row_height="tall"),
+            build.row("Live OnCall ownership", ["b_oncall"], max_columns=1),
+        ]),
+        build.rows_tab("Technology and cluster registers", [
+            build.row("Technologies", ["tbl_technologies"], max_columns=1),
+            build.row("Clusters", ["tbl_clusters"], max_columns=1),
+        ]),
+        build.rows_tab("Classification evidence", [
+            build.row("Metric names", ["tbl_metrics"], max_columns=1, row_height="tall"),
+            build.row("Legacy service identity", ["tbl_legacy"], max_columns=1),
+        ]),
+        build.tab("Summary", ["tbl_summary"], max_columns=1, row_height="tall"),
+    ]
+    return "gcinsight-coverage", "Grafana Cloud Org Insights - Coverage", \
+        ("Pillar K: the affirmative observed-estate asset register, how deeply each named service is "
+         "covered, the explicit ownership and response relationships attached to it, and the adjacent "
+         "surface where observation can carry more value."), el, tabs
+
+
 def d_commercial(ds: str):
     """Pillar H - the commitment and the run rate. Live from `grafanacloud-usage`, no collector.
 
@@ -3779,7 +3978,8 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
 # pillars/findings.py rather than restated, so adding a finding kind reaches the right dashboard with no
 # edit here.
 PILLAR_OF = {"estate": "A", "cost": "B", "usage": "C", "maturity": "D", "risk": "E", "value": "F",
-             "operations": "G", "commercial": "H", "ai": "I", "dashboards": "J"}
+             "operations": "G", "commercial": "H", "ai": "I", "dashboards": "J",
+             "coverage": "K"}
 
 
 # The named rows behind each pillar's finding counts, as (element key, panel title, view name).
@@ -3827,7 +4027,7 @@ BUILDERS = {
     "estate": d_estate, "cost": d_cost, "usage": d_usage,
     "maturity": d_maturity, "risk": d_risk, "value": d_value,
     "operations": d_operations, "commercial": d_commercial, "ai": d_ai,
-    "dashboards": d_dashboards,
+    "dashboards": d_dashboards, "coverage": d_coverage,
 }
 
 

@@ -2022,14 +2022,6 @@ class EveryPublishedViewIsRenderedSomewhereTest(unittest.TestCase):
         "insights_dashboard_opening_31d",
         "insights_datasource_query_cost",
         "risk_org_members",
-        # GCI-0008.05 deliberately ships the Pillar K producer before its dependent dashboard task.
-        # GCI-0008.06 removes all six while binding the Coverage surface.
-        "coverage_cluster_register",
-        "coverage_legacy_service_register",
-        "coverage_metric_name_register",
-        "coverage_service_register",
-        "coverage_summary",
-        "coverage_technology_register",
     }
 
     @classmethod
@@ -2093,19 +2085,6 @@ class EveryEmittedMetricIsRenderedOrAlertedTest(unittest.TestCase):
         "gcinsight_risk_public_dashboards_total",
     }
 
-    # Emitted by the independently shippable GCI-0008.05 producer. The dependent GCI-0008.06
-    # dashboard removes this exact set as it binds each metric to a panel.
-    PENDING_COVERAGE_DASHBOARD = {
-        "gcinsight_coverage_metric_names",
-        "gcinsight_coverage_service_identity",
-        "gcinsight_coverage_services_by_depth",
-        "gcinsight_coverage_stack_clusters",
-        "gcinsight_coverage_stack_services",
-        "gcinsight_coverage_stack_technologies",
-        "gcinsight_coverage_stacks_measured",
-        "gcinsight_coverage_technology_stacks",
-    }
-
     @classmethod
     def setUpClass(cls):
         import json
@@ -2127,7 +2106,6 @@ class EveryEmittedMetricIsRenderedOrAlertedTest(unittest.TestCase):
             m.name for m in budget.CATALOGUE
             if getattr(m, "store", None) != "view"
             and m.name not in self.NEVER_EMITTED
-            and m.name not in self.PENDING_COVERAGE_DASHBOARD
             and not self._contains_metric(self.haystack, m.name)
         )
         self.assertEqual(
@@ -2135,14 +2113,6 @@ class EveryEmittedMetricIsRenderedOrAlertedTest(unittest.TestCase):
             f"emitted every run and rendered nowhere: {orphans}. Add a panel or an alert, or add it to "
             f"NEVER_EMITTED with the reason it is declared but not emitted.",
         )
-
-    def test_pending_coverage_metrics_are_really_emitted(self):
-        import pathlib
-        src = (pathlib.Path(__file__).resolve().parent.parent
-               / "collector" / "pillars" / "coverage.py").read_text()
-        for name in sorted(self.PENDING_COVERAGE_DASHBOARD):
-            with self.subTest(metric=name):
-                self.assertTrue(self._contains_metric(src, name))
 
     def test_never_emitted_entries_are_really_never_emitted(self):
         """An entry that starts being emitted must lose its exemption, not keep hiding behind it."""

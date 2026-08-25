@@ -818,6 +818,7 @@ DASHBOARDS = (
     ("gcinsight-commercial", "Commercial"),
     ("gcinsight-ai", "AI usage"),
     ("gcinsight-dashboards", "Dashboard usage"),
+    ("gcinsight-coverage", "Coverage"),
 )
 
 BANNER_MD = """\
@@ -873,6 +874,9 @@ DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     # panel at all beside figures that can be a day old - the same class of error as the old
     # T1-timestamp-everywhere default, and harder to spot because half the page really is live.
     "ai": ("assistant",),
+    # Pillar K combines the daily signal-label sweep with the existing dashboard and alert inventories.
+    # The live usage panels carry datasource-native freshness and are called out separately in the banner.
+    "coverage": ("alert_routing", "dashboard_inventory", "signal_inventory"),
 }
 
 # Inputs used by metric panels but not by an S3 view on the same dashboard. Most dashboard input
@@ -900,6 +904,15 @@ MIXED_BANNER_MD: dict[str, str] = {
   credential, including a full Admin, so these are not stack totals and cannot be made into them.
 - **Category breakdowns are shares of the CATEGORISED subset**, which is a minority of messages on most
   stacks. The uncategorised share is on the page for exactly that reason.
+""",
+    "coverage": """
+- **The question this surface must answer:** "How can we expand this to show our customers which apps / infra etc are currently observed by us and how can we capture the value that we bring to the table? This could move the conversation from gaps and cost to upside potential and top line revenue growth."
+- **This dashboard MIXES collector output, S3 registers and live `grafanacloud-usage`.** Coverage depth,
+  technology classification and the named registers follow the input ages shown below. Hosts, pods,
+  containers, log streams, integrations and the OnCall ownership catalogue are live datasource panels;
+  the Stack selector does not filter them.
+- **Canonical service identity is exact after trim and case-folding.** The generic Mimir `service` label
+  stays in the legacy register and is never silently promoted into canonical coverage.
 """,
 }
 
@@ -973,6 +986,7 @@ INPUT_LABELS = {
     "alert_routing": "Alert-routing inventory",
     "service_accounts": "Service-account inventory",
     "org_members": "Organisation membership",
+    "signal_inventory": "Signal label inventory",
 }
 
 INPUT_DESCRIPTIONS = {
@@ -1012,6 +1026,9 @@ INPUT_DESCRIPTIONS = {
     "org_members": "Age of the Grafana.com organisation membership response behind the Admin, Viewer "
                    "and staff-access counts. This is one org-level population rather than a per-stack "
                    "sample; if it is unavailable the metrics and named table are withheld, never zeroed.",
+    "signal_inventory": "Age of the explicitly-windowed Mimir, Loki, Tempo and Pyroscope label sweep "
+                        "behind the observed service, technology and cluster registers. Gathered daily; "
+                        "a failed stack contributes no row or per-stack metric rather than a zero.",
 }
 
 

@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "generated_at": "2026-08-25T07:11:14.036775+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack158",
+      "Services discovered": 2,
+      "Services retained": 2,
+      "Technologies": 1,
+      "Clusters": 1,
+      "Metric names": 2,
+      "Unmatched metric names": 1,
+      "Unmatched metric share %": 50,
+      "Legacy-only services": 1,
+      "Legacy-only service share %": 33.3,
+      "Registry version": "1",
+      "Last seen": "2026-08-25T00:00:00+00:00"
+    }
+  ]
+}

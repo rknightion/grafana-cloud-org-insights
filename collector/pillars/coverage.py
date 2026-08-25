@@ -122,6 +122,7 @@ def build(
     legacy_rows: list[dict[str, Any]] = []
     summary_rows: list[dict[str, Any]] = []
     depth_counts = {depth: 0 for depth in range(1, 5)}
+    signal_counts = {signal: 0 for signal in ("metrics", "logs", "traces", "profiles")}
     technology_stacks = {entry.key: 0 for entry in technology_registry.REGISTRY.entries}
     classified_counts = {"matched": 0, "unmatched": 0}
     identity_counts = {"canonical": 0, "legacy_only": 0, "overlap": 0}
@@ -140,6 +141,8 @@ def build(
             "traces": _names(record, "trace_services"),
             "profiles": _names(record, "profile_services"),
         }
+        for signal, names in by_signal.items():
+            signal_counts[signal] += len(names)
         canonical = set().union(*by_signal.values())
         legacy = _names(record, "legacy_metric_services")
         legacy_only = legacy - canonical
@@ -233,6 +236,10 @@ def build(
     metrics.extend(
         ("gcinsight_coverage_services_by_depth", {"kind": str(depth)}, float(count))
         for depth, count in depth_counts.items()
+    )
+    metrics.extend(
+        ("gcinsight_coverage_services_by_signal", {"kind": signal}, float(count))
+        for signal, count in signal_counts.items()
     )
     metrics.extend(
         ("gcinsight_coverage_technology_stacks", {"kind": entry.key},

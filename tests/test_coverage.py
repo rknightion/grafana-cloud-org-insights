@@ -179,6 +179,11 @@ class CoverageBuildTest(unittest.TestCase):
         depth = "gcinsight_coverage_services_by_depth"
         self.assertEqual(by_metric[(depth, (("kind", "1"),))], 2)
         self.assertEqual(by_metric[(depth, (("kind", "4"),))], 1)
+        by_signal = "gcinsight_coverage_services_by_signal"
+        self.assertEqual(by_metric[(by_signal, (("kind", "metrics"),))], 2)
+        self.assertEqual(by_metric[(by_signal, (("kind", "logs"),))], 2)
+        self.assertEqual(by_metric[(by_signal, (("kind", "traces"),))], 1)
+        self.assertEqual(by_metric[(by_signal, (("kind", "profiles"),))], 1)
 
     def test_failed_stack_and_departed_payload_produce_no_rows_or_zero_metrics(self):
         metrics, views = coverage.build(STACKS, SIGNALS)
