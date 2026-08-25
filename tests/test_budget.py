@@ -67,6 +67,10 @@ class BudgetShapeTest(unittest.TestCase):
         from collector.emit import hydrate
         self.assertEqual(budget.INPUT, len(hydrate.INPUT_OWNER))
 
+    def test_technology_cardinality_tracks_the_registry(self):
+        from collector import technology_registry
+        self.assertEqual(budget.TECHNOLOGY, len(technology_registry.REGISTRY.entries))
+
 
 class BudgetBackstopTest(unittest.TestCase):
     """The budget is static; live denominators belong in a contemporaneous range query."""
@@ -163,6 +167,9 @@ class EveryPillarsEmissionIsDeclaredTest(unittest.TestCase):
             stacks, coverage,
             dataplane=data.get("dataplane"), stack_detail=data.get("stack_detail"),
             access_policies=data.get("access_policies"), assistant=data.get("assistant"),
+            dashboard_inventory=data.get("dashboard_inventory"),
+            alert_routing=data.get("alert_routing"),
+            signal_inventory=data.get("signal_inventory"),
             now=dt.datetime(2026, 8, 20, tzinfo=dt.timezone.utc),
         )
         cls.declared = {(s.name, tuple(sorted(s.labels))): s for s in CATALOGUE if s.store == "mimir"}

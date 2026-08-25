@@ -49,6 +49,15 @@ def responses(*, logs: object | None = None) -> dict[str, tuple[int, object]]:
         "https://logs.example/loki/api/v1/label/service_name/values": (
             200, {"status": "success", "data": [] if logs is None else logs},
         ),
+        "https://metrics.example/api/prom/api/v1/label/service_name/values": (
+            200, {"status": "success", "data": ["checkout"]},
+        ),
+        "https://metrics.example/api/prom/api/v1/label/service/values": (
+            200, {"status": "success", "data": ["legacy-api"]},
+        ),
+        "https://metrics.example/api/prom/api/v1/label/cluster/values": (
+            200, {"status": "success", "data": ["compute-a"]},
+        ),
         "https://traces.example/tempo/api/v2/search/tag/resource.service.name/values": (
             200, {"tagValues": [{"type": "string", "value": "checkout"}]},
         ),
@@ -69,6 +78,9 @@ class SignalInventoryWindowTest(unittest.TestCase):
 
         self.assertTrue(out["available"])
         self.assertEqual(out["metric_names"], ["node_uname_info", "up"])
+        self.assertEqual(out["metric_services"], ["checkout"])
+        self.assertEqual(out["legacy_metric_services"], ["legacy-api"])
+        self.assertEqual(out["clusters"], ["compute-a"])
         self.assertEqual(out["log_services"], [])
         self.assertEqual(out["trace_services"], ["checkout"])
         self.assertEqual(out["profile_services"], [])
@@ -81,6 +93,14 @@ class SignalInventoryWindowTest(unittest.TestCase):
             "start": START_SECONDS, "end": END_SECONDS, "limit": source.METRIC_NAME_LIMIT,
         })
         self.assertEqual(mimir[1], ("11", "cap"))
+        for label in ("service_name", "service", "cluster"):
+            params, basic = by_url[
+                f"https://metrics.example/api/prom/api/v1/label/{label}/values"
+            ]
+            self.assertEqual(params, {
+                "start": START_SECONDS, "end": END_SECONDS, "limit": source.LABEL_VALUE_LIMIT,
+            })
+            self.assertEqual(basic, ("11", "cap"))
         self.assertEqual(
             by_url["https://logs.example/loki/api/v1/label/service_name/values"],
             ({"start": START_SECONDS * 1_000_000_000, "end": END_SECONDS * 1_000_000_000},
@@ -111,7 +131,9 @@ class SignalInventoryWindowTest(unittest.TestCase):
             out = source.probe_stack(Client(empty), STACK, "cap", now=NOW)
 
         self.assertEqual(out["available"], True)
-        for key in ("metric_names", "log_services", "trace_services", "profile_services"):
+        for key in (
+            "metric_names", "log_services", "trace_services", "profile_services",
+        ):
             self.assertEqual(out[key], [])
 
     def test_tempo_extracts_object_values_and_rejects_a_string_list(self):
@@ -132,6 +154,20 @@ class SignalInventoryWindowTest(unittest.TestCase):
         out = source.probe_stack(Client(bad), STACK, "cap", now=NOW)
         self.assertEqual(out["reason"], "invalid_response")
         self.assertFalse(out["available"])
+
+        bad[path] = (200, {"data": []})
+        out = source.probe_stack(Client(bad), STACK, "cap", now=NOW)
+        self.assertEqual(out["reason"], "invalid_response")
+
+    def test_a_response_reaching_the_bound_is_withheld_as_possibly_truncated(self):
+        bounded = responses()
+        path = "https://metrics.example/api/prom/api/v1/label/service_name/values"
+        bounded[path] = (200, {"status": "success", "data": ["a", "b"]})
+        with mock.patch.object(source, "LABEL_VALUE_LIMIT", 2):
+            out = source.probe_stack(Client(bounded), STACK, "cap", now=NOW)
+        self.assertEqual(out, {
+            "slug": "example", "available": False, "signal": "metrics", "reason": "truncated",
+        })
 
 
 class SignalInventoryFailureTest(unittest.TestCase):

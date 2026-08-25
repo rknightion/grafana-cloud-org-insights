@@ -1,7 +1,11 @@
+"""Pillar K coverage depth, identity joins, and absent-versus-zero contracts."""
+
 from __future__ import annotations
 
 import unittest
 
+from collector.pillars import coverage
+from collector.emit import hydrate
 from collector.coverage import Coverage, rollup
 
 
@@ -112,6 +116,140 @@ class CoverageTest(unittest.TestCase):
         cov = Coverage(tier="t1", total=0)
         self.assertEqual(cov.ratio, 0.0)
         self.assertFalse(cov.should_abort)
+
+
+STACKS = [{"slug": "alpha"}, {"slug": "failed"}, {"slug": "departed-never-iterate"}]
+SIGNALS = {
+    "alpha": {
+        "available": True,
+        "window_end": "2026-08-25T00:00:00+00:00",
+        "metric_names": ["kube_pod_info", "unknown_metric"],
+        "metric_services": [" Checkout ", "inventory"],
+        "legacy_metric_services": ["legacy-api"],
+        "log_services": ["checkout", "log-only"],
+        "trace_services": ["CHECKOUT"],
+        "profile_services": ["checkout"],
+        "clusters": ["compute-a"],
+    },
+    "failed": {"available": False, "reason": "auth"},
+    "payload-only": {"available": True, "metric_names": ["kube_pod_info"]},
+}
+DASHBOARDS = {
+    "alpha": {
+        "available": True,
+        "dashboards": [
+            {"uid": "explicit", "title": "Unrelated title", "service_tags": ["service:checkout"]},
+            {"uid": "title-only", "title": "inventory dashboard", "service_tags": []},
+        ],
+    },
+}
+ALERTS = {
+    "alpha": {
+        "available": True,
+        "service_routes": [
+            {"service_name": "checkout", "identity_label": "service_name", "paused": False,
+             "routing": "direct", "receiver_state": "provisioned"},
+            {"service_name": "inventory", "identity_label": "service_name", "paused": True,
+             "routing": "direct", "receiver_state": "provisioned"},
+        ],
+    },
+}
+
+
+class CoverageBuildTest(unittest.TestCase):
+    def test_service_depth_uses_canonical_exact_normalized_identity(self):
+        metrics, views = coverage.build(
+            STACKS, SIGNALS, dashboard_inventory=DASHBOARDS, alert_routing=ALERTS,
+        )
+        rows = {row["Service"]: row for row in views[coverage.SERVICE_VIEW]}
+        self.assertEqual(set(rows), {"checkout", "inventory", "log-only"})
+        self.assertEqual(rows["checkout"]["Signals present"], 4)
+        self.assertEqual(rows["checkout"]["Signals"], "metrics, logs, traces, profiles")
+        self.assertEqual(rows["checkout"]["Has alert"], "yes")
+        self.assertEqual(rows["checkout"]["Has dashboard"], "yes")
+        self.assertEqual(rows["checkout"]["Has routed active alert"], "yes")
+        self.assertEqual(rows["inventory"]["Has alert"], "yes")
+        self.assertEqual(rows["inventory"]["Has dashboard"], "no",
+                         "dashboard titles must never infer a service relationship")
+        self.assertEqual(rows["inventory"]["Has routed active alert"], "no")
+
+        by_metric = {}
+        for name, labels, value in metrics:
+            by_metric[(name, tuple(sorted(labels.items())))] = value
+        depth = "gcinsight_coverage_services_by_depth"
+        self.assertEqual(by_metric[(depth, (("kind", "1"),))], 2)
+        self.assertEqual(by_metric[(depth, (("kind", "4"),))], 1)
+
+    def test_failed_stack_and_departed_payload_produce_no_rows_or_zero_metrics(self):
+        metrics, views = coverage.build(STACKS, SIGNALS)
+        self.assertNotIn("failed", {row[" Stack"] for rows in views.values() for row in rows})
+        self.assertNotIn("payload-only", {row[" Stack"] for rows in views.values() for row in rows})
+        per_stack = [(labels.get("stack"), value) for _name, labels, value in metrics if "stack" in labels]
+        self.assertTrue(per_stack)
+        self.assertEqual({stack for stack, _value in per_stack}, {"alpha"})
+
+    def test_legacy_service_is_reported_separately_not_promoted_into_coverage(self):
+        metrics, views = coverage.build(STACKS, SIGNALS)
+        services = {row["Service"] for row in views[coverage.SERVICE_VIEW]}
+        self.assertNotIn("legacy-api", services)
+        self.assertEqual(views[coverage.LEGACY_SERVICE_VIEW], [{
+            " Stack": "alpha", "Legacy service": "legacy-api", "Also canonical": "no",
+            "Last seen": "2026-08-25T00:00:00+00:00",
+        }])
+        identity = {
+            labels["kind"]: value for name, labels, value in metrics
+            if name == "gcinsight_coverage_service_identity"
+        }
+        self.assertEqual(identity, {"canonical": 3, "legacy_only": 1, "overlap": 0})
+
+    def test_technology_classification_publishes_names_and_unmatched_share_inputs(self):
+        metrics, views = coverage.build(STACKS, SIGNALS)
+        tech = views[coverage.TECHNOLOGY_VIEW]
+        self.assertEqual(tech[0]["Technology"], "Kubernetes")
+        metric_rows = {row["Metric name"]: row for row in views[coverage.METRIC_VIEW]}
+        self.assertEqual(metric_rows["kube_pod_info"]["Technology"], "Kubernetes")
+        self.assertEqual(metric_rows["unknown_metric"]["Technology"], "(unmatched)")
+        classified = {
+            labels["kind"]: value for name, labels, value in metrics
+            if name == "gcinsight_coverage_metric_names"
+        }
+        self.assertEqual(classified, {"matched": 1, "unmatched": 1})
+
+    def test_no_signal_input_emits_nothing(self):
+        self.assertEqual(coverage.build(STACKS, None), ([], {}))
+
+    def test_named_service_view_is_withheld_when_explicit_metadata_inputs_are_unsatisfied(self):
+        provenance = hydrate.Provenance({
+            "signal_inventory": {"available": True, "stale": False},
+            "dashboard_inventory": {"available": False, "stale": False},
+            "alert_routing": {"available": True, "stale": False},
+        })
+        views = {
+            coverage.SERVICE_VIEW: [{"Service": "checkout"}],
+            coverage.TECHNOLOGY_VIEW: [{"Technology": "Kubernetes"}],
+        }
+        kept, withheld = hydrate.filter_views(views, provenance)
+        self.assertNotIn(coverage.SERVICE_VIEW, kept)
+        self.assertIn(coverage.SERVICE_VIEW, withheld)
+        self.assertIn(coverage.TECHNOLOGY_VIEW, kept)
+
+    def test_service_view_is_top_n_bounded_per_stack(self):
+        record = dict(SIGNALS["alpha"])
+        record["log_services"] = [f"service-{index:03d}" for index in range(coverage.MAX_SERVICES + 1)]
+        _metrics, views = coverage.build([{"slug": "alpha"}], {"alpha": record})
+        self.assertEqual(len(views[coverage.SERVICE_VIEW]), coverage.MAX_SERVICES)
+        self.assertEqual(views[coverage.SUMMARY_VIEW][0]["Services retained"], coverage.MAX_SERVICES)
+        self.assertGreater(views[coverage.SUMMARY_VIEW][0]["Services discovered"], coverage.MAX_SERVICES)
+
+    def test_declared_view_schemas_are_derived_from_real_rows(self):
+        _metrics, views = coverage.build(
+            STACKS, SIGNALS, dashboard_inventory=DASHBOARDS, alert_routing=ALERTS,
+        )
+        self.assertEqual(set(views), set(coverage.VIEW_SCHEMAS))
+        for name, schema in coverage.VIEW_SCHEMAS.items():
+            with self.subTest(view=name):
+                self.assertTrue(views[name], "fixture must exercise the schema instead of asserting it")
+                self.assertEqual(tuple(views[name][0]), tuple(column for column, _kind in schema))
 
 
 if __name__ == "__main__":

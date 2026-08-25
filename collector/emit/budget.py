@@ -25,7 +25,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Iterable, Literal, Mapping
 
-from collector import identity
+from collector import identity, technology_registry
 from collector.emit.guard import ALLOWED_LABELS
 
 # The acceptance ceiling. A runaway backstop, NOT a design constraint.
@@ -89,6 +89,7 @@ INPUT = 14
 # without an unplanned series jump. Estate-wide ONLY; the per-stack cross product is a view.
 CATEGORY = 8
 SURFACE = 8
+TECHNOLOGY = len(technology_registry.REGISTRY.entries)
 
 
 CATALOGUE: tuple[MetricSpec, ...] = (
@@ -502,6 +503,37 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("usage_query_cost_attribution", "C", {"stack": STACK}, store="view", phase=2),
     MetricSpec("public_dashboard_inventory", "E", {"stack": STACK}, store="view", phase=3,
                note="complete configured public-dashboard inventory for comparison with local policy"),
+
+    # --- Pillar K: affirmative observed estate and coverage depth. ---
+    MetricSpec("gcinsight_coverage_stacks_measured", "K",
+               note="stacks whose atomic four-signal inventory succeeded"),
+    MetricSpec("gcinsight_coverage_stack_services", "K", {"stack": STACK},
+               note="canonical service_name union across metrics, logs, traces and profiles"),
+    MetricSpec("gcinsight_coverage_stack_technologies", "K", {"stack": STACK},
+               note="technologies present through versioned sentinel matching"),
+    MetricSpec("gcinsight_coverage_stack_clusters", "K", {"stack": STACK},
+               note="distinct explicitly-windowed Mimir cluster label values"),
+    MetricSpec("gcinsight_coverage_services_by_depth", "K", {"kind": 4},
+               note="service assets carrying exactly 1, 2, 3 or 4 canonical signals"),
+    MetricSpec("gcinsight_coverage_technology_stacks", "K", {"kind": TECHNOLOGY},
+               note="one bounded registry enum per technology; value is measured stacks present"),
+    MetricSpec("gcinsight_coverage_metric_names", "K", {"kind": 2},
+               note="matched vs unmatched metric names; their ratio is the published unmatched share"),
+    MetricSpec("gcinsight_coverage_service_identity", "K", {"kind": 3},
+               note="canonical, legacy-only and overlap counts; generic service is never silently "
+                    "promoted to service_name"),
+    MetricSpec("coverage_service_register", "K", {"stack": STACK}, store="view",
+               note="top-N named services with signal depth and explicit alert/dashboard metadata"),
+    MetricSpec("coverage_technology_register", "K", {"stack": STACK, "kind": TECHNOLOGY}, store="view",
+               note="stack x technology is current-state identity detail, not a time series"),
+    MetricSpec("coverage_metric_name_register", "K", {"stack": STACK}, store="view",
+               note="metric names and their registry classification; names never become labels"),
+    MetricSpec("coverage_cluster_register", "K", {"stack": STACK}, store="view",
+               note="named observed clusters; names never become labels"),
+    MetricSpec("coverage_legacy_service_register", "K", {"stack": STACK}, store="view",
+               note="generic Mimir service values retained separately as legacy identity evidence"),
+    MetricSpec("coverage_summary", "K", {"stack": STACK}, store="view",
+               note="per-stack counts, registry version, truncation and unmatched shares"),
 )
 
 

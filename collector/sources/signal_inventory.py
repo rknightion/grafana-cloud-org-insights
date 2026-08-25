@@ -21,9 +21,10 @@ from collector.sources import dataplane
 WINDOW = dt.timedelta(hours=24)
 # The endpoint is required to be bounded even though a normal tenant has far fewer distinct names.
 METRIC_NAME_LIMIT = 100_000
+LABEL_VALUE_LIMIT = 100_000
 FAILURE_REASONS = frozenset({
     "auth", "http_429", "http_5xx", "timeout", "invalid_response", "missing_endpoint",
-    "http_other", "unknown",
+    "http_other", "truncated", "unknown",
 })
 
 
@@ -71,19 +72,38 @@ def _get_list(
     params: Mapping[str, object],
     basic: tuple[str, str],
     field: str,
-) -> tuple[list[str] | None, int | None]:
+) -> tuple[list[str] | None, int | None, str | None]:
     response = client.get(url, params=params, basic=basic)
     if not response.ok:
-        return None, response.status
+        return None, response.status, None
     try:
         body = response.json()
     except (TypeError, ValueError):
-        return None, None
+        return None, None, "invalid_response"
     if not isinstance(body, Mapping):
-        return None, None
-    if body.get("status") not in (None, "success"):
-        return None, None
-    return _strings(body.get(field)), None
+        return None, None, "invalid_response"
+    if body.get("status") != "success":
+        return None, None, "invalid_response"
+    values = _strings(body.get(field))
+    if values is None:
+        return None, None, "invalid_response"
+    limit = params.get("limit")
+    # The standard response has no documented truncation field. Reaching the requested bound is
+    # therefore treated conservatively as possibly incomplete; a false unknown is safer than a
+    # plausible partial asset register presented as complete.
+    if isinstance(limit, int) and limit > 0 and len(values) >= limit:
+        return None, None, "truncated"
+    return values, None, None
+
+
+def _list_failure(
+    slug: str, signal: str, status: int | None, reason: str | None,
+) -> dict[str, Any]:
+    return _failure(
+        slug, signal,
+        _http_reason(status) if status is not None else (reason or "invalid_response"),
+        http=status,
+    )
 
 
 def _tempo_values(response: Response) -> list[str] | None:
@@ -136,32 +156,48 @@ def probe_stack(
         if located is None:
             return _failure(slug, "metrics", "missing_endpoint")
         base, auth = located
-        metric_names, status = _get_list(
+        metric_names, status, reason = _get_list(
             client, f"{base}/api/prom/api/v1/label/__name__/values",
             params={"start": start_seconds, "end": end_seconds, "limit": METRIC_NAME_LIMIT},
             basic=auth, field="data",
         )
         if metric_names is None:
-            return _failure(
-                slug, "metrics", _http_reason(status) if status is not None else "invalid_response",
-                http=status,
-            )
+            return _list_failure(slug, "metrics", status, reason)
+
+        metric_services, status, reason = _get_list(
+            client, f"{base}/api/prom/api/v1/label/service_name/values",
+            params={"start": start_seconds, "end": end_seconds, "limit": LABEL_VALUE_LIMIT},
+            basic=auth, field="data",
+        )
+        if metric_services is None:
+            return _list_failure(slug, "metrics", status, reason)
+        legacy_metric_services, status, reason = _get_list(
+            client, f"{base}/api/prom/api/v1/label/service/values",
+            params={"start": start_seconds, "end": end_seconds, "limit": LABEL_VALUE_LIMIT},
+            basic=auth, field="data",
+        )
+        if legacy_metric_services is None:
+            return _list_failure(slug, "metrics", status, reason)
+        clusters, status, reason = _get_list(
+            client, f"{base}/api/prom/api/v1/label/cluster/values",
+            params={"start": start_seconds, "end": end_seconds, "limit": LABEL_VALUE_LIMIT},
+            basic=auth, field="data",
+        )
+        if clusters is None:
+            return _list_failure(slug, "metrics", status, reason)
 
         current_signal = "logs"
         located = _base_and_auth(stack, "logs", "hlInstanceUrl", cap)
         if located is None:
             return _failure(slug, "logs", "missing_endpoint")
         base, auth = located
-        log_services, status = _get_list(
+        log_services, status, reason = _get_list(
             client, f"{base}/loki/api/v1/label/service_name/values",
             params={"start": start_seconds * 1_000_000_000, "end": end_seconds * 1_000_000_000},
             basic=auth, field="data",
         )
         if log_services is None:
-            return _failure(
-                slug, "logs", _http_reason(status) if status is not None else "invalid_response",
-                http=status,
-            )
+            return _list_failure(slug, "logs", status, reason)
 
         current_signal = "traces"
         located = _base_and_auth(stack, "traces", "htInstanceUrl", cap)
@@ -206,6 +242,9 @@ def probe_stack(
         "window_start": start.isoformat(),
         "window_end": end.isoformat(),
         "metric_names": metric_names,
+        "metric_services": metric_services,
+        "legacy_metric_services": legacy_metric_services,
+        "clusters": clusters,
         "log_services": log_services,
         "trace_services": trace_services,
         "profile_services": profile_services,

@@ -137,6 +137,17 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     "insights_summary": frozenset({"insights"}),
     "insights_dashboard_opening_31d": frozenset({"dashboard_inventory"}),
     "insights_datasource_query_cost": frozenset({"datasource_query_cost"}),
+    # Pillar K. Derived from the compose fixture: the named service register includes explicit
+    # dashboard tags and alert-rule labels, so all three inputs are required. Every other asset view
+    # is a projection of the atomic four-signal inventory alone.
+    "coverage_service_register": frozenset({
+        "signal_inventory", "dashboard_inventory", "alert_routing",
+    }),
+    "coverage_technology_register": frozenset({"signal_inventory"}),
+    "coverage_metric_name_register": frozenset({"signal_inventory"}),
+    "coverage_cluster_register": frozenset({"signal_inventory"}),
+    "coverage_legacy_service_register": frozenset({"signal_inventory"}),
+    "coverage_summary": frozenset({"signal_inventory"}),
     "cost": frozenset({"dataplane"}),
     "cost_adaptive_headroom": frozenset({"dataplane"}),
     "cost_adaptive_metric_recommendations": frozenset({"dataplane"}),

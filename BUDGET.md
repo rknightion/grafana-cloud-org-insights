@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **7,836** |
-| Phase 1 only | 7,835 |
+| **Declared (all phases)** | **8,680** |
+| Phase 1 only | 8,679 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -27,8 +27,9 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | F | 21 |
 | I | 895 |
 | J | 4,368 |
+| K | 844 |
 | scan | 210 |
-| **Total** | **7,836** |
+| **Total** | **8,680** |
 
 ## Metrics
 
@@ -48,6 +49,9 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_ai_messages` | I | `stack`(271) | 271 | 1 | Assistant user messages in the 30-day window. Emitted for every stack whose Assistant API was READ, zeros included, so an absent series still means 'not measured' and never 'not used' |
 | `gcinsight_ai_tokens_per_active_user` | I | `stack`(271) | 271 | 1 | the outlier detector. ABSENT where there are no active users: the ratio is undefined, and a zero would rank a dormant stack as the most efficient |
 | `gcinsight_cost_adaptivelogs_pending_bytes` | B | `stack`(271) | 271 | 1 | per stack, only where recommendations exist; the view carries the breakdown |
+| `gcinsight_coverage_stack_clusters` | K | `stack`(271) | 271 | 1 | distinct explicitly-windowed Mimir cluster label values |
+| `gcinsight_coverage_stack_services` | K | `stack`(271) | 271 | 1 | canonical service_name union across metrics, logs, traces and profiles |
+| `gcinsight_coverage_stack_technologies` | K | `stack`(271) | 271 | 1 | technologies present through versioned sentinel matching |
 | `gcinsight_stack_active_series` | A | `stack`(271) | 271 | 1 | the metrics cost driver; growth per stack is the platform team's core question |
 | `gcinsight_stack_billed_users` | B | `stack`(271) | 271 | 1 | billingActiveUsers, NEVER currentActiveUsers. Named `stack_` not `cost_` so it cannot collide with the estate rollup of the same quantity |
 | `gcinsight_stack_collectors_active` | E | `stack`(271) | 271 | 1 | the per-stack half; use it to find registration concentration and churn |
@@ -56,6 +60,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_input_available` | scan | `tier`(4), `input`(14) | 56 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
 | `gcinsight_usage_plugin_adoption` | C | `kind`(50) | 50 | 1 | bounded headroom for datasource types; excludes grafana-knowledgegraph-datasource because it is auto-provisioned rather than an adoption decision |
 | `gcinsight_scan_stacks_failed` | scan | `tier`(4), `reason`(8) | 32 | 1 | reason is a closed failure vocabulary: http_429, http_5xx, timeout, auth, ... |
+| `gcinsight_coverage_technology_stacks` | K | `kind`(21) | 21 | 1 | one bounded registry enum per technology; value is measured stacks present |
 | `gcinsight_findings` | scan | `kind`(18) | 18 | 1 | count per finding kind, derived from the pillar views by pillars/findings.py. A kind the running tier cannot compute is ABSENT, never 0 |
 | `gcinsight_maturity_dimension_mean` | D | `dimension`(9), `version`(2) | 18 | 1 | estate mean per rubric dimension  -  answers 'which dimension is the estate weakest on', which the per-stack view cannot trend without a stack-by-dimension cross product. Mean is over the stacks that SCORED that dimension, excluding the four unscored reasons |
 | `gcinsight_scan_stacks_skipped` | scan | `tier`(4), `reason`(3) | 12 | 1 | paused, unresolvable, out_of_scope |
@@ -74,6 +79,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_carry_forward_age_seconds` | scan | `tier`(4) | 4 | 1 | age of the T3 state being carried. ALERT ON THIS  -  a stale carry-forward would otherwise republish last month's scores as current, indefinitely |
 | `gcinsight_carry_forward_dropped_absent` | scan | `tier`(4) | 4 | 1 | series NOT republished because their stack has left the estate. The estate is re-discovered every run, so this going non-zero means a stack was decommissioned between the last T3 and this T1  -  expected, and the proof the golden rule holds |
 | `gcinsight_carry_forward_series` | scan | `tier`(4) | 4 | 1 | PLAN 5.3  -  how many slower-tier series the hourly tier republished |
+| `gcinsight_coverage_services_by_depth` | K | `kind`(4) | 4 | 1 | service assets carrying exactly 1, 2, 3 or 4 canonical signals |
 | `gcinsight_risk_org_members_staff_access` | E | `status`(4) | 4 | 1 | members by active / expired / none / unknown staff-access-window state. Identity and expiry timestamps remain in the S3 view, never labels |
 | `gcinsight_scan_completed_timestamp_seconds` | scan | `tier`(4) | 4 | 1 | PLAN 1.8  -  alerting is on ITS AGE, not on exit code |
 | `gcinsight_scan_coverage_ratio` | scan | `tier`(4) | 4 | 1 |  |
@@ -81,10 +87,12 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_scan_stacks_scannable` | scan | `tier`(4) | 4 | 1 |  |
 | `gcinsight_scan_stacks_scanned` | scan | `tier`(4) | 4 | 1 |  |
 | `gcinsight_scan_stacks_total` | scan | `tier`(4) | 4 | 1 |  |
+| `gcinsight_coverage_service_identity` | K | `kind`(3) | 3 | 1 | canonical, legacy-only and overlap counts; generic service is never silently promoted to service_name |
 | `gcinsight_estate_feature_stacks` | A | `kind`(3) | 3 | 1 | incident / machine_learning / k6  -  provisioned capability nobody switched on. Emits 0 deliberately: a MEASURED zero is the finding here, unlike a structural zero elsewhere. Proves the feature is off, NOT that it is paid for |
 | `gcinsight_estate_stacks` | A | `status`(3) | 3 | 1 |  |
 | `gcinsight_estate_users_by_role` | A | `role`(3) | 3 | 1 |  |
 | `gcinsight_ai_estate_investigations` | I | `kind`(2) | 2 | 1 | created by assistant vs by user. The INVENTORY is not collectable; these counts are |
+| `gcinsight_coverage_metric_names` | K | `kind`(2) | 2 | 1 | matched vs unmatched metric names; their ratio is the published unmatched share |
 | `gcinsight_dashboards_estate_anonymous_views` | J | `version`(2) | 2 | 1 |  |
 | `gcinsight_dashboards_estate_dashboards_viewed` | J | `version`(2) | 2 | 1 |  |
 | `gcinsight_dashboards_estate_datasources_queried` | J | `version`(2) | 2 | 1 |  |
@@ -116,6 +124,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_cost_billed_users` | B |  -  | 1 | 1 | estate total, no labels. Emitted by Pillar A today since it comes from the same inventory pass; the pillar attribution here is about which dashboard reads it |
 | `gcinsight_cost_series_per_billed_user` | B |  -  | 1 | 1 | estate efficiency ratio; the per-stack version is a view column |
 | `gcinsight_cost_stacks_without_adaptive` | B |  -  | 1 | 1 | stacks with active series but no applied Adaptive Metrics rules |
+| `gcinsight_coverage_stacks_measured` | K |  -  | 1 | 1 | stacks whose atomic four-signal inventory succeeded |
 | `gcinsight_estate_active_users` | A |  -  | 1 | 1 |  |
 | `gcinsight_estate_alert_rules` | A |  -  | 1 | 1 |  |
 | `gcinsight_estate_daily_users` | A |  -  | 1 | 1 |  |
@@ -173,6 +182,12 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `ai_token_outliers` | I | 1 | 1 |  |
 | `cost_adaptive_metric_recommendations` | B | 1 | 1 | bounded top-ten-per-stack Adaptive Metrics action queue; metric names stay out of labels |
 | `cost_cardinality_outliers` | B | 271 | 1 | point-in-time stack and label-name drill-down for cardinality outliers |
+| `coverage_cluster_register` | K | 271 | 1 | named observed clusters; names never become labels |
+| `coverage_legacy_service_register` | K | 271 | 1 | generic Mimir service values retained separately as legacy identity evidence |
+| `coverage_metric_name_register` | K | 271 | 1 | metric names and their registry classification; names never become labels |
+| `coverage_service_register` | K | 271 | 1 | top-N named services with signal depth and explicit alert/dashboard metadata |
+| `coverage_summary` | K | 271 | 1 | per-stack counts, registry version, truncation and unmatched shares |
+| `coverage_technology_register` | K | 5,691 | 1 | stack x technology is current-state identity detail, not a time series |
 | `estate` | A | 271 | 1 | wide per-stack inventory: region, cluster, status, dashboards, alert rules, users by role, admin share, age, idle, drift, delete protection, leftover, created/updated by |
 | `estate_leftovers_billing` | A | 1 | 1 | billing-active leftover candidates; row count is deployment-specific |
 | `estate_leftovers_idle` | A | 1 | 1 | idle non-billing stack candidates; row count is deployment-specific |

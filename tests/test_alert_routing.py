@@ -24,7 +24,7 @@ class FakeClient:
         return Response(status=status, body=json.dumps(body).encode(), url=url)
 
 
-def rule(uid, *, paused=False, receiver=None, title=None):
+def rule(uid, *, paused=False, receiver=None, title=None, labels=None):
     return {
         "uid": uid,
         "title": title or f"Rule {uid}",
@@ -34,6 +34,7 @@ def rule(uid, *, paused=False, receiver=None, title=None):
         "notification_settings": {"receiver": receiver} if receiver else None,
         "data": [{"model": {"secret": "DO-NOT-STORE"}}],
         "annotations": {"private": "DO-NOT-STORE"},
+        "labels": labels or {},
     }
 
 
@@ -111,6 +112,25 @@ class HealthyInventoryTest(unittest.TestCase):
         })
         self.assertNotIn("DO-NOT-STORE", repr(out))
         self.assertNotIn("private@example.test", repr(out))
+
+    def test_explicit_service_labels_create_service_routes_without_title_inference(self):
+        client = FakeClient([
+            (200, [
+                rule("labelled", receiver="platform", labels={"service_name": "checkout"}),
+                rule("legacy", labels={"service": "legacy-api"}),
+                rule("title-only", title="checkout latency"),
+            ]),
+            (200, [contact("platform")]),
+        ])
+
+        out = ar.probe_stack(client, STACK, "tok")
+
+        self.assertEqual(out["service_routes"], [
+            {"service_name": "checkout", "identity_label": "service_name", "paused": False,
+             "routing": "direct", "receiver_state": ar.PROVISIONED},
+        ])
+        self.assertNotIn("title-only", repr(out["service_routes"]))
+        self.assertNotIn("legacy-api", repr(out["service_routes"]))
 
     def test_bounded_detail_keeps_broken_direct_receivers_ahead_of_inherited_rules(self):
         rules = [rule(f"inherited-{i}") for i in range(ar.MAX_FINDINGS)]

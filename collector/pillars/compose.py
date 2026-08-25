@@ -20,7 +20,7 @@ from typing import Any
 
 from collector.coverage import Coverage
 from collector.emit import guard
-from collector.pillars import ai, cost, estate, maturity, risk, usage, value
+from collector.pillars import ai, cost, coverage as coverage_pillar, estate, maturity, risk, usage, value
 # Aliased: the kwarg is `insights`, matching the hydrated input key so `**inputs` works.
 from collector.pillars import insights as insights_pillar
 from collector.pillars import insights_inventory
@@ -97,6 +97,11 @@ def build_all(
             stacks,
             dashboard_inventory=dashboard_inventory,
             datasource_query_cost=datasource_query_cost,
+        ),
+        coverage_pillar.build(
+            stacks, signal_inventory,
+            dashboard_inventory=dashboard_inventory,
+            alert_routing=alert_routing,
         ),
     ):
         metrics.extend(pillar_metrics)

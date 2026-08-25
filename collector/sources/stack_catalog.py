@@ -86,7 +86,7 @@ def probe_dashboards_stack(
             "inventory carries no valid dashboardCnt for completeness verification",
         )
 
-    dashboards: list[dict[str, str]] = []
+    dashboards: list[dict[str, Any]] = []
     seen: set[str] = set()
     for page in range(1, MAX_PAGES + 1):
         try:
@@ -118,8 +118,18 @@ def probe_dashboards_stack(
             if folder is not None and not isinstance(folder, str):
                 return unavailable(slug, INVALID_RESPONSE,
                                    f"dashboard search page {page} item {index} has invalid folder")
+            tags = item.get("tags", [])
+            if not isinstance(tags, list) or any(not isinstance(tag, str) for tag in tags):
+                return unavailable(slug, INVALID_RESPONSE,
+                                   f"dashboard search page {page} item {index} has invalid tags")
             seen.add(uid)
-            dashboards.append({"uid": uid, "title": title, "folder": folder or ""})
+            # Tags are tenant-authored and can contain arbitrary identity detail. Pillar K needs only
+            # the explicit service contract, so unrelated tags are discarded at the source boundary.
+            service_tags = [tag for tag in tags if tag.casefold().startswith("service:")]
+            dashboards.append({
+                "uid": uid, "title": title, "folder": folder or "",
+                "service_tags": service_tags,
+            })
         if len(batch) < SEARCH_PAGE_SIZE:
             if len(dashboards) != expected:
                 return unavailable(

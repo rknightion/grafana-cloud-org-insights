@@ -86,6 +86,13 @@ def _validate_rules(rules: list[Any]) -> str | None:
             receiver = settings.get("receiver")
             if not isinstance(receiver, str) or not receiver:
                 return f"alert rule {index} has invalid notification_settings.receiver"
+        labels = rule.get("labels", {})
+        if not isinstance(labels, Mapping):
+            return f"alert rule {index} has invalid labels"
+        if "service_name" in labels and (
+            not isinstance(labels["service_name"], str) or not labels["service_name"].strip()
+        ):
+            return f"alert rule {index} has invalid service_name label"
     return None
 
 
@@ -129,6 +136,22 @@ def _rule_row(rule: Mapping[str, Any], contact_names: set[str]) -> dict[str, Any
         "routing": routing,
         "receiver": receiver,
         "receiver_state": receiver_state,
+    }
+
+
+def _service_route(rule: Mapping[str, Any], row: Mapping[str, Any]) -> dict[str, Any] | None:
+    labels = rule.get("labels")
+    if not isinstance(labels, Mapping):
+        return None
+    value = labels.get("service_name")
+    if not isinstance(value, str) or not value.strip():
+        return None
+    return {
+        "service_name": value.strip(),
+        "identity_label": "service_name",
+        "paused": row["paused"],
+        "routing": row["routing"],
+        "receiver_state": row["receiver_state"],
     }
 
 
@@ -191,6 +214,10 @@ def probe_stack(client: ReadOnlyClient, stack: Mapping[str, Any], token: str) ->
         if receiver == BUILTIN_DEFAULT_RECEIVER and receiver not in contact_names
     ]
     classified = [_rule_row(rule, contact_names) for rule in rules]
+    service_routes = [
+        route for rule, row in zip(rules, classified)
+        if (route := _service_route(rule, row)) is not None
+    ]
     findings = sorted(
         (row for row in classified
          if row["routing"] == "inherited" or row["receiver_state"] != PROVISIONED),
@@ -234,6 +261,9 @@ def probe_stack(client: ReadOnlyClient, stack: Mapping[str, Any], token: str) ->
         "findings_retained": min(len(findings), MAX_FINDINGS),
         "findings_truncated": len(findings) > MAX_FINDINGS,
         "findings": findings[:MAX_FINDINGS],
+        # Only explicit service labels survive. Titles and receiver names are never treated as service
+        # identities, because a plausible fuzzy join is worse than an unknown relationship.
+        "service_routes": service_routes,
     }
 
 

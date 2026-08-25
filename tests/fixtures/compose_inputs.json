@@ -19720,6 +19720,15 @@
      "receiver": null,
      "receiver_state": "not_applicable"
     }
+   ],
+   "service_routes": [
+    {
+     "service_name": "checkout",
+     "identity_label": "service_name",
+     "paused": false,
+     "routing": "direct",
+     "receiver_state": "provisioned"
+    }
    ]
   }
  },
@@ -31368,9 +31377,37 @@
    "detail": null
   }
  },
- "dashboard_inventory": {},
+ "dashboard_inventory": {
+  "stack158": {
+   "available": true,
+   "activity_available": true,
+   "dashboards": [
+    {
+     "uid": "coverage-fixture",
+     "title": "Synthetic service dashboard",
+     "folder": "Synthetic",
+     "service_tags": ["service:checkout"]
+    }
+   ],
+   "opened": []
+  }
+ },
  "datasource_query_cost": {},
- "signal_inventory": {},
+ "signal_inventory": {
+  "stack158": {
+   "slug": "stack158",
+   "available": true,
+   "window_start": "2026-08-24T00:00:00+00:00",
+   "window_end": "2026-08-25T00:00:00+00:00",
+   "metric_names": ["kube_pod_info", "synthetic_unmatched_metric"],
+   "metric_services": ["checkout"],
+   "legacy_metric_services": ["legacy-checkout"],
+   "log_services": ["checkout", "logs-only"],
+   "trace_services": ["checkout"],
+   "profile_services": [],
+   "clusters": ["synthetic-cluster"]
+  }
+ },
  "org_members": {
   "state": "ok",
   "members": [

@@ -206,7 +206,7 @@ class StackCatalogSourceTest(unittest.TestCase):
     def test_dashboard_search_pages_to_a_short_page_and_keeps_every_dashboard(self):
         first = [
             {"uid": f"d-{index}", "title": f"Dashboard {index}", "type": "dash-db",
-             "folderTitle": "Ops"}
+             "folderTitle": "Ops", "tags": ["service:checkout", "private:discard-me"]}
             for index in range(2)
         ]
         client = FakeClient([(200, first), (200, [])])
@@ -214,6 +214,8 @@ class StackCatalogSourceTest(unittest.TestCase):
             out = stack_catalog.probe_dashboards_stack(client, self.STACK, "tok")
         self.assertTrue(out["available"])
         self.assertEqual([row["uid"] for row in out["dashboards"]], ["d-0", "d-1"])
+        self.assertEqual(out["dashboards"][0]["service_tags"], ["service:checkout"])
+        self.assertNotIn("private:discard-me", repr(out))
         self.assertEqual([call[1]["params"]["page"] for call in client.calls], [1, 2])
         self.assertTrue(all(call[0].startswith("https://authoritative.example/")
                             for call in client.calls))
