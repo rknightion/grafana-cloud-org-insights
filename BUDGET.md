@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **8,770** |
-| Phase 1 only | 8,769 |
+| **Declared (all phases)** | **8,774** |
+| Phase 1 only | 8,773 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -27,9 +27,9 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | F | 21 |
 | I | 895 |
 | J | 4,368 |
-| K | 934 |
+| K | 938 |
 | scan | 210 |
-| **Total** | **8,770** |
+| **Total** | **8,774** |
 
 ## Metrics
 
@@ -82,6 +82,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_carry_forward_series` | scan | `tier`(4) | 4 | 1 | PLAN 5.3  -  how many slower-tier series the hourly tier republished |
 | `gcinsight_coverage_services_by_depth` | K | `kind`(4) | 4 | 1 | service assets carrying exactly 1, 2, 3 or 4 canonical signals |
 | `gcinsight_coverage_services_by_signal` | K | `kind`(4) | 4 | 1 | service assets carrying canonical metrics, logs, traces or profiles identity |
+| `gcinsight_coverage_stacks_by_technology_count` | K | `kind`(4) | 4 | 1 | measured stacks detecting 0, 1, 2-4 or 5+ registry technologies |
 | `gcinsight_risk_org_members_staff_access` | E | `status`(4) | 4 | 1 | members by active / expired / none / unknown staff-access-window state. Identity and expiry timestamps remain in the S3 view, never labels |
 | `gcinsight_scan_completed_timestamp_seconds` | scan | `tier`(4) | 4 | 1 | PLAN 1.8  -  alerting is on ITS AGE, not on exit code |
 | `gcinsight_scan_coverage_ratio` | scan | `tier`(4) | 4 | 1 |  |
@@ -94,7 +95,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_estate_stacks` | A | `status`(3) | 3 | 1 |  |
 | `gcinsight_estate_users_by_role` | A | `role`(3) | 3 | 1 |  |
 | `gcinsight_ai_estate_investigations` | I | `kind`(2) | 2 | 1 | created by assistant vs by user. The INVENTORY is not collectable; these counts are |
-| `gcinsight_coverage_metric_names` | K | `kind`(2) | 2 | 1 | matched vs unmatched metric names; their ratio is the published unmatched share |
+| `gcinsight_coverage_metric_names` | K | `kind`(2) | 2 | 1 | matched vs unmatched metric-name evidence; unmatched is a registry backlog, never a coverage share |
 | `gcinsight_coverage_service_applicable_components_mean` | K | `version`(2) | 2 | 1 | mean score denominator over exactly the same services as completeness |
 | `gcinsight_coverage_service_completeness_mean` | K | `version`(2) | 2 | 1 | mean over non-ephemeral services with at least four applicable components |
 | `gcinsight_dashboards_estate_anonymous_views` | J | `version`(2) | 2 | 1 |  |
@@ -190,7 +191,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `coverage_legacy_service_register` | K | 271 | 1 | generic Mimir service values retained separately as legacy identity evidence |
 | `coverage_metric_name_register` | K | 271 | 1 | metric names and their registry classification; names never become labels |
 | `coverage_service_register` | K | 271 | 1 | top-N named services with signal depth and explicit alert/dashboard metadata |
-| `coverage_summary` | K | 271 | 1 | per-stack counts, registry version, truncation and unmatched shares |
+| `coverage_summary` | K | 271 | 1 | per-stack counts, registry version, truncation and unmatched-name backlog |
 | `coverage_technology_register` | K | 17,073 | 1 | stack x technology is current-state identity detail, not a time series |
 | `estate` | A | 271 | 1 | wide per-stack inventory: region, cluster, status, dashboards, alert rules, users by role, admin share, age, idle, drift, delete protection, leftover, created/updated by |
 | `estate_leftovers_billing` | A | 1 | 1 | billing-active leftover candidates; row count is deployment-specific |

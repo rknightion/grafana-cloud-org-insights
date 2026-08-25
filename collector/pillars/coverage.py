@@ -71,7 +71,7 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
         (" Stack", "string"), ("Services discovered", "number"),
         ("Services retained", "number"), ("Technologies", "number"),
         ("Clusters", "number"), ("Metric names", "number"),
-        ("Unmatched metric names", "number"), ("Unmatched metric share %", "number"),
+        ("Unmatched metric names", "number"),
         ("Legacy-only services", "number"), ("Legacy-only service share %", "number"),
         ("Registry version", "string"), ("Last seen", "time"),
     ),
@@ -143,6 +143,14 @@ def _ephemeral(service: str) -> bool:
     return EPHEMERAL_IDENTITY.search(service) is not None
 
 
+def _technology_count_bucket(count: int) -> str:
+    if count <= 1:
+        return str(count)
+    if count <= 4:
+        return "2-4"
+    return "5+"
+
+
 def build(
     stacks: Sequence[Mapping[str, Any]],
     signal_inventory: Mapping[str, Mapping[str, Any]] | None,
@@ -165,6 +173,7 @@ def build(
     depth_counts = {depth: 0 for depth in range(1, 5)}
     signal_counts = {signal: 0 for signal in ("metrics", "logs", "traces", "profiles")}
     technology_stacks = {entry.key: 0 for entry in technology_registry.REGISTRY.entries}
+    technology_count_distribution = {kind: 0 for kind in ("0", "1", "2-4", "5+")}
     classified_counts = {"matched": 0, "unmatched": 0}
     identity_counts = {"canonical": 0, "legacy_only": 0, "overlap": 0}
     unscored_counts: Counter[tuple[str, str]] = Counter()
@@ -285,6 +294,9 @@ def build(
         service_rows.extend(rows[:MAX_SERVICES])
 
         classification = technology_registry.classify(record.get("metric_names") or [])
+        technology_count_distribution[
+            _technology_count_bucket(len(classification["technologies"]))
+        ] += 1
         tech_by_metric: dict[str, str] = {}
         for technology in classification["technologies"]:
             technology_stacks[technology["key"]] += 1
@@ -319,7 +331,6 @@ def build(
             "Last seen": last_seen,
         } for service in sorted(legacy))
 
-        unmatched_share = classification["unmatched_share"]
         legacy_denominator = len(canonical) + len(legacy_only)
         summary_rows.append({
             " Stack": slug,
@@ -329,9 +340,6 @@ def build(
             "Clusters": len(clusters),
             "Metric names": classification["total_metric_name_count"],
             "Unmatched metric names": classification["unmatched_metric_name_count"],
-            "Unmatched metric share %": (
-                None if unmatched_share is None else round(unmatched_share * 100, 1)
-            ),
             "Legacy-only services": len(legacy_only),
             "Legacy-only service share %": (
                 None if not legacy_denominator else round(len(legacy_only) / legacy_denominator * 100, 1)
@@ -359,6 +367,10 @@ def build(
         ("gcinsight_coverage_technology_stacks", {"kind": entry.key},
          float(technology_stacks[entry.key]))
         for entry in technology_registry.REGISTRY.entries
+    )
+    metrics.extend(
+        ("gcinsight_coverage_stacks_by_technology_count", {"kind": kind}, float(count))
+        for kind, count in technology_count_distribution.items()
     )
     metrics.extend(
         ("gcinsight_coverage_metric_names", {"kind": kind}, float(value))

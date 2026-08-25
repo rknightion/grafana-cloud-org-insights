@@ -3198,15 +3198,17 @@ def d_coverage(ds: str):
             "Observed technologies ranked by measured stacks",
             "topk(20, gcinsight_coverage_technology_stacks > 0)", legend="{{kind}}", limit=20,
             description="Bounded technology-registry entries ranked by the stacks where a sentinel "
-                        "metric was observed. The unmatched share is stated beside this chart and the "
-                        "named evidence remains in S3."),
-        "n_unmatched": build.stat_panel(
-            "Metric names unmatched by the registry",
-            'gcinsight_coverage_metric_names{kind="unmatched"} / '
-            'scalar(sum(gcinsight_coverage_metric_names))',
-            unit="percentunit", decimals=1,
-            description="The published unmatched share of the classification population. It stays "
-                        "visible beside the technology ranking so registry confidence is never implied."),
+                        "metric was observed. This is registry reach; the named evidence remains in S3."),
+        "b_technology_presence": build.barchart_panel(
+            "Stacks by technologies detected",
+            "gcinsight_coverage_stacks_by_technology_count", legend="{{kind}} technologies", sort=None,
+            description="A bounded distribution over the measured-stack population. The registry is a "
+                        "presence detector, so its denominator is stacks rather than every metric name."),
+        "n_no_technology": build.stat_panel(
+            "Stacks with no technology detected",
+            'gcinsight_coverage_stacks_by_technology_count{kind="0"}',
+            description="The actionable registry gap: measured stacks where no versioned sentinel was "
+                        "observed in the explicit signal-inventory window."),
         "n_legacy": build.stat_panel(
             "Service identities present only in legacy Mimir service",
             'gcinsight_coverage_service_identity{kind="legacy_only"} / '
@@ -3215,6 +3217,11 @@ def d_coverage(ds: str):
             unit="percentunit", decimals=1,
             description="Legacy-only identities divided by canonical plus legacy-only identities. The "
                         "generic service label is reported separately and never promoted silently."),
+        "n_metric_backlog": build.stat_panel(
+            "Unmatched metric names in the registry backlog",
+            'gcinsight_coverage_metric_names{kind="unmatched"}',
+            description="A development work-queue count, not a coverage share or confidence score. "
+                        "The table below names the evidence that needs registry review."),
         "b_identity": build.barchart_panel(
             "Canonical and legacy service identity populations",
             "gcinsight_coverage_service_identity", legend="{{kind}}", sort="desc",
@@ -3359,7 +3366,8 @@ def d_coverage(ds: str):
             "Metric-name classification register", coverage_pillar.METRIC_VIEW, ds,
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.METRIC_VIEW],
             description="The metric-name evidence behind the technology registry, including every "
-                        "unmatched name. This is the work queue for improving classification."),
+                        "unmatched name and its count. Unmatched names are the registry-development "
+                        "backlog, not a share of technology coverage."),
         "tbl_legacy": build.table_panel(
             "Legacy Mimir service register", coverage_pillar.LEGACY_SERVICE_VIEW, ds,
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.LEGACY_SERVICE_VIEW],
@@ -3368,8 +3376,8 @@ def d_coverage(ds: str):
         "tbl_summary": build.table_panel(
             "Coverage summary and registry version", coverage_pillar.SUMMARY_VIEW, ds,
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.SUMMARY_VIEW],
-            description="Per-stack denominators, retained-row count, unmatched shares and the exact "
-                        "technology registry version used to classify this publication."),
+            description="Per-stack denominators, retained-row count, unmatched-name backlog and the "
+                        "exact technology registry version used for this publication."),
     }
     tabs = [
         build.rows_tab("Observed estate", [
@@ -3388,9 +3396,10 @@ def d_coverage(ds: str):
                       max_columns=2, row_height="short"),
             build.row("Why components are not scored", ["b_unscored"], max_columns=1),
             build.row("Coverage depth per service", ["b_depth"], max_columns=1, row_height="tall"),
-            build.row("Signals and technology", ["b_signal", "b_technology"], max_columns=2),
-            build.row("Classification confidence", ["n_unmatched", "n_legacy", "b_identity"],
-                      max_columns=3),
+            build.row("Services by signal", ["b_signal"], max_columns=1),
+            build.row("Technology presence", ["b_technology_presence", "n_no_technology",
+                                                "b_technology"], max_columns=3),
+            build.row("Identity evidence", ["n_legacy", "b_identity"], max_columns=2),
             build.row("Where the assets sit", ["b_stack_services", "b_stack_technologies",
                                                 "b_stack_clusters"], max_columns=3),
         ]),
@@ -3421,6 +3430,8 @@ def d_coverage(ds: str):
             build.row("Clusters", ["tbl_clusters"], max_columns=1),
         ]),
         build.rows_tab("Classification evidence", [
+            build.row("Registry-development backlog", ["n_metric_backlog"], max_columns=1,
+                      row_height="short"),
             build.row("Metric names", ["tbl_metrics"], max_columns=1, row_height="tall"),
             build.row("Legacy service identity", ["tbl_legacy"], max_columns=1),
         ]),

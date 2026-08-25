@@ -519,8 +519,11 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                note="service assets carrying canonical metrics, logs, traces or profiles identity"),
     MetricSpec("gcinsight_coverage_technology_stacks", "K", {"kind": TECHNOLOGY},
                note="one bounded registry enum per technology; value is measured stacks present"),
+    MetricSpec("gcinsight_coverage_stacks_by_technology_count", "K", {"kind": 4},
+               note="measured stacks detecting 0, 1, 2-4 or 5+ registry technologies"),
     MetricSpec("gcinsight_coverage_metric_names", "K", {"kind": 2},
-               note="matched vs unmatched metric names; their ratio is the published unmatched share"),
+               note="matched vs unmatched metric-name evidence; unmatched is a registry backlog, "
+                    "never a coverage share"),
     MetricSpec("gcinsight_coverage_service_identity", "K", {"kind": 3},
                note="canonical, legacy-only and overlap counts; generic service is never silently "
                     "promoted to service_name"),
@@ -542,7 +545,7 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("coverage_legacy_service_register", "K", {"stack": STACK}, store="view",
                note="generic Mimir service values retained separately as legacy identity evidence"),
     MetricSpec("coverage_summary", "K", {"stack": STACK}, store="view",
-               note="per-stack counts, registry version, truncation and unmatched shares"),
+               note="per-stack counts, registry version, truncation and unmatched-name backlog"),
 )
 
 

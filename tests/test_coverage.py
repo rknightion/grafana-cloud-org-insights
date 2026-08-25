@@ -341,6 +341,35 @@ class CoverageBuildTest(unittest.TestCase):
         }
         self.assertEqual(classified, {"matched": 1, "unmatched": 1})
 
+    def test_technology_presence_distribution_uses_four_closed_buckets(self):
+        """The registry detects presence; dividing sentinel matches by every metric name is invalid."""
+        sentinels = [
+            "kube_pod_info", "node_uname_info", "mysql_up", "redis_up", "rabbitmq_channels",
+        ]
+        stacks = [{"slug": f"stack-{index}"} for index in range(4)]
+        records = {}
+        for index, count in enumerate((0, 1, 2, 5)):
+            records[f"stack-{index}"] = {
+                "available": True,
+                "window_end": "2026-08-25T00:00:00+00:00",
+                "metric_names": sentinels[:count],
+                "metric_services": [], "legacy_metric_services": [], "log_services": [],
+                "trace_services": [], "profile_services": [], "slo_services": [], "clusters": [],
+            }
+        metrics, _views = coverage.build(stacks, records)
+        distribution = {
+            labels["kind"]: value for name, labels, value in metrics
+            if name == "gcinsight_coverage_stacks_by_technology_count"
+        }
+        self.assertEqual(distribution, {"0": 1, "1": 1, "2-4": 1, "5+": 1})
+
+    def test_summary_keeps_unmatched_count_without_publishing_a_share(self):
+        """Unmatched names are a registry backlog, not a classification-confidence denominator."""
+        _metrics, views = coverage.build(STACKS, SIGNALS)
+        row = views[coverage.SUMMARY_VIEW][0]
+        self.assertEqual(row["Unmatched metric names"], 1)
+        self.assertNotIn("Unmatched metric share %", row)
+
     def test_no_signal_input_emits_nothing(self):
         self.assertEqual(coverage.build(STACKS, None), ([], {}))
 
