@@ -66,11 +66,36 @@ class PluginAdoptionTest(unittest.TestCase):
         counts = [r["Stacks"] for r in self.views["usage_plugin_adoption"]]
         self.assertEqual(counts, sorted(counts, reverse=True))
 
-    def test_plugin_labels_stay_within_the_declared_budget(self):
+    def test_stack_type_counts_are_a_view_and_vendor_names_never_become_metric_labels(self):
+        """Datasource types are discovered vendor strings, not a fixed enum, so they belong in S3."""
+        expected = sorted(
+            (str(stack["slug"]), kind, int(count))
+            for stack in self.stacks
+            for kind, count in (stack.get("datasourceCnts") or {}).items()
+            if count and kind not in usage.EXCLUDED_DATASOURCES
+        )
+        actual = sorted(
+            (row[" Stack"], row["Datasource type"], row["Provisioned instances"])
+            for row in self.views["usage_datasource_inventory"]
+        )
+        self.assertEqual(actual, expected)
+        self.assertFalse(any(labels for name, labels, _value in self.metrics
+                             if name.startswith("gcinsight_usage_datasource")))
+        emitted_names = {name for name, _labels, _value in self.metrics}
+        self.assertNotIn("gcinsight_usage_plugin_adoption", emitted_names)
+        self.assertEqual(
+            [(name, labels, value) for name, labels, value in self.metrics
+             if name == "gcinsight_usage_synthetic_monitoring_datasource_stacks"],
+            [("gcinsight_usage_synthetic_monitoring_datasource_stacks", {}, 65.0)],
+        )
+
+    def test_only_the_distinct_type_count_is_published_as_the_estate_metric(self):
+        """The billing total is a lossier inventory projection, so no per-stack count is justified."""
+        emitted = [(name, labels, value) for name, labels, value in self.metrics
+                   if name.startswith("gcinsight_usage_datasource_")]
+        self.assertEqual(emitted, [("gcinsight_usage_datasource_types_distinct", {}, 35.0)])
         declared = {s.name: s for s in CATALOGUE if s.store == "mimir"}
-        emitted = len([1 for n, _, _ in self.metrics if n == "gcinsight_usage_plugin_adoption"])
-        self.assertEqual(emitted, 35, "36 types in use, less the auto-provisioned one")
-        self.assertLessEqual(emitted, declared["gcinsight_usage_plugin_adoption"].series)
+        self.assertEqual(declared["gcinsight_usage_datasource_types_distinct"].series, 1)
 
 
 class StickinessTest(unittest.TestCase):

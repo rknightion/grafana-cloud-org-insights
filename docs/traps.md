@@ -445,6 +445,9 @@ shape. Read the schema at `/openapi/v3/apis/dashboard.grafana.app/v2` rather tha
  per-TYPE breakdown the billing datasource does not expose at all.
 - **`grafana-knowledgegraph-datasource` is auto-provisioned everywhere.** Counted, it is the
  most-adopted plugin in the estate and means nothing. Exclude it from any adoption count.
+- **Datasource type names are discovered vendor vocabulary, not a fixed metric enum.** Publish the
+ stack/type/count mapping and per-type ranking as S3 views. Mimir may carry the scalar distinct-type
+ count, never one labelled series per discovered vendor type or per stack.
 - **Synthetic Monitoring rejects an org-realm token and 500s even from an Admin service account.**
 - **`POST /api/v1/rule/backtest` returns HTTP 400 and is not worth pursuing.** To prove an alert fires,
  evaluate the live rule's own expression over a window where the fault really happened. That is

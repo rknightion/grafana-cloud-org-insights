@@ -63,6 +63,14 @@ ROW_SCHEMA: tuple[tuple[str, str], ...] = (
 
 VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
     "usage_dormant_stacks": ROW_SCHEMA,
+    "usage_plugin_adoption": (
+        (" Plugin", "string"), ("Stacks", "number"),
+        ("Share of estate %", "number"), ("Total instances", "number"),
+    ),
+    "usage_datasource_inventory": (
+        (" Stack", "string"), ("Datasource type", "string"),
+        ("Provisioned instances", "number"),
+    ),
 }
 
 
@@ -147,8 +155,14 @@ def build(
                 continue
             adoption[name] = adoption.get(name, 0) + 1
             instances[name] = instances.get(name, 0) + count
-    for name, count in sorted(adoption.items()):
-        metrics.append(("gcinsight_usage_plugin_adoption", {"kind": name}, float(count)))
+    # Vendor datasource types are discovered strings, not a fixed enum. They stay in the views below;
+    # Mimir gets only scalar estate counts. The Synthetic Monitoring scalar preserves the established
+    # provisioned-versus-active comparison without republishing its plugin id as a label value.
+    metrics.append(("gcinsight_usage_datasource_types_distinct", {}, float(len(adoption))))
+    metrics.append((
+        "gcinsight_usage_synthetic_monitoring_datasource_stacks", {},
+        float(adoption.get("synthetic-monitoring-datasource", 0)),
+    ))
 
     for signal in SIGNAL_FIELDS:
         metrics.append((
@@ -193,6 +207,19 @@ def build(
                 for name, count in adoption.items()
             ],
             key=lambda r: -r["Stacks"],
+        ),
+        "usage_datasource_inventory": sorted(
+            [
+                {
+                    " Stack": str(stack.get("slug") or ""),
+                    "Datasource type": name,
+                    "Provisioned instances": int(count),
+                }
+                for stack in stacks
+                for name, count in (stack.get("datasourceCnts") or {}).items()
+                if count and name not in EXCLUDED_DATASOURCES
+            ],
+            key=lambda row: (row["Datasource type"], row[" Stack"]),
         ),
         # Provisioned, populated, and nobody logs in. The clearest "paid for, not used" list.
         "usage_dormant_stacks": sorted(

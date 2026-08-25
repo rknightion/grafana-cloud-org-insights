@@ -205,10 +205,12 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                note="estate daily/active; per-stack is a view column"),
     MetricSpec("gcinsight_usage_users_last_seen_bucket", "C", {"kind": 5},
                note="<7d, <30d, <90d, <180d, never"),
-    MetricSpec("gcinsight_usage_plugin_adoption", "C", {"kind": 50},
-               note="bounded headroom for datasource types; excludes "
-                    "grafana-knowledgegraph-datasource because it is auto-provisioned rather than an "
-                    "adoption decision"),
+    MetricSpec("gcinsight_usage_datasource_types_distinct", "C",
+               note="distinct provisioned datasource types estate-wide; vendor names stay in S3 and "
+                    "the auto-provisioned knowledge-graph datasource is excluded"),
+    MetricSpec("gcinsight_usage_synthetic_monitoring_datasource_stacks", "C",
+               note="fixed scalar preserving the provisioned-versus-active Synthetic Monitoring "
+                    "comparison without a datasource-type label"),
     MetricSpec("gcinsight_usage_stacks_by_signal", "C", {"signal": SIGNAL},
                note="signal PRESENCE from inventory usage fields, thresholded at USAGE_FLOOR. Protocol-adoption panels are live and query grafanacloud-usage directly, so they need no collector series. The synthetic two-series floor is deliberately excluded"),
 
@@ -394,6 +396,10 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("insights_coverage", "J", store="view",
                note="the denominator: why a stack has no figures"),
     MetricSpec("insights_summary", "J", store="view"),
+
+    MetricSpec("usage_datasource_inventory", "C", {"stack": STACK}, store="view",
+               note="live-inventory stack, vendor datasource type and instance count; type names stay "
+                    "out of metric labels"),
 
     MetricSpec("cost_adaptive_metric_recommendations", "B", store="view",
                note="bounded top-ten-per-stack Adaptive Metrics action queue; metric names stay out of labels"),

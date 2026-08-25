@@ -1,0 +1,320 @@
+{
+  "meta": {
+    "generated_at": "2026-08-25T16:49:14.182912+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack050",
+      "Datasource type": "cloudwatch",
+      "Provisioned instances": 3
+    },
+    {
+      " Stack": "stack097",
+      "Datasource type": "cloudwatch",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack020",
+      "Datasource type": "elasticsearch",
+      "Provisioned instances": 4
+    },
+    {
+      " Stack": "stack035",
+      "Datasource type": "elasticsearch",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack037",
+      "Datasource type": "elasticsearch",
+      "Provisioned instances": 12
+    },
+    {
+      " Stack": "stack071",
+      "Datasource type": "elasticsearch",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack111",
+      "Datasource type": "elasticsearch",
+      "Provisioned instances": 3
+    },
+    {
+      " Stack": "obs-hub",
+      "Datasource type": "grafana-atlassianstatuspage-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Datasource type": "grafana-atlassianstatuspage-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack037",
+      "Datasource type": "grafana-datadog-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Datasource type": "grafana-gitlab-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack053",
+      "Datasource type": "grafana-gitlab-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "obs-hub",
+      "Datasource type": "grafana-googlesheets-datasource",
+      "Provisioned instances": 2
+    },
+    {
+      " Stack": "stack037",
+      "Datasource type": "grafana-logicmonitor-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack071",
+      "Datasource type": "grafana-logicmonitor-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack036",
+      "Datasource type": "grafana-mongodb-datasource",
+      "Provisioned instances": 2
+    },
+    {
+      " Stack": "stack020",
+      "Datasource type": "grafana-postgresql-datasource",
+      "Provisioned instances": 2
+    },
+    {
+      " Stack": "stack036",
+      "Datasource type": "grafana-postgresql-datasource",
+      "Provisioned instances": 3
+    },
+    {
+      " Stack": "stack145",
+      "Datasource type": "grafana-postgresql-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack193",
+      "Datasource type": "grafana-postgresql-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack050",
+      "Datasource type": "grafana-x-ray-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack020",
+      "Datasource type": "influxdb",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack036",
+      "Datasource type": "influxdb",
+      "Provisioned instances": 2
+    },
+    {
+      " Stack": "stack145",
+      "Datasource type": "mysql",
+      "Provisioned instances": 3
+    },
+    {
+      " Stack": "stack038",
+      "Datasource type": "prometheus",
+      "Provisioned instances": 2
+    },
+    {
+      " Stack": "stack071",
+      "Datasource type": "prometheus",
+      "Provisioned instances": 2
+    },
+    {
+      " Stack": "stack072",
+      "Datasource type": "prometheus",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack097",
+      "Datasource type": "prometheus",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack111",
+      "Datasource type": "prometheus",
+      "Provisioned instances": 4
+    },
+    {
+      " Stack": "stack158",
+      "Datasource type": "prometheus",
+      "Provisioned instances": 8
+    },
+    {
+      " Stack": "obs-hub",
+      "Datasource type": "synthetic-monitoring-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Datasource type": "synthetic-monitoring-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack020",
+      "Datasource type": "synthetic-monitoring-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack035",
+      "Datasource type": "synthetic-monitoring-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack037",
+      "Datasource type": "synthetic-monitoring-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack050",
+      "Datasource type": "synthetic-monitoring-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack052",
+      "Datasource type": "synthetic-monitoring-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack053",
+      "Datasource type": "synthetic-monitoring-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack054",
+      "Datasource type": "synthetic-monitoring-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack055",
+      "Datasource type": "synthetic-monitoring-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack070",
+      "Datasource type": "synthetic-monitoring-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack111",
+      "Datasource type": "synthetic-monitoring-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "obs-hub",
+      "Datasource type": "tempo",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "obs-hub",
+      "Datasource type": "yesoreyeram-infinity-datasource",
+      "Provisioned instances": 6
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Datasource type": "yesoreyeram-infinity-datasource",
+      "Provisioned instances": 4
+    },
+    {
+      " Stack": "stack020",
+      "Datasource type": "yesoreyeram-infinity-datasource",
+      "Provisioned instances": 3
+    },
+    {
+      " Stack": "stack037",
+      "Datasource type": "yesoreyeram-infinity-datasource",
+      "Provisioned instances": 1
+    },
+    {
+      " Stack": "stack111",
+      "Datasource type": "yesoreyeram-infinity-datasource",
+      "Provisioned instances": 10
+    },
+    {
+      " Stack": "stack125",
+      "Datasource type": "yesoreyeram-infinity-datasource",
+      "Provisioned instances": 2
+    },
+    {
+      " Stack": "stack158",
+      "Datasource type": "yesoreyeram-infinity-datasource",
+      "Provisioned instances": 1
+    }
+  ]
+}

@@ -38,6 +38,12 @@ If data is already present in `grafanacloud-usage`, a panel is preferred unless 
 trendable bounded series unlocks a separate workflow. Capability adoption is the deliberate exception:
 its S3 call list and gap trend support enablement outreach and closure tracking.
 
+The control-plane inventory's `datasourceCnts` map is the adjacent-estate source. Vendor type names and
+stack/type/count mappings stay in S3 views; Mimir receives only the scalar distinct-type count. The
+auto-provisioned knowledge-graph datasource is excluded from adoption. Coverage presents that
+point-in-time provisioned inventory beside Pillar J's separately windowed, separately covered evidence
+of datasource types actually queried.
+
 ## 4. Credential and permission model
 
 1. `GCINSIGHT_READ_TOKEN` is an org-realm read credential. It discovers the estate and reads the

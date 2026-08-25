@@ -1170,7 +1170,7 @@ def d_usage(ds: str):
                         "one very large stack dominates it; the per-stack column in Per-stack engagement "
                         "is where you see who is actually sticky."),
         "n_types": build.stat_panel(
-            "Datasource types in use", "count(gcinsight_usage_plugin_adoption)",
+            "Datasource types in use", "gcinsight_usage_datasource_types_distinct",
             description="Distinct datasource plugin types provisioned anywhere in the estate - a breadth "
                         "measure of what the organisation connects Grafana to. Excludes "
                         "`grafana-knowledgegraph-datasource`, which is auto-provisioned on every stack and "
@@ -1182,11 +1182,6 @@ def d_usage(ds: str):
         "t_signals": build.timeseries_panel(
             "Stacks using each signal", [("gcinsight_usage_stacks_by_signal", "{{signal}}")],
             description="Thresholded above the synthetic floor of 2 series, never at >0."),
-        "b_plugins": build.barchart_panel(
-            "Plugin adoption - stacks per datasource type",
-            "topk(15, gcinsight_usage_plugin_adoption)", legend="{{kind}}",
-            description="Counts STACKS not instances, and excludes the auto-provisioned "
-                        "grafana-knowledgegraph-datasource which is present estate-wide."),
         "b_recency": build.barchart_panel(
             "Users by last-seen bucket", "gcinsight_usage_users_last_seen_bucket",
             # `sort=None` on purpose: these buckets are an ORDERED CATEGORY (recent -> never), so ranking
@@ -1406,7 +1401,7 @@ def d_usage(ds: str):
     }
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
-        build.tab("Adoption", ["b_plugins", "t_signals", "plugins"]),
+        build.tab("Adoption", ["t_signals", "plugins"]),
         build.tab("Engagement", ["b_recency", "dormant", "recency", "usage"]),
         build.tab("Protocol adoption", ["n_otlp", "n_otlp_floor", "t_otlp"]),
         build.tab("Unread telemetry", ["n_logs_unread", "n_logs_unread_bytes",
@@ -2384,7 +2379,7 @@ def d_value(ds: str):
                         "lifetime test inventory."),
         "n_sm_provisioned": build.stat_panel(
             "Stacks with the Synthetic Monitoring datasource",
-            'gcinsight_usage_plugin_adoption{kind="synthetic-monitoring-datasource"}',
+            "gcinsight_usage_synthetic_monitoring_datasource_stacks",
             description="Stacks where the Synthetic Monitoring datasource is provisioned. Presence alone "
                         "does not prove a check is executing; compare with the 24-hour activity count."),
         "n_sm_active": build.stat_panel(
@@ -3277,6 +3272,30 @@ def d_coverage(ds: str):
             description="Stacks showing no use inside the stated capability population, ranked by "
                         "active series so the largest existing telemetry footprints lead the queue."),
 
+        "tbl_datasource_provisioned": build.table_panel(
+            "Third-party datasource types PROVISIONED",
+            "usage_plugin_adoption", ds,
+            schema=usage_pillar.VIEW_SCHEMAS["usage_plugin_adoption"],
+            description="Point-in-time control-plane inventory, ranked by stacks carrying each type. "
+                        "The auto-provisioned grafana-knowledgegraph-datasource is excluded because it "
+                        "is not an adoption decision. This states configuration, not use."),
+        "tbl_datasource_queried": build.table_panel(
+            "Datasource types actually QUERIED in 24 hours",
+            "insights_datasource_types", ds,
+            schema=insights_pillar.VIEW_SCHEMAS["insights_datasource_types"],
+            description="Pillar J usage-insights evidence from measured stacks only. This states real "
+                        "panel demand in its explicit 24-hour window, not what is merely provisioned; "
+                        "its freshness and coverage denominator are shown above."),
+        "tbl_datasource_inventory": build.table_panel(
+            "Named stack-to-datasource inventory",
+            "usage_datasource_inventory", ds,
+            schema=usage_pillar.VIEW_SCHEMAS["usage_datasource_inventory"],
+            description="The call list behind the provisioned ranking: one row per live stack and "
+                        "third-party datasource type, with its instance count. Fundable next step: "
+                        "commission a datasource consolidation assessment for the highest-reach vendor "
+                        "type, then use this register to scope the stack owners and Pillar J to confirm "
+                        "current demand."),
+
         "tbl_services": build.table_panel(
             "Named service observability completeness register", coverage_pillar.SERVICE_VIEW, ds,
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.SERVICE_VIEW],
@@ -3437,6 +3456,12 @@ def d_coverage(ds: str):
             build.row("Population and fundable next step", ["tbl_adoption"], max_columns=1),
             build.row("Named call list, largest telemetry footprint first",
                       ["tbl_adoption_targets"], max_columns=1, row_height="tall"),
+        ]),
+        build.rows_tab("Adjacent datasource estate", [
+            build.row("Provisioned configuration versus measured use",
+                      ["tbl_datasource_provisioned", "tbl_datasource_queried"], max_columns=2),
+            build.row("Named consolidation call list", ["tbl_datasource_inventory"],
+                      max_columns=1, row_height="tall"),
         ]),
         build.rows_tab("Outcome value", [
             build.row("Recorded response", ["n_value_groups", "n_value_acknowledged",

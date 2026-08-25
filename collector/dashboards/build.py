@@ -926,7 +926,10 @@ DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     "ai": ("assistant",),
     # Pillar K combines the daily signal-label sweep with the existing dashboard and alert inventories.
     # The live usage panels carry datasource-native freshness and are called out separately in the banner.
-    "coverage": ("alert_routing", "capability_adoption", "dashboard_inventory", "signal_inventory"),
+    "coverage": (
+        "alert_routing", "capability_adoption", "dashboard_inventory", "insights",
+        "signal_inventory",
+    ),
 }
 
 # Inputs used by metric panels but not by an S3 view on the same dashboard. Most dashboard input

@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **8,811** |
-| Phase 1 only | 8,810 |
+| **Declared (all phases)** | **8,763** |
+| Phase 1 only | 8,762 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -21,7 +21,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 |---|---|
 | A | 296 |
 | B | 1,101 |
-| C | 62 |
+| C | 14 |
 | D | 582 |
 | E | 301 |
 | F | 21 |
@@ -29,7 +29,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | J | 4,368 |
 | K | 967 |
 | scan | 218 |
-| **Total** | **8,811** |
+| **Total** | **8,763** |
 
 ## Metrics
 
@@ -60,7 +60,6 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(15) | 60 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
 | `gcinsight_input_available` | scan | `tier`(4), `input`(15) | 60 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
 | `gcinsight_coverage_unscored` | K | `component`(8), `reason`(7) | 56 | 1 | bounded component/reason counts; product absence and unavailable evidence are excluded from the score rather than published as failed coverage |
-| `gcinsight_usage_plugin_adoption` | C | `kind`(50) | 50 | 1 | bounded headroom for datasource types; excludes grafana-knowledgegraph-datasource because it is auto-provisioned rather than an adoption decision |
 | `gcinsight_scan_stacks_failed` | scan | `tier`(4), `reason`(8) | 32 | 1 | reason is a closed failure vocabulary: http_429, http_5xx, timeout, auth, ... |
 | `gcinsight_findings` | scan | `kind`(18) | 18 | 1 | count per finding kind, derived from the pillar views by pillars/findings.py. A kind the running tier cannot compute is ABSENT, never 0 |
 | `gcinsight_maturity_dimension_mean` | D | `dimension`(9), `version`(2) | 18 | 1 | estate mean per rubric dimension  -  answers 'which dimension is the estate weakest on', which the per-stack view cannot trend without a stack-by-dimension cross product. Mean is over the stacks that SCORED that dimension, excluding the four unscored reasons |
@@ -165,7 +164,9 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_risk_stacks_without_delete_protection` | E |  -  | 1 | 1 | estate count, no labels  -  the per-stack risk detail is the view |
 | `gcinsight_stacks_missing_credential` | I |  -  | 1 | 1 | count of provisionable stacks with no working credential. NOT the alert: a count above zero is normal for hours after the organisation creates a stack |
 | `gcinsight_stacks_provisioned` | I |  -  | 1 | 1 |  |
+| `gcinsight_usage_datasource_types_distinct` | C |  -  | 1 | 1 | distinct provisioned datasource types estate-wide; vendor names stay in S3 and the auto-provisioned knowledge-graph datasource is excluded |
 | `gcinsight_usage_stickiness_ratio` | C |  -  | 1 | 1 | estate daily/active; per-stack is a view column |
+| `gcinsight_usage_synthetic_monitoring_datasource_stacks` | C |  -  | 1 | 1 | fixed scalar preserving the provisioned-versus-active Synthetic Monitoring comparison without a datasource-type label |
 | `gcinsight_value_savings_identified_currency` | F |  -  | 1 | 1 | the same reduction priced with the deployment's own rate card. ABSENT, never zero, when no rate card is supplied or no stack returned verbose counts |
 | `gcinsight_value_savings_identified_series` | F |  -  | 1 | 1 | remediable series, summed from the per-metric reduction each Adaptive recommendation declares under ?verbose=true. Emitted whenever T3 data is present |
 | `gcinsight_value_savings_unused_currency` | F |  -  | 1 | 1 | the unused-reference subset, priced. Same absence rule as above; still subject to owner review |
@@ -216,6 +217,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `risk_org_members` | E | 1 | 1 | clear-PII named org membership and staff-access-window drill-down |
 | `risk_plugin_version_drift` | E | 271 | 1 |  |
 | `risk_sa_and_token_inventory` | E | 271 | 1 | named service-account and token inventory stays out of metric labels |
+| `usage_datasource_inventory` | C | 271 | 1 | live-inventory stack, vendor datasource type and instance count; type names stay out of metric labels |
 | `usage_query_cost_attribution` | C | 271 | 2 |  |
 
 ## Rules this table enforces

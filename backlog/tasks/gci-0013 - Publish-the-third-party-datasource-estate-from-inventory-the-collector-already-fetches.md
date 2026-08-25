@@ -3,9 +3,11 @@ id: GCI-0013
 title: >-
   Publish the third-party datasource estate from inventory the collector already
   fetches
-status: To Do
-assignee: []
+status: Done
+assignee:
+  - '@codex'
 created_date: '2026-08-25 13:00'
+updated_date: '2026-08-25 17:01'
 labels:
   - coverage
   - adjacent-estate
@@ -49,16 +51,43 @@ Datasource type names are vendor identifiers, not customer identifiers, so they 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Per-type datasource inventory published as a view from the existing inventory call
-- [ ] #2 No new per-stack metric is emitted for datasource counts
-- [ ] #3 The auto-provisioned knowledge-graph datasource is excluded from every adoption figure and the exclusion is stated
-- [ ] #4 Provisioned versus actually-queried is presented as two distinct figures
-- [ ] #5 Any adoption threshold uses > 1, never > 0
+- [x] #1 Per-type datasource inventory published as a view from the existing inventory call
+- [x] #2 No new per-stack metric is emitted for datasource counts
+- [x] #3 The auto-provisioned knowledge-graph datasource is excluded from every adoption figure and the exclusion is stated
+- [x] #4 Provisioned versus actually-queried is presented as two distinct figures
+- [x] #5 Any adoption threshold uses > 1, never > 0
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 python3 -m pytest tests -q
-- [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
-- [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
+- [x] #1 python3 -m pytest tests -q
+- [x] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
+- [x] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Pin the inventory denominator, knowledge-graph exclusion, view-only vendor names and provisioned-versus-queried distinction with focused tests.
+2. Publish a live-inventory-derived stack/type/count view and retain the ranked per-type aggregate view; replace the dynamic datasource-type metric label with scalar estate counts only.
+3. Add a Coverage adjacent-estate tab showing provisioned types, the named stack register and Pillar J 24-hour queried types as distinct evidence, with a specific consolidation assessment next step.
+4. Regenerate derived views and BUDGET.md, run the full repository gates and CodeRabbit, finalize Backlog, commit to main and push.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+IMPLEMENTATION EVIDENCE. The existing gcom inventory already carries datasourceCnts, so the new usage_datasource_inventory view is composed directly from the live stack set with no request, credential or configured type list. It publishes stack, datasource type and provisioned instance count. The ranked usage_plugin_adoption view remains the provisioned aggregate. Both exclude grafana-knowledgegraph-datasource because it is auto-provisioned rather than an adoption decision.
+
+Discovered vendor type names no longer enter Mimir labels: the former gcinsight_usage_plugin_adoption{kind} series is retired. Mimir now receives only gcinsight_usage_datasource_types_distinct as the bounded estate figure. The established Synthetic Monitoring provisioned-versus-active comparison is preserved as a separate fixed scalar with no datasource label. No per-stack datasource metric or billing-datasource collection was added.
+
+Coverage now presents the provisioned type ranking beside Pillar J datasource types actually queried in its explicit 24-hour window, then provides the named stack/type/count register. Descriptions distinguish point-in-time configuration from measured use, state the knowledge-graph exclusion and name a fundable consolidation assessment starting with the highest-reach vendor type. The Coverage freshness banner now includes the separate insights input so stale or partial query evidence cannot masquerade as current inventory.
+
+VERIFICATION. python3 -m pytest tests -q: 1409 passed, 2 skipped, 6741 subtests. tofu fmt -check -recursive terraform passed; tofu validate passed for terraform/ and terraform/examples/standalone/ using the initialized modules. Generated BUDGET.md matches collector.emit.budget. Customer-identifier history and shipped-text gates are clean. CodeRabbit initially raised one valid test-strengthening point and one invalid generated-view claim: the latter was disproved by matching hashes over all 50 non-zero, non-excluded rows from the 40-stack compose fixture; its separate 35-type figure comes from the 271-stack evidence fixture. After strengthening the test, the final review raised 0 issues.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Published the adjacent datasource estate from the inventory already fetched every run. Coverage now separates provisioned third-party datasource types from types actually queried over Pillar J's 24-hour window, provides the named stack/type/count consolidation call list, excludes the auto-provisioned knowledge-graph datasource from adoption, and keeps discovered vendor names in S3 rather than metric labels. The only adoption metric added is the scalar distinct-type count; no per-stack count or extra collection was introduced.
+<!-- SECTION:FINAL_SUMMARY:END -->
