@@ -17,8 +17,8 @@
 # can never be attributed. Run it after any apply that replaces storage, or whenever a Cost Explorer
 # figure looks too low.
 #
-#   bin/check-tags.sh              # audit, exit 1 if anything is missing
-#   bin/check-tags.sh --fix        # apply the tag to whatever is missing it, then re-audit
+#   just check-tags              # audit, exit 1 if anything is missing
+#   just check-tags --fix        # apply the tag to whatever is missing it, then re-audit
 set -uo pipefail
 
 REGION="${GCINSIGHT_S3_REGION:-eu-west-1}"

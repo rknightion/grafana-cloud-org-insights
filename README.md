@@ -139,12 +139,12 @@ first-deployment order, because doing those steps out of sequence gives you four
 to start.
 
 ```bash
-bin/build-and-push.sh --repo <ecr-uri> --no-push # build the image; ARM64, no Python dependencies
-bin/build-and-push.sh --repo <ecr-uri> # push immutable :sha-<commit>
+just image --repo <ecr-uri> # build the image; ARM64, no Python dependencies
+just publish-image --repo <ecr-uri> # confirm, then push immutable :sha-<commit>
 python3 bin/alerts.py --list # the health alert rules and their routing
 python3 bin/trace.py --live --context <gcx-context> # prove every headline reproduces from the raw scan
 python3 bin/probe_usage_signals.py # re-measure the grafanacloud-usage panels; needs no credential
-bin/check-tags.sh # audit the cost-allocation tag; --fix to repair
+just check-tags # audit the cost-allocation tag; pass --fix to repair
 ```
 
 Fargate pulls at task start, so a pushed image is picked up by the next scheduled run with no apply.
@@ -184,7 +184,7 @@ policy. `python3 bin/alerts.py --activate --receiver <contact point>`.
 ## Tests
 
 ```bash
-python3 -m pytest tests -q
+just test
 ```
 
 No AWS credentials, no network, no live estate. `testdata/` holds a synthetic estate and

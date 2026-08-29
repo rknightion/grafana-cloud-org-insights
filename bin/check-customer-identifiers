@@ -3,6 +3,18 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# `just setup` creates `.venv/`, which is intentionally ignored by the content scan so third-party
+# tooling cannot create false positives. A force-tracked virtualenv at any repository depth would bypass
+# that scan, so refuse it before evaluating the supplied identifier patterns.
+if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  tracked_venv="$(git -C "$ROOT" ls-files -- ':(top,glob)**/.venv/**')"
+  if [ -n "$tracked_venv" ]; then
+    echo "error: .venv must not be tracked" >&2
+    exit 1
+  fi
+fi
+
 HISTORY=0
 TARGET="$ROOT"
 PATTERNS_FILE=""
@@ -42,6 +54,7 @@ fi
 set +e
 hits="$(grep -rInoE "$PATTERNS" "$TARGET" \
   --exclude-dir=.git \
+  --exclude-dir=.venv \
   --exclude-dir=__pycache__ \
   --exclude-dir=.pytest_cache \
   --exclude-dir=.terraform)"

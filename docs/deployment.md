@@ -45,8 +45,8 @@ The full procedure for a named organisation - which credentials to create in whi
 ## Building the image
 
 ```bash
-bin/build-and-push.sh --repo <ecr-uri> --no-push   # ARM64, no Python dependencies
-bin/build-and-push.sh --repo <ecr-uri>             # push immutable :sha-<commit>
+just image --repo <ecr-uri>   # ARM64, no Python dependencies
+just publish-image --repo <ecr-uri> # confirm, then push immutable :sha-<commit>
 ```
 
 Fargate pulls at task start, so a pushed image is picked up by the next scheduled run with no apply.

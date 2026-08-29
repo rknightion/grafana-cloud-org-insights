@@ -64,8 +64,8 @@ For `ssm:GetParametersByPath`, test the bare path ARN as well as a child ARN. Th
 ## Cost allocation
 
 ```bash
-bin/check-tags.sh          # audit the cost-allocation tag
-bin/check-tags.sh --fix    # repair it
+just check-tags          # audit the cost-allocation tag
+just check-tags --fix    # repair it
 ```
 
 ## Proving a headline
