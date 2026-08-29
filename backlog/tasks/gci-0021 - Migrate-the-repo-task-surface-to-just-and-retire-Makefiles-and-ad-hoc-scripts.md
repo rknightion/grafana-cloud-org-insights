@@ -1,10 +1,10 @@
 ---
 id: GCI-0021
 title: Migrate the repo task surface to just and retire Makefiles and ad-hoc scripts
-status: Parked
+status: Done
 assignee: []
 created_date: '2026-08-28 19:32'
-updated_date: '2026-08-29 15:44'
+updated_date: '2026-08-29 16:31'
 labels:
   - 'wave:2-fleet'
 dependencies: []
@@ -445,23 +445,23 @@ tracker's markdown" rule targets tasks/docs, not this settings file.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Top-level justfile exists with all seven mandatory recipes (default, setup, fmt, fmt-check, lint, test, check) plus tf-validate, check-identifiers, no-em-dashes, check-tags, image, publish-image, consumer-build, consumer-exec, clean
-- [ ] #2 just check passes locally and is exactly what ci.yml's tests/identifiers/terraform jobs enforce (pytest, dependency-file guard, customer-identifier scan, em-dash scan, tofu validate/fmt for terraform/ and terraform/examples/standalone/)
-- [ ] #3 just --fmt --check passes on the justfile
-- [ ] #4 just --list shows a doc comment and a group for every public recipe
-- [ ] #5 No Makefile exists in the repo (none existed before this migration either - confirmed absent, not deleted)
-- [ ] #6 All five KEEP shell scripts (bin/build-and-push.sh, bin/check-tags.sh, bin/check-customer-identifiers, bin/consumer-build, bin/consumer-exec) remain as files and are each reachable only via a just recipe
-- [ ] #7 ci.yml's tests, identifiers, and terraform jobs call just recipes (just lint, just setup, just test, just check-identifiers, just no-em-dashes, just tf-validate) via a pinned extractions/setup-just step, and ci-success still gates on the same three job names
-- [ ] #8 AGENTS.md (and CLAUDE.md if it duplicates the instruction) references just --list / just --dump / just --show instead of make or a raw command, and includes the Task interface section from the fleet standard
-- [ ] #9 backlog/config.yml's definition_of_done names just test, just tf-validate, and just check-identifiers/just no-em-dashes instead of raw python3/tofu/ci.yml-gate references
-- [ ] #10 .venv/ is added to .gitignore before or alongside the justfile
+- [x] #1 Top-level justfile exists with all seven mandatory recipes (default, setup, fmt, fmt-check, lint, test, check) plus tf-validate, check-identifiers, no-em-dashes, check-tags, image, publish-image, consumer-build, consumer-exec, clean
+- [x] #2 just check passes locally and is exactly what ci.yml's tests/identifiers/terraform jobs enforce (pytest, dependency-file guard, customer-identifier scan, em-dash scan, tofu validate/fmt for terraform/ and terraform/examples/standalone/)
+- [x] #3 just --fmt --check passes on the justfile
+- [x] #4 just --list shows a doc comment and a group for every public recipe
+- [x] #5 No Makefile exists in the repo (none existed before this migration either - confirmed absent, not deleted)
+- [x] #6 All five KEEP shell scripts (bin/build-and-push.sh, bin/check-tags.sh, bin/check-customer-identifiers, bin/consumer-build, bin/consumer-exec) remain as files and are each reachable only via a just recipe
+- [x] #7 ci.yml's tests, identifiers, and terraform jobs call just recipes (just lint, just setup, just test, just check-identifiers, just no-em-dashes, just tf-validate) via a pinned extractions/setup-just step, and ci-success still gates on the same three job names
+- [x] #8 AGENTS.md (and CLAUDE.md if it duplicates the instruction) references just --list / just --dump / just --show instead of make or a raw command, and includes the Task interface section from the fleet standard
+- [x] #9 backlog/config.yml's definition_of_done names just test, just tf-validate, and just check-identifiers/just no-em-dashes instead of raw python3/tofu/ci.yml-gate references
+- [x] #10 .venv/ is added to .gitignore before or alongside the justfile
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 python3 -m pytest tests -q
-- [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
-- [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
+- [x] #1 python3 -m pytest tests -q
+- [x] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
+- [x] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -477,6 +477,10 @@ tracker's markdown" rule targets tasks/docs, not this settings file.
 
 <!-- SECTION:NOTES:BEGIN -->
 Campaign parking boundary: the migration is fully staged but no trustworthy final gate exists. A non-isolated just check resolved Playwright from another repository and was invalidated; the follow-up child then drifted into an unrelated BrewMDM polling command and was stopped to enforce repository ownership. Resume in this checkout only: first prove pwd and git top-level, use an absolute justfile/working-directory and unique JUST_TEMPDIR/TMPDIR, sanitize PATH and PYTHON/Node environment so every invoked binary resolves inside this repository or the system toolchain, then run just --fmt --check, JSON dump, just check, CodeRabbit, commit/push, exact-head CI, and finalization. Preserve the current staged migration and do not count any earlier cross-repository process as evidence.
+
+Resumed from the documented park boundary. An isolated full gate passed pytest but hit a transient OpenTofu provider-startup failure in the standalone example; the same recipe then passed with a fresh provider data directory and the default temporary-directory setting. The final provenance-controlled full gate is being rerun before review and commit.
+
+Final verification: an isolated sentinel-backed just check passed (1,422 passed, 2 skipped, 6,743 subtests; both OpenTofu roots validated; identifier history and em-dash scans clean). The protected customer-identifier pattern was exercised by exact-head GitHub CI, where the identifier, pytest, OpenTofu, and ci-success jobs all passed. just formatter, JSON dump, recipe list, actionlint, zizmor, named-path diff checks, Makefile absence, script retention, and .venv ignore behavior were also verified. CodeRabbit review found and the migration fixed the tracked nested-virtualenv scan bypass; one non-impactful test-only absolute-git-path minor was deliberately left.
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -522,3 +526,9 @@ Eleven of the 42 lanes arrived at this shape independently before it was ratifie
 **If this repo has no such legs, it has no `ci` recipe at all** and `check` is the whole gate. Do not add an empty one.
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Migrated the repository task surface to a top-level justfile, repointed CI and documentation, preserved all five real shell tools behind recipes, and added safe local-virtualenv handling. Verified by isolated local gate and exact-head required GitHub CI.
+<!-- SECTION:FINAL_SUMMARY:END -->
