@@ -13,4 +13,4 @@ jobs:
     permissions:
       security-events: write # upload Scorecard results
       id-token: write        # publish signed results to OpenSSF
-    uses: rknightion/.github/.github/workflows/scorecard.yml@8c1e89103d1a86179c2e94356b85bedd7c543a42 # v1.9.3
+    uses: rknightion/.github/.github/workflows/scorecard.yml@0e56520d848f5fda8cbfa0bda17797ef41f2a5a7 # v1.9.8
