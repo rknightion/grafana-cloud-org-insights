@@ -73,6 +73,15 @@ class IdentifierGateTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("unable to scan", result.stderr)
 
+    def test_gate_ignores_the_repo_local_virtualenv(self):
+        venv_marker = self.repo / ".venv" / "marker.txt"
+        venv_marker.parent.mkdir()
+        venv_marker.write_text("forbidden-customer\n")
+
+        result = self.run_gate()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_history_mode_rejects_a_leak_removed_from_head(self):
         (self.repo / "artifact.txt").write_text("forbidden-customer\n")
         self.commit("add unsafe fixture")

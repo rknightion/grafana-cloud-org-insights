@@ -1,10 +1,10 @@
 ---
 id: GCI-0021
 title: Migrate the repo task surface to just and retire Makefiles and ad-hoc scripts
-status: To Do
+status: Parked
 assignee: []
 created_date: '2026-08-28 19:32'
-updated_date: '2026-08-29 10:43'
+updated_date: '2026-08-29 15:44'
 labels:
   - 'wave:2-fleet'
 dependencies: []
@@ -463,6 +463,21 @@ tracker's markdown" rule targets tasks/docs, not this settings file.
 - [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
 - [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Add the prescribed top-level justfile and ignore the repo-local test virtualenv.
+2. Repoint the three CI jobs, agent contract, and Backlog definition of done without changing shared-workflow calls or aggregator semantics.
+3. Verify justfile syntax and isolated local gates, account for the secret-backed identifier gate, then scan for stale entry points.
+4. Stage named paths, run proportionate review, commit and push main, obtain exact-head green CI, and finalize the task.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Campaign parking boundary: the migration is fully staged but no trustworthy final gate exists. A non-isolated just check resolved Playwright from another repository and was invalidated; the follow-up child then drifted into an unrelated BrewMDM polling command and was stopped to enforce repository ownership. Resume in this checkout only: first prove pwd and git top-level, use an absolute justfile/working-directory and unique JUST_TEMPDIR/TMPDIR, sanitize PATH and PYTHON/Node environment so every invoked binary resolves inside this repository or the system toolchain, then run just --fmt --check, JSON dump, just check, CodeRabbit, commit/push, exact-head CI, and finalization. Preserve the current staged migration and do not count any earlier cross-repository process as evidence.
+<!-- SECTION:NOTES:END -->
 
 ## Comments
 

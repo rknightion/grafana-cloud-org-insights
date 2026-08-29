@@ -33,10 +33,10 @@ remains owned by the Terraform consumer's root lock file.
 `bin/consumer_manifest.py check` proves the manifest, generic checkout, Terraform ref, deterministic
 digests, externally supplied customer-identifier patterns, and declared retired-core paths agree. Set
 `GCINSIGHT_CUSTOMER_IDENTIFIER_PATTERN` or pass a private file to
-`bin/check-customer-identifiers --patterns-file`; the pattern set must never be committed to the public
-product repository. A deployment wrapper passes
+`just check-identifiers --patterns-file`; the pattern set must never be committed to the public product
+repository. A deployment wrapper passes
 each historical fork path with `--forbidden-core-path`; the checker also rejects the product's standard
-collector, scan, dashboard, and alert paths automatically. `bin/consumer-build` creates and verifies a
+collector, scan, dashboard, and alert paths automatically. `just consumer-build` creates and verifies a
 local candidate without registry access.
-`bin/consumer-exec` runs product tooling under one exact runtime projection. None of these commands
+`just consumer-exec` runs product tooling under one exact runtime projection. None of these commands
 deploys anything.
