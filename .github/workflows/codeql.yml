@@ -17,6 +17,6 @@ jobs:
       packages: read         # resolve private action packages if required
       actions: read          # inspect workflow metadata
       contents: read
-    uses: rknightion/.github/.github/workflows/codeql.yml@99a633c653561f10ef871cac2f3b2e3aad13bb5f # v1.10.1
+    uses: rknightion/.github/.github/workflows/codeql.yml@873962525bd50b84dfdb3226efab8c8e2cd6a9a2 # v1.11.0
     with:
       languages: '[{"language":"python","build-mode":"none"},{"language":"actions","build-mode":"none"}]'
