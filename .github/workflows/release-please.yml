@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: Mint a repository-scoped release token
         id: bao
-        uses: rknightion/.github/.github/actions/broker-token@99a633c653561f10ef871cac2f3b2e3aad13bb5f # v1.10.1
+        uses: rknightion/.github/.github/actions/broker-token@873962525bd50b84dfdb3226efab8c8e2cd6a9a2 # v1.11.0
         with:
           permission-set: release-please-grafana-cloud-org-insights
           role: release-please-grafana-cloud-org-insights
