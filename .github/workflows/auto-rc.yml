@@ -2,7 +2,7 @@ name: auto-rc
 
 # Fires off CI's completion rather than the push itself. The old `push:` trigger
 # started this workflow immediately and then burned a runner slot in
-# `rc / wait-for-ci` polling for a CI run still queued behind it — 20.6
+# `rc / wait-for-ci` polling for a CI run still queued behind it - 20.6
 # runner-hours of pure polling fleet-wide, and 5 of 17 in-flight jobs at one
 # sample. workflow_run fires only once CI has a verdict.
 #
@@ -32,7 +32,7 @@ jobs:
     uses: rknightion/.github/.github/workflows/auto-rc.yml@97f4a7ad0cd1ddd83562a30b9061ef8295242405 # v1.14.0
     with:
       # Under workflow_run, github.sha is the DEFAULT BRANCH HEAD, not the
-      # commit CI ran on — it races ahead on rapid pushes. head_sha is the
+      # commit CI ran on - it races ahead on rapid pushes. head_sha is the
       # commit the triggering run actually tested.
       sha: ${{ github.event.workflow_run.head_sha }}
       image-ref: ghcr.io/rknightion/grafana-cloud-org-insights
