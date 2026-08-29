@@ -42,10 +42,10 @@ Commit the deployment manifest and Terraform wiring. Build and attest a local im
 commit exists:
 
 ```bash
-just consumer-build \
-  /path/to/deployment/consumer.json \
-  /path/to/deployment \
-  /path/to/deployment/consumer.tf \
+bin/consumer-build \
+  --manifest /path/to/deployment/consumer.json \
+  --deployment-root /path/to/deployment \
+  --terraform /path/to/deployment/consumer.tf \
   --tag local/gcinsight-consumer:validation
 ```
 

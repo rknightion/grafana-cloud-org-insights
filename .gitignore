@@ -45,7 +45,6 @@ terraform.rc
 # Python
 __pycache__/
 *.py[cod]
-.venv/
 
 # Provider lock: `terraform/` is a reusable module and the example is illustrative, so pinning
 # providers here would constrain consumers rather than help them. CI runs `tofu init` itself.

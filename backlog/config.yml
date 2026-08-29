@@ -2,9 +2,9 @@ project_name: "Grafana Cloud Org Insights"
 default_status: "To Do"
 statuses: ["To Do", "In Progress", "Parked", "Done"]
 definition_of_done:
-  - "just test"
-  - "just tf-validate"
-  - "just check-identifiers and just no-em-dashes both return clean"
+  - "python3 -m pytest tests -q"
+  - "tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/"
+  - "customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean"
 labels: []
 date_format: yyyy-mm-dd
 max_column_width: 20

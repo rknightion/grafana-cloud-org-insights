@@ -3,11 +3,11 @@
 # builds and runs its own image  -  a README list of docker steps is how the code and the running image
 # drift apart.
 #
-#   just publish-image                           # confirm, then build + push an immutable sha-<commit> tag
-#   just publish-image --repo <uri>              # somewhere else (a customer's registry)
-#   just image --repo <uri>                      # build only, for a local parity check
-#   just publish-image --allow-dirty             # push from a dirty tree, deliberately
-#   just publish-image --publish-latest          # ALSO move :latest (live deployment opt-in)
+#   bin/build-and-push.sh                        # build + push an immutable sha-<commit> tag
+#   bin/build-and-push.sh --repo <uri>           # somewhere else (a customer's registry)
+#   bin/build-and-push.sh --no-push              # build only, for a local parity check
+#   bin/build-and-push.sh --allow-dirty          # push from a dirty tree, deliberately
+#   bin/build-and-push.sh --publish-latest       # ALSO move :latest (live deployment opt-in)
 #
 # TAGS: `:sha-<short>` by default. `:latest` only with `--publish-latest`.
 #
@@ -82,7 +82,7 @@ if [ "$DIRTY" -eq 1 ] && [ "$PUSH" -eq 1 ] && [ "$ALLOW_DIRTY" -eq 0 ]; then
   echo "" >&2
   echo "Commit first, or pass --allow-dirty if the tree is deliberately ahead of a commit and you" >&2
   echo "have run the tests. Adding --publish-latest would move that dirty image into production." >&2
-  echo "  just publish-image --allow-dirty" >&2
+  echo "  bin/build-and-push.sh --allow-dirty" >&2
   exit 3
 fi
 if [ "$DIRTY" -eq 1 ]; then

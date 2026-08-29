@@ -133,23 +133,8 @@ between a working page and one that renders "plugin not found".
 The suite runs with no AWS credentials, no network and no live estate:
 
 ```bash
-just test
+python3 -m pytest tests -q
 ```
-
-## Task interface
-
-This repo's task surface is a `justfile`. Discover it, don't guess it:
-
-    just --list                        # human-readable
-    just --dump --dump-format json     # machine-readable
-    just --show <recipe>               # what a recipe actually runs
-
-- `just check` is the full gate and is exactly what CI enforces. It must pass before you commit.
-- Prefer `just <recipe>` over the underlying tool. If you are typing `pytest`, you want `just test`.
-- Run `just` with stdin from /dev/null. Recipes marked `[confirm]` are destructive - stop and ask
-  before running one; never pass `--yes` or `JUST_YES=1`.
-- If a task you need does not exist, add a recipe with a `#` doc comment and a `[group(...)]`
-  rather than running a bare command.
 
 `testdata/` is a synthetic estate and `tests/fixtures/` a synthetic scan. Read `testdata/README.md`
 before treating any number in either as a measurement.

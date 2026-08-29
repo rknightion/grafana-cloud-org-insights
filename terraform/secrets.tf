@@ -59,7 +59,7 @@ data "aws_secretsmanager_secret" "tokens" {
 # and what a real failure does not.
 #
 # Deliberately NOT serialised with `depends_on`: adding artificial ordering to work around a transient read
-# would slow every apply to fix a cosmetic error. **`just check-tags` is the safety net** for the case
+# would slow every apply to fix a cosmetic error. **`bin/check-tags.sh` is the safety net** for the case
 # that would actually matter - a tag genuinely absent - and it exits non-zero on a miss.
 resource "aws_secretsmanager_tag" "adopted" {
   for_each = var.create_secret || !var.tag_adopted_secret ? {} : local.tags
