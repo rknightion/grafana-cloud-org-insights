@@ -21,7 +21,7 @@
 #
 #   docker run --rm -e GCINSIGHT_READ_TOKEN -e AWS_* gcinsight:dev --tier t1 --dry-run
 
-FROM python:3.14-slim@sha256:cae66f2ef0ec51a9891263eeee7f987dacf0a9879e8aa9353d5606e0530619a5
+FROM python:3.14-slim@sha256:656d12e70054d5fda18a045e2494c96701e9792dd1445f95b3d038df954f57e9
 
 ARG GCINSIGHT_SOURCE_URL=https://github.com/rknightion/grafana-cloud-org-insights
 ARG GCINSIGHT_SOURCE_REVISION=unknown
