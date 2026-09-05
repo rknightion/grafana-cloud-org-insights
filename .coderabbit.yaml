@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Product-specific additions to the central CodeRabbit defaults.
+# Keep inheritance enabled; shared review policy lives in the owner/coderabbit repository.
+inheritance: true
+reviews:
+  path_filters:
+  - '!BUDGET.md'
+  path_instructions:
+  - path: collector/**/*.py
+    instructions: >-
+      Discover the live estate on every run and iterate inventory, treating per-stack payloads as left-join
+      lookups. An empty inventory means unknown and must not erase carried per-stack series. A pillar
+      that cannot compute a value omits the series; never publish structural zero, a partial subtotal
+      as an estate total, or hydrate a tier's own failed input from its previous scan.
+  - path: collector/emit/**/*.py
+    instructions: >-
+      Emit directly to Loki and Mimir, not through the measured OTLP gateway. Every metric must be declared
+      in budget.py, use bounded dimensions, and justify time-series cost. Keep VIEW_INPUTS derived from
+      composition and preserve per-input provenance and the shared staleness boundary.
+  - path: bin/dashboards.py
+    instructions: >-
+      Check dashboard registration across build.DASHBOARDS, BUILDERS and PILLAR_OF, query each source
+      with its actual contract, and preserve mandatory stack/instance guards. Fixture numbers are synthetic
+      unless separately evidenced.
