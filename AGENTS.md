@@ -112,6 +112,9 @@ stack's logs.
 `just check` is the gate and is exactly what CI enforces. The suite runs with no AWS credentials, no
 network and no live estate, so run and rerun it freely.
 
+`just publish-image` is `[confirm]`-gated and pushes a real image to the configured ECR repository.
+Never pass `--yes` or `JUST_YES=1` to get past that gate.
+
 `testdata/` is a synthetic estate and `tests/fixtures/` a synthetic scan. Read `testdata/README.md`
 before treating any number in either as a measurement.
 
