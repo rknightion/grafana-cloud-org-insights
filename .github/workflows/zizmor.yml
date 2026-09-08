@@ -14,4 +14,4 @@ jobs:
       contents: read
       security-events: write # upload zizmor results
       actions: read          # inspect workflow metadata
-    uses: rknightion/.github/.github/workflows/zizmor.yml@27b0bd31dbe7bf238b89773d00d60ed5dfe187bb # v1.20.0
+    uses: rknightion/.github/.github/workflows/zizmor.yml@81fc55183265da0b21e92e690f70d679b20ed822 # v1.21.0
