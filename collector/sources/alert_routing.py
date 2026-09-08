@@ -70,9 +70,11 @@ def _validate_rules(rules: list[Any]) -> str | None:
     for index, rule in enumerate(rules):
         # The API schema requires these fields. Defaulting one would turn an incompatible response into
         # a plausible routing classification, which is worse than refusing the measurement.
-        for field in ("uid", "title", "folderUID", "ruleGroup"):
+        for field in ("uid", "title", "folderUID"):
             if not isinstance(rule.get(field), str) or not rule.get(field):
                 return f"alert rule {index} has invalid {field}"
+        if not isinstance(rule.get("ruleGroup"), str):
+            return f"alert rule {index} has invalid ruleGroup"
         uid = rule["uid"]
         if uid in seen:
             return f"alert rules contain duplicate uid at item {index}"
@@ -127,11 +129,14 @@ def _rule_row(rule: Mapping[str, Any], contact_names: set[str]) -> dict[str, Any
     else:
         receiver_state = MISSING
         routing = "direct"
+    group = str(rule.get("ruleGroup") or "").strip()
+    if group and set(group) == {"*"}:
+        group = ""
     return {
         "rule_uid": rule.get("uid"),
         "title": rule.get("title"),
         "folder_uid": rule.get("folderUID"),
-        "rule_group": rule.get("ruleGroup"),
+        "rule_group": group,
         "paused": bool(rule.get("isPaused")),
         "routing": routing,
         "receiver": receiver,
@@ -261,6 +266,9 @@ def probe_stack(client: ReadOnlyClient, stack: Mapping[str, Any], token: str) ->
         "findings_retained": min(len(findings), MAX_FINDINGS),
         "findings_truncated": len(findings) > MAX_FINDINGS,
         "findings": findings[:MAX_FINDINGS],
+        # Accumulated from the complete API response before the risk finding cap. Titles are already
+        # identity-bearing view input; rule queries and annotations remain discarded at the boundary.
+        "rule_titles": [str(rule["title"]) for rule in rules],
         # Only explicit service labels survive. Titles and receiver names are never treated as service
         # identities, because a plausible fuzzy join is worse than an unknown relationship.
         "service_routes": service_routes,

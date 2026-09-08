@@ -162,6 +162,95 @@ ALERTS = {
 
 
 class CoverageBuildTest(unittest.TestCase):
+    def test_query_selector_evidence_has_priority_and_carries_count_and_opened_qualifier(self):
+        """Only literal query evidence supports saying the dashboard actually queries the service."""
+        dashboards = {
+            "alpha": {
+                "available": True,
+                "detail_enabled": True,
+                "detail_available": True,
+                "activity_available": True,
+                "opened": [{"dashboardUid": "query", "count": 2}],
+                "dashboards": [
+                    {"uid": "query", "title": "Unrelated", "folder": "",
+                     "service_tags": [], "identity_selectors": ["checkout"]},
+                    {"uid": "named", "title": "Checkout overview", "folder": "",
+                     "service_tags": [], "identity_selectors": []},
+                ],
+            },
+        }
+        _metrics, views = coverage.build(
+            [{"slug": "alpha"}], {"alpha": SIGNALS["alpha"]},
+            dashboard_inventory=dashboards, alert_routing=ALERTS,
+        )
+
+        row = next(row for row in views[coverage.SERVICE_VIEW] if row["Service"] == "checkout")
+        self.assertEqual(row["Has dashboard"], "yes")
+        self.assertEqual(row["Dashboard evidence"], "query_selector")
+        self.assertEqual(row["Dashboard matches"], 2)
+        self.assertEqual(row["Dashboard opened 31d"], "yes")
+
+    def test_named_matching_is_token_contiguous_and_guarded_by_live_estate_spread(self):
+        """Departed payload rows cannot keep a generic dashboard name above the spread threshold."""
+        live = [{"slug": name} for name in ("alpha", "bravo", "charlie")]
+        payload = {
+            name: {"available": True, "dashboards": [{
+                "uid": name, "title": "Checkout service overview", "folder": "",
+                "service_tags": [],
+            }]}
+            for name in ("alpha", "bravo", "charlie", "departed")
+        }
+        signals = {"alpha": {**SIGNALS["alpha"], "metric_services": ["checkout-service"],
+                              "log_services": [], "trace_services": [], "profile_services": []}}
+        _metrics, views = coverage.build(
+            live, signals, dashboard_inventory=payload,
+            alert_routing={"alpha": {"available": True, "rules_total": 0}},
+        )
+        row = views[coverage.SERVICE_VIEW][0]
+        self.assertEqual(row["Dashboard evidence"], "named")
+
+        payload["alpha"]["dashboards"][0]["title"] = "checkoutservice overview"
+        _metrics, views = coverage.build(
+            live, signals, dashboard_inventory=payload,
+            alert_routing={"alpha": {"available": True, "rules_total": 0}},
+        )
+        self.assertEqual(views[coverage.SERVICE_VIEW][0]["Has dashboard"], "no",
+                         "raw substrings must never count")
+
+    def test_technology_dashboard_requires_same_stack_registry_evidence(self):
+        """Stock dashboards count only when their technology is detected on that same stack."""
+        live = [{"slug": name} for name in ("alpha", "bravo", "charlie", "delta")]
+        dashboards = {name: {"available": True, "dashboards": [{
+            "uid": name, "title": "Kubernetes overview", "folder": "", "service_tags": [],
+        }]} for name in ("alpha", "bravo", "charlie", "delta")}
+        signal = {**SIGNALS["alpha"], "metric_services": ["kubernetes"], "log_services": [],
+                  "trace_services": [], "profile_services": [], "metric_names": ["kube_pod_info"]}
+        _metrics, views = coverage.build(
+            live, {"alpha": signal}, dashboard_inventory=dashboards,
+            alert_routing={"alpha": {"available": True, "rules_total": 0}},
+        )
+        self.assertEqual(views[coverage.SERVICE_VIEW][0]["Dashboard evidence"],
+                         "technology_and_dashboard")
+
+        signal["metric_names"] = ["unclassified_metric"]
+        _metrics, views = coverage.build(
+            live, {"alpha": signal}, dashboard_inventory=dashboards,
+            alert_routing={"alpha": {"available": True, "rules_total": 0}},
+        )
+        self.assertEqual(views[coverage.SERVICE_VIEW][0]["Has dashboard"], "no")
+
+    def test_alert_titles_add_evidence_without_query_matching(self):
+        """Rule titles are free name evidence; rule query bodies never enter this source contract."""
+        alerts = {"alpha": {"available": True, "rules_total": 1,
+                            "service_routes": [], "rule_titles": ["checkout latency"]}}
+        _metrics, views = coverage.build(
+            [{"slug": "alpha"}], {"alpha": SIGNALS["alpha"]},
+            dashboard_inventory={"alpha": {"available": True, "dashboards": []}},
+            alert_routing=alerts,
+        )
+        row = next(row for row in views[coverage.SERVICE_VIEW] if row["Service"] == "checkout")
+        self.assertEqual(row["Has alert"], "yes")
+
     def test_structurally_absent_products_are_unscored_with_the_reason(self):
         """Product absence is an adoption opportunity, not failed service coverage."""
         record = dict(SIGNALS["alpha"])
@@ -300,10 +389,11 @@ class CoverageBuildTest(unittest.TestCase):
         self.assertEqual(rows["checkout"]["Score maximum"], 7)
         self.assertEqual(rows["checkout"]["Score version"], observability_score.VERSION)
         self.assertEqual(rows["inventory"]["Has alert"], "yes")
-        self.assertEqual(rows["inventory"]["Has dashboard"], "no",
-                         "dashboard titles must never infer a service relationship")
+        self.assertEqual(rows["inventory"]["Has dashboard"], "yes")
+        self.assertEqual(rows["inventory"]["Dashboard evidence"], "named",
+                         "a contiguous title match within the live spread guard is named evidence")
         self.assertEqual(rows["inventory"]["Has routed active alert"], "no")
-        self.assertEqual(rows["inventory"]["Observability completeness %"], round(2 / 7 * 100, 1))
+        self.assertEqual(rows["inventory"]["Observability completeness %"], round(3 / 7 * 100, 1))
 
         by_metric = {}
         for name, labels, value in metrics:
@@ -330,7 +420,7 @@ class CoverageBuildTest(unittest.TestCase):
         self.assertEqual(row["Metrics"], "yes")
         self.assertEqual(row["Logs"], "no")
         self.assertEqual(row["Has alert"], "yes")
-        self.assertEqual(row["Observability completeness %"], round(5 / 7 * 100, 1))
+        self.assertEqual(row["Observability completeness %"], round(6 / 7 * 100, 1))
 
     def test_failed_stack_and_departed_payload_produce_no_rows_or_zero_metrics(self):
         metrics, views = coverage.build(STACKS, SIGNALS)

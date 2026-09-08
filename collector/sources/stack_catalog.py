@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import re
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Mapping, Sequence
@@ -9,6 +11,7 @@ from typing import Any, Callable, Mapping, Sequence
 from collector.httpclient import ReadOnlyClient
 
 SEARCH_PATH = "api/search/"
+DASHBOARD_DETAIL_PATH = "api/dashboards/uid"
 DATASOURCES_PATH = "api/datasources"
 SEARCH_PAGE_SIZE = 5000  # Grafana's documented maximum.
 MAX_PAGES = 100
@@ -24,6 +27,14 @@ INVALID_RESPONSE = "invalid_response"
 TRUNCATED = "truncated"
 INVALID_URL = "invalid_url"
 INCOMPLETE_INVENTORY = "incomplete_inventory"
+
+# Canonical Pillar K identities come from service_name. `job` was measured live and resolved none of
+# 35 values, so widening this list would manufacture a bridge between disjoint namespaces.
+DASHBOARD_IDENTITY_LABELS = ("service_name",)
+_LITERAL_IDENTITY_SELECTOR = re.compile(
+    r'(?<![A-Za-z0-9_])(' + "|".join(map(re.escape, DASHBOARD_IDENTITY_LABELS))
+    + r')\s*=\s*"((?:\\.|[^"\\])*)"'
+)
 
 
 def unavailable(slug: str, reason: str, detail: str = "") -> dict[str, Any]:
@@ -69,8 +80,84 @@ def _body(response: Any, slug: str, what: str) -> tuple[Any | None, dict[str, An
                                  f"{what}: invalid JSON ({type(exc).__name__})")
 
 
+def _panel_queries(dashboard: Mapping[str, Any]) -> list[str] | None:
+    panels = dashboard.get("panels", [])
+    if not isinstance(panels, list) or not all(isinstance(panel, Mapping) for panel in panels):
+        return None
+    queries: list[str] = []
+
+    def visit(panel: Mapping[str, Any]) -> bool:
+        targets = panel.get("targets", [])
+        if not isinstance(targets, list) or not all(isinstance(target, Mapping) for target in targets):
+            return False
+        for target in targets:
+            # These are the query-bearing fields used by Grafana's Prometheus and Loki datasources.
+            # The raw strings are inspected in memory and never retained in the source payload.
+            for key in ("expr", "query"):
+                value = target.get(key)
+                if isinstance(value, str):
+                    queries.append(value)
+        children = panel.get("panels", [])
+        if not isinstance(children, list) or not all(isinstance(child, Mapping) for child in children):
+            return False
+        return all(visit(child) for child in children)
+
+    return queries if all(visit(panel) for panel in panels) else None
+
+
+def _identity_selectors(body: Any) -> list[str] | None:
+    if not isinstance(body, Mapping) or not isinstance(body.get("dashboard"), Mapping):
+        return None
+    queries = _panel_queries(body["dashboard"])
+    if queries is None:
+        return None
+    values: set[str] = set()
+    for query in queries:
+        for _label, encoded in _LITERAL_IDENTITY_SELECTOR.findall(query):
+            try:
+                value = json.loads(f'"{encoded}"')
+            except json.JSONDecodeError:
+                return None
+            if isinstance(value, str) and value.strip():
+                values.add(value.strip())
+    return sorted(values, key=str.casefold)
+
+
+def _attach_dashboard_details(
+    client: ReadOnlyClient, slug: str, base: str, token: str,
+    dashboards: list[dict[str, Any]],
+) -> dict[str, Any]:
+    detailed: list[dict[str, Any]] = []
+    for dashboard in dashboards:
+        uid = str(dashboard["uid"])
+        try:
+            response = client.get(
+                f"{base}/{DASHBOARD_DETAIL_PATH}/{urllib.parse.quote(uid, safe='')}", bearer=token,
+            )
+        except Exception as exc:  # noqa: BLE001 - one failed detail invalidates the stack census
+            return {
+                "detail_available": False, "detail_reason": TRANSPORT_ERROR,
+                "detail": f"dashboard detail: {type(exc).__name__}"[:240],
+            }
+        body, error = _body(response, slug, "dashboard detail")
+        if error:
+            return {
+                "detail_available": False, "detail_reason": error["reason"],
+                "detail": error.get("detail", ""),
+            }
+        selectors = _identity_selectors(body)
+        if selectors is None:
+            return {
+                "detail_available": False, "detail_reason": INVALID_RESPONSE,
+                "detail": "dashboard detail has invalid dashboard or panel query structure",
+            }
+        detailed.append({**dashboard, "identity_selectors": selectors})
+    return {"detail_available": True, "detail_reason": "", "dashboards": detailed}
+
+
 def probe_dashboards_stack(
     client: ReadOnlyClient, stack: Mapping[str, Any], token: str,
+    *, include_detail: bool = False,
 ) -> dict[str, Any]:
     """Enumerate the complete search result, never a top-N sample."""
     slug = str(stack.get("slug") or "")
@@ -136,10 +223,21 @@ def probe_dashboards_stack(
                     slug, INCOMPLETE_INVENTORY,
                     f"dashboard search returned {len(dashboards)} of inventory dashboardCnt={expected}",
                 )
-            return {
+            result = {
                 "slug": slug, "available": True, "reason": OK,
                 "completeness": "paged_to_short_response", "dashboards": dashboards,
+                "detail_enabled": include_detail,
             }
+            if include_detail:
+                detail = _attach_dashboard_details(client, slug, base, token, dashboards)
+                if detail.get("detail_available"):
+                    result.update(detail)
+                else:
+                    result.update(detail)
+                    # Never expose partial selector evidence: it would score early dashboards while
+                    # treating later failed reads as a trustworthy no.
+                    result["dashboards"] = dashboards
+            return result
     return unavailable(slug, TRUNCATED,
                        f"dashboard search still returned full pages after {MAX_PAGES} pages")
 
@@ -193,8 +291,14 @@ def _probe_all(
         slug = str(stack.get("slug") or "")
         token = str((credentials.get(slug) or {}).get("token") or "")
         record = probe(client, stack, token)
-        if not record.get("available") and on_error is not None:
-            on_error(slug, f"{record.get('reason')}: {record.get('detail', '')}".strip())
+        if on_error is not None:
+            if not record.get("available"):
+                on_error(slug, f"{record.get('reason')}: {record.get('detail', '')}".strip())
+            elif record.get("detail_available") is False:
+                on_error(
+                    slug,
+                    f"{record.get('detail_reason')}: {record.get('detail', '')}".strip(),
+                )
         return slug, record
 
     with ThreadPoolExecutor(max_workers=max(1, concurrency)) as pool:
@@ -205,7 +309,13 @@ def probe_dashboards_all(
     client: ReadOnlyClient, stacks: Sequence[Mapping[str, Any]],
     credentials: Mapping[str, Mapping[str, Any]], **kwargs: Any,
 ) -> dict[str, dict[str, Any]]:
-    return _probe_all(probe_dashboards_stack, client, stacks, credentials, **kwargs)
+    include_detail = bool(kwargs.pop("include_detail", False))
+    return _probe_all(
+        lambda source_client, stack, token: probe_dashboards_stack(
+            source_client, stack, token, include_detail=include_detail,
+        ),
+        client, stacks, credentials, **kwargs,
+    )
 
 
 def probe_datasources_all(

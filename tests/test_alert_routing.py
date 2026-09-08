@@ -144,6 +144,27 @@ class HealthyInventoryTest(unittest.TestCase):
         self.assertTrue(out["findings_truncated"])
         self.assertIn("missing", {row["rule_uid"] for row in out["findings"]})
 
+    def test_rule_titles_are_collected_before_findings_are_capped(self):
+        """Coverage title matching needs the whole free API response, not the risk view's top 100."""
+        rules = [rule(f"inherited-{i}") for i in range(ar.MAX_FINDINGS)]
+        rules.append(rule("after-cap", title="checkout latency"))
+        out = ar.probe_stack(
+            FakeClient([(200, rules), (200, [contact("platform")])]), STACK, "tok",
+        )
+
+        self.assertIn("checkout latency", out["rule_titles"])
+        self.assertEqual(len(out["rule_titles"]), ar.MAX_FINDINGS + 1)
+
+    def test_missing_rule_group_is_empty_not_asterisk_padding(self):
+        """An absent group stays absent so it cannot pollute later identity indexes."""
+        padded = rule("padded")
+        padded["ruleGroup"] = "*" * 80
+        out = ar.probe_stack(
+            FakeClient([(200, [padded]), (200, [contact("platform")])]), STACK, "tok",
+        )
+
+        self.assertEqual(out["findings"][0]["rule_group"], "")
+
 
 class FailureStateTest(unittest.TestCase):
     def test_missing_authoritative_url_is_invalid_without_a_request(self):

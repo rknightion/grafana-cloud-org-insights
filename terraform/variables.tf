@@ -152,6 +152,12 @@ variable "coverage_score_weights" {
   }
 }
 
+variable "dashboard_detail_enabled" {
+  description = "Fetch every dashboard JSON on the daily tier to enable literal service_name query-selector evidence. A failed detail census un-scores dashboard coverage for that stack."
+  type        = bool
+  default     = false
+}
+
 # --- Credentials -----------------------------------------------------------------------------------
 
 variable "create_secret" {

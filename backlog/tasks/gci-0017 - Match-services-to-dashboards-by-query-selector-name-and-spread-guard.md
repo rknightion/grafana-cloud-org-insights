@@ -1,10 +1,10 @@
 ---
 id: GCI-0017
 title: 'Match services to dashboards by query selector, name and spread guard'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-25 13:11'
-updated_date: '2026-08-25 13:21'
+updated_date: '2026-08-25 18:18'
 labels:
   - pillar-k
   - coverage
@@ -99,6 +99,16 @@ The SLO read is already complete. On a stack with 27 SLOs all carrying a service
 - [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
 - [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Pin matching and unscoring decisions with focused failing tests.
+2. Extend dashboard inventory detail collection behind the existing configuration boundary without changing reader permissions.
+3. Build dashboard-name spread from live inventory, publish evidence tier/count/opened qualifier, and require same-stack technology evidence for stock dashboards.
+4. Add alert-title evidence before the findings cap and remove rule-group padding.
+5. Run the full repository gates and CodeRabbit review, then commit and push.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 

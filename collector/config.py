@@ -115,6 +115,19 @@ WRITER_SCOPES = ("metrics:write", "logs:write")
 # Shared with `bin/provision.py` under the same variable name on purpose: two lists would drift, and the
 # consequence of drift is the coverage alert firing for ever on a stack we were asked to leave alone.
 OPT_OUT_ENV = "GCINSIGHT_OPT_OUT"
+DASHBOARD_DETAIL_ENV = "GCINSIGHT_DASHBOARD_DETAIL_ENABLED"
+
+
+def _optional_bool(name: str, default: bool = False) -> bool:
+    raw = os.environ.get(name)
+    if raw is None or not raw.strip():
+        return default
+    value = raw.strip().casefold()
+    if value in {"1", "true"}:
+        return True
+    if value in {"0", "false"}:
+        return False
+    raise MissingConfig(f"{name} must be one of 1, 0, true or false")
 
 
 @dataclass(frozen=True)
@@ -135,6 +148,7 @@ class Config:
     loki_tenant: str
     opt_out: tuple[str, ...] = ()
     coverage_score_weights: dict[str, float] | None = None
+    dashboard_detail_enabled: bool = False
 
     @property
     def redacted(self) -> dict[str, object]:
@@ -156,6 +170,7 @@ class Config:
             "credentials_split": self.write_token != self.cap,
             "opt_out": list(self.opt_out),
             "coverage_score_weights": self.coverage_score_weights,
+            "dashboard_detail_enabled": self.dashboard_detail_enabled,
         }
 
 
@@ -204,4 +219,5 @@ def load(
         loki_tenant=_require(*REQUIRED_ENV[5]),
         opt_out=tuple(s.strip() for s in os.environ.get(OPT_OUT_ENV, "").split(",") if s.strip()),
         coverage_score_weights=score_weights,
+        dashboard_detail_enabled=_optional_bool(DASHBOARD_DETAIL_ENV),
     )

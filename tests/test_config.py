@@ -74,6 +74,14 @@ class RequiredConfigTest(unittest.TestCase):
             ):
                 config.load(tier="t1")
 
+    def test_dashboard_detail_flag_is_explicit_and_strict(self):
+        """A misspelt rollout flag must not silently disable the denominator evidence."""
+        with _Env(**dict(COMPLETE, GCINSIGHT_DASHBOARD_DETAIL_ENABLED="true")):
+            self.assertTrue(config.load(tier="t2").dashboard_detail_enabled)
+        with _Env(**dict(COMPLETE, GCINSIGHT_DASHBOARD_DETAIL_ENABLED="sometimes")):
+            with self.assertRaisesRegex(config.MissingConfig, "DASHBOARD_DETAIL"):
+                config.load(tier="t2")
+
     def test_every_required_variable_is_refused_when_absent(self):
         for missing in REQUIRED:
             env = {k: v for k, v in COMPLETE.items() if k != missing}

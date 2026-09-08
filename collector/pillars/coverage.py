@@ -85,7 +85,10 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
         (" Stack", "string"), ("Service", "string"), ("Population", "string"),
         ("Observability completeness %", "number"), ("Signals present", "number"),
         ("Metrics", "string"), ("Logs", "string"), ("Traces", "string"),
-        ("Profiles", "string"), ("Has dashboard", "string"), ("Has alert", "string"),
+        ("Profiles", "string"), ("Has dashboard", "string"),
+        ("Dashboard evidence", "string"), ("Dashboard matches", "number"),
+        ("Dashboard opened 31d", "string"),
+        ("Has alert", "string"),
         ("Has SLO", "string"), ("Has routed active alert", "string"),
         ("Applicable components", "number"), ("Unscored reason", "string"),
         ("Score numerator", "number"), ("Score maximum", "number"),
@@ -157,6 +160,83 @@ def _dashboard_services(record: Mapping[str, Any]) -> set[str]:
     return services
 
 
+def _tokens(value: Any) -> tuple[str, ...]:
+    return tuple(token for token in re.split(r"[^a-z0-9]+", _normalise(value)) if token)
+
+
+def _contiguous_tokens(needle: tuple[str, ...], haystack: tuple[str, ...]) -> bool:
+    if not needle or len(needle) > len(haystack):
+        return False
+    return any(haystack[index:index + len(needle)] == needle
+               for index in range(len(haystack) - len(needle) + 1))
+
+
+def _named_dashboard(service: str, dashboard: Mapping[str, Any]) -> bool:
+    service_tokens = _tokens(service)
+    return any(
+        _contiguous_tokens(service_tokens, _tokens(dashboard.get(field)))
+        for field in ("title", "folder")
+    )
+
+
+def _dashboard_evidence(
+    service: str,
+    record: Mapping[str, Any],
+    live_dashboard_records: Mapping[str, Mapping[str, Any]],
+    technology_keys: set[str],
+) -> tuple[set[str], str, str]:
+    dashboards = [row for row in (record.get("dashboards") or []) if isinstance(row, Mapping)]
+    selectors: set[str] = set()
+    tags: set[str] = set()
+    named: set[str] = set()
+    for dashboard in dashboards:
+        uid = str(dashboard.get("uid") or "")
+        if not uid:
+            continue
+        if service in {_normalise(value) for value in dashboard.get("identity_selectors") or []}:
+            selectors.add(uid)
+        if service in {
+            _normalise(tag.split(":", 1)[1])
+            for tag in dashboard.get("service_tags") or []
+            if isinstance(tag, str) and tag.casefold().startswith("service:")
+        }:
+            tags.add(uid)
+        if _named_dashboard(service, dashboard):
+            named.add(uid)
+
+    spread = sum(
+        any(
+            isinstance(dashboard, Mapping) and _named_dashboard(service, dashboard)
+            for dashboard in (estate_record.get("dashboards") or [])
+        )
+        for estate_record in live_dashboard_records.values()
+        if estate_record.get("available")
+    )
+    technology = named if service in technology_keys else set()
+    guarded_named = named if spread <= 3 else set()
+    matches = selectors | tags | technology | guarded_named
+    if selectors:
+        tier = "query_selector"
+    elif tags:
+        tier = "service_tag"
+    elif technology:
+        tier = "technology_and_dashboard"
+    elif guarded_named:
+        tier = "named"
+    else:
+        tier = ""
+
+    opened = {
+        str(row.get("dashboardUid") or "") for row in (record.get("opened") or [])
+        if isinstance(row, Mapping)
+    }
+    if not record.get("activity_available"):
+        opened_state = "unscored: activity_unavailable"
+    else:
+        opened_state = "yes" if matches & opened else "no"
+    return matches, tier, opened_state
+
+
 def _alert_services(record: Mapping[str, Any]) -> tuple[set[str], set[str]]:
     if not record.get("available"):
         return set(), set()
@@ -176,6 +256,15 @@ def _alert_services(record: Mapping[str, Any]) -> tuple[set[str], set[str]]:
         ):
             routed.add(service)
     return alerts, routed
+
+
+def _alert_title_matches(service: str, record: Mapping[str, Any]) -> bool:
+    service_tokens = _tokens(service)
+    return any(
+        _contiguous_tokens(service_tokens, _tokens(title))
+        for title in (record.get("rule_titles") or [])
+        if isinstance(title, str)
+    )
 
 
 def _component_state(value: bool | None, reason: str | None) -> str:
@@ -383,6 +472,14 @@ def build(
     scored_denominators: list[int] = []
     score_product_use: dict[str, dict[str, bool]] = {}
     measured = 0
+    live_slugs = {
+        str(stack.get("slug") or "") for stack in stacks
+        if stack.get("slug") and stack.get("status") != "paused"
+    }
+    live_dashboard_records = {
+        slug: record for slug, record in (dashboard_inventory or {}).items()
+        if slug in live_slugs and isinstance(record, Mapping)
+    }
 
     for stack in stacks:
         slug = str(stack.get("slug") or "")
@@ -407,7 +504,6 @@ def build(
 
         dashboard_record = (dashboard_inventory or {}).get(slug) or {}
         alert_record = (alert_routing or {}).get(slug) or {}
-        dashboards = _dashboard_services(dashboard_record)
         alerts, routed = _alert_services(alert_record)
         product_use = _score_product_use(record, by_signal)
         score_product_use[slug] = product_use
@@ -435,6 +531,12 @@ def build(
         }
         for signal, names in by_signal.items():
             signal_counts[signal] += len(names & application_services)
+
+        classification = technology_registry.classify(
+            record.get("metric_names") or [],
+            label_matches=record.get("technology_label_matches") or [],
+        )
+        technology_keys = {row["key"] for row in classification["technologies"]}
         rows = []
         for service in canonical:
             signals = signals_by_service[service]
@@ -446,16 +548,20 @@ def build(
             }.get(population)
             if row_unscored is None:
                 depth_counts[depth] += 1
+            dashboard_matches, dashboard_tier, dashboard_opened = _dashboard_evidence(
+                service, dashboard_record, live_dashboard_records, technology_keys,
+            )
+            service_alerts = service in alerts or _alert_title_matches(service, alert_record)
             components: dict[str, bool | None] = {
                 "metrics": service in by_signal["metrics"],
                 "logs": service in by_signal["logs"],
                 "traces": service in by_signal["traces"],
                 "profiles": service in by_signal["profiles"] if profiles_in_use else None,
                 "dashboard": (
-                    service in dashboards
+                    bool(dashboard_matches)
                     if dashboard_available and dashboard_evidence_available else None
                 ),
-                "alert": service in alerts if alert_in_use else None,
+                "alert": service_alerts if alert_in_use else None,
                 "slo": service in slos if slo_in_use else None,
             }
             reasons: dict[str, str] = {}
@@ -498,6 +604,12 @@ def build(
                 "Has dashboard": _component_state(
                     components["dashboard"], reasons.get("dashboard")
                 ),
+                "Dashboard evidence": dashboard_tier,
+                "Dashboard matches": len(dashboard_matches),
+                "Dashboard opened 31d": (
+                    _component_state(None, reasons.get("dashboard"))
+                    if reasons.get("dashboard") else dashboard_opened
+                ),
                 "Has alert": _component_state(components["alert"], reasons.get("alert")),
                 "Has SLO": _component_state(components["slo"], reasons.get("slo")),
                 "Has routed active alert": "yes" if service in routed else "no",
@@ -514,10 +626,6 @@ def build(
         ))
         service_rows.extend(rows[:MAX_SERVICES])
 
-        classification = technology_registry.classify(
-            record.get("metric_names") or [],
-            label_matches=record.get("technology_label_matches") or [],
-        )
         technology_count_distribution[
             _technology_count_bucket(len(classification["technologies"]))
         ] += 1
@@ -534,7 +642,6 @@ def build(
                 "Registry version": classification["registry_version"],
                 "Last seen": last_seen,
             })
-        technology_keys = {row["key"] for row in classification["technologies"]}
         label_evidence = set(record.get("instrumentation_label_evidence") or [])
         if "otel_sdk" in technology_keys:
             instrumentation_stacks["sdk"] += 1

@@ -560,6 +560,7 @@ def gather_dashboard_inventory(
         return {}, [f"credential store: {exc}"]
     catalog = stack_catalog.probe_dashboards_all(
         client, stacks, creds, concurrency=cfg.concurrency,
+        include_detail=cfg.dashboard_detail_enabled,
         on_error=lambda slug, msg: errors.append(f"{slug}: dashboard inventory: {msg}"),
     )
     activity = usage_insights.probe_dashboard_activity_all(
@@ -584,6 +585,9 @@ def gather_dashboard_inventory(
             "available": True,
             "window": usage_insights.ACTIVITY_WINDOW,
             "dashboards": inventory.get("dashboards") or [],
+            "detail_enabled": bool(inventory.get("detail_enabled")),
+            "detail_available": inventory.get("detail_available") is not False,
+            "detail_reason": inventory.get("detail_reason", ""),
             "activity_available": bool(observed.get("available")),
             "activity_reason": "" if observed.get("available") else observed.get("reason", "not_measured"),
             "activity_detail": "" if observed.get("available") else observed.get("detail", ""),

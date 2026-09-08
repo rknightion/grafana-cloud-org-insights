@@ -79,6 +79,12 @@ variable "coverage_score_weights" {
   }
 }
 
+variable "dashboard_detail_enabled" {
+  description = "Enable daily per-dashboard detail reads for literal service_name selector evidence."
+  type        = bool
+  default     = false
+}
+
 variable "firehose_logs_enabled" {
   description = "Create the optional ECS-log Firehose stream without yet wiring the live CloudWatch log group."
   type        = bool

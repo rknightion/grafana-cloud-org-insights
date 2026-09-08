@@ -220,6 +220,52 @@ class StackCatalogSourceTest(unittest.TestCase):
         self.assertTrue(all(call[0].startswith("https://authoritative.example/")
                             for call in client.calls))
 
+    def test_dashboard_detail_keeps_only_allowlisted_literal_identity_selectors(self):
+        """Query evidence is exact service_name equality; job and regex selectors are not bridges."""
+        search = [
+            {"uid": "d-0", "title": "Unrelated", "type": "dash-db", "tags": []},
+            {"uid": "d-1", "title": "Also unrelated", "type": "dash-db", "tags": []},
+        ]
+        client = FakeClient([
+            (200, search),
+            (200, {"dashboard": {"panels": [{"targets": [{
+                "expr": 'sum(rate(requests_total{service_name="checkout",job="checkout"}[5m]))',
+            }]}]}}),
+            (200, {"dashboard": {"panels": [{"targets": [{
+                "expr": 'requests_total{service_name=~"inventory.*"}',
+            }]}]}}),
+        ])
+
+        out = stack_catalog.probe_dashboards_stack(
+            client, self.STACK, "tok", include_detail=True,
+        )
+
+        self.assertTrue(out["detail_available"])
+        self.assertEqual(out["dashboards"][0]["identity_selectors"], ["checkout"])
+        self.assertEqual(out["dashboards"][1]["identity_selectors"], [])
+        self.assertNotIn("requests_total", repr(out))
+
+    def test_one_failed_dashboard_detail_marks_stack_evidence_unavailable(self):
+        """A partial detail census cannot support a no finding for any service on the stack."""
+        search = [
+            {"uid": "d-0", "title": "One", "type": "dash-db", "tags": []},
+            {"uid": "d-1", "title": "Two", "type": "dash-db", "tags": []},
+        ]
+        out = stack_catalog.probe_dashboards_stack(
+            FakeClient([
+                (200, search),
+                (200, {"dashboard": {"panels": []}}),
+                (500, {}),
+            ]),
+            self.STACK,
+            "tok",
+            include_detail=True,
+        )
+
+        self.assertTrue(out["available"])
+        self.assertFalse(out["detail_available"])
+        self.assertTrue(all("identity_selectors" not in row for row in out["dashboards"]))
+
     def test_dashboard_search_refuses_duplicate_or_malformed_rows(self):
         duplicate = [
             {"uid": "same", "title": "One", "type": "dash-db"},
