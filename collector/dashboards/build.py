@@ -908,8 +908,8 @@ DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     "cost": ("adaptive_logs", "dataplane"),
     "usage": ("stack_detail",),
     "maturity": ("dataplane", "stack_detail"),
-    "risk": ("access_policies", "alert_routing", "dataplane", "fleet", "org_members",
-             "public_dashboards", "service_accounts", "stack_detail"),
+    "risk": ("access_policies", "alert_routing", "dataplane", "fleet", "loki_config",
+             "org_members", "public_dashboards", "service_accounts", "stack_detail"),
     "value": ("dataplane",),
     # Operations and Commercial read `grafanacloud-usage` DIRECTLY - no collector, no view, no input.
     # Their freshness is the datasource's own, which is why they get no input-age panel at all.
@@ -1041,6 +1041,7 @@ INPUT_LABELS = {
     "org_members": "Organisation membership",
     "signal_inventory": "Signal label inventory",
     "capability_adoption": "Capability adoption sweep",
+    "loki_config": "Loki configuration sweep",
 }
 
 INPUT_DESCRIPTIONS = {
@@ -1086,6 +1087,10 @@ INPUT_DESCRIPTIONS = {
     "capability_adoption": "Age of the bounded org-usage sweep behind capability opportunity counts. "
                            "Rate-shaped signals and their populations share one 24-hour window; the "
                            "named target view is withheld if this input or signal inventory is stale.",
+    "loki_config": "Age of the per-stack effective Loki retention and self-serve change-request "
+                   "sweep. Both routes are read independently, so a readable request queue does not "
+                   "stand in for unreadable effective limits, or the reverse. Gathered daily; stale "
+                   "inputs withhold their dependent views rather than publishing zeros.",
 }
 
 

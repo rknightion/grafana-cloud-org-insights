@@ -239,6 +239,48 @@ class T3CarryPublicationOrderTest(unittest.TestCase):
         self.assertEqual(rc, 0)
         save_state.assert_called_once_with(metrics, "t3", bucket=scan.s3emit.BUCKET)
 
+    def test_retention_change_rows_are_forwarded_to_loki_after_view_withholding(self):
+        row = {
+            " Stack": "alpha",
+            "Status": "pending",
+            "Requested": "requested-at",
+            "Processed": None,
+            "Author": "operator",
+            "Message": "retain synthetic logs",
+            "PR": 7,
+            "Limit": '{"period":"14d"}',
+            "Opaque keys": '{}',
+        }
+        result = {
+            "meta": {
+                "tier": "t2", "generated_at": "2026-08-21T00:00:00+00:00",
+                "coverage_ratio": 1.0, "stacks_failed": 0, "stacks_scannable": 1,
+                "stacks_total": 1, "source_failures": [], "inputs": {},
+            },
+            "data": {},
+            "_emit": {
+                "metrics": [],
+                "views": {"risk_retention_change_requests": [row]},
+            },
+        }
+        with (
+            mock.patch.object(scan, "run_t2", return_value=result),
+            mock.patch.object(scan.s3emit, "write_views", return_value=[]),
+            mock.patch.object(scan.s3emit, "write_scan", return_value=[]),
+            mock.patch.object(scan.mimir.RemoteWriter, "push", return_value=0),
+            mock.patch.object(scan.loki.LokiWriter, "push", return_value=2) as push,
+        ):
+            rc = scan.run(FakeClient(), cfg_for("t2"), SimpleNamespace(out=None))
+
+        self.assertEqual(rc, 0)
+        events = push.call_args.args[0]
+        change = [line for labels, line in events if labels.get("event") == "change"]
+        self.assertEqual(change, [{
+            "stack": "alpha", "status": "pending", "requested": "requested-at",
+            "processed": None, "author": "operator", "message": "retain synthetic logs",
+            "pr": 7, "limit": '{"period":"14d"}', "opaque": '{}',
+        }])
+
     def test_production_stdout_is_a_compact_summary_not_the_scan_envelope(self):
         result = {
             "meta": {
@@ -373,6 +415,28 @@ class T3CarryPublicationOrderTest(unittest.TestCase):
 
 
 class T2SourceHealthTest(unittest.TestCase):
+    def test_loki_retention_uses_org_cap_and_stack_reader_store_independently(self):
+        client = object()
+        stacks = [{"slug": "alpha", "status": "active"}]
+        cfg = SimpleNamespace(concurrency=3, cap="org-cap")
+        creds = {"alpha": {"token": "reader"}}
+        result = {
+            "alpha": {
+                "limits": {"available": True, "retention_stream": []},
+                "change_requests": {"available": True, "items": []},
+            }
+        }
+        with (
+            mock.patch.object(scan.credentials, "load_all", return_value=creds),
+            mock.patch.object(scan.loki_config_src, "probe_all", return_value=result) as probe,
+        ):
+            data, errors = scan.gather_loki_config(client, cfg, stacks)
+
+        self.assertIs(data, result)
+        self.assertEqual(errors, [])
+        self.assertEqual(probe.call_args.args, (client, stacks, "org-cap", creds))
+        self.assertEqual(probe.call_args.kwargs["concurrency"], 3)
+
     def test_usage_insights_receives_the_shared_deadline_aware_client(self):
         client = object()
         stacks = [{"slug": "alpha", "status": "active"}]
@@ -439,6 +503,7 @@ class T2SourceHealthTest(unittest.TestCase):
             mock.patch.object(scan, "gather_alert_routing", return_value=unavailable),
             mock.patch.object(scan, "gather_signal_inventory", return_value=unavailable),
             mock.patch.object(scan, "gather_capability_adoption", return_value=unavailable),
+            mock.patch.object(scan, "gather_loki_config", return_value=unavailable),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=hydrate_own),
             mock.patch.object(scan.compose, "build_all", return_value=([], {})),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
@@ -454,7 +519,8 @@ class T2SourceHealthTest(unittest.TestCase):
             set(result["meta"]["source_failures"]),
             {"service_accounts", "assistant", "insights", "adaptive_logs", "public_dashboards",
              "alert_routing", "dashboard_inventory", "datasource_query_cost", "signal_inventory",
-             "capability_adoption"},
+             "capability_adoption", "loki_config_limits",
+             "loki_config_change_requests"},
         )
         for name in result["meta"]["source_failures"]:
             with self.subTest(source=name):
@@ -522,6 +588,13 @@ class T2SourceHealthTest(unittest.TestCase):
             return {s["slug"]: {"slug": s["slug"], "users": [], "plugins": []} for s in selected}
 
         healthy = {s["slug"]: {"available": True} for s in stacks}
+        loki_healthy = {
+            s["slug"]: {
+                "limits": {"available": True, "retention_stream": []},
+                "change_requests": {"available": True, "items": []},
+            }
+            for s in stacks
+        }
         service_accounts = {
             s["slug"]: {"state": scan.sa_src.OK, "accounts": []} for s in stacks
         }
@@ -564,6 +637,7 @@ class T2SourceHealthTest(unittest.TestCase):
                 scan, "gather_capability_adoption",
                 return_value=({"available": True, "values": {}}, []),
             ),
+            mock.patch.object(scan, "gather_loki_config", return_value=(loki_healthy, [])),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=local_hydrate),
             mock.patch.object(scan.compose, "build_all", side_effect=compose),
             mock.patch.object(scan, "assistant_gaps", return_value={}) as assistant_gaps,
@@ -821,6 +895,12 @@ class RateCardLoadingTest(unittest.TestCase):
             return [], {}
 
         available = ({"alpha": {"available": True}}, [])
+        loki_available = ({
+            "alpha": {
+                "limits": {"available": True, "retention_stream": []},
+                "change_requests": {"available": True, "items": []},
+            },
+        }, [])
         with (
             mock.patch.object(scan.gcom, "fetch_inventory", return_value=stacks),
             mock.patch.object(scan.gcom, "fetch_all_stack_detail", side_effect=detail),
@@ -840,6 +920,7 @@ class RateCardLoadingTest(unittest.TestCase):
                 scan, "gather_capability_adoption",
                 return_value=({"available": True, "values": {}}, []),
             ),
+            mock.patch.object(scan, "gather_loki_config", return_value=loki_available),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=lambda _t, own, **_kw: (own, hydrate.Provenance())),
             mock.patch.object(scan.compose, "build_all", side_effect=compose),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
@@ -849,6 +930,7 @@ class RateCardLoadingTest(unittest.TestCase):
 
         self.assertIs(seen.get("ratecard"), card)
         self.assertIs(seen.get("signal_inventory"), available[0])
+        self.assertIs(seen.get("loki_config"), loki_available[0])
         self.assertIs(result["data"].get("signal_inventory"), available[0])
 
     def test_a_malformed_present_card_is_an_honest_configuration_error(self):

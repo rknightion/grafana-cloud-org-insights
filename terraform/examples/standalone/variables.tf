@@ -85,6 +85,24 @@ variable "dashboard_detail_enabled" {
   default     = false
 }
 
+variable "expected_retention_policy" {
+  description = "Optional per-stream Loki retention expectations. Empty disables policy-gap reporting."
+  type = list(object({
+    selector       = string
+    minimum_period = string
+  }))
+  default = []
+
+  validation {
+    condition = alltrue([
+      for policy in var.expected_retention_policy :
+      trimspace(policy.selector) != "" &&
+      can(regex("^[0-9]+([.][0-9]+)?[dh]$", trimspace(policy.minimum_period)))
+    ])
+    error_message = "Each retention expectation needs a non-empty selector and a minimum_period in hours or days, such as 24h or 14d."
+  }
+}
+
 variable "firehose_logs_enabled" {
   description = "Create the optional ECS-log Firehose stream without yet wiring the live CloudWatch log group."
   type        = bool

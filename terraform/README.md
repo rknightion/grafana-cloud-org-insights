@@ -52,6 +52,13 @@ be above zero; setting a weight to zero removes that component from the arithmet
 evidence columns. The weighted score remains in S3 rather than becoming a metric label, so deployment
 policy cannot expand Mimir cardinality.
 
+## Optional Loki retention expectations
+
+`expected_retention_policy` accepts a list of `selector` and `minimum_period` objects. The module
+serialises the list into the collector task environment. Its empty default disables policy-gap
+reporting; no selector or period is embedded in this module. Treat selectors as customer data and
+keep deployment-specific values in the consumer configuration.
+
 ## Optional ECS task logs through Data Firehose
 
 The collector already writes its structured application records to Loki. The optional Firehose path is

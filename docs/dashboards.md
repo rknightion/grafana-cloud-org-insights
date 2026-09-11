@@ -7,10 +7,10 @@ Ten surfaces, published as ordinary Grafana dashboards on the nominated write st
 | Dashboard | Pillar | Answers |
 |---|---|---|
 | `estate` | A | what stacks exist, their region, status, age, drift, delete protection and who is left over |
-| `cost` | B | consumption and its drivers: cardinality outliers and the Adaptive Metrics action queue |
+| `cost` | B | consumption and its drivers: cardinality outliers and the Adaptive Metrics action queue, including auto-apply state |
 | `usage` | C | consumer behaviour, including datasource query cost attribution |
 | `maturity` | D | a composite maturity score, with every dimension's contribution in a table |
-| `risk` | E | admin share, plugin version drift, service accounts and tokens, alert routing, org membership, configured public dashboards |
+| `risk` | E | admin share, plugin drift, identities, alert routing, public dashboards and effective per-stream retention |
 | `value` | F | business value and unit economics, priced where a rate card is supplied |
 | `operations` | - | panels only, over `grafanacloud-usage` |
 | `commercial` | - | panels only, over `grafanacloud-usage` |

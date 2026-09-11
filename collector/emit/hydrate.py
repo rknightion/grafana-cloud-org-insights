@@ -119,6 +119,10 @@ INPUT_OWNER: dict[str, str] = {
     # One org-usage query through the write-stack reader. It is separate from signal_inventory because
     # either source can fail independently; the opportunity views need both and are withheld on either.
     "capability_adoption": "t2",
+    # Effective Loki per-stream retention and the self-serve request queue. Both reads are daily:
+    # the approval path is measured in business days, and their independent availability is retained
+    # inside each per-stack record rather than flattened into a structural zero.
+    "loki_config": "t2",
 }
 
 # What each view actually needs, beyond inventory.
@@ -163,6 +167,11 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     "risk_public_dashboards": frozenset({"public_dashboards"}),
     "risk_alert_routing": frozenset({"alert_routing"}),
     "risk_alert_routing_findings": frozenset({"alert_routing"}),
+    # GCI-0022. Re-derived from the compose fixture: all three views disappear without the atomic
+    # Loki configuration input and reproduce the full-input output with that input alone.
+    "risk_retention_change_requests": frozenset({"loki_config"}),
+    "risk_retention_stream": frozenset({"loki_config"}),
+    "risk_retention_policy_gaps": frozenset({"loki_config"}),
     "cost_cardinality_outliers": frozenset({"dataplane"}),
     "cost_summary": frozenset({"dataplane"}),
     "maturity": frozenset({"dataplane"}),

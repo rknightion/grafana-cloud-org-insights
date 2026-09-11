@@ -84,7 +84,7 @@ PILLAR_J_EPOCHS = 2  # contaminated unversioned history plus the clean v2 epoch 
 FINDING_KIND = 18
 # Cardinality follows `len(hydrate.INPUT_OWNER)`; the test below the catalogue re-derives it so adding an
 # input cannot silently leave this declaration stale.
-INPUT = 15
+INPUT = 16
 # Assistant's chat taxonomy (pillars/ai.py). Declared at 8 x 8 = 64 to leave room for product additions
 # without an unplanned series jump. Estate-wide ONLY; the per-stack cross product is a view.
 CATEGORY = 8
@@ -272,6 +272,16 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("gcinsight_risk_alert_rules_unverified_builtin", "E",
                note="rules naming grafana-default-email when that built-in is absent from provisioning; "
                     "unverified, not called broken"),
+    # Loki retention. Global days per stack already exist on grafanacloud-usage, so the collector adds
+    # only bounded estate aggregates and keeps selectors, authors and messages in S3 views.
+    MetricSpec("gcinsight_risk_retention_stacks_measured", "E",
+               note="stacks whose effective Loki limits response was readable"),
+    MetricSpec("gcinsight_risk_retention_change_request_stacks", "E",
+               note="stacks whose Databases Configuration request queue was readable"),
+    MetricSpec("gcinsight_risk_retention_change_requests", "E", {"status": 3},
+               note="self-serve requests by applied, pending or rejected; identity stays in the view"),
+    MetricSpec("gcinsight_risk_retention_policy_gap_stacks", "E",
+               note="stacks breaching deployment-supplied selector policy; absent when no policy is set"),
     MetricSpec("gcinsight_risk_stacks_without_delete_protection", "E",
                note="estate count, no labels  -  the per-stack risk detail is the view"),
     MetricSpec("gcinsight_risk_plugin_drift_stacks", "E"),
@@ -410,6 +420,12 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                note="bounded named rule drill-down; rule identity stays out of metric labels"),
     MetricSpec("risk_org_members", "E", store="view",
                note="clear-PII named org membership and staff-access-window drill-down"),
+    MetricSpec("risk_retention_change_requests", "E", store="view",
+               note="self-serve request record; author and message never become metric labels"),
+    MetricSpec("risk_retention_stream", "E", store="view",
+               note="effective per-stream periods and selectors from Loki tenant limits"),
+    MetricSpec("risk_retention_policy_gaps", "E", store="view",
+               note="deployment-supplied selector expectations not met by readable effective limits"),
     MetricSpec("risk_fleet_attributes", "E", store="view",
                note="bounded active-collector version, OS, platform, source and type breakdowns"),
     MetricSpec("risk_fleet_pipelines", "E", store="view",

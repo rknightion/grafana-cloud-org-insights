@@ -63,9 +63,10 @@ module "insights" {
   # secret, push the image, run one tier by hand with `aws ecs run-task`, read its logs, confirm the
   # dashboards populate - then set this true. Turning schedules on before the secret has values gives
   # four tasks an hour failing to start, and the first thing anyone sees is a CloudWatch bill.
-  schedules_enabled        = var.schedules_enabled
-  coverage_score_weights   = var.coverage_score_weights
-  dashboard_detail_enabled = var.dashboard_detail_enabled
+  schedules_enabled         = var.schedules_enabled
+  coverage_score_weights    = var.coverage_score_weights
+  dashboard_detail_enabled  = var.dashboard_detail_enabled
+  expected_retention_policy = var.expected_retention_policy
 
   # Optional two-stage CloudWatch Logs -> Firehose -> the same Loki target. First enable the stream,
   # manually prove delivery, and only then enable the subscription. The secret is adopted by ARN; its

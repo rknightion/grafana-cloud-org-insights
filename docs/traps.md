@@ -235,6 +235,25 @@ is already a datasource on the target stack, a panel beats a pipeline.**
  block framing are both short enough to hand-roll, and a single uncompressed literal run is valid
  snappy.
 
+## Loki retention and app-plugin routes
+
+- **A reported global period that differs from a documented default is not override evidence.** The
+  effective value is the contract. Confirm a per-stream override from `retention_stream`, not by
+  comparing `retention_period` with documentation.
+- **An empty Databases Configuration request list means no self-serve request was returned.** It does
+  not mean no override is in force: an engineering-applied override can exist without an app request.
+  Keep the request and effective-limit views independent.
+- **Do not use `/loki/api/v1/config/limits/applied`.** It is deprecated and needs a different scope.
+  Read effective limits at `/config/tenant/v1/limits` with `hlInstanceId` and the existing
+  `logs:read` org token. The path has no `/loki` prefix.
+- **This effective-limits route is Loki-only.** Do not project it onto Mimir, Tempo or Pyroscope.
+  Cross-signal explicit overrides are a separate control-plane surface and are outside this source.
+- **App-plugin proxy patterns are plugin-specific.** A resources route working for one plugin does
+  not establish that it works for another. Discover a plugin's route by reading its settings module
+  URL, fetching the module and named webpack chunks from the plugin CDN, then searching those chunks
+  for `/api/plugins/` and `/api/datasources/proxy/` call sites. A 200 on the discovered route is the
+  contract; a guessed sibling path is not.
+
 ## S3 and the AWS CLI
 
 - **`aws s3api put-object --body -` does not read stdin.** It fails with

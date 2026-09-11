@@ -31,7 +31,7 @@ Four scheduled scan tiers plus a provisioner, all ECS Fargate tasks on EventBrid
 | | Cadence | Gathers |
 |---|---|---|
 | T1 | hourly | org inventory, access policies, org members and Fleet Management |
-| T2 | daily | per-stack users, plugins, service accounts, Assistant, dashboard usage, public dashboards and alert routing |
+| T2 | daily | per-stack users, plugins, service accounts, Assistant, dashboard usage, public dashboards, alert routing and Loki retention |
 | T3 | every 6h | the data plane: cardinality and Adaptive Metrics rules/recommendations |
 | T4 | daily | the estate diff, two windows: 7 days and 1 day |
 | provisioner | daily | reconciles one read-only service account per stack |

@@ -39,6 +39,10 @@ AUTH_FIELD = {
     "fleet": "id",
 }
 
+AUTO_APPLY_ENABLED = "enabled"
+AUTO_APPLY_ABSENT = "absent"
+AUTO_APPLY_UNREADABLE = "unreadable"
+
 
 def auth_for(stack: dict[str, Any], signal: str, cap: str) -> tuple[str, str]:
     field = AUTH_FIELD[signal]
@@ -248,6 +252,40 @@ def summarise_recommendations(rec_list: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _auto_apply_config(
+    client: ReadOnlyClient,
+    base: str,
+    auth: tuple[str, str],
+) -> dict[str, Any]:
+    """Read the Adaptive Metrics auto-apply object without flattening its shape.
+
+    A successful config response without an ``auto_apply`` key is a measured absence. A failed or
+    malformed response is deliberately a separate state: it cannot tell us whether auto-apply is off
+    or simply unreadable. The object itself is retained for the view, including any nested policy
+    fields; unrelated config such as ``keep_labels`` never crosses this source boundary.
+    """
+    try:
+        response = client.get(f"{base}/aggregations/recommendations/config", basic=auth)
+        if not response.ok:
+            return {"auto_apply_state": AUTO_APPLY_UNREADABLE}
+        body = response.json()
+    except Exception:  # noqa: BLE001 - an unreadable optional config must not lose other AM data
+        return {"auto_apply_state": AUTO_APPLY_UNREADABLE}
+
+    if not isinstance(body, Mapping):
+        return {"auto_apply_state": AUTO_APPLY_UNREADABLE}
+    if "auto_apply" not in body:
+        return {"auto_apply_state": AUTO_APPLY_ABSENT}
+
+    auto_apply = body["auto_apply"]
+    state = (
+        AUTO_APPLY_ENABLED
+        if isinstance(auto_apply, Mapping) and auto_apply.get("enabled") is True
+        else AUTO_APPLY_ABSENT
+    )
+    return {"auto_apply_state": state, "auto_apply": auto_apply}
+
+
 def adaptive_metrics(client: ReadOnlyClient, stack: dict[str, Any], cap: str) -> dict[str, Any]:
     """Applied aggregation rules vs waiting recommendations = the unrealised saving."""
     base = stack.get("hmInstancePromUrl")
@@ -263,6 +301,7 @@ def adaptive_metrics(client: ReadOnlyClient, stack: dict[str, Any], cap: str) ->
     # 11.3 MB verbose) for the same latency. That is affordable because the records are summarised
     # here and never stored.
     recs = client.get(f"{base}/aggregations/recommendations?verbose=true", basic=auth)
+    auto_apply = _auto_apply_config(client, base, auth)
     if not rules.ok and not recs.ok:
         return {"available": False, "http": rules.status}
 
@@ -286,6 +325,7 @@ def adaptive_metrics(client: ReadOnlyClient, stack: dict[str, Any], cap: str) ->
         # A stack with recommendations and zero applied rules has taken none of the saving on offer.
         "adopted": len(rule_list) > 0,
         "recommendations_available": recommendations_available,
+        **auto_apply,
         **summary,
     }
 

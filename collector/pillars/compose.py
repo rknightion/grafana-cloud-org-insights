@@ -20,7 +20,17 @@ from typing import Any
 
 from collector.coverage import Coverage
 from collector.emit import guard
-from collector.pillars import ai, cost, coverage as coverage_pillar, estate, maturity, risk, usage, value
+from collector.pillars import (
+    ai,
+    cost,
+    coverage as coverage_pillar,
+    estate,
+    maturity,
+    retention,
+    risk,
+    usage,
+    value,
+)
 # Aliased: the kwarg is `insights`, matching the hydrated input key so `**inputs` works.
 from collector.pillars import insights as insights_pillar
 from collector.pillars import insights_inventory
@@ -77,6 +87,8 @@ def build_all(
     # Gathered and hydrated in GCI-0008.04; consumed by the single Pillar K wiring pass in .05.
     signal_inventory: dict[str, Any] | None = None,
     capability_adoption: dict[str, Any] | None = None,
+    loki_config: dict[str, Any] | None = None,
+    expected_retention_policy: tuple[dict[str, str], ...] = (),
     score_weights: dict[str, float] | None = None,
     now: dt.datetime | None = None,
 ) -> tuple[Metrics, Views]:
@@ -92,6 +104,12 @@ def build_all(
         risk.build(stacks, coverage, dataplane, stack_detail, access_policies, fleet=fleet,
                    public_dashboards=public_dashboards, service_accounts=service_accounts,
                    alert_routing=alert_routing, org_members=org_members, now=now),
+        retention.build(
+            stacks,
+            coverage,
+            loki_config,
+            expected_policy=expected_retention_policy,
+        ),
         value.build(stacks, coverage, dataplane, ratecard=ratecard),
         ai.build(stacks, coverage, assistant, gap_first_seen=gap_first_seen, now=now),
         insights_pillar.build(stacks, coverage, insights),

@@ -240,12 +240,15 @@ class FirehoseLogPathTest(unittest.TestCase):
         self.assertIn('"firehose:PutRecordBatch"', subscription_policy)
         self.assertIn("aws_kinesis_firehose_delivery_stream.ecs_logs[0].arn", subscription_policy)
 
-    def test_subscription_trust_accepts_log_stream_source_arns(self):
+    def test_subscription_trust_matches_the_creation_time_log_group_source_arn(self):
         assume = _block(
             FIREHOSE, 'data "aws_iam_policy_document" "firehose_subscription_assume"'
         )
         self.assertIn('test     = "ArnLike"', assume)
-        self.assertIn('"${aws_cloudwatch_log_group.tasks.arn}:*"', assume)
+        self.assertIn('values = ["${aws_cloudwatch_log_group.tasks.arn}"]', assume)
+        self.assertNotIn('"${aws_cloudwatch_log_group.tasks.arn}:*"', assume)
+        self.assertIn('variable = "aws:SourceAccount"', assume)
+        self.assertIn('values   = [data.aws_caller_identity.current.account_id]', assume)
 
     def test_every_new_named_resource_is_in_the_live_tag_gate(self):
         for label in (

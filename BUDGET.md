@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **8,763** |
-| Phase 1 only | 8,762 |
+| **Declared (all phases)** | **8,777** |
+| Phase 1 only | 8,776 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -23,13 +23,13 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | B | 1,101 |
 | C | 14 |
 | D | 582 |
-| E | 301 |
+| E | 307 |
 | F | 21 |
 | I | 895 |
 | J | 4,368 |
 | K | 967 |
-| scan | 218 |
-| **Total** | **8,763** |
+| scan | 226 |
+| **Total** | **8,777** |
 
 ## Metrics
 
@@ -56,9 +56,9 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_stack_billed_users` | B | `stack`(271) | 271 | 1 | billingActiveUsers, NEVER currentActiveUsers. Named `stack_` not `cost_` so it cannot collide with the estate rollup of the same quantity |
 | `gcinsight_stack_collectors_active` | E | `stack`(271) | 271 | 1 | the per-stack half; use it to find registration concentration and churn |
 | `gcinsight_ai_estate_messages` | I | `category`(8), `surface`(8) | 64 | 1 | estate-wide category x surface, NO `stack` label  -  the per-stack cross product belongs in the existing `ai_category_surface` view |
+| `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(16) | 64 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
+| `gcinsight_input_available` | scan | `tier`(4), `input`(16) | 64 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
 | `gcinsight_coverage_technology_stacks` | K | `kind`(61) | 61 | 1 | one bounded registry enum per technology; value is measured stacks present |
-| `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(15) | 60 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
-| `gcinsight_input_available` | scan | `tier`(4), `input`(15) | 60 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
 | `gcinsight_coverage_unscored` | K | `component`(8), `reason`(7) | 56 | 1 | bounded component/reason counts; product absence and unavailable evidence are excluded from the score rather than published as failed coverage |
 | `gcinsight_scan_stacks_failed` | scan | `tier`(4), `reason`(8) | 32 | 1 | reason is a closed failure vocabulary: http_429, http_5xx, timeout, auth, ... |
 | `gcinsight_findings` | scan | `kind`(18) | 18 | 1 | count per finding kind, derived from the pillar views by pillars/findings.py. A kind the running tier cannot compute is ABSENT, never 0 |
@@ -95,6 +95,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_estate_feature_stacks` | A | `kind`(3) | 3 | 1 | incident / machine_learning / k6  -  provisioned capability nobody switched on. Emits 0 deliberately: a MEASURED zero is the finding here, unlike a structural zero elsewhere. Proves the feature is off, NOT that it is paid for |
 | `gcinsight_estate_stacks` | A | `status`(3) | 3 | 1 |  |
 | `gcinsight_estate_users_by_role` | A | `role`(3) | 3 | 1 |  |
+| `gcinsight_risk_retention_change_requests` | E | `status`(3) | 3 | 1 | self-serve requests by applied, pending or rejected; identity stays in the view |
 | `gcinsight_ai_estate_investigations` | I | `kind`(2) | 2 | 1 | created by assistant vs by user. The INVENTORY is not collectable; these counts are |
 | `gcinsight_coverage_instrumentation_stacks` | K | `kind`(2) | 2 | 1 | official SDK and deduplicated SDK-equivalent stack counts; protocol adoption stays live on grafanacloud-usage |
 | `gcinsight_coverage_metric_names` | K | `kind`(2) | 2 | 1 | matched vs unmatched metric-name evidence; unmatched is a registry backlog, never a coverage share |
@@ -161,6 +162,9 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_risk_public_dashboards_measured` | E |  -  | 1 | 1 | stacks the enumeration actually read. Never assume the rest are zero |
 | `gcinsight_risk_public_dashboards_stacks` | E |  -  | 1 | 1 | how many stacks carry at least one - the number of owner conversations |
 | `gcinsight_risk_public_dashboards_total` | E |  -  | 1 | 2 | RETIRED name, never emitted. Superseded twice: first by gcinsight_dashboards_estate_public (Pillar J, event-derived), then by the `_enumerated` family below, which counts the ones that EXIST. Kept declared so the decision stays on the record. PLAN 0.4, 18.17 |
+| `gcinsight_risk_retention_change_request_stacks` | E |  -  | 1 | 1 | stacks whose Databases Configuration request queue was readable |
+| `gcinsight_risk_retention_policy_gap_stacks` | E |  -  | 1 | 1 | stacks breaching deployment-supplied selector policy; absent when no policy is set |
+| `gcinsight_risk_retention_stacks_measured` | E |  -  | 1 | 1 | stacks whose effective Loki limits response was readable |
 | `gcinsight_risk_stacks_pipelines_no_collectors` | E |  -  | 1 | 1 | stacks with provisioned pipelines but no active collectors |
 | `gcinsight_risk_stacks_without_delete_protection` | E |  -  | 1 | 1 | estate count, no labels  -  the per-stack risk detail is the view |
 | `gcinsight_stacks_missing_credential` | I |  -  | 1 | 1 | count of provisionable stacks with no working credential. NOT the alert: a count above zero is normal for hours after the organisation creates a stack |
@@ -217,6 +221,9 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `risk_fleet_pipelines` | E | 1 | 1 | named pipeline matcher reach; full Alloy contents are never retained |
 | `risk_org_members` | E | 1 | 1 | clear-PII named org membership and staff-access-window drill-down |
 | `risk_plugin_version_drift` | E | 271 | 1 |  |
+| `risk_retention_change_requests` | E | 1 | 1 | self-serve request record; author and message never become metric labels |
+| `risk_retention_policy_gaps` | E | 1 | 1 | deployment-supplied selector expectations not met by readable effective limits |
+| `risk_retention_stream` | E | 1 | 1 | effective per-stream periods and selectors from Loki tenant limits |
 | `risk_sa_and_token_inventory` | E | 271 | 1 | named service-account and token inventory stays out of metric labels |
 | `usage_datasource_inventory` | C | 271 | 1 | live-inventory stack, vendor datasource type and instance count; type names stay out of metric labels |
 | `usage_query_cost_attribution` | C | 271 | 2 |  |

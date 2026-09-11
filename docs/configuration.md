@@ -60,6 +60,22 @@ Currency and billing period come from the card. Metrics-series pricing is per 1,
 - `base_rate_only` excludes DPM;
 - `dpm_aware` applies `max(active_series, total_dpm / included_dpm)` per stack, using live usage inputs and a dedicated dashboard calculation. It never falls back to the two-input base-series saving.
 
+## Expected Loki retention policy
+
+`GCINSIGHT_EXPECTED_RETENTION_POLICY` is an optional JSON list of `selector` and `minimum_period`
+objects. Terraform exposes the same value as `expected_retention_policy` and passes it into every scan
+task. It is genuine deployment policy, not an estate inventory:
+
+```json
+[{"selector":"{service=\"example\"}","minimum_period":"14d"}]
+```
+
+The default is an empty list. In that state the policy metric is absent and the policy-gap view is
+empty. A configured selector is evaluated only against readable effective `retention_stream` data;
+an unreadable or undisclosed response is not called compliant and is not called a breach. Selectors
+can contain customer label names and values, so the redacted runtime configuration logs only the
+number of configured expectations.
+
 ## Optional Firehose logs
 
 The collector writes its own structured Loki records, but it cannot report an image-pull failure, bootstrap error, early traceback or OOM kill - by the time any of those happen there is no collector to do the writing. The optional Firehose path forwards ECS CloudWatch logs to Loki and is **off by default**.

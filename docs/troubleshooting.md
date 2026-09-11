@@ -66,9 +66,14 @@ Every stack-local source - service accounts, Assistant, usage insights, dashboar
 
 ## `PutSubscriptionFilter` says the Firehose stream is not ACTIVE
 
-The stream is ACTIVE. The message is misleading: what actually failed is CloudWatch Logs assuming the subscription role, because it passes the **bare log-group ARN** as `aws:SourceArn` and the trust policy matches `<log-group-arn>:*`.
+The stream can be ACTIVE while the same message reports a role-assumption failure. CloudWatch Logs
+passes the **bare log-group ARN** as `aws:SourceArn`; the current module matches that exact ARN and also
+checks `aws:SourceAccount`. A trust policy matching `<log-group-arn>:*` indicates an older pinned module
+revision or drift.
 
-This affects new deployments only - the condition is evaluated when the filter is created, so an existing filter keeps working and the problem stays invisible until the next deployment is stood up.
+Inspect the planned trust policy, update the pinned revision or repair the drift, and retry against a
+log group which has never had a subscription filter. An existing filter keeps working without
+re-evaluating the creation-time condition and is not acceptance evidence.
 
 ## `--publish all` raises `EmptyView`
 

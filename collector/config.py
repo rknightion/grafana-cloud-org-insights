@@ -7,7 +7,9 @@ reading it automatically would put a `set:cloud-admin` token on the collector's 
 
 from __future__ import annotations
 
+import json
 import os
+import re
 from dataclasses import dataclass
 
 from collector import identity, observability_score
@@ -116,6 +118,8 @@ WRITER_SCOPES = ("metrics:write", "logs:write")
 # consequence of drift is the coverage alert firing for ever on a stack we were asked to leave alone.
 OPT_OUT_ENV = "GCINSIGHT_OPT_OUT"
 DASHBOARD_DETAIL_ENV = "GCINSIGHT_DASHBOARD_DETAIL_ENABLED"
+RETENTION_POLICY_ENV = "GCINSIGHT_EXPECTED_RETENTION_POLICY"
+_RETENTION_PERIOD = re.compile(r"^\d+(?:\.\d+)?[dh]$")
 
 
 def _optional_bool(name: str, default: bool = False) -> bool:
@@ -128,6 +132,33 @@ def _optional_bool(name: str, default: bool = False) -> bool:
     if value in {"0", "false"}:
         return False
     raise MissingConfig(f"{name} must be one of 1, 0, true or false")
+
+
+def _retention_policy(name: str = RETENTION_POLICY_ENV) -> tuple[dict[str, str], ...]:
+    """Parse deployment policy without embedding an organisation's selectors in source."""
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return ()
+    try:
+        value = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise MissingConfig(f"{name} must be a JSON list ({exc})") from exc
+    if not isinstance(value, list):
+        raise MissingConfig(f"{name} must be a JSON list")
+    policy: list[dict[str, str]] = []
+    for index, item in enumerate(value):
+        if not isinstance(item, dict):
+            raise MissingConfig(f"{name}[{index}] must be an object")
+        selector = item.get("selector")
+        minimum = item.get("minimum_period")
+        if not isinstance(selector, str) or not selector.strip():
+            raise MissingConfig(f"{name}[{index}].selector must be a non-empty string")
+        if not isinstance(minimum, str) or not minimum.strip():
+            raise MissingConfig(f"{name}[{index}].minimum_period must be a non-empty string")
+        if not _RETENTION_PERIOD.fullmatch(minimum.strip()):
+            raise MissingConfig(f"{name}[{index}].minimum_period must use hours or days")
+        policy.append({"selector": selector.strip(), "minimum_period": minimum.strip()})
+    return tuple(policy)
 
 
 @dataclass(frozen=True)
@@ -149,6 +180,7 @@ class Config:
     opt_out: tuple[str, ...] = ()
     coverage_score_weights: dict[str, float] | None = None
     dashboard_detail_enabled: bool = False
+    expected_retention_policy: tuple[dict[str, str], ...] = ()
 
     @property
     def redacted(self) -> dict[str, object]:
@@ -171,6 +203,8 @@ class Config:
             "opt_out": list(self.opt_out),
             "coverage_score_weights": self.coverage_score_weights,
             "dashboard_detail_enabled": self.dashboard_detail_enabled,
+            # Selectors can contain customer label names and values. Count the policy, never log it.
+            "expected_retention_policy_count": len(self.expected_retention_policy),
         }
 
 
@@ -220,4 +254,5 @@ def load(
         opt_out=tuple(s.strip() for s in os.environ.get(OPT_OUT_ENV, "").split(",") if s.strip()),
         coverage_score_weights=score_weights,
         dashboard_detail_enabled=_optional_bool(DASHBOARD_DETAIL_ENV),
+        expected_retention_policy=_retention_policy(),
     )

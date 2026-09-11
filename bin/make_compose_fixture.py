@@ -77,6 +77,7 @@ def main(argv: list[str] | None = None) -> int:
     # the dependency harness can still distinguish an input-present empty view from an absent view.
     dashboard_inventory = t2["data"].get("dashboard_inventory") or {}
     datasource_query_cost = t2["data"].get("datasource_query_cost") or {}
+    loki_config = t2["data"].get("loki_config") or {}
     # Pillar E's Fleet Management half, moved to T1 (PLAN 18.15). Same caveat as the two above: a T1 scan
     # predating the move has no such key, and the derivation test then cannot exercise the dependency.
     fleet = t1["data"].get("fleet") or {}
@@ -109,6 +110,7 @@ def main(argv: list[str] | None = None) -> int:
         "datasource_query_cost": {
             k: v for k, v in datasource_query_cost.items() if k in slugs
         },
+        "loki_config": {k: v for k, v in loki_config.items() if k in slugs},
         "fleet": {k: v for k, v in fleet.items() if k in slugs},
         "org_members": org_members,
         # Policies are org-scoped rather than per-stack, so they are kept whole but capped.

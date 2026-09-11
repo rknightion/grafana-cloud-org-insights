@@ -160,6 +160,55 @@ class RecommendationCoverageTest(unittest.TestCase):
         self.assertFalse(out["series_counts_complete"])
 
 
+class AutoApplyConfigTest(unittest.TestCase):
+    class Response:
+        def __init__(self, ok: bool, body: object, status: int = 200) -> None:
+            self.ok = ok
+            self._body = body
+            self.status = status
+
+        def json(self) -> object:
+            return self._body
+
+    class Client:
+        def __init__(self, response) -> None:
+            self.response = response
+
+        def get(self, url: str, basic: object = None):
+            return self.response
+
+    def test_enabled_preserves_the_whole_object_and_discards_keep_labels(self):
+        out = dataplane._auto_apply_config(
+            self.Client(self.Response(True, {
+                "keep_labels": ["discard-me"],
+                "auto_apply": {"enabled": True, "gate": {"policy": "synthetic"}},
+            })),
+            "https://prom.example",
+            ("1", "cap"),
+        )
+        self.assertEqual(out, {
+            "auto_apply_state": dataplane.AUTO_APPLY_ENABLED,
+            "auto_apply": {"enabled": True, "gate": {"policy": "synthetic"}},
+        })
+        self.assertNotIn("keep_labels", out)
+
+    def test_omitted_key_is_absent_not_false(self):
+        out = dataplane._auto_apply_config(
+            self.Client(self.Response(True, {"keep_labels": []})),
+            "https://prom.example",
+            ("1", "cap"),
+        )
+        self.assertEqual(out, {"auto_apply_state": dataplane.AUTO_APPLY_ABSENT})
+
+    def test_failed_or_malformed_response_is_unreadable(self):
+        for response in (self.Response(False, {}, 503), self.Response(True, [])):
+            with self.subTest(status=response.status, body=response._body):
+                out = dataplane._auto_apply_config(
+                    self.Client(response), "https://prom.example", ("1", "cap")
+                )
+                self.assertEqual(out, {"auto_apply_state": dataplane.AUTO_APPLY_UNREADABLE})
+
+
 class ConnectRpcTest(unittest.TestCase):
     def test_read_payload_is_sent_without_relaxing_the_path_guard(self):
         response = mock.MagicMock()

@@ -82,6 +82,32 @@ class RequiredConfigTest(unittest.TestCase):
             with self.assertRaisesRegex(config.MissingConfig, "DASHBOARD_DETAIL"):
                 config.load(tier="t2")
 
+    def test_expected_retention_policy_is_optional_validated_json(self):
+        with _Env(**dict(
+            COMPLETE,
+            GCINSIGHT_EXPECTED_RETENTION_POLICY=(
+                '[{"selector":"{service=\\"api\\"}","minimum_period":"14d"}]'
+            ),
+        )):
+            cfg = config.load(tier="t2")
+        self.assertEqual(cfg.expected_retention_policy, ({
+            "selector": '{service="api"}', "minimum_period": "14d",
+        },))
+        self.assertEqual(cfg.redacted["expected_retention_policy_count"], 1)
+        self.assertNotIn("service", str(cfg.redacted))
+
+        with _Env(**dict(COMPLETE, GCINSIGHT_EXPECTED_RETENTION_POLICY='{"selector":"x"}')):
+            with self.assertRaisesRegex(config.MissingConfig, "JSON list"):
+                config.load(tier="t2")
+        with _Env(**dict(
+            COMPLETE,
+            GCINSIGHT_EXPECTED_RETENTION_POLICY=(
+                '[{"selector":"{service=\\"api\\"}","minimum_period":"two weeks"}]'
+            ),
+        )):
+            with self.assertRaisesRegex(config.MissingConfig, "hours or days"):
+                config.load(tier="t2")
+
     def test_every_required_variable_is_refused_when_absent(self):
         for missing in REQUIRED:
             env = {k: v for k, v in COMPLETE.items() if k != missing}

@@ -24,7 +24,8 @@ absent rather than becoming a zero or an inferred total.
 
 from __future__ import annotations
 
-from typing import Any
+import json
+from typing import Any, Mapping
 
 from collector.coverage import Coverage
 
@@ -47,7 +48,7 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
     "cost_adaptive_metric_recommendations": (
         (" Stack", "string"), ("Metric", "string"), ("Current series", "number"),
         ("Recommended series", "number"), ("Removable series", "number"),
-        ("Dependencies", "number"),
+        ("Dependencies", "number"), ("Auto apply", "string"), ("Auto apply raw", "string"),
     ),
     "cost_adaptive_logs": (
         (" Stack", "string"), ("Recommendations", "number"), ("Pending", "number"),
@@ -65,6 +66,26 @@ def _adaptive(dataplane: dict[str, Any], slug: str) -> dict[str, Any] | None:
     entry = (dataplane or {}).get(slug) or {}
     am = entry.get("adaptive_metrics") or {}
     return am if am.get("available") else None
+
+
+def _auto_apply(am: dict[str, Any]) -> tuple[str, str | None]:
+    """Return the explicit auto-apply state and a deterministic copy of its full object."""
+    state = am.get("auto_apply_state")
+    if state == "unreadable":
+        return "unreadable", None
+    if state == "absent":
+        if "auto_apply" not in am:
+            return "absent", None
+        return "absent", json.dumps(am["auto_apply"], sort_keys=True, separators=(",", ":"))
+
+    # The direct object fallback keeps injected scan records and older callers useful while still
+    # treating a missing source state as unreadable when no object was supplied.
+    if "auto_apply" not in am:
+        return "unreadable", None
+    raw = am["auto_apply"]
+    if state != "enabled":
+        state = "enabled" if isinstance(raw, Mapping) and raw.get("enabled") is True else "absent"
+    return state, json.dumps(raw, sort_keys=True, separators=(",", ":"))
 
 
 def _cardinality(dataplane: dict[str, Any], slug: str) -> dict[str, Any] | None:
@@ -216,9 +237,12 @@ def build(
                     "Recommended series": recommendation.get("recommended_series"),
                     "Removable series": recommendation.get("remediable_series"),
                     "Dependencies": recommendation.get("used_in"),
+                    "Auto apply": auto_apply_state,
+                    "Auto apply raw": auto_apply_raw,
                 }
                 for am, s in measured
                 for recommendation in (am.get("sample_recommendations") or [])
+                for auto_apply_state, auto_apply_raw in (_auto_apply(am),)
             ],
             key=lambda row: (-(row["Removable series"] or 0), row[" Stack"], row["Metric"] or ""),
         )

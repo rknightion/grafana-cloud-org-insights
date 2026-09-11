@@ -16163,6 +16163,27 @@
    "investigation_inventory_measurable": false
   }
  },
+ "loki_config": {
+  "stack158": {
+   "slug": "stack158",
+   "limits": {
+    "available": true,
+    "state": "ok",
+    "retention_stream": [
+     {
+      "period": "7d",
+      "priority": 1,
+      "selector": "{service=\"synthetic\"}"
+     }
+    ]
+   },
+   "change_requests": {
+    "available": true,
+    "state": "ok",
+    "items": []
+   }
+  }
+ },
  "access_policies": [
   {
    "name": "policy001",

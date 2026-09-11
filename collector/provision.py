@@ -108,6 +108,7 @@ ADAPTIVE_LOGS_PLUGIN = "grafana-adaptivelogs-app"
 # protected from aggregation, so it CAPS the achievable saving - a savings figure computed without it
 # overstates what can actually be applied.
 ADAPTIVE_METRICS_PLUGIN = "grafana-adaptive-metrics-app"
+DATABASES_CONFIG_PLUGIN = "grafana-dbcfg-app"
 
 # Adaptive Traces. **There is only ONE plugin role, `admin`**, and it bundles `config:write`,
 # `policies:write`, `policies:delete` and `recommendations:apply` with the reads. Never assign that
@@ -124,6 +125,7 @@ ADAPTIVE_TRACES_PLUGIN = "grafana-adaptivetraces-app"
 
 DESIRED_PERMISSIONS: tuple[dict[str, str], ...] = (
     {"action": "plugins.app:access", "scope": "plugins:id:grafana-assistant-app"},
+    {"action": "plugins.app:access", "scope": f"plugins:id:{DATABASES_CONFIG_PLUGIN}"},
     *({"action": f"grafana-assistant-app.{a}"} for a in ASSISTANT_ACTIONS),
     {"action": "plugins.app:access", "scope": f"plugins:id:{ADAPTIVE_LOGS_PLUGIN}"},
     {"action": f"{ADAPTIVE_LOGS_PLUGIN}.patterns:read"},

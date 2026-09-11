@@ -234,6 +234,45 @@ class FindingAndSummaryTest(unittest.TestCase):
         line = json.loads(payload["streams"][0]["values"][0][1])
         self.assertEqual(line["level"], "info")
 
+    def test_retention_change_identity_is_body_only_in_one_bounded_stream(self):
+        rows = [
+            {
+                " Stack": "one",
+                "Status": "pending",
+                "Requested": "requested-at",
+                "Processed": None,
+                "Author": "operator-one",
+                "Message": "retain synthetic logs",
+                "PR": 7,
+                "Limit": '{"period":"14d"}',
+                "Opaque keys": '{"future":{"kept":true}}',
+            },
+            {
+                " Stack": "two",
+                "Status": "applied",
+                "Requested": "requested-later",
+                "Processed": "processed-at",
+                "Author": "operator-two",
+                "Message": "retain another synthetic stream",
+                "PR": 8,
+                "Limit": '{"period":"31d"}',
+                "Opaque keys": '{}',
+            },
+        ]
+
+        entries = loki.retention_change_events("t2", rows)
+        payload = loki.build_payload(entries, timestamp=NOW)
+
+        self.assertEqual(len(payload["streams"]), 1)
+        labels, line = entries[0]
+        self.assertEqual(labels, {"tier": "t2", "pillar": "E", "event": "change"})
+        self.assertEqual(line["stack"], "one")
+        self.assertEqual(line["author"], "operator-one")
+        self.assertEqual(line["message"], "retain synthetic logs")
+        self.assertEqual(line["opaque"], '{"future":{"kept":true}}')
+        for forbidden in ("stack", "author", "message", "selector", "status"):
+            self.assertNotIn(forbidden, labels)
+
     def test_the_event_vocabulary_is_closed(self):
         used = {loki.summary_event("t1", {})[0]["event"],
                 loki.stack_detail_events("t1", _stacks()[:1])[0][0]["event"],

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "generated_at": "2026-09-11T12:23:19.047367+00:00",
     "tier": "t3",
     "stacks_total": 44,
     "stacks_scannable": 40,
@@ -50,6 +50,22 @@
       "alert_routing": {
         "source": "local",
         "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
       }
     }
   },
@@ -60,7 +76,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub",
@@ -68,7 +86,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub",
@@ -76,7 +96,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub",
@@ -84,7 +106,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub",
@@ -92,7 +116,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub",
@@ -100,7 +126,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub",
@@ -108,7 +136,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub",
@@ -116,7 +146,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub",
@@ -124,7 +156,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub",
@@ -132,7 +166,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub-dev",
@@ -140,7 +176,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub-dev",
@@ -148,7 +186,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub-dev",
@@ -156,7 +196,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub-dev",
@@ -164,7 +206,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub-dev",
@@ -172,7 +216,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub-dev",
@@ -180,7 +226,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub-dev",
@@ -188,7 +236,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub-dev",
@@ -196,7 +246,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub-dev",
@@ -204,7 +256,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "obs-hub-dev",
@@ -212,7 +266,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack001b",
@@ -220,7 +276,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack001b",
@@ -228,7 +286,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack001b",
@@ -236,7 +296,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack001b",
@@ -244,7 +306,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack001b",
@@ -252,7 +316,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack001b",
@@ -260,7 +326,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack001b",
@@ -268,7 +336,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack001b",
@@ -276,7 +346,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack001b",
@@ -284,7 +356,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack001b",
@@ -292,7 +366,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack019",
@@ -300,7 +376,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack019",
@@ -308,7 +386,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack019",
@@ -316,7 +396,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack019",
@@ -324,7 +406,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack019",
@@ -332,7 +416,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack019",
@@ -340,7 +426,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack019",
@@ -348,7 +436,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack019",
@@ -356,7 +446,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack019",
@@ -364,7 +456,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack019",
@@ -372,7 +466,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack020",
@@ -380,7 +476,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack020",
@@ -388,7 +486,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack020",
@@ -396,7 +496,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack020",
@@ -404,7 +506,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack020",
@@ -412,7 +516,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack020",
@@ -420,7 +526,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack020",
@@ -428,7 +536,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack020",
@@ -436,7 +546,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack020",
@@ -444,7 +556,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack020",
@@ -452,7 +566,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack035",
@@ -460,7 +576,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack035",
@@ -468,7 +586,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack035",
@@ -476,7 +596,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack035",
@@ -484,7 +606,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack035",
@@ -492,7 +616,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack035",
@@ -500,7 +626,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack035",
@@ -508,7 +636,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack035",
@@ -516,7 +646,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack035",
@@ -524,7 +656,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack035",
@@ -532,7 +666,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack036",
@@ -540,7 +676,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack036",
@@ -548,7 +686,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack036",
@@ -556,7 +696,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack036",
@@ -564,7 +706,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack036",
@@ -572,7 +716,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack036",
@@ -580,7 +726,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack036",
@@ -588,7 +736,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack036",
@@ -596,7 +746,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack036",
@@ -604,7 +756,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack036",
@@ -612,7 +766,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack037",
@@ -620,7 +776,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack037",
@@ -628,7 +786,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack037",
@@ -636,7 +796,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack037",
@@ -644,7 +806,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack037",
@@ -652,7 +816,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack037",
@@ -660,7 +826,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack037",
@@ -668,7 +836,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack037",
@@ -676,7 +846,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack037",
@@ -684,7 +856,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack037",
@@ -692,7 +866,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack038",
@@ -700,7 +876,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack038",
@@ -708,7 +886,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack038",
@@ -716,7 +896,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack038",
@@ -724,7 +906,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack038",
@@ -732,7 +916,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack038",
@@ -740,7 +926,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack038",
@@ -748,7 +936,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack038",
@@ -756,7 +946,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack038",
@@ -764,7 +956,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack038",
@@ -772,7 +966,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack049",
@@ -780,7 +976,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack049",
@@ -788,7 +986,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack049",
@@ -796,7 +996,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack049",
@@ -804,7 +1006,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack049",
@@ -812,7 +1016,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack049",
@@ -820,7 +1026,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack049",
@@ -828,7 +1036,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack049",
@@ -836,7 +1046,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack049",
@@ -844,7 +1056,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack049",
@@ -852,7 +1066,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack050",
@@ -860,7 +1076,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack050",
@@ -868,7 +1086,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack050",
@@ -876,7 +1096,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack052",
@@ -884,7 +1106,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack052",
@@ -892,7 +1116,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack052",
@@ -900,7 +1126,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack052",
@@ -908,7 +1136,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack052",
@@ -916,7 +1146,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack052",
@@ -924,7 +1156,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack052",
@@ -932,7 +1166,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack052",
@@ -940,7 +1176,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack052",
@@ -948,7 +1186,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack052",
@@ -956,7 +1196,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack053",
@@ -964,7 +1206,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack053",
@@ -972,7 +1216,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack053",
@@ -980,7 +1226,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack053",
@@ -988,7 +1236,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack053",
@@ -996,7 +1246,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack053",
@@ -1004,7 +1256,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack053",
@@ -1012,7 +1266,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack053",
@@ -1020,7 +1276,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack053",
@@ -1028,7 +1286,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack053",
@@ -1036,7 +1296,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack055",
@@ -1044,7 +1306,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack055",
@@ -1052,7 +1316,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack055",
@@ -1060,7 +1326,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack055",
@@ -1068,7 +1336,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack055",
@@ -1076,7 +1346,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack055",
@@ -1084,7 +1356,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack055",
@@ -1092,7 +1366,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack055",
@@ -1100,7 +1376,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack055",
@@ -1108,7 +1386,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack055",
@@ -1116,7 +1396,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack072",
@@ -1124,7 +1406,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack072",
@@ -1132,7 +1416,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack072",
@@ -1140,7 +1426,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack072",
@@ -1148,7 +1436,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack072",
@@ -1156,7 +1446,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack072",
@@ -1164,7 +1456,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack072",
@@ -1172,7 +1466,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack072",
@@ -1180,7 +1476,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack072",
@@ -1188,7 +1486,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack072",
@@ -1196,7 +1496,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack111",
@@ -1204,7 +1506,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack111",
@@ -1212,7 +1516,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack113",
@@ -1220,7 +1526,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack158",
@@ -1228,7 +1536,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack158",
@@ -1236,7 +1546,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack158",
@@ -1244,7 +1556,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack158",
@@ -1252,7 +1566,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack158",
@@ -1260,7 +1576,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack158",
@@ -1268,7 +1586,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack158",
@@ -1276,7 +1596,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack158",
@@ -1284,7 +1606,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack158",
@@ -1292,7 +1616,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack158",
@@ -1300,7 +1626,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack170",
@@ -1308,7 +1636,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack170",
@@ -1316,7 +1646,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack170",
@@ -1324,7 +1656,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack170",
@@ -1332,7 +1666,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack170",
@@ -1340,7 +1676,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack170",
@@ -1348,7 +1686,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack170",
@@ -1356,7 +1696,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack170",
@@ -1364,7 +1706,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack170",
@@ -1372,7 +1716,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack170",
@@ -1380,7 +1726,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack177",
@@ -1388,7 +1736,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack177",
@@ -1396,7 +1746,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack177",
@@ -1404,7 +1756,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack177",
@@ -1412,7 +1766,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack177",
@@ -1420,7 +1776,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack177",
@@ -1428,7 +1786,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack177",
@@ -1436,7 +1796,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack177",
@@ -1444,7 +1806,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack177",
@@ -1452,7 +1816,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack177",
@@ -1460,7 +1826,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack193",
@@ -1468,7 +1836,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack193",
@@ -1476,7 +1846,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack193",
@@ -1484,7 +1856,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack193",
@@ -1492,7 +1866,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack193",
@@ -1500,7 +1876,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack193",
@@ -1508,7 +1886,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack193",
@@ -1516,7 +1896,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack193",
@@ -1524,7 +1906,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack193",
@@ -1532,7 +1916,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     },
     {
       " Stack": "stack193",
@@ -1540,7 +1926,9 @@
       "Current series": null,
       "Recommended series": null,
       "Removable series": null,
-      "Dependencies": null
+      "Dependencies": null,
+      "Auto apply": "unreadable",
+      "Auto apply raw": null
     }
   ]
 }

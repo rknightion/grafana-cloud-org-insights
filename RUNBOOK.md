@@ -195,6 +195,10 @@ The collector reads `GCINSIGHT_READ_TOKEN` and `GCINSIGHT_WRITE_TOKEN`. The prov
 alone reads the provision token. Per-stack reader tokens are SSM `SecureString` values below the
 configured prefix.
 
+`GCINSIGHT_EXPECTED_RETENTION_POLICY` is optional deployment policy, supplied by Terraform's
+`expected_retention_policy` list. Leave it empty to disable selector-policy findings. See
+`docs/configuration.md` for the JSON shape; never put an organisation's selectors in this repository.
+
 ## Manual scans
 
 Local development uses `--dry-run`. A live manual run should use the deployed ECS task definition,
@@ -338,7 +342,7 @@ Stage 2 is worth doing properly, because it is the only stage that proves the cr
 `DeliveryToHttpEndpoint.Success` on the stream and an empty failed-record bucket. Allow a few minutes -
 these metrics lag the delivery.
 
-### A new deployment currently cannot complete stage 3
+### If stage 3 reports that the active stream is unavailable
 
 `PutSubscriptionFilter` fails with:
 
@@ -347,16 +351,15 @@ InvalidParameterException: Could not deliver test message to specified Firehose 
 Check if the given Firehose stream is in ACTIVE state.
 ```
 
-**The stream is ACTIVE and the message is misleading.** The real failure is the AssumeRole behind that
-test message. CloudWatch Logs assumes the subscription role passing the **bare log-group ARN** as
-`aws:SourceArn`, while the module's trust policy matches `<log-group-arn>:*`, so the condition never
-matches. Isolated against a throwaway role: `aws:SourceAccount` alone works, `ArnLike` on
-`<log-group-arn>:*` is blocked, and the identical condition without the `:*` suffix works.
+**The stream can be ACTIVE while the message is still returned.** The error also covers failure to
+assume the subscription role. CloudWatch Logs passes the bare log-group ARN as `aws:SourceArn`; the
+current module matches that exact ARN and retains the `aws:SourceAccount` condition. A deployment still
+matching `<log-group-arn>:*` is on an older module revision or carries trust-policy drift.
 
-An existing subscription filter keeps working, because the condition is evaluated only when the filter
-is created. This therefore looks like it affects nobody until someone stands up a new deployment - and
-it affects every one of them. Leave `firehose_log_subscription_enabled` false until the module's trust
-policy is fixed; ECS task logs remain in CloudWatch meanwhile, and only the copy to Loki is missing.
+Inspect the planned trust policy before retrying. It must contain this deployment's bare log-group ARN,
+with no `:*` suffix, and this AWS account. Update the pinned generic revision or repair the drift, then
+create the filter against a log group which has never had one. An existing filter is not acceptance
+evidence because the condition is evaluated when the filter is created.
 
 ## Credential and policy checks
 

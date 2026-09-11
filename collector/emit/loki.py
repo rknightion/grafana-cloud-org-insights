@@ -195,6 +195,34 @@ def finding_events(
     return out
 
 
+def retention_change_events(
+    tier: str, rows: Sequence[Mapping[str, Any]]
+) -> list[tuple[dict[str, str], dict[str, Any]]]:
+    """Retention request identities in line bodies under one fixed stream.
+
+    The S3 view uses display-oriented column names. Translate them at the emission boundary so Loki
+    remains directly queryable while author, message, stack and opaque request content never become
+    stream labels.
+    """
+    return [
+        (
+            {"tier": tier, "pillar": "E", "event": "change"},
+            {
+                "stack": row.get(" Stack"),
+                "status": row.get("Status"),
+                "requested": row.get("Requested"),
+                "processed": row.get("Processed"),
+                "author": row.get("Author"),
+                "message": row.get("Message"),
+                "pr": row.get("PR"),
+                "limit": row.get("Limit"),
+                "opaque": row.get("Opaque keys"),
+            },
+        )
+        for row in rows
+    ]
+
+
 def summary_event(
     tier: str, meta: Mapping[str, Any]
 ) -> tuple[dict[str, str], dict[str, Any]]:

@@ -37,6 +37,7 @@ from collector.sources import stack_catalog
 from collector.sources import assistant as assistant_src
 from collector.sources import fleet as fleet_src
 from collector.sources import serviceaccounts as sa_src
+from collector.sources import loki_config as loki_config_src
 from collector.sources import signal_inventory as signal_inventory_src
 from collector.sources import capability_adoption as capability_adoption_src
 from collector.sources import usage_insights, dataplane, gcom
@@ -549,6 +550,39 @@ def gather_capability_adoption(
     return record, errors
 
 
+def gather_loki_config(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[str]]:
+    """Daily effective Loki limits and independent self-serve retention requests."""
+    errors: list[str] = []
+    try:
+        creds = credentials.load_all()
+    except credentials.StoreUnavailable as exc:
+        # The org CAP can still read effective limits. Preserve that evidence in the in-memory record;
+        # source health below prevents this failed owner run from replacing the last good T2 envelope.
+        creds = {}
+        errors.append(f"credential store: {exc}")
+    data = loki_config_src.probe_all(
+        client,
+        stacks,
+        cfg.cap,
+        creds,
+        concurrency=cfg.concurrency,
+        on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
+    )
+    limits = sum(bool((record.get("limits") or {}).get("available")) for record in data.values())
+    requests = sum(
+        bool((record.get("change_requests") or {}).get("available"))
+        for record in data.values()
+    )
+    console_log(
+        "warn" if errors or limits < len(data) or requests < len(data) else "info",
+        f"Loki retention: effective limits readable on {limits}/{len(data)} stacks; "
+        f"change requests readable on {requests}/{len(data)} stacks",
+    )
+    return data, errors
+
+
 def gather_dashboard_inventory(
     client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], list[str]]:
@@ -763,6 +797,7 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         gap_first_seen=assistant_gaps(cfg, stacks, inputs.get("assistant"), gathered=False),
         ratecard=rate_card,
         score_weights=getattr(cfg, "coverage_score_weights", None),
+        expected_retention_policy=getattr(cfg, "expected_retention_policy", ()),
         **inputs,
     )
     scan_inputs = prov
@@ -860,6 +895,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         client, cfg, stacks,
     )
     errors += capability_adoption_errors
+    loki_config, loki_config_errors = gather_loki_config(client, cfg, selected)
+    errors += loki_config_errors
 
     # Decide publication eligibility BEFORE hydration or composition. A non-empty per-stack mapping is
     # not an available estate input: 1 success plus 268 failures is partial, not a tiny but valid total.
@@ -876,6 +913,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "alert_routing": alert_routing,
         "signal_inventory": signal_inventory,
         "capability_adoption": capability_adoption,
+        "loki_config": loki_config,
     }
     sources = {
         "stack_detail": source_report(expected, detail, available=lambda _r: True),
@@ -927,6 +965,20 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
             ),
             "unit": "org usage response",
         },
+        # One compound input, two independent read domains. Both must clear the owner publication
+        # floor; inside the payload, an individual failure withholds only that domain's row.
+        "loki_config_limits": source_report(
+            expected,
+            loki_config,
+            available=lambda r: bool((r.get("limits") or {}).get("available")),
+            errors=loki_config_errors,
+        ),
+        "loki_config_change_requests": source_report(
+            expected,
+            loki_config,
+            available=lambda r: bool((r.get("change_requests") or {}).get("available")),
+            errors=loki_config_errors,
+        ),
     }
     source_failures = sorted(name for name, report in sources.items() if not report["healthy"])
     publishable_inputs, unavailable_inputs = publication_inputs(gathered_inputs, sources)
@@ -951,6 +1003,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         ),
         ratecard=rate_card,
         score_weights=getattr(cfg, "coverage_score_weights", None),
+        expected_retention_policy=getattr(cfg, "expected_retention_policy", ()),
         **inputs,
     )
     scan_inputs = prov
@@ -1001,6 +1054,7 @@ def run_t3(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         gap_first_seen=assistant_gaps(cfg, stacks, inputs.get("assistant"), gathered=False),
         ratecard=rate_card,
         score_weights=getattr(cfg, "coverage_score_weights", None),
+        expected_retention_policy=getattr(cfg, "expected_retention_policy", ()),
         **inputs,
     )
     scan_inputs = prov
@@ -1246,6 +1300,12 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
     # of label-banned fields in the platform (logins, SA names, plugin versions).
     if scan["data"].get("stack_detail"):
         events += loki.stack_identity_events(cfg.tier, scan["data"]["stack_detail"])
+    # Retention requests carry operator identity and arbitrary customer-authored text. The final,
+    # post-hydration view is the source so an unsatisfied input cannot leak a stale or partial event.
+    # Every identity stays in the line body under one fixed stream; none becomes a Loki label.
+    retention_changes = emit["views"].get("risk_retention_change_requests") or []
+    if retention_changes:
+        events += loki.retention_change_events(cfg.tier, retention_changes)
     lokiw = loki.LokiWriter(cfg.loki_url, cfg.loki_tenant, cfg.write_token, dry_run=cfg.dry_run)
     try:
         lines = lokiw.push(events)

@@ -8,7 +8,7 @@ turning an unavailable source into zero.
 
 `collector.config.READER_SCOPES` is authoritative:
 
-| Scope | Verified route | Basic-auth user |
+| Scope | Routes this collector calls, not the scope boundary | Basic-auth user |
 |---|---|---|
 | `stacks:read` | Grafana.com stack inventory | bearer |
 | `stack-users:read` | per-stack users through Grafana.com | bearer |
@@ -16,7 +16,7 @@ turning an unavailable source into zero.
 | `org-members:read` | organisation membership | bearer |
 | `accesspolicies:read` | regional access-policy inventory | bearer |
 | `metrics:read` | Mimir cardinality API **and the whole Prometheus query API** | `hmInstancePromId` |
-| `logs:read` | `/loki/api/v1/labels`, `/loki/api/v1/label/<name>/values` | `hlInstanceId` |
+| `logs:read` | `/loki/api/v1/labels`, `/loki/api/v1/label/<name>/values`, `/config/tenant/v1/limits` | `hlInstanceId` |
 | `traces:read` | `/tempo/api/v2/search/tags`, `/tempo/api/v2/search/tag/<t>/values` | `htInstanceId` |
 | `profiles:read` | `querier.v1.QuerierService/LabelValues` | `hpInstanceId` |
 | `rules:read` | `/api/prom/api/v1/rules`, `/api/prom/api/v1/alerts`, Loki `/prometheus/api/v1/rules` | signal instance id |
@@ -26,8 +26,25 @@ turning an unavailable source into zero.
 | `adaptive-metrics-config:read` | `/aggregations/recommendations/config` | `hmInstancePromId` |
 | `adaptive-metrics-rules:read` (segments) | `/aggregations/rules/segments`, `/aggregations/rules?segment=<id>` | `hmInstancePromId` |
 | `adaptive-metrics-recommendations:read` (segments) | `/aggregations/recommendations?segment=<id>` | `hmInstancePromId` |
-| `adaptive-metrics-exemptions:read` | **none found on any reachable surface** | - |
 | `fleet-management:read` | Fleet Management Connect-RPC list methods | stack `id` |
+
+The route column is an implementation inventory. It is not a claim that the credential cannot call
+other read routes.
+
+- **`logs:read` is a full Loki read scope.** A scope-isolated probe returned log content from
+  `/loki/api/v1/query_range`, and the same scope reaches the effective tenant limits route. It stays
+  because the label inventory needs it, no narrower Grafana Cloud scope reaches label names and
+  values, and planned log analytics will need log reads outright. The collector does not call a log
+  query endpoint: its Loki reads are fixed label and effective-limit routes. That restraint is an
+  implementation property enforced by source review, not a credential boundary.
+- **`traces:read` breadth beyond the two tag routes is unverified.** The isolating probe is a
+  throwaway org-realm policy carrying only `traces:read`, followed by a Tempo search and trace fetch
+  over synthetic data, then deletion and a residual-policy check.
+- **`profiles:read` breadth beyond `LabelValues` is unverified.** The isolating probe is a throwaway
+  org-realm policy carrying only `profiles:read`, followed by a Pyroscope profile query over synthetic
+  data, then deletion and a residual-policy check.
+- **`rules:read` reaches rule definitions and firing alert payloads.** The latter include full customer
+  label sets. The collector reduces those payloads to bounded counts and never republishes the labels.
 
 One org-realm token reaches all four signal databases in every region of the estate. The region hint in
 the token payload does not constrain the data plane. The basic-auth user differs per signal and comes
@@ -41,13 +58,17 @@ answers with its paused-stack conflict response.
 There is no `stack-service-accounts:read` org scope. Only the write scope exists, so it is not
 given to the collector. Service-account inventory is reachable through each stack's local reader.
 
-`adaptive-metrics-exemptions:read` has no reachable route and the scope should be dropped rather than
-carried. Over forty candidate paths have now been probed across two independent stacks, every one
-answering a plain-text `404 page not found` byte-identical to deliberate control paths that cannot
-exist. Crucially the probe was repeated on a stack with **316 applied rules, `auto_apply` enabled and a
-configured segment**, which rules out "the route appears only once there is data". The Grafana plugin
-proxy cannot settle it either: every `resources/*` path returns `500 plugin.requestFailureError`,
-including a control path and including a path that answers 200 on the Mimir host.
+`adaptive-metrics-exemptions:read` is deliberately absent from `READER_SCOPES`. The initial sweep
+covered 34 candidate paths plus deliberate nonexistent controls; later checks expanded the set past
+forty across two independent stacks. Every candidate returned the same plain-text 404 as the controls,
+and the result remained unchanged on a stack with applied rules, auto apply enabled and a configured
+segment. That rules out a route which appears only after data exists.
+
+The org-realm scope was the wrong mechanism. Exemptions are a stack-level plugin RBAC resource. The
+Grafana plugin proxy could not settle a concrete read route on the tested stack because every
+`resources/*` path returned `500 plugin.requestFailureError`, including controls. A future route probe
+must first call the plugin health resource with a stack reader; a 500 means the proxy is unavailable
+and proves nothing about the candidate route.
 
 A scope existing is not evidence a route does. Grafana mints scope families per resource type, so an
 unexposed or plugin-internal resource still gets a public scope name.
@@ -102,6 +123,7 @@ The role can read:
 
 - Assistant aggregate usage, tenant-scoped inventory and investigations counts;
 - Adaptive Logs recommendations through the plugin-proxy route;
+- retention change requests through the Databases Configuration app resource route;
 - service-account inventory and permission metadata;
 - datasource metadata and caching state;
 - folders, dashboards, public dashboards and snapshots;
@@ -147,6 +169,14 @@ The default response is structurally complete-looking but insufficient for savin
 The working read route is the Adaptive Logs plugin proxy. Frontend app resource paths can return 500
 and datasource-proxy calls can report authentication failure even when the reader role is correct.
 Recommendation volume has no declared or settable time window.
+
+### Loki retention
+
+Effective tenant limits come from `/config/tenant/v1/limits` on the Loki dataplane under the existing
+org CAP and `logs:read`. The path has no `/loki` prefix. The deprecated
+`/loki/api/v1/config/limits/applied` route needs a different scope and is not used. Self-serve change
+requests come from the stack-local Databases Configuration app resource route; they are evidence that
+a request happened, never evidence that no direct override exists.
 
 ### Assistant
 

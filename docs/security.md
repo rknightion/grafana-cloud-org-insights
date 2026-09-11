@@ -2,7 +2,16 @@
 
 ## Read-only by construction, not by convention
 
-The scanning credential is read-only by scope, and the collector's HTTP client **rejects every method except GET**. Some Grafana Cloud read APIs are implemented as Connect-RPC POSTs; those calls live outside the collector HTTP client and are authorised by read scopes.
+The scanning credential is read-only by scope, and deployments run only against organisations that
+have explicitly consented to the declared read capabilities. Read-only does not mean metadata-only:
+`logs:read` is a full Loki read scope and can return log content. It is retained deliberately because
+the label inventory requires it, no narrower Grafana Cloud scope reaches label names and values, and
+planned log analytics will require it.
+
+The collector's HTTP client **rejects every method except GET**. Its Loki implementation calls fixed
+label and effective-limit routes, not log query endpoints; that restraint is a reviewed implementation
+property, not a credential property. Some Grafana Cloud read APIs are implemented as Connect-RPC POSTs;
+those calls live outside the collector HTTP client and are authorised by read scopes.
 
 Nothing is installed on any scanned stack. The collector runs in your AWS account and talks to `grafana.com` and to each stack's own API over HTTPS.
 

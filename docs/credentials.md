@@ -19,7 +19,7 @@ Region does not constrain what an org-realm token can then reach: it reaches eve
 
 `collector.config.READER_SCOPES` is authoritative. One org-realm token reaches all four signal databases in every region of the estate - the region hint in the token payload does not constrain the data plane.
 
-| Scope | Reaches | Basic-auth user |
+| Scope | Routes this collector calls, not the scope boundary | Basic-auth user |
 |---|---|---|
 | `stacks:read` | Grafana.com stack inventory | bearer |
 | `stack-users:read` | per-stack users through Grafana.com | bearer |
@@ -27,7 +27,7 @@ Region does not constrain what an org-realm token can then reach: it reaches eve
 | `org-members:read` | organisation membership | bearer |
 | `accesspolicies:read` | regional access-policy inventory | bearer |
 | `metrics:read` | Mimir cardinality API **and the whole Prometheus query API** | `hmInstancePromId` |
-| `logs:read` | Loki label and label-value endpoints | `hlInstanceId` |
+| `logs:read` | Loki label and label-value endpoints plus effective tenant limits | `hlInstanceId` |
 | `traces:read` | Tempo search-tag endpoints | `htInstanceId` |
 | `profiles:read` | Pyroscope `LabelValues` | `hpInstanceId` |
 | `rules:read` | Prometheus and Loki ruler inventory | signal instance id |
@@ -39,13 +39,21 @@ Region does not constrain what an org-realm token can then reach: it reaches eve
 
 The basic-auth user differs per signal and comes from `dataplane.AUTH_FIELD`. Fleet Management and the Alertmanager are the two that do not use a signal instance id.
 
+The route column describes current implementation. It is not a credential boundary. In particular,
+`logs:read` is a full Loki read scope and can return log content. It is retained deliberately for the
+label inventory and planned log analytics, with explicit deployment consent. `CAPABILITIES.md` records
+the verified breadth, unverified scope probes and the implementation restraints.
+
 Fleet calls use POST because that is the RPC transport. The scope and the methods remain reads, and they live outside the collector's HTTP client - which rejects every method except GET.
 
 Grafana.com is paced at six requests per second. Paused stacks are skipped when the control plane answers with its paused-stack conflict response.
 
 Two things the org token deliberately does not have:
 
-- **`adaptive-metrics-exemptions:read`** is declared to match the deployed policy, but no path has answered 200. Eight candidates under `/aggregations` were tried and all 404. Treat it as reserved, not as a capability, until a route is verified.
+- **`adaptive-metrics-exemptions:read` is deliberately absent.** The first path sweep covered 34
+  candidates plus deliberate nonexistent controls, and later checks expanded past forty across two
+  stacks. The resource is stack-plugin RBAC, not an org access-policy scope. `CAPABILITIES.md` records
+  the route evidence and remaining plugin-health probe.
 - **`stack-service-accounts:read` does not exist.** Only the write scope does, so it is not given to the collector. Service-account inventory is reached through each stack's local reader instead.
 
 ### The two scopes that reach beyond inventory
@@ -64,6 +72,7 @@ The role can read:
 
 - Assistant aggregate usage, tenant-scoped inventory and investigations counts;
 - Adaptive Logs recommendations through the plugin-proxy route;
+- retention change requests through the Databases Configuration app resource route;
 - service-account inventory and permission metadata;
 - datasource metadata and caching state;
 - folders, dashboards, public dashboards and snapshots;
@@ -100,6 +109,14 @@ The label is the stack `id` for Grafana events, not its Prometheus tenant id. Th
 ### Adaptive Logs
 
 The working read route is the Adaptive Logs plugin proxy. Frontend app resource paths can return 500, and datasource-proxy calls can report authentication failure even when the reader role is correct. Recommendation volume has no declared or settable time window.
+
+### Loki retention
+
+Effective `retention_stream` entries come from the Loki dataplane under the existing org
+`logs:read` token. The stack-local reader uses only generic app access for the Databases
+Configuration request resource. No datasource-query permission for the production Logs datasource
+is granted. The two reads are independent: an empty request list does not prove that no effective
+override exists.
 
 ### Assistant
 

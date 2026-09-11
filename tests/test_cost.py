@@ -80,7 +80,7 @@ class CostMathsTest(unittest.TestCase):
             self.assertEqual(
                 list(rows[0]),
                 [" Stack", "Metric", "Current series", "Recommended series", "Removable series",
-                 "Dependencies"],
+                 "Dependencies", "Auto apply", "Auto apply raw"],
             )
             self.assertEqual(
                 [row["Removable series"] for row in rows],
@@ -156,6 +156,56 @@ class CostBudgetConformanceTest(unittest.TestCase):
         for key, count in actual.items():
             self.assertLessEqual(count, self.declared[key].series,
                                  f"{key[0]} emitted {count}, declared {self.declared[key].series}")
+
+
+class AutoApplyViewTest(unittest.TestCase):
+    def _build(self, adaptive_metrics):
+        stacks = [{"slug": "example", "status": "active"}]
+        coverage = Coverage(tier="t3", total=1)
+        coverage.record_ok("example")
+        metrics, views = cost.build(
+            stacks,
+            coverage,
+            {"example": {"adaptive_metrics": {
+                "available": True,
+                "adopted": False,
+                "rules_applied": 0,
+                "recommendations_pending": 1,
+                "remediable_series": 9,
+                "remediable_series_unused": 9,
+                "sample_recommendations": [{
+                    "metric": "synthetic_metric",
+                    "current_series": 10,
+                    "recommended_series": 1,
+                    "remediable_series": 9,
+                    "used_in": 0,
+                }],
+                **adaptive_metrics,
+            }}},
+        )
+        return metrics, views["cost_adaptive_metric_recommendations"][0]
+
+    def test_auto_apply_has_exactly_three_explicit_states(self):
+        cases = (
+            ({"auto_apply_state": "enabled", "auto_apply": {
+                "enabled": True, "gate": {"policy": "synthetic"},
+            }}, "enabled", '{"enabled":true,"gate":{"policy":"synthetic"}}'),
+            ({"auto_apply_state": "absent"}, "absent", None),
+            ({"auto_apply_state": "unreadable"}, "unreadable", None),
+        )
+        metric_sets = []
+        for payload, state, raw in cases:
+            with self.subTest(state=state):
+                metrics, row = self._build(payload)
+                self.assertEqual(row["Auto apply"], state)
+                self.assertEqual(row["Auto apply raw"], raw)
+                self.assertNotEqual(row["Auto apply"], "false")
+                metric_sets.append({
+                    (name, tuple(sorted(labels.items())), value)
+                    for name, labels, value in metrics
+                })
+        self.assertEqual(metric_sets[1:], metric_sets[:-1],
+                         "auto-apply state is view-only and must not add a metric")
 
 
 class PillarInteractionTest(unittest.TestCase):

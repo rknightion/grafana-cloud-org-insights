@@ -38,6 +38,7 @@ from collector.pillars import (
     findings,
     insights as insights_pillar,
     insights_inventory as insights_inventory_pillar,
+    retention as retention_pillar,
     risk as risk_pillar,
     usage as usage_pillar,
 )
@@ -1838,6 +1839,50 @@ def d_risk(ds: str):
             description="Rules naming `grafana-default-email` when that built-in does not appear in the "
                         "provisioning response. These are UNVERIFIED, not called broken; confirm delivery "
                         "before changing the rule or contact points."),
+        "n_retention_measured": build.stat_panel(
+            "Stacks measured for effective retention",
+            "gcinsight_risk_retention_stacks_measured",
+            description="The denominator for effective per-stream retention. Unreadable stacks are "
+                        "absent rather than counted as having no override."),
+        "n_retention_requests_measured": build.stat_panel(
+            "Stacks measured for retention requests",
+            "gcinsight_risk_retention_change_request_stacks",
+            description="The independent denominator for the Databases Configuration request queue. "
+                        "A readable empty queue means no self-serve request, not no effective override."),
+        "b_retention_requests": build.barchart_panel(
+            "Retention change requests by status",
+            "sum by(status)(gcinsight_risk_retention_change_requests)",
+            legend="{{status}}",
+            description="Applied, pending and rejected self-serve requests. The effective-retention "
+                        "table is independent because engineering can apply an override directly."),
+        "n_retention_policy_gaps": build.stat_panel(
+            "Stacks below configured retention policy",
+            "gcinsight_risk_retention_policy_gap_stacks",
+            description="Present only when the deployment supplies selector expectations and at least "
+                        "one effective retention_stream is readable. No repository default is assumed."),
+        "retention_requests": build.table_panel(
+            "Self-serve retention change requests",
+            "risk_retention_change_requests",
+            ds,
+            schema=retention_pillar.VIEW_SCHEMAS["risk_retention_change_requests"],
+            description="Who requested a change, its status and the approving pull-request number. "
+                        "An empty table proves only that no self-serve request was returned."),
+        "retention_stream": build.table_panel(
+            "Effective per-stream retention",
+            "risk_retention_stream",
+            ds,
+            schema=retention_pillar.VIEW_SCHEMAS["risk_retention_stream"],
+            units={"Period days": "d"},
+            description="What is actually in force from the Loki dataplane. Selectors can contain "
+                        "customer labels and remain view data, never metric labels."),
+        "retention_policy_gaps": build.table_panel(
+            "Configured retention policy gaps",
+            "risk_retention_policy_gaps",
+            ds,
+            schema=retention_pillar.VIEW_SCHEMAS["risk_retention_policy_gaps"],
+            units={"Expected days": "d", "Effective days": "d"},
+            description="Readable stacks whose effective selector rule falls below a deployment-supplied "
+                        "minimum. Unreadable stacks are not classified as compliant or in breach."),
         "routing_scope": build.text_panel(
             "How to read alert routing",
             "A direct receiver can be checked against the stack's contact-point list. An inherited rule "
@@ -2249,6 +2294,19 @@ def d_risk(ds: str):
             build.row("Trend", ["t_alerting"], max_columns=1),
         ]),
         build.rows_tab("Alert routing", alert_routing_rows),
+        build.rows_tab("Logs retention", [
+            build.row("Coverage and policy", ["n_retention_measured",
+                                               "n_retention_requests_measured",
+                                               "n_retention_policy_gaps"],
+                      max_columns=3, row_height="short"),
+            build.row("Request status", ["b_retention_requests"], max_columns=1),
+            build.row("What is in force", ["retention_stream"], max_columns=1,
+                      row_height="tall"),
+            build.row("Self-serve history", ["retention_requests"], max_columns=1,
+                      row_height="tall"),
+            build.row("Policy gaps", ["retention_policy_gaps"], max_columns=1,
+                      row_height="tall"),
+        ]),
         build.rows_tab("Access", access_rows),
         build.rows_tab("Credentials", [
             build.row("Headline", ["n_sa_custom", "n_sa_extsvc"],

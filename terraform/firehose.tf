@@ -291,10 +291,10 @@ data "aws_iam_policy_document" "firehose_subscription_assume" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      # Normal delivery assumes this role with the concrete log-stream source ARN. The subscription
-      # control probe uses the bare log-group ARN, so an exact match can pass creation while every
-      # real event fails with AWS/Logs DeliveryErrors. Retain log-group scope and admit its streams.
-      values = ["${aws_cloudwatch_log_group.tasks.arn}:*"]
+      # CloudWatch Logs passes the bare log-group ARN when it assumes the subscription role. Appending
+      # a stream wildcard rejects the control probe before the filter is created. Keep the account and
+      # exact deployment log-group constraints together.
+      values = ["${aws_cloudwatch_log_group.tasks.arn}"]
     }
   }
 }

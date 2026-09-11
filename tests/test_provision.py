@@ -206,7 +206,7 @@ class FrozenSeamTest(unittest.TestCase):
     #: The reviewed surface, action by action. A count alone would let one action be swapped for
     #: another without the test noticing, and every one is a grant on each provisioned stack.
     REVIEWED = {
-        "plugins.app:access": "the Assistant, Adaptive Logs, Metrics and Traces plugin gateways",
+        "plugins.app:access": "the Assistant, Databases Configuration, Adaptive Logs, Metrics and Traces plugin gateways",
         "grafana-assistant-app.usage:read": "Assistant aggregate usage",
         "grafana-assistant-app.investigations:read": "investigation counts",
         "grafana-assistant-app.investigations.all:read": "tenant investigation coverage",
@@ -278,6 +278,16 @@ class FrozenSeamTest(unittest.TestCase):
         })
         for action in traces:
             self.assertTrue(action.endswith((":read", ":access")), action)
+
+    def test_databases_configuration_gets_only_generic_app_access(self):
+        self.assertIn(
+            ("plugins.app:access", f"plugins:id:{pr.DATABASES_CONFIG_PLUGIN}"),
+            pr.DESIRED_PAIRS,
+        )
+        self.assertFalse(any(
+            action.startswith(f"{pr.DATABASES_CONFIG_PLUGIN}.")
+            for action in pr.DESIRED_ACTIONS
+        ))
 
     def test_adaptive_metrics_grants_only_exemptions_because_the_rest_is_org_reachable(self):
         """Rules, recommendations, segments and config answer to the ORG token on the Mimir host.
