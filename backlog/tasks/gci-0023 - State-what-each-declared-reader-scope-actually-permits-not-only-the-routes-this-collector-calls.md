@@ -3,10 +3,11 @@ id: GCI-0023
 title: >-
   State what each declared reader scope actually permits, not only the routes
   this collector calls
-status: To Do
-assignee: []
+status: Done
+assignee:
+  - '@codex'
 created_date: '2026-09-11 11:07'
-updated_date: '2026-09-11 11:15'
+updated_date: '2026-09-11 13:43'
 labels:
   - security
   - docs
@@ -90,17 +91,35 @@ this task exists to remove.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The reader table's route column is headed so it cannot be read as the scope boundary
-- [ ] #2 logs:read is documented as a full Loki read scope, with the label-endpoints-only restraint stated as an implementation property rather than a credential property
-- [ ] #3 The reason logs:read is retained is recorded beside it: the label inventory needs it, no narrower Grafana Cloud scope reaches label names and values, and planned log analytics will require log reads outright
-- [ ] #4 docs/security.md states the explicit-consent basis beside its read-only-by-scope sentence, so the two are read together
-- [ ] #5 traces:read, profiles:read and rules:read are each audited for the same understatement and either corrected, or marked explicitly unverified with the probe named
-- [ ] #6 No declared scope is removed or narrowed, and no log-content read is added to the collector
+- [x] #1 The reader table route column is headed so it cannot be read as the scope boundary
+- [x] #2 `logs:read` is documented as a full Loki read scope, with fixed label and effective-limit routes stated as implementation properties and no log-query endpoint added
+- [x] #3 The reason `logs:read` is retained is recorded beside it: the label inventory needs it, no narrower Grafana Cloud scope reaches label names and values, and planned log analytics will require log reads outright
+- [x] #4 `docs/security.md` states the explicit-consent basis beside its read-only-by-scope sentence, so the two are read together
+- [x] #5 `traces:read`, `profiles:read` and `rules:read` are each audited for the same understatement and either corrected or marked explicitly unverified with the probe named
+- [x] #6 No declared scope is removed or narrowed, and no log-content read is added to the collector
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Audit declared reader scopes in CAPABILITIES.md, state verified breadth and explicit unverified boundaries without narrowing any scope, update docs/security.md with the consent basis, then validate documentation gates.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Tracker reconciliation 2026-09-11: criterion 2 now includes the effective-limit GET added by GCI-0022. The security boundary remains no Loki log-query endpoint; calling the new non-content limits route does not restore the stale label-endpoints-only statement.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+CAPABILITIES.md now separates routes this collector calls from the broader permissions of each declared scope. logs:read is documented as full Loki read with the consent and retention rationale; effective limits are included without adding a log-content query; traces and profiles remain explicitly unverified with the required probe named; rules breadth is recorded. No scope was narrowed. Final gate at b6cf849614054894e2bea49d0154d958fc016d7b passed.
+<!-- SECTION:FINAL_SUMMARY:END -->

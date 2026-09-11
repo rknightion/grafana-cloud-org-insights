@@ -3,10 +3,11 @@ id: GCI-0022
 title: >-
   Surface Loki retention overrides and per-stream retention as an operational
   finding
-status: To Do
-assignee: []
+status: Done
+assignee:
+  - '@codex'
 created_date: '2026-09-11 09:57'
-updated_date: '2026-09-11 11:16'
+updated_date: '2026-09-11 13:43'
 labels:
   - risk
   - cost
@@ -115,27 +116,33 @@ The platform's HTTP client refuses every method but GET and that property stays 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Effective global retention and query lookback per stack ship as panels over grafanacloud-usage with no collector change and no credential
-- [ ] #2 The lookback-divergence count is published as a CANDIDATE count with its measured-stack denominator beside it, never as a confirmed override count
-- [ ] #3 A stack reader source reads config/tenant/v1/limits and publishes retention_stream entries as a view, with period, priority and selector
-- [ ] #4 The lokiconfigretentions change-request record is published as a view with author, message, status, timestamps and pr_info.number
-- [ ] #5 An empty change-request list is published as no-self-serve-request, never as no-override; the two states are distinct in the view and the panel
-- [ ] #6 spec.author, spec.message and retention_stream[].selector never become metric labels
-- [ ] #7 Unrecognised spec keys on a retention change request are recorded verbatim as opaque, never coerced into a guessed schema
-- [ ] #8 Metrics are bounded aggregates only and every one is declared in budget.py CATALOGUE
-- [ ] #9 A stack whose plugin route or datasource proxy fails is withheld as unreadable and never published as a structural zero
-- [ ] #10 docs/traps.md records the 31d-is-not-an-override trap, the empty-CRD trap, the deprecated applied endpoint and the Loki-only scope; CAPABILITIES.md records the new routes and the identity each needs
-- [ ] #11 The effective tenant limits are read from the Loki DATAPLANE with the existing org CAP and logs:read, never through a stack datasource proxy, and no new scope or reader action is added
-- [ ] #12 retention_stream entries publish period, priority and selector per stack, with the selector as a view column only
-- [ ] #13 An expected-retention-policy check is a generic mechanism: the deployment supplies a list of {selector, minimum period} and the platform reports stacks whose effective retention_stream does not satisfy it, with its measured-stack denominator. No expectation value is hardcoded in this repository
+- [x] #1 Effective global retention and query lookback per stack ship as panels over grafanacloud-usage with no collector change and no credential
+- [x] #2 The lookback-divergence count is published as a CANDIDATE count with its measured-stack denominator beside it, never as a confirmed override count
+- [x] #3 The collector reads `config/tenant/v1/limits` from the Loki dataplane with the existing org CAP and publishes `retention_stream` entries as a view with period, priority and selector
+- [x] #4 The `lokiconfigretentions` change-request record is published as a view with author, message, status, timestamps and `pr_info.number`
+- [x] #5 An empty change-request list is published as no-self-serve-request, never as no-override; the two states are distinct in the view and the panel
+- [x] #6 `spec.author`, `spec.message` and `retention_stream[].selector` never become metric labels
+- [x] #7 Unrecognised `spec` keys on a retention change request are recorded verbatim as opaque, never coerced into a guessed schema
+- [x] #8 Metrics are bounded aggregates only and every one is declared in `budget.py` CATALOGUE
+- [x] #9 A stack whose plugin route or Loki dataplane route fails is withheld as unreadable and never published as a structural zero
+- [x] #10 `docs/traps.md` records the 31d-is-not-an-override trap, the empty-CRD trap, the deprecated applied endpoint and the Loki-only scope; `CAPABILITIES.md` records the new routes and the identity each needs
+- [x] #11 Effective tenant limits use the existing org CAP and `logs:read`, never a stack datasource proxy; the only new reader action is generic `plugins.app:access` scoped to `plugins:id:grafana-dbcfg-app` for change requests
+- [x] #12 `retention_stream` entries publish period, priority and selector per stack, with the selector as a view column only
+- [x] #13 The expected-retention-policy check is a generic mechanism: the deployment supplies `{selector, minimum_period}` entries and the platform reports stacks whose readable effective `retention_stream` does not satisfy them, with its measured-stack denominator. No expectation value is hardcoded in this repository
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Build and integrate the zero-credential Operations panel tier first; then integrate the read-only Loki dataplane and change-request collector tier, generic expected-policy mechanism, dashboard wiring, documentation, focused evidence, security review and final gate.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
@@ -181,4 +188,12 @@ So point 4 is a documentation task about a **declared and consented capability**
 mitigate. Nothing in this task narrows a scope, and nothing here authorises the collector to read log
 content - that remains an implementation restraint enforced by review, and a future analytics feature
 that changes it is its own task with its own review.
+
+Tracker reconciliation 2026-09-11: acceptance criteria 3, 9 and 11 were corrected to the frozen Wave 1 route. The pre-probe text named a stack reader and datasource proxy and prohibited every reader action; the settled contract uses the Loki dataplane with the existing org CAP, forbids the datasource proxy, and authorises exactly one generic Databases Configuration app-access permission.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Delivered the usage-only retention panels, Loki effective-limit and Databases Configuration reads, three retention views, bounded metrics, generic expected-policy evaluation, Loki change-event emission, documentation and security review. Final gate at b6cf849614054894e2bea49d0154d958fc016d7b passed: 1468 tests, 2 skipped, 7232 subtests, 232.8 MiB peak RSS, both Terraform roots valid, identifier history clean and shipped-text scan clean. Live Grafana rendering was not commissioned and remains unproven.
+<!-- SECTION:FINAL_SUMMARY:END -->

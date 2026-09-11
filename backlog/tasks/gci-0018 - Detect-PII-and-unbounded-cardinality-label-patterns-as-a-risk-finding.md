@@ -1,9 +1,11 @@
 ---
 id: GCI-0018
 title: Detect PII and unbounded-cardinality label patterns as a risk finding
-status: To Do
-assignee: []
+status: Parked
+assignee:
+  - '@codex'
 created_date: '2026-08-25 13:12'
+updated_date: '2026-09-11 13:43'
 labels:
   - risk
   - privacy
@@ -77,3 +79,21 @@ An estate owner cannot grep their own label space at this scale, and the two con
 - [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
 - [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Implement the versioned generic label-name pattern data and pure classifier with focused tests, then integrate its bounded metrics, view, dashboard and hydration wiring before security review.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Wave 1 source-contract audit found no generic label-name payload in collector/sources/signal_inventory.py. The source currently exposes metric names plus selected label values used for service and technology matching. Implementing the classifier now would either inspect values contrary to the privacy contract or invent data the collector does not gather. Resume after deciding and implementing a key-only, all-signal label-name source contract with explicit minimisation and retention behavior.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+No product implementation was accepted. A draft classifier test was archived under codex/backups and excluded from the product tree. The task is parked at the missing key-only label-name source contract; no acceptance criterion is claimed.
+<!-- SECTION:FINAL_SUMMARY:END -->

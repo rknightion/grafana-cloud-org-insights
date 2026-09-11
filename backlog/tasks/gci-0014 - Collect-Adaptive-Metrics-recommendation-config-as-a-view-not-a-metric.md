@@ -1,10 +1,11 @@
 ---
 id: GCI-0014
 title: 'Collect Adaptive Metrics recommendation config as a view, not a metric'
-status: To Do
-assignee: []
+status: Done
+assignee:
+  - '@codex'
 created_date: '2026-08-25 13:00'
-updated_date: '2026-08-25 13:51'
+updated_date: '2026-09-11 13:43'
 labels:
   - cost
   - adaptive-metrics
@@ -46,19 +47,25 @@ One route remains genuinely unresolved: the Grafana stack plugin path under `gra
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 auto_apply collected as a view column with enabled/absent/unreadable states
-- [ ] #2 keep_labels is not collected
-- [ ] #3 No new metric series are emitted
-- [ ] #4 CAPABILITIES.md records the 34 probed exemption paths and the control-path method
-- [ ] #5 A decision is recorded on whether to keep or drop adaptive-metrics-exemptions:read
+- [x] #1 auto_apply collected as a view column with enabled/absent/unreadable states
+- [x] #2 keep_labels is not collected
+- [x] #3 No new metric series are emitted
+- [x] #4 CAPABILITIES.md records the 34 probed exemption paths and the control-path method
+- [x] #5 A decision is recorded on whether to keep or drop adaptive-metrics-exemptions:read
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 python3 -m pytest tests -q
-- [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
-- [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
+- [x] #1 python3 -m pytest tests -q
+- [x] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
+- [x] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Test-first the enabled, absent and unreadable auto_apply states, preserve the raw object in the existing view without collecting keep_labels or adding series, then integrate documentation and final gates.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
@@ -128,3 +135,9 @@ there, against a per-stack reader once the actions above are added. Probe /resou
 
 SEGMENTS remain the immediately actionable find and need no plugin role - see the earlier note.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Collected the complete auto_apply object into the existing Adaptive Metrics view with enabled, absent and unreadable states; keep_labels is discarded and no metric series was added. CAPABILITIES.md records the exemption-route probe and the org scope was removed after the stack-plugin RBAC boundary was established. Final gate at b6cf849614054894e2bea49d0154d958fc016d7b passed.
+<!-- SECTION:FINAL_SUMMARY:END -->
