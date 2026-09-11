@@ -18,7 +18,6 @@ So the tests that matter here are not "does hydration merge dicts". They are:
 from __future__ import annotations
 
 import datetime as dt
-import itertools
 import json
 import pathlib
 import unittest
@@ -27,6 +26,7 @@ from unittest import mock
 from collector.coverage import Coverage
 from collector.emit import guard, hydrate
 from collector.pillars import compose
+from tests.combinatorics import subsets_up_to
 
 NOW = dt.datetime(2026, 8, 19, 20, 0, tzinfo=dt.timezone.utc)
 FIXTURES = pathlib.Path(__file__).resolve().parent / "fixtures"
@@ -312,8 +312,9 @@ class ViewInputsAreDerivedNotAssumed(unittest.TestCase):
     This is the test that keeps the fix working. `VIEW_INPUTS` is what decides whether a view is
     published or withheld, so a pillar quietly gaining a dependency on the data plane - with the
     declaration left alone - puts the platform straight back to publishing that view from a tier that
-    cannot compute it. Rather than trusting a hand-maintained table, this composes every subset of the
-    optional inputs and checks which ones reproduce the full-input output byte for byte.
+    cannot compute it. Rather than trusting a hand-maintained table, this checks a bounded proof for
+    every view: its declared inputs reproduce the full-input output byte for byte, and removing any
+    one declared input stops doing so.
     """
 
     @classmethod
@@ -364,24 +365,34 @@ class ViewInputsAreDerivedNotAssumed(unittest.TestCase):
 
     def test_declaration_matches_what_the_pillars_really_need(self):
         names = sorted(hydrate.INPUT_OWNER)
-        built = {frozenset(s): self._build(s)
-                 for r in range(len(names) + 1)
-                 for s in itertools.combinations(names, r)}
-        full = built[frozenset(names)]
-
-        derived: dict[str, frozenset[str]] = {}
-        for view in full:
-            reproducing = [s for s in built
-                           if view in built[s] and built[s][view] == full[view]]
-            derived[view] = frozenset(min(reproducing, key=len)) if reproducing else frozenset(names)
-
-        expected = {v: n for v, n in derived.items() if n}
+        full = self._build(frozenset(names))
         actual = {v: n for v, n in hydrate.VIEW_INPUTS.items() if v in full}
-        self.assertEqual(
-            actual, expected,
-            "VIEW_INPUTS has drifted from what the pillars compute. A view here that needs an input the "
-            "declaration omits WILL be published as zeros by a tier that lacks it.",
+        declared = {view: actual.get(view, frozenset()) for view in full}
+
+        max_compositions = 512
+        largest_declaration = max(map(len, declared.values()), default=0)
+        smaller_candidates = set(
+            subsets_up_to(
+                names,
+                max_size=largest_declaration - 1,
+                max_subsets=max_compositions,
+            )
         )
+        candidates = smaller_candidates | set(declared.values())
+        self.assertLessEqual(len(candidates), max_compositions)
+
+        for subset in candidates:
+            candidate = self._build(subset)
+            for view, needed in declared.items():
+                if subset != needed and len(subset) >= len(needed):
+                    continue
+                with self.subTest(view=view, inputs=sorted(subset)):
+                    reproduced = view in candidate and candidate[view] == full[view]
+                    self.assertEqual(
+                        reproduced,
+                        subset == needed,
+                        f"{view} dependency declaration is not globally minimal and sufficient",
+                    )
 
     def test_every_declared_view_actually_exists(self):
         """A renamed view left in the declaration silently stops being guarded."""

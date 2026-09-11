@@ -32,11 +32,11 @@ lint:
     done
     echo "no dependency files present"
 
-# run the pytest suite (offline by construction - no AWS, no network, no credentials)
+# run pytest offline, terminating its process tree above 2 GiB RSS or 9 minutes
 [group('check')]
 [no-exit-message]
 test filter="":
-    .venv/bin/python3 -m pytest tests -q {{ if filter == "" { "" } else { "-k " + quote(filter) } }}
+    .venv/bin/python3 -m tests.guarded_pytest tests -q {{ if filter == "" { "" } else { "-k " + quote(filter) } }}
 
 # validate the reusable terraform module and the standalone example, and check formatting
 [group('infra')]

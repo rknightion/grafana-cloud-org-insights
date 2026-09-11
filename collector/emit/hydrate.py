@@ -127,12 +127,11 @@ INPUT_OWNER: dict[str, str] = {
 
 # What each view actually needs, beyond inventory.
 #
-# DERIVED, NOT ASSERTED. This table was produced by composing all eight subsets of the three optional
-# inputs against a real scan and recording, per view, the minimal subset whose output is byte-identical
-# to the full build  -  `tests/test_hydrate.py::ViewInputsAreDerivedNotAssumed` re-derives it from
-# fixtures and fails if the declaration drifts from what the pillars really do. Hand-maintaining it
-# would reintroduce the defect the module exists to fix: a view quietly needing a new input, still
-# being written by a tier that lacks it.
+# DERIVED AND MECHANICALLY CHECKED. For every view, the declared inputs must reproduce the full-input
+# output byte for byte and no proper subset may do so. Comparing the declared set with the full build
+# catches an omitted dependency; checking every globally smaller candidate catches redundant or
+# alternate inputs. `tests/test_hydrate.py::ViewInputsAreDerivedNotAssumed` caps that proof before
+# composing any subsets, so adding inputs cannot turn the gate into an exponential resource failure.
 VIEW_INPUTS: dict[str, frozenset[str]] = {
     # Pillar J. Every one needs the per-stack usage-insights sweep; none can be computed without it,
     # so all six are withheld rather than published as zeros by a tier that did not gather it.
