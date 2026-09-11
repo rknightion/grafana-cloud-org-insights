@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@codex'
 created_date: '2026-08-25 14:11'
-updated_date: '2026-08-25 17:40'
+updated_date: '2026-09-11 10:06'
 labels:
   - cost
   - value
@@ -107,4 +107,35 @@ PANEL-FIRST CHECKPOINT. The Coverage surface now reads Adaptive Traces directly 
 This checkpoint changes dashboard configuration only. No collector source, credential, permission, emitted metric or S3 view was added. Dashboard coverage gate: 158 passed, 2 skipped, 106 subtests.
 
 ROUTE-DISCOVERY CHECKPOINT. Public Grafana documentation verifies the direct hosted Tempo GET routes for policies, individual policies and recommendations, plus the four read-only plugin actions already granted. It does not document the stack-local plugin-proxy path, a proxy health endpoint or the config/status route. The direct API requires a separate tenant Basic-auth access-policy token with adaptive-traces:admin in the published example, so it is not adopted under the existing least-privilege reader seam. Collector work is parked until the plugin-proxy contract is verified; the shipped datasource-only panels remain valid.
+
+ROUTE-DISCOVERY TECHNIQUE FOUND, 2026-09-11. This task is parked on "the plugin-proxy contract is
+verified". There is now a live-verified, general way to verify it for any Grafana Cloud app plugin,
+found while investigating GCI-0022:
+
+1. `GET {stackUrl}/api/plugins/<plugin-id>/settings` returns a `module` field pointing at the
+   plugin's `module.js` on `plugins-cdn.grafana.net`, version-pinned.
+2. Fetch that `module.js`. It is a webpack loader carrying a chunk map of `{id: "<hash>"}` pairs.
+3. Fetch each chunk as `<baseUrl>/<id>.js?_cache=<hash>`.
+4. Grep the chunks for `/api/plugins/`, `/api/plugin-proxy/` and `/api/datasources/proxy/`. The
+   frontend's own call sites are the contract.
+
+On `grafana-dbcfg-app` this produced three real routes in one pass, including two `resources/v1/...`
+paths that answer 200 - which also corrects a belief this repository was carrying. `/api/plugins/<id>/
+resources/...` returning 500 is true for `grafana-adaptivelogs-app` and FALSE as a general claim: the
+route pattern is per-plugin and must be discovered, not inferred from another plugin.
+
+Second finding relevant here: `grafana-dbcfg-app` declares NO RBAC actions of its own - verified
+against a live stack's `/api/access-control/user/actions`, which lists every
+`grafana-adaptive-metrics-app.*` action and nothing for dbcfg. So a plugin with no declared actions is
+reached with the generic `{"action": "plugins.app:access", "scope": "plugins:id:<plugin>"}` alone.
+Check whether `grafana-adaptivetraces-app` declares its own actions before assuming the granted
+`.policies:read` / `.recommendations:read` / `.config:read` / `.plugin:access` set is what the resource
+route actually gates on.
+
+Third, incidental but it settles a hypothesis recorded on GCI-0014: `grafana-adaptive-metrics-app.exemptions:read`
+DOES exist as a stack-level plugin action. That is consistent with exemptions being plugin-internal and
+unreachable from an org-realm scope, which is why `adaptive-metrics-exemptions:read` was dropped.
+
+Not actioned here - this task stays Parked and out of the 2026-09-11 wave 1 scope. Recorded so the
+resume does not start by re-deriving the technique.
 <!-- SECTION:NOTES:END -->
