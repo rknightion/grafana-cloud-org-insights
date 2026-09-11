@@ -3,16 +3,20 @@ id: GCI-0024
 title: >-
   Unblock container publishing - Trivy fails the gate on base-image CVEs that
   have no upstream fix
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-09-11 14:14'
-updated_date: '2026-09-11 14:41'
+updated_date: '2026-09-11 14:48'
 labels:
   - ci
   - security
   - release
 dependencies: []
+modified_files:
+  - .trivyignore.yaml
+  - .github/workflows/publish.yml
+  - Dockerfile
 priority: high
 type: bug
 ordinal: 33000
@@ -60,19 +64,19 @@ Rejected: leaving the gate red. RC tags keep being cut with nothing shippable be
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A reviewed Trivy ignore file exists in the repository, one entry per CVE, each naming that no upstream fix is available
-- [ ] #2 Every entry carries an expiry date so the finding re-fails the gate once it lapses
-- [ ] #3 publish.yml passes the file through container-publish's trivy-ignore-file input
-- [ ] #4 Trivy still runs with CRITICAL,HIGH and exit-code 1, and SARIF upload stays enabled
-- [ ] #5 An image is observed published to GHCR at the repaired revision, not merely a green workflow run
-- [ ] #6 A separate tracker entry records the rejected fleet-wide ignore-unfixed input for rknightion/.github
+- [x] #1 A reviewed Trivy ignore file exists in the repository, one entry per CVE, each naming that no upstream fix is available
+- [x] #2 Every entry carries an expiry date so the finding re-fails the gate once it lapses
+- [x] #3 publish.yml passes the file through container-publish's trivy-ignore-file input
+- [x] #4 Trivy still runs with CRITICAL,HIGH and exit-code 1, and SARIF upload stays enabled
+- [x] #5 An image is observed published to GHCR at the repaired revision, not merely a green workflow run
+- [x] #6 A separate tracker entry records the rejected fleet-wide ignore-unfixed input for rknightion/.github
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -90,3 +94,9 @@ Rejected: leaving the gate red. RC tags keep being cut with nothing shippable be
 <!-- SECTION:NOTES:BEGIN -->
 The first hosted repair attempt at 3215d3d proved the 18 per-CVE rules were loaded: all unfixed operating-system findings were suppressed, but the gate still found two fixable HIGH findings in pip vendor metadata from the pinned Python base. The collector is stdlib-only and never installs Python packages, so the follow-up removes pip and ensurepip from the runtime image. Local ARM64 proof: collector --help exits 0, aws --version exits 0, Python imports neither pip nor ensurepip, and Trivy 0.70.0 reports zero HIGH/CRITICAL findings with the reviewed ignore file. CodeRabbit reviewed Dockerfile and returned 0 findings.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Restored container publishing without weakening the HIGH/CRITICAL gate. The repository now passes a reviewed, expiring per-CVE ignore file to the reusable publisher and removes unused pip/ensurepip metadata from the stdlib-only runtime image. Verified by just test (1468 passed, 2 skipped, 7232 subtests), both Terraform validations, clean identifier and dash gates, CodeRabbit with 0 findings, successful hosted run 34611737833 at 72c84cf19e7e099794ed2b90b5ad320299282831, and direct observation of the signed multi-architecture GHCR image with tags main, main-72c84cf, and 0.3.0-rc.38. GCI-0027 records the fleet-wide follow-up.
+<!-- SECTION:FINAL_SUMMARY:END -->
