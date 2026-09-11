@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@codex'
 created_date: '2026-08-25 13:12'
-updated_date: '2026-09-11 13:43'
+updated_date: '2026-09-11 14:13'
 labels:
   - risk
   - privacy
@@ -90,6 +90,12 @@ Implement the versioned generic label-name pattern data and pure classifier with
 
 <!-- SECTION:NOTES:BEGIN -->
 Wave 1 source-contract audit found no generic label-name payload in collector/sources/signal_inventory.py. The source currently exposes metric names plus selected label values used for service and technology matching. Implementing the classifier now would either inspect values contrary to the privacy contract or invent data the collector does not gather. Resume after deciding and implementing a key-only, all-signal label-name source contract with explicit minimisation and retention behavior.
+
+CORRECTION, 2026-09-11 wave 1 closeout. The wave 1 audit finding above is WRONG as stated. It checked only collector/sources/signal_inventory.py. A key-only label-name payload DOES already exist: collector/sources/dataplane.py cardinality() calls Mimir /api/prom/api/v1/cardinality/label_names and returns top_labels, a list of the highest-cardinality label NAMES per stack with their value counts and no values. It already reaches the scan envelope, Loki and S3, and that file's own comment records the privacy decision for it. collector/pillars/cost.py cost_cardinality_outliers publishes only top_labels[0] as Worst label and discards the other nineteen names.
+
+What is genuinely missing is narrower than the note claimed: the payload is Mimir only, and it is the top N by cardinality rather than a complete label-name set. That is a good input for the unbounded-cardinality class and a poor one for the PII class, because a low-cardinality identity label such as an owner slug never enters the top N.
+
+This task is therefore split. The unbounded-cardinality half is commissioned as GCI-0018.01 over the existing payload with no new source contract. This parent stays Parked for the identity-bearing half only, and resumes after an all-signal key-only label-name source contract exists across Mimir, Loki, Tempo and Pyroscope.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
