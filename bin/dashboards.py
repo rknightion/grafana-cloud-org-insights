@@ -29,6 +29,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 from collector import identity, observability_score
 from collector import ratecard as ratecard_model
 from collector.dashboards import build
+from collector.dashboards.retention_panels import retention_panels
 from collector.pillars import (
     ai as ai_pillar,
     coverage as coverage_pillar,
@@ -2764,7 +2765,15 @@ def d_operations(ds: str):
                         "A `firing` line climbing while `resolved` stays flat means alerts arriving and "
                         "not being closed."),
     }
+    el.update(retention_panels())
     tabs = [
+        build.rows_tab("Logs retention", [
+            build.row("Estate retention", ["_ret_denom", "_ret_global", "_ret_candidates"],
+                      max_columns=3, row_height="short"),
+            build.row("Candidate stacks", ["_ret_candidate_table"], max_columns=1,
+                      row_height="tall"),
+            build.row("Trend", ["_ret_trend"], max_columns=1),
+        ]),
         build.rows_tab("Engagement", [
             build.row("Headline", ["n_engagement", "n_engaged", "n_engaged_denom"],
                       max_columns=3, row_height="short"),

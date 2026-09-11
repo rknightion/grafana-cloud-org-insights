@@ -1109,7 +1109,8 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
         self.assertIn("Workload", self._tabs("usage"))
         self.assertIn("Capability gaps", self._tabs("value"))
         self.assertEqual(self._tabs("operations"),
-                         ["Engagement", "Response time", "Ownership", "Alert flow"])
+                         ["Logs retention", "Engagement", "Response time", "Ownership",
+                          "Alert flow"])
         self.assertEqual(self._tabs("commercial"),
                          ["Commitment", "Run rate", "Consumption vs term"])
         self.assertEqual(self._tabs("ai"),
