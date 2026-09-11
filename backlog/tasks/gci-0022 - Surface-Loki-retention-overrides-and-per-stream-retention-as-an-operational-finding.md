@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-09-11 09:57'
-updated_date: '2026-09-11 11:07'
+updated_date: '2026-09-11 11:16'
 labels:
   - risk
   - cost
@@ -171,4 +171,14 @@ Four consequences.
    GET, so the method restriction does not bound it. `CAPABILITIES.md` lists `logs:read` against two
    label routes under a "verified route" heading, which reads as a boundary and is not one. Tracked
    separately; it is a documentation-precision defect, not a code defect.
+
+DECISION on point 4 above, 2026-09-11 by Rob: **`logs:read` stays.** The label inventory requires it,
+no narrower Grafana Cloud scope reaches Loki label names and values, planned log analytics will
+require log reads outright, and deployments run only against organisations that have explicitly
+consented to that access. Recorded as a standing decision in `doc-0002` and as GCI-0023's subject.
+
+So point 4 is a documentation task about a **declared and consented capability**, not a risk to
+mitigate. Nothing in this task narrows a scope, and nothing here authorises the collector to read log
+content - that remains an implementation restraint enforced by review, and a future analytics feature
+that changes it is its own task with its own review.
 <!-- SECTION:NOTES:END -->

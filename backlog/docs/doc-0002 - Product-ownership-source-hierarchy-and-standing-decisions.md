@@ -3,7 +3,7 @@ id: doc-0002
 title: 'Product ownership, source hierarchy, and standing decisions'
 type: specification
 created_date: '2026-08-24 12:02'
-updated_date: '2026-08-24 12:18'
+updated_date: '2026-09-11 11:15'
 ---
 # Product ownership, source hierarchy, and standing decisions
 
@@ -41,6 +41,8 @@ No command copies product files into a consumer. A consumer may contain adapters
 - Provisioning and collector execution remain separate identities and schedules.
 - Alert publication preserves live routing and pause state; new alerts start paused and unrouted.
 - Contracted prices are deployment data. The generic product contains only the rate-card schema and semantics.
+- Declared reader scopes are documented by what the scope permits, not only by the routes this collector currently calls. Where a scope is materially wider than its use, the breadth is retained deliberately and the reason is recorded beside it.
+- `logs:read` is a full Loki read scope and reaches log content. It is retained deliberately: the label inventory requires it, there is no narrower Grafana Cloud scope that reaches label names and values, and planned log analytics will require it outright. The collector's restraint is that its code calls label endpoints only, which is an implementation property enforced by review, not a property of the credential. Deployments run only against organisations that have explicitly consented to that access.
 
 ## Repository hierarchy
 
