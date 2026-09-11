@@ -6,6 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-09-11 09:57'
+updated_date: '2026-09-11 11:07'
 labels:
   - risk
   - cost
@@ -124,6 +125,9 @@ The platform's HTTP client refuses every method but GET and that property stays 
 - [ ] #8 Metrics are bounded aggregates only and every one is declared in budget.py CATALOGUE
 - [ ] #9 A stack whose plugin route or datasource proxy fails is withheld as unreadable and never published as a structural zero
 - [ ] #10 docs/traps.md records the 31d-is-not-an-override trap, the empty-CRD trap, the deprecated applied endpoint and the Loki-only scope; CAPABILITIES.md records the new routes and the identity each needs
+- [ ] #11 The effective tenant limits are read from the Loki DATAPLANE with the existing org CAP and logs:read, never through a stack datasource proxy, and no new scope or reader action is added
+- [ ] #12 retention_stream entries publish period, priority and selector per stack, with the selector as a view column only
+- [ ] #13 An expected-retention-policy check is a generic mechanism: the deployment supplies a list of {selector, minimum period} and the platform reports stacks whose effective retention_stream does not satisfy it, with its measured-stack denominator. No expectation value is hardcoded in this repository
 <!-- AC:END -->
 
 ## Definition of Done
@@ -132,3 +136,39 @@ The platform's HTTP client refuses every method but GET and that property stays 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+SCOPE QUESTION SETTLED 2026-09-11, AND THE PROXY CAP IS LIFTED. A throwaway org-realm access policy
+carrying `logs:read` and nothing else was minted in region `us` on a control organisation, probed, and
+deleted; both DELETEs returned 204 and a follow-up list confirmed no residual policy.
+
+| Route, Loki dataplane, basic auth user = hlInstanceId | `logs:read` only |
+|---|---|
+| `GET {lokiUrl}/config/tenant/v1/limits` | **200**, full effective limits including `retention_stream` |
+| `GET {lokiUrl}/loki/api/v1/config/limits/applied` | **401** `authentication error: invalid scope requested` |
+| `GET {lokiUrl}/loki/api/v1/labels` | 200 |
+| `GET {lokiUrl}/loki/api/v1/query_range` | **200, and it returned a real log line** |
+
+Four consequences.
+
+1. **Build on `GET {lokiUrl}/config/tenant/v1/limits`.** It is the non-deprecated route, it reaches the
+   effective `retention_stream` value, and it needs NO new scope, NO reader action, NO Grafana service
+   account, NO datasource proxy and NO re-provisioning. The org CAP the collector already carries is
+   enough. `/loki/config/tenant/v1/limits` is a 404; the path has no `/loki` prefix.
+2. **Do not use the datasource proxy for this.** `GET {stackUrl}/api/datasources/proxy/uid/grafanacloud-logs/config/tenant/v1/limits`
+   returns the same body, but it needs `datasources:query` at `datasources:uid:grafanacloud-logs`,
+   which is the production-log-data grant `collector/sources/usage_insights.py` names as unacceptable.
+   The dataplane route makes that trade unnecessary. Never grant it for this feature.
+3. **The published documentation is right about the deprecated endpoint and wrong about the new one.**
+   Grafana's self-serve API page says this endpoint family needs "logs write permissions". That is true
+   of `/loki/api/v1/config/limits/applied`, which 401s under `logs:read` with `invalid scope requested`,
+   and false of `config/tenant/v1/limits`. Do not infer one route's scope from another's documentation.
+4. **`logs:read` is a FULL Loki read scope, not a label-only scope.** `query_range` under that scope
+   returned customer log content. The collector's read-only property comes from its HTTP client
+   refusing non-GET methods plus its code only ever calling label endpoints - `query_range` is itself a
+   GET, so the method restriction does not bound it. `CAPABILITIES.md` lists `logs:read` against two
+   label routes under a "verified route" heading, which reads as a boundary and is not one. Tracked
+   separately; it is a documentation-precision defect, not a code defect.
+<!-- SECTION:NOTES:END -->
