@@ -261,6 +261,12 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                     "and expiry timestamps remain in the S3 view, never labels"),
     MetricSpec("gcinsight_risk_service_accounts_total", "E", {"kind": 2},
                note="extsvc (auto-provisioned) vs custom"),
+    MetricSpec("gcinsight_risk_label_cardinality_stacks_measured", "E",
+               note="stacks whose Mimir top-cardinality label-name response was readable"),
+    MetricSpec("gcinsight_stack_label_cardinality_findings", "E",
+               {"stack": STACK, "kind": 2},
+               note="per-stack counts split into high-confidence and possible. Label names remain in "
+                    "S3 and Loki and never become metric labels"),
     MetricSpec("gcinsight_risk_alert_routing_stacks_measured", "E",
                note="stacks whose alert-rule and contact-point provisioning endpoints both answered"),
     MetricSpec("gcinsight_risk_alert_rules_total", "E",
@@ -426,6 +432,9 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                note="effective per-stream periods and selectors from Loki tenant limits"),
     MetricSpec("risk_retention_policy_gaps", "E", store="view",
                note="deployment-supplied selector expectations not met by readable effective limits"),
+    MetricSpec("risk_label_cardinality", "E", {"stack": STACK}, store="view",
+               note="Mimir top-cardinality label names and counts. Identity-bearing label names stay "
+                    "in S3 and Loki, never metric labels"),
     MetricSpec("risk_fleet_attributes", "E", store="view",
                note="bounded active-collector version, OS, platform, source and type breakdowns"),
     MetricSpec("risk_fleet_pipelines", "E", store="view",

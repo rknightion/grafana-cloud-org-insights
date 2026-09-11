@@ -1780,6 +1780,41 @@ class RecentDashboardPresentationContractsTest(unittest.TestCase):
         self.assertEqual(expr, 'max(gcinsight_input_available{input="alert_routing"})')
         self.assertIn("age", available["description"].lower())
 
+    def test_label_cardinality_keeps_confidence_counts_and_coverage_separate(self):
+        from unittest import mock
+
+        with mock.patch.object(self.dash, "_published_views_exist", return_value=True):
+            risk = self.dash.d_risk("infinity-uid")
+        high = risk[3]["n_label_cardinality_high"]["spec"]
+        possible = risk[3]["n_label_cardinality_possible"]["spec"]
+        measured = risk[3]["n_label_cardinality_measured"]["spec"]
+
+        high_expr = high["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]["expr"]
+        possible_expr = possible["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]["expr"]
+        measured_expr = measured["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]["expr"]
+        self.assertIn('kind="high_confidence"', high_expr)
+        self.assertIn('kind="possible"', possible_expr)
+        self.assertEqual(
+            measured_expr, "gcinsight_risk_label_cardinality_stacks_measured",
+        )
+        self.assertIn("mimir", high["description"].lower())
+        self.assertIn("top 20", high["description"].lower())
+        self.assertIn("denominator", measured["description"].lower())
+
+        panel = risk[3]["label_cardinality"]["spec"]
+        prose = (panel["title"] + " " + panel["description"]).lower()
+        self.assertIn("mimir", prose)
+        self.assertIn("top 20", prose)
+        self.assertIn("does not cover loki, tempo or pyroscope", prose)
+        tab = next(tab for tab in risk[4]
+                   if tab["spec"]["title"] == "Label cardinality")
+        rows = tab["spec"]["layout"]["spec"]["rows"]
+        self.assertEqual(
+            _placed_names(rows[0])[:2],
+            ["n_label_cardinality_high", "n_label_cardinality_measured"],
+        )
+        self.assertIn("label_cardinality", _placed_names(rows[1]))
+
     def test_new_views_wire_same_tab_drilldowns_once_the_objects_exist(self):
         """First publication is fail-closed; after S3 exists, the dashboard must stop exempting detail."""
         from unittest import mock
@@ -1798,13 +1833,15 @@ class RecentDashboardPresentationContractsTest(unittest.TestCase):
         self.assertIn("adaptive_logs_recommendations", cost_tabs["Adaptive Logs"])
         self.assertIn("adaptive_metric_recommendations", cost_tabs["Savings available"])
 
-        for key in ("public_dashboards", "alert_routing_inventory", "alert_routing_findings"):
+        for key in ("public_dashboards", "alert_routing_inventory", "alert_routing_findings",
+                    "label_cardinality"):
             self.assertIn(key, risk[3])
         risk_tabs = {tab["spec"]["title"]: set(_placed_names(tab)) for tab in risk[4]}
         self.assertIn("public_dashboards", risk_tabs["Public dashboards"])
         self.assertLessEqual(
             {"alert_routing_inventory", "alert_routing_findings"}, risk_tabs["Alert routing"],
         )
+        self.assertIn("label_cardinality", risk_tabs["Label cardinality"])
 
     def test_service_account_inventory_is_a_named_same_tab_drilldown(self):
         self.assertEqual(

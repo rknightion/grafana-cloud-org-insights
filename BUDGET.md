@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **8,777** |
-| Phase 1 only | 8,776 |
+| **Declared (all phases)** | **9,320** |
+| Phase 1 only | 9,319 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -23,13 +23,13 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | B | 1,101 |
 | C | 14 |
 | D | 582 |
-| E | 307 |
+| E | 850 |
 | F | 21 |
 | I | 895 |
 | J | 4,368 |
 | K | 967 |
 | scan | 226 |
-| **Total** | **8,777** |
+| **Total** | **9,320** |
 
 ## Metrics
 
@@ -45,6 +45,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_dashboards_viewers` | J | `stack`(271), `version`(2) | 542 | 1 | distinct userIds opening a dashboard. Per stack; NOT deduplicated across the org |
 | `gcinsight_dashboards_views` | J | `stack`(271), `version`(2) | 542 | 1 | dashboard opens in the window. The adoption signal - a stack with 400 dashboards and 3 anyone opens looks healthy in every other pillar |
 | `gcinsight_maturity_score` | D | `stack`(271), `version`(2) | 542 | 1 | versioned so a rubric change is visible rather than silently rescoring history |
+| `gcinsight_stack_label_cardinality_findings` | E | `stack`(271), `kind`(2) | 542 | 1 | per-stack counts split into high-confidence and possible. Label names remain in S3 and Loki and never become metric labels |
 | `gcinsight_ai_machine_share` | I | `stack`(271) | 271 | 1 | share of CATEGORISED messages from a non-web surface (cli/a2a/automation/lodestone/slack). Absent where nothing was categorised. Exists in no other datasource |
 | `gcinsight_ai_messages` | I | `stack`(271) | 271 | 1 | Assistant user messages in the 30-day window. Emitted for every stack whose Assistant API was READ, zeros included, so an absent series still means 'not measured' and never 'not used' |
 | `gcinsight_ai_tokens_per_active_user` | I | `stack`(271) | 271 | 1 | the outlier detector. ABSENT where there are no active users: the ratio is undefined, and a zero would rank a dormant stack as the most efficient |
@@ -151,6 +152,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_risk_collectors_total` | E |  -  | 1 | 1 | every REGISTRATION Fleet Management returns, unchanged so the series stays continuous. Read it with the active and inactive splits below |
 | `gcinsight_risk_collectors_unconfigured` | E |  -  | 1 | 1 | alive, registered, and targeted by no ENABLED pipeline - so receiving no configuration. Also the matcher evaluator's sanity check |
 | `gcinsight_risk_fleet_matchers_unparsed` | E |  -  | 1 | 1 | pipeline matchers this platform cannot parse. Non-zero means at least one 'collectors targeted' figure is UNKNOWN rather than small |
+| `gcinsight_risk_label_cardinality_stacks_measured` | E |  -  | 1 | 1 | stacks whose Mimir top-cardinality label-name response was readable |
 | `gcinsight_risk_org_members_admins` | E |  -  | 1 | 1 | Grafana.com org Admin membership count. Reported without a target or grade |
 | `gcinsight_risk_org_members_viewers` | E |  -  | 1 | 1 | Grafana.com org Viewer membership count. Reported without a target or grade |
 | `gcinsight_risk_pipelines_enabled` | E |  -  | 1 | 1 | a disabled pipeline still describes a target set but configures nothing; the plain pipeline count alone therefore overstates active configuration |
@@ -219,6 +221,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `risk_alert_routing_findings` | E | 1 | 1 | bounded named rule drill-down; rule identity stays out of metric labels |
 | `risk_fleet_attributes` | E | 1 | 1 | bounded active-collector version, OS, platform, source and type breakdowns |
 | `risk_fleet_pipelines` | E | 1 | 1 | named pipeline matcher reach; full Alloy contents are never retained |
+| `risk_label_cardinality` | E | 271 | 1 | Mimir top-cardinality label names and counts. Identity-bearing label names stay in S3 and Loki, never metric labels |
 | `risk_org_members` | E | 1 | 1 | clear-PII named org membership and staff-access-window drill-down |
 | `risk_plugin_version_drift` | E | 271 | 1 |  |
 | `risk_retention_change_requests` | E | 1 | 1 | self-serve request record; author and message never become metric labels |

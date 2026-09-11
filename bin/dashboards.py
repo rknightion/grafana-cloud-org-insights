@@ -1598,6 +1598,7 @@ def d_risk(ds: str):
         "risk_alert_routing", "risk_alert_routing_findings",
     )
     org_members_view_live = _published_views_exist("risk_org_members")
+    label_cardinality_view_live = _published_views_exist("risk_label_cardinality")
     el = {
         "n_org_admins": build.stat_panel(
             "Organisation members with Admin role",
@@ -1624,6 +1625,23 @@ def d_risk(ds: str):
                         "with delete protection and active series: the decision is which materially used, "
                         "unprotected stacks have an unusually broad destructive role, not whether one "
                         "dated estate-wide median is high."),
+        "n_label_cardinality_high": build.stat_panel(
+            "High-confidence Mimir label-name findings",
+            'sum(gcinsight_stack_label_cardinality_findings{kind="high_confidence"})',
+            description="High-confidence key-only matches within Mimir's top 20 label names by "
+                        "cardinality per measured stack. This is a report for owner review, not an "
+                        "instruction to drop or rewrite a label."),
+        "n_label_cardinality_measured": build.stat_panel(
+            "Stacks measured for Mimir label names",
+            "gcinsight_risk_label_cardinality_stacks_measured",
+            description="Coverage denominator for the Mimir-only top-20 window. An unreadable stack is "
+                        "absent rather than counted as a clean zero."),
+        "n_label_cardinality_possible": build.stat_panel(
+            "Possible Mimir label-name findings",
+            'sum(gcinsight_stack_label_cardinality_findings{kind="possible"})',
+            description="Keys such as endpoint, route and path can be unbounded or can be legitimate "
+                        "parameterised dimensions, so this confidence tier stays separate from the "
+                        "high-confidence count."),
         "n_noprot": build.stat_panel(
             "Stacks with no delete protection", "gcinsight_risk_stacks_without_delete_protection",
             description="Stacks that can be deleted without a confirmation guard. This is the "
@@ -2208,6 +2226,15 @@ def d_risk(ds: str):
                         "The inventory stays below the summary because it supports review rather than "
                         "being the headline.",
         )
+    if label_cardinality_view_live:
+        el["label_cardinality"] = build.table_panel(
+            "Mimir top-20 label-name findings", "risk_label_cardinality", ds,
+            schema=risk_pillar.VIEW_SCHEMAS["risk_label_cardinality"],
+            description="Key-only classification over Mimir's top 20 label names by cardinality per "
+                        "measured stack. It does not cover Loki, Tempo or Pyroscope and it is not a "
+                        "complete label-name inventory. Report only; confirm each label's semantics "
+                        "with its owner.",
+        )
 
     collector_rows = [
         build.row("The fleet that exists",
@@ -2270,6 +2297,18 @@ def d_risk(ds: str):
             max_columns=1, row_height="tall",
         ))
 
+    label_cardinality_rows = [
+        build.row("Mimir top-20 coverage and confidence",
+                  ["n_label_cardinality_high", "n_label_cardinality_measured",
+                   "n_label_cardinality_possible"],
+                  max_columns=3, row_height="short"),
+    ]
+    if label_cardinality_view_live:
+        label_cardinality_rows.append(build.row(
+            "Label-name detail", ["label_cardinality"],
+            max_columns=1, row_height="tall",
+        ))
+
     tabs = [
         build.tab("Overview", ["n_public", "n_admin", "n_noprot", "n_fmdead", "n_coll_active", "summary",
                                "t_admin"]),
@@ -2308,6 +2347,7 @@ def d_risk(ds: str):
                       row_height="tall"),
         ]),
         build.rows_tab("Access", access_rows),
+        build.rows_tab("Label cardinality", label_cardinality_rows),
         build.rows_tab("Credentials", [
             build.row("Headline", ["n_sa_custom", "n_sa_extsvc"],
                       max_columns=2, row_height="short"),

@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "unbounded": {
+    "high": [
+      "uuid",
+      "guid",
+      "id",
+      "trace_id",
+      "traceid",
+      "span_id",
+      "spanid",
+      "request_id",
+      "requestid",
+      "correlation_id",
+      "run_id",
+      "job_id",
+      "build_id",
+      "task_id",
+      "container_id",
+      "pod_template_hash",
+      "pid",
+      "timestamp",
+      "epoch",
+      "time",
+      "datetime",
+      "url",
+      "full_path",
+      "query",
+      "querystring",
+      "uri"
+    ],
+    "possible": [
+      "path",
+      "endpoint",
+      "route"
+    ]
+  }
+}

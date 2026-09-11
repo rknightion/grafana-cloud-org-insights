@@ -71,6 +71,17 @@ class BudgetShapeTest(unittest.TestCase):
         from collector import technology_registry
         self.assertEqual(budget.TECHNOLOGY, len(technology_registry.REGISTRY.entries))
 
+    def test_label_cardinality_metrics_use_only_the_bounded_kind_and_stack_dimensions(self):
+        declared = {spec.name: spec for spec in CATALOGUE}
+        findings = declared["gcinsight_stack_label_cardinality_findings"]
+        measured = declared["gcinsight_risk_label_cardinality_stacks_measured"]
+
+        self.assertEqual(findings.labels, {"stack": budget.STACK, "kind": 2})
+        self.assertEqual(measured.labels, {})
+        self.assertIn("risk_label_cardinality", declared)
+        self.assertEqual(declared["risk_label_cardinality"].store, "view")
+        self.assertEqual(declared["risk_label_cardinality"].labels, {"stack": budget.STACK})
+
 
 class BudgetBackstopTest(unittest.TestCase):
     """The budget is static; live denominators belong in a contemporaneous range query."""

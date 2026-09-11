@@ -17,6 +17,7 @@ import json
 from typing import Any, Mapping
 
 from collector.coverage import Coverage
+from collector import label_cardinality
 from collector.sources import public_dashboards as pubdash
 from collector.sources import serviceaccounts as sa
 
@@ -157,6 +158,11 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
         ("Folder uid", "string"), ("Rule group", "string"), ("Paused", "boolean"),
         ("Routing", "string"), ("Receiver", "string"), ("Receiver state", "string"),
     ),
+    "risk_label_cardinality": (
+        (" Stack", "string"), ("Label name", "string"), ("Label values", "number"),
+        ("Class", "string"), ("Confidence", "string"), ("Signal", "string"),
+        ("Top-N window", "number"),
+    ),
 }
 
 
@@ -188,6 +194,61 @@ def _service_account_flag(account: dict[str, Any], kind: str) -> str | None:
     return "; ".join(findings) or None
 
 
+def _label_cardinality(
+    stacks: list[dict[str, Any]], dataplane: Mapping[str, Any]
+) -> tuple[int, list[dict[str, Any]], list[tuple[str, dict[str, str], float]]]:
+    """Classify measured Mimir top-label rows over the live inventory only.
+
+    ``None`` is the unreadable state at the stack boundary, while an empty list is a successful measured
+    zero. A malformed available record is treated like a failed read so it can never clear a previously
+    measured finding view with an invented empty result.
+    """
+    measured = 0
+    findings: list[dict[str, Any]] = []
+    finding_metrics: list[tuple[str, dict[str, str], float]] = []
+    for stack in stacks:
+        # The data-plane probe skips paused stacks. A stale payload entry for one must not make it
+        # appear as a currently measured member of the cardinality denominator.
+        if stack.get("status") == "paused":
+            continue
+        slug = str(stack["slug"])
+        record = dataplane.get(slug)
+        if not isinstance(record, Mapping):
+            continue
+        card = record.get("cardinality")
+        if not isinstance(card, Mapping) or card.get("available") is not True:
+            continue
+        top_labels = card.get("top_labels")
+        if not isinstance(top_labels, list):
+            continue
+        try:
+            classified = label_cardinality.classify_rows(top_labels)
+        except label_cardinality.PatternError:
+            continue
+        measured += 1
+        by_confidence = collections.Counter(row["confidence"] for row in classified)
+        for confidence in label_cardinality.CONFIDENCE_TIERS:
+            finding_metrics.append((
+                "gcinsight_stack_label_cardinality_findings",
+                {"stack": slug, "kind": label_cardinality.METRIC_KIND[confidence]},
+                float(by_confidence[confidence]),
+            ))
+        findings.extend({
+            " Stack": slug,
+            "Label name": row["label"],
+            "Label values": row["values"],
+            "Class": row["class"],
+            "Confidence": row["confidence"],
+            "Signal": label_cardinality.SIGNAL,
+            "Top-N window": label_cardinality.TOP_N,
+        } for row in classified)
+    findings.sort(key=lambda row: (
+        row["Confidence"] != label_cardinality.CONFIDENCE_HIGH,
+        -(row["Label values"] or 0), row[" Stack"], row["Label name"],
+    ))
+    return measured, findings, finding_metrics
+
+
 def build(
     stacks: list[dict[str, Any]],
     coverage: Coverage,
@@ -215,6 +276,15 @@ def build(
     now = now or dt.datetime.now(dt.timezone.utc)
     metrics: list[tuple[str, dict[str, str], float]] = []
     live_slugs = [str(stack["slug"]) for stack in stacks]
+    label_cardinality_measured, label_cardinality_rows, label_cardinality_metrics = (
+        _label_cardinality(stacks, dataplane)
+    )
+    if label_cardinality_measured:
+        metrics.append((
+            "gcinsight_risk_label_cardinality_stacks_measured", {},
+            float(label_cardinality_measured),
+        ))
+        metrics.extend(label_cardinality_metrics)
 
     def fleet_record(slug: str) -> dict[str, Any]:
         return fleet.get(slug) or (dataplane.get(slug) or {}).get("fleet") or {}
@@ -467,6 +537,10 @@ def build(
             key=lambda r: -(r["Active series"] or 0),
         ),
     }
+    # A measured empty top-N list is a real zero and must clear a stale view; an unavailable or
+    # malformed cardinality record never contributes to this view or its denominator.
+    if label_cardinality_measured:
+        views["risk_label_cardinality"] = label_cardinality_rows
     if member_rows is not None:
         views["risk_org_members"] = member_rows
     # **Emit a view ONLY where the input existed.** Every tier writes every view it returns, so a tier
@@ -647,6 +721,14 @@ def build(
         }, {
             " Metric": "Access policies on the org",
             "Value": len(access_policies) if access_policies else "needs a T1 scan",
+        }, {
+            " Metric": "Stacks measured for unbounded label cardinality",
+            "Value": (
+                f"{label_cardinality_measured} of {coverage.scannable} scannable "
+                f"({coverage.total} total); Mimir top {label_cardinality.TOP_N} label names per stack"
+                if label_cardinality_measured
+                else "not measured - needs a T3 cardinality scan"
+            ),
         }]
     if sa_readable_stacks:
         views["risk_service_accounts"] = sorted(

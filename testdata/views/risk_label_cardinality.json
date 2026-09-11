@@ -1,0 +1,371 @@
+{
+  "meta": {
+    "generated_at": "2026-09-11T15:08:55.364857+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "obs-hub",
+      "Label name": "url",
+      "Label values": 13691,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack072",
+      "Label name": "id",
+      "Label values": 2435,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack072",
+      "Label name": "container_id",
+      "Label values": 2213,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack038",
+      "Label name": "id",
+      "Label values": 2022,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack038",
+      "Label name": "container_id",
+      "Label values": 1960,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack049",
+      "Label name": "id",
+      "Label values": 1139,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack053",
+      "Label name": "id",
+      "Label values": 1108,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack049",
+      "Label name": "container_id",
+      "Label values": 1017,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack036",
+      "Label name": "uuid",
+      "Label values": 575,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack052",
+      "Label name": "id",
+      "Label values": 558,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack001b",
+      "Label name": "container_id",
+      "Label values": 405,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Label name": "url",
+      "Label values": 370,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack037",
+      "Label name": "uuid",
+      "Label values": 369,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack052",
+      "Label name": "container_id",
+      "Label values": 355,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack001b",
+      "Label name": "id",
+      "Label values": 338,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack158",
+      "Label name": "uri",
+      "Label values": 242,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack035",
+      "Label name": "uuid",
+      "Label values": 235,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack053",
+      "Label name": "container_id",
+      "Label values": 201,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack170",
+      "Label name": "uri",
+      "Label values": 174,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack072",
+      "Label name": "uuid",
+      "Label values": 148,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack052",
+      "Label name": "guid",
+      "Label values": 64,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Label name": "id",
+      "Label values": 44,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "obs-hub",
+      "Label name": "id",
+      "Label values": 29,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack158",
+      "Label name": "container_id",
+      "Label values": 28,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack170",
+      "Label name": "id",
+      "Label values": 11,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack020",
+      "Label name": "url",
+      "Label values": 6,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack177",
+      "Label name": "container_id",
+      "Label values": 6,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack050",
+      "Label name": "url",
+      "Label values": 2,
+      "Class": "unbounded",
+      "Confidence": "high",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack072",
+      "Label name": "path",
+      "Label values": 179,
+      "Class": "unbounded",
+      "Confidence": "possible",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack158",
+      "Label name": "path",
+      "Label values": 69,
+      "Class": "unbounded",
+      "Confidence": "possible",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack036",
+      "Label name": "endpoint",
+      "Label values": 53,
+      "Class": "unbounded",
+      "Confidence": "possible",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack036",
+      "Label name": "path",
+      "Label values": 30,
+      "Class": "unbounded",
+      "Confidence": "possible",
+      "Signal": "metrics",
+      "Top-N window": 20
+    },
+    {
+      " Stack": "stack037",
+      "Label name": "path",
+      "Label values": 23,
+      "Class": "unbounded",
+      "Confidence": "possible",
+      "Signal": "metrics",
+      "Top-N window": 20
+    }
+  ]
+}

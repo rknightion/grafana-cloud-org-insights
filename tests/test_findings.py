@@ -25,6 +25,18 @@ def cardinality_view(n: int, worst: int = 9_999) -> list[dict]:
              "Active series": 500_000} for i in range(1, n + 1)]
 
 
+def label_cardinality_view() -> list[dict]:
+    """Both confidence classes from the key-only Mimir top-N finding view."""
+    return [
+        {" Stack": "s1", "Label name": "trace_id", "Label values": 9_999,
+         "Class": "unbounded", "Confidence": "high", "Signal": "metrics",
+         "Top-N window": 20},
+        {" Stack": "s2", "Label name": "endpoint", "Label values": 2_000,
+         "Class": "unbounded", "Confidence": "possible", "Signal": "metrics",
+         "Top-N window": 20},
+    ]
+
+
 def sa_view(flagged: int, unflagged: int) -> list[dict]:
     """`risk_service_accounts` is the whole inventory; only `Flag` rows are findings."""
     rows = [{" Stack": "s", "Service account": f"svc{i}", "Kind": "custom", "Role": "Admin",
@@ -157,6 +169,28 @@ class TestRowFilters(unittest.TestCase):
             with self.subTest(kind=kind):
                 self.assertEqual(spec.require, ())
                 self.assertEqual(spec.at_least, ())
+                self.assertEqual(spec.equals, ())
+
+    def test_label_cardinality_confidence_tiers_never_merge(self):
+        found, totals = findings.derive({"risk_label_cardinality": label_cardinality_view()})
+
+        self.assertEqual(totals["label_cardinality_high_confidence"], 1)
+        self.assertEqual(totals["label_cardinality_possible"], 1)
+        self.assertEqual(
+            {item["kind"] for item in found},
+            {"label_cardinality_high_confidence", "label_cardinality_possible"},
+        )
+
+    def test_label_cardinality_loki_detail_keeps_the_name_out_of_stream_labels(self):
+        found, _ = findings.derive({"risk_label_cardinality": label_cardinality_view()})
+        events = loki.finding_events("t3", found)
+
+        self.assertEqual(len(events), 2)
+        for labels, body in events:
+            self.assertNotIn("stack", labels)
+            self.assertNotIn("label", labels)
+            self.assertIn("Label name", body["detail"])
+            self.assertEqual(body["detail"]["Signal"], "metrics")
 
 
 class TestContract(unittest.TestCase):

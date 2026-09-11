@@ -65,6 +65,7 @@ class FindingSpec:
     # the pillar to publish a filtered view; until it does, the threshold lives here and says why.
     require: tuple[str, ...] = field(default_factory=tuple)          # field must be truthy
     at_least: tuple[tuple[str, float], ...] = field(default_factory=tuple)  # field >= value
+    equals: tuple[tuple[str, Any], ...] = field(default_factory=tuple)  # field == value
 
     def matches(self, row: Mapping[str, Any]) -> bool:
         for key in self.require:
@@ -73,6 +74,9 @@ class FindingSpec:
         for key, floor in self.at_least:
             value = row.get(key)
             if not isinstance(value, (int, float)) or value < floor:
+                return False
+        for key, expected in self.equals:
+            if row.get(key) != expected:
                 return False
         return True
 
@@ -101,6 +105,20 @@ SPECS: tuple[FindingSpec, ...] = (
         "risk_admin_sprawl", "E", "admin_sprawl", "high",
         "Admin share is far above what the user count justifies. Every Admin can delete the stack.",
         ("Users (active)", "Admins", "Admin share %", "Delete protection", "Active series"),
+    ),
+    FindingSpec(
+        "risk_label_cardinality", "E", "label_cardinality_high_confidence", "high",
+        "Mimir's top-cardinality label-name window contains a key matching a high-confidence "
+        "unbounded-cardinality pattern. Report only; confirm the label's semantics with its owner.",
+        ("Label name", "Label values", "Class", "Confidence", "Signal", "Top-N window"),
+        equals=(("Confidence", "high"),),
+    ),
+    FindingSpec(
+        "risk_label_cardinality", "E", "label_cardinality_possible", "info",
+        "Mimir's top-cardinality label-name window contains a key that can be unbounded but may be a "
+        "legitimate parameterised dimension. Report only; confirm the label's semantics with its owner.",
+        ("Label name", "Label values", "Class", "Confidence", "Signal", "Top-N window"),
+        equals=(("Confidence", "possible"),),
     ),
     FindingSpec(
         "risk_service_accounts", "E", "service_account_risk", "high",

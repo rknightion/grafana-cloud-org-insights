@@ -172,6 +172,7 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     "risk_retention_stream": frozenset({"loki_config"}),
     "risk_retention_policy_gaps": frozenset({"loki_config"}),
     "cost_cardinality_outliers": frozenset({"dataplane"}),
+    "risk_label_cardinality": frozenset({"dataplane"}),
     "cost_summary": frozenset({"dataplane"}),
     "maturity": frozenset({"dataplane"}),
     "maturity_dimensions": frozenset({"dataplane"}),
