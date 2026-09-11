@@ -51,6 +51,7 @@ jobs:
     uses: rknightion/.github/.github/workflows/container-publish.yml@81fc55183265da0b21e92e690f70d679b20ed822 # v1.21.0
     with:
       release-tag: ${{ inputs.release-tag || '' }}
+      trivy-ignore-file: .trivyignore.yaml
       build-args: |
         GCINSIGHT_SOURCE_URL=https://github.com/${{ github.repository }}
         GCINSIGHT_SOURCE_REVISION=${{ needs.source.outputs.revision }}

@@ -3,9 +3,11 @@ id: GCI-0024
 title: >-
   Unblock container publishing - Trivy fails the gate on base-image CVEs that
   have no upstream fix
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-09-11 14:14'
+updated_date: '2026-09-11 14:24'
 labels:
   - ci
   - security
@@ -72,3 +74,13 @@ Rejected: leaving the gate red. RC tags keep being cut with nothing shippable be
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Reconfirm the current failed publish evidence, exact CVE set, reusable input contract, and current base-image status.
+2. Add a reviewed per-CVE Trivy ignore file with an expiry and no-fix rationale for every entry, then wire it through publish.yml without weakening Trivy or SARIF.
+3. Validate the declarative change with workflow parsing, actionlint, identifier and dash gates; skip a unit test because this is declarative configuration.
+4. Commit only the task files to main, push, and verify a GHCR image exists for the repaired revision.
+5. Create the separate fleet-wide follow-up task, then finalize GCI-0024 through the CLI against objective evidence.
+<!-- SECTION:PLAN:END -->

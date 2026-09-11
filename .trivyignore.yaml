@@ -1,0 +1,55 @@
+vulnerabilities:
+  - id: CVE-2025-69720
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-11822
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-11824
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-13221
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-16742
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-41992
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-42496
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-42497
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-48962
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-54369
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-57432
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-57433
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-76642
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-78408
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-78409
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-78410
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-8376
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
+  - id: CVE-2026-9538
+    statement: No upstream fix is available in Debian 13 as of 2026-09-11.
+    expired_at: 2026-10-11
