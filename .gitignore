@@ -69,3 +69,9 @@ docs/fonts/
 
 # The hub's own build output, if a docs build is run locally.
 /site/
+
+# Fan-out run artefacts: goals, launch messages, reports, per-wave evidence.
+# The directory name is load-bearing (codex-sync.sh matches it exactly). Ignore the
+# DIRECTORY, not a filename pattern, so a new artefact type cannot leak by being
+# named something a pattern did not anticipate.
+codex/
