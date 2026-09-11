@@ -3,9 +3,10 @@ id: GCI-0025
 title: >-
   Verify what traces:read and profiles:read actually permit, with an isolated
   mint-and-delete probe
-status: To Do
+status: Parked
 assignee: []
 created_date: '2026-09-11 14:15'
+updated_date: '2026-09-11 15:25'
 labels:
   - security
   - capabilities
@@ -47,7 +48,19 @@ Mint an access policy carrying `traces:read` and nothing else, on a control orga
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Wave 2 attended probe did not run because the operator did not supply the control-organisation identity. No organisation was inferred and no access policy was minted, read, modified or deleted.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Parked without live mutation. The control organisation was not supplied, so traces:read and profiles:read remain explicitly unverified, no content-bearing route result was claimed, and CAPABILITIES.md was not changed.
+<!-- SECTION:FINAL_SUMMARY:END -->

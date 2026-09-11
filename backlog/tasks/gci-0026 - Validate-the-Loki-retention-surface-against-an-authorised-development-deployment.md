@@ -3,9 +3,10 @@ id: GCI-0026
 title: >-
   Validate the Loki retention surface against an authorised development
   deployment
-status: To Do
+status: Parked
 assignee: []
 created_date: '2026-09-11 14:15'
+updated_date: '2026-09-11 15:25'
 labels:
   - retention
   - validation
@@ -50,7 +51,19 @@ Authorised by the operator on 2026-09-11 for wave 2.
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Wave 2 attended validation did not run because the operator did not supply the development-deployment identity. No deployment or bucket was inferred, and no collector, S3, Loki, metric-label or dashboard observation was made.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Parked without a live collector run. The development deployment was not supplied, so the three retention artifacts, fixed-label Loki change event, identity placement and five populated Operations elements remain unproved.
+<!-- SECTION:FINAL_SUMMARY:END -->

@@ -7,7 +7,7 @@ status: Parked
 assignee:
   - '@codex'
 created_date: '2026-08-25 08:27'
-updated_date: '2026-09-11 13:43'
+updated_date: '2026-09-11 15:24'
 labels:
   - bug
 dependencies: []
@@ -67,10 +67,14 @@ Fix the Firehose trust SourceArn condition using the bare log-group ARN, validat
 
 <!-- SECTION:NOTES:BEGIN -->
 Wave 1 implementation and deterministic verification completed. Acceptance criterion 3 requires a write to an AWS deployment and was outside the run authority. Resume by applying a consumer deployment with firehose_logs_enabled=true and firehose_log_subscription_enabled=true against a log group that has never carried a subscription filter, then verify aws_cloudwatch_log_subscription_filter.ecs_logs is created without manual intervention.
+
+Wave 2 attended acceptance did not run because the operator did not supply the required consumer deployment and fresh log-group identity during the run. No deployment was inferred. Acceptance criterion 3 remains unproved.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 The trust policy now matches the bare log-group ARN CloudWatch Logs sends while retaining SourceAccount and the deployment-specific log-group constraint. RUNBOOK and troubleshooting guidance were corrected. Terraform tests and both validate roots passed at b6cf849614054894e2bea49d0154d958fc016d7b. Parked only on the required first-filter live AWS apply.
+
+Wave 2 left the task Parked: the required consumer deployment and fresh log group were not supplied, so no first-time subscription-filter creation was attempted or observed.
 <!-- SECTION:FINAL_SUMMARY:END -->
