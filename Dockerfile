@@ -23,6 +23,13 @@
 
 FROM python:3.14-slim@sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6
 
+# The collector is stdlib-only and the image never installs Python packages. Remove pip and the
+# ensurepip bootstrap from the runtime image so their bundled build tooling and vendored libraries
+# do not become an unused vulnerability surface.
+RUN python3 -m pip uninstall --yes pip && \
+    rm -rf /usr/local/lib/python3.14/ensurepip && \
+    ! python3 -m pip --version
+
 ARG GCINSIGHT_SOURCE_URL=https://github.com/rknightion/grafana-cloud-org-insights
 ARG GCINSIGHT_SOURCE_REVISION=unknown
 ARG GCINSIGHT_OVERLAY_DIGEST=none

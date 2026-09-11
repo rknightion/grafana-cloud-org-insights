@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-09-11 14:14'
-updated_date: '2026-09-11 14:24'
+updated_date: '2026-09-11 14:41'
 labels:
   - ci
   - security
@@ -84,3 +84,9 @@ Rejected: leaving the gate red. RC tags keep being cut with nothing shippable be
 4. Commit only the task files to main, push, and verify a GHCR image exists for the repaired revision.
 5. Create the separate fleet-wide follow-up task, then finalize GCI-0024 through the CLI against objective evidence.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+The first hosted repair attempt at 3215d3d proved the 18 per-CVE rules were loaded: all unfixed operating-system findings were suppressed, but the gate still found two fixable HIGH findings in pip vendor metadata from the pinned Python base. The collector is stdlib-only and never installs Python packages, so the follow-up removes pip and ensurepip from the runtime image. Local ARM64 proof: collector --help exits 0, aws --version exits 0, Python imports neither pip nor ensurepip, and Trivy 0.70.0 reports zero HIGH/CRITICAL findings with the reviewed ignore file. CodeRabbit reviewed Dockerfile and returned 0 findings.
+<!-- SECTION:NOTES:END -->
