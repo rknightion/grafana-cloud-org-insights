@@ -22,3 +22,10 @@ reviews:
       Check dashboard registration across build.DASHBOARDS, BUILDERS and PILLAR_OF, query each source
       with its actual contract, and preserve mandatory stack/instance guards. Fixture numbers are synthetic
       unless separately evidenced.
+knowledge_base:
+  linked_repositories:
+  - repository: m7kni/m7kni-net-site
+    instructions: >-
+      Documentation hub. This repository dispatches documentation changes to the hub, which clones the
+      docs source and builds it. Check docs_path, config_file and the dispatch payload against this
+      repository's entry in the hub's docs-repos.json manifest.
