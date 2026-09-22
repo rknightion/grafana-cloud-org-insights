@@ -567,6 +567,7 @@ def d_estate(ds: str):
         "drift": build.table_panel(
             "Stacks off the standard Grafana build", "estate_drift", ds,
             columns=['Stack', 'Region', 'Cluster', 'Version drift', 'Active series', 'Users (active)', 'Age (days)'],
+            schema=estate_pillar.VIEW_SCHEMAS["estate_drift"],
             description="Stacks not on the version the rest of the estate runs. Being behind is not automatically "
                         "wrong - the question each row asks is whether that pin was deliberate and is "
                         "still needed, because a forgotten pin misses security fixes silently."),
@@ -893,10 +894,12 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
                         "rather than rendering blank."),
         "headroom": build.table_panel(
             "Adaptive headroom - sorted by remediable volume", "cost_adaptive_headroom", ds,
+            schema=cost_pillar.VIEW_SCHEMAS["cost_adaptive_headroom"],
             description="Pending recommendations, zero rules applied. Sorted by what you can remove, "
                         "not by spend."),
         "cardinality": build.table_panel(
             "Cardinality outliers", "cost_cardinality_outliers", ds,
+            schema=cost_pillar.VIEW_SCHEMAS["cost_cardinality_outliers"],
             description="The exact ranked and filterable work queue behind the treemap. Worst label NAME "
                         "per stack is unbounded, so it lives here and never in a metric label."),
         "cardinality_treemap": build.treemap_panel(
@@ -904,6 +907,7 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
             text_field="Stack", size_field="Label values",
             color_by_field="Worst label values",
             label_fields=("Active series", "Worst label", "Worst label values"),
+            schema=cost_pillar.VIEW_SCHEMAS["cost_cardinality_outliers"],
             description="Each rectangle's AREA is the stack's total label values, so this view answers "
                         "whether cardinality is concentrated in a few stacks or spread across the estate. "
                         "Hover for active series and the worst-label detail; use the native table beside "
@@ -1917,6 +1921,7 @@ def d_risk(ds: str):
         "admins": build.table_panel(
             "Admin sprawl", "risk_admin_sprawl", ds,
             columns=['Stack', 'Region', 'Users (active)', 'Admins', 'Admin share %', 'Delete protection'],
+            schema=risk_pillar.VIEW_SCHEMAS["risk_admin_sprawl"],
             description="Sorted by active series: biggest stacks first, where it matters most."),
         "fleet": build.table_panel(
             "Fleet Management configured and dead", "risk_fleet_dead", ds,
@@ -1925,6 +1930,7 @@ def d_risk(ds: str):
             # it is what the FM UI shows, and a reader comparing the two is the point.
             columns=['Stack', 'Region', 'Collectors', 'Collectors (active)', 'Collectors (inactive)',
                      'Inactive %', 'Pipelines', 'Pipelines (enabled)', 'FM dead', 'Alert rules'],
+            schema=risk_pillar.VIEW_SCHEMAS["risk_fleet_dead"],
             description="The named stacks behind the FM counter: pipelines defined, no LIVE collectors "
                         "connected. Start with the ones that also carry real series - an empty stack with "
                         "a dead pipeline costs nothing and misleads nobody. `Collectors` counts every "
@@ -1945,6 +1951,7 @@ def d_risk(ds: str):
         "noprot": build.table_panel(
             "Production load with no delete protection", "risk_delete_protection", ds,
             columns=['Stack', 'Region', 'Active series', 'Users (active)', 'Alert rules', 'Delete protection'],
+            schema=risk_pillar.VIEW_SCHEMAS["risk_delete_protection"],
             description="Unprotected AND 50,000+ active series, largest first. Cross-read with Admin "
                         "sprawl: a stack that is admin-heavy AND unprotected can be deleted by any of "
                         "those admins, with nothing to stop them. Empty stacks are excluded - those are "
@@ -1958,6 +1965,7 @@ def d_risk(ds: str):
                         "rather than no sample in range."),
         "plugindrift": build.table_panel(
             "Stacks with unusual datasource plugins", "risk_plugin_drift", ds,
+            schema=risk_pillar.VIEW_SCHEMAS["risk_plugin_drift"],
             description="The DRILL-DOWN behind the plugin-drift counter: the named stacks running "
                         "datasource types the rest of the estate does not. Read as a question rather than "
                         "a fault - a one-off plugin may be entirely legitimate, but it is unsupported "

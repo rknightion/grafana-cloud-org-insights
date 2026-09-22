@@ -111,6 +111,21 @@ class ColumnGenerationTest(unittest.TestCase):
         cols = build.columns_for(view)
         self.assertEqual([c["selector"] for c in cols], [" Stack", "Region", "Series"])
 
+    @mock.patch.object(build, "read_view", return_value={"rows": []})
+    @mock.patch.object(build, "BUCKET", "test-bucket")
+    def test_treemap_accepts_an_explicit_empty_view_schema(self, _read_view):
+        panel = build.treemap_panel(
+            "Cardinality", "empty", "infinity",
+            text_field="Stack", size_field="Values", color_by_field="Worst",
+            schema=((" Stack", "string"), ("Values", "number"), ("Worst", "number")),
+        )
+
+        query = panel["spec"]["data"]["spec"]["queries"][0]
+        self.assertEqual(
+            [column["selector"] for column in query["spec"]["query"]["spec"]["columns"]],
+            [" Stack", "Values", "Worst"],
+        )
+
     def test_the_leading_space_is_stripped_from_the_display_text(self):
         """The space forces order in Infinity's alphabetising parser; it must not reach the header."""
         cols = build.columns_for({"rows": [{" Stack": "a"}]})

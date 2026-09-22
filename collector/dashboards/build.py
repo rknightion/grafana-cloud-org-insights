@@ -457,14 +457,15 @@ def table_panel(title: str, view_name: str, ds_uid: str, *, description: str = "
 
 def treemap_panel(title: str, view_name: str, ds_uid: str, *,
                   text_field: str, size_field: str, color_by_field: str,
-                  label_fields: Sequence[str] = (), description: str = "") -> dict[str, Any]:
+                  label_fields: Sequence[str] = (), description: str = "",
+                  schema: Sequence[tuple[str, str]] | None = None) -> dict[str, Any]:
     """A Marcus Olsson Treemap bound to a complete Infinity view.
 
     The third-party v2 envelope and these option names were round-tripped on obs-hub before this
     builder was added. Keep the native table beside a treemap: area communicates concentration, while
     the table remains the exact ranked and filterable work queue.
     """
-    declared = view_columns(view_name)
+    declared = view_columns(view_name, schema)
     mapped = [text_field, size_field, color_by_field, *label_fields]
     missing = [field for field in mapped if field not in declared]
     if missing:
@@ -477,6 +478,7 @@ def treemap_panel(title: str, view_name: str, ds_uid: str, *,
         [infinity_query(
             view_name, ds_uid,
             stack_filter=STACK_COLUMN in declared,
+            schema=schema,
         )],
         viz("marcusolsson-treemap-panel", {
             "fieldConfig": {
