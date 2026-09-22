@@ -245,6 +245,66 @@ class StackCatalogSourceTest(unittest.TestCase):
         self.assertEqual(out["dashboards"][1]["identity_selectors"], [])
         self.assertNotIn("requests_total", repr(out))
 
+    def test_dashboard_detail_lexes_promql_before_accepting_selector_evidence(self):
+        """Comments and strings are not selectors; supported PromQL literals decode exactly."""
+        search = [
+            {"uid": "d-0", "title": "Noise", "type": "dash-db", "tags": []},
+            {"uid": "d-1", "title": "Literals", "type": "dash-db", "tags": []},
+        ]
+        client = FakeClient([
+            (200, search),
+            (200, {"dashboard": {"panels": [{"targets": [{
+                "expr": '# up{service_name="commented"}\n'
+                        'label_replace(up, "dst", "service_name=\\"stringy\\"", "src", ".*")',
+                "query": r"where value = 'bad\qescape'",
+            }]}]}}),
+            (200, {"dashboard": {"panels": [{"targets": [
+                {"expr": r"up{service_name='check\x6fut'}"},
+                {"expr": "up{service_name=`inventory`}"},
+                {"expr": r'up{"service_name"="pay\155ents"}'},
+            ]}]}}),
+        ])
+
+        out = stack_catalog.probe_dashboards_stack(
+            client, self.STACK, "tok", include_detail=True,
+        )
+
+        self.assertTrue(out["detail_available"])
+        self.assertEqual(out["dashboards"][0]["identity_selectors"], [])
+        self.assertEqual(
+            out["dashboards"][1]["identity_selectors"],
+            ["checkout", "inventory", "payments"],
+        )
+
+    def test_malformed_promql_selector_makes_detail_evidence_unavailable(self):
+        """Malformed selector syntax cannot be downgraded to trustworthy negative evidence."""
+        search = [
+            {"uid": "d-0", "title": "One", "type": "dash-db", "tags": []},
+        ]
+        for expression in (
+            r'up{service_name="bad\qescape"}',
+            r'up{service_name="bad\777escape"}',
+            'up{service_name="checkout" job="api"}',
+        ):
+            with self.subTest(expression=expression):
+                out = stack_catalog.probe_dashboards_stack(
+                    FakeClient([
+                        (200, search),
+                        (200, {"dashboard": {"panels": [{"targets": [{
+                            "expr": expression,
+                        }]}]}}),
+                    ]),
+                    {**self.STACK, "dashboardCnt": 1},
+                    "tok",
+                    include_detail=True,
+                )
+
+                self.assertFalse(out["detail_available"])
+                self.assertEqual(out["detail_reason"], stack_catalog.INVALID_RESPONSE)
+                self.assertTrue(
+                    all("identity_selectors" not in row for row in out["dashboards"]),
+                )
+
     def test_one_failed_dashboard_detail_marks_stack_evidence_unavailable(self):
         """A partial detail census cannot support a no finding for any service on the stack."""
         search = [

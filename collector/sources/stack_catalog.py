@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import json
-import re
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Mapping, Sequence
@@ -31,10 +29,10 @@ INCOMPLETE_INVENTORY = "incomplete_inventory"
 # Canonical Pillar K identities come from service_name. `job` was measured live and resolved none of
 # 35 values, so widening this list would manufacture a bridge between disjoint namespaces.
 DASHBOARD_IDENTITY_LABELS = ("service_name",)
-_LITERAL_IDENTITY_SELECTOR = re.compile(
-    r'(?<![A-Za-z0-9_])(' + "|".join(map(re.escape, DASHBOARD_IDENTITY_LABELS))
-    + r')\s*=\s*"((?:\\.|[^"\\])*)"'
-)
+_PROMQL_ESCAPES = {
+    "a": "\a", "b": "\b", "f": "\f", "n": "\n", "r": "\r", "t": "\t",
+    "v": "\v", "\\": "\\",
+}
 
 
 def unavailable(slug: str, reason: str, detail: str = "") -> dict[str, Any]:
@@ -105,6 +103,212 @@ def _panel_queries(dashboard: Mapping[str, Any]) -> list[str] | None:
     return queries if all(visit(panel) for panel in panels) else None
 
 
+def _promql_string(query: str, start: int) -> tuple[str | None, int] | None:
+    """Decode one PromQL string literal using its documented Go-style escapes."""
+    quote = query[start]
+    end = start + 1
+    value: list[str] = []
+    valid = True
+    while end < len(query):
+        char = query[end]
+        if char == quote:
+            return ("".join(value) if valid else None), end + 1
+        if quote == "`":
+            value.append(char)
+            end += 1
+            continue
+        if char in "\r\n":
+            valid = False
+            value.append(char)
+            end += 1
+            continue
+        if char != "\\":
+            value.append(char)
+            end += 1
+            continue
+        end += 1
+        if end >= len(query):
+            return None
+        escape = query[end]
+        if escape == quote:
+            value.append(quote)
+            end += 1
+            continue
+        if escape in _PROMQL_ESCAPES:
+            value.append(_PROMQL_ESCAPES[escape])
+            end += 1
+            continue
+        if escape in "01234567":
+            digits = query[end:end + 3]
+            if len(digits) != 3 or any(digit not in "01234567" for digit in digits):
+                valid = False
+                end += 1
+                continue
+            codepoint = int(digits, 8)
+            if codepoint > 0xFF:
+                valid = False
+            else:
+                value.append(chr(codepoint))
+            end += 3
+            continue
+        widths = {"x": 2, "u": 4, "U": 8}
+        width = widths.get(escape)
+        if width is None:
+            valid = False
+            end += 1
+            continue
+        digits = query[end + 1:end + 1 + width]
+        if len(digits) != width or any(digit not in "0123456789abcdefABCDEF" for digit in digits):
+            valid = False
+            end += 1
+            continue
+        codepoint = int(digits, 16)
+        if codepoint > 0x10FFFF or 0xD800 <= codepoint <= 0xDFFF:
+            valid = False
+        else:
+            value.append(chr(codepoint))
+        end += width + 1
+    return None
+
+
+def _promql_tokens(query: str) -> list[tuple[str, str]] | None:
+    """Lex only the PromQL tokens needed to identify literal equality matchers."""
+    tokens: list[tuple[str, str]] = []
+    index = 0
+    while index < len(query):
+        char = query[index]
+        if char.isspace():
+            index += 1
+            continue
+        if char == "#":
+            newline = query.find("\n", index + 1)
+            index = len(query) if newline < 0 else newline + 1
+            continue
+        if char in "'\"`":
+            decoded = _promql_string(query, index)
+            if decoded is None:
+                return None
+            value, index = decoded
+            tokens.append(("string" if value is not None else "invalid_string", value or ""))
+            continue
+        if char.isalpha() or char == "_":
+            end = index + 1
+            while end < len(query) and (query[end].isalnum() or query[end] == "_"):
+                end += 1
+            tokens.append(("identifier", query[index:end]))
+            index = end
+            continue
+        if char == "{":
+            tokens.append(("open", char))
+            index += 1
+            continue
+        if char == "}":
+            tokens.append(("close", char))
+            index += 1
+            continue
+        if char == "=" and query[index:index + 2] not in ("==", "=~"):
+            tokens.append(("equal", char))
+            index += 1
+            continue
+        if query[index:index + 2] in ("==", "=~", "!=", "!~"):
+            tokens.append(("other", query[index:index + 2]))
+            index += 2
+            continue
+        tokens.append(("other", char))
+        index += 1
+    return tokens
+
+
+def _closing_brace(tokens: Sequence[tuple[str, str]], start: int) -> int | None:
+    depth = 1
+    for index in range(start + 1, len(tokens)):
+        if tokens[index][0] == "open":
+            depth += 1
+        elif tokens[index][0] == "close":
+            depth -= 1
+            if depth == 0:
+                return index
+    return None
+
+
+def _matcher_identity_selectors(tokens: Sequence[tuple[str, str]]) -> set[str] | None:
+    """Validate one complete matcher list and return its literal identity values."""
+    values: set[str] = set()
+    index = 0
+    while index < len(tokens):
+        if tokens[index] == ("other", "$"):
+            if index + 1 >= len(tokens):
+                return None
+            if tokens[index + 1][0] == "identifier":
+                index += 2
+            elif tokens[index + 1][0] == "open":
+                end = _closing_brace(tokens, index + 1)
+                if end is None:
+                    return None
+                index = end + 1
+            else:
+                return None
+        else:
+            if index + 2 >= len(tokens):
+                return None
+            label_kind, label = tokens[index]
+            operator = tokens[index + 1]
+            value_kind, value = tokens[index + 2]
+            if (
+                label_kind not in ("identifier", "string")
+                or operator not in (("equal", "="), ("other", "!="),
+                                    ("other", "=~"), ("other", "!~"))
+                or value_kind != "string"
+            ):
+                return None
+            if label in DASHBOARD_IDENTITY_LABELS and operator == ("equal", "="):
+                selector = value.strip()
+                if selector:
+                    values.add(selector)
+            index += 3
+        if index == len(tokens):
+            break
+        if tokens[index] != ("other", ","):
+            return None
+        index += 1
+    return values
+
+
+def _query_identity_selectors(query: str) -> set[str] | None:
+    tokens = _promql_tokens(query)
+    if tokens is None:
+        return None
+    values: set[str] = set()
+    index = 0
+    while index < len(tokens):
+        kind, _value = tokens[index]
+        if kind == "close":
+            return None
+        if kind != "open":
+            index += 1
+            continue
+        end = _closing_brace(tokens, index)
+        if end is None:
+            return None
+        if index > 0 and tokens[index - 1] == ("other", "$"):
+            index = end + 1
+            continue
+        matcher_tokens = tokens[index + 1:end]
+        selectors = _matcher_identity_selectors(matcher_tokens)
+        if selectors is None:
+            if any(
+                token_kind in ("identifier", "string")
+                and token_value in DASHBOARD_IDENTITY_LABELS
+                for token_kind, token_value in matcher_tokens
+            ):
+                return None
+            index = end + 1
+            continue
+        values.update(selectors)
+        index = end + 1
+    return values
+
+
 def _identity_selectors(body: Any) -> list[str] | None:
     if not isinstance(body, Mapping) or not isinstance(body.get("dashboard"), Mapping):
         return None
@@ -113,13 +317,10 @@ def _identity_selectors(body: Any) -> list[str] | None:
         return None
     values: set[str] = set()
     for query in queries:
-        for _label, encoded in _LITERAL_IDENTITY_SELECTOR.findall(query):
-            try:
-                value = json.loads(f'"{encoded}"')
-            except json.JSONDecodeError:
-                return None
-            if isinstance(value, str) and value.strip():
-                values.add(value.strip())
+        selectors = _query_identity_selectors(query)
+        if selectors is None:
+            return None
+        values.update(selectors)
     return sorted(values, key=str.casefold)
 
 

@@ -1,15 +1,19 @@
 ---
 id: GCI-0017
 title: 'Match services to dashboards by query selector, name and spread guard'
-status: In Progress
-assignee: []
+status: Done
+assignee:
+  - '@codex'
 created_date: '2026-08-25 13:11'
-updated_date: '2026-08-25 18:18'
+updated_date: '2026-09-22 09:04'
 labels:
   - pillar-k
   - coverage
   - matching
 dependencies: []
+modified_files:
+  - collector/sources/stack_catalog.py
+  - tests/test_stage19_insights.py
 priority: medium
 type: enhancement
 ordinal: 25000
@@ -84,20 +88,20 @@ The SLO read is already complete. On a stack with 27 SLOs all carrying a service
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Tier 1 query-selector matching implemented behind a config flag, identity labels an explicit allow-list
-- [ ] #2 Tier 2 uses token-subsequence matching, never raw substring
-- [ ] #3 Generic-name guard is estate spread built from the live stack set, not a curated list
-- [ ] #4 Evidence tier stored per row alongside match count; no merged boolean
-- [ ] #5 Alert rule-title matching added at zero API cost; rule-query matching not built
-- [ ] #6 A failed detail fetch unscores the dashboard component rather than scoring no
-- [ ] #7 rule_group asterisk padding removed
+- [x] #1 Tier 1 query-selector matching implemented behind a config flag, identity labels an explicit allow-list
+- [x] #2 Tier 2 uses token-subsequence matching, never raw substring
+- [x] #3 Generic-name guard is estate spread built from the live stack set, not a curated list
+- [x] #4 Evidence tier stored per row alongside match count; no merged boolean
+- [x] #5 Alert rule-title matching added at zero API cost; rule-query matching not built
+- [x] #6 A failed detail fetch unscores the dashboard component rather than scoring no
+- [x] #7 rule_group asterisk padding removed
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 python3 -m pytest tests -q
-- [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
-- [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
+- [x] #1 python3 -m pytest tests -q
+- [x] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
+- [x] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -124,4 +128,12 @@ This is strictly stronger than either signal alone and it converts all ten of th
 Known edge, to be handled rather than ignored: the conjunction is only as sound as the sentinel. For Grafana own components the metric families can arrive from Grafana Cloud self-monitoring rather than from a customer deployment, so a service named after one could satisfy the conjunction without a real deployment behind it. This is safe TODAY only because the registry deliberately carries no self-hosted Grafana, Loki, Mimir, Tempo or Pyroscope entries - they are pending sentinel capture in the lab. When those entries land, the conjunction must additionally require the sentinel to be a metric a customer deployment emits and Grafana Cloud does not, or those four technologies must be excluded from tier 3.
 
 Record the evidence tier as `technology_and_dashboard` so a consumer can still distinguish it from a literal query-selector match.
+
+Final verification on 2026-09-22: focused dashboard, coverage, alert-routing and config contracts passed (87 tests, 51 subtests). CodeRabbit review of the original implementation found that regex extraction could treat commented or malformed PromQL as selector evidence. Replaced it with a bounded lexer and complete matcher-list validator using PromQL comment and Go-style string rules; regression tests cover comments, non-selector strings, single/double/backtick literals, hex/octal escapes, malformed escapes and missing matcher separators. CodeRabbit second pass completed with zero findings. Final `just check` passed: 1482 tests, 2 skipped, 7276 subtests; both OpenTofu validations and recursive format check passed; customer-identifier working-tree/history and shipped-text checks were clean.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Implemented the tiered dashboard and alert-title coverage matcher, with live-estate spread guarding, per-row evidence tier/count/opened state, explicit query-detail rollout control, and fail-closed unscoring. Hardened literal selector extraction so only valid allow-listed equality matchers in real PromQL/LogQL selector syntax count as evidence. Verified with focused contracts, the complete offline/infra/privacy/text gate, and CodeRabbit review.
+<!-- SECTION:FINAL_SUMMARY:END -->
