@@ -5,15 +5,15 @@ status: Done
 assignee:
   - '@codex'
 created_date: '2026-08-25 13:11'
-updated_date: '2026-09-22 09:04'
+updated_date: '2026-09-22 15:17'
 labels:
   - pillar-k
   - coverage
   - matching
 dependencies: []
 modified_files:
-  - collector/sources/stack_catalog.py
-  - tests/test_stage19_insights.py
+  - collector/pillars/coverage.py
+  - tests/test_coverage.py
 priority: medium
 type: enhancement
 ordinal: 25000
@@ -130,6 +130,8 @@ Known edge, to be handled rather than ignored: the conjunction is only as sound 
 Record the evidence tier as `technology_and_dashboard` so a consumer can still distinguish it from a literal query-selector match.
 
 Final verification on 2026-09-22: focused dashboard, coverage, alert-routing and config contracts passed (87 tests, 51 subtests). CodeRabbit review of the original implementation found that regex extraction could treat commented or malformed PromQL as selector evidence. Replaced it with a bounded lexer and complete matcher-list validator using PromQL comment and Go-style string rules; regression tests cover comments, non-selector strings, single/double/backtick literals, hex/octal escapes, malformed escapes and missing matcher separators. CodeRabbit second pass completed with zero findings. Final `just check` passed: 1482 tests, 2 skipped, 7276 subtests; both OpenTofu validations and recursive format check passed; customer-identifier working-tree/history and shipped-text checks were clean.
+
+Rollout regression follow-up, 2026-09-22: enabling the completed dashboard-detail input on a large estate exposed quadratic recomputation in Pillar K. Historical T1 completed in 120-145s; rc.65 exceeded 35m after Fleet completed. Exact-profile reproduction against the 14,085,600-byte T2 envelope located the cost in per-service estate-wide dashboard and alert-title tokenization. Replaced both nested rescans with contiguous-token indexes. Exact large-estate composition now completes in 5.120s under cProfile (69 views, 142,038 rows) instead of exceeding 35m. Added tokenization-bound and detail-unavailable spread regressions. just check: 1,491 passed, 2 skipped, 7,290 subtests; Terraform validation and privacy/history gates clean. CodeRabbit pass 1 identified detail-unavailable stacks influencing spread; fixed. Pass 2: zero findings.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

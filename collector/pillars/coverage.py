@@ -171,24 +171,78 @@ def _contiguous_tokens(needle: tuple[str, ...], haystack: tuple[str, ...]) -> bo
                for index in range(len(haystack) - len(needle) + 1))
 
 
-def _named_dashboard(service: str, dashboard: Mapping[str, Any]) -> bool:
-    service_tokens = _tokens(service)
-    return any(
-        _contiguous_tokens(service_tokens, _tokens(dashboard.get(field)))
-        for field in ("title", "folder")
-    )
+def _name_token_index(
+    names: set[str],
+) -> tuple[dict[tuple[str, ...], set[str]], tuple[int, ...]]:
+    by_tokens: dict[tuple[str, ...], set[str]] = {}
+    for name in names:
+        tokens = _tokens(name)
+        if tokens:
+            by_tokens.setdefault(tokens, set()).add(name)
+    return by_tokens, tuple(sorted({len(tokens) for tokens in by_tokens}))
+
+
+def _names_in_values(
+    values: Any,
+    by_tokens: Mapping[tuple[str, ...], set[str]],
+    lengths: tuple[int, ...],
+) -> set[str]:
+    matched: set[str] = set()
+    for value in values:
+        haystack = _tokens(value)
+        for length in lengths:
+            if length > len(haystack):
+                break
+            for index in range(len(haystack) - length + 1):
+                matched.update(by_tokens.get(haystack[index:index + length], ()))
+    return matched
+
+
+def _dashboard_name_index(
+    records: Mapping[str, Mapping[str, Any]],
+    services: set[str],
+) -> tuple[dict[str, dict[str, set[str]]], dict[str, int]]:
+    """Index contiguous service-name matches without rescanning the estate per service.
+
+    The old spread guard called ``_named_dashboard`` for every discovered service against every live
+    dashboard. On a large estate that made T1 proportional to services times dashboards, and each
+    comparison repeated the same title/folder tokenisation. Index the bounded token windows once and
+    retain the exact contiguous-token matching contract.
+    """
+    by_tokens, lengths = _name_token_index(services)
+
+    named_by_stack: dict[str, dict[str, set[str]]] = {}
+    spread: dict[str, int] = {}
+    for slug, record in records.items():
+        named: dict[str, set[str]] = {}
+        for dashboard in record.get("dashboards") or []:
+            if not isinstance(dashboard, Mapping):
+                continue
+            uid = str(dashboard.get("uid") or "")
+            if not uid:
+                continue
+            matched = _names_in_values(
+                (dashboard.get("title"), dashboard.get("folder")), by_tokens, lengths,
+            )
+            for service in matched:
+                named.setdefault(service, set()).add(uid)
+        named_by_stack[slug] = named
+        if record.get("available") and record.get("detail_available") is not False:
+            for service in named:
+                spread[service] = spread.get(service, 0) + 1
+    return named_by_stack, spread
 
 
 def _dashboard_evidence(
     service: str,
     record: Mapping[str, Any],
-    live_dashboard_records: Mapping[str, Mapping[str, Any]],
+    named: set[str],
+    spread: int,
     technology_keys: set[str],
 ) -> tuple[set[str], str, str]:
     dashboards = [row for row in (record.get("dashboards") or []) if isinstance(row, Mapping)]
     selectors: set[str] = set()
     tags: set[str] = set()
-    named: set[str] = set()
     for dashboard in dashboards:
         uid = str(dashboard.get("uid") or "")
         if not uid:
@@ -201,17 +255,6 @@ def _dashboard_evidence(
             if isinstance(tag, str) and tag.casefold().startswith("service:")
         }:
             tags.add(uid)
-        if _named_dashboard(service, dashboard):
-            named.add(uid)
-
-    spread = sum(
-        any(
-            isinstance(dashboard, Mapping) and _named_dashboard(service, dashboard)
-            for dashboard in (estate_record.get("dashboards") or [])
-        )
-        for estate_record in live_dashboard_records.values()
-        if estate_record.get("available")
-    )
     technology = named if service in technology_keys else set()
     guarded_named = named if spread <= 3 else set()
     matches = selectors | tags | technology | guarded_named
@@ -258,12 +301,12 @@ def _alert_services(record: Mapping[str, Any]) -> tuple[set[str], set[str]]:
     return alerts, routed
 
 
-def _alert_title_matches(service: str, record: Mapping[str, Any]) -> bool:
-    service_tokens = _tokens(service)
-    return any(
-        _contiguous_tokens(service_tokens, _tokens(title))
-        for title in (record.get("rule_titles") or [])
-        if isinstance(title, str)
+def _alert_title_services(services: set[str], record: Mapping[str, Any]) -> set[str]:
+    by_tokens, lengths = _name_token_index(services)
+    return _names_in_values(
+        (title for title in (record.get("rule_titles") or []) if isinstance(title, str)),
+        by_tokens,
+        lengths,
     )
 
 
@@ -480,6 +523,17 @@ def build(
         slug: record for slug, record in (dashboard_inventory or {}).items()
         if slug in live_slugs and isinstance(record, Mapping)
     }
+    dashboard_services = set().union(*(
+        set().union(*(
+            _names(record, field)
+            for field in ("metric_services", "log_services", "trace_services", "profile_services")
+        ))
+        for slug, record in signal_inventory.items()
+        if slug in live_slugs and record.get("available")
+    )) if live_slugs else set()
+    named_dashboards, dashboard_name_spread = _dashboard_name_index(
+        live_dashboard_records, dashboard_services,
+    )
 
     for stack in stacks:
         slug = str(stack.get("slug") or "")
@@ -505,6 +559,7 @@ def build(
         dashboard_record = (dashboard_inventory or {}).get(slug) or {}
         alert_record = (alert_routing or {}).get(slug) or {}
         alerts, routed = _alert_services(alert_record)
+        alert_title_services = _alert_title_services(canonical, alert_record)
         product_use = _score_product_use(record, by_signal)
         score_product_use[slug] = product_use
         profiles_in_use = product_use["profiles"]
@@ -549,9 +604,13 @@ def build(
             if row_unscored is None:
                 depth_counts[depth] += 1
             dashboard_matches, dashboard_tier, dashboard_opened = _dashboard_evidence(
-                service, dashboard_record, live_dashboard_records, technology_keys,
+                service,
+                dashboard_record,
+                named_dashboards.get(slug, {}).get(service, set()),
+                dashboard_name_spread.get(service, 0),
+                technology_keys,
             )
-            service_alerts = service in alerts or _alert_title_matches(service, alert_record)
+            service_alerts = service in alerts or service in alert_title_services
             components: dict[str, bool | None] = {
                 "metrics": service in by_signal["metrics"],
                 "logs": service in by_signal["logs"],

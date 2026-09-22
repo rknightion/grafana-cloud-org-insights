@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest import mock
 
 from collector import observability_score
 from collector.pillars import coverage
@@ -162,6 +163,37 @@ ALERTS = {
 
 
 class CoverageBuildTest(unittest.TestCase):
+    def test_dashboard_name_matching_indexes_each_dashboard_once(self):
+        """Estate spread must not retokenize every dashboard once per discovered service."""
+        live = [{"slug": name} for name in ("alpha", "bravo", "charlie", "delta")]
+        dashboards = {
+            name: {
+                "available": True,
+                "dashboards": [
+                    {"uid": f"{name}-checkout", "title": "Checkout overview", "folder": "Apps"},
+                    {"uid": f"{name}-inventory", "title": "Inventory overview", "folder": "Apps"},
+                ],
+            }
+            for name in ("alpha", "bravo", "charlie", "delta")
+        }
+        with mock.patch.object(coverage, "_tokens", wraps=coverage._tokens) as tokenise:
+            coverage.build(
+                live,
+                {"alpha": SIGNALS["alpha"]},
+                dashboard_inventory=dashboards,
+                alert_routing={"alpha": {
+                    "available": True,
+                    "rules_total": 8,
+                    "rule_titles": [f"Rule {index}" for index in range(8)],
+                }},
+            )
+
+        self.assertLessEqual(
+            tokenise.call_count,
+            35,
+            "dashboard and alert-title tokens must be indexed once, not recomputed per service",
+        )
+
     def test_query_selector_evidence_has_priority_and_carries_count_and_opened_qualifier(self):
         """Only literal query evidence supports saying the dashboard actually queries the service."""
         dashboards = {
@@ -216,6 +248,23 @@ class CoverageBuildTest(unittest.TestCase):
         )
         self.assertEqual(views[coverage.SERVICE_VIEW][0]["Has dashboard"], "no",
                          "raw substrings must never count")
+
+    def test_detail_unavailable_dashboard_does_not_affect_name_spread(self):
+        live = [{"slug": name} for name in ("alpha", "bravo", "charlie", "delta")]
+        dashboards = {name: {"available": True, "dashboards": [{
+            "uid": name, "title": "Checkout overview", "folder": "", "service_tags": [],
+        }]} for name in ("alpha", "bravo", "charlie", "delta")}
+        dashboards["delta"]["detail_available"] = False
+        signal = {**SIGNALS["alpha"], "metric_services": ["checkout"],
+                  "log_services": [], "trace_services": [], "profile_services": [],
+                  "metric_names": ["unclassified_metric"]}
+
+        _metrics, views = coverage.build(
+            live, {"alpha": signal}, dashboard_inventory=dashboards,
+            alert_routing={"alpha": {"available": True, "rules_total": 0}},
+        )
+
+        self.assertEqual(views[coverage.SERVICE_VIEW][0]["Dashboard evidence"], "named")
 
     def test_technology_dashboard_requires_same_stack_registry_evidence(self):
         """Stock dashboards count only when their technology is detected on that same stack."""
