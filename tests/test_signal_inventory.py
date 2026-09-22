@@ -186,6 +186,18 @@ class SignalInventoryWindowTest(unittest.TestCase):
         self.assertEqual(out["technology_label_matches"], [])
         self.assertEqual(out["instrumentation_label_evidence"], [])
 
+    def test_loki_success_envelope_may_omit_its_empty_data_field(self):
+        empty = responses()
+        empty["https://logs.example/loki/api/v1/label/service_name/values"] = (
+            200, {"status": "success"},
+        )
+
+        with mock.patch.object(source.dataplane, "_connect_rpc", return_value={"names": []}):
+            out = source.probe_stack(Client(empty), STACK, "cap", now=NOW)
+
+        self.assertTrue(out["available"])
+        self.assertEqual(out["log_services"], [])
+
     def test_empty_connect_object_is_measured_profile_absence(self):
         with mock.patch.object(source.dataplane, "_connect_rpc", return_value={}):
             out = source.probe_stack(Client(responses()), STACK, "cap", now=NOW)

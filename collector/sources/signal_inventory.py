@@ -78,6 +78,7 @@ def _get_list(
     params: Mapping[str, object],
     basic: tuple[str, str],
     field: str,
+    missing_is_empty: bool = False,
 ) -> tuple[list[str] | None, int | None, str | None]:
     response = client.get(url, params=params, basic=basic)
     if not response.ok:
@@ -90,7 +91,8 @@ def _get_list(
         return None, None, "invalid_response"
     if body.get("status") != "success":
         return None, None, "invalid_response"
-    values = _strings(body.get(field))
+    raw = [] if missing_is_empty and field not in body else body.get(field)
+    values = _strings(raw)
     if values is None:
         return None, None, "invalid_response"
     limit = params.get("limit")
@@ -237,7 +239,7 @@ def probe_stack(
         log_services, status, reason = _get_list(
             client, f"{base}/loki/api/v1/label/service_name/values",
             params={"start": start_seconds * 1_000_000_000, "end": end_seconds * 1_000_000_000},
-            basic=auth, field="data",
+            basic=auth, field="data", missing_is_empty=True,
         )
         if log_services is None:
             return _list_failure(slug, "logs", status, reason)

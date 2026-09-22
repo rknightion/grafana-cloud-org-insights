@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import unittest
 
 from collector.sources import loki_config
@@ -10,14 +11,14 @@ from collector.sources import loki_config
 class Response:
     def __init__(self, status: int, payload: object) -> None:
         self.status = status
-        self.payload = payload
+        self.body = payload if isinstance(payload, bytes) else json.dumps(payload).encode()
 
     @property
     def ok(self) -> bool:
         return 200 <= self.status < 300
 
     def json(self) -> object:
-        return self.payload
+        return json.loads(self.body)
 
 
 class Client:
@@ -39,6 +40,58 @@ STACK = {
 
 
 class LokiConfigSourceTest(unittest.TestCase):
+    def test_reads_the_live_plain_text_yaml_limits_contract(self):
+        client = Client([
+            Response(200, b'''discover_service_name: []
+retention_period: 744h
+retention_stream:
+  - period: 31d
+    priority: 4
+    selector: '{service="api"}'
+'''),
+            Response(200, {"items": []}),
+        ])
+
+        limits = loki_config.probe_stack(
+            client, STACK, "cap-token", "reader-token"
+        )["limits"]
+
+        self.assertTrue(limits["available"])
+        self.assertEqual(limits["retention_stream"], [{
+            "period": "31d", "priority": 4, "selector": '{service="api"}',
+        }])
+
+    def test_live_yaml_without_stream_overrides_is_still_a_readable_limit(self):
+        client = Client([
+            Response(200, b"discover_service_name: []\nretention_period: 744h\n"),
+            Response(200, {"items": []}),
+        ])
+
+        limits = loki_config.probe_stack(client, STACK, "cap", "reader")["limits"]
+
+        self.assertTrue(limits["available"])
+        self.assertNotIn("retention_stream", limits)
+
+    def test_malformed_limits_text_is_not_promoted_to_an_empty_read(self):
+        client = Client([
+            Response(200, b"this is neither JSON nor a YAML mapping\n"),
+            Response(200, {"items": []}),
+        ])
+
+        limits = loki_config.probe_stack(client, STACK, "cap", "reader")["limits"]
+
+        self.assertFalse(limits["available"])
+        self.assertEqual(limits["state"], loki_config.INVALID_RESPONSE)
+        self.assertNotIn("retention_stream", limits)
+
+        client = Client([
+            Response(200, b"discover_service_name: [\nretention_period: 744h\n"),
+            Response(200, {"items": []}),
+        ])
+        limits = loki_config.probe_stack(client, STACK, "cap", "reader")["limits"]
+        self.assertFalse(limits["available"])
+        self.assertEqual(limits["state"], loki_config.INVALID_RESPONSE)
+
     def test_reads_effective_limits_with_loki_basic_auth_and_change_requests_with_reader(self):
         client = Client([
             Response(200, {"retention_stream": [

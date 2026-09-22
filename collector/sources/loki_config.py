@@ -8,6 +8,9 @@ one unavailable route must not turn a readable route into an invented zero.
 
 from __future__ import annotations
 
+import ast
+import json
+import re
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Mapping, Sequence
 
@@ -26,6 +29,117 @@ NOT_FOUND = "endpoint_absent_404"
 HTTP_ERROR = "http_error"
 TRANSPORT_ERROR = "transport_error"
 INVALID_RESPONSE = "invalid_response"
+
+_YAML_KEY = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+_YAML_INTEGER = re.compile(r"^-?[0-9]+$")
+
+
+def _balanced_yaml_line(line: str) -> bool:
+    quote = ""
+    escaped = False
+    square = curly = 0
+    for char in line:
+        if escaped:
+            escaped = False
+            continue
+        if quote:
+            if char == "\\" and quote == '"':
+                escaped = True
+            elif char == quote:
+                quote = ""
+            continue
+        if char in "'\"":
+            quote = char
+        elif char == "[":
+            square += 1
+        elif char == "]":
+            square -= 1
+        elif char == "{":
+            curly += 1
+        elif char == "}":
+            curly -= 1
+        if square < 0 or curly < 0:
+            return False
+    return not quote and square == 0 and curly == 0
+
+
+def _yaml_scalar(raw: str) -> Any:
+    value = raw.strip()
+    if not value:
+        raise ValueError("empty scalar")
+    if value[0] in "'\"":
+        parsed = ast.literal_eval(value)
+        if not isinstance(parsed, str):
+            raise ValueError("quoted scalar is not a string")
+        return parsed
+    if _YAML_INTEGER.fullmatch(value):
+        return int(value)
+    return value
+
+
+def _yaml_limits(body: bytes) -> dict[str, Any]:
+    """Parse only Loki's flat retention_stream YAML without accepting arbitrary YAML features."""
+    text = body.decode("utf-8")
+    if text.lstrip().startswith(("{", "[")):
+        raise ValueError("malformed JSON is not YAML")
+    lines = text.splitlines()
+    top_level = [line for line in lines if line and not line[0].isspace() and not line.startswith("#")]
+    if (
+        not top_level
+        or "\t" in text
+        or any(":" not in line for line in top_level)
+        or any(not _YAML_KEY.fullmatch(line.partition(":")[0]) for line in top_level)
+        or any(not _balanced_yaml_line(line) for line in lines)
+    ):
+        raise ValueError("response is not a YAML mapping")
+
+    start: int | None = None
+    inline = ""
+    for index, line in enumerate(lines):
+        if line.startswith("retention_stream:"):
+            start = index + 1
+            inline = line.partition(":")[2].strip()
+            break
+    if start is None:
+        return {}
+    if inline == "[]":
+        return {"retention_stream": []}
+    if inline:
+        raise ValueError("retention_stream is not a block list")
+
+    items: list[dict[str, Any]] = []
+    current: dict[str, Any] | None = None
+    for line in lines[start:]:
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if not line[0].isspace():
+            break
+        stripped = line.strip()
+        if stripped.startswith("- "):
+            if current is not None:
+                items.append(current)
+            current = {}
+            stripped = stripped[2:].strip()
+        if current is None or ":" not in stripped:
+            raise ValueError("retention_stream contains a non-mapping item")
+        key, _, raw = stripped.partition(":")
+        key = key.strip()
+        if not _YAML_KEY.fullmatch(key):
+            raise ValueError("retention_stream contains an invalid key")
+        current[key] = _yaml_scalar(raw)
+    if current is not None:
+        items.append(current)
+    return {"retention_stream": items}
+
+
+def _limits_body(response: Any) -> Mapping[str, Any]:
+    try:
+        body = response.json()
+    except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+        body = _yaml_limits(response.body)
+    if not isinstance(body, Mapping):
+        raise ValueError(f"expected object, got {type(body).__name__}")
+    return body
 
 
 def unavailable(slug: str, state: str, detail: str = "") -> dict[str, Any]:
@@ -52,11 +166,9 @@ def _limits_record(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str) -
     if not response.ok:
         return unavailable(slug, _state_for(response.status), f"HTTP {response.status}")
     try:
-        body = response.json()
-    except Exception as exc:  # noqa: BLE001 - malformed JSON is an explicit state
-        return unavailable(slug, INVALID_RESPONSE, f"invalid JSON ({type(exc).__name__})")
-    if not isinstance(body, Mapping):
-        return unavailable(slug, INVALID_RESPONSE, f"expected object, got {type(body).__name__}")
+        body = _limits_body(response)
+    except (UnicodeDecodeError, ValueError, SyntaxError) as exc:
+        return unavailable(slug, INVALID_RESPONSE, f"invalid limits body ({type(exc).__name__})")
     streams = body.get("retention_stream")
     if streams is not None and (
         not isinstance(streams, list) or not all(isinstance(item, Mapping) for item in streams)
