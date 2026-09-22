@@ -573,6 +573,7 @@ def d_estate(ds: str):
         "idle": build.table_panel(
             "Test leftovers - idle, cost nothing", "estate_leftovers_idle", ds,
             columns=['Stack', 'Region', 'Idle (days)', 'Age (days)', 'Active series', 'Users (active)', 'Dashboards', 'Delete protection'],
+            schema=estate_pillar.VIEW_SCHEMAS["estate_leftovers_idle"],
             description="Governance and attack surface, NEVER automatically a saving. These rows meet "
                         "the live idle-test criteria shown in the table; verify current volume before "
                         "acting."),
@@ -4408,23 +4409,29 @@ PILLAR_OF = {"estate": "A", "cost": "B", "usage": "C", "maturity": "D", "risk": 
 # not placed on the tab where the counts appear.
 #
 # Views are reused rather than duplicated, so a stack appearing in two lists is the same row in both.
-FINDING_DETAIL: dict[str, tuple[tuple[str, str, str], ...]] = {
-    "estate": (("_fd_idle", "Idle test leftovers - which stacks", "estate_leftovers_idle"),
+FINDING_DETAIL: dict[str, tuple[tuple[object, ...], ...]] = {
+    "estate": (("_fd_idle", "Idle test leftovers - which stacks", "estate_leftovers_idle",
+                estate_pillar.VIEW_SCHEMAS["estate_leftovers_idle"]),
                ("_fd_billing", "Test leftovers that DO bill - which stacks", "estate_leftovers_billing",
                 estate_pillar.VIEW_SCHEMAS["estate_leftovers_billing"]),
-               ("_fd_drift", "Off the standard build - which stacks", "estate_drift")),
-    "cost": (("_fd_headroom", "Adaptive headroom - which stacks", "cost_adaptive_headroom"),
-             ("_fd_cardinality", "Cardinality outliers - which stacks", "cost_cardinality_outliers")),
+               ("_fd_drift", "Off the standard build - which stacks", "estate_drift",
+                estate_pillar.VIEW_SCHEMAS["estate_drift"])),
+    "cost": (("_fd_headroom", "Adaptive headroom - which stacks", "cost_adaptive_headroom",
+              cost_pillar.VIEW_SCHEMAS["cost_adaptive_headroom"]),
+             ("_fd_cardinality", "Cardinality outliers - which stacks", "cost_cardinality_outliers",
+              cost_pillar.VIEW_SCHEMAS["cost_cardinality_outliers"])),
     "usage": (("_fd_dormant", "Dormant stacks - which stacks", "usage_dormant_stacks",
                usage_pillar.VIEW_SCHEMAS["usage_dormant_stacks"]),),
-    "risk": (("_fd_admins", "Admin sprawl - which stacks", "risk_admin_sprawl"),
-             ("_fd_noprot", "No delete protection - which stacks", "risk_delete_protection"),
-             ("_fd_fleet", "Fleet Management dead - which stacks", "risk_fleet_dead"),
-             ("_fd_plugins", "Plugin drift - which stacks", "risk_plugin_drift")),
-    # Pillar I. These four carry a SCHEMA as a fourth item, because all four are condition-matched lists
-    # where finding nothing is the good outcome - and `build.columns_for` derives a table's column spec
-    # from the view's first row, so an empty view would fail the dashboard BUILD on a healthy estate and
-    # take the whole page with it rather than one panel.
+    "risk": (("_fd_admins", "Admin sprawl - which stacks", "risk_admin_sprawl",
+              risk_pillar.VIEW_SCHEMAS["risk_admin_sprawl"]),
+             ("_fd_noprot", "No delete protection - which stacks", "risk_delete_protection",
+              risk_pillar.VIEW_SCHEMAS["risk_delete_protection"]),
+             ("_fd_fleet", "Fleet Management dead - which stacks", "risk_fleet_dead",
+              risk_pillar.VIEW_SCHEMAS["risk_fleet_dead"]),
+             ("_fd_plugins", "Plugin drift - which stacks", "risk_plugin_drift",
+              risk_pillar.VIEW_SCHEMAS["risk_plugin_drift"])),
+    # Every finding detail carries a schema because finding nothing is a legitimate healthy outcome.
+    # Without the fourth item, an empty condition-matched view fails the whole dashboard build.
     "ai": (("_fd_ai_gap", "Assistant used with no tenant configuration - which stacks",
             "ai_enablement_gap", ai_pillar.VIEW_SCHEMAS["ai_enablement_gap"]),
            ("_fd_ai_tokens", "Tokens-per-user outliers - which stacks", "ai_token_outliers",

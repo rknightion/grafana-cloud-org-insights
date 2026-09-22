@@ -451,9 +451,11 @@ def build(
         key=lambda r: (r["Score"] is None, -(r["Score"] or 0)),
     )
 
-    # The rubric is a T3 product end to end: without the data plane nothing clears the coverage bar, so
-    # every one of these tables would be all-nulls and would overwrite the real weekly ones.
-    if not values:
+    # The rubric is a T3 product end to end. Direct thin-tier composition has no dataplane mapping and
+    # must not overwrite the richer views. Once a dataplane mapping exists, an all-unscored estate is a
+    # valid result that must still publish the explainable leaderboard, rubric and denominator instead
+    # of leaving no dashboard source.
+    if not dataplane:
         return metrics, {}
 
     views: dict[str, list[dict[str, Any]]] = {

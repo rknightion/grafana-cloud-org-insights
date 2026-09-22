@@ -115,6 +115,29 @@ FLEET_DEAD_FIELDS = (
 )
 
 VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
+    "risk_admin_sprawl": (
+        (" Stack", "string"), ("Region", "string"), ("Users (active)", "number"),
+        ("Admins", "number"), ("Admin share %", "number"),
+        ("Delete protection", "boolean"), ("Alert rules", "number"),
+        ("Active series", "number"),
+    ),
+    "risk_delete_protection": (
+        (" Stack", "string"), ("Region", "string"), ("Users (active)", "number"),
+        ("Admins", "number"), ("Admin share %", "number"),
+        ("Delete protection", "boolean"), ("Alert rules", "number"),
+        ("Active series", "number"),
+    ),
+    "risk_fleet_dead": (
+        (" Stack", "string"), ("Region", "string"), ("Collectors", "number"),
+        ("Collectors (active)", "number"), ("Collectors (inactive)", "number"),
+        ("Inactive %", "number"), ("Pipelines", "number"),
+        ("Pipelines (enabled)", "number"), ("FM dead", "boolean"),
+        ("Alert rules", "number"), ("Active series", "number"),
+    ),
+    "risk_plugin_drift": (
+        (" Stack", "string"), ("Plugin", "string"), ("Installed", "string"),
+        ("Latest", "string"),
+    ),
     "risk_service_accounts": (
         (" Stack", "string"), ("Service account", "string"), ("Kind", "string"),
         ("Role", "string"), ("Assigned roles", "string"), ("Role read", "string"),

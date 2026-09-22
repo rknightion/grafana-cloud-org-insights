@@ -172,6 +172,19 @@ class EligibilityTest(unittest.TestCase):
     def test_a_paused_stack_is_not_scored(self):
         self.assertEqual(maturity.eligibility(self._stack(status="paused")), "paused")
 
+    def test_an_all_unscored_estate_still_publishes_the_explainable_views(self):
+        stack = self._stack(currentActiveUsers=1)
+        coverage = Coverage(tier="t3", total=1)
+        coverage.record_ok("x")
+
+        metrics, views = maturity.build([stack], coverage, {"x": {"available": True}})
+
+        self.assertEqual(metrics, [])
+        self.assertIn("maturity", views)
+        self.assertEqual(views["maturity"][0]["Unscored reason"], "too_few_users")
+        self.assertIn("maturity_rubric", views)
+        self.assertIn("maturity_summary", views)
+
     def test_an_ineligible_stack_scores_none_not_zero(self):
         """0 on a leaderboard is an accusation; None is 'we cannot judge this'."""
         entry = score_stack(self._stack(currentActiveUsers=1))

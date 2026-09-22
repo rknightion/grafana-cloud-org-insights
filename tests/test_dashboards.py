@@ -88,6 +88,24 @@ class LayoutCompletenessTest(unittest.TestCase):
 
 
 class ColumnGenerationTest(unittest.TestCase):
+    def test_every_finding_detail_declares_its_empty_view_schema(self):
+        import pathlib
+        from bin import dashboards
+
+        views = pathlib.Path(__file__).resolve().parent.parent / "testdata" / "views"
+        with mock.patch.object(build, "VIEWS_DIR", str(views)):
+            for dashboard, entries in dashboards.FINDING_DETAIL.items():
+                for entry in entries:
+                    with self.subTest(dashboard=dashboard, view=entry[2]):
+                        self.assertEqual(len(entry), 4)
+                        self.assertTrue(entry[3])
+                        live = build.read_view(entry[2])
+                        if live.get("rows"):
+                            self.assertEqual(
+                                [selector for selector, _kind in entry[3]],
+                                [column["selector"] for column in build.columns_for(live)],
+                            )
+
     def test_columns_follow_the_view_key_order(self):
         view = {"rows": [{" Stack": "a", "Region": "eu", "Series": 1}]}
         cols = build.columns_for(view)

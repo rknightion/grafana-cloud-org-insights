@@ -45,6 +45,15 @@ SIGNAL_USAGE = {
 USAGE_FLOOR = 1000
 
 VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
+    "cost_adaptive_headroom": (
+        (" Stack", "string"), ("Active series", "number"), ("Recs pending", "number"),
+        ("Rules applied", "number"), ("Share of org series %", "number"),
+    ),
+    "cost_cardinality_outliers": (
+        (" Stack", "string"), ("Label values", "number"), ("Label names", "number"),
+        ("Active series", "number"), ("Worst label", "string"),
+        ("Worst label values", "number"),
+    ),
     "cost_adaptive_metric_recommendations": (
         (" Stack", "string"), ("Metric", "string"), ("Current series", "number"),
         ("Recommended series", "number"), ("Removable series", "number"),
