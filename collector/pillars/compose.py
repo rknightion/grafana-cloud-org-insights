@@ -26,6 +26,7 @@ from collector.pillars import (
     coverage as coverage_pillar,
     estate,
     maturity,
+    producing_signals,
     retention,
     risk,
     usage,
@@ -125,6 +126,7 @@ def build_all(
             capability_adoption=capability_adoption,
             score_weights=score_weights,
         ),
+        producing_signals.build(stacks, capability_adoption),
     ):
         metrics.extend(pillar_metrics)
         for name, rows in pillar_views.items():

@@ -38,6 +38,7 @@ from collector.pillars import (
     findings,
     insights as insights_pillar,
     insights_inventory as insights_inventory_pillar,
+    producing_signals as producing_signals_pillar,
     retention as retention_pillar,
     risk as risk_pillar,
     usage as usage_pillar,
@@ -3537,6 +3538,14 @@ def d_coverage(ds: str):
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.ADOPTION_TARGET_VIEW],
             description="Stacks showing no use inside the stated capability population, ranked by "
                         "active series so the largest existing telemetry footprints lead the queue."),
+        "tbl_producing_signals": build.table_panel(
+            "Backend producing signals by stack",
+            producing_signals_pillar.VIEW, ds,
+            schema=producing_signals_pillar.SCHEMA,
+            description="A 24-hour peak of each documented usage metric. Active Metrics series "
+                        "are a count; Trace bytes are a per-second rate. Missing means the usage "
+                        "series was absent, while measured zero means it returned zero. A positive "
+                        "backend signal does not prove a person used the Grafana UI."),
 
         "tbl_datasource_provisioned": build.table_panel(
             "Third-party datasource types PROVISIONED",
@@ -3756,6 +3765,8 @@ def d_coverage(ds: str):
                                                 "b_stack_clusters"], max_columns=3),
         ]),
         build.rows_tab("Adoption opportunities", [
+            build.row("Documented backend production", ["tbl_producing_signals"],
+                      max_columns=1, row_height="tall"),
             build.row("Opportunity counts", ["b_adoption_gap"], max_columns=1),
             build.row("Population and fundable next step", ["tbl_adoption"], max_columns=1),
             build.row("Named call list, largest telemetry footprint first",

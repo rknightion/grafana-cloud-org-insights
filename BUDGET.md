@@ -204,6 +204,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `coverage_cluster_register` | K | 271 | 1 | named observed clusters; names never become labels |
 | `coverage_legacy_service_register` | K | 271 | 1 | generic Mimir service values retained separately as legacy identity evidence |
 | `coverage_metric_name_register` | K | 271 | 1 | metric names and their registry classification; names never become labels |
+| `coverage_producing_signals` | A | 1 | 1 | documented Metrics and Traces backend production over the prior 24 hours |
 | `coverage_service_register` | K | 271 | 1 | top-N named services with signal depth and explicit alert/dashboard metadata |
 | `coverage_summary` | K | 271 | 1 | per-stack counts, registry version, truncation and unmatched-name backlog |
 | `coverage_technology_register` | K | 17,073 | 1 | stack x technology is current-state identity detail, not a time series |

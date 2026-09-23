@@ -160,6 +160,7 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     "coverage_summary": frozenset({"signal_inventory"}),
     "coverage_capability_adoption": frozenset({"signal_inventory", "capability_adoption"}),
     "coverage_capability_opportunities": frozenset({"signal_inventory", "capability_adoption"}),
+    "coverage_producing_signals": frozenset({"capability_adoption"}),
     "cost": frozenset({"dataplane"}),
     "cost_adaptive_headroom": frozenset({"dataplane"}),
     "cost_adaptive_metric_recommendations": frozenset({"dataplane"}),

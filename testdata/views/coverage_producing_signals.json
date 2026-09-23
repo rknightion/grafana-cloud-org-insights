@@ -1,0 +1,954 @@
+{
+  "meta": {
+    "generated_at": "2026-09-23T22:21:16.826232+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      "Stack": "stack158",
+      "Signal": "Metrics",
+      "State": "producing",
+      "Value": 128779,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack158",
+      "Signal": "Traces",
+      "State": "producing",
+      "Value": 1,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack145",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack145",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack177",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack177",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack125",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack125",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack001",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack001",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack001b",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack001b",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack001c",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack001c",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack001a",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack001a",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack019",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack019",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack049",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack049",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack110",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack110",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack020",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack020",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "obs-hub",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "obs-hub",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "obs-hub-dev",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "obs-hub-dev",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack035",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack035",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack036",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack036",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack111",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack111",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack070",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack070",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack037",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack037",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack071",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack071",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack050",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack050",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack112",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack112",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack051",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack051",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack146",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack146",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack147",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack147",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack038",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack038",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack052",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack052",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack053",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack053",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack054",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack054",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack148",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack148",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack126",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack126",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack002",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack002",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack113",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack113",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack097",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack097",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack072",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack072",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack055",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack055",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack193",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack193",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack170",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack170",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack201",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack201",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    },
+    {
+      "Stack": "stack149",
+      "Signal": "Metrics",
+      "State": "missing",
+      "Value": null,
+      "Unit": "active series",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive active-series count was observed in the Metrics backend during the window."
+    },
+    {
+      "Stack": "stack149",
+      "Signal": "Traces",
+      "State": "missing",
+      "Value": null,
+      "Unit": "bytes/second",
+      "Window": "24h",
+      "Window start": "2026-08-24T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
+      "Nonzero means": "A positive rate of bytes received by Cloud Traces was observed during the window."
+    }
+  ]
+}
