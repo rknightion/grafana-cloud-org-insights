@@ -3,10 +3,11 @@ id: GCI-0030
 title: >-
   Publish per-stack expected-retention-policy status, compliant as well as
   non-compliant
-status: To Do
-assignee: []
+status: Parked
+assignee:
+  - '@codex'
 created_date: '2026-09-23 08:35'
-updated_date: '2026-09-23 08:36'
+updated_date: '2026-09-23 11:58'
 labels:
   - retention
   - dashboards
@@ -42,3 +43,15 @@ Generic mechanism only: no expectation value, selector or stack identity is hard
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Implement generic status view and aggregate coverage metrics with unreadable kept separate; test the mixed readable/unreadable case, render dashboard, run just check including private identifier pattern, review, then release by exact SHA and signed auto-RC.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Wave 8 parked by owner before commit or push. Local staged implementation and unstaged attempt-4 regression tests remain in checkout. Two new tests currently fail: malformed retention_stream leaks a partial row; dashboard assembly fails when the status view is absent. Resume with fixes for those two cases, targeted tests and full just check, then exact-SHA CI and release. CodeRabbit slice used two passes; do not call those findings resolved without fixes.
+<!-- SECTION:NOTES:END -->
