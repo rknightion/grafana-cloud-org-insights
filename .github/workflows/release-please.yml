@@ -44,7 +44,7 @@ jobs:
         id: release-pr
         env:
           APP_TOKEN: ${{ steps.bao.outputs.token }}
-          RELEASE_PR_BRANCH: release-please--branches--main
+          RELEASE_PR_BRANCH: release-please--branches--main--components--grafana-cloud-org-insights
         run: |
           set -euo pipefail
           repository_owner="${GITHUB_REPOSITORY%%/*}"
