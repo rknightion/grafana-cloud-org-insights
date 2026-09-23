@@ -474,6 +474,12 @@ class CompositionAndHydrationContractTest(unittest.TestCase):
             hydrate.VIEW_INPUTS.get("insights_datasource_query_cost"),
             frozenset({"datasource_query_cost"}),
         )
+        for view in (
+            "insights_surface_usage", "insights_surface_usage_estate",
+            "insights_surface_unmapped",
+        ):
+            with self.subTest(view=view):
+                self.assertEqual(hydrate.VIEW_INPUTS.get(view), frozenset({"insights"}))
 
     def test_compose_emits_new_views_but_no_new_metrics(self):
         stacks = [{"slug": "alpha"}]
@@ -494,6 +500,40 @@ class CompositionAndHydrationContractTest(unittest.TestCase):
         self.assertEqual(metrics, baseline, "the two S3 views must add zero metric series")
         self.assertIn("insights_dashboard_opening_31d", views)
         self.assertIn("insights_datasource_query_cost", views)
+
+    def test_surface_views_and_trends_compose_from_the_t2_insights_input(self):
+        stacks = [{"slug": "alpha"}]
+        cov = Coverage(tier="t2", total=1)
+        cov.record_ok("alpha")
+        insight_input = {
+            "alpha": {
+                "available": True,
+                "requests": 4,
+                "surface_users_available": {"app_scenes": True},
+                "surface_requests": [{"surface": "app_scenes", "count": 4}],
+                "surface_users": [{"surface": "app_scenes", "count": 2}],
+                "surface_unmapped_sources": [],
+            },
+        }
+
+        metrics, views = compose.build_all(stacks, cov, insights=insight_input)
+
+        self.assertIn("insights_surface_usage", views)
+        self.assertIn("insights_surface_usage_estate", views)
+        self.assertIn("insights_surface_unmapped", views)
+        self.assertEqual(views["insights_surface_usage"][0]["Surface"], "app_scenes")
+        self.assertEqual(views["insights_surface_usage"][0]["Distinct identified users"], 2)
+        self.assertEqual(views["insights_surface_usage_estate"][0]["Stacks queried"], 1)
+        series = {
+            (name, labels.get("surface"))
+            for name, labels, _value in metrics
+            if name.startswith("gcinsight_dashboards_estate_surface_")
+        }
+        self.assertEqual(series, {
+            (f"gcinsight_dashboards_estate_surface_{suffix}", surface)
+            for suffix in ("requests", "stacks")
+            for surface in ui.SURFACE_VALUES
+        })
 
 
 if __name__ == "__main__":

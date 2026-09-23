@@ -134,13 +134,16 @@ INPUT_OWNER: dict[str, str] = {
 # composing any subsets, so adding inputs cannot turn the gate into an exponential resource failure.
 VIEW_INPUTS: dict[str, frozenset[str]] = {
     # Pillar J. Every one needs the per-stack usage-insights sweep; none can be computed without it,
-    # so all six are withheld rather than published as zeros by a tier that did not gather it.
+    # so all nine are withheld rather than published as zeros by a tier that did not gather it.
     "insights_dashboard_usage": frozenset({"insights"}),
     "insights_public_dashboards": frozenset({"insights"}),
     "insights_top_dashboards": frozenset({"insights"}),
     "insights_datasource_types": frozenset({"insights"}),
     "insights_coverage": frozenset({"insights"}),
     "insights_summary": frozenset({"insights"}),
+    "insights_surface_usage": frozenset({"insights"}),
+    "insights_surface_usage_estate": frozenset({"insights"}),
+    "insights_surface_unmapped": frozenset({"insights"}),
     "insights_dashboard_opening_31d": frozenset({"dashboard_inventory"}),
     "insights_datasource_query_cost": frozenset({"datasource_query_cost"}),
     # Pillar K. Derived from the compose fixture: the named service register includes explicit

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import unittest
 import urllib.error
+import urllib.parse
 from unittest import mock
 
 from collector.coverage import Coverage
@@ -48,6 +49,15 @@ class QueryShapeTest(unittest.TestCase):
         for field, (template, _labels) in ui.BREAKDOWNS.items():
             with self.subTest(field=field):
                 bounded = template.startswith("topk(") or "by (datasourceType)" in template
+                if field in ("surface_source_requests", "surface_user_id_requests"):
+                    bounded = f'source=~"{ui._SURFACE_KNOWN_PATTERN}"' in template
+                elif field == "surface_users":
+                    bounded = f'source=~"{ui._SURFACE_DIRECT_PATTERN}"' in template
+                elif field == "surface_fallback_users":
+                    bounded = (
+                        '"surface", "unknown"' in template
+                        and '"surface", "other"' in template
+                    )
                 self.assertTrue(bounded, f"{field} is neither topk-bounded nor a closed label set")
 
     def test_the_window_is_one_definition(self):
@@ -112,6 +122,147 @@ class QueryShapeTest(unittest.TestCase):
         query = ui.SCALARS["viewers"]
         self.assertIn('userId!="-1"', query)
         self.assertIn('userId!=""', query)
+
+    def test_surface_identity_coverage_is_bounded_by_the_surface_mapping(self):
+        query, labels = ui.BREAKDOWNS["surface_user_id_requests"]
+        self.assertIn('userId!=""', query)
+        self.assertNotIn('userId!="-1"', query)
+        self.assertIn(f'source=~"{ui._SURFACE_KNOWN_PATTERN}"', query)
+        self.assertEqual(labels, ("source",))
+        other = ui.SCALARS["surface_other_user_id_requests"]
+        self.assertIn('userId!=""', other)
+        self.assertIn(f'source!~"{ui._SURFACE_MAPPED_PATTERN}"', other)
+        self.assertIn("count_over_time", query)
+
+    def test_surface_queries_use_the_24_hour_window_and_bound_raw_source_output(self):
+        for field in (
+            "surface_source_requests", "surface_user_id_requests", "surface_users",
+            "surface_fallback_users", "surface_unmapped_sources",
+        ):
+            query, _labels = ui.BREAKDOWNS[field]
+            with self.subTest(field=field):
+                self.assertIn("%(sel)s", query)
+                self.assertIn(f"[{ui.WINDOW}]", query)
+        self.assertIn("sum by (source)", ui.BREAKDOWNS["surface_source_requests"][0])
+        self.assertIn("count by (source)", ui.BREAKDOWNS["surface_users"][0])
+        self.assertIn('userId!="-1"', ui.BREAKDOWNS["surface_users"][0])
+        self.assertIn('userId!=""', ui.BREAKDOWNS["surface_users"][0])
+        self.assertIn(f"topk({ui.TOP_UNMAPPED_SOURCES}",
+                      ui.BREAKDOWNS["surface_unmapped_sources"][0])
+
+
+class SurfaceSourceTest(unittest.TestCase):
+    def test_raw_sources_map_to_the_frozen_closed_enum(self):
+        cases = {
+            "dashboard": "dashboard",
+            "explore": "explore",
+            "scenes": "app_scenes",
+            "grafana-assistant-app": "assistant",
+            "app": "app",
+            "grafana-k8s-app": "kubernetes",
+            "unknown": "unknown",
+            "": "unknown",
+            "new-plugin": "other",
+        }
+        for raw, surface in cases.items():
+            with self.subTest(raw=raw):
+                self.assertEqual(ui.surface_for_source(raw), surface)
+
+    def test_surface_enum_is_closed_and_does_not_emit_unobserved_surfaces(self):
+        self.assertEqual(
+            set(ui.SURFACE_VALUES),
+            {"dashboard", "explore", "app_scenes", "assistant", "app", "kubernetes",
+             "unknown", "other"},
+        )
+
+    def test_probe_runs_surface_queries_through_the_stack_scoped_executor(self):
+        calls = []
+        sel = ui.selector(instance_id="123")
+
+        def execute(_base, _token, expr, *, expected_instance_id, client, evaluation_time):
+            calls.append((expr, expected_instance_id, client, evaluation_time))
+            self.assertEqual(expected_instance_id, "123")
+            ui._assert_scoped(expr, expected_instance_id)
+            if expr == ui.SCALARS["requests"] % {"sel": sel}:
+                return vector(11)
+            if expr == ui.SCALARS["surface_other_user_id_requests"] % {"sel": sel}:
+                return vector(0)
+            if expr == ui.BREAKDOWNS["surface_source_requests"][0] % {"sel": sel}:
+                return series([({"source": "dashboard"}, 6), ({"source": "scenes"}, 3),
+                               ({"source": "unknown"}, 1)])
+            if expr == ui.BREAKDOWNS["surface_user_id_requests"][0] % {"sel": sel}:
+                return series([({"source": "dashboard"}, 4), ({"source": "unknown"}, 1)])
+            if expr == ui.BREAKDOWNS["surface_users"][0] % {"sel": sel}:
+                return series([({"source": "dashboard"}, 2)])
+            if expr == ui.BREAKDOWNS["surface_fallback_users"][0] % {"sel": sel}:
+                return series([({"surface": "unknown"}, 1)])
+            if expr == ui.BREAKDOWNS["surface_unmapped_sources"][0] % {"sel": sel}:
+                return series([({"source": "new-plugin"}, 1)])
+            if expr in [template % {"sel": sel} for template in ui.SCALARS.values()]:
+                return vector(0)
+            return series([])
+
+        with mock.patch.object(ui.time, "time", return_value=1_726_000_000) as clock, \
+                mock.patch.object(ui, "_execute_query", side_effect=execute):
+            record = ui.probe_stack(
+                "alpha", "https://alpha.example", "token", instance_id="123", client=object(),
+            )
+
+        self.assertTrue(record["available"])
+        self.assertEqual(record["surface_requests"], [
+            {"surface": "dashboard", "count": 6.0},
+            {"surface": "app_scenes", "count": 3.0},
+            {"surface": "unknown", "count": 1.0},
+            {"surface": "other", "count": 1.0},
+        ])
+        self.assertEqual(record["surface_users"], [
+            {"surface": "dashboard", "count": 2.0},
+            {"surface": "unknown", "count": 1.0},
+        ])
+        self.assertEqual(record["surface_unmapped_sources"], [
+            {"source": "new-plugin", "count": 1.0},
+        ])
+        self.assertEqual(record["surface_users_available"], {
+            "dashboard": True, "app_scenes": False, "unknown": True, "other": False,
+        })
+        self.assertEqual({call[3] for call in calls}, {1_726_000_000})
+        clock.assert_called_once()
+        self.assertTrue(calls)
+
+    def test_surface_identity_coverage_is_mapped_per_surface(self):
+        record = {
+            "requests": 4,
+            "surface_other_user_id_requests": 0,
+            "surface_source_requests": [
+                {"source": "dashboard", "count": 2},
+                {"source": "scenes", "count": 2},
+            ],
+            "surface_user_id_requests": [{"source": "dashboard", "count": 2}],
+            "surface_users": [{"source": "dashboard", "count": 1}],
+            "surface_fallback_users": [],
+        }
+
+        ui._normalize_surface_breakdowns(record)
+
+        self.assertEqual(record["surface_users_available"], {
+            "dashboard": True, "app_scenes": False,
+        })
+        self.assertEqual(record["surface_users"], [{"surface": "dashboard", "count": 1.0}])
+
+    def test_surface_users_are_withheld_when_no_surface_has_a_user_id(self):
+        record = {
+            "requests": 4,
+            "surface_other_user_id_requests": 0,
+            "surface_source_requests": [{"source": "dashboard", "count": 4}],
+            "surface_user_id_requests": [],
+            "surface_users": [{"source": "dashboard", "count": 2}],
+            "surface_fallback_users": [],
+        }
+
+        ui._normalize_surface_breakdowns(record)
+
+        self.assertEqual(record["surface_users_available"], {"dashboard": False})
+        self.assertEqual(record["surface_users"], [])
 
 
 class ScalarParsingTest(unittest.TestCase):
@@ -181,11 +332,24 @@ class ProbeTest(unittest.TestCase):
         token. One re-attempt, not a loop."""
         calls = []
 
-        def fake(base, token, expr, *, expected_instance_id, timeout=90.0):
-            calls.append(expr)
+        sel = ui.selector(instance_id="1")
+
+        def fake(base, token, expr, *, expected_instance_id, evaluation_time,
+                 timeout=90.0):
+            calls.append((expr, evaluation_time))
             if len(calls) == 1:
                 raise urllib.error.HTTPError("u", 403, "forbidden", {}, None)
-            return vector(1)
+            for field, template in ui.SCALARS.items():
+                if expr == template % {"sel": sel}:
+                    return vector(0 if field == "surface_other_user_id_requests" else 1)
+            for field, (template, _labels) in ui.BREAKDOWNS.items():
+                if expr == template % {"sel": sel}:
+                    if field in ("surface_source_requests", "surface_user_id_requests",
+                                 "surface_users"):
+                        label = "source"
+                        return series([({label: "dashboard"}, 1)])
+                    return series([])
+            raise AssertionError(f"unexpected query: {expr}")
 
         original = ui._query
         ui._query = fake
@@ -195,11 +359,12 @@ class ProbeTest(unittest.TestCase):
             ui._query = original
         self.assertTrue(rec["available"])
         self.assertGreater(len(calls), len(ui.SCALARS))
+        self.assertEqual(calls[0][1], calls[1][1])
 
     def test_a_401_is_never_retried(self):
         calls = []
 
-        def fake(base, token, expr, *, expected_instance_id, timeout=90.0):
+        def fake(base, token, expr, *, expected_instance_id, evaluation_time, timeout=90.0):
             calls.append(expr)
             raise urllib.error.HTTPError("u", 401, "no", {}, None)
 
@@ -213,7 +378,7 @@ class ProbeTest(unittest.TestCase):
         self.assertEqual(len(calls), 1, "401 does not change in three seconds")
 
     def test_a_failing_breakdown_marks_the_whole_stack_unavailable(self):
-        def fake(base, token, expr, *, expected_instance_id, timeout=90.0):
+        def fake(base, token, expr, *, expected_instance_id, evaluation_time, timeout=90.0):
             if "topk" in expr:
                 raise urllib.error.HTTPError("u", 500, "boom", {}, None)
             return vector(7)
@@ -229,7 +394,7 @@ class ProbeTest(unittest.TestCase):
         self.assertIn("top_dashboards", rec["detail"])
 
     def test_a_malformed_scalar_marks_the_whole_stack_unavailable(self):
-        def fake(base, token, expr, *, expected_instance_id, timeout=90.0):
+        def fake(base, token, expr, *, expected_instance_id, evaluation_time, timeout=90.0):
             return {"status": "success", "data": {"resultType": "vector",
                     "result": [{"metric": {}, "value": [0]}]}}
 
@@ -244,7 +409,7 @@ class ProbeTest(unittest.TestCase):
         self.assertIn("views", rec["detail"])
 
     def test_distinct_panel_pairs_cannot_exceed_identified_panel_requests(self):
-        def fake(_base, _token, expr, *, expected_instance_id, timeout=90.0):
+        def fake(_base, _token, expr, *, expected_instance_id, evaluation_time, timeout=90.0):
             if expr == ui.SCALARS["panels_queried"] % {"sel": ui.selector(instance_id="1")}:
                 return vector(2)
             if expr == ui.SCALARS["panel_identity_requests"] % {
@@ -376,6 +541,112 @@ class PillarTest(unittest.TestCase):
         self.assertEqual(row["Data requests"], 21360)
         self.assertEqual(row["Cumulative duration (ms)"], 987654)
         self.assertEqual(row["Request errors"], 17)
+
+    def test_surface_views_and_metrics_keep_raw_sources_out_of_labels(self):
+        stacks = [
+            {"slug": "alpha"},
+            {"slug": "beta"},
+            {"slug": "noids"},
+            {"slug": "unavailable"},
+        ]
+        payload = {
+            "alpha": {
+                "available": True,
+                "surface_users_available": {
+                    "dashboard": True, "app_scenes": False, "other": True,
+                },
+                "requests": 10,
+                "surface_requests": [
+                    {"surface": "dashboard", "count": 6},
+                    {"surface": "app_scenes", "count": 3},
+                    {"surface": "other", "count": 1},
+                ],
+                "surface_users": [
+                    {"surface": "dashboard", "count": 2},
+                    {"surface": "app_scenes", "count": 1},
+                ],
+                "surface_unmapped_sources": [{"source": "synthetic-plugin", "count": 1}],
+            },
+            "beta": {
+                "available": True,
+                "surface_users_available": {"explore": True},
+                "requests": 2,
+                "surface_requests": [{"surface": "explore", "count": 2}],
+                "surface_users": [{"surface": "explore", "count": 1}],
+                "surface_unmapped_sources": [],
+            },
+            "noids": {
+                "available": True,
+                "surface_users_available": {"dashboard": False},
+                "requests": 2,
+                "surface_requests": [{"surface": "dashboard", "count": 2}],
+                "surface_users": [],
+                "surface_unmapped_sources": [],
+            },
+            "unavailable": {"available": False, "reason": "no_credential"},
+        }
+        metrics, views = insights.build(
+            stacks, Coverage(tier="t2", total=4), payload,
+        )
+        self.assertEqual(views["insights_surface_usage"], [
+            {" Stack": "alpha", "Surface": "dashboard", "Requests": 6,
+             "Share of stack requests %": 60.0, "Distinct identified users": 2,
+             "User identity": "observed"},
+            {" Stack": "alpha", "Surface": "app_scenes", "Requests": 3,
+             "Share of stack requests %": 30.0, "Distinct identified users": None,
+             "User identity": "unavailable"},
+            {" Stack": "beta", "Surface": "explore", "Requests": 2,
+             "Share of stack requests %": 100.0, "Distinct identified users": 1,
+             "User identity": "observed"},
+            {" Stack": "noids", "Surface": "dashboard", "Requests": 2,
+             "Share of stack requests %": 100.0, "Distinct identified users": None,
+             "User identity": "unavailable"},
+            {" Stack": "alpha", "Surface": "other", "Requests": 1,
+             "Share of stack requests %": 10.0, "Distinct identified users": 0,
+             "User identity": "observed"},
+        ])
+        estate_rows = {row["Surface"]: row for row in views["insights_surface_usage_estate"]}
+        self.assertEqual(estate_rows["dashboard"]["Requests"], 8)
+        self.assertEqual(estate_rows["dashboard"]["Stacks queried"], 2)
+        self.assertEqual(estate_rows["dashboard"]["Sum of per-stack users"], 2)
+        self.assertEqual(estate_rows["dashboard"]["Stacks with user identity"], 1)
+        self.assertEqual(estate_rows["dashboard"]["Share of requests %"], 57.1)
+        self.assertIsNone(estate_rows["app_scenes"]["Sum of per-stack users"])
+        self.assertEqual(estate_rows["app_scenes"]["Stacks with user identity"], 0)
+        self.assertEqual(views["insights_surface_unmapped"], [
+            {" Stack": "alpha", "Source": "synthetic-plugin", "Requests": 1},
+        ])
+
+        surfaces = {
+            (name, labels["surface"]): value
+            for name, labels, value in metrics
+            if name.startswith("gcinsight_dashboards_estate_surface_")
+        }
+        self.assertEqual({surface for _, surface in surfaces}, set(ui.SURFACE_VALUES))
+        self.assertEqual(
+            surfaces[("gcinsight_dashboards_estate_surface_requests", "assistant")], 0.0,
+        )
+        self.assertEqual(
+            surfaces[("gcinsight_dashboards_estate_surface_requests", "dashboard")], 8.0,
+        )
+        self.assertNotIn("gcinsight_dashboards_estate_surface_users",
+                         {name for name, _surface in surfaces})
+        self.assertNotIn("synthetic-plugin", repr([labels for _, labels, _ in metrics]))
+
+    def test_surface_metrics_match_the_declared_bounded_budget(self):
+        from collector.emit import budget
+
+        declared = {spec.name: spec for spec in budget.CATALOGUE}
+        for name in (
+            "gcinsight_dashboards_estate_surface_requests",
+            "gcinsight_dashboards_estate_surface_stacks",
+        ):
+            with self.subTest(name=name):
+                self.assertEqual(
+                    declared[name].labels,
+                    {"surface": len(ui.SURFACE_VALUES),
+                     "version": budget.PILLAR_J_EPOCHS},
+                )
 
     def test_a_share_with_no_denominator_is_None_not_zero(self):
         stacks = [{"slug": "busy", "url": "u", "dashboardCnt": 0}]
@@ -522,6 +793,34 @@ class RuntimeGuardTest(unittest.TestCase):
             ui._query("http://127.0.0.1:1", "tok", expr,
                       expected_instance_id="654321", timeout=0.4)
         self.assertNotIsInstance(caught.exception, ui.RegionalQueryRefused)
+
+    def test_query_uses_the_probe_evaluation_timestamp(self):
+        class Response:
+            ok = True
+
+            @staticmethod
+            def json():
+                return vector(1)
+
+        class Client:
+            url = ""
+
+            def get(self, url, *, bearer):
+                self.url = url
+                return Response()
+
+        client = Client()
+        expr = ui.SCALARS["views"] % {"sel": ui.selector(instance_id="654321")}
+
+        ui._query(
+            "https://s", "tok", expr, expected_instance_id="654321",
+            evaluation_time=1_726_000_000, client=client,
+        )
+
+        self.assertEqual(
+            urllib.parse.parse_qs(urllib.parse.urlsplit(client.url).query)["time"],
+            ["1726000000"],
+        )
 
     def test_a_scoped_selector_plus_an_unscoped_selector_is_refused(self):
         expr = (

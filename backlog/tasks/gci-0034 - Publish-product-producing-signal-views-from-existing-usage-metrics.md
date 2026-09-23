@@ -1,0 +1,36 @@
+---
+id: GCI-0034
+title: Publish product producing-signal views from existing usage metrics
+status: To Do
+assignee: []
+created_date: '2026-09-23 18:35'
+labels:
+  - feature-usage
+  - follow-on
+dependencies: []
+references:
+  - backlog/docs/doc-0006 - Feature-usage-observability-matrix.md
+priority: high
+type: enhancement
+ordinal: 44000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+Rank 1 - high value, low implementation cost. The two live write-stack usage datasources expose 325 metric names, but a positive rate, an active gauge and a billing-period quantity mean different things. Build bounded per-stack views for product producing signals from the existing write-stack reader, with explicit windows and absent-not-zero behavior. Proposed new emitted series: 0; point-in-time views and direct panels suffice.
+<!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 Each product signal has a documented metric-specific window, unit and nonzero interpretation
+- [ ] #2 Views distinguish missing input from measured zero and never infer human UI use
+- [ ] #3 No raw metric names or stack identifiers become new metric labels
+<!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 just test
+- [ ] #2 just tf-validate
+- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+<!-- DOD:END -->

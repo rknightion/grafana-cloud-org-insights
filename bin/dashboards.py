@@ -3121,6 +3121,68 @@ def d_dashboards(ds: str):
                         "One request can contain several queries, so this is not a query count. Read with "
                         "the per-stack error rate in the adoption table, which normalises for request volume."),
 
+        # --- Query activity by Grafana surface -------------------------------------------------------
+        "surface_scope": build.text_panel(
+            "How to read Grafana surfaces",
+            "`source` is recorded on `data-request` events, so these panels count data requests, not page "
+            "visits. A page visit that emits no data request is absent.\n\n"
+            "The `scenes` value means **Scenes-based app plugins (Drilldown and others)**. Usage Insights "
+            "does not provide a plugin or URL field to split that bucket per app, so no per-app attribution "
+            "is claimed.\n\n"
+            "Upstream does not populate `error` for Explore or correlations, so there is no per-surface "
+            "error rate here. Panel-editor data requests are suppressed upstream, so editing activity is "
+            "under-counted or absent.\n\n"
+            "Distinct users count non-anonymous `userId`s only where at least one data request from that "
+            "surface exposed the field. A blank user count means that surface's events did not expose a "
+            "userId. Estate user totals sum per stack and are not deduplicated across stacks. Unmapped "
+            "sources are grouped as `other` in metrics; the bounded table below retains their raw values "
+            "for review.",
+        ),
+        "b_surface_share": build.barchart_panel(
+            "Share of data requests by Grafana surface",
+            'sum by (surface) (gcinsight_dashboards_estate_surface_requests{version="2"}) '
+            '/ ignoring(surface) group_left '
+            'sum(gcinsight_dashboards_estate_surface_requests{version="2"})',
+            legend="{{surface}}", unit="percentunit", sort=None,
+            description="Share of measured data-request events attributed to each observed surface. "
+                        "These are data requests, not page visits. Values cover the 24-hour usage-insights "
+                        "window and only stacks whose probes succeeded."),
+        "n_surface_stacks": build.stat_panel(
+            "Stacks queried through each surface",
+            'gcinsight_dashboards_estate_surface_stacks{version="2"}',
+            description="One value per observed surface: stacks with at least one data-request event in "
+                        "the 24-hour window. A missing surface series means no request was observed, not "
+                        "that Grafana has no such capability."),
+        "tbl_surface_estate": build.table_panel(
+            "Estate data-request volume, reach and identified users by surface",
+            "insights_surface_usage_estate", ds,
+            schema=insights_pillar.VIEW_SCHEMAS["insights_surface_usage_estate"],
+            description="Estate totals cover measured stacks. `Sum of per-stack users` counts a person "
+                        "again when they query from another stack. `Stacks with user identity` shows how "
+                        "many queried stacks had a non-empty userId field, so the user total is not read "
+                        "as complete when identity data is missing."),
+        "t_surface_requests": build.timeseries_panel(
+            "Data requests over time by Grafana surface",
+            [('gcinsight_dashboards_estate_surface_requests{version="2"}', "{{surface}}")],
+            description="Trend in data-request events by observed closed-enum surface. It counts data "
+                        "requests, not visits to a page, and each point is the collector's daily 24-hour "
+                        "windowed count."),
+        "tbl_surface_usage": build.table_panel(
+            "Per stack: data requests by surface",
+            "insights_surface_usage", ds,
+            schema=insights_pillar.VIEW_SCHEMAS["insights_surface_usage"],
+            description="One row per observed stack and surface. Blank `Distinct identified users` "
+                        "means the stack's events did not expose a userId; zero means identity was "
+                        "observed but no non-anonymous user was counted. The table covers all measured "
+                        "stacks."),
+        "tbl_surface_unmapped": build.table_panel(
+            "New or unmapped data-request sources",
+            "insights_surface_unmapped", ds,
+            schema=insights_pillar.VIEW_SCHEMAS["insights_surface_unmapped"],
+            description="Top 10 unmapped raw source values per stack. This bounded detail table is the "
+                        "review queue for deciding whether a newly observed source belongs in the closed "
+                        "surface mapping; raw values never become metric labels."),
+
         # --- What people open -------------------------------------------------------------------------
         "tbl_top": build.table_panel(
             "Most-opened candidates (up to 10 retained per stack)",
@@ -3218,6 +3280,17 @@ def d_dashboards(ds: str):
             build.row("Trend", ["t_public", "t_anon"], max_columns=1),
         ]),
         build.rows_tab("Query behaviour", query_rows),
+        build.rows_tab("Grafana surfaces", [
+            build.row("How to read this", ["surface_scope"], max_columns=1,
+                      row_height="short"),
+            build.row("Share and stack reach", ["b_surface_share", "n_surface_stacks"],
+                      max_columns=2, row_height="standard"),
+            build.row("Estate totals", ["tbl_surface_estate"], max_columns=1),
+            build.row("Trend", ["t_surface_requests"], max_columns=1),
+            build.row("Per stack", ["tbl_surface_usage"], max_columns=1, row_height="tall"),
+            build.row("Unmapped sources", ["tbl_surface_unmapped"], max_columns=1,
+                      row_height="tall"),
+        ]),
         build.rows_tab("What people open", opening_rows),
         build.tab("Coverage", ["tbl_coverage"], max_columns=1),
     ]

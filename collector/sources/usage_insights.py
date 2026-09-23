@@ -57,6 +57,40 @@ WINDOW = "24h"
 CONCURRENCY = 12
 
 TOP_DASHBOARDS = 10
+TOP_UNMAPPED_SOURCES = 10
+
+# `data-request.source` is chosen by the Grafana app. Keep its raw vocabulary out of metrics and map only
+# observed, intentionally supported values into a closed label set. Every other non-empty value is
+# represented by the `other` surface and separately surfaced in a bounded view.
+SURFACE_SOURCE_MAP: Mapping[str, str] = {
+    "dashboard": "dashboard",
+    "explore": "explore",
+    "scenes": "app_scenes",
+    "grafana-assistant-app": "assistant",
+    "app": "app",
+    "grafana-k8s-app": "kubernetes",
+}
+SURFACE_VALUES = (
+    "dashboard", "explore", "app_scenes", "assistant", "app", "kubernetes", "unknown", "other",
+)
+
+
+def surface_for_source(source: str) -> str:
+    """Map Grafana's open-ended `source` field to the frozen metric enum."""
+    if source in ("", "unknown"):
+        return "unknown"
+    return SURFACE_SOURCE_MAP.get(source, "other")
+
+
+_SURFACE_KNOWN_PATTERN = (
+    "^(dashboard|explore|scenes|grafana-assistant-app|app|grafana-k8s-app|unknown)?$"
+)
+_SURFACE_DIRECT_PATTERN = (
+    "^(dashboard|explore|scenes|grafana-assistant-app|app|grafana-k8s-app)$"
+)
+_SURFACE_MAPPED_PATTERN = (
+    "^(dashboard|explore|scenes|grafana-assistant-app|app|grafana-k8s-app|unknown)$"
+)
 
 # Stage 19's full dashboard-opening inventory uses a deliberately separate window from the existing
 # daily operational figures.  A dashboard is "unopened" only when this complete 31-day observation
@@ -107,6 +141,45 @@ _BASE = "%(sel)s"
 _VIEW = '%(sel)s | eventName="dashboard-view"'
 _REQ = '%(sel)s | eventName="data-request"'
 
+# Known request rows are bounded by an explicit matcher. Requests from new sources are the residual of
+# the complete request scalar. Distinct users for the merged fallback surfaces are counted after all
+# their raw source values have been selected, so one person using two unknown plugins is still one user
+# in `other`.
+_SURFACE_SOURCE_REQUESTS = (
+    "sum by (source) (count_over_time(" + _REQ + ' | source=~"' + _SURFACE_KNOWN_PATTERN
+    + '" [' + WINDOW + "]))"
+)
+_SURFACE_USER_ID_REQUESTS = (
+    "sum by (source) (count_over_time(" + _REQ + ' | source=~"' + _SURFACE_KNOWN_PATTERN
+    + '" | userId!="" [' + WINDOW + "]))"
+)
+_SURFACE_USERS = (
+    "count by (source) (sum by (source, userId) (count_over_time("
+    + _REQ + ' | source=~"' + _SURFACE_DIRECT_PATTERN
+    + '" | userId!="-1" | userId!="" [' + WINDOW + "])))"
+)
+_SURFACE_UNKNOWN_USERS = (
+    "count(sum by (userId) (count_over_time("
+    + _REQ + ' | source=~"^(unknown)?$" | userId!="-1" | userId!="" [' + WINDOW + "])))"
+)
+_SURFACE_OTHER_USERS = (
+    "count(sum by (userId) (count_over_time("
+    + _REQ + ' | source!="" | source!~"' + _SURFACE_MAPPED_PATTERN
+    + '" | userId!="-1" | userId!="" [' + WINDOW + "])))"
+)
+_SURFACE_FALLBACK_USERS = (
+    'label_replace((' + _SURFACE_UNKNOWN_USERS
+    + '), "surface", "unknown", "userId", ".*")'
+    + " or "
+    + 'label_replace((' + _SURFACE_OTHER_USERS
+    + '), "surface", "other", "userId", ".*")'
+)
+_SURFACE_UNMAPPED_SOURCES = (
+    "topk(" + str(TOP_UNMAPPED_SOURCES) + ", sum by (source) (count_over_time("
+    + _REQ + ' | source!="" | source!~"' + _SURFACE_MAPPED_PATTERN
+    + '" [' + WINDOW + "])))"
+)
+
 # Every figure, as a LogQL metric expression TEMPLATE. `%(sel)s` is substituted with the per-stack
 # selector at query time, so there is exactly one place a stack's identity enters a query.
 SCALARS: Mapping[str, str] = {
@@ -129,6 +202,12 @@ SCALARS: Mapping[str, str] = {
     ),
     "anonymous_views": 'sum(count_over_time(' + _VIEW + ' | userId="-1" [' + WINDOW + ']))',
     "requests": "sum(count_over_time(" + _REQ + " [" + WINDOW + "]))",
+    # The open-ended `other` source group cannot return raw source values without an unbounded result.
+    # Count its identity-bearing events as one scalar, then map availability to the closed `other` enum.
+    "surface_other_user_id_requests": (
+        "sum(count_over_time(" + _REQ + ' | source!="" | source!~"'
+        + _SURFACE_MAPPED_PATTERN + '" | userId!="" [' + WINDOW + "]))"
+    ),
     "request_errors": 'sum(count_over_time(' + _REQ + ' | error!="" [' + WINDOW + ']))',
     "queries_total": "sum(sum_over_time(" + _REQ + " | unwrap totalQueries [" + WINDOW + "]))",
     "queries_cached": "sum(sum_over_time(" + _REQ + " | unwrap cachedQueries [" + WINDOW + "]))",
@@ -170,6 +249,11 @@ BREAKDOWNS: Mapping[str, tuple[str, tuple[str, ...]]] = {
         + _REQ + ' | error!="" [' + WINDOW + "]))",
         ("datasourceType",),
     ),
+    "surface_source_requests": (_SURFACE_SOURCE_REQUESTS, ("source",)),
+    "surface_user_id_requests": (_SURFACE_USER_ID_REQUESTS, ("source",)),
+    "surface_users": (_SURFACE_USERS, ("source",)),
+    "surface_fallback_users": (_SURFACE_FALLBACK_USERS, ("surface",)),
+    "surface_unmapped_sources": (_SURFACE_UNMAPPED_SOURCES, ("source",)),
 }
 
 # Full distinct dashboard set, not top-N. The current dashboard catalogue is joined in Python; Loki
@@ -256,7 +340,8 @@ def _assert_scoped(expr: str, expected_instance_id: str) -> None:
 
 
 def _query(base: str, token: str, expr: str, *, expected_instance_id: str,
-           timeout: float = 90.0, client: ReadOnlyClient | None = None) -> Any:
+           evaluation_time: int | None = None, timeout: float = 90.0,
+           client: ReadOnlyClient | None = None) -> Any:
     """One instant LogQL metric query through the stack's datasource proxy.
 
     **Refuses any expression without an `instance_id` filter.** This is belt and braces on top of the
@@ -266,8 +351,9 @@ def _query(base: str, token: str, expr: str, *, expected_instance_id: str,
     it wrong and reported 340 public dashboards where there were 2.
     """
     _assert_scoped(expr, expected_instance_id)
+    query_time = int(time.time()) if evaluation_time is None else int(evaluation_time)
     url = (f"{base}/api/datasources/proxy/uid/{DS_UID}/loki/api/v1/query?"
-           + urllib.parse.urlencode({"query": expr, "time": int(time.time())}))
+           + urllib.parse.urlencode({"query": expr, "time": query_time}))
     if client is not None:
         response = client.get(url, bearer=token)
         if not response.ok:
@@ -280,13 +366,17 @@ def _query(base: str, token: str, expr: str, *, expected_instance_id: str,
 
 def _execute_query(
     base: str, token: str, expr: str, *, expected_instance_id: str,
-    client: ReadOnlyClient | None,
+    client: ReadOnlyClient | None, evaluation_time: int | None = None,
 ) -> Any:
     """Keep the legacy test/probe seam while production uses the shared deadline client."""
     if client is None:
-        return _query(base, token, expr, expected_instance_id=expected_instance_id)
+        return _query(
+            base, token, expr, expected_instance_id=expected_instance_id,
+            evaluation_time=evaluation_time,
+        )
     return _query(
-        base, token, expr, expected_instance_id=expected_instance_id, client=client,
+        base, token, expr, expected_instance_id=expected_instance_id,
+        evaluation_time=evaluation_time, client=client,
     )
 
 
@@ -341,6 +431,70 @@ def _series(body: Any, labels: Sequence[str]) -> list[dict[str, Any]]:
     return sorted(out, key=lambda r: -r["count"])
 
 
+def _normalize_surface_breakdowns(record: dict[str, Any]) -> None:
+    """Collapse bounded raw-source queries to surface rows without retaining source in metrics."""
+    requests_by_surface: dict[str, float] = {}
+    known_requests = 0.0
+    for item in record.pop("surface_source_requests"):
+        source = str(item.get("source") or "")
+        count = float(item["count"])
+        surface = surface_for_source(source)
+        requests_by_surface[surface] = requests_by_surface.get(surface, 0.0) + count
+        known_requests += count
+
+    total_requests = float(record.get("requests") or 0)
+    other_requests = total_requests - known_requests
+    if other_requests < -1e-6:
+        raise InsightsError("surface request rows exceed the complete data-request count")
+    if other_requests > 0:
+        requests_by_surface["other"] = requests_by_surface.get("other", 0.0) + other_requests
+    record["surface_requests"] = sorted(
+        ({"surface": surface, "count": count}
+         for surface, count in requests_by_surface.items() if count > 0),
+        key=lambda row: -row["count"],
+    )
+
+    surface_user_id_requests: dict[str, float] = {}
+    for item in record.pop("surface_user_id_requests"):
+        source = str(item.get("source") or "")
+        surface = surface_for_source(source)
+        surface_user_id_requests[surface] = (
+            surface_user_id_requests.get(surface, 0.0) + float(item["count"])
+        )
+    surface_users_available = {
+        surface: surface_user_id_requests.get(surface, 0.0) > 0
+        for surface in requests_by_surface
+    }
+    other_user_id_requests = float(record.pop("surface_other_user_id_requests", 0) or 0)
+    if other_user_id_requests > other_requests + 1e-6:
+        raise InsightsError("other-surface userId rows exceed its data-request count")
+    if other_requests > 0:
+        surface_users_available["other"] = other_user_id_requests > 0
+    for surface, identified_count in surface_user_id_requests.items():
+        if identified_count > requests_by_surface.get(surface, 0.0) + 1e-6:
+            raise InsightsError(f"{surface} userId rows exceed its data-request count")
+    record["surface_users_available"] = surface_users_available
+    users_by_surface: dict[str, float] = {}
+    for item in record["surface_users"]:
+        source = str(item.get("source") or "")
+        surface = surface_for_source(source)
+        if surface_users_available.get(surface, False):
+            users_by_surface[surface] = users_by_surface.get(surface, 0.0) + float(item["count"])
+    for item in record.pop("surface_fallback_users"):
+        surface = str(item.get("surface") or "")
+        if surface not in ("unknown", "other"):
+            raise InsightsError(f"surface fallback users returned an invalid surface {surface!r}")
+        if surface_users_available.get(surface, False):
+            users_by_surface[surface] = float(item["count"])
+    for item in record["surface_requests"]:
+        if surface_users_available.get(item["surface"], False):
+            users_by_surface.setdefault(item["surface"], 0.0)
+    record["surface_users"] = sorted(
+        ({"surface": surface, "count": count} for surface, count in users_by_surface.items()),
+        key=lambda row: -row["count"],
+    )
+
+
 def unavailable(slug: str, reason: str, detail: str = "") -> dict[str, Any]:
     return {"slug": slug, "available": False, "reason": reason, "detail": detail[:200]}
 
@@ -360,6 +514,7 @@ def probe_stack(slug: str, url: str, token: str, *, instance_id: str = "",
         return unavailable(slug, NO_INSTANCE_ID, "inventory carries no id to filter on")
     sel = selector(instance_id=instance_id)
     base = url.rstrip("/")
+    evaluation_time = int(time.time())
     out: dict[str, Any] = {"slug": slug, "available": True, "window": WINDOW,
                            "instance_id": instance_id}
     first = True
@@ -368,6 +523,7 @@ def probe_stack(slug: str, url: str, token: str, *, instance_id: str = "",
         try:
             body = _execute_query(
                 base, token, expr, expected_instance_id=instance_id, client=client,
+                evaluation_time=evaluation_time,
             )
         except urllib.error.HTTPError as exc:
             if first and exc.code in RETRY_STATUSES:
@@ -376,6 +532,7 @@ def probe_stack(slug: str, url: str, token: str, *, instance_id: str = "",
                 try:
                     body = _execute_query(
                         base, token, expr, expected_instance_id=instance_id, client=client,
+                        evaluation_time=evaluation_time,
                     )
                 except urllib.error.HTTPError as retry:
                     return unavailable(slug, _reason(retry.code), f"{field}: HTTP {retry.code}")
@@ -403,6 +560,7 @@ def probe_stack(slug: str, url: str, token: str, *, instance_id: str = "",
             body = _execute_query(
                 base, token, template % {"sel": sel},
                 expected_instance_id=instance_id, client=client,
+                evaluation_time=evaluation_time,
             )
             out[field] = _series(body, labels)
         except urllib.error.HTTPError as exc:
@@ -411,6 +569,10 @@ def probe_stack(slug: str, url: str, token: str, *, instance_id: str = "",
             return unavailable(slug, MALFORMED_RESPONSE, f"{field}: {exc}")
         except Exception as exc:                                       # noqa: BLE001
             return unavailable(slug, TRANSPORT_ERROR, f"{field}: {exc}")
+    try:
+        _normalize_surface_breakdowns(out)
+    except InsightsError as exc:
+        return unavailable(slug, MALFORMED_RESPONSE, f"surface_requests: {exc}")
     return out
 
 

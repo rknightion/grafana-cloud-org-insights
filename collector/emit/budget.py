@@ -89,6 +89,7 @@ INPUT = 16
 # without an unplanned series jump. Estate-wide ONLY; the per-stack cross product is a view.
 CATEGORY = 8
 SURFACE = 8
+GRAFANA_SURFACE = 8  # closed `data-request.source` mapping in sources.usage_insights
 TECHNOLOGY = len(technology_registry.REGISTRY.entries)
 
 
@@ -402,6 +403,13 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("gcinsight_dashboards_estate_stacks", "J",
                {"kind": 3, "version": PILLAR_J_EPOCHS},
                note="measured / with_views / with_public_dashboards"),
+    MetricSpec("gcinsight_dashboards_estate_surface_requests", "J",
+               {"surface": GRAFANA_SURFACE, "version": PILLAR_J_EPOCHS},
+               note="daily query-request trend by the closed Grafana surface enum; point-in-time per-stack "
+                    "detail stays in insights_surface_usage"),
+    MetricSpec("gcinsight_dashboards_estate_surface_stacks", "J",
+               {"surface": GRAFANA_SURFACE, "version": PILLAR_J_EPOCHS},
+               note="daily count of measured stacks with at least one request through each observed surface"),
 
     MetricSpec("insights_dashboard_usage", "J", store="view", note="per-stack table"),
     MetricSpec("insights_public_dashboards", "J", store="view",
@@ -409,6 +417,12 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("insights_top_dashboards", "J", store="view"),
     MetricSpec("insights_datasource_types", "J", store="view",
                note="which datasource types are actually QUERIED, not merely provisioned"),
+    MetricSpec("insights_surface_usage", "J", store="view",
+               note="per-stack query requests, share and distinct users by closed surface enum"),
+    MetricSpec("insights_surface_usage_estate", "J", store="view",
+               note="estate query requests, stacks queried and sum of per-stack distinct users by surface"),
+    MetricSpec("insights_surface_unmapped", "J", store="view",
+               note="top unmapped raw `source` values per stack; raw values never become metric labels"),
     MetricSpec("insights_coverage", "J", store="view",
                note="the denominator: why a stack has no figures"),
     MetricSpec("insights_summary", "J", store="view"),

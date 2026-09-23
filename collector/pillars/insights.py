@@ -24,7 +24,7 @@ from __future__ import annotations
 from typing import Any, Mapping, Sequence
 
 from collector.coverage import Coverage
-from collector.sources.usage_insights import WINDOW
+from collector.sources.usage_insights import SURFACE_VALUES, WINDOW
 
 # A per-stack cache ratio is only meaningful once a stack has run enough queries for the ratio to mean
 # anything. Below this the figure swings between 0 and 100 on a handful of requests.
@@ -70,6 +70,22 @@ _DS_ROW_SCHEMA: tuple[tuple[str, str], ...] = (
     ("Stacks", "number"),
 )
 
+_SURFACE_STACK_SCHEMA: tuple[tuple[str, str], ...] = (
+    (" Stack", "string"), ("Surface", "string"), ("Requests", "number"),
+    ("Share of stack requests %", "number"), ("Distinct identified users", "number"),
+    ("User identity", "string"),
+)
+
+_SURFACE_ESTATE_SCHEMA: tuple[tuple[str, str], ...] = (
+    ("Surface", "string"), ("Requests", "number"), ("Share of requests %", "number"),
+    ("Stacks queried", "number"), ("Sum of per-stack users", "number"),
+    ("Stacks with user identity", "number"),
+)
+
+_SURFACE_UNMAPPED_SCHEMA: tuple[tuple[str, str], ...] = (
+    (" Stack", "string"), ("Source", "string"), ("Requests", "number"),
+)
+
 # Views where finding nothing is a legitimate state, so the dashboard renders an empty table rather
 # than failing the whole build. `insights_public_dashboards` empty is the GOOD outcome.
 VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
@@ -78,6 +94,9 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
     "insights_top_dashboards": _TOP_ROW_SCHEMA,
     "insights_coverage": _COVERAGE_ROW_SCHEMA,
     "insights_datasource_types": _DS_ROW_SCHEMA,
+    "insights_surface_usage": _SURFACE_STACK_SCHEMA,
+    "insights_surface_usage_estate": _SURFACE_ESTATE_SCHEMA,
+    "insights_surface_unmapped": _SURFACE_UNMAPPED_SCHEMA,
 }
 
 # Why a stack has no figures. Split so "nobody has provisioned it yet" never reads as "it has no usage".
@@ -116,6 +135,9 @@ def build(
     public_rows: list[dict[str, Any]] = []
     top_rows: list[dict[str, Any]] = []
     ds_counts: dict[str, dict[str, float]] = {}
+    surface_rows: list[dict[str, Any]] = []
+    surface_unmapped_rows: list[dict[str, Any]] = []
+    surface_estate: dict[str, dict[str, float]] = {}
 
     est = dict.fromkeys(
         ("views", "viewers", "dashboards_viewed", "public_events", "anonymous_views",
@@ -185,6 +207,58 @@ def build(
             "Anonymous views": int(rec.get("anonymous_views") or 0),
         })
 
+        stack_surface_requests: dict[str, float] = {}
+        for item in rec.get("surface_requests") or []:
+            surface = str(item.get("surface") or "unknown")
+            if surface not in SURFACE_VALUES:
+                surface = "other"
+            count = float(item.get("count") or 0)
+            if count > 0:
+                stack_surface_requests[surface] = stack_surface_requests.get(surface, 0.0) + count
+
+        stack_surface_users: dict[str, float] = {}
+        for item in rec.get("surface_users") or []:
+            surface = str(item.get("surface") or "unknown")
+            if surface not in SURFACE_VALUES:
+                surface = "other"
+            count = float(item.get("count") or 0)
+            if count > 0:
+                stack_surface_users[surface] = stack_surface_users.get(surface, 0.0) + count
+
+        surface_user_coverage = rec.get("surface_users_available")
+        for surface, count in stack_surface_requests.items():
+            identity_available = (
+                isinstance(surface_user_coverage, Mapping)
+                and bool(surface_user_coverage.get(surface, False))
+            )
+            users = stack_surface_users.get(surface, 0.0) if identity_available else None
+            surface_rows.append({
+                " Stack": slug,
+                "Surface": surface,
+                "Requests": int(count),
+                "Share of stack requests %": _ratio(count, requests),
+                "Distinct identified users": int(users) if users is not None else None,
+                "User identity": "observed" if identity_available else "unavailable",
+            })
+            total = surface_estate.setdefault(
+                surface, {"requests": 0.0, "stacks": 0.0, "users": 0.0, "user_stacks": 0.0},
+            )
+            total["requests"] += count
+            total["stacks"] += 1
+            if identity_available:
+                total["users"] += float(users or 0)
+                total["user_stacks"] += 1
+
+        for item in rec.get("surface_unmapped_sources") or []:
+            source = str(item.get("source") or "")
+            count = float(item.get("count") or 0)
+            if source and count > 0:
+                surface_unmapped_rows.append({
+                    " Stack": slug,
+                    "Source": source,
+                    "Requests": int(count),
+                })
+
         for pub in rec.get("public_dashboards") or []:
             public_rows.append({
                 " Stack": slug,
@@ -252,6 +326,23 @@ def build(
          for k, v in ds_counts.items()),
         key=lambda r: -r["Cumulative duration (ms)"],
     )
+    views["insights_surface_usage"] = sorted(
+        surface_rows, key=lambda row: (-row["Requests"], row[" Stack"], row["Surface"]),
+    )
+    views["insights_surface_usage_estate"] = sorted(
+        ({"Surface": surface, "Requests": int(values["requests"]),
+         "Share of requests %": _ratio(values["requests"], est["requests"]),
+         "Stacks queried": int(values["stacks"]),
+         "Sum of per-stack users": (
+             int(values["users"]) if values["user_stacks"] else None
+         ),
+         "Stacks with user identity": int(values["user_stacks"])}
+         for surface, values in surface_estate.items()),
+        key=lambda row: (-row["Requests"], row["Surface"]),
+    )
+    views["insights_surface_unmapped"] = sorted(
+        surface_unmapped_rows, key=lambda row: (-row["Requests"], row[" Stack"], row["Source"]),
+    )
 
     # Coverage itself may be a measured zero. Everything derived from a measured stack is absent until
     # at least one stack succeeds; emitting structural zeroes would turn a total collection failure into
@@ -266,6 +357,18 @@ def build(
         for kind, count in (("with_views", with_views),
                             ("with_public_dashboards", with_public)):
             metrics.append(("gcinsight_dashboards_estate_stacks", {"kind": kind}, float(count)))
+
+    # Estate-level request and stack trends justify these bounded surface labels. Identity totals remain
+    # in the S3 view because userId coverage varies across stacks; no raw source or identity is a label.
+    if measured:
+        for surface in SURFACE_VALUES:
+            values = surface_estate.get(surface, {})
+            for suffix in ("requests", "stacks"):
+                metrics.append((
+                    f"gcinsight_dashboards_estate_surface_{suffix}",
+                    {"surface": surface},
+                    float(values.get(suffix, 0)),
+                ))
 
     views["insights_summary"] = [
         {" Metric": f"Stacks measured (window {WINDOW})",

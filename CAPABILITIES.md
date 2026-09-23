@@ -202,6 +202,24 @@ automatically labelled broken.
 
 ## Known unavailable or rejected routes
 
+- The SLO app's documented `GET /api/plugins/grafana-slo-app/resources/v1/slo` returned HTTP 403
+ with the existing stack reader on three development and six customer-estate stacks in a read-only
+ sample. The declared reader lacks `grafana-slo-app.slo:read` and plugin access scoped to
+ `plugins:id:grafana-slo-app`. A live development role-definition GET also listed
+ `grafana-slo-app.orgpreferences:read` in the SLO reader role. A new grant is a separate scope decision, not a silent collector
+ expansion. This result does not say whether those stacks have SLOs.
+- A live role-definition GET on one development stack showed the Synthetic Monitoring checks reader
+ would grant `grafana-synthetic-monitoring-app:read`,
+ `grafana-synthetic-monitoring-app.checks:read` and plugin access on that app. The IRM integrations
+ reader would grant `grafana-irm-app.integrations:read` and its plugin access. The k6 reader would
+ grant `k6-app.settings:read` and plugin access on `k6-app`; that role name alone does not prove a
+ k6 runs API is reachable. None of these pairs is declared in the existing reader. Product object
+ and run routes were not queried with an expanded identity.
+- In the same sample, `/api/plugins`, `/api/datasources`, `/api/v1/provisioning/alert-rules`,
+ `/api/search/` and the existing Adaptive Logs plugin-proxy recommendation route returned HTTP 200.
+ The plugin, datasource, rule and search lists were populated; a 200 alone is not an unfiltered
+ inventory guarantee. Assistant `/api/v1/usage/hero-stats` was called without the endpoint's required
+ parameters and returned HTTP 400 on all nine; this is a rejected request shape, not a role verdict.
 - Synthetic Monitoring result inventory has no verified safe unattended read route.
 - Adaptive Profiles endpoints have not produced a verified read contract.
 - Adaptive Traces collection is absent until a concrete read-only consumer and permission contract

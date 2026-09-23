@@ -3,10 +3,10 @@ id: GCI-0032
 title: >-
   Research what Grafana Cloud feature and sub-feature usage the platform can
   observe, and from which source
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-23 17:50'
-updated_date: '2026-09-23 17:51'
+updated_date: '2026-09-23 18:28'
 labels:
   - research
   - adoption

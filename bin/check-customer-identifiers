@@ -51,13 +51,16 @@ if [ -z "$PATTERNS" ]; then
   exit 2
 fi
 
+# codex/ is gitignored private campaign state. Consumer exports omit it, and public-artefact checks
+# must not scan it as if it were a tracked product source.
 set +e
 hits="$(grep -rInoE "$PATTERNS" "$TARGET" \
   --exclude-dir=.git \
   --exclude-dir=.venv \
   --exclude-dir=__pycache__ \
   --exclude-dir=.pytest_cache \
-  --exclude-dir=.terraform)"
+  --exclude-dir=.terraform \
+  --exclude-dir=codex)"
 status=$?
 set -e
 if [ "$status" -ne 0 ] && [ "$status" -ne 1 ]; then

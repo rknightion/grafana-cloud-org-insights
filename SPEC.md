@@ -136,6 +136,9 @@ a whole region, so every LogQL selector includes `instance_type="grafana"` and t
 `instance_id`. For Grafana events, `instance_id` is the stack's `id`. Selectors are
 created through one helper and `_query` refuses a template without the regional guard.
 
+Pillar J also groups `data-request` activity by a closed Grafana `source` surface enum; it
+measures data requests, not page visits, and the `scenes` bucket is not split per app.
+
 Usage events and inventory answer different questions. Pillar J reports public dashboards observed in
 use; the Risk dashboard enumerates configured public dashboards whether or not anybody opened them. The
 generic build presents both and leaves the policy target to the deploying organisation.

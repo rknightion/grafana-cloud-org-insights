@@ -336,7 +336,7 @@ class ConsumerShellTest(unittest.TestCase):
         product = parent / "product"
         shutil.copytree(
             ROOT, product,
-            ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__", ".terraform"),
+            ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__", ".terraform", "codex"),
         )
         revision = self.git_repository(product)
         self.run_command(

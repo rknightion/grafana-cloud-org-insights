@@ -145,6 +145,33 @@ is already a datasource on the target stack, a panel beats a pipeline.**
  real.
 - **Aggregate in Loki.** Raw usage-insights events are high volume; the collector runs bounded scalar
  and top-N LogQL queries rather than downloading event lines.
+- **`data-request.source` counts queries, not page visits.** A guarded seven-day live probe on five
+ development and 50 customer-estate stacks found `dashboard`, `scenes`, `app`, `explore`,
+ `grafana-assistant-app`, `unknown` and `grafana-k8s-app`. The development sample had 7,208 dashboard,
+ 807 app, 161 scenes, 129 unknown, 22 Assistant and two Explore requests. The customer sample had
+ 197,570 dashboard, 14,589 scenes, 11,373 app, 1,283 Explore, 392 Assistant, 78 Kubernetes-app and
+ six unknown requests. These are sample counts, not estate totals or unique users. The query was
+ `sum by (source) (count_over_time({instance_type="grafana", instance_id="<current stack id>"}
+ | logfmt | eventName="data-request" [7d]))`, run separately per stack.
+- **`scenes` cannot presently identify one app.** Inspected live scenes lines had datasource type,
+ datasource and dashboard fields, and `userId`, but no plugin or URL field. A grouped
+ `source,datasourceType` query found Prometheus, Loki, Tempo and Pyroscope types; a datasource is
+ compatible with several apps, so it is only a weak inference. A known Drilldown user's exact
+ request was not independently identified in this probe. Do not label `scenes` as one Drilldown app.
+- **Distinct people require a filtered `userId`, not request volume.** Nonempty, non-anonymous IDs
+ occurred on four of five development and 41 of 50 sampled customer stacks. Aggregate distinct IDs
+ inside Loki; do not put an identity or raw plugin-chosen `source` into a metric label.
+- **Surface identity coverage is per surface.** One source carrying `userId` does not make another source
+  identity-complete. The new bounded surface probe returned available results on one development and
+  one customer-estate stack (24 guarded GET queries each); its classified request totals reconciled
+  with the complete data-request count. Missing identity stays null in the per-stack view, and the
+  estate view sums per-stack users rather than claiming distinct people across stacks.
+- **A non-dashboard request can retain a dashboard UID.** Live `source="scenes"` events with a
+ nonempty `dashboardUid` occurred in one development stack and eight sampled customer stacks, four
+ and 94 events respectively. The field can reflect `getDashboardSrv().getCurrent()` after navigation.
+ Classify the request by `source`, never by a nonempty dashboard UID. Upstream also suppresses panel
+ editor requests with `editPanel` and omits `error` on Explore and correlations requests, so neither
+ panel-editor volume nor those surfaces' error rate can be inferred from this event.
 
 ## Adaptive recommendations and rate cards
 

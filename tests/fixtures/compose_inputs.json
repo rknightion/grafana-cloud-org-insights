@@ -23396,6 +23396,23 @@
    "request_errors": 0.0,
    "requests": 11.0,
    "slug": "stack158",
+   "surface_requests": [
+    {"surface": "dashboard", "count": 5.0},
+    {"surface": "app_scenes", "count": 4.0},
+    {"surface": "other", "count": 2.0}
+   ],
+   "surface_users_available": {
+    "dashboard": true,
+    "app_scenes": true,
+    "other": false
+   },
+   "surface_users": [
+    {"surface": "dashboard", "count": 2.0},
+    {"surface": "app_scenes", "count": 1.0}
+   ],
+   "surface_unmapped_sources": [
+    {"source": "synthetic-plugin", "count": 2.0}
+   ],
    "top_dashboards": [
     {
      "count": 2.0,

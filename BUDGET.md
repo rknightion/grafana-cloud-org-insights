@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **9,320** |
-| Phase 1 only | 9,319 |
+| **Declared (all phases)** | **9,354** |
+| Phase 1 only | 9,353 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -26,10 +26,10 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | E | 850 |
 | F | 21 |
 | I | 895 |
-| J | 4,368 |
-| K | 967 |
+| J | 4,400 |
+| K | 969 |
 | scan | 226 |
-| **Total** | **9,320** |
+| **Total** | **9,354** |
 
 ## Metrics
 
@@ -59,11 +59,13 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_ai_estate_messages` | I | `category`(8), `surface`(8) | 64 | 1 | estate-wide category x surface, NO `stack` label  -  the per-stack cross product belongs in the existing `ai_category_surface` view |
 | `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(16) | 64 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
 | `gcinsight_input_available` | scan | `tier`(4), `input`(16) | 64 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
-| `gcinsight_coverage_technology_stacks` | K | `kind`(61) | 61 | 1 | one bounded registry enum per technology; value is measured stacks present |
+| `gcinsight_coverage_technology_stacks` | K | `kind`(63) | 63 | 1 | one bounded registry enum per technology; value is measured stacks present |
 | `gcinsight_coverage_unscored` | K | `component`(8), `reason`(7) | 56 | 1 | bounded component/reason counts; product absence and unavailable evidence are excluded from the score rather than published as failed coverage |
 | `gcinsight_scan_stacks_failed` | scan | `tier`(4), `reason`(8) | 32 | 1 | reason is a closed failure vocabulary: http_429, http_5xx, timeout, auth, ... |
 | `gcinsight_findings` | scan | `kind`(18) | 18 | 1 | count per finding kind, derived from the pillar views by pillars/findings.py. A kind the running tier cannot compute is ABSENT, never 0 |
 | `gcinsight_maturity_dimension_mean` | D | `dimension`(9), `version`(2) | 18 | 1 | estate mean per rubric dimension  -  answers 'which dimension is the estate weakest on', which the per-stack view cannot trend without a stack-by-dimension cross product. Mean is over the stacks that SCORED that dimension, excluding the four unscored reasons |
+| `gcinsight_dashboards_estate_surface_requests` | J | `surface`(8), `version`(2) | 16 | 1 | daily query-request trend by the closed Grafana surface enum; point-in-time per-stack detail stays in insights_surface_usage |
+| `gcinsight_dashboards_estate_surface_stacks` | J | `surface`(8), `version`(2) | 16 | 1 | daily count of measured stacks with at least one request through each observed surface |
 | `gcinsight_scan_stacks_skipped` | scan | `tier`(4), `reason`(3) | 12 | 1 | paused, unresolvable, out_of_scope |
 | `gcinsight_coverage_capability_gap` | K | `kind`(10) | 10 | 1 | provisioned or population-eligible stacks with no measured use, by a fixed capability enum. Deliberately emits measured zero gaps on the adoption surface |
 | `gcinsight_value_benchmark` | F | `kind`(10) | 10 | 1 | internal benchmarking: median/p90/worst across the dimensions that have data |
@@ -204,7 +206,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `coverage_metric_name_register` | K | 271 | 1 | metric names and their registry classification; names never become labels |
 | `coverage_service_register` | K | 271 | 1 | top-N named services with signal depth and explicit alert/dashboard metadata |
 | `coverage_summary` | K | 271 | 1 | per-stack counts, registry version, truncation and unmatched-name backlog |
-| `coverage_technology_register` | K | 16,531 | 1 | stack x technology is current-state identity detail, not a time series |
+| `coverage_technology_register` | K | 17,073 | 1 | stack x technology is current-state identity detail, not a time series |
 | `estate` | A | 271 | 1 | wide per-stack inventory: region, cluster, status, dashboards, alert rules, users by role, admin share, age, idle, drift, delete protection, leftover, created/updated by |
 | `estate_leftovers_billing` | A | 1 | 1 | billing-active leftover candidates; row count is deployment-specific |
 | `estate_leftovers_idle` | A | 1 | 1 | idle non-billing stack candidates; row count is deployment-specific |
@@ -213,6 +215,9 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `insights_datasource_types` | J | 1 | 1 | which datasource types are actually QUERIED, not merely provisioned |
 | `insights_public_dashboards` | J | 1 | 1 | observed activity list: stack, dashboard, publicDashboardUid, events |
 | `insights_summary` | J | 1 | 1 |  |
+| `insights_surface_unmapped` | J | 1 | 1 | top unmapped raw `source` values per stack; raw values never become metric labels |
+| `insights_surface_usage` | J | 1 | 1 | per-stack query requests, share and distinct users by closed surface enum |
+| `insights_surface_usage_estate` | J | 1 | 1 | estate query requests, stacks queried and sum of per-stack distinct users by surface |
 | `insights_top_dashboards` | J | 1 | 1 |  |
 | `maturity_dimensions` | D | 2,439 | 1 | a table shows every dimension's contribution; only the composite needs trending |
 | `public_dashboard_inventory` | E | 271 | 3 | complete configured public-dashboard inventory for comparison with local policy |

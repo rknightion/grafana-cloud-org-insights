@@ -1,0 +1,36 @@
+---
+id: GCI-0041
+title: Decide read-only product scopes for feature inventory
+status: To Do
+assignee: []
+created_date: '2026-09-23 18:35'
+labels:
+  - feature-usage
+  - scope-decision
+dependencies: []
+references:
+  - backlog/docs/doc-0006 - Feature-usage-observability-matrix.md
+priority: high
+type: task
+ordinal: 51000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+GCI-0032 found product object APIs beyond the existing basic-role-None stack reader. This is a scope decision, not authorization to change the role. The SLO GET returned 403 on nine sampled stacks. Live role metadata showed SLO reader actions grafana-slo-app.orgpreferences:read and grafana-slo-app.slo:read plus plugins.app:access scoped to plugins:id:grafana-slo-app; Synthetic Monitoring checks reader actions grafana-synthetic-monitoring-app:read and grafana-synthetic-monitoring-app.checks:read plus plugin access scoped to plugins:id:grafana-synthetic-monitoring-app; IRM integrations reader action grafana-irm-app.integrations:read plus plugin access scoped to plugins:id:grafana-irm-app; and k6 reader action k6-app.settings:read plus plugin access scoped to plugins:id:k6-app. Further product roles for probes, alert groups, schedules, app observability, knowledge graph, frontend, Kubernetes, cloud provider, database, PDC, ML, reporting, library panels and playlists need action/scope and safe-output verification. Each grant may expose customer configuration, identities, URLs or scripts. Datasource query scope remains pinned to the two exact Grafana-provisioned uids; decrypted secrets and write actions remain refused. Decide which products merit a narrow read grant before any provisioner change. Proposed new emitted series: 0 for the inventory views; access breadth, not cardinality, is the cost.
+<!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 Record an explicit approve, defer or reject decision per product read family, including exact action and scope pairs
+- [ ] #2 For each approved family, identify data minimization, access control, encryption and retention for identity-bearing detail
+- [ ] #3 Keep basic role None, datasource query uid pins, and refused secret/write actions unchanged
+<!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 just test
+- [ ] #2 just tf-validate
+- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+<!-- DOD:END -->
