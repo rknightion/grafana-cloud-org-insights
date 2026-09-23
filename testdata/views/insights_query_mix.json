@@ -1,0 +1,986 @@
+{
+  "meta": {
+    "generated_at": "2026-09-23T23:00:18.249525+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "obs-hub",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 351,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "obs-hub",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "obs-hub",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 351,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "obs-hub",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 859,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 859,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack001",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack001",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack001a",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack001a",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 1086,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 1086,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack001b",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack001c",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack001c",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack002",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack002",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 56,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 56,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack019",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 1006,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 1006,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack020",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 1,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 1,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack035",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 30,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 30,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack036",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack037",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack037",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 186,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 186,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack038",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack049",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack049",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 212,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 212,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack050",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack051",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack051",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 8,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 8,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack052",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 6,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 6,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack053",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack054",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack054",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 14,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 14,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack055",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack070",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack070",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 337,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 337,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack071",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 20,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 20,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack072",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack110",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack110",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 220,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 220,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack111",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack112",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack112",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 1397,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 1397,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack113",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack125",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack125",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 22,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 22,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack126",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack145",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack145",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack146",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack146",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack147",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack147",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack148",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack148",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack149",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack149",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack158",
+      "Dimension": "datasourceType",
+      "Value": "synthetic-datasource",
+      "Row type": "value",
+      "Data requests": 11,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack158",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack158",
+      "Dimension": "panelPluginId",
+      "Value": "synthetic-panel",
+      "Row type": "value",
+      "Data requests": 11,
+      "Distinct values seen": null
+    },
+    {
+      " Stack": "stack158",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 1
+    },
+    {
+      " Stack": "stack170",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack170",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack177",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack177",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack193",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack193",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack201",
+      "Dimension": "datasourceType",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    },
+    {
+      " Stack": "stack201",
+      "Dimension": "panelPluginId",
+      "Value": "other",
+      "Row type": "remainder",
+      "Data requests": 0,
+      "Distinct values seen": 0
+    }
+  ]
+}

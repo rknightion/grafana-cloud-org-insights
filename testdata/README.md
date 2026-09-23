@@ -59,6 +59,7 @@ reserved signal namespace without inventing a stack relationship.
 | `usage-datasource-signals.json` | `grafanacloud-usage` label cardinality, and the instant-vs-window evidence the dashboard tests read |
 | `ui-instance-ids.json`, `ui-series-pairs.json` | id-collision and series-pair invariants |
 | `views/` | the composed view set, so table panels build with no S3 |
+| `views/insights_query_mix.json` | local dashboard build fixture with illustrative synthetic datasource and panel-plugin values, not a measurement |
 
 Regenerate the composed views with `python3 bin/make_local_views.py`. The raw scan fixtures are not
 regenerable from anything in this repo: they are a captured snapshot, and replacing one means capturing

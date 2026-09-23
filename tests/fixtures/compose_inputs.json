@@ -23397,9 +23397,18 @@
    "requests": 11.0,
    "slug": "stack158",
    "surface_requests": [
-    {"surface": "dashboard", "count": 5.0},
-    {"surface": "app_scenes", "count": 4.0},
-    {"surface": "other", "count": 2.0}
+    {
+     "surface": "dashboard",
+     "count": 5.0
+    },
+    {
+     "surface": "app_scenes",
+     "count": 4.0
+    },
+    {
+     "surface": "other",
+     "count": 2.0
+    }
    ],
    "surface_users_available": {
     "dashboard": true,
@@ -23407,11 +23416,20 @@
     "other": false
    },
    "surface_users": [
-    {"surface": "dashboard", "count": 2.0},
-    {"surface": "app_scenes", "count": 1.0}
+    {
+     "surface": "dashboard",
+     "count": 2.0
+    },
+    {
+     "surface": "app_scenes",
+     "count": 1.0
+    }
    ],
    "surface_unmapped_sources": [
-    {"source": "synthetic-plugin", "count": 2.0}
+    {
+     "source": "synthetic-plugin",
+     "count": 2.0
+    }
    ],
    "top_dashboards": [
     {
@@ -23423,7 +23441,24 @@
    ],
    "viewers": 1.0,
    "views": 2.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 11.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 11.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 11.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 11.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack145": {
    "anonymous_views": 0.0,
@@ -23444,7 +23479,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack177": {
    "anonymous_views": 0.0,
@@ -23465,7 +23507,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack125": {
    "anonymous_views": 0.0,
@@ -23486,7 +23535,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack001": {
    "anonymous_views": 0.0,
@@ -23507,7 +23563,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack001b": {
    "anonymous_views": 0.0,
@@ -23610,7 +23673,24 @@
    ],
    "viewers": 4.0,
    "views": 34.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 1086.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 1086.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 1086.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 1086.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack001c": {
    "anonymous_views": 0.0,
@@ -23631,7 +23711,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack001a": {
    "anonymous_views": 0.0,
@@ -23652,7 +23739,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack019": {
    "anonymous_views": 0.0,
@@ -23709,7 +23803,24 @@
    ],
    "viewers": 3.0,
    "views": 4.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 56.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 56.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 56.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 56.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack049": {
    "anonymous_views": 0.0,
@@ -23730,7 +23841,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack110": {
    "anonymous_views": 0.0,
@@ -23751,7 +23869,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack020": {
    "anonymous_views": 0.0,
@@ -23854,7 +23979,24 @@
    ],
    "viewers": 7.0,
    "views": 23.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 1006.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 1006.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 1006.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 1006.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "obs-hub": {
    "anonymous_views": 0.0,
@@ -23943,7 +24085,24 @@
    ],
    "viewers": 5.0,
    "views": 14.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 351.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 351.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 351.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 351.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "obs-hub-dev": {
    "anonymous_views": 0.0,
@@ -24038,7 +24197,24 @@
    ],
    "viewers": 4.0,
    "views": 69.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 859.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 859.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 859.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 859.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack035": {
    "anonymous_views": 0.0,
@@ -24071,7 +24247,24 @@
    ],
    "viewers": 1.0,
    "views": 1.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 1.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 1.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 1.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 1.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack036": {
    "anonymous_views": 0.0,
@@ -24108,7 +24301,24 @@
    ],
    "viewers": 1.0,
    "views": 1.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 30.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 30.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 30.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 30.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack111": {
    "anonymous_views": 0.0,
@@ -24167,7 +24377,24 @@
    ],
    "viewers": 4.0,
    "views": 17.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 220.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 220.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 220.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 220.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack070": {
    "anonymous_views": 0.0,
@@ -24188,7 +24415,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack037": {
    "anonymous_views": 0.0,
@@ -24209,7 +24443,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack071": {
    "anonymous_views": 0.0,
@@ -24280,7 +24521,24 @@
    ],
    "viewers": 2.0,
    "views": 13.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 337.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 337.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 337.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 337.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack050": {
    "anonymous_views": 0.0,
@@ -24375,7 +24633,24 @@
    ],
    "viewers": 1.0,
    "views": 11.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 212.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 212.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 212.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 212.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack112": {
    "anonymous_views": 0.0,
@@ -24396,7 +24671,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack051": {
    "anonymous_views": 0.0,
@@ -24417,7 +24699,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack146": {
    "anonymous_views": 0.0,
@@ -24438,7 +24727,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack147": {
    "anonymous_views": 0.0,
@@ -24459,7 +24755,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack038": {
    "anonymous_views": 0.0,
@@ -24504,7 +24807,24 @@
    ],
    "viewers": 2.0,
    "views": 3.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 186.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 186.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 186.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 186.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack052": {
    "anonymous_views": 0.0,
@@ -24541,7 +24861,24 @@
    ],
    "viewers": 1.0,
    "views": 1.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 8.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 8.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 8.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 8.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack053": {
    "anonymous_views": 0.0,
@@ -24584,7 +24921,24 @@
    ],
    "viewers": 1.0,
    "views": 2.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 6.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 6.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 6.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 6.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack054": {
    "anonymous_views": 0.0,
@@ -24605,7 +24959,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack148": {
    "anonymous_views": 0.0,
@@ -24626,7 +24987,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack126": {
    "anonymous_views": 0.0,
@@ -24663,7 +25031,24 @@
    ],
    "viewers": 1.0,
    "views": 2.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 22.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 22.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 22.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 22.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack002": {
    "anonymous_views": 0.0,
@@ -24684,7 +25069,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack113": {
    "anonymous_views": 0.0,
@@ -24781,7 +25173,24 @@
    ],
    "viewers": 4.0,
    "views": 16.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 1397.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 1397.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 1397.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 1397.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack097": {
    "available": false,
@@ -24830,7 +25239,24 @@
    ],
    "viewers": 1.0,
    "views": 2.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 20.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 20.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 20.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 20.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack055": {
    "anonymous_views": 0.0,
@@ -24867,7 +25293,24 @@
    ],
    "viewers": 1.0,
    "views": 1.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [
+    {
+     "datasourceType": "synthetic-datasource",
+     "count": 14.0
+    }
+   ],
+   "query_mix_datasource_types_requests": 14.0,
+   "query_mix_datasource_types_distinct": 1,
+   "query_mix_panel_plugins": [
+    {
+     "panelPluginId": "synthetic-panel",
+     "count": 14.0
+    }
+   ],
+   "query_mix_panel_plugins_requests": 14.0,
+   "query_mix_panel_plugins_distinct": 1
   },
   "stack193": {
    "anonymous_views": 0.0,
@@ -24888,7 +25331,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack170": {
    "anonymous_views": 0.0,
@@ -24909,7 +25359,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack201": {
    "anonymous_views": 0.0,
@@ -24930,7 +25387,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "stack149": {
    "anonymous_views": 0.0,
@@ -24951,7 +25415,14 @@
    "top_dashboards": [],
    "viewers": 0.0,
    "views": 0.0,
-   "window": "24h"
+   "window": "24h",
+   "query_mix_complete": true,
+   "query_mix_datasource_types": [],
+   "query_mix_datasource_types_requests": 0.0,
+   "query_mix_datasource_types_distinct": 0,
+   "query_mix_panel_plugins": [],
+   "query_mix_panel_plugins_requests": 0.0,
+   "query_mix_panel_plugins_distinct": 0
   },
   "testsrobot002": {
    "available": false,
@@ -31424,7 +31895,9 @@
      "uid": "coverage-fixture",
      "title": "Synthetic service dashboard",
      "folder": "Synthetic",
-     "service_tags": ["service:checkout"]
+     "service_tags": [
+      "service:checkout"
+     ]
     }
    ],
    "opened": []
@@ -31437,14 +31910,30 @@
    "available": true,
    "window_start": "2026-08-24T00:00:00+00:00",
    "window_end": "2026-08-25T00:00:00+00:00",
-   "metric_names": ["kube_pod_info", "synthetic_unmatched_metric"],
-   "metric_services": ["checkout"],
-   "slo_services": ["checkout"],
-   "legacy_metric_services": ["legacy-checkout"],
-   "log_services": ["checkout", "logs-only"],
-   "trace_services": ["checkout"],
+   "metric_names": [
+    "kube_pod_info",
+    "synthetic_unmatched_metric"
+   ],
+   "metric_services": [
+    "checkout"
+   ],
+   "slo_services": [
+    "checkout"
+   ],
+   "legacy_metric_services": [
+    "legacy-checkout"
+   ],
+   "log_services": [
+    "checkout",
+    "logs-only"
+   ],
+   "trace_services": [
+    "checkout"
+   ],
    "profile_services": [],
-   "clusters": ["synthetic-cluster"]
+   "clusters": [
+    "synthetic-cluster"
+   ]
   }
  },
  "capability_adoption": {
@@ -31452,15 +31941,33 @@
   "window_start": "2026-08-24T00:00:00+00:00",
   "window_end": "2026-08-25T00:00:00+00:00",
   "values": {
-   "metrics": {"5000001": 128779},
-   "traces": {"5000001": 1},
-   "span_metrics": {"5000001": 0},
-   "service_graphs": {"5000001": 0},
-   "native_histograms": {"5000001": 0},
-   "exemplars": {"5000001": 0},
-   "irm_oncall": {"5000001": 0},
-   "k6": {"5000001": 0},
-   "frontend_observability": {"5000001": 0}
+   "metrics": {
+    "5000001": 128779
+   },
+   "traces": {
+    "5000001": 1
+   },
+   "span_metrics": {
+    "5000001": 0
+   },
+   "service_graphs": {
+    "5000001": 0
+   },
+   "native_histograms": {
+    "5000001": 0
+   },
+   "exemplars": {
+    "5000001": 0
+   },
+   "irm_oncall": {
+    "5000001": 0
+   },
+   "k6": {
+    "5000001": 0
+   },
+   "frontend_observability": {
+    "5000001": 0
+   }
   }
  },
  "org_members": {

@@ -133,12 +133,13 @@ INPUT_OWNER: dict[str, str] = {
 # alternate inputs. `tests/test_hydrate.py::ViewInputsAreDerivedNotAssumed` caps that proof before
 # composing any subsets, so adding inputs cannot turn the gate into an exponential resource failure.
 VIEW_INPUTS: dict[str, frozenset[str]] = {
-    # Pillar J. Every one needs the per-stack usage-insights sweep; none can be computed without it,
-    # so all nine are withheld rather than published as zeros by a tier that did not gather it.
+    # Pillar J. These views need the per-stack usage-insights sweep; none can be computed without it,
+    # so they are withheld rather than published as zeros by a tier that did not gather it.
     "insights_dashboard_usage": frozenset({"insights"}),
     "insights_public_dashboards": frozenset({"insights"}),
     "insights_top_dashboards": frozenset({"insights"}),
     "insights_datasource_types": frozenset({"insights"}),
+    "insights_query_mix": frozenset({"insights"}),
     "insights_coverage": frozenset({"insights"}),
     "insights_summary": frozenset({"insights"}),
     "insights_surface_usage": frozenset({"insights"}),

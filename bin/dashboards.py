@@ -2928,6 +2928,7 @@ def d_dashboards(ds: str):
     """
     opening_inventory_live = _published_views_exist(insights_inventory_pillar.DASHBOARD_VIEW)
     query_cost_live = _published_views_exist(insights_inventory_pillar.QUERY_COST_VIEW)
+    query_mix_live = _published_views_exist("insights_query_mix")
     el = {
         # --- Adoption ---------------------------------------------------------------------------------
         "n_views": build.stat_panel(
@@ -3237,6 +3238,29 @@ def d_dashboards(ds: str):
                         "coverage detail rather than disappearing and making the measured total look "
                         "complete. Start with high duration and low cache share.",
         )
+    if query_mix_live:
+        el["query_mix_scope"] = build.text_panel(
+            "How to read query mix",
+            "Datasource type names the query backend observed on a request. It is an inference about "
+            "what Grafana surface may be in use, not an app identity: several apps can query the same "
+            "datasource type, and `scenes` can combine several app plugins. Panel plugin IDs identify "
+            "the recorded panel plugin, not a page visit or an app user. Counts are `data-request` "
+            "events, not the `totalQueries` count inside those events.\n\n"
+            "The table keeps the 20 most frequent non-empty values per stack and dimension, then one "
+            "`other` remainder row for additional values. Requests missing the dimension are excluded, "
+            "not assigned to `other`. `Distinct values seen` appears on that remainder row. If no "
+            "non-empty panel plugin ID was observed, that dimension has no rows. Counts cover the same "
+            "24-hour usage-insights window.",
+        )
+        el["tbl_query_mix"] = build.table_panel(
+            "Top datasource types and panel plugins by query request",
+            "insights_query_mix", ds,
+            schema=insights_pillar.VIEW_SCHEMAS["insights_query_mix"],
+            description="Per-stack top 20 non-empty values by dimension plus one `other` remainder row. "
+                        "Requests with no value for that dimension are excluded. The distinct-value count "
+                        "is on the remainder row. Datasource type is a query-backend inference, not an "
+                        "application identity.",
+        )
 
     query_rows = [
         build.row("Headline", ["n_queries", "n_qtotal", "n_qcached", "n_cache"],
@@ -3245,6 +3269,13 @@ def d_dashboards(ds: str):
                   max_columns=3, row_height="short"),
         build.row("Datasource types", ["tbl_ds"], max_columns=1),
     ]
+    if query_mix_live:
+        query_rows.extend([
+            build.row("How to read query mix", ["query_mix_scope"], max_columns=1,
+                      row_height="short"),
+            build.row("Top query categories per stack", ["tbl_query_mix"], max_columns=1,
+                      row_height="tall"),
+        ])
     if query_cost_live:
         query_rows.append(build.row(
             "Named datasource cost queue", ["tbl_datasource_query_cost"],

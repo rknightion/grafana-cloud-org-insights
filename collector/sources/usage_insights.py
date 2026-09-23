@@ -97,6 +97,7 @@ _SURFACE_MAPPED_PATTERN = (
 # set was measured; absence from an unavailable set is UNKNOWN.
 ACTIVITY_WINDOW = "31d"
 TOP_DATASOURCES = 10
+TOP_QUERY_MIX = 20
 
 # Grafana emits `duration` as `request.endTime - request.startTime`; both are JavaScript epoch
 # timestamps in milliseconds (`public/app/features/query/state/queryAnalytics.ts`). Live obs-hub
@@ -220,6 +221,20 @@ SCALARS: Mapping[str, str] = {
         + _REQ + ' | dashboardUid!="" | panelId!="" [' + WINDOW + "])))"
     ),
     "datasources_queried": "count(sum by (datasourceType) (count_over_time(" + _REQ + " [" + WINDOW + "])))",
+    "query_mix_datasource_types_requests": (
+        "sum(count_over_time(" + _REQ + ' | datasourceType!="" [' + WINDOW + "]))"
+    ),
+    "query_mix_datasource_types_distinct": (
+        "count(sum by (datasourceType) (count_over_time("
+        + _REQ + ' | datasourceType!="" [' + WINDOW + "])))"
+    ),
+    "query_mix_panel_plugins_requests": (
+        "sum(count_over_time(" + _REQ + ' | panelPluginId!="" [' + WINDOW + "]))"
+    ),
+    "query_mix_panel_plugins_distinct": (
+        "count(sum by (panelPluginId) (count_over_time("
+        + _REQ + ' | panelPluginId!="" [' + WINDOW + "])))"
+    ),
 }
 
 # Breakdowns, each returning a labelled series. Bounded by `topk` or a small closed label set, so a
@@ -238,6 +253,16 @@ BREAKDOWNS: Mapping[str, tuple[str, tuple[str, ...]]] = {
     "datasource_types": (
         "sum by (datasourceType) (count_over_time(" + _REQ + " [" + WINDOW + "]))",
         ("datasourceType",),
+    ),
+    "query_mix_datasource_types": (
+        "topk(" + str(TOP_QUERY_MIX) + ", sum by (datasourceType) (count_over_time("
+        + _REQ + ' | datasourceType!="" [' + WINDOW + "])))",
+        ("datasourceType",),
+    ),
+    "query_mix_panel_plugins": (
+        "topk(" + str(TOP_QUERY_MIX) + ", sum by (panelPluginId) (count_over_time("
+        + _REQ + ' | panelPluginId!="" [' + WINDOW + "])))",
+        ("panelPluginId",),
     ),
     "datasource_duration_ms": (
         "sum by (datasourceType) (sum_over_time("
@@ -495,6 +520,76 @@ def _normalize_surface_breakdowns(record: dict[str, Any]) -> None:
     )
 
 
+def _probe_query_mix(out: dict[str, Any], *, base: str, token: str, instance_id: str,
+                     sel: str, client: ReadOnlyClient | None,
+                     evaluation_time: int) -> None:
+    """Collect the optional query-mix view without making core insights depend on it."""
+    try:
+        for field, template in SCALARS.items():
+            if not field.startswith("query_mix_"):
+                continue
+            body = _execute_query(
+                base, token, template % {"sel": sel},
+                expected_instance_id=instance_id, client=client,
+                evaluation_time=evaluation_time,
+            )
+            out[field] = _scalar(body)
+
+        for field, (template, labels) in BREAKDOWNS.items():
+            if not field.startswith("query_mix_"):
+                continue
+            body = _execute_query(
+                base, token, template % {"sel": sel},
+                expected_instance_id=instance_id, client=client,
+                evaluation_time=evaluation_time,
+            )
+            out[field] = _series(body, labels)
+
+        for field, requests_field, distinct_field in (
+            ("query_mix_datasource_types", "query_mix_datasource_types_requests",
+             "query_mix_datasource_types_distinct"),
+            ("query_mix_panel_plugins", "query_mix_panel_plugins_requests",
+             "query_mix_panel_plugins_distinct"),
+        ):
+            rows = out[field]
+            dimension_requests = out[requests_field]
+            distinct = out[distinct_field]
+            if dimension_requests > out["requests"] + 1e-6:
+                raise InsightsError(f"{field}: requests exceed complete total")
+            if len(rows) > TOP_QUERY_MIX:
+                raise InsightsError(f"{field}: more than {TOP_QUERY_MIX} rows returned")
+            row_requests = sum(float(row["count"]) for row in rows)
+            if row_requests > dimension_requests + 1e-6:
+                raise InsightsError(f"{field}: rows exceed dimension requests")
+            if distinct > 0 and not rows:
+                raise InsightsError(f"{field}: distinct values have no top rows")
+            if dimension_requests == 0 and distinct > 0:
+                raise InsightsError(f"{field}: distinct values have zero requests")
+            if dimension_requests > 0 and distinct == 0:
+                raise InsightsError(f"{field}: requests have no distinct values")
+            if distinct + 1e-6 < len(rows):
+                raise InsightsError(f"{field}: distinct count is smaller than its top-N")
+            remainder = dimension_requests - row_requests
+            if distinct > len(rows) and remainder <= 1e-6:
+                raise InsightsError(
+                    f"{field}: distinct values exceed top rows without a positive remainder",
+                )
+            if distinct == len(rows) and remainder > 1e-6:
+                raise InsightsError(
+                    f"{field}: complete top rows leave an unexplained positive remainder",
+                )
+    except Exception:  # noqa: BLE001 - this view is optional; core insights remain valid.
+        for field in list(out):
+            if field.startswith("query_mix_"):
+                out.pop(field)
+        out["query_mix_complete"] = False
+        return
+
+    # Hydrated scans from a prior image lack these fields. The pillar uses this marker to withhold
+    # the new view until the input actually contains both bounded observations.
+    out["query_mix_complete"] = True
+
+
 def unavailable(slug: str, reason: str, detail: str = "") -> dict[str, Any]:
     return {"slug": slug, "available": False, "reason": reason, "detail": detail[:200]}
 
@@ -519,6 +614,8 @@ def probe_stack(slug: str, url: str, token: str, *, instance_id: str = "",
                            "instance_id": instance_id}
     first = True
     for field, template in SCALARS.items():
+        if field.startswith("query_mix_"):
+            continue
         expr = template % {"sel": sel}
         try:
             body = _execute_query(
@@ -556,6 +653,8 @@ def probe_stack(slug: str, url: str, token: str, *, instance_id: str = "",
         )
 
     for field, (template, labels) in BREAKDOWNS.items():
+        if field.startswith("query_mix_"):
+            continue
         try:
             body = _execute_query(
                 base, token, template % {"sel": sel},
@@ -569,6 +668,11 @@ def probe_stack(slug: str, url: str, token: str, *, instance_id: str = "",
             return unavailable(slug, MALFORMED_RESPONSE, f"{field}: {exc}")
         except Exception as exc:                                       # noqa: BLE001
             return unavailable(slug, TRANSPORT_ERROR, f"{field}: {exc}")
+
+    _probe_query_mix(
+        out, base=base, token=token, instance_id=instance_id, sel=sel, client=client,
+        evaluation_time=evaluation_time,
+    )
     try:
         _normalize_surface_breakdowns(out)
     except InsightsError as exc:

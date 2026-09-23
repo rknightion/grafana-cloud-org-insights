@@ -12,6 +12,7 @@ from collector.httpclient import Response
 from collector.coverage import Coverage
 from collector.emit import hydrate
 from collector.pillars import compose
+from collector.pillars import insights
 from collector.pillars import insights_inventory
 from collector.sources import stack_catalog
 from collector.sources import usage_insights as ui
@@ -186,6 +187,74 @@ class DatasourceQueryCostViewTest(unittest.TestCase):
         _metrics, views = insights_inventory.build(stacks, datasource_query_cost=payload)
         self.assertEqual(views["insights_datasource_query_cost"][0]["State"], "unknown")
         self.assertEqual(views["insights_datasource_query_cost"][0]["Datasource uid"], "")
+
+
+class QueryMixViewTest(unittest.TestCase):
+    def test_nonfinite_hydrated_mix_is_withheld(self):
+        base = {
+            "requests": 10, "query_mix_datasource_types_requests": 10,
+            "query_mix_datasource_types_distinct": 1,
+            "query_mix_datasource_types": [{"datasourceType": "prometheus", "count": 10}],
+        }
+        for change in (
+            {"query_mix_datasource_types": [{"datasourceType": "prometheus", "count": float("nan")}]},
+            {"query_mix_datasource_types_requests": float("inf")},
+            {"requests": float("nan")},
+        ):
+            with self.subTest(change=change):
+                record = {**base, **change}
+                self.assertIsNone(insights._query_mix_rows(
+                    "alpha", record, dimension="datasourceType",
+                    breakdown="query_mix_datasource_types",
+                    requests_field="query_mix_datasource_types_requests",
+                    distinct_field="query_mix_datasource_types_distinct",
+                ))
+
+    def test_query_mix_view_is_scoped_to_the_insights_input_and_adds_no_metrics(self):
+        stacks = [{"slug": "alpha"}]
+        cov = Coverage(tier="t2", total=1)
+        cov.record_ok("alpha")
+        insight_input = {
+            "alpha": {
+                "available": True,
+                "requests": 42,
+                "datasources_queried": 2,
+                "query_mix_datasource_types_requests": 35,
+                "query_mix_datasource_types_distinct": 2,
+                "query_mix_panel_plugins_requests": 27,
+                "query_mix_panel_plugins_distinct": 3,
+                "query_mix_complete": True,
+                "query_mix_datasource_types": [
+                    {"datasourceType": "prometheus", "count": 30},
+                ],
+                "query_mix_panel_plugins": [
+                    {"panelPluginId": "timeseries", "count": 25},
+                ],
+            },
+        }
+
+        metrics, views = compose.build_all(stacks, cov, insights=insight_input)
+        direct_metrics, _direct_views = insights.build(stacks, cov, insight_input)
+        _baseline_metrics, baseline_views = compose.build_all(stacks, cov)
+        legacy_record = dict(insight_input["alpha"])
+        for field in (
+            "query_mix_complete", "query_mix_datasource_types", "query_mix_panel_plugins",
+            "query_mix_datasource_types_requests", "query_mix_datasource_types_distinct",
+            "query_mix_panel_plugins_requests", "query_mix_panel_plugins_distinct",
+        ):
+            legacy_record.pop(field, None)
+        legacy_metrics, _legacy_views = insights.build(stacks, cov, {"alpha": legacy_record})
+
+        self.assertEqual(hydrate.VIEW_INPUTS.get("insights_query_mix"), frozenset({"insights"}))
+        self.assertIn("insights_query_mix", views)
+        self.assertNotIn("insights_query_mix", baseline_views)
+        self.assertEqual(direct_metrics, legacy_metrics)
+        self.assertTrue(all("prometheus" not in str(labels) and "timeseries" not in str(labels)
+                            for _name, labels, _value in metrics))
+
+        old_input = {"alpha": {"available": True, "requests": 42}}
+        _old_metrics, old_views = compose.build_all(stacks, cov, insights=old_input)
+        self.assertNotIn("insights_query_mix", old_views)
 
 
 class FakeClient:

@@ -21,10 +21,11 @@ other figure on this pillar, and a percentage without it is meaningless.
 
 from __future__ import annotations
 
+import math
 from typing import Any, Mapping, Sequence
 
 from collector.coverage import Coverage
-from collector.sources.usage_insights import SURFACE_VALUES, WINDOW
+from collector.sources.usage_insights import SURFACE_VALUES, TOP_QUERY_MIX, WINDOW
 
 # A per-stack cache ratio is only meaningful once a stack has run enough queries for the ratio to mean
 # anything. Below this the figure swings between 0 and 100 on a handful of requests.
@@ -70,6 +71,12 @@ _DS_ROW_SCHEMA: tuple[tuple[str, str], ...] = (
     ("Stacks", "number"),
 )
 
+_QUERY_MIX_ROW_SCHEMA: tuple[tuple[str, str], ...] = (
+    (" Stack", "string"), ("Dimension", "string"), ("Value", "string"),
+    ("Row type", "string"), ("Data requests", "number"),
+    ("Distinct values seen", "number"),
+)
+
 _SURFACE_STACK_SCHEMA: tuple[tuple[str, str], ...] = (
     (" Stack", "string"), ("Surface", "string"), ("Requests", "number"),
     ("Share of stack requests %", "number"), ("Distinct identified users", "number"),
@@ -94,6 +101,7 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
     "insights_top_dashboards": _TOP_ROW_SCHEMA,
     "insights_coverage": _COVERAGE_ROW_SCHEMA,
     "insights_datasource_types": _DS_ROW_SCHEMA,
+    "insights_query_mix": _QUERY_MIX_ROW_SCHEMA,
     "insights_surface_usage": _SURFACE_STACK_SCHEMA,
     "insights_surface_usage_estate": _SURFACE_ESTATE_SCHEMA,
     "insights_surface_unmapped": _SURFACE_UNMAPPED_SCHEMA,
@@ -117,6 +125,88 @@ def _ratio(part: float, whole: float) -> float | None:
     return round(100 * part / whole, 1) if whole else None
 
 
+def _query_mix_rows(
+    slug: str,
+    rec: Mapping[str, Any],
+    *,
+    dimension: str,
+    breakdown: str,
+    requests_field: str,
+    distinct_field: str,
+) -> list[dict[str, Any]] | None:
+    """Build one stack/dimension's top-20 rows and its single remainder summary row."""
+    counts: dict[str, float] = {}
+    for item in rec.get(breakdown) or []:
+        if not isinstance(item, Mapping):
+            return None
+        value = str(item.get(dimension) or "(unknown)")
+        try:
+            count = float(item.get("count") or 0)
+        except (TypeError, ValueError):
+            return None
+        if not math.isfinite(count) or count < 0:
+            return None
+        counts[value] = counts.get(value, 0.0) + count
+        if not math.isfinite(counts[value]):
+            return None
+
+    try:
+        total = float(rec.get(requests_field) or 0)
+        all_requests = float(rec.get("requests") or 0)
+        distinct = int(float(rec.get(distinct_field) or 0))
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if (not math.isfinite(total) or not math.isfinite(all_requests)
+            or total < 0 or total > all_requests + 1e-6 or distinct < 0):
+        return None
+
+    # Requests without this dimension are not an `other` category. Zero activity is a measured zero,
+    # while a populated request stream with no values means this dimension is absent on the events.
+    if distinct == 0:
+        return ([{
+            " Stack": slug,
+            "Dimension": dimension,
+            "Value": "other",
+            "Row type": "remainder",
+            "Data requests": 0,
+            "Distinct values seen": 0,
+        }] if all_requests == 0 and total == 0 else [])
+    if not counts:
+        return None
+
+    top = sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:TOP_QUERY_MIX]
+    if distinct < len(counts):
+        return None
+    remainder = total - sum(count for _value, count in top)
+    if remainder < -1e-6:
+        return None
+    if distinct > len(top) and remainder <= 1e-6:
+        return None
+    if distinct == len(top) and remainder > 1e-6:
+        return None
+
+    rows = [
+        {
+            " Stack": slug,
+            "Dimension": dimension,
+            "Value": value,
+            "Row type": "value",
+            "Data requests": int(round(count)),
+            "Distinct values seen": None,
+        }
+        for value, count in top
+    ]
+    rows.append({
+        " Stack": slug,
+        "Dimension": dimension,
+        "Value": "other",
+        "Row type": "remainder",
+        "Data requests": int(round(max(0.0, remainder))),
+        "Distinct values seen": distinct,
+    })
+    return rows
+
+
 def build(
     stacks: list[dict[str, Any]],
     coverage: Coverage,
@@ -138,6 +228,9 @@ def build(
     surface_rows: list[dict[str, Any]] = []
     surface_unmapped_rows: list[dict[str, Any]] = []
     surface_estate: dict[str, dict[str, float]] = {}
+    query_mix_rows: list[dict[str, Any]] = []
+    query_mix_complete = True
+    query_mix_stacks = 0
 
     est = dict.fromkeys(
         ("views", "viewers", "dashboards_viewed", "public_events", "anonymous_views",
@@ -167,6 +260,30 @@ def build(
             continue
 
         measured += 1
+        if rec.get("query_mix_complete") is not True:
+            # An older hydrated owner scan has the same `insights` input name but predates these
+            # bounded fields. Withhold this view until a fresh T2 scan supplies the full shape.
+            query_mix_complete = False
+        else:
+            datasource_mix = _query_mix_rows(
+                slug, rec, dimension="datasourceType",
+                breakdown="query_mix_datasource_types",
+                requests_field="query_mix_datasource_types_requests",
+                distinct_field="query_mix_datasource_types_distinct",
+            )
+            plugin_mix = _query_mix_rows(
+                slug, rec, dimension="panelPluginId",
+                breakdown="query_mix_panel_plugins",
+                requests_field="query_mix_panel_plugins_requests",
+                distinct_field="query_mix_panel_plugins_distinct",
+            )
+            if datasource_mix is None or plugin_mix is None:
+                query_mix_complete = False
+            else:
+                query_mix_stacks += 1
+                query_mix_rows.extend(datasource_mix)
+                query_mix_rows.extend(plugin_mix)
+
         provisioned = float(stack.get("dashboardCnt") or 0)
         est_provisioned += provisioned
         views_n = float(rec.get("views") or 0)
@@ -326,6 +443,15 @@ def build(
          for k, v in ds_counts.items()),
         key=lambda r: -r["Cumulative duration (ms)"],
     )
+    if query_mix_complete and query_mix_stacks:
+        dimension_order = {"datasourceType": 0, "panelPluginId": 1}
+        views["insights_query_mix"] = sorted(
+            query_mix_rows,
+            key=lambda row: (
+                row[" Stack"], dimension_order[row["Dimension"]],
+                row["Row type"] == "remainder", -row["Data requests"], row["Value"],
+            ),
+        )
     views["insights_surface_usage"] = sorted(
         surface_rows, key=lambda row: (-row["Requests"], row[" Stack"], row["Surface"]),
     )

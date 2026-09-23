@@ -214,6 +214,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `insights_dashboard_usage` | J | 1 | 1 | per-stack table |
 | `insights_datasource_types` | J | 1 | 1 | which datasource types are actually QUERIED, not merely provisioned |
 | `insights_public_dashboards` | J | 1 | 1 | observed activity list: stack, dashboard, publicDashboardUid, events |
+| `insights_query_mix` | J | 1 | 1 | top 20 datasource types and panel plugins per stack, plus one remainder row |
 | `insights_summary` | J | 1 | 1 |  |
 | `insights_surface_unmapped` | J | 1 | 1 | top unmapped raw `source` values per stack; raw values never become metric labels |
 | `insights_surface_usage` | J | 1 | 1 | per-stack query requests, share and distinct users by closed surface enum |

@@ -86,6 +86,28 @@ class QueryShapeTest(unittest.TestCase):
         self.assertIn("by (datasourceType)", query)
         self.assertNotIn("datasourceUid", query)
 
+    def test_query_mix_breakdowns_are_top_twenty_for_both_live_dimensions(self):
+        for field, label in (
+            ("query_mix_datasource_types", "datasourceType"),
+            ("query_mix_panel_plugins", "panelPluginId"),
+        ):
+            with self.subTest(field=field):
+                query, labels = ui.BREAKDOWNS[field]
+                self.assertTrue(query.startswith(f"topk({ui.TOP_QUERY_MIX}, "))
+                self.assertIn(f"sum by ({label})", query)
+                self.assertEqual(labels, (label,))
+
+        for field, label in (
+            ("query_mix_datasource_types_distinct", "datasourceType"),
+            ("query_mix_panel_plugins_distinct", "panelPluginId"),
+        ):
+            with self.subTest(field=field):
+                distinct = ui.SCALARS[field]
+                self.assertIn("count(", distinct)
+                self.assertIn(f"by ({label})", distinct)
+                self.assertIn(f'| {label}!=""', distinct)
+                self.assertNotIn("topk", distinct)
+
     def test_distinct_panels_are_dashboard_panel_pairs_with_both_ids_present(self):
         """Panel ids are dashboard-local. Missing ids must not collapse into one synthetic panel."""
         query = ui.SCALARS["panels_queried"]
@@ -229,6 +251,133 @@ class SurfaceSourceTest(unittest.TestCase):
         clock.assert_called_once()
         self.assertTrue(calls)
 
+
+class QueryMixSourceTest(unittest.TestCase):
+    @staticmethod
+    def _probe_query_mix(*, datasource_distinct=1, datasource_requests=60,
+                         datasource_rows=None, fail_field=None):
+        calls = []
+        sel = ui.selector(instance_id="123")
+        if datasource_rows is None:
+            datasource_rows = [{"datasourceType": "prometheus", "count": 60}]
+
+        def execute(_base, _token, expr, *, expected_instance_id, client, evaluation_time):
+            calls.append((expr, expected_instance_id, evaluation_time))
+            ui._assert_scoped(expr, expected_instance_id)
+            if fail_field and expr == ui.SCALARS[fail_field] % {"sel": sel}:
+                raise urllib.error.HTTPError("u", 500, "optional mix failed", {}, None)
+            if expr == ui.SCALARS["requests"] % {"sel": sel}:
+                return vector(100)
+            scalar_values = {
+                "query_mix_datasource_types_requests": datasource_requests,
+                "query_mix_datasource_types_distinct": datasource_distinct,
+                "query_mix_panel_plugins_requests": 0,
+                "query_mix_panel_plugins_distinct": 0,
+            }
+            for field, value in scalar_values.items():
+                if expr == ui.SCALARS[field] % {"sel": sel}:
+                    return vector(value)
+            if expr == ui.BREAKDOWNS["query_mix_datasource_types"][0] % {"sel": sel}:
+                return series([
+                    ({"datasourceType": row["datasourceType"]}, row["count"])
+                    for row in datasource_rows
+                ])
+            if expr == ui.BREAKDOWNS["query_mix_panel_plugins"][0] % {"sel": sel}:
+                return series([])
+            if expr in [template % {"sel": sel} for template in ui.SCALARS.values()]:
+                return vector(0)
+            if expr in [template % {"sel": sel} for template, _labels in ui.BREAKDOWNS.values()]:
+                return series([])
+            raise AssertionError(f"unexpected query: {expr}")
+
+        with mock.patch.object(ui.time, "time", return_value=1_726_000_000), \
+                mock.patch.object(ui, "_execute_query", side_effect=execute):
+            record = ui.probe_stack(
+                "alpha", "https://alpha.example", "token", instance_id="123", client=object(),
+            )
+        return record, calls
+
+    def test_probe_collects_scoped_bounded_query_mix_and_distinct_counts(self):
+        calls = []
+        sel = ui.selector(instance_id="123")
+
+        def execute(_base, _token, expr, *, expected_instance_id, client, evaluation_time):
+            calls.append((expr, expected_instance_id, evaluation_time))
+            ui._assert_scoped(expr, expected_instance_id)
+            if expr == ui.SCALARS["requests"] % {"sel": sel}:
+                return vector(100)
+            if expr == ui.SCALARS["datasources_queried"] % {"sel": sel}:
+                return vector(23)
+            if expr == ui.SCALARS["query_mix_datasource_types_requests"] % {"sel": sel}:
+                return vector(60)
+            if expr == ui.SCALARS["query_mix_datasource_types_distinct"] % {"sel": sel}:
+                return vector(1)
+            if expr == ui.SCALARS["query_mix_panel_plugins_requests"] % {"sel": sel}:
+                return vector(70)
+            if expr == ui.SCALARS["query_mix_panel_plugins_distinct"] % {"sel": sel}:
+                return vector(1)
+            if expr == ui.BREAKDOWNS["query_mix_datasource_types"][0] % {"sel": sel}:
+                return series([({"datasourceType": "prometheus"}, 60)])
+            if expr == ui.BREAKDOWNS["query_mix_panel_plugins"][0] % {"sel": sel}:
+                return series([({"panelPluginId": "timeseries"}, 70)])
+            if expr in [template % {"sel": sel} for template in ui.SCALARS.values()]:
+                return vector(0)
+            return series([])
+
+        with mock.patch.object(ui.time, "time", return_value=1_726_000_000), \
+                mock.patch.object(ui, "_execute_query", side_effect=execute):
+            record = ui.probe_stack(
+                "alpha", "https://alpha.example", "token", instance_id="123", client=object(),
+            )
+
+        self.assertTrue(record["available"])
+        self.assertTrue(record["query_mix_complete"])
+        self.assertEqual(record["query_mix_panel_plugins_distinct"], 1)
+        self.assertEqual(record["query_mix_datasource_types"], [
+            {"datasourceType": "prometheus", "count": 60},
+        ])
+        self.assertEqual(record["query_mix_panel_plugins"], [
+            {"panelPluginId": "timeseries", "count": 70},
+        ])
+        self.assertEqual({call[1] for call in calls}, {"123"})
+        self.assertEqual({call[2] for call in calls}, {1_726_000_000})
+
+    def test_query_mix_failure_keeps_core_insights_available_and_withholds_mix(self):
+        record, _calls = self._probe_query_mix(fail_field="query_mix_panel_plugins_requests")
+
+        self.assertTrue(record["available"])
+        self.assertEqual(record["requests"], 100)
+        self.assertFalse(record["query_mix_complete"])
+        self.assertNotIn("query_mix_datasource_types", record)
+
+    def test_distinct_values_without_a_positive_other_remainder_withhold_mix(self):
+        record, _calls = self._probe_query_mix(
+            datasource_distinct=2,
+            datasource_rows=[{"datasourceType": "prometheus", "count": 60}],
+        )
+
+        self.assertTrue(record["available"])
+        self.assertFalse(record["query_mix_complete"])
+        self.assertNotIn("query_mix_datasource_types", record)
+
+    def test_positive_dimension_requests_without_distinct_values_withhold_mix(self):
+        record, _calls = self._probe_query_mix(datasource_distinct=0, datasource_rows=[])
+
+        self.assertTrue(record["available"])
+        self.assertFalse(record["query_mix_complete"])
+        self.assertNotIn("query_mix_datasource_types", record)
+
+    def test_complete_top_rows_with_positive_remainder_withhold_mix(self):
+        record, _calls = self._probe_query_mix(
+            datasource_distinct=1,
+            datasource_requests=61,
+            datasource_rows=[{"datasourceType": "prometheus", "count": 60}],
+        )
+
+        self.assertTrue(record["available"])
+        self.assertFalse(record["query_mix_complete"])
+        self.assertNotIn("query_mix_datasource_types", record)
+
     def test_surface_identity_coverage_is_mapped_per_surface(self):
         record = {
             "requests": 4,
@@ -341,7 +490,9 @@ class ProbeTest(unittest.TestCase):
                 raise urllib.error.HTTPError("u", 403, "forbidden", {}, None)
             for field, template in ui.SCALARS.items():
                 if expr == template % {"sel": sel}:
-                    return vector(0 if field == "surface_other_user_id_requests" else 1)
+                    if field == "surface_other_user_id_requests" or field.startswith("query_mix_"):
+                        return vector(0)
+                    return vector(1)
             for field, (template, _labels) in ui.BREAKDOWNS.items():
                 if expr == template % {"sel": sel}:
                     if field in ("surface_source_requests", "surface_user_id_requests",
@@ -541,6 +692,129 @@ class PillarTest(unittest.TestCase):
         self.assertEqual(row["Data requests"], 21360)
         self.assertEqual(row["Cumulative duration (ms)"], 987654)
         self.assertEqual(row["Request errors"], 17)
+
+    def test_query_mix_keeps_top_twenty_and_one_other_remainder_per_stack_dimension(self):
+        datasource_rows = [
+            {"datasourceType": f"type-{index:02d}", "count": 100 - index}
+            for index in range(25)
+        ]
+        panel_rows = [
+            {"panelPluginId": f"plugin-{index:02d}", "count": 60 - index}
+            for index in range(25)
+        ]
+        payload = {
+            "busy": {
+                "available": True,
+                "requests": 5000,
+                "datasources_queried": 25,
+                "query_mix_datasource_types_requests": 4000,
+                "query_mix_datasource_types_distinct": 25,
+                "query_mix_panel_plugins_requests": 3000,
+                "query_mix_panel_plugins_distinct": 25,
+                "query_mix_complete": True,
+                "query_mix_datasource_types": datasource_rows,
+                "query_mix_panel_plugins": panel_rows,
+            },
+            "quiet": {
+                "available": True,
+                "requests": 0,
+                "datasources_queried": 0,
+                "query_mix_datasource_types_requests": 0,
+                "query_mix_datasource_types_distinct": 0,
+                "query_mix_panel_plugins_requests": 0,
+                "query_mix_panel_plugins_distinct": 0,
+                "query_mix_complete": True,
+                "query_mix_datasource_types": [],
+                "query_mix_panel_plugins": [],
+            },
+            "nopanel": {
+                "available": True,
+                "requests": 42,
+                "query_mix_complete": True,
+                "query_mix_datasource_types_requests": 42,
+                "query_mix_datasource_types_distinct": 1,
+                "query_mix_datasource_types": [
+                    {"datasourceType": "prometheus", "count": 42},
+                ],
+                "query_mix_panel_plugins_requests": 0,
+                "query_mix_panel_plugins_distinct": 0,
+                "query_mix_panel_plugins": [],
+            },
+            "nocred": {"available": False, "reason": "no_credential"},
+        }
+
+        stacks = self.STACKS + [{"slug": "nopanel"}]
+        metrics, views = insights.build(stacks, Coverage(tier="t2", total=4), payload)
+        rows = views["insights_query_mix"]
+        busy_ds = [r for r in rows if r[" Stack"] == "busy" and r["Dimension"] == "datasourceType"]
+        busy_plugins = [r for r in rows if r[" Stack"] == "busy" and r["Dimension"] == "panelPluginId"]
+        quiet_rows = [r for r in rows if r[" Stack"] == "quiet"]
+
+        self.assertEqual(len(busy_ds), 21)
+        self.assertEqual(len(busy_plugins), 21)
+        self.assertEqual(sum(r["Data requests"] for r in busy_ds), 4000)
+        self.assertEqual(sum(r["Data requests"] for r in busy_plugins), 3000)
+        self.assertEqual(busy_ds[-1]["Value"], "other")
+        self.assertEqual(busy_ds[-1]["Data requests"], 2190)
+        self.assertEqual(busy_ds[-1]["Distinct values seen"], 25)
+        self.assertEqual(busy_plugins[-1]["Value"], "other")
+        self.assertEqual(busy_plugins[-1]["Data requests"], 1990)
+        self.assertEqual(busy_plugins[-1]["Distinct values seen"], 25)
+        self.assertEqual(len(quiet_rows), 2)
+        self.assertTrue(all(r["Value"] == "other" and r["Data requests"] == 0
+                            and r["Distinct values seen"] == 0 for r in quiet_rows))
+        nopanel_rows = [r for r in rows if r[" Stack"] == "nopanel"]
+        self.assertEqual({r["Dimension"] for r in nopanel_rows}, {"datasourceType"})
+        self.assertFalse(any(r["Data requests"] == 42 for r in nopanel_rows
+                             if r["Value"] == "other"))
+        self.assertTrue(all("type-" not in str(labels) and "plugin-" not in str(labels)
+                            for _name, labels, _value in metrics))
+        self.assertNotIn("nocred", {row[" Stack"] for row in rows})
+
+    def test_complete_empty_query_mix_publishes_an_empty_view(self):
+        payload = {
+            "alpha": {
+                "available": True,
+                "requests": 42,
+                "query_mix_complete": True,
+                "query_mix_datasource_types_requests": 0,
+                "query_mix_datasource_types_distinct": 0,
+                "query_mix_datasource_types": [],
+                "query_mix_panel_plugins_requests": 0,
+                "query_mix_panel_plugins_distinct": 0,
+                "query_mix_panel_plugins": [],
+            },
+        }
+
+        _metrics, views = insights.build(
+            [{"slug": "alpha"}], Coverage(tier="t2", total=1), payload,
+        )
+
+        self.assertIn("insights_query_mix", views)
+        self.assertEqual(views["insights_query_mix"], [])
+
+    def test_query_mix_composition_rejects_remainder_when_all_values_are_listed(self):
+        payload = {
+            "alpha": {
+                "available": True,
+                "requests": 100,
+                "query_mix_complete": True,
+                "query_mix_datasource_types_requests": 61,
+                "query_mix_datasource_types_distinct": 1,
+                "query_mix_datasource_types": [
+                    {"datasourceType": "prometheus", "count": 60},
+                ],
+                "query_mix_panel_plugins_requests": 0,
+                "query_mix_panel_plugins_distinct": 0,
+                "query_mix_panel_plugins": [],
+            },
+        }
+
+        _metrics, views = insights.build(
+            [{"slug": "alpha"}], Coverage(tier="t2", total=1), payload,
+        )
+
+        self.assertNotIn("insights_query_mix", views)
 
     def test_surface_views_and_metrics_keep_raw_sources_out_of_labels(self):
         stacks = [
