@@ -1,0 +1,16 @@
+{
+  "metric_names": [
+    "ClickHouseAsyncMetrics_Uptime",
+    "sql_count",
+    "cilium_feature_adv_connect_and_lb_bandwidth_manager_enabled",
+    "istio_requests_total"
+  ],
+  "expected_technology_keys": [
+    "clickhouse",
+    "cockroachdb"
+  ],
+  "expected_unmatched_metric_names": [
+    "cilium_feature_adv_connect_and_lb_bandwidth_manager_enabled",
+    "istio_requests_total"
+  ]
+}

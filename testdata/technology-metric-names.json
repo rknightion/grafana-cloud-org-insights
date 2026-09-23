@@ -3,6 +3,7 @@
   "technology_label_matches": ["otel_sdk"],
   "metric_names": [
     "DCGM_FI_DEV_GPU_UTIL",
+    "ClickHouseAsyncMetrics_Uptime",
     "airflow_task_tries",
     "akuity_managed_platform_cluster_agenthealthstatus_bool",
     "alloy_build_info",
@@ -56,6 +57,7 @@
     "redis_up",
     "rest_client_requests_total",
     "slurm_cpus_total",
+    "sql_count",
     "sm_check_info",
     "stackdriver_monitoring_scrapes_total",
     "system_cpu_count",

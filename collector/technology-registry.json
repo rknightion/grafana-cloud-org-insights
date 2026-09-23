@@ -1,5 +1,5 @@
 {
-  "version": "7",
+  "version": "8",
   "technologies": [
     {"key": "airflow", "name": "Apache Airflow", "match": {"exact": "airflow_task_tries"}},
     {"key": "akuity", "name": "Akuity managed Argo CD", "match": {"pattern": {"prefix": "akuity_", "suffix": "_cluster_agenthealthstatus_bool"}}},
@@ -11,7 +11,9 @@
     {"key": "beyla_ebpf", "name": "Grafana Beyla (eBPF zero-code instrumentation)", "match": {"exact": "beyla_internal_build_info"}},
     {"key": "cadvisor", "name": "cAdvisor", "match": {"exact": "container_cpu_usage_seconds_total"}},
     {"key": "cert_manager", "name": "cert-manager", "match": {"exact": "certmanager_certificate_ready_status"}},
+    {"key": "clickhouse", "name": "ClickHouse", "match": {"exact": "ClickHouseAsyncMetrics_Uptime"}},
     {"key": "cloudnativepg", "name": "CloudNativePG", "match": {"exact": "cnpg_collector_up"}},
+    {"key": "cockroachdb", "name": "CockroachDB", "match": {"exact": "sql_count"}},
     {"key": "controller_runtime", "name": "controller-runtime operator", "match": {"exact": "controller_runtime_active_workers"}},
     {"key": "coredns", "name": "CoreDNS", "match": {"exact": "coredns_build_info"}},
     {"key": "crossplane", "name": "Crossplane", "match": {"exact": "crossplane_managed_resource_exists"}},
@@ -62,5 +64,57 @@
     {"key": "victoriametrics", "name": "VictoriaMetrics", "match": {"exact": "vm_app_version"}},
     {"key": "weka", "name": "WEKA parallel filesystem", "match": {"exact": "weka_drives"}},
     {"key": "windows_exporter", "name": "Windows exporter", "match": {"exact": "windows_os_info"}}
-  ]
+  ],
+  "research": {
+    "checked_on": "2026-09-23",
+    "accepted": [
+      {
+        "key": "clickhouse",
+        "metric_name": "ClickHouseAsyncMetrics_Uptime",
+        "description": "ClickHouse server uptime in seconds, including startup before it accepts connections.",
+        "emitter": "ClickHouse server built-in Prometheus metrics endpoint, exposing system.asynchronous_metrics.",
+        "version_scope": "Current unversioned server documentation checked 2026-09-23. The docs do not state a minimum release. The documented v26.8 name-mode change concerns key-value metrics, while Uptime is scalar.",
+        "documentation": [
+          "https://clickhouse.com/docs/reference/system-tables/asynchronous_metrics",
+          "https://clickhouse.com/docs/concepts/features/interfaces/prometheus-metrics",
+          "https://clickhouse.com/docs/cloud/clickhouse-private/reference/metrics-and-alerts"
+        ]
+      },
+      {
+        "key": "cockroachdb",
+        "metric_name": "sql_count",
+        "description": "Counter of successfully executed SQL statements, divided by query_type and whether each query is internal.",
+        "emitter": "Each CockroachDB node server's Prometheus-compatible /metrics endpoint.",
+        "version_scope": "CockroachDB v25.3 and v26.3 documentation both describe this endpoint; the current v26.3 page documents sql_count with static labels. Older releases are not asserted.",
+        "documentation": [
+          "https://www.cockroachlabs.com/docs/v25.3/prometheus-endpoint",
+          "https://www.cockroachlabs.com/docs/v26.3/prometheus-endpoint"
+        ]
+      }
+    ],
+    "omitted": [
+      {
+        "key": "cilium",
+        "metric_name": "cilium_feature_adv_connect_and_lb_bandwidth_manager_enabled",
+        "description": "Indicates whether the Cilium agent has its Bandwidth Manager enabled.",
+        "emitter": "Cilium agent Prometheus metrics endpoint.",
+        "version_scope": "Cilium stable documentation identifies version 1.20.2; no wider metric compatibility range is stated.",
+        "documentation": [
+          "https://docs.cilium.io/en/stable/observability/metrics/"
+        ],
+        "reason": "This reports one optional agent feature rather than Cilium presence. The agent Prometheus metrics endpoint itself requires prometheus.enabled=true, so the docs provide no always-present Cilium sentinel."
+      },
+      {
+        "key": "istio",
+        "metric_name": "istio_requests_total",
+        "description": "Counter incremented for each request handled by an Istio proxy.",
+        "emitter": "Istio proxy, using Envoy; the metric can come from either the client-side or server-side proxy.",
+        "version_scope": "Current unversioned Istio standard-metrics documentation; no minimum or compatibility range is stated.",
+        "documentation": [
+          "https://istio.io/latest/docs/reference/config/metrics/"
+        ],
+        "reason": "The counter is traffic-dependent, and the same name is emitted by either side of a proxy connection. It does not provide an always-present, side-independent sentinel."
+      }
+    ]
+  }
 }
