@@ -52,14 +52,15 @@ tf-validate:
 check-identifiers *args:
     bin/check-customer-identifiers --history {{ args }}
 
-# refuse em dashes in shipped text - house style is a spaced hyphen
+# refuse em dashes in shipped text; private gitignored codex state is not shipped
 [group('check')]
 [script('bash')]
 no-em-dashes:
     set -uo pipefail
     hits=$(grep -rIn $'\342\200\224' . \
       --exclude-dir=.git --exclude-dir=backlog --exclude-dir=testdata \
-      --exclude-dir=.venv --exclude-dir=__pycache__ --exclude-dir=.terraform || true)
+      --exclude-dir=.venv --exclude-dir=__pycache__ --exclude-dir=.terraform \
+      --exclude-dir=codex || true)
     if [ -n "$hits" ]; then
       echo "em dashes present, use a spaced hyphen:"
       echo "$hits"
