@@ -7,7 +7,7 @@ a schedule, transforms what it finds, and publishes it as ordinary Grafana dashb
 nominate.
 
 It exists because past a couple of dozen stacks nobody can answer simple questions any more. Which
-stacks cost the most and why. Who has admin on what. What is provisioned and never used. Which stacks
+stacks cost the most and why. Who has admin on what. What is provisioned but has no observed use in the measured window. Which stacks
 are on last quarter's build. Answering those by hand, stack by stack, is a day's work that goes stale
 the moment it finishes.
 
@@ -26,12 +26,12 @@ is defensible and whether adoption is growing.
 
 ## How it works
 
-Four scheduled scan tiers plus a provisioner, all ECS Fargate tasks on EventBridge schedules.
+Four scheduled scan tiers plus a provisioner, all ECS Fargate tasks on EventBridge schedules. The estate is discovered afresh on each run.
 
 | | Cadence | Gathers |
 |---|---|---|
 | T1 | hourly | org inventory, access policies, org members and Fleet Management |
-| T2 | daily | per-stack users, plugins, service accounts, Assistant, dashboard usage, public dashboards, alert routing and Loki retention |
+| T2 | daily | per-stack users, plugins, service accounts, Assistant, usage insights, public dashboards, alert routing, Loki retention, signal labels and capability adoption |
 | T3 | every 6h | the data plane: cardinality and Adaptive Metrics rules/recommendations |
 | T4 | daily | the estate diff, two windows: 7 days and 1 day |
 | provisioner | daily | reconciles one read-only service account per stack |
@@ -40,8 +40,9 @@ Three landing zones, each chosen for what it is good at:
 
 - **Mimir** takes bounded metrics, for trends and alerting. Labels carry `stack`, `region` and fixed
  enums only.
-- **Loki** takes the finding detail, including the offender names a metric label must never carry: metric
- names, dashboard uids, user logins, rule names.
+- **Loki** takes finding detail. Identity-bearing fields such as dashboard uids and user logins
+ require deployment acceptance and controls for minimisation, access, encryption and retention; they
+ never become metric labels.
 - **S3** takes pre-shaped tables the dashboards render directly, plus a raw scan archive for the diff
  and for audit. Long-term history lives in Mimir, not in the archive.
 
@@ -49,22 +50,128 @@ Every tier composes the full view set from the full input set, hydrating whateve
 itself from the other tiers' latest scans. A view whose inputs are unsatisfied is withheld rather than
 written as zeros, so a table that stops advancing is the signal that something upstream has stopped.
 
-## Ten dashboards
+## What you can observe
 
-`estate`, `cost`, `usage`, `maturity`, `risk`, `value`, `operations`, `commercial`, `ai`,
-`dashboards`.
+The eleven dashboards answer different questions. The source and window matter: configured inventory,
+telemetry production and human activity are different observations. Scan-fed dashboards include
+measured-population and input-age context; a missing value is not a measured zero. Each image below
+is a reviewed screenshot from the robknight development stack, rendered over a 24-hour range.
+
+### Estate
+
+| Question it answers | Source | Cadence or window | Fidelity |
+|---|---|---|---|
+| Which stacks exist and what changed? | Org inventory and scan history | Hourly inventory; daily 1-day and 7-day diff | Configured |
+
+[![Estate dashboard screenshot](docs/assets/screenshots/gcinsight-estate.png)](docs/dashboards.md#estate)
+
+### Cost
+
+| Question it answers | Source | Cadence or window | Fidelity |
+|---|---|---|---|
+| Which stacks and signals drive cost, and where can rules reduce it? | Collector, Adaptive Metrics and Logs, billing datasource | 6-hour data plane; daily Logs; live billing period | Producing and configured |
+
+[![Cost dashboard screenshot](docs/assets/screenshots/gcinsight-cost.png)](docs/dashboards.md#cost)
+
+### Usage
+
+| Question it answers | Source | Cadence or window | Fidelity |
+|---|---|---|---|
+| Which capabilities and datasources are configured or producing telemetry? | Stack inventory and signal measurements | Daily inventory; 24-hour signal windows where labelled | Configured and producing |
+
+[![Usage dashboard screenshot](docs/assets/screenshots/gcinsight-usage.png)](docs/dashboards.md#usage)
+
+### Maturity
+
+| Question it answers | Source | Cadence or window | Fidelity |
+|---|---|---|---|
+| How does each measured stack score, and why? | Collector inventory and data plane | Daily and 6-hour inputs | Configured and producing |
+
+[![Maturity dashboard screenshot](docs/assets/screenshots/gcinsight-maturity.png)](docs/dashboards.md#maturity)
+
+### Risk
+
+| Question it answers | Source | Cadence or window | Fidelity |
+|---|---|---|---|
+| Where are access, routing, retention and public-share risks? | Org, stack and signal inventories | Hourly, daily and 6-hour inputs | Configured; public opens are used |
+
+[![Risk dashboard screenshot](docs/assets/screenshots/gcinsight-risk.png)](docs/dashboards.md#risk)
+
+### Value
+
+| Question it answers | Source | Cadence or window | Fidelity |
+|---|---|---|---|
+| What savings and capability gaps can be evidenced? | Collector and optional rate card | Daily and 6-hour inputs | Configured and producing |
+
+[![Value dashboard screenshot](docs/assets/screenshots/gcinsight-value.png)](docs/dashboards.md#value)
+
+### Operations
+
+| Question it answers | Source | Cadence or window | Fidelity |
+|---|---|---|---|
+| Are OnCall alerts acknowledged and owned? | Live `grafanacloud-usage` | Billing datasource; 24-hour windows for rates | Producing and recorded response |
+
+[![Operations dashboard screenshot](docs/assets/screenshots/gcinsight-operations.png)](docs/dashboards.md#operations)
+
+### Commercial
+
+| Question it answers | Source | Cadence or window | Fidelity |
+|---|---|---|---|
+| How do current run rate and commitment compare? | Live `grafanacloud-usage` | Current billing period | Billed consumption |
+
+[![Commercial dashboard screenshot](docs/assets/screenshots/gcinsight-commercial.png)](docs/dashboards.md#commercial)
+
+### AI usage
+
+| Question it answers | Source | Cadence or window | Fidelity |
+|---|---|---|---|
+| Where is Assistant enabled and reporting use? | Live billing datasource and daily Assistant read | Billing period and rolling 30-day plugin window | Configured and reported use |
+
+[![AI usage dashboard screenshot](docs/assets/screenshots/gcinsight-ai.png)](docs/dashboards.md#ai-usage)
+
+### Dashboard usage
+
+| Question it answers | Source | Cadence or window | Fidelity |
+|---|---|---|---|
+| Which dashboards were opened and what did panels query? | Per-stack `grafanacloud-usage-insights` | Daily sweep of a rolling 24-hour window | Used by people and panel requests |
+
+[![Dashboard usage screenshot](docs/assets/screenshots/gcinsight-dashboards.png)](docs/dashboards.md#dashboard-usage)
+
+### Coverage
+
+| Question it answers | Source | Cadence or window | Fidelity |
+|---|---|---|---|
+| Which services, technologies and infrastructure are observed? | Signal labels, stack inventory, S3 registers and live billing datasource | Daily sweep; explicit signal windows; live 24-hour panels | Producing, with configured context |
+
+[![Coverage dashboard screenshot](docs/assets/screenshots/gcinsight-coverage.png)](docs/dashboards.md#coverage)
 
 Two of them - `operations` and `commercial` - are panels only. They read `grafanacloud-usage`, a
-Prometheus datasource already provisioned on every Grafana Cloud stack, so they need no collector code,
-no credential and no series at all. That is the general rule this project keeps relearning: if the data
-is already a datasource on the target stack, a panel beats a pipeline. The collector is for what no
-datasource exposes.
+Prometheus datasource already provisioned on every Grafana Cloud stack, so those panels need no collector collection, credential or emitted series. If data is already a
+datasource on the target stack, a panel can present it directly.
 
 The `dashboards` surface is Pillar J. It reads each stack's own
 `grafanacloud-usage-insights` datasource through that stack's datasource proxy, with a basic-role-None
 reader whose query permission is scoped to that datasource uid. It measures what people open and which
 datasources panels actually query. The Risk dashboard independently enumerates configured public
 dashboards, because usage events cannot see a share nobody opens.
+
+## What it cannot see
+
+- Provisioned plugins, datasources, dashboards and capabilities do not prove anyone uses them. A
+  produced signal proves ingest or requests, not a person's intent or business value.
+- Usage insights records dashboard opens and panel data requests. A page visit without a request is
+  invisible. A `source` value counts requests, not visits; the generic `scenes` bucket cannot identify
+  individual Scenes apps. Panel-editor requests are suppressed upstream. Explore and correlation
+  errors are not reliably populated.
+- Distinct viewers summed across stacks are not distinct people across the org. Anonymous opens have
+  no person identity. Assistant tenant inventory cannot see user-scoped skills or rules, and its
+  billing and plugin windows are different.
+- A missing series can mean no telemetry, an unavailable reader, an unmeasured stack or a stale input.
+  Read each panel's denominator and freshness before treating absence as a finding. Currency is absent
+  when no complete price basis exists.
+- The platform does not measure application business outcomes or prove that a configured alert was
+  seen by a human. OnCall response panels report recorded acknowledgements and their measured
+  population; they do not infer attention from a missing timing event.
 
 ## Running a scan
 
@@ -81,10 +188,10 @@ export GCINSIGHT_STACK_TOKEN_PREFIX=/gcinsight/stack-token # per-stack reader to
 
 ./scan.py --tier t1 --dry-run # inventory only, prints the meta block and writes nothing
 ./scan.py --tier t1
-./scan.py --tier t2 --limit 6 # a subset, for development
+./scan.py --tier t2 --limit 6 --dry-run # bounded diagnostic; publishing a subset is refused
 ./scan.py --tier t3
 ./scan.py --tier t4 # reads S3 only, makes no API calls
-./scan.py --tier t2 --stack <slug> # one stack, for debugging
+./scan.py --tier t2 --stack <slug> --dry-run # one-stack diagnostic
 ```
 
 None of those have defaults. A default org id or tenant would be one deployment's identifiers baked
@@ -96,8 +203,7 @@ interactive run works. A deployment sets both, and the write token's realm shoul
 alone. The daily provisioner uses a third org-realm token with only `stacks:read` and
 `stack-service-accounts:write`; the collector never receives it.
 
-Exit codes: `0` fine, `1` more than 10% of scannable stacks failed, `2` configuration, `3` the scan
-gathered everything but could not publish. `3` is separate on purpose - "the estate is unreachable" and
+Exit codes: `0` fine, `1` scan coverage or owner-input health below the publication floor, `2` configuration or unsafe publication, `3` gathering succeeded but publication failed, `4` lock collision. `3` is separate on purpose - "the estate is unreachable" and
 "we cannot write to the target stack" need different responses.
 
 ## Building the dashboards
@@ -147,7 +253,7 @@ python3 bin/probe_usage_signals.py # re-measure the grafanacloud-usage panels; n
 just check-tags # audit the cost-allocation tag; pass --fix to repair
 ```
 
-Fargate pulls at task start, so a pushed image is picked up by the next scheduled run with no apply.
+Fargate pulls the image reference in its task definition at task start. A consumer pinned by digest requires a reviewed deployment change to move that reference.
 
 For a customer deployment, use the immutable consumer contract in `consumer/`. The deployment repository
 owns the manifest and customer values; this repository owns the schema, validation, build, execution,

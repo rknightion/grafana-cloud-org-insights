@@ -2,6 +2,15 @@
 
 The quickest useful thing is a dry-run inventory scan against your own org. It makes read-only calls, prints what it found, and writes nothing anywhere.
 
+## What the first run tells you
+
+The dry run discovers the live stack inventory. Once all tiers and their inputs have published,
+[eleven dashboards](dashboards.md) separate configured state, signal production and recorded human
+activity. A dry-run inventory alone does not measure use. Usage insights sees dashboard opens and
+panel requests over a rolling window; it cannot see a page visit without a request or identify
+individual apps inside the `scenes` bucket. Check each dashboard's population and input age before
+using its numbers.
+
 ## Requirements
 
 - Python 3.13 or a container runtime. The collector is stdlib-only - no third-party runtime dependencies.
@@ -32,10 +41,10 @@ export GCINSIGHT_S3_BUCKET=...
 export GCINSIGHT_STACK_TOKEN_PREFIX=/gcinsight/stack-token   # per-stack reader tokens in SSM
 
 ./scan.py --tier t1
-./scan.py --tier t2 --limit 6           # a subset, for development
+./scan.py --tier t2 --limit 6 --dry-run # bounded diagnostic; publishing a subset is refused
 ./scan.py --tier t3
 ./scan.py --tier t4                     # reads S3 only, makes no API calls
-./scan.py --tier t2 --stack <slug>      # one stack, for debugging
+./scan.py --tier t2 --stack <slug> --dry-run # one-stack diagnostic
 ```
 
 `GCINSIGHT_WRITE_TOKEN` publishes, and falls back to the read token when unset, so a single-credential interactive run works. A real deployment sets both, and the write token's realm should be the write stack alone.

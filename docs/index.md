@@ -2,7 +2,7 @@
 
 Estate-wide insight for a large Grafana Cloud organisation. A collector scans every stack in the org on a schedule, transforms what it finds, and publishes it as ordinary Grafana dashboards on one stack you nominate.
 
-It exists because past a couple of dozen stacks nobody can answer simple questions any more. Which stacks cost the most and why. Who has admin on what. What is provisioned and never used. Which stacks are on last quarter's build. Answering those by hand, stack by stack, is a day's work that goes stale the moment it finishes.
+It exists because past a couple of dozen stacks nobody can answer simple questions any more. Which stacks cost the most and why. Who has admin on what. What is provisioned but has no observed use in the measured window. Which stacks are on last quarter's build. Answering those by hand, stack by stack, is a day's work that goes stale the moment it finishes.
 
 Two audiences, two cadences. A platform team reads it weekly and wants to know who is struggling, who is over-alerting and who needs help. Leadership reads it quarterly and wants to know whether the spend is defensible and whether adoption is growing.
 
@@ -19,24 +19,34 @@ Four scheduled scan tiers plus a provisioner, all ECS Fargate tasks on EventBrid
 | Tier | Cadence | Gathers |
 |---|---|---|
 | T1 | hourly | org inventory, access policies, org members and Fleet Management |
-| T2 | daily | per-stack users, plugins, service accounts, Assistant, dashboard usage, public dashboards and alert routing |
+| T2 | daily | per-stack users, plugins, service accounts, Assistant, usage insights, public dashboards, alert routing, Loki retention, signal labels and capability adoption |
 | T3 | every 6h | the data plane: cardinality and Adaptive Metrics rules and recommendations |
 | T4 | daily | the estate diff, over two windows: 7 days and 1 day |
 | provisioner | daily | reconciles one read-only service account per stack |
 
-Results land in three places, each chosen for what it is good at. Mimir takes bounded metrics for trends and alerting. Loki takes the finding detail, including the offender names a metric label must never carry. S3 takes pre-shaped tables the dashboards render directly, plus a raw scan archive for the diff and for audit.
+Results land in three places, each chosen for what it is good at. Mimir takes bounded metrics for trends and alerting. Loki takes finding detail; identity-bearing fields require deployment acceptance and privacy controls and never become metric labels. S3 takes pre-shaped tables the dashboards render directly, plus a raw scan archive for the diff and for audit.
 
 [Architecture](architecture.md) covers the tiers, hydration and the cardinality rule in full.
 
-## Ten dashboards
+## What you can observe
 
-`estate`, `cost`, `usage`, `maturity`, `risk`, `value`, `operations`, `commercial`, `ai`, `dashboards`.
+Eleven dashboards cover inventory, cost, usage, maturity, risk, value, operations, commercial
+consumption, AI usage, dashboard usage and observed coverage. [The dashboard guide](dashboards.md)
+lists each panel group, its source, window, caveats and screenshot. Use it to tell configured state,
+telemetry production and recorded human activity apart.
 
-Two of them - `operations` and `commercial` - are panels only. They read `grafanacloud-usage`, a Prometheus datasource already provisioned on every Grafana Cloud stack, so they need no collector code, no credential and no series at all.
+The collector discovers the live estate on every run. Scan-fed dashboards include measured-population
+and input-age context. Operations and Commercial read `grafanacloud-usage` directly;
+AI usage and Coverage mix live billing panels with collector output. Live billing panels are not
+filtered by the Stack selector.
 
-That is the general rule this project keeps relearning: if the data is already a datasource on the target stack, a panel beats a pipeline. The collector is for what no datasource exposes.
+### What it cannot see
 
-See [Dashboards and alerts](dashboards.md) for what each surface answers and how to publish them.
+A provisioned datasource, plugin or capability does not prove a person used it. Usage insights sees
+dashboard opens and panel data requests, but a page visit without a query is invisible, and the
+`scenes` request bucket cannot identify individual apps. A missing series can mean an unavailable
+reader or stale input rather than zero use. See [Dashboard usage](dashboards.md#dashboard-usage)
+and the [interpretation guide](dashboards.md) before quoting an adoption figure.
 
 ## Start here
 
