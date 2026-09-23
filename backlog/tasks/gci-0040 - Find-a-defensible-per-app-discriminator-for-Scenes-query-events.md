@@ -1,9 +1,10 @@
 ---
 id: GCI-0040
 title: Find a defensible per-app discriminator for Scenes query events
-status: To Do
+status: Parked
 assignee: []
 created_date: '2026-09-23 18:35'
+updated_date: '2026-09-23 19:52'
 labels:
   - feature-usage
   - follow-on
@@ -34,3 +35,9 @@ Rank 7 - valuable but upstream-dependent. In a live 55-stack sample, scenes line
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Parked pending a defensible app discriminator: 55 guarded usage-insights stack probes saw scenes, but log lines carried no plugin or URL and datasourceType is ambiguous. Resume with a known Drilldown user query or upstream event enrichment evidence.
+<!-- SECTION:NOTES:END -->

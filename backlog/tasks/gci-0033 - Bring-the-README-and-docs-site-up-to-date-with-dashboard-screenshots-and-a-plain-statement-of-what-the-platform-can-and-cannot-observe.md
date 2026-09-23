@@ -3,9 +3,10 @@ id: GCI-0033
 title: >-
   Bring the README and docs site up to date with dashboard screenshots and a
   plain statement of what the platform can and cannot observe
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-23 17:50'
+updated_date: '2026-09-23 19:52'
 labels:
   - docs
 dependencies: []
@@ -57,16 +58,28 @@ This is a standalone docs task. It has no dependency on any collector or dashboa
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 README has a question-led 'What you can observe' section covering every dashboard in the DASHBOARDS registry, and a 'What it cannot see' section
-- [ ] #2 Every existing README claim checked against current code; stale claims fixed or removed
-- [ ] #3 One screenshot per dashboard from synthetic or anonymised data, reviewed by eye for identifiers, stored under stable names
-- [ ] #4 docs/dashboards.md has a section per dashboard with screenshot, questions answered, source and caveats; index and getting-started consistent with the README
-- [ ] #5 Only built and rendered features are documented; no source code changed
+- [x] #1 README has a question-led 'What you can observe' section covering every dashboard in the DASHBOARDS registry, and a 'What it cannot see' section
+- [x] #2 Every existing README claim checked against current code; stale claims fixed or removed
+- [x] #3 One screenshot per dashboard from synthetic or anonymised data, reviewed by eye for identifiers, stored under stable names
+- [x] #4 docs/dashboards.md has a section per dashboard with screenshot, questions answered, source and caveats; index and getting-started consistent with the README
+- [x] #5 Only built and rendered features are documented; no source code changed
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
+- [x] #1 just test
+- [x] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+README and docs cover all 11 registry dashboards with source, cadence, fidelity and caveats. Eleven 1600x1100 light-theme PNGs were rendered from robknight staff dev over 24h after T4, inspected individually for names, emails, logins and customer material, and committed at 7aeb451. User Wave 1 goal explicitly authorised staff-org screenshots. Exact-SHA CI 35911835378 passed pytest, tofu and current-file identifier checks. Isolated exact-SHA worktree passed just no-em-dashes and current-file identifier scan. Local root just check is red from unrelated uncommitted retention tests and the historical identifier gate includes eight pre-wave commits; DoD3 remains unchecked for that literal history check. Zensical is unavailable locally, so a site build is unverified.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Updated README and docs for all 11 built dashboards and committed eleven reviewed dev screenshots. Verified registry links and PNG format, independent Grafana readback, and exact-SHA hosted CI 35911835378. No source code changed.
+<!-- SECTION:FINAL_SUMMARY:END -->

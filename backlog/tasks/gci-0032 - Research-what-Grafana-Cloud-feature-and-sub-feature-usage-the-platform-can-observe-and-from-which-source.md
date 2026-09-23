@@ -3,10 +3,10 @@ id: GCI-0032
 title: >-
   Research what Grafana Cloud feature and sub-feature usage the platform can
   observe, and from which source
-status: In Progress
+status: Parked
 assignee: []
 created_date: '2026-09-23 17:50'
-updated_date: '2026-09-23 18:28'
+updated_date: '2026-09-23 19:51'
 labels:
   - research
   - adoption
@@ -95,18 +95,18 @@ The first concrete strand is already scoped as subtask GCI-0032.01: the `source`
 <!-- AC:BEGIN -->
 - [ ] #1 Live enumeration of every grafanacloud_* metric on the write stack, each mapped to a product and sub-feature with its windowing semantics
 - [ ] #2 Every product and sub-feature listed in the description has a matrix row naming the best reachable fidelity level (available, configured, producing, used by people), source, exact route or query, credential and scope
-- [ ] #3 Each row states live-verified or not, and on how many stacks; negative results (401, 403-by-design, 200-with-wrong-data) are recorded in CAPABILITIES.md
+- [x] #3 Each row states live-verified or not, and on how many stacks; negative results (401, 403-by-design, 200-with-wrong-data) are recorded in CAPABILITIES.md
 - [ ] #4 No reader role, scope or access policy was changed; every route that would need a new (action, scope) pair is listed with what it reads and its risk, grouped into one decision task for Rob
-- [ ] #5 Per-app attribution inside the Scenes 'scenes' source bucket is resolved or recorded as not obtainable, with the evidence
-- [ ] #6 Matrix exists as a backlog doc and its summary answers the field question: trackable today, trackable after follow-ons, not visible to any available source
-- [ ] #7 One follow-on task per build-now row or coherent group, created via the backlog CLI and ranked by value vs cost, each stating proposed series cost
-- [ ] #8 No customer identifiers, stack slugs, user names or tokens appear in any committed artifact
+- [x] #5 Per-app attribution inside the Scenes 'scenes' source bucket is resolved or recorded as not obtainable, with the evidence
+- [x] #6 Matrix exists as a backlog doc and its summary answers the field question: trackable today, trackable after follow-ons, not visible to any available source
+- [x] #7 One follow-on task per build-now row or coherent group, created via the backlog CLI and ranked by value vs cost, each stating proposed series cost
+- [x] #8 No customer identifiers, stack slugs, user names or tokens appear in any committed artifact
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
+- [x] #1 just test
+- [x] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
@@ -116,4 +116,8 @@ The first concrete strand is already scoped as subtask GCI-0032.01: the `source`
 Upstream evidence for the source-field strand (Grafana surface attribution, Scenes 'scenes' bucket, Assistant source value) is archived verbatim in GCI-0032.01's implementation notes. Headline for this research: usage-insights has only dashboard-view and data-request events; data-request.source is request.app; Scenes-based app plugins appear to report 'scenes' unless their scene root implements enrichDataRequest, so per-app attribution (Drilldown, App O11y, K8s, KG) needs another signal. Candidates to test first: datasourceType split within scenes, panelPluginId, installed-plugin inventory from gcom, and product sentinel series in each stack's Mimir via the technology registry.
 
 Existing reader scopes (collector/provision.py READER permissions) at task creation: Assistant, Adaptive Logs/Metrics/Traces and a databases-config plugin via plugins.app:access; serviceaccounts, datasources (read and caching read), folders, dashboards, snapshots, teams, user roles, roles and alert rules/receivers read; datasources:query pinned to grafanacloud-usage-insights (plus grafanacloud-usage on the write stack only). None of SLO, Synthetic Monitoring, Knowledge Graph, App O11y, K8s Monitoring, IRM, k6 or Frontend O11y plugin resources are in scope today.
+
+Wave 1 matrix doc-0006 covers 34 product/subfeature groups and an exact 325-name live grafanacloud_* union from two write-stack usage datasources. It records verified scope, explicit unknown billing/window semantics, nine-stack API route probes and 55 guarded usage-insights stack probes. CAPABILITIES and docs/traps updated; GCI-0034 through GCI-0041 capture follow-ons and the scope decision. AC1 remains unproven because vendor contracts for many billable gauges and counters did not establish rate/counter/billing-period window semantics; the appendix marks these unknown instead of guessing. Resume with authoritative metric-definition or billing export evidence for each unknown family, then complete AC1. Exact-SHA CI 35908750277 passed; historical identifier gate remains red on eight pre-wave commits, while current-file and hosted gates passed.
+
+Criterion audit correction: AC2 and AC4 also stay open. Several candidate plugin routes are wildcard or unverified and their exact reader action/scope pairs are unknown; GCI-0041 is the explicit scope-decision and route-validation boundary. The matrix labels these gaps rather than presenting candidate routes as confirmed contracts.
 <!-- SECTION:NOTES:END -->

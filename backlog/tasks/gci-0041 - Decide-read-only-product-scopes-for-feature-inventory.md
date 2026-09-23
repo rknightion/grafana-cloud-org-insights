@@ -1,9 +1,10 @@
 ---
 id: GCI-0041
 title: Decide read-only product scopes for feature inventory
-status: To Do
+status: Parked
 assignee: []
 created_date: '2026-09-23 18:35'
+updated_date: '2026-09-23 19:52'
 labels:
   - feature-usage
   - scope-decision
@@ -34,3 +35,9 @@ GCI-0032 found product object APIs beyond the existing basic-role-None stack rea
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Parked for Rob decision at Wave 1 report: candidate product read scopes and their data/risk are in doc-0006 and CAPABILITIES.md. No role or access policy changed in this wave.
+<!-- SECTION:NOTES:END -->

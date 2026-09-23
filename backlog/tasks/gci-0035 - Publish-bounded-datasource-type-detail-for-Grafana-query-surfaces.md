@@ -1,9 +1,10 @@
 ---
 id: GCI-0035
 title: Publish bounded datasource-type detail for Grafana query surfaces
-status: To Do
+status: Parked
 assignee: []
 created_date: '2026-09-23 18:35'
+updated_date: '2026-09-23 19:52'
 labels:
   - feature-usage
   - follow-on
@@ -34,3 +35,9 @@ Rank 2 - high value, moderate cost. Live usage-insights lines carry datasourceTy
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Parked at Wave 1 boundary: researched build candidate in doc-0006, outside this wave implementation scope. Resume when Rob selects the next product work; first verify the candidate metric or datasource contract named in this task.
+<!-- SECTION:NOTES:END -->

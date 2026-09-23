@@ -1,9 +1,10 @@
 ---
 id: GCI-0036
 title: 'Inventory SLO objects, alerting and source after a reader-scope decision'
-status: To Do
+status: Parked
 assignee: []
 created_date: '2026-09-23 18:35'
+updated_date: '2026-09-23 19:52'
 labels:
   - feature-usage
   - follow-on
@@ -34,3 +35,9 @@ Rank 3 - high value, low code cost after authorization. The documented SLO GET r
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Parked at Wave 1 boundary pending GCI-0041 reader scope decision and exact safe read-route verification. No new scope, policy or credential was granted during research.
+<!-- SECTION:NOTES:END -->
