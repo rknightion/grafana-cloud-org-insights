@@ -94,7 +94,7 @@ jobs:
 
           path = Path("CHANGELOG.md")
           original = path.read_text(encoding="utf-8")
-          normalized = re.sub(r"[ \t]*[—–][ \t]*", " - ", original)
+          normalized = re.sub(r"[ \t]*[\u2014\u2013][ \t]*", " - ", original)
           if normalized != original:
               path.write_text(normalized, encoding="utf-8")
           PY
