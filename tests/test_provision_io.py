@@ -175,6 +175,23 @@ class SsmStoreFailClosedTest(unittest.TestCase):
         repair.assert_not_called()
         delete.assert_not_called()
 
+    def test_unknown_product_read_refuses_before_inventory_or_any_write_path(self):
+        with mock.patch.dict(cli.os.environ, {
+            "GCINSIGHT_PROVISION_TOKEN": "x", "GCINSIGHT_ORG_ID": "900001",
+            "GCINSIGHT_WRITE_STACK": "a", "GCINSIGHT_READER_PRODUCT_READS": "slo,k6",
+        }, clear=True), mock.patch.object(cli, "Gcom") as gcom, \
+                mock.patch.object(cli, "ssm_load_all") as load, \
+                mock.patch.object(cli, "sweep_leftover_admin") as sweep, \
+                mock.patch.object(cli, "repair") as repair, \
+                mock.patch.object(cli, "ssm_delete") as delete:
+            self.assertEqual(cli.main([]), 2)
+
+        gcom.assert_not_called()
+        load.assert_not_called()
+        sweep.assert_not_called()
+        repair.assert_not_called()
+        delete.assert_not_called()
+
 
 class _RoleStack:
     def __init__(self, permissions, full_status=200):
@@ -224,6 +241,61 @@ class EnsureRoleScopeTest(unittest.TestCase):
         self.assertIn("REFUSED", note)
         self.assertIn("datasources:query", note)
         self.assertEqual(st.puts, [])
+
+
+class EnsureRoleReconciliationTest(unittest.TestCase):
+    def test_configured_pairs_are_added_unconfigured_pairs_removed_and_exact_state_is_noop(self):
+        def role(permissions):
+            return _RoleStack([dict(p) for p in permissions])
+
+        empty = role(pr.DESIRED_PERMISSIONS)
+        ok, _, note = cli.ensure_role(empty, product_reads={"slo"})
+        self.assertTrue(ok)
+        self.assertIn("patched", note)
+        added = {(p["action"], p.get("scope") or "")
+                 for p in empty.puts[0][1]["permissions"]}
+        self.assertEqual(added - pr.DESIRED_PAIRS, frozenset({
+            ("grafana-slo-app.orgpreferences:read", ""),
+            ("grafana-slo-app.slo:read", ""),
+            ("plugins.app:access", "plugins:id:grafana-slo-app"),
+        }))
+
+        all_grants = [dict(p) for p in pr.desired_permissions(
+            write_stack=False, product_reads={"slo", "synthetic-monitoring"},
+        )]
+        configured = role(all_grants)
+        ok, _, note = cli.ensure_role(configured, product_reads={"slo"})
+        self.assertTrue(ok)
+        self.assertIn("patched", note)
+        remaining = {(p["action"], p.get("scope") or "")
+                     for p in configured.puts[0][1]["permissions"]}
+        self.assertEqual(remaining - pr.DESIRED_PAIRS, frozenset({
+            ("grafana-slo-app.orgpreferences:read", ""),
+            ("grafana-slo-app.slo:read", ""),
+            ("plugins.app:access", "plugins:id:grafana-slo-app"),
+        }))
+
+        unset = role(all_grants)
+        ok, _, note = cli.ensure_role(unset)
+        self.assertTrue(ok)
+        self.assertIn("patched", note)
+        self.assertEqual(
+            {(p["action"], p.get("scope") or "")
+             for p in unset.puts[0][1]["permissions"]},
+            pr.DESIRED_PAIRS,
+        )
+
+        unchanged = role(pr.desired_permissions(write_stack=False, product_reads={"slo"}))
+        ok, _, note = cli.ensure_role(unchanged, product_reads={"slo"})
+        self.assertTrue(ok)
+        self.assertEqual(note, "unchanged")
+        self.assertEqual(unchanged.puts, [])
+
+        generator = role(pr.desired_permissions(write_stack=False, product_reads={"slo"}))
+        ok, _, note = cli.ensure_role(generator, product_reads=(name for name in ("slo",)))
+        self.assertTrue(ok)
+        self.assertEqual(note, "unchanged")
+        self.assertEqual(generator.puts, [])
 
     def test_a_broad_query_is_not_preserved_beside_a_benign_extra(self):
         permissions = [

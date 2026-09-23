@@ -42,6 +42,7 @@ def fixture(revision: str | None = None) -> dict:
     runtime["provisioner"]["GCINSIGHT_STACK_TOKEN_PREFIX"] = "/example/token"
     runtime["scan"]["GCINSIGHT_OPT_OUT"] = ""
     runtime["provisioner"]["GCINSIGHT_OPT_OUT"] = ""
+    runtime["provisioner"]["GCINSIGHT_READER_PRODUCT_READS"] = ""
     body = {
         "schema_version": 1,
         "generic_source": {
@@ -160,6 +161,11 @@ class ManifestValidationTest(unittest.TestCase):
             "GCINSIGHT_RUNTIME_CONFIG_DIGEST=" + body["runtime_projection_digests"]["alerts"],
             lines,
         )
+
+    def test_product_reader_setting_is_part_of_the_provisioner_projection_and_defaults_empty(self):
+        body = fixture()
+        self.assertEqual(body["runtime"]["provisioner"]["GCINSIGHT_READER_PRODUCT_READS"], "")
+        consumer_manifest.validate(body)
 
 
 class UpgradeTest(unittest.TestCase):

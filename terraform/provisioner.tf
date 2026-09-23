@@ -74,6 +74,8 @@ resource "aws_ecs_task_definition" "provisioner" {
         # render as `opted out` in the coverage view rather than as failures - without that, the
         # missing-credential alert would fire forever on a stack we were told to leave alone.
         { name = "GCINSIGHT_OPT_OUT", value = join(",", var.provision_opt_out) },
+        # Product object readers are explicitly selected per deployment and empty by default.
+        { name = "GCINSIGHT_READER_PRODUCT_READS", value = join(",", var.provisioner_product_reads) },
       ]
 
       # Deliberately NOT given GCINSIGHT_READ_TOKEN or GCINSIGHT_WRITE_TOKEN. This task provisions; it does not

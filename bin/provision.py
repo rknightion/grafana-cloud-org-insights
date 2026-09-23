@@ -53,7 +53,7 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -337,7 +337,8 @@ def list_sas(g: Gcom, slug: str) -> tuple[int, list[dict]]:
 
 def probe(slug: str, stack_url: str, sas: list[dict],
           stored: dict[str, dict[str, Any]], *,
-          desired: Any = pr.DESIRED_PAIRS) -> pr.Presence:
+          desired: Any = pr.DESIRED_PAIRS,
+          removable: Any = pr.RETIRED_PAIRS) -> pr.Presence:
     """Phase 1: READ-ONLY. No gcom writes, no Admin identity, no stack-side role inspection.
 
     Role facts come from the stored token's own effective permissions, which is all that is knowable
@@ -366,22 +367,28 @@ def probe(slug: str, stack_url: str, sas: list[dict],
         # Only meaningful once we have Admin; phase 1 infers from the token and `needs_repair` ignores it.
         role_exists=bool(actions),
         role_actions=actions,
-        assigned=bool(actions) and not pr.role_drift(actions, desired),
+        assigned=bool(actions) and not pr.role_drift(actions, desired, removable=removable),
     )
 
 
-def ensure_role(st: Stack, *, write_stack: bool = False) -> tuple[bool, str, str]:
+def ensure_role(
+    st: Stack,
+    *,
+    write_stack: bool = False,
+    product_reads: Iterable[str] = (),
+) -> tuple[bool, str, str]:
     """Create or reconcile `custom:gcinsight.reader`. Returns (ok, uid, note).
 
     GET → compare → PUT, never a blind POST: role creation is not idempotent (400 on a duplicate name),
     and the comparison is a SUBSET check on an unordered set so Grafana's self-attached `folders:read`
     does not look like drift and rewrite 273 roles every run.
     """
-    desired_permissions = pr.desired_permissions(write_stack=write_stack)
-    desired_pairs = pr.permission_pairs(desired_permissions)
-    removable_pairs = pr.RETIRED_PAIRS | (
-        frozenset() if write_stack else frozenset({pr.WRITE_STACK_PAIR})
+    product_reads = frozenset(product_reads)
+    desired_permissions = pr.desired_permissions(
+        write_stack=write_stack, product_reads=product_reads,
     )
+    desired_pairs = pr.permission_pairs(desired_permissions)
+    removable_pairs = pr.removable_pairs(write_stack=write_stack, product_reads=product_reads)
     status, roles = st.get("/api/access-control/roles?includeHidden=true")
     if status == Stack.NOT_INSPECTED:
         # Dry run: the gcom write plan above is real, the stack-side plan cannot be known without
@@ -416,14 +423,14 @@ def ensure_role(st: Stack, *, write_stack: bool = False) -> tuple[bool, str, str
         return False, uid, (
             "REFUSED: the reader role carries unexpected blast-radius permissions: " + shown
         )
-    if not pr.role_drift(have, desired_pairs):
+    if not pr.role_drift(have, desired_pairs, removable=removable_pairs):
         return True, uid, "unchanged"
 
     # Replacing the role body is the only update API. Preserve every permission we did not declare,
     # except the explicitly retired pairs, including its scope: collapsing extras to `{action}` silently
     # broadens or destroys scoped grants.
     # Dangerous extras were refused above. Benign Grafana-added reads remain preserved.
-    retired = [
+    removed = [
         permission for permission in permissions
         if (permission["action"], permission.get("scope") or "") in removable_pairs
     ]
@@ -445,7 +452,7 @@ def ensure_role(st: Stack, *, write_stack: bool = False) -> tuple[bool, str, str
         return False, uid, f"role update HTTP {status}: {str(updated)[:120]}"
     shown = ",".join(f"{action}@{scope or '<global>'}" for action, scope in missing)
     return True, uid, (
-        f"patched (added {len(missing)} pair(s), removed {len(retired)} retired pair(s): "
+        f"patched (added {len(missing)} pair(s), removed {len(removed)} unconfigured pair(s): "
         f"{shown[:80]})"
     )
 
@@ -464,16 +471,23 @@ def validate_write_stack(
 
 
 def verify_reader(g: Gcom, slug: str, stack_url: str, token: str, *,
-                  write_stack: bool = False) -> tuple[bool, str]:
+                  write_stack: bool = False,
+                  product_reads: Iterable[str] = ()) -> tuple[bool, str]:
     """Re-probe the durable reader after repair; accepted writes are not proof they took effect."""
+    product_reads = frozenset(product_reads)
     status, sas = list_sas(g, slug)
     if status != 200:
         return False, f"service-account verification HTTP {status}"
-    desired = pr.permission_pairs(pr.desired_permissions(write_stack=write_stack))
-    verified = probe(slug, stack_url, sas, {slug: {"token": token}}, desired=desired)
-    if pr.needs_repair(verified, desired):
+    desired = pr.permission_pairs(pr.desired_permissions(
+        write_stack=write_stack, product_reads=product_reads,
+    ))
+    removable = pr.removable_pairs(write_stack=write_stack, product_reads=product_reads)
+    verified = probe(
+        slug, stack_url, sas, {slug: {"token": token}}, desired=desired, removable=removable,
+    )
+    if pr.needs_repair(verified, desired, removable=removable):
         return False, (
-            f"post-repair probe still needs {pr.plan_action(verified, desired)} "
+            f"post-repair probe still needs {pr.plan_action(verified, desired, removable=removable)} "
             f"(sa={verified.sa_exists} secret={verified.secret_exists} "
             f"token={verified.token_status} basic_role={verified.basic_role})"
         )
@@ -482,7 +496,8 @@ def verify_reader(g: Gcom, slug: str, stack_url: str, token: str, *,
 
 def repair(g: Gcom, ledger: Ledger, slug: str, stack_url: str, sas: list[dict],
            dry_run: bool, *, presence: pr.Presence,
-           existing_token: str | None, write_stack: bool = False) -> pr.Outcome:
+           existing_token: str | None, write_stack: bool = False,
+           product_reads: Iterable[str] = ()) -> pr.Outcome:
     """Phase 2: the only place that writes. Creates a transient Admin identity, repairs, cleans up.
 
     The Admin service account is deleted in the `finally`, LAST  -  it is the only identity that can undo
@@ -491,6 +506,7 @@ def repair(g: Gcom, ledger: Ledger, slug: str, stack_url: str, sas: list[dict],
     `presence` decides whether a reader token has to be minted. It is a required, validated fact: an
     unknown presence must fail before the first write rather than restoring unconditional minting.
     """
+    product_reads = frozenset(product_reads)
     if not isinstance(presence, pr.Presence):
         raise TypeError("repair requires a probed Presence; refusing writes with unknown token state")
     status, admin = g.post(f"/instances/{slug}/api/serviceaccounts",
@@ -510,7 +526,9 @@ def repair(g: Gcom, ledger: Ledger, slug: str, stack_url: str, sas: list[dict],
             return pr.Outcome(slug, pr.PROVISIONABLE, "admin_token_failed", str(tok)[:140])
         st = Stack(stack_url, tok["key"], dry_run=dry_run)
 
-        ok, role_uid, note = ensure_role(st, write_stack=write_stack)
+        ok, role_uid, note = ensure_role(
+            st, write_stack=write_stack, product_reads=product_reads,
+        )
         if not ok:
             # A brand-new stack may not have the Assistant plugin yet, so its actions are unknown to
             # RBAC. Retry next run rather than failing the sweep.
@@ -597,6 +615,7 @@ def repair(g: Gcom, ledger: Ledger, slug: str, stack_url: str, sas: list[dict],
                               f"role {note}; post-repair probe not available in dry-run")
         verified, detail = verify_reader(
             g, slug, stack_url, reader_token, write_stack=write_stack,
+            product_reads=product_reads,
         )
         if not verified:
             return pr.Outcome(slug, pr.PROVISIONABLE, "verification_failed", detail)
@@ -620,6 +639,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-prune", action="store_true",
                     help="skip deleting stored credentials for stacks that have left the estate")
     args = ap.parse_args(argv)
+
+    try:
+        product_reads = pr.parse_product_reads(os.environ.get(pr.PRODUCT_READS_ENV))
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
 
     try:
         identity.verify_runtime_projection("provisioner")
@@ -655,6 +680,8 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     stacks = body.get("items") or []
     print(f"estate: {len(stacks)} stacks discovered")
+    if product_reads:
+        print(f"product reader grants: {', '.join(sorted(product_reads))}")
 
     opted_out = [s for s in os.environ.get("GCINSIGHT_OPT_OUT", "").split(",") if s.strip()]
     if opted_out:
@@ -705,13 +732,18 @@ def main(argv: list[str] | None = None) -> int:
             _, sas = list_sas(g, slug)
 
         is_write_stack = slug == write_stack_slug
-        desired = pr.permission_pairs(pr.desired_permissions(write_stack=is_write_stack))
-        presence = probe(slug, stack_url, sas, stored, desired=desired)
-        if not pr.needs_repair(presence, desired):
+        desired = pr.permission_pairs(pr.desired_permissions(
+            write_stack=is_write_stack, product_reads=product_reads,
+        ))
+        removable = pr.removable_pairs(write_stack=is_write_stack, product_reads=product_reads)
+        presence = probe(
+            slug, stack_url, sas, stored, desired=desired, removable=removable,
+        )
+        if not pr.needs_repair(presence, desired, removable=removable):
             outcomes.append(pr.Outcome(slug, pr.PROVISIONABLE, pr.OK, "already provisioned"))
             continue
 
-        action = pr.plan_action(presence, desired)
+        action = pr.plan_action(presence, desired, removable=removable)
         print(f"  {slug}: {action} (sa={presence.sa_exists} secret={presence.secret_exists} "
               f"token={presence.token_status} basic_role={presence.basic_role})")
         if action == pr.UNEXPLAINED_403:
@@ -724,6 +756,7 @@ def main(argv: list[str] | None = None) -> int:
         outcomes.append(repair(
             g, ledger, slug, stack_url, sas, args.dry_run,
             presence=presence, existing_token=record.get("token"), write_stack=is_write_stack,
+            product_reads=product_reads,
         ))
 
     if not args.no_prune and not args.stack and not args.limit:

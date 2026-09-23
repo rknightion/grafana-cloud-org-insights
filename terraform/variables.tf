@@ -570,6 +570,19 @@ variable "provision_opt_out" {
   default     = []
 }
 
+variable "provisioner_product_reads" {
+  description = "Optional, default-off read-only product families for the per-stack reader. SLO and Synthetic Monitoring grants apply only to deployments that explicitly select them."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition = length(distinct(var.provisioner_product_reads)) == length(var.provisioner_product_reads) && alltrue([
+      for family in var.provisioner_product_reads : contains(["slo", "synthetic-monitoring"], family)
+    ])
+    error_message = "provisioner_product_reads may contain each of slo and synthetic-monitoring at most once."
+  }
+}
+
 variable "provisioner_cpu" {
   description = "Fargate CPU units for the provisioner. It is I/O bound on a 6 req/s rate limit, so the smallest size is correct."
   type        = string

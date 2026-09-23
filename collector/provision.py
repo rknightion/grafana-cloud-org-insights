@@ -8,8 +8,8 @@ exist as a gcom scope, only `:write`).
 
 Per stack, created once and then reconciled:
 
-- custom role `custom:gcinsight.reader`  -  27 read permission pairs (26 unique action names),
-  listed in `DESIRED_PERMISSIONS`
+- custom role `custom:gcinsight.reader` with the fixed read permission pairs in `DESIRED_PERMISSIONS`,
+  plus product reads selected by an explicit per-deployment tunable
 - service account `gcinsight-data`, basic role **None**, holding that role
 - one **non-expiring** token, stored in SSM at `/gcinsight/stack-token/<slug>`
 
@@ -60,6 +60,7 @@ READER_SA_NAME = identity.env("GCINSIGHT_READER_SA_NAME", "gcinsight-data")
 ADMIN_SA_NAME = identity.env("GCINSIGHT_ADMIN_SA_NAME", "gcinsight-insights-provisioner")
 SSM_PREFIX = identity.env("GCINSIGHT_STACK_TOKEN_PREFIX", "/gcinsight/stack-token")
 TOKEN_NAME_PREFIX = identity.env("GCINSIGHT_TOKEN_NAME_PREFIX", "gcinsight-data")
+PRODUCT_READS_ENV = "GCINSIGHT_READER_PRODUCT_READS"
 
 # Short on purpose. A run killed between creating this identity and deleting it leaves an Admin service
 # account on a customer stack; a 15-minute token means the leftover is inert almost immediately, and the
@@ -179,11 +180,83 @@ WRITE_STACK_PERMISSION = {
 WRITE_STACK_PAIR = (WRITE_STACK_PERMISSION["action"], WRITE_STACK_PERMISSION["scope"])
 
 
-def desired_permissions(*, write_stack: bool) -> tuple[dict[str, str], ...]:
-    """The write stack alone can query the org usage datasource; every other role stays unchanged."""
+PRODUCT_READ_FAMILIES: dict[str, tuple[tuple[str, str], ...]] = {
+    "slo": (
+        ("grafana-slo-app.orgpreferences:read", ""),
+        ("grafana-slo-app.slo:read", ""),
+        ("plugins.app:access", "plugins:id:grafana-slo-app"),
+    ),
+    "synthetic-monitoring": (
+        ("grafana-synthetic-monitoring-app:read", ""),
+        ("grafana-synthetic-monitoring-app.checks:read", ""),
+        ("plugins.app:access", "plugins:id:grafana-synthetic-monitoring-app"),
+    ),
+}
+
+
+def parse_product_reads(raw: str | None) -> frozenset[str]:
+    """Parse the default-off product read allow-list before the provisioner can write."""
+    if raw is None or not raw.strip():
+        return frozenset()
+    tokens = [token.strip() for token in raw.split(",")]
+    if any(not token for token in tokens):
+        raise ValueError(f"{PRODUCT_READS_ENV} contains an empty product read token")
+    unknown = set(tokens) - PRODUCT_READ_FAMILIES.keys()
+    if unknown:
+        raise ValueError(
+            f"{PRODUCT_READS_ENV} contains unknown product read token(s): {', '.join(sorted(unknown))}"
+        )
+    return frozenset(tokens)
+
+
+def _selected_product_reads(product_reads: Iterable[str]) -> frozenset[str]:
+    selected = frozenset(product_reads)
+    unknown = selected - PRODUCT_READ_FAMILIES.keys()
+    if unknown:
+        raise ValueError(
+            f"{PRODUCT_READS_ENV} contains unknown product read token(s): {', '.join(sorted(unknown))}"
+        )
+    return selected
+
+
+def product_read_pairs(product_reads: Iterable[str]) -> frozenset[tuple[str, str]]:
+    selected = _selected_product_reads(product_reads)
+    return frozenset(
+        pair
+        for family, pairs in PRODUCT_READ_FAMILIES.items()
+        if family in selected
+        for pair in pairs
+    )
+
+
+def desired_permissions(
+    *, write_stack: bool, product_reads: Iterable[str] = (),
+) -> tuple[dict[str, str], ...]:
+    """Build the run's desired role while keeping the manifest's fixed baseline static."""
+    selected = _selected_product_reads(product_reads)
+    permissions = list(DESIRED_PERMISSIONS)
+    if write_stack:
+        permissions.append(WRITE_STACK_PERMISSION)
+    permissions.extend(
+        {"action": action, **({"scope": scope} if scope else {})}
+        for family, pairs in PRODUCT_READ_FAMILIES.items()
+        if family in selected
+        for action, scope in pairs
+    )
+    return tuple(permissions)
+
+
+def removable_pairs(
+    *, write_stack: bool, product_reads: Iterable[str] = (),
+) -> frozenset[tuple[str, str]]:
+    """Pairs previously granted by this provisioner but not selected for the current run."""
+    selected = _selected_product_reads(product_reads)
+    configured = product_read_pairs(selected)
+    all_product_pairs = product_read_pairs(PRODUCT_READ_FAMILIES)
+    removable = RETIRED_PAIRS | (all_product_pairs - configured)
     if not write_stack:
-        return DESIRED_PERMISSIONS
-    return DESIRED_PERMISSIONS + (WRITE_STACK_PERMISSION,)
+        removable |= frozenset({WRITE_STACK_PAIR})
+    return removable
 
 
 def permission_pairs(permissions: Iterable[Mapping[str, str]]) -> frozenset[tuple[str, str]]:
@@ -211,13 +284,15 @@ DESIRED_ACTIONS = frozenset(p["action"] for p in DESIRED_PERMISSIONS)
 # Grafana attaches `folders:read` itself at `folders:uid:sharedwithme`, which is a real permission on a
 # pseudo-folder and satisfies nothing we declared. A scopeless action is reported by the API as `['']`.
 DESIRED_PAIRS = frozenset((p["action"], p.get("scope", "")) for p in DESIRED_PERMISSIONS)
-# Permissions this project previously granted and now deliberately removes. All other extra pairs are
-# preserved: pruning arbitrary customer-added access is not reconciliation.
+# Permissions this project previously granted and now deliberately removes. Product pairs that are not
+# selected for a run join this set dynamically. All other extra pairs are preserved: pruning arbitrary
+# customer-added access is not reconciliation.
 #
 # The two Adaptive Traces pairs that lived here are GONE from this set, deliberately. They are now in
-# `DESIRED_PERMISSIONS` because a consumer was approved. A pair must never appear in both: the
-# provisioner would grant it and then read it back as drift to remove, rewriting the role on every
-# stack every run for ever. A test asserts the two sets are disjoint.
+# `DESIRED_PERMISSIONS` because a consumer was approved. A pair must never appear in both the run's
+# desired and removable sets: the provisioner would grant it and then read it back as drift to remove,
+# rewriting the role on every stack every run for ever. Tests assert the base and runtime sets are
+# disjoint.
 RETIRED_PAIRS: frozenset[tuple[str, str]] = frozenset()
 
 
@@ -241,10 +316,10 @@ def pairs_are_scoped(permissions: Mapping[str, Iterable[str]] | Iterable[str]) -
     return isinstance(permissions, _MappingABC)
 
 # Everything a per-stack token COULD reach and deliberately does not: dashboards, alert rules, folders,
-# teams, org users, plugins, annotations, library elements, snapshots, SLOs, and every datasource other
-# than the single usage-insights one named above. All verified reachable with an Admin token. Adding any
-# of them is a separate security decision about 273 customer stacks (PLAN 17D)  -  not a convenience edit
-# here.
+# teams, org users, annotations, library elements, snapshots, and every datasource other than the two
+# exact telemetry datasource uids. Product object reads for SLOs and Synthetic Monitoring are outside
+# the static baseline and remain default-off; every other family is deferred pending a separate security
+# decision.
 
 
 def token_name(slug: str) -> str:
@@ -312,13 +387,18 @@ OK = "ok"
 UNEXPLAINED_403 = "unexplained_403"
 
 
-def role_drift(current, desired: Iterable[tuple[str, str]] = DESIRED_PAIRS) -> bool:
+def role_drift(
+    current,
+    desired: Iterable[tuple[str, str]] = DESIRED_PAIRS,
+    *,
+    removable: Iterable[tuple[str, str]] = RETIRED_PAIRS,
+) -> bool:
     """True when the role is missing an (action, scope) pair we declared.
 
     **Subset, not equality, and unordered.** Grafana attaches permissions of its own accord, so
     demanding equality would report drift on every stack for ever and rewrite the whole estate daily.
-    Ordered comparison would do the same. Drift is a MISSING declared pair or one of the narrow,
-    explicitly named `RETIRED_PAIRS`; arbitrary extras remain untouched.
+    Ordered comparison would do the same. Drift is a MISSING declared pair or one of the explicitly
+    removable pairs for this run; arbitrary extras remain untouched.
 
     **Scope is part of the comparison.** See `DESIRED_PAIRS` - comparing action names alone would call a
     role complete while a declared grant sat at the wrong scope, which is how a wildcard silently becomes
@@ -328,10 +408,11 @@ def role_drift(current, desired: Iterable[tuple[str, str]] = DESIRED_PAIRS) -> b
     than fatal: `missing_pairs` reports what could not be checked so the weakness is visible.
     """
     held = held_pairs(current)
+    removable_pairs_set = frozenset(removable)
     return bool(
         missing_pairs(current, desired)
-        or (held & RETIRED_PAIRS)
-        or dangerous_extra_pairs(current, desired)
+        or (held & removable_pairs_set)
+        or dangerous_extra_pairs(current, desired, removable_pairs_set)
     )
 
 
@@ -377,7 +458,12 @@ def missing_pairs(current, desired: Iterable[tuple[str, str]] = DESIRED_PAIRS
     return frozenset(p for p in desired if p not in held)
 
 
-def needs_repair(p: Presence, desired: Iterable[tuple[str, str]] = DESIRED_PAIRS) -> bool:
+def needs_repair(
+    p: Presence,
+    desired: Iterable[tuple[str, str]] = DESIRED_PAIRS,
+    *,
+    removable: Iterable[tuple[str, str]] = RETIRED_PAIRS,
+) -> bool:
     """Phase-1 verdict, from READ-ONLY facts only.
 
     The run is two-phase on purpose. Phase 1 asks "is this stack fine?" using nothing but a service
@@ -394,10 +480,15 @@ def needs_repair(p: Presence, desired: Iterable[tuple[str, str]] = DESIRED_PAIRS
     if p.basic_role is not None and p.basic_role != "None":
         return True
     # 200 means the credential works AND carries every declared action. Anything else needs a look.
-    return p.token_status != 200 or role_drift(p.role_actions, desired)
+    return p.token_status != 200 or role_drift(p.role_actions, desired, removable=removable)
 
 
-def plan_action(p: Presence, desired: Iterable[tuple[str, str]] = DESIRED_PAIRS) -> str:
+def plan_action(
+    p: Presence,
+    desired: Iterable[tuple[str, str]] = DESIRED_PAIRS,
+    *,
+    removable: Iterable[tuple[str, str]] = RETIRED_PAIRS,
+) -> str:
     """The single next repair for one stack. Ordered by what unblocks the rest.
 
     Returns one action, not a list: each repair changes what the next probe would see, so the caller
@@ -407,7 +498,7 @@ def plan_action(p: Presence, desired: Iterable[tuple[str, str]] = DESIRED_PAIRS)
         return CREATE_SA
     if not p.role_exists:
         return ENSURE_ROLE
-    if role_drift(p.role_actions, desired):
+    if role_drift(p.role_actions, desired, removable=removable):
         return PATCH_ROLE
     # A Viewer/Admin basic role would silently break the "provably read-only" property we told the organisation
     # about, so it is corrected before anything that depends on the credential working.

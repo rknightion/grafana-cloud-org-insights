@@ -22,6 +22,103 @@ def _p(**kw):
     return pr.Presence(**base)
 
 
+class ProductReadScopeTest(unittest.TestCase):
+    SLO_PAIRS = frozenset({
+        ("grafana-slo-app.orgpreferences:read", ""),
+        ("grafana-slo-app.slo:read", ""),
+        ("plugins.app:access", "plugins:id:grafana-slo-app"),
+    })
+    SYNTHETIC_MONITORING_PAIRS = frozenset({
+        ("grafana-synthetic-monitoring-app:read", ""),
+        ("grafana-synthetic-monitoring-app.checks:read", ""),
+        ("plugins.app:access", "plugins:id:grafana-synthetic-monitoring-app"),
+    })
+    ALL_PRODUCT_PAIRS = SLO_PAIRS | SYNTHETIC_MONITORING_PAIRS
+
+    def test_product_reads_are_default_off_and_parse_the_fixed_enum(self):
+        self.assertEqual(pr.parse_product_reads(None), frozenset())
+        self.assertEqual(pr.parse_product_reads("  "), frozenset())
+        self.assertEqual(
+            pr.parse_product_reads(" slo, synthetic-monitoring "),
+            frozenset({"slo", "synthetic-monitoring"}),
+        )
+
+    def test_unknown_product_read_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "GCINSIGHT_READER_PRODUCT_READS.*k6"):
+            pr.parse_product_reads("slo,k6")
+
+    def test_static_manifest_pair_catalogue_stays_separate_from_runtime_grants(self):
+        self.assertEqual(len(pr.DESIRED_PAIRS), 36)
+        self.assertTrue(self.ALL_PRODUCT_PAIRS.isdisjoint(pr.DESIRED_PAIRS))
+
+    def test_configured_family_adds_only_its_exact_pairs_and_unconfigured_pairs_are_removable(self):
+        base = pr.permission_pairs(pr.desired_permissions(write_stack=False))
+        configured = pr.permission_pairs(pr.desired_permissions(
+            write_stack=False, product_reads={"slo"},
+        ))
+        self.assertEqual(configured - base, self.SLO_PAIRS)
+        configured_both = pr.permission_pairs(pr.desired_permissions(
+            write_stack=False, product_reads={"slo", "synthetic-monitoring"},
+        ))
+        self.assertEqual(configured_both - base, self.ALL_PRODUCT_PAIRS)
+        self.assertEqual(
+            pr.removable_pairs(write_stack=False, product_reads={"slo"}),
+            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.SYNTHETIC_MONITORING_PAIRS,
+        )
+        self.assertEqual(
+            pr.removable_pairs(write_stack=False, product_reads={"slo", "synthetic-monitoring"}),
+            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR},
+        )
+
+    def test_runtime_desired_and_removable_sets_do_not_conflict(self):
+        for write_stack in (False, True):
+            for selected in (frozenset(), frozenset({"slo"}),
+                             frozenset({"synthetic-monitoring"}),
+                             frozenset({"slo", "synthetic-monitoring"})):
+                desired = pr.permission_pairs(pr.desired_permissions(
+                    write_stack=write_stack, product_reads=selected,
+                ))
+                removable = pr.removable_pairs(
+                    write_stack=write_stack, product_reads=selected,
+                )
+                self.assertFalse(desired & removable)
+
+    def test_runtime_product_pairs_participate_in_drift_without_changing_basic_role(self):
+        configured = pr.parse_product_reads("slo")
+        desired = pr.permission_pairs(pr.desired_permissions(
+            write_stack=False, product_reads=configured,
+        ))
+        removable = pr.removable_pairs(write_stack=False, product_reads=configured)
+        held = {}
+        for action, scope in pr.DESIRED_PAIRS:
+            held.setdefault(action, []).append(scope)
+        for action, scope in self.SLO_PAIRS:
+            held.setdefault(action, []).append(scope)
+
+        self.assertFalse(pr.role_drift(held, desired, removable=removable))
+        self.assertTrue(pr.role_drift(
+            {**held, "grafana-synthetic-monitoring-app:read": [""]},
+            desired, removable=removable,
+        ))
+        healthy = _p(basic_role="None", role_actions=held)
+        self.assertFalse(pr.needs_repair(healthy, desired, removable=removable))
+        self.assertEqual(pr.plan_action(healthy, desired, removable=removable), pr.OK)
+
+    def test_product_read_grants_do_not_broaden_datasource_queries_or_include_mutations(self):
+        desired = pr.permission_pairs(pr.desired_permissions(
+            write_stack=True, product_reads={"slo", "synthetic-monitoring"},
+        ))
+        queries = {scope for action, scope in desired if action == "datasources:query"}
+        self.assertEqual(queries, {
+            f"datasources:uid:{pr.USAGE_INSIGHTS_DS_UID}",
+            f"datasources:uid:{pr.USAGE_DS_UID}",
+        })
+        self.assertTrue(all(
+            action.rpartition(":")[2] in {"read", "access", "query"}
+            for action, _ in desired
+        ))
+
+
 class TokenNamingTest(unittest.TestCase):
     """Verified live: token names are unique per ORG, not per service account."""
 
