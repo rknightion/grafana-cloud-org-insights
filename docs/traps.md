@@ -145,6 +145,13 @@ is already a datasource on the target stack, a panel beats a pipeline.**
  real.
 - **Aggregate in Loki.** Raw usage-insights events are high volume; the collector runs bounded scalar
  and top-N LogQL queries rather than downloading event lines.
+- **Query mix counts events, not `totalQueries`.** The top-20 remainder covers lower-ranked non-empty
+ `datasourceType` or `panelPluginId` values. Requests without that field are excluded from its
+ dimension; an absent panel plugin is not an `other` app. Datasource type is only a backend inference.
+ In a guarded 24-hour dev read on 2026-09-23, two active stacks had 368 and 183 data requests, all
+ with a datasource type and none with a non-empty `panelPluginId`. Do not claim the panel dimension
+ is populated until a positive live observation exists. A mix query failure withholds the mix view,
+ not the existing insights results.
 - **`data-request.source` counts queries, not page visits.** A guarded seven-day live probe on five
  development and 50 customer-estate stacks found `dashboard`, `scenes`, `app`, `explore`,
  `grafana-assistant-app`, `unknown` and `grafana-k8s-app`. The development sample had 7,208 dashboard,
@@ -274,7 +281,13 @@ is already a datasource on the target stack, a panel beats a pipeline.**
   Read effective limits at `/config/tenant/v1/limits` with `hlInstanceId` and the existing
   `logs:read` org token. The path has no `/loki` prefix.
 - **This effective-limits route is Loki-only.** Do not project it onto Mimir, Tempo or Pyroscope.
-  Cross-signal explicit overrides are a separate control-plane surface and are outside this source.
+ Cross-signal explicit overrides are a separate control-plane surface and are outside this source.
+- **Producing signals are backend observations.** The Coverage view uses a 24-hour peak of
+ `grafanacloud_instance_active_series` and
+ `grafanacloud_traces_instance_bytes_received_per_second` from `grafanacloud-usage`. Zero means the
+ series was measured at zero; an absent series means unknown. A positive value does not prove a
+ Grafana UI visit. The public definitions are in [Grafana invoice reconciliation](https://grafana.com/docs/grafana-cloud/platform/cost-management-and-billing/manage-invoices/understand-your-invoice/reconcile-invoices/)
+ and [usage limits](https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/).
 - **App-plugin proxy patterns are plugin-specific.** A resources route working for one plugin does
   not establish that it works for another. Discover a plugin's route by reading its settings module
   URL, fetching the module and named webpack chunks from the plugin CDN, then searching those chunks

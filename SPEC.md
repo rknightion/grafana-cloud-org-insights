@@ -62,6 +62,12 @@ reader alone also receives `datasources:uid:grafanacloud-usage`. Query is never 
 Mutation and secret-bearing actions remain absent. A healthy reconciliation performs reads only and
 does not mint a replacement token.
 
+`GCINSIGHT_READER_PRODUCT_READS` is an optional deployment setting. It defaults to empty and accepts
+only `slo` and `synthetic-monitoring`. The dev deployment may grant the corresponding read and plugin
+access pairs; a customer deployment needs a separate decision. This setting does not widen datasource
+query scope or grant any write action. Product object collection is a separate change: retain bounded
+counts and state only, and discard names, URLs, scripts, headers and expressions at collection time.
+
 The collector's HTTP client rejects every method except GET. Some read APIs are implemented as
 Connect-RPC POSTs; those calls live outside the collector HTTP client and are authorised by read scopes.
 
@@ -138,6 +144,18 @@ created through one helper and `_query` refuses a template without the regional 
 
 Pillar J also groups `data-request` activity by a closed Grafana `source` surface enum; it
 measures data requests, not page visits, and the `scenes` bucket is not split per app.
+
+Pillar J publishes per-stack query mix as point-in-time S3 detail with no new metric series. It counts
+`data-request` events by non-empty datasource type and panel plugin ID, retaining the top 20 values,
+one remainder row and the distinct-value count per dimension. Datasource type is a backend inference,
+not Grafana app identity. A failed optional query withholds this view while preserving the older core
+insights result. Live dev observations on 2026-09-23 found datasource types on active stacks but no
+non-empty `panelPluginId`; the panel dimension remains an evidence gap.
+
+Coverage also presents a producing-signal view from documented usage metrics: a 24-hour peak of
+Metrics active series and Traces bytes received per second. A missing series is unknown, a returned
+zero is measured zero, and a positive value means backend production during the window. None proves
+a human opened a Grafana UI.
 
 Usage events and inventory answer different questions. Pillar J reports public dashboards observed in
 use; the Risk dashboard enumerates configured public dashboards whether or not anybody opened them. The

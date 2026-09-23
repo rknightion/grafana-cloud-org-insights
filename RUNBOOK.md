@@ -199,6 +199,13 @@ configured prefix.
 `expected_retention_policy` list. Leave it empty to disable selector-policy findings. See
 `docs/configuration.md` for the JSON shape; never put an organisation's selectors in this repository.
 
+`GCINSIGHT_READER_PRODUCT_READS` is optional and defaults to empty. The only accepted values are
+`slo` and `synthetic-monitoring`, comma-separated. An unknown value stops the provisioner before any
+write. Enabling a family reconciles its exact read and plugin-access pairs on the per-stack custom
+role; disabling it removes those pairs without re-minting a working reader token. The dev deployment
+may enable both. A customer deployment needs a separate explicit grant decision. This setting grants
+read access; it does not add SLO or Synthetic Monitoring object collection to a scan.
+
 ## Manual scans
 
 Local development uses `--dry-run`. A live manual run should use the deployed ECS task definition,
@@ -224,6 +231,10 @@ Verify a run from both sides:
 
 Exit `4` is a lock collision, not a failed scan. Do not disable a schedule to work around it.
 A limited `--stack` or `--limit` run cannot publish.
+
+The query-mix view needs a fresh T2 `insights` input with `query_mix_complete`. Hydrated older inputs
+without that marker withhold the new view while keeping the last good copy on S3. A failed optional
+query-mix request preserves the core insights input and withholds only this view.
 
 ## Provisioner
 

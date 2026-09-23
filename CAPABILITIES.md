@@ -138,6 +138,16 @@ The role can read:
 `datasources:uid:grafanacloud-usage` for the bounded capability-adoption input. No reader can query
 arbitrary production datasources.
 
+An optional, default-off `GCINSIGHT_READER_PRODUCT_READS` setting accepts `slo` and
+`synthetic-monitoring`. In the dev deployment, `slo` adds unscoped
+`grafana-slo-app.orgpreferences:read` and `grafana-slo-app.slo:read`, plus `plugins.app:access` scoped
+to `plugins:id:grafana-slo-app`. `synthetic-monitoring` adds unscoped
+`grafana-synthetic-monitoring-app:read` and `grafana-synthetic-monitoring-app.checks:read`, plus
+`plugins.app:access` scoped to `plugins:id:grafana-synthetic-monitoring-app`. These pairs were checked
+against live role metadata on 2026-09-23. Unsetting the option removes those product pairs during
+reconciliation without replacing a working reader token. The customer deployment grants neither
+family until a separate explicit decision.
+
 The declaration explicitly refuses decrypted alert secrets, secure values, user session tokens,
 Grafana auth settings, support bundles, provisioning writes and Adaptive Traces mutation actions.
 `chats:access` is not granted.
@@ -158,6 +168,11 @@ own reader and includes:
 The label is the stack `id` for Grafana events, not its Prometheus tenant id. The query helper
 refuses a selector without `instance_id`. Other usage-insights instance types are not queried by
 Pillar J.
+
+Query-mix detail uses the same token, datasource uid, exact `instance_id` guard and 24-hour window.
+No extra permission is required. The datasource-type dimension is inference about a backend, not an
+application identity. Two active dev stacks returned nonzero request counts but no non-empty
+`panelPluginId` on 2026-09-23, so the panel-plugin half has no live positive proof.
 
 ### Adaptive Metrics
 
@@ -206,21 +221,30 @@ automatically labelled broken.
  with the existing stack reader on three development and six customer-estate stacks in a read-only
  sample. The declared reader lacks `grafana-slo-app.slo:read` and plugin access scoped to
  `plugins:id:grafana-slo-app`. A live development role-definition GET also listed
- `grafana-slo-app.orgpreferences:read` in the SLO reader role. A new grant is a separate scope decision, not a silent collector
- expansion. This result does not say whether those stacks have SLOs.
+ `grafana-slo-app.orgpreferences:read` in the SLO reader role. The optional dev-only grant above
+ addresses that permission seam; this earlier 403 does not say whether those stacks have SLOs.
 - A live role-definition GET on one development stack showed the Synthetic Monitoring checks reader
  would grant `grafana-synthetic-monitoring-app:read`,
  `grafana-synthetic-monitoring-app.checks:read` and plugin access on that app. The IRM integrations
  reader would grant `grafana-irm-app.integrations:read` and its plugin access. The k6 reader would
  grant `k6-app.settings:read` and plugin access on `k6-app`; that role name alone does not prove a
- k6 runs API is reachable. None of these pairs is declared in the existing reader. Product object
- and run routes were not queried with an expanded identity.
+ k6 runs API is reachable. SLO and Synthetic pairs are optional and default off; k6 and IRM remain
+ undeclared. Product object and run routes were not queried with an expanded identity at that time.
 - In the same sample, `/api/plugins`, `/api/datasources`, `/api/v1/provisioning/alert-rules`,
  `/api/search/` and the existing Adaptive Logs plugin-proxy recommendation route returned HTTP 200.
  The plugin, datasource, rule and search lists were populated; a 200 alone is not an unfiltered
  inventory guarantee. Assistant `/api/v1/usage/hero-stats` was called without the endpoint's required
  parameters and returned HTTP 400 on all nine; this is a rejected request shape, not a role verdict.
 - Synthetic Monitoring result inventory has no verified safe unattended read route.
+- The Synthetic Monitoring app source calls `GET <synthetic-monitoring-datasource URL>/sm/check/list`
+ to list checks. The datasource plugin maps that to its backend API through Grafana's datasource
+ proxy. A guarded dev reader GET to `/api/datasources/proxy/uid/<synthetic datasource uid>/sm/check/list`
+ returned 403 before the optional product grant on 2026-09-23. The reader's datasource query scope
+ intentionally excludes this datasource, so the optional app read pairs alone do not establish a
+ reachable check-list route. The backend's separate REST API requires a Synthetic Monitoring token.
+ Do not add a datasource query grant or mint that token under this wave's D8 boundary. See the
+ [plugin source](https://github.com/grafana/synthetic-monitoring-app/blob/97fefc26fac1abd508f753ec41807a448e957ae5/src/datasource/DataSource.ts)
+ and [Grafana API documentation](https://grafana.com/docs/grafana-cloud/observe-and-act/testing/synthetic-monitoring/api-reference/).
 - Adaptive Profiles endpoints have not produced a verified read contract.
 - Adaptive Traces collection is absent until a concrete read-only consumer and permission contract
   exist.
