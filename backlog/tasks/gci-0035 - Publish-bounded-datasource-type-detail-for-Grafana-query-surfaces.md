@@ -4,7 +4,7 @@ title: Publish bounded datasource-type detail for Grafana query surfaces
 status: Parked
 assignee: []
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-23 19:52'
+updated_date: '2026-09-23 23:47'
 labels:
   - feature-usage
   - follow-on
@@ -40,4 +40,6 @@ Rank 2 - high value, moderate cost. Live usage-insights lines carry datasourceTy
 
 <!-- SECTION:NOTES:BEGIN -->
 Parked at Wave 1 boundary: researched build candidate in doc-0006, outside this wave implementation scope. Resume when Rob selects the next product work; first verify the candidate metric or datasource contract named in this task.
+
+Wave 2 code landed at a070885: bounded top-20 plus remainder query mix per live stack, scoped by exact instance_id, no new metrics. Four implementation attempts; final CodeRabbit had one valid non-finite input finding, reproduced and fixed by root. Focused 154 passed, 794 subtests. Guarded dev read found 368 and 183 requests on active stacks with datasourceType, but no non-empty panelPluginId; panel positive proof remains unavailable. Final exact-SHA gate, CI and dev readback pending.
 <!-- SECTION:NOTES:END -->

@@ -4,7 +4,7 @@ title: Decide read-only product scopes for feature inventory
 status: Parked
 assignee: []
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-23 19:52'
+updated_date: '2026-09-23 23:47'
 labels:
   - feature-usage
   - scope-decision
@@ -40,4 +40,6 @@ GCI-0032 found product object APIs beyond the existing basic-role-None stack rea
 
 <!-- SECTION:NOTES:BEGIN -->
 Parked for Rob decision at Wave 1 report: candidate product read scopes and their data/risk are in doc-0006 and CAPABILITIES.md. No role or access policy changed in this wave.
+
+Wave 2 decision: dev-only default-off approval for SLO and Synthetic Monitoring reads. SLO pairs: grafana-slo-app.orgpreferences:read and grafana-slo-app.slo:read with empty scope, plugins.app:access scoped to plugins:id:grafana-slo-app. Synthetic pairs: grafana-synthetic-monitoring-app:read and grafana-synthetic-monitoring-app.checks:read with empty scope, plugins.app:access scoped to plugins:id:grafana-synthetic-monitoring-app. k6, IRM and other families deferred. Customer grant needs a separate decision. Code at edc7abb preserves basic role None, datasource query uid pins and refused secret/write actions; L6 security PASS. Minimise future SLO output to counts, state and bounded source; Synthetic output to counts by bounded type and public/private probe class, dropping identities, URLs, scripts, headers and expressions at collection. Keep raw identity-bearing payloads out of logs, metrics, permanent views and scan envelopes; any future approved private S3 detail needs encryption, task-role access and retention. Dev grant and route proof pending R4.
 <!-- SECTION:NOTES:END -->
