@@ -140,3 +140,4 @@ class of bug that looks like working code:
 - `BUDGET.md` - the declared metric catalogue, generated from `collector/emit/budget.py`; never
   hand-edited.
 - `terraform/README.md` - read before changing the module or ordering a first deployment.
+- `LOOP.md` - read at loop preparation: gates, release rules, environments and credential conventions, standing route exceptions, traps, cross-harness eligibility, resource mutexes and Grafana stacks for this repository's loops.
