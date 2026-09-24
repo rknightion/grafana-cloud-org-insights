@@ -1,10 +1,10 @@
 ---
 id: GCI-0034
 title: Publish product producing-signal views from existing usage metrics
-status: Parked
+status: Done
 assignee: []
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-23 23:47'
+updated_date: '2026-09-24 00:16'
 labels:
   - feature-usage
   - follow-on
@@ -24,16 +24,16 @@ Rank 1 - high value, low implementation cost. The two live write-stack usage dat
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Each product signal has a documented metric-specific window, unit and nonzero interpretation
-- [ ] #2 Views distinguish missing input from measured zero and never infer human UI use
-- [ ] #3 No raw metric names or stack identifiers become new metric labels
+- [x] #1 Each product signal has a documented metric-specific window, unit and nonzero interpretation
+- [x] #2 Views distinguish missing input from measured zero and never infer human UI use
+- [x] #3 No raw metric names or stack identifiers become new metric labels
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -43,3 +43,9 @@ Parked at Wave 1 boundary: researched build candidate in doc-0006, outside this 
 
 Wave 2 code landed at 6ecd68b: coverage_producing_signals is a point-in-time view of documented Metrics active series and Traces bytes per second, each using the capability-adoption 24-hour peak. Missing, measured zero and positive are distinct; no human UI use is inferred. No metrics or labels were added. CodeRabbit completed with zero findings; targeted checks 217 passed, 2 skipped. Final exact-SHA gate, CI and dev readback pending.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Code acceptance: two documented backend signals, missing versus measured-zero semantics, no new metric series; reviewed and tested at product 51ce670 with Gate G and hosted CI 35935370824 success. Dev live view publication was not proved: T2 failed before scan on the consumer projection mismatch and dev was rolled back. Do not cite code acceptance as live proof.
+<!-- SECTION:FINAL_SUMMARY:END -->
