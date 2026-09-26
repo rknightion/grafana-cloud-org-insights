@@ -13,7 +13,7 @@ them. Read it at loop preparation.
 - `just test [filter]` runs pytest offline through a guarded wrapper that terminates the process tree
   above 2 GiB RSS or 9 minutes (justfile: `test`).
 - `just lint` refuses any stray Python dependency file (`requirements*.txt`, `pyproject.toml`,
-  `Pipfile`, `poetry.lock`) — the collector ships stdlib-only by design; adding a dependency needs a
+  `Pipfile`, `poetry.lock`) - the collector ships stdlib-only by design; adding a dependency needs a
   Dockerfile change and review (justfile: `lint`).
 - `just tf-validate` validates the reusable Terraform module and its standalone example and checks
   formatting (justfile: `tf-validate`).
