@@ -56,8 +56,8 @@
 * **agents:** review fix - restore the publish-image confirm gate ([bc020d9](https://github.com/rknightion/grafana-cloud-org-insights/commit/bc020d921ebc6b7285a32b1be8627a9640d6fb43))
 * align recovery contracts and compaction evidence ([9e580c9](https://github.com/rknightion/grafana-cloud-org-insights/commit/9e580c9516f67c186637a358543343025d54d8d6))
 * **backlog:** reconcile Wave 1 proof and park open gaps ([a1a71c0](https://github.com/rknightion/grafana-cloud-org-insights/commit/a1a71c0dd4e5354a1108ff5829287f5fd4b91e23))
-* **backlog:** sync fan-out protocol — CodeRabbit review gate ([9234f6a](https://github.com/rknightion/grafana-cloud-org-insights/commit/9234f6a7fcb650f8d03590a0b0aeade64181ead9))
-* **backlog:** sync fan-out protocol — success criteria vs write authority ([d629fc2](https://github.com/rknightion/grafana-cloud-org-insights/commit/d629fc2e49777aeec928dcf4917f6a7fb84bf42f))
+* **backlog:** sync fan-out protocol - CodeRabbit review gate ([9234f6a](https://github.com/rknightion/grafana-cloud-org-insights/commit/9234f6a7fcb650f8d03590a0b0aeade64181ead9))
+* **backlog:** sync fan-out protocol - success criteria vs write authority ([d629fc2](https://github.com/rknightion/grafana-cloud-org-insights/commit/d629fc2e49777aeec928dcf4917f6a7fb84bf42f))
 * **backlog:** track generated changelog gate failure ([71d83ad](https://github.com/rknightion/grafana-cloud-org-insights/commit/71d83ad616b8d9d1b62b647beb681748d703fdd6))
 * **backlog:** track local-only history scan ([107949d](https://github.com/rknightion/grafana-cloud-org-insights/commit/107949d049566de4c03e4c981154b948b548b09c))
 * close GCI-0006 against the wave 1 exact-SHA CI run ([0740258](https://github.com/rknightion/grafana-cloud-org-insights/commit/07402586e8e481d3748de10c372f0585dd403def))
@@ -114,7 +114,7 @@
 ### Miscellaneous
 
 * align CodeRabbit review configuration ([556d718](https://github.com/rknightion/grafana-cloud-org-insights/commit/556d718da79e2e6682a82ec7efdda975f0b4df58))
-* **backlog:** add GCI-0021 — migrate the repo task surface to just ([cdf7404](https://github.com/rknightion/grafana-cloud-org-insights/commit/cdf74045c0ce73264bf709182620ea5bd0cae9b2))
+* **backlog:** add GCI-0021 - migrate the repo task surface to just ([cdf7404](https://github.com/rknightion/grafana-cloud-org-insights/commit/cdf74045c0ce73264bf709182620ea5bd0cae9b2))
 * **backlog:** ratify ci as the sanctioned superset of check ([fe14d2d](https://github.com/rknightion/grafana-cloud-org-insights/commit/fe14d2d99fd71d56bdb5d648ff0b5cbc18d3a515))
 * **backlog:** track Grafana feature-usage research, surface breakdown and docs refresh ([dd6a274](https://github.com/rknightion/grafana-cloud-org-insights/commit/dd6a27437f16b2167c5e6c01aca7513760d78426))
 * **backlog:** wire the fleet migration ordering into this task ([4bdaf92](https://github.com/rknightion/grafana-cloud-org-insights/commit/4bdaf926e0486f41b308eca8c726fbda8127595c))
