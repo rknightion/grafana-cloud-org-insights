@@ -14,7 +14,7 @@ concurrency:
 jobs:
   release-please:
     name: maintain release PR or cut release
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     permissions:
       contents: write      # create release commits, tags and GitHub Releases
