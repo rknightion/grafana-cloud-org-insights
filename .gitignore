@@ -75,3 +75,6 @@ docs/fonts/
 # DIRECTORY, not a filename pattern, so a new artefact type cannot leak by being
 # named something a pattern did not anticipate.
 codex/
+
+# loop-pi (pi-subagents writes .pi/subagents/)
+.pi/
