@@ -470,10 +470,35 @@ def validate_write_stack(
     return None
 
 
+# Read-only re-probes after a repair, and the waits before each retry. Role assignments take seconds
+# to propagate: a wave 2 dev run exited 1 on two stacks whose pairs a fresh readback minutes later showed
+# were all in place (GCI-0045). A bounded wait tells propagation from persistent drift; it never mints,
+# so the no-remint rule holds whatever the outcome.
+VERIFY_BACKOFF_SECONDS = (5.0, 15.0, 30.0)
+
+
 def verify_reader(g: Gcom, slug: str, stack_url: str, token: str, *,
                   write_stack: bool = False,
-                  product_reads: Iterable[str] = ()) -> tuple[bool, str]:
-    """Re-probe the durable reader after repair; accepted writes are not proof they took effect."""
+                  product_reads: Iterable[str] = (),
+                  sleep=time.sleep) -> tuple[bool, str]:
+    """Re-probe the durable reader after repair, allowing bounded propagation time."""
+    verified, detail = _verify_reader_once(g, slug, stack_url, token, write_stack=write_stack,
+                                           product_reads=product_reads)
+    for wait in VERIFY_BACKOFF_SECONDS:
+        # Only a readable reader that is still missing pairs can be propagation. A failed listing or an
+        # absent account will not heal by waiting, and each wait holds the transient Admin account open.
+        if verified or not detail.startswith("post-repair probe") or "sa=False" in detail:
+            break
+        sleep(wait)
+        verified, detail = _verify_reader_once(g, slug, stack_url, token, write_stack=write_stack,
+                                               product_reads=product_reads)
+    return verified, detail
+
+
+def _verify_reader_once(g: Gcom, slug: str, stack_url: str, token: str, *,
+                        write_stack: bool = False,
+                        product_reads: Iterable[str] = ()) -> tuple[bool, str]:
+    """One read-only probe; accepted writes are not proof they took effect."""
     product_reads = frozenset(product_reads)
     status, sas = list_sas(g, slug)
     if status != 200:

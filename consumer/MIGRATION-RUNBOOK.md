@@ -53,6 +53,16 @@ The build requires a clean generic checkout and committed deployment manifest/wi
 generic revision, deployment revision, and overlay digest, verifies every runtime projection inside the
 image, and never logs in, pushes, or moves a tag.
 
+Both the build and `check --terraform` also compare the manifest with the consumer's module block. Any
+runtime key the module renders from a variable must be wired from the manifest, unless the manifest
+value equals the module default. A gap names the key, never its value, and stops the build before any
+push. JSON-valued keys are hashed in Terraform's `jsonencode` form (sorted keys, compact, integral
+numbers), so the key order a person typed no longer changes the digest.
+
+On the first upgrade to a revision with that normalisation, an existing manifest's recorded digests no
+longer validate, and `upgrade` refuses it. Add any newly required runtime keys, run `regenerate` from
+a clean checkout of the TARGET revision, then run `upgrade`.
+
 The upgrade command journals the original and target manifest/Terraform pair before replacing either
 file. A check refuses an incomplete journal. Re-running the upgrade restores the original pair from a
 valid journal before retrying; it refuses recovery if either file was independently edited.

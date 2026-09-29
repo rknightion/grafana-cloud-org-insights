@@ -43,6 +43,7 @@ def fixture(revision: str | None = None) -> dict:
     runtime["scan"]["GCINSIGHT_OPT_OUT"] = ""
     runtime["provisioner"]["GCINSIGHT_OPT_OUT"] = ""
     runtime["provisioner"]["GCINSIGHT_READER_PRODUCT_READS"] = ""
+    runtime["scan"]["GCINSIGHT_DASHBOARD_DETAIL_ENABLED"] = "0"
     body = {
         "schema_version": 1,
         "generic_source": {
@@ -114,6 +115,16 @@ class ManifestValidationTest(unittest.TestCase):
         with self.assertRaisesRegex(consumer_manifest.ManifestError, "runtime.scan keys differ"):
             consumer_manifest.validate(body)
 
+    def test_values_terraform_cannot_round_trip_are_rejected(self):
+        body = fixture()
+        body["runtime"]["scan"]["GCINSIGHT_DASHBOARD_DETAIL_ENABLED"] = "true"
+        with self.assertRaisesRegex(consumer_manifest.ManifestError, "must be 1 or 0"):
+            consumer_manifest.validate(consumer_manifest.regenerate(body))
+        body = fixture()
+        body["runtime"]["provisioner"]["GCINSIGHT_OPT_OUT"] = "stack-a"
+        with self.assertRaisesRegex(consumer_manifest.ManifestError, "OPT_OUT must be identical"):
+            consumer_manifest.validate(consumer_manifest.regenerate(body))
+
     def test_digest_drift_is_rejected(self):
         body = fixture()
         body["runtime"]["scan"]["GCINSIGHT_USER_AGENT"] = "changed-user-agent"
@@ -166,6 +177,98 @@ class ManifestValidationTest(unittest.TestCase):
         body = fixture()
         self.assertEqual(body["runtime"]["provisioner"]["GCINSIGHT_READER_PRODUCT_READS"], "")
         consumer_manifest.validate(body)
+
+
+class RenderedEnvironmentParityTest(unittest.TestCase):
+    """GCI-0045. The manifest digest must equal the digest of the env Terraform actually renders.
+
+    Terraform passes JSON values through `jsonencode(jsondecode(...))`, which sorts keys and writes an
+    integral float as an integer. A wave 2 dev rollout hashed the raw manifest string instead, and T2
+    refused to start on a policy both sides held identically.
+    """
+
+    def test_a_retention_policy_in_either_key_order_matches_the_rendered_environment(self):
+        body = fixture()
+        body["runtime"]["scan"]["GCINSIGHT_EXPECTED_RETENTION_POLICY"] = (
+            '[{"selector": "{kind=\\"auditing\\"}", "minimum_period": "120d"}]')
+        body["runtime"]["scan"]["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"] = '{"metrics": 1.0, "logs": 2}'
+        body = consumer_manifest.regenerate(body)
+        rendered = dict(body["runtime"]["scan"])
+        # Exactly what `jsonencode(jsondecode(value))` emits for these two values.
+        rendered["GCINSIGHT_EXPECTED_RETENTION_POLICY"] = (
+            '[{"minimum_period":"120d","selector":"{kind=\\"auditing\\"}"}]')
+        rendered["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"] = '{"logs":2,"metrics":1}'
+        self.assertEqual(body["runtime_projection_digests"]["scan"],
+                         identity.projection_digest("scan", rendered))
+
+
+CONSUMER_TF = """
+module "insights" {
+  source = "git::https://github.com/rknightion/grafana-cloud-org-insights.git//terraform?ref=%s"
+
+  grafana_org_id            = local.scan.GCINSIGHT_ORG_ID
+  fleet_default_scrape_interval = local.scan.GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL
+  coverage_score_weights = jsondecode(
+    local.scan.GCINSIGHT_COVERAGE_SCORE_WEIGHTS
+  )
+  %s
+}
+""" % ("a" * 40, "%s")
+
+
+class TerraformWiringPreflightTest(unittest.TestCase):
+    """GCI-0045 AC2. A manifest key the module block never passes renders as the module default."""
+
+    MODULE = ROOT / "terraform"
+
+    def _manifest(self, **scan):
+        body = fixture()
+        body["runtime"]["scan"].update(scan)
+        return body
+
+    def _gaps(self, body, extra=""):
+        return [gap for gap in consumer_manifest.terraform_wiring_gaps(
+            body, CONSUMER_TF % extra, self.MODULE)
+            if "FLEET_DEFAULT" in gap or "COVERAGE" in gap or "DASHBOARD_DETAIL" in gap]
+
+    def test_an_unwired_non_default_value_is_caught(self):
+        body = self._manifest(GCINSIGHT_DASHBOARD_DETAIL_ENABLED="1")
+        self.assertEqual(len(self._gaps(body)), 1)
+        self.assertIn("GCINSIGHT_DASHBOARD_DETAIL_ENABLED", self._gaps(body)[0])
+
+    def test_an_unwired_value_equal_to_the_module_default_is_accepted(self):
+        body = self._manifest(GCINSIGHT_DASHBOARD_DETAIL_ENABLED="0")
+        self.assertEqual(self._gaps(body), [])
+
+    def test_a_wired_value_is_accepted_and_a_wrongly_sourced_one_is_not(self):
+        body = self._manifest(GCINSIGHT_DASHBOARD_DETAIL_ENABLED="1")
+        wired = 'dashboard_detail_enabled = local.scan.GCINSIGHT_DASHBOARD_DETAIL_ENABLED == "1"'
+        self.assertEqual(self._gaps(body, wired), [])
+        self.assertEqual(len(self._gaps(body, "dashboard_detail_enabled = true")), 1)
+
+    def test_every_projected_key_is_checked_or_explicitly_unchecked(self):
+        """A module env entry the preflight stops parsing must show up here, not vanish silently."""
+        inputs = consumer_manifest.module_env_inputs(self.MODULE)
+        for kind, names in (("scan", identity.SCAN_ENV), ("provisioner", identity.PROVISIONER_ENV)):
+            with self.subTest(kind=kind):
+                unchecked = set(names) - set(inputs[kind])
+                self.assertEqual(unchecked, set(consumer_manifest.UNCHECKED_PROJECTED_ENV) & set(names))
+
+    def test_a_comment_or_identifier_mentioning_module_does_not_move_the_block(self):
+        body = self._manifest(GCINSIGHT_DASHBOARD_DETAIL_ENABLED="1")
+        wired = 'dashboard_detail_enabled = local.scan.GCINSIGHT_DASHBOARD_DETAIL_ENABLED == "1"'
+        text = (CONSUMER_TF % wired).replace(
+            "  source =", "  count = var.robknight_module_enabled ? 1 : 0\n  # this module is pinned\n  source =")
+        gaps = [g for g in consumer_manifest.terraform_wiring_gaps(body, text, self.MODULE)
+                if "DASHBOARD_DETAIL" in g or "COVERAGE" in g]
+        self.assertEqual(gaps, [])
+
+    def test_gaps_name_keys_and_never_values(self):
+        body = self._manifest(GCINSIGHT_DASHBOARD_DETAIL_ENABLED="1",
+                              GCINSIGHT_OPT_OUT="customer-stack-secret")
+        gaps = consumer_manifest.terraform_wiring_gaps(body, CONSUMER_TF % "", self.MODULE)
+        self.assertTrue(any("GCINSIGHT_OPT_OUT" in gap for gap in gaps))
+        self.assertNotIn("customer-stack-secret", " ".join(gaps))
 
 
 class UpgradeTest(unittest.TestCase):
@@ -360,10 +463,18 @@ class ConsumerShellTest(unittest.TestCase):
         terraform = root / "consumer.tf"
         body = fixture(revision)
         manifest.write_text(consumer_manifest.json_text(body))
+        # A correctly wired consumer: every module input that renders a runtime value reads it from
+        # the manifest, which is what the GCI-0045 wiring preflight now requires before a build.
+        wiring = "".join(
+            f"  {variable} = local.{kind}.{env}\n"
+            for kind, entries in consumer_manifest.module_env_inputs(ROOT / "terraform").items()
+            for env, (variable, _expr) in sorted(entries.items())
+        )
         terraform.write_text(
             'module "insights" {\n'
             '  source = "git::https://github.com/rknightion/grafana-cloud-org-insights.git//terraform'
             f'?ref={revision}"\n'
+            f"{wiring}"
             '}\n'
         )
         self.git_repository(root)

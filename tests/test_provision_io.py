@@ -655,5 +655,34 @@ class RolePatchDoesNotChurnTokensTest(unittest.TestCase):
         self.assertFalse(pr.needs_token_mint(p))
 
 
+
+class VerifyReaderBackoffTest(unittest.TestCase):
+    """GCI-0045 AC3. Propagation delay is retried read-only; persistent drift still fails."""
+
+    def _run(self, results):
+        calls = iter(results)
+        waits = []
+        with mock.patch.object(cli, "_verify_reader_once", side_effect=lambda *a, **k: next(calls)):
+            outcome = cli.verify_reader(None, "s", "u", "t", sleep=waits.append)
+        return outcome, waits
+
+    def test_a_late_propagation_is_verified_without_failing_the_run(self):
+        outcome, waits = self._run([(False, "post-repair probe still needs pairs (sa=True)"), (False, "post-repair probe still needs pairs (sa=True)"), (True, "verified")])
+        self.assertEqual(outcome, (True, "verified"))
+        self.assertEqual(len(waits), 2)
+
+    def test_a_failure_that_waiting_cannot_fix_is_not_retried(self):
+        """Each wait holds the transient Admin account open; a failed listing will not self-heal."""
+        outcome, waits = self._run([(False, "service-account verification HTTP 500")])
+        self.assertFalse(outcome[0])
+        self.assertEqual(waits, [])
+
+    def test_persistent_drift_fails_after_a_bounded_number_of_probes(self):
+        results = [(False, "post-repair probe still needs pairs (sa=True)")] * (len(cli.VERIFY_BACKOFF_SECONDS) + 1)
+        outcome, waits = self._run(results)
+        self.assertEqual(outcome, (False, "post-repair probe still needs pairs (sa=True)"))
+        self.assertEqual(waits, list(cli.VERIFY_BACKOFF_SECONDS))
+
+
 if __name__ == "__main__":
     unittest.main()

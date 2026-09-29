@@ -72,8 +72,11 @@ def overlay(manifest: dict[str, Any]) -> dict[str, Any]:
 
 
 def calculated_digests(manifest: dict[str, Any]) -> tuple[str, dict[str, str]]:
+    # The SAME function the task runs at startup. A second implementation here is how the manifest and
+    # the rendered environment came to disagree about a policy they both held (GCI-0045).
     projections = {
-        kind: digest(manifest["runtime"][kind]) for kind in sorted(identity.PROJECTION_ENVS)
+        kind: identity.projection_digest(kind, manifest["runtime"][kind])
+        for kind in sorted(identity.PROJECTION_ENVS)
     }
     return digest(overlay(manifest)), projections
 
@@ -123,6 +126,14 @@ def validate(manifest: dict[str, Any]) -> None:
                 raise ManifestError(f"runtime.{kind}.{name} must be explicit and non-empty")
             if "\n" in value or "\x00" in value:
                 raise ManifestError(f"runtime.{kind}.{name} is not environment-safe")
+
+    # Values Terraform cannot round-trip. The consumer wiring renders the flag as `== "1"`, so "true"
+    # (which the collector accepts) renders "0"; and both tasks render OPT_OUT from ONE module input,
+    # so two different lists make one task refuse to start on a digest mismatch (GCI-0045 review).
+    if runtime["scan"]["GCINSIGHT_DASHBOARD_DETAIL_ENABLED"] not in {"1", "0"}:
+        raise ManifestError("runtime.scan.GCINSIGHT_DASHBOARD_DETAIL_ENABLED must be 1 or 0")
+    if runtime["scan"]["GCINSIGHT_OPT_OUT"] != runtime["provisioner"]["GCINSIGHT_OPT_OUT"]:
+        raise ManifestError("runtime.scan and runtime.provisioner GCINSIGHT_OPT_OUT must be identical")
 
     for section in ("aws", "policy"):
         values = manifest.get(section)
@@ -381,6 +392,142 @@ def verify_deployment_files(
         raise ManifestError("deployment manifest or Terraform wiring is not committed")
 
 
+# --- Terraform wiring preflight (GCI-0045) -------------------------------------------------------
+#
+# The manifest digest is only half of the contract. The task environment is whatever the module RENDERS,
+# and a manifest key the consumer never passes into the module renders as the module default instead.
+# The task then refuses to start on a digest mismatch after the image has been pushed and applied. This
+# reads the module's own env list and the consumer's module block and fails before either happens.
+
+_MODULE_ENV = re.compile(
+    r'\{\s*name\s*=\s*"(GCINSIGHT_[A-Z0-9_]+)",\s*value\s*=\s*(.+?)\s*\},?\s*$', re.M)
+_MODULE_ENV_FILES = {"scan": "ecs.tf", "provisioner": "provisioner.tf"}
+# Wired by the module from the manifest's own digest block, not from a runtime value.
+_WIRING_EXEMPT = frozenset({"GCINSIGHT_RUNTIME_CONFIG_DIGEST", "GCINSIGHT_REQUIRE_EXPLICIT_CONFIG"})
+# Projected keys the module renders from something other than one variable, so this preflight cannot
+# check them. A test pins this set: a module env entry the regex stops reading shows up as drift here
+# rather than as silently lost coverage.
+UNCHECKED_PROJECTED_ENV = frozenset({
+    "GCINSIGHT_S3_BUCKET",   # local.bucket_name: var.bucket_name or a name_prefix default
+    "GCINSIGHT_S3_REGION",   # data.aws_region
+    "GCINSIGHT_SSM_REGION",  # data.aws_region
+})
+
+
+def module_env_inputs(module_root: pathlib.Path) -> dict[str, dict[str, tuple[str, str]]]:
+    """{kind: {env: (module variable, render expression)}} for env values taken from one variable."""
+    out: dict[str, dict[str, tuple[str, str]]] = {}
+    for kind, name in _MODULE_ENV_FILES.items():
+        text = (module_root / name).read_text()
+        entries: dict[str, tuple[str, str]] = {}
+        for env, expr in _MODULE_ENV.findall(text):
+            variables = set(re.findall(r"\bvar\.([a-z0-9_]+)", expr))
+            if env in _WIRING_EXEMPT or len(variables) != 1:
+                continue
+            entries[env] = (variables.pop(), expr)
+        out[kind] = entries
+    return out
+
+
+def module_default_render(module_root: pathlib.Path, variable: str, expr: str) -> str | None:
+    """What the module renders for `expr` when `variable` is left at its default, or None if unknown."""
+    text = "\n".join(p.read_text() for p in sorted(module_root.glob("*.tf")))
+    block = re.search(rf'variable\s+"{re.escape(variable)}"\s*\{{(.*?)\n\}}', text, re.S)
+    if not block:
+        return None
+    default = re.search(r"^\s*default\s*=\s*(.+?)\s*$", block.group(1), re.M)
+    if not default:
+        return None
+    raw = default.group(1)
+    if raw == "{" and expr.startswith("jsonencode("):
+        # A multi-line map of scalars, as coverage_score_weights declares.
+        body = block.group(1)[default.end():]
+        body = body[:body.index("}")] if "}" in body else ""
+        mapping: dict[str, Any] = {}
+        for key, value in re.findall(r"^\s*([A-Za-z_][\w]*)\s*=\s*(.+?)\s*$", body, re.M):
+            try:
+                mapping[key] = json.loads(value)
+            except ValueError:
+                return None
+        return identity.canonical_json_text(json.dumps(mapping))
+    bare = expr.strip() == f"var.{variable}"
+    if bare and re.fullmatch(r'"[^"]*"', raw):
+        return raw[1:-1]
+    if expr.startswith("join(") and raw == "[]":
+        return ""
+    if expr.startswith("jsonencode(") and raw in ("[]", "{}"):
+        return raw
+    if "?" in expr and raw in ("true", "false"):
+        picked = re.search(r'\?\s*"([^"]*)"\s*:\s*"([^"]*)"', expr)
+        if picked:
+            return picked.group(1) if raw == "true" else picked.group(2)
+    return None
+
+
+def _module_block(text: str) -> str:
+    match = MODULE_SOURCE.search(text)
+    if not match:
+        raise ManifestError("expected exactly one immutable generic Terraform module source")
+    headers = [m for m in re.finditer(r'^\s*module\s+"[^"]+"\s*\{', text, re.M)
+               if m.end() <= match.start()]
+    if not headers:
+        raise ManifestError("generic Terraform module source is not inside a module block")
+    depth, i = 0, headers[-1].end() - 1
+    for j in range(i, len(text)):
+        depth += {"{": 1, "}": -1}.get(text[j], 0)
+        if depth == 0:
+            return text[i:j + 1]
+    raise ManifestError("unbalanced generic Terraform module block")
+
+
+def _assignment(block: str, variable: str) -> str | None:
+    """The right-hand side of `variable = ...` in the module block, across continuation lines."""
+    lines = block.splitlines()
+    for index, line in enumerate(lines):
+        match = re.match(rf"^(\s*){re.escape(variable)}\s*=(.*)$", line)
+        if not match:
+            continue
+        indent, span = len(match.group(1)), [match.group(2)]
+        for follow in lines[index + 1:]:
+            if re.match(r"^\s*[a-z_][a-z0-9_]*\s*=", follow) and (
+                    len(follow) - len(follow.lstrip())) <= indent:
+                break
+            span.append(follow)
+        return "\n".join(span)
+    return None
+
+
+def terraform_wiring_gaps(manifest: dict[str, Any], terraform_text: str,
+                          module_root: pathlib.Path) -> list[str]:
+    """Manifest runtime keys the consumer's Terraform would NOT render as the manifest says.
+
+    Names only, never values: a retention selector or an opt-out list is customer data.
+    """
+    block = _module_block(terraform_text)
+    gaps: list[str] = []
+    for kind, entries in module_env_inputs(module_root).items():
+        runtime = manifest["runtime"].get(kind) or {}
+        for env, (variable, expr) in sorted(entries.items()):
+            if env not in runtime:
+                continue
+            assigned = _assignment(block, variable)
+            if assigned is not None:
+                # An exact token outside comments, so GCINSIGHT_OPT_OUT_X or `# GCINSIGHT_OPT_OUT`
+                # cannot satisfy GCINSIGHT_OPT_OUT.
+                code = re.sub(r"(#|//).*", "", assigned)
+                if not re.search(rf"(?<![A-Z0-9_]){re.escape(env)}(?![A-Z0-9_])", code):
+                    gaps.append(f"{kind}: module input {variable} does not read {env} from the manifest")
+                continue
+            rendered = module_default_render(module_root, variable, expr)
+            wanted = str(runtime[env]).strip()
+            if env in identity.JSON_VALUED_ENV and wanted:
+                wanted = identity.canonical_json_text(wanted)
+            if rendered is None or rendered != wanted:
+                gaps.append(f"{kind}: {env} is not wired to module input {variable}, so Terraform "
+                            "renders the module default rather than the manifest value")
+    return gaps
+
+
 def replaced_terraform_revision(text: str, revision: str) -> str:
     updated, count = MODULE_SOURCE.subn(rf"\g<1>{revision}\g<3>", text)
     if count != 1:
@@ -403,6 +550,12 @@ def command_check(args: argparse.Namespace) -> int:
             tagged, args.deployment_root.resolve(), args.terraform.resolve(),
             require_committed=args.require_committed_deployment,
         )
+        gaps = terraform_wiring_gaps(
+            manifest, args.terraform.resolve().read_text(),
+            args.generic_source.resolve() / "terraform",
+        )
+        if gaps:
+            raise ManifestError("Terraform wiring differs from the manifest:\n  " + "\n  ".join(gaps))
         verify_no_replacement_core(
             args.deployment_root.resolve(), args.forbidden_core_path,
         )

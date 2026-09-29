@@ -110,13 +110,48 @@ def map_tree(value: Any) -> Any:
     return value
 
 
+# Projection values that carry JSON. Terraform renders them with `jsonencode(jsondecode(value))`, which
+# sorts object keys, drops whitespace and writes an integral float as an integer. The manifest holds
+# whatever a person typed. Hashing the raw strings made the same policy produce two digests and every
+# task refuse to start (GCI-0045), so both sides hash the value in this one canonical form instead.
+JSON_VALUED_ENV = frozenset({
+    "GCINSIGHT_COVERAGE_SCORE_WEIGHTS", "GCINSIGHT_EXPECTED_RETENTION_POLICY",
+    "GCINSIGHT_ALERT_RULE_UIDS_JSON",
+})
+
+
+def _integral(value: Any) -> Any:
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    if isinstance(value, list):
+        return [_integral(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _integral(item) for key, item in value.items()}
+    return value
+
+
+def canonical_json_text(raw: str) -> str:
+    """The Terraform-equivalent rendering of a JSON value, or the input unchanged if it is not JSON.
+
+    Unparseable text is left alone rather than rejected here: the loader that consumes the value owns
+    that error and names the variable.
+    """
+    try:
+        value = json.loads(raw)
+    except (TypeError, ValueError):
+        return raw
+    return json.dumps(_integral(value), sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
 def canonical_projection(kind: str, environ: Mapping[str, str] | None = None) -> dict[str, str]:
     try:
         names = PROJECTION_ENVS[kind]
     except KeyError as exc:
         raise InvalidIdentity(f"unknown runtime projection {kind!r}") from exc
     source = os.environ if environ is None else environ
-    return {name: str(source.get(name, "")).strip() for name in names}
+    out = {name: str(source.get(name, "")).strip() for name in names}
+    return {name: canonical_json_text(value) if name in JSON_VALUED_ENV and value else value
+            for name, value in out.items()}
 
 
 def projection_digest(kind: str, environ: Mapping[str, str] | None = None) -> str:
