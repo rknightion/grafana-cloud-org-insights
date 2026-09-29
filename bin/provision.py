@@ -476,6 +476,52 @@ def validate_write_stack(
 # so the no-remint rule holds whatever the outcome.
 VERIFY_BACKOFF_SECONDS = (5.0, 15.0, 30.0)
 
+# A mass role update can take minutes to show in a reader's effective permissions: a product-reads
+# change on a ~300-stack estate left 61 stacks failing the in-run backoff, and every one held its pairs a
+# probe later (GCI-0050). A stack still propagating after the backoff is probed once more at the end of
+# the run, at least this long after its repair. Read-only, never mints, and the waits overlap, so the run
+# grows by at most this much however many stacks are pending.
+FINAL_VERIFY_MIN_AGE_SECONDS = 300.0
+# Failures printed in full at the end of a run; the rest are counted.
+FAILURE_LINES = 20
+
+
+def _still_propagating(outcome: pr.Outcome) -> bool:
+    """The only verification failure waiting can fix: a readable reader that is missing pairs."""
+    return (outcome.action == "verification_failed"
+            and outcome.detail.startswith("post-repair probe") and "sa=False" not in outcome.detail)
+
+
+def reverify_pending(g: Gcom, outcomes: list[pr.Outcome],
+                     pending: dict[str, tuple[str, bool, float]], stored: dict[str, dict[str, Any]], *,
+                     product_reads: Iterable[str] = (), clock=None,
+                     sleep=None) -> list[pr.Outcome]:
+    """Give each still-propagating repair one final read-only probe with its stored credential.
+
+    `pending` maps a slug to (stack URL, is write stack, clock time of its repair). The credential is the
+    one in the store after the run, which is the one every scan will use.
+    """
+    clock = clock or time.monotonic
+    sleep = sleep or time.sleep
+    result: list[pr.Outcome] = []
+    for outcome in outcomes:
+        entry = pending.get(outcome.slug)
+        token = (stored.get(outcome.slug) or {}).get("token")
+        if entry is None or not token or not _still_propagating(outcome):
+            result.append(outcome)
+            continue
+        stack_url, write_stack, repaired_at = entry
+        wait = FINAL_VERIFY_MIN_AGE_SECONDS - (clock() - repaired_at)
+        if wait > 0:
+            sleep(wait)
+        verified, detail = _verify_reader_once(g, outcome.slug, stack_url, token,
+                                               write_stack=write_stack, product_reads=product_reads)
+        result.append(pr.Outcome(outcome.slug, outcome.state, pr.OK, "role repaired; verified at end of run")
+                      if verified else
+                      pr.Outcome(outcome.slug, outcome.state, outcome.action,
+                                 f"{detail}; still failing at end of run"))
+    return result
+
 
 def verify_reader(g: Gcom, slug: str, stack_url: str, token: str, *,
                   write_stack: bool = False,
@@ -731,6 +777,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"credential store: {len(stored)} stack(s) already hold a token")
 
     outcomes: list[pr.Outcome] = []
+    pending: dict[str, tuple[str, bool, float]] = {}
     for s in stacks:
         slug = str(s.get("slug"))
         state = pr.classify(s, opted_out)
@@ -783,6 +830,20 @@ def main(argv: list[str] | None = None) -> int:
             presence=presence, existing_token=record.get("token"), write_stack=is_write_stack,
             product_reads=product_reads,
         ))
+        if _still_propagating(outcomes[-1]):
+            pending[slug] = (stack_url, is_write_stack, time.monotonic())
+
+    if pending and not args.dry_run:
+        print(f"re-verifying {len(pending)} repair(s) still propagating")
+        try:
+            # Re-read: a repair may have minted and stored a new credential during the run.
+            final_store = ssm_load_all()
+        except SsmStoreUnreadable as exc:
+            print(f"  WARNING: credential store unreadable; keeping in-run verdicts: {exc}",
+                  file=sys.stderr)
+        else:
+            outcomes = reverify_pending(g, outcomes, pending, final_store,
+                                        product_reads=product_reads)
 
     if not args.no_prune and not args.stack and not args.limit:
         gone = pr.prune_targets(sorted(stored), [str(s.get("slug")) for s in
@@ -805,8 +866,10 @@ def main(argv: list[str] | None = None) -> int:
     failed = [o for o in outcomes if o.action != pr.OK]
     if failed:
         print(f"\n{len(failed)} stack(s) not provisioned:")
-        for o in failed[:20]:
+        for o in failed[:FAILURE_LINES]:
             print(f"  {o.slug}: {o.action}  -  {o.detail}")
+        if len(failed) > FAILURE_LINES:
+            print(f"  ... and {len(failed) - FAILURE_LINES} more")
     return 1 if failed else 0
 
 

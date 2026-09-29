@@ -8,6 +8,7 @@ credential itself cannot be stopped from deleting the organisation's own service
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import unittest
 from types import SimpleNamespace
@@ -682,6 +683,85 @@ class VerifyReaderBackoffTest(unittest.TestCase):
         outcome, waits = self._run(results)
         self.assertEqual(outcome, (False, "post-repair probe still needs pairs (sa=True)"))
         self.assertEqual(waits, list(cli.VERIFY_BACKOFF_SECONDS))
+
+
+class EndOfRunReverifyTest(unittest.TestCase):
+    """GCI-0050. A mass role update can outlast the in-run backoff; the final probe decides."""
+
+    PROPAGATING = "post-repair probe still needs patch_role (sa=True secret=True token=200 basic_role=None)"
+
+    def _main(self, final_probe, slugs=("a", "b")):
+        class InventoryGcom:
+            def __init__(self, *_args, **_kwargs):
+                self.reads = self.writes = 0
+
+            def get(self, _path):
+                self.reads += 1
+                return 200, {"items": [{"slug": s, "status": "active",
+                                        "url": f"https://authoritative-{s}.example"} for s in slugs]}
+
+        stored = {s: {"token": f"token-{s}"} for s in slugs}
+        probed = []
+
+        def once(_g, slug, _url, token, **_kwargs):
+            probed.append((slug, token))
+            return final_probe[slug]
+
+        out = io.StringIO()
+        with mock.patch.dict(cli.os.environ, {"GCINSIGHT_PROVISION_TOKEN": "x",
+                                              "GCINSIGHT_ORG_ID": "900001",
+                                              "GCINSIGHT_WRITE_STACK": slugs[0]}, clear=False), \
+             mock.patch.object(cli, "Gcom", InventoryGcom), \
+             mock.patch.object(cli, "ssm_load_all", return_value=stored), \
+             mock.patch.object(cli, "list_sas", return_value=(200, [])), \
+             mock.patch.object(cli, "sweep_leftover_admin", return_value=0), \
+             mock.patch.object(cli, "probe", return_value=SimpleNamespace(sa_exists=True, secret_exists=True, token_status=200, basic_role=None)), \
+             mock.patch.object(cli.pr, "needs_repair", return_value=True), \
+             mock.patch.object(cli.pr, "plan_action", return_value="patch_role"), \
+             mock.patch.object(cli, "repair", side_effect=lambda _g, _l, slug, *a, **k: cli.pr.Outcome(
+                 slug, cli.pr.PROVISIONABLE, "verification_failed", self.PROPAGATING)), \
+             mock.patch.object(cli, "_verify_reader_once", side_effect=once), \
+             mock.patch.object(cli.time, "sleep"), \
+             mock.patch("sys.stdout", out):
+            code = cli.main(["--no-prune"])
+        return code, out.getvalue(), probed
+
+    def test_repairs_that_verify_at_the_end_of_the_run_exit_zero(self):
+        code, out, probed = self._main({"a": (True, "verified"), "b": (True, "verified")})
+        self.assertEqual(code, 0)
+        self.assertIn("provisionable/ok=2", out)
+        # The final probe uses the durable stored credential, never a fresh mint.
+        self.assertEqual(sorted(probed), [("a", "token-a"), ("b", "token-b")])
+
+    def test_drift_that_survives_the_final_probe_still_fails_the_run(self):
+        code, out, _ = self._main({"a": (True, "verified"), "b": (False, self.PROPAGATING)})
+        self.assertEqual(code, 1)
+        self.assertIn("provisionable/verification_failed=1", out)
+
+    def test_final_waits_overlap_so_the_run_grows_by_at_most_the_minimum_age(self):
+        now = [250.0]
+        waits = []
+
+        def sleep(seconds):
+            waits.append(seconds)
+            now[0] += seconds
+
+        outcomes = [cli.pr.Outcome(s, cli.pr.PROVISIONABLE, "verification_failed", self.PROPAGATING)
+                    for s in ("a", "b", "c")]
+        pending = {"a": ("u", False, 0.0), "b": ("u", False, 100.0), "c": ("u", False, 150.0)}
+        stored = {s: {"token": "t"} for s in pending}
+        with mock.patch.object(cli, "_verify_reader_once", return_value=(True, "verified")):
+            result = cli.reverify_pending(None, outcomes, pending, stored,
+                                          clock=lambda: now[0], sleep=sleep)
+        self.assertEqual(waits, [50.0, 100.0, 50.0])
+        self.assertLessEqual(sum(waits), cli.FINAL_VERIFY_MIN_AGE_SECONDS)
+        self.assertTrue(all(o.action == cli.pr.OK for o in result))
+
+    def test_a_truncated_failure_list_says_how_many_it_left_out(self):
+        slugs = tuple(f"s{i:02d}" for i in range(23))
+        code, out, _ = self._main({s: (False, self.PROPAGATING) for s in slugs}, slugs=slugs)
+        self.assertEqual(code, 1)
+        self.assertIn("and 3 more", out)
 
 
 if __name__ == "__main__":

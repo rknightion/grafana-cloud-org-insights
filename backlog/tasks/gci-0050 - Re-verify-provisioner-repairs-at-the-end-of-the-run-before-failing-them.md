@@ -1,9 +1,10 @@
 ---
 id: GCI-0050
 title: Re-verify provisioner repairs at the end of the run before failing them
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-29 23:23'
+updated_date: '2026-09-29 23:41'
 labels: []
 dependencies: []
 priority: medium
@@ -19,10 +20,10 @@ The GCI-0045 re-probe backoff (5, 15, 30 seconds) is too short when a run repair
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A stack that fails post-repair verification is re-verified once more after every other stack has been processed, read-only and without a re-mint, and is reported verification_failed only if that final probe still finds drift
-- [ ] #2 A stack that verifies on the final probe counts as provisionable/ok and does not raise gcinsight_stacks_missing_credential
-- [ ] #3 The failure summary says how many failures it omitted when it truncates the list
-- [ ] #4 A test proves a stack failing every in-run probe but passing the final one exits 0, and one failing the final probe still exits 1
+- [x] #1 A stack that fails post-repair verification is re-verified once more after every other stack has been processed, read-only and without a re-mint, and is reported verification_failed only if that final probe still finds drift
+- [x] #2 A stack that verifies on the final probe counts as provisionable/ok and does not raise gcinsight_stacks_missing_credential
+- [x] #3 The failure summary says how many failures it omitted when it truncates the list
+- [x] #4 A test proves a stack failing every in-run probe but passing the final one exits 0, and one failing the final probe still exits 1
 <!-- AC:END -->
 
 ## Definition of Done
@@ -31,3 +32,9 @@ The GCI-0045 re-probe backoff (5, 15, 30 seconds) is too short when a run repair
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+A repair still propagating after the in-run backoff is recorded with its clock time; after the stack loop the store is re-read and each gets one read-only _verify_reader_once with its stored credential, at least FINAL_VERIFY_MIN_AGE_SECONDS (300) after its repair. Waits overlap, so a run grows by at most 300s; a test pins that bound and was seen failing against cumulative waits. An unreadable store at that point keeps the in-run verdicts. The summary prints '... and N more' past 20 failures. Live context: the production rerun after the long night exited 0 at 306/306 ok, 308 gcom reads and 5 writes (one new reader).
+<!-- SECTION:NOTES:END -->
