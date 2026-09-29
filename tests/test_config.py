@@ -108,6 +108,17 @@ class RequiredConfigTest(unittest.TestCase):
             with self.assertRaisesRegex(config.MissingConfig, "hours or days"):
                 config.load(tier="t2")
 
+    def test_fleet_default_scrape_interval_defaults_to_60s_and_is_validated(self):
+        with _Env(**COMPLETE):
+            self.assertEqual(config.load(tier="t1").fleet_default_scrape_interval_seconds, 60.0)
+        with _Env(**dict(COMPLETE, GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL="1m30s")):
+            self.assertEqual(config.load(tier="t1").fleet_default_scrape_interval_seconds, 90.0)
+        for bad in ("30", "0s", "fast"):
+            with self.subTest(value=bad), _Env(**dict(
+                    COMPLETE, GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL=bad)):
+                with self.assertRaisesRegex(config.MissingConfig, "positive duration"):
+                    config.load(tier="t1")
+
     def test_every_required_variable_is_refused_when_absent(self):
         for missing in REQUIRED:
             env = {k: v for k, v in COMPLETE.items() if k != missing}

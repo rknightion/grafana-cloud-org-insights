@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **9,354** |
-| Phase 1 only | 9,353 |
+| **Declared (all phases)** | **9,628** |
+| Phase 1 only | 9,627 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -23,13 +23,13 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | B | 1,101 |
 | C | 14 |
 | D | 582 |
-| E | 850 |
+| E | 1,124 |
 | F | 21 |
 | I | 895 |
 | J | 4,400 |
 | K | 969 |
 | scan | 226 |
-| **Total** | **9,354** |
+| **Total** | **9,628** |
 
 ## Metrics
 
@@ -56,6 +56,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_stack_active_series` | A | `stack`(271) | 271 | 1 | the metrics cost driver; growth per stack is the platform team's core question |
 | `gcinsight_stack_billed_users` | B | `stack`(271) | 271 | 1 | billingActiveUsers, NEVER currentActiveUsers. Named `stack_` not `cost_` so it cannot collide with the estate rollup of the same quantity |
 | `gcinsight_stack_collectors_active` | E | `stack`(271) | 271 | 1 | the per-stack half; use it to find registration concentration and churn |
+| `gcinsight_stack_fleet_fast_scrape_pipelines` | E | `stack`(271) | 271 | 1 | enabled, reaching Fleet pipelines scraping faster than the default interval. Per stack because the alert names the stack and remediation is a trend; ABSENT where Fleet was not read or the payload predates the interval parser |
 | `gcinsight_ai_estate_messages` | I | `category`(8), `surface`(8) | 64 | 1 | estate-wide category x surface, NO `stack` label  -  the per-stack cross product belongs in the existing `ai_category_surface` view |
 | `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(16) | 64 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
 | `gcinsight_input_available` | scan | `tier`(4), `input`(16) | 64 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
@@ -153,7 +154,10 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_risk_collectors_inactive` | E |  -  | 1 | 1 | registrations for collectors that are gone. Ephemeral compute churns these: the id embeds the hostname, so every pod reschedule creates one |
 | `gcinsight_risk_collectors_total` | E |  -  | 1 | 1 | every REGISTRATION Fleet Management returns, unchanged so the series stays continuous. Read it with the active and inactive splits below |
 | `gcinsight_risk_collectors_unconfigured` | E |  -  | 1 | 1 | alive, registered, and targeted by no ENABLED pipeline - so receiving no configuration. Also the matcher evaluator's sanity check |
+| `gcinsight_risk_fleet_fast_scrape_stacks` | E |  -  | 1 | 1 | stacks with at least one faster-than-default Fleet pipeline |
 | `gcinsight_risk_fleet_matchers_unparsed` | E |  -  | 1 | 1 | pipeline matchers this platform cannot parse. Non-zero means at least one 'collectors targeted' figure is UNKNOWN rather than small |
+| `gcinsight_risk_fleet_scrape_interval_default_seconds` | E |  -  | 1 | 1 | the deployment's configured default, so panels and readers compare against the same number the collector used |
+| `gcinsight_risk_fleet_scrape_intervals_unparsed` | E |  -  | 1 | 1 | interval expressions that are not literals (arguments, env lookups). Non-zero means at least one pipeline's cadence is UNKNOWN rather than default |
 | `gcinsight_risk_label_cardinality_stacks_measured` | E |  -  | 1 | 1 | stacks whose Mimir top-cardinality label-name response was readable |
 | `gcinsight_risk_org_members_admins` | E |  -  | 1 | 1 | Grafana.com org Admin membership count. Reported without a target or grade |
 | `gcinsight_risk_org_members_viewers` | E |  -  | 1 | 1 | Grafana.com org Viewer membership count. Reported without a target or grade |
@@ -228,6 +232,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `risk_alert_routing_findings` | E | 1 | 1 | bounded named rule drill-down; rule identity stays out of metric labels |
 | `risk_fleet_attributes` | E | 1 | 1 | bounded active-collector version, OS, platform, source and type breakdowns |
 | `risk_fleet_pipelines` | E | 1 | 1 | named pipeline matcher reach; full Alloy contents are never retained |
+| `risk_fleet_scrape_intervals` | E | 1 | 1 | named pipelines whose declared scrape intervals differ from the default; parsed in memory, contents never retained |
 | `risk_label_cardinality` | E | 271 | 1 | Mimir top-cardinality label names and counts. Identity-bearing label names stay in S3 and Loki, never metric labels |
 | `risk_org_members` | E | 1 | 1 | clear-PII named org membership and staff-access-window drill-down |
 | `risk_plugin_version_drift` | E | 271 | 1 |  |

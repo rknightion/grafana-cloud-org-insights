@@ -90,6 +90,7 @@ def build_all(
     capability_adoption: dict[str, Any] | None = None,
     loki_config: dict[str, Any] | None = None,
     expected_retention_policy: tuple[dict[str, str], ...] = (),
+    fleet_default_scrape_interval_seconds: float = 60.0,
     score_weights: dict[str, float] | None = None,
     now: dt.datetime | None = None,
 ) -> tuple[Metrics, Views]:
@@ -104,7 +105,9 @@ def build_all(
         maturity.build(stacks, coverage, dataplane, stack_detail),
         risk.build(stacks, coverage, dataplane, stack_detail, access_policies, fleet=fleet,
                    public_dashboards=public_dashboards, service_accounts=service_accounts,
-                   alert_routing=alert_routing, org_members=org_members, now=now),
+                   alert_routing=alert_routing, org_members=org_members,
+                   fleet_default_scrape_interval_seconds=fleet_default_scrape_interval_seconds,
+                   now=now),
         retention.build(
             stacks,
             coverage,

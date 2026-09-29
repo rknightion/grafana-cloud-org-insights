@@ -19,6 +19,7 @@ from typing import Any, Mapping
 from collector.coverage import Coverage
 from collector import label_cardinality
 from collector.sources import public_dashboards as pubdash
+from collector.sources import scrape_intervals as SI
 from collector.sources import serviceaccounts as sa
 
 # Above this share of admins a stack is flagged. Estate median is 50%, so this is not a strict bar.
@@ -164,6 +165,15 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
         ("Collectors targeted", "number"), ("Enabled collectors targeted", "number"),
         ("Matchers", "string"), ("Updated at", "string"),
     ),
+    "risk_fleet_scrape_intervals": (
+        (" Stack", "string"), ("Pipeline", "string"), ("Enabled", "boolean"),
+        ("Source", "string"), ("Config type", "string"),
+        ("Shortest interval (s)", "number"), ("Intervals", "string"),
+        ("Default (s)", "number"), ("Direction", "string"),
+        ("DPM factor", "number"), ("Faster than default", "boolean"),
+        ("Unparsed intervals", "number"), ("Enabled collectors targeted", "number"),
+        ("Updated at", "string"),
+    ),
     "risk_public_dashboards": (
         (" Stack", "string"), ("Dashboard", "string"),
         ("Dashboard uid", "string"), ("Enabled", "boolean"),
@@ -272,6 +282,97 @@ def _label_cardinality(
     return measured, findings, finding_metrics
 
 
+def _scrape_direction(intervals: list[float], unparsed: int, default: float) -> str | None:
+    """How a pipeline's declared intervals sit against the default, or None when they all match it."""
+    faster = any(v < default for v in intervals)
+    slower = any(v > default for v in intervals)
+    if faster and slower:
+        return "mixed"
+    if faster:
+        return "faster"
+    if slower:
+        return "slower"
+    return "unparsed" if unparsed else None
+
+
+def _scrape_counts(pipeline: dict[str, Any], default: float) -> bool:
+    """Does this pipeline raise DPM on a live fleet: enabled, reaching a collector, faster than default?
+
+    Reach is `targeted_enabled`, the active collectors an ENABLED pipeline's matchers select. Zero is a
+    pipeline configuring nothing, so it cannot raise DPM. None (unparsed matchers) is unknown reach and
+    counts, because an unknown should surface for a human rather than hide a fast pipeline.
+    """
+    shortest = pipeline.get("scrape_interval_min_seconds")
+    reach = pipeline.get("targeted_enabled")
+    return (bool(pipeline.get("enabled")) and shortest is not None and shortest < default
+            and (reach is None or reach > 0))
+
+
+def _fleet_scrape_intervals(
+    fm_available: list[tuple[str, dict[str, Any]]], default: float,
+) -> tuple[list[tuple[str, dict[str, str], float]], list[dict[str, Any]] | None]:
+    """GCI-0046. Per-stack faster-than-default pipeline counts, and the named rows behind them.
+
+    Only stacks whose Fleet payload carries parsed intervals are measured. A payload hydrated from a
+    scan that predates the parser has no intervals at all, and a 0 there would be a clean bill of health
+    nobody measured.
+    """
+    measured = [(slug, fm) for slug, fm in fm_available if fm.get("scrape_intervals_parsed")]
+    if not measured:
+        return [], None
+    # A stack can fall back to a pre-parser payload while its neighbours are fresh. Its per-stack series
+    # is then absent, and the estate totals are withheld too: summed over a subset they would read as
+    # the whole estate.
+    complete = len(measured) == len(fm_available)
+    metrics: list[tuple[str, dict[str, str], float]] = []
+    rows: list[dict[str, Any]] = []
+    fast_stacks = 0
+    unparsed_total = 0
+    for slug, fm in measured:
+        fast = 0
+        for pipeline in fm.get("pipeline_detail") or []:
+            if not isinstance(pipeline, dict):
+                continue
+            intervals = [float(v) for v in pipeline.get("scrape_intervals") or []]
+            unparsed = int(pipeline.get("scrape_intervals_unparsed") or 0)
+            unparsed_total += unparsed
+            counts = _scrape_counts(pipeline, default)
+            fast += counts
+            direction = _scrape_direction(intervals, unparsed, default)
+            if direction is None:
+                continue
+            shortest = pipeline.get("scrape_interval_min_seconds")
+            rows.append({
+                " Stack": slug,
+                "Pipeline": pipeline.get("name"),
+                "Enabled": bool(pipeline.get("enabled")),
+                "Source": pipeline.get("source_type"),
+                "Config type": pipeline.get("config_type"),
+                "Shortest interval (s)": shortest,
+                "Intervals": SI.format_seconds(intervals) or None,
+                "Default (s)": default,
+                "Direction": direction,
+                # How many times the default cadence the shortest scrape writes. Per target, not per
+                # pipeline: it says how much faster, not how many series.
+                "DPM factor": round(default / shortest, 2) if shortest else None,
+                "Faster than default": counts,
+                "Unparsed intervals": unparsed,
+                "Enabled collectors targeted": pipeline.get("targeted_enabled"),
+                "Updated at": pipeline.get("updated_at"),
+            })
+        fast_stacks += fast > 0
+        metrics.append(("gcinsight_stack_fleet_fast_scrape_pipelines", {"stack": slug}, float(fast)))
+    if complete:
+        metrics.append(("gcinsight_risk_fleet_fast_scrape_stacks", {}, float(fast_stacks)))
+        metrics.append(("gcinsight_risk_fleet_scrape_intervals_unparsed", {}, float(unparsed_total)))
+    metrics.append(("gcinsight_risk_fleet_scrape_interval_default_seconds", {}, float(default)))
+    rows.sort(key=lambda r: (
+        not r["Faster than default"], r["Shortest interval (s)"] is None,
+        r["Shortest interval (s)"] or 0.0, r[" Stack"], r["Pipeline"] or "",
+    ))
+    return metrics, rows
+
+
 def build(
     stacks: list[dict[str, Any]],
     coverage: Coverage,
@@ -283,6 +384,7 @@ def build(
     service_accounts: dict[str, Any] | None = None,
     alert_routing: dict[str, Any] | None = None,
     org_members: dict[str, Any] | None = None,
+    fleet_default_scrape_interval_seconds: float = SI.IMPLICIT_DEFAULT_SECONDS,
     now: dt.datetime | None = None,
 ) -> tuple[list[tuple[str, dict[str, str], float]], dict[str, list[dict[str, Any]]]]:
     dataplane = dataplane or {}
@@ -400,6 +502,9 @@ def build(
         if unmatched:
             metrics.append(("gcinsight_risk_collectors_unconfigured", {},
                             float(sum(unmatched))))
+    scrape_metrics, scrape_rows = _fleet_scrape_intervals(
+        fm_available, float(fleet_default_scrape_interval_seconds))
+    metrics.extend(scrape_metrics)
 
     # --- T2 halves: service accounts and plugin drift. ---
     sa_rows: list[dict[str, Any]] = []
@@ -679,6 +784,10 @@ def build(
             row["Enabled"], -(row["Enabled collectors targeted"] or 0),
             row[" Stack"], row["Pipeline"] or "",
         ))
+    if scrape_rows is not None:
+        # Every pipeline whose declared intervals differ from the default, faster first. Slower and
+        # unparsed rows are context for a reader; only `Faster than default` rows count in the metric.
+        views["risk_fleet_scrape_intervals"] = scrape_rows
     if access_policies:
         views["risk_access_policies"] = sorted(
             [

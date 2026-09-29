@@ -13,6 +13,7 @@ import re
 from dataclasses import dataclass
 
 from collector import identity, observability_score
+from collector.sources import scrape_intervals
 
 GCOM = "https://grafana.com/api"
 
@@ -119,6 +120,10 @@ WRITER_SCOPES = ("metrics:write", "logs:write")
 OPT_OUT_ENV = "GCINSIGHT_OPT_OUT"
 DASHBOARD_DETAIL_ENV = "GCINSIGHT_DASHBOARD_DETAIL_ENABLED"
 RETENTION_POLICY_ENV = "GCINSIGHT_EXPECTED_RETENTION_POLICY"
+# The organisation's expected scrape cadence. A Fleet Management pipeline scraping faster than this raises
+# DPM and is published as a finding (GCI-0046). Policy, not inventory, so it is a tunable.
+FLEET_SCRAPE_INTERVAL_ENV = "GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL"
+FLEET_SCRAPE_INTERVAL_DEFAULT_SECONDS = 60.0
 _RETENTION_PERIOD = re.compile(r"^\d+(?:\.\d+)?[dh]$")
 
 
@@ -161,6 +166,16 @@ def _retention_policy(name: str = RETENTION_POLICY_ENV) -> tuple[dict[str, str],
     return tuple(policy)
 
 
+def _fleet_scrape_interval(name: str = FLEET_SCRAPE_INTERVAL_ENV) -> float:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return FLEET_SCRAPE_INTERVAL_DEFAULT_SECONDS
+    seconds = scrape_intervals.parse_duration(raw)
+    if seconds is None:
+        raise MissingConfig(f"{name} must be a positive duration such as 60s or 1m (got {raw!r})")
+    return seconds
+
+
 @dataclass(frozen=True)
 class Config:
     cap: str
@@ -181,6 +196,7 @@ class Config:
     coverage_score_weights: dict[str, float] | None = None
     dashboard_detail_enabled: bool = False
     expected_retention_policy: tuple[dict[str, str], ...] = ()
+    fleet_default_scrape_interval_seconds: float = FLEET_SCRAPE_INTERVAL_DEFAULT_SECONDS
 
     @property
     def redacted(self) -> dict[str, object]:
@@ -205,6 +221,7 @@ class Config:
             "dashboard_detail_enabled": self.dashboard_detail_enabled,
             # Selectors can contain customer label names and values. Count the policy, never log it.
             "expected_retention_policy_count": len(self.expected_retention_policy),
+            "fleet_default_scrape_interval_seconds": self.fleet_default_scrape_interval_seconds,
         }
 
 
@@ -255,4 +272,5 @@ def load(
         coverage_score_weights=score_weights,
         dashboard_detail_enabled=_optional_bool(DASHBOARD_DETAIL_ENV),
         expected_retention_policy=_retention_policy(),
+        fleet_default_scrape_interval_seconds=_fleet_scrape_interval(),
     )

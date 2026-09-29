@@ -146,6 +146,15 @@ SPECS: tuple[FindingSpec, ...] = (
         ("Collectors", "Pipelines", "FM dead", "Active series"),
     ),
     FindingSpec(
+        "risk_fleet_scrape_intervals", "E", "fleet_fast_scrape", "high",
+        "Enabled Fleet Management pipeline scrapes faster than the organisation's default interval, "
+        "raising DPM on a live fleet. A high-DPM stack bills across the whole organisation.",
+        ("Pipeline", "Shortest interval (s)", "Default (s)", "DPM factor",
+         "Enabled collectors targeted"),
+        # The view also carries slower and unparsed rows as context; only these count.
+        require=("Faster than default",),
+    ),
+    FindingSpec(
         "risk_plugin_drift", "E", "plugin_drift", "medium",
         "Installed plugin is behind its latest version.",
     ),

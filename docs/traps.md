@@ -430,6 +430,10 @@ shape. Read the schema at `/openapi/v3/apis/dashboard.grafana.app/v2` rather tha
  collectors with no `markedInactiveAt` whose `updatedAt` was eleven months old, and four of
  twenty-four sampled stacks had a newest `updatedAt` over ninety days. Recency of `updatedAt` is the
  stronger liveness test.
+- **Fleet Management has no scrape-interval field.** Intervals exist only inside pipeline `contents`,
+ as Alloy `scrape_interval = "15s"` or the OTel prometheus receiver's `scrape_interval: 15s`. An
+ omitted Alloy `prometheus.scrape` interval is 60s; `pyroscope.scrape` also takes `scrape_interval`
+ and adds no DPM, so match on the enclosing component, never on the attribute name alone.
 - **`remotecfg_*` is NOT a Fleet Management sentinel.** Measured against `ListCollectors` ground truth
  it has recall 0.47 under both a has-collectors and a checked-in-recently definition: it misses more
  than half of the stacks genuinely using Fleet Management, and it fires on stacks with no

@@ -60,6 +60,20 @@ Currency and billing period come from the card. Metrics-series pricing is per 1,
 - `base_rate_only` excludes DPM;
 - `dpm_aware` applies `max(active_series, total_dpm / included_dpm)` per stack, using live usage inputs and a dedicated dashboard calculation. It never falls back to the two-input base-series saving.
 
+## Fleet Management default scrape interval
+
+`GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL` is the organisation's expected scrape cadence, as a Go
+duration such as `60s`, `1m` or `1m30s`. It defaults to `60s`. Terraform exposes it as
+`fleet_default_scrape_interval`.
+
+The hourly tier already lists every Fleet Management pipeline; it parses each pipeline's declared
+`scrape_interval` values in memory and compares them with this default, so the check adds no Fleet
+Management calls. An enabled pipeline that reaches active collectors and declares a shorter interval
+raises DPM and is counted per stack, listed in `risk_fleet_scrape_intervals` and raises the paused
+`fleet_fast_scrape` alert rule. An omitted interval is the component default of 60s. An interval that
+is not a literal (a module argument or an environment lookup) is counted as unparsed, never as the
+default. Local Alloy and collector configs outside Fleet Management are not visible.
+
 ## Expected Loki retention policy
 
 `GCINSIGHT_EXPECTED_RETENTION_POLICY` is an optional JSON list of `selector` and `minimum_period`

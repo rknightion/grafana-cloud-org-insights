@@ -103,6 +103,20 @@ variable "expected_retention_policy" {
   }
 }
 
+variable "fleet_default_scrape_interval" {
+  description = "Expected scrape cadence; faster Fleet Management pipelines are reported as DPM findings."
+  type        = string
+  default     = "60s"
+
+  validation {
+    condition = (
+      can(regex("^([0-9]+([.][0-9]+)?(ms|s|m|h))+$", var.fleet_default_scrape_interval)) &&
+      !can(regex("^([0.]+(ms|s|m|h))+$", var.fleet_default_scrape_interval))
+    )
+    error_message = "fleet_default_scrape_interval must be a positive duration such as 60s, 1m or 1m30s."
+  }
+}
+
 variable "firehose_logs_enabled" {
   description = "Create the optional ECS-log Firehose stream without yet wiring the live CloudWatch log group."
   type        = bool

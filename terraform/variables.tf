@@ -176,6 +176,20 @@ variable "expected_retention_policy" {
   }
 }
 
+variable "fleet_default_scrape_interval" {
+  description = "The organisation's expected scrape cadence. Fleet Management pipelines scraping faster than this raise DPM and are reported as findings. Deployment policy, not discovered estate state."
+  type        = string
+  default     = "60s"
+
+  validation {
+    condition = (
+      can(regex("^([0-9]+([.][0-9]+)?(ms|s|m|h))+$", var.fleet_default_scrape_interval)) &&
+      !can(regex("^([0.]+(ms|s|m|h))+$", var.fleet_default_scrape_interval))
+    )
+    error_message = "fleet_default_scrape_interval must be a positive duration such as 60s, 1m or 1m30s."
+  }
+}
+
 # --- Credentials -----------------------------------------------------------------------------------
 
 variable "create_secret" {

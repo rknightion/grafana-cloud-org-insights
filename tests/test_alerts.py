@@ -541,7 +541,9 @@ class TestTitleMigration(unittest.TestCase):
 
     def test_the_table_covers_every_rule_the_builder_produces(self):
         """A rule left out of the table keeps its old title live for ever."""
-        built = {r["title"] for r in alerts.build_all(paused=True, receiver=None)}
+        born_after = {alerts.RULE_UIDS[key] for key in alerts.BORN_AFTER_RENAME}
+        built = {r["title"] for r in alerts.build_all(paused=True, receiver=None)
+                 if r["uid"] not in born_after}
         self.assertEqual(set(alerts.RENAMED_TITLES.values()), built)
 
     def test_no_new_title_still_contains_an_em_dash(self):

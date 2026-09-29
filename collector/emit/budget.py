@@ -318,6 +318,18 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                     "'collectors targeted' figure is UNKNOWN rather than small"),
     MetricSpec("gcinsight_risk_stacks_pipelines_no_collectors", "E",
                note="stacks with provisioned pipelines but no active collectors"),
+    MetricSpec("gcinsight_stack_fleet_fast_scrape_pipelines", "E", {"stack": STACK},
+               note="enabled, reaching Fleet pipelines scraping faster than the default interval. "
+                    "Per stack because the alert names the stack and remediation is a trend; ABSENT "
+                    "where Fleet was not read or the payload predates the interval parser"),
+    MetricSpec("gcinsight_risk_fleet_fast_scrape_stacks", "E",
+               note="stacks with at least one faster-than-default Fleet pipeline"),
+    MetricSpec("gcinsight_risk_fleet_scrape_interval_default_seconds", "E",
+               note="the deployment's configured default, so panels and readers compare against the "
+                    "same number the collector used"),
+    MetricSpec("gcinsight_risk_fleet_scrape_intervals_unparsed", "E",
+               note="interval expressions that are not literals (arguments, env lookups). Non-zero "
+                    "means at least one pipeline's cadence is UNKNOWN rather than default"),
 
     # --- Pillar F: business value. Rollups only; this is a leadership surface. ---
     MetricSpec("gcinsight_value_unit_cost_per_billed_user", "F"),
@@ -457,6 +469,9 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                note="bounded active-collector version, OS, platform, source and type breakdowns"),
     MetricSpec("risk_fleet_pipelines", "E", store="view",
                note="named pipeline matcher reach; full Alloy contents are never retained"),
+    MetricSpec("risk_fleet_scrape_intervals", "E", store="view",
+               note="named pipelines whose declared scrape intervals differ from the default; parsed "
+                    "in memory, contents never retained"),
 
     # --- Declared as views, deliberately. Zero series. This half of the table is the decision record. ---
     MetricSpec("estate", "A", {"stack": STACK}, store="view",

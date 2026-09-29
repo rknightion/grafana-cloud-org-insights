@@ -192,6 +192,7 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     "risk_fleet_dead": frozenset({"fleet"}),
     "risk_fleet_attributes": frozenset({"fleet"}),
     "risk_fleet_pipelines": frozenset({"fleet"}),
+    "risk_fleet_scrape_intervals": frozenset({"fleet"}),
     "risk_plugin_drift": frozenset({"stack_detail"}),
     "risk_service_accounts": frozenset({"service_accounts"}),
     "risk_summary": frozenset({"access_policies", "dataplane", "service_accounts"}),

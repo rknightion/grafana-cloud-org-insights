@@ -36,6 +36,7 @@ import datetime as dt
 from typing import Any, Callable, Mapping, Sequence
 
 from collector.sources import matchers as M
+from collector.sources import scrape_intervals as SI
 from collector.sources.dataplane import _connect_rpc, auth_for
 
 LIST_COLLECTORS = "collector.v1.CollectorService/ListCollectors"
@@ -113,9 +114,11 @@ def pipeline_record(
 
     **`contents` is never kept.** It is the full Alloy configuration - kilobytes per pipeline, and it is
     the customer's own config including whatever they put in it. The shape of a pipeline is answered by
-    its matchers and its source; the body is not this platform's business.
+    its matchers and its source; the body is not this platform's business. The one thing read from it is
+    the scrape intervals it declares (GCI-0046), parsed in memory into seconds and counts.
     """
     source = pipeline.get("source") or {}
+    config_type = pipeline.get("config_type") or pipeline.get("configType")
     return {
         "name": pipeline.get("name"),
         "enabled": bool(pipeline.get("enabled")),
@@ -123,10 +126,11 @@ def pipeline_record(
         # SOURCE_TYPE_GRAFANA means Grafana generated it; an absent source means somebody wrote it.
         # That distinction is the difference between "onboarding created this" and "a team owns this".
         "source_type": source.get("type") or "user",
-        "config_type": pipeline.get("config_type") or pipeline.get("configType"),
+        "config_type": config_type,
         "targeted": targeted,
         "targeted_enabled": targeted_enabled,
         "updated_at": pipeline.get("updatedAt"),
+        **SI.summarise(pipeline.get("contents"), config_type),
     }
 
 
@@ -200,6 +204,10 @@ def probe_stack(stack: Mapping[str, Any], cap: str) -> dict[str, Any]:
         }),
         "attributes": attribute_breakdown(alive),
         "pipeline_detail": pipe_rows,
+        # Marks a payload whose pipeline rows carry scrape intervals. A hydrated scan from before
+        # GCI-0046 has none, and reading its missing intervals as "no fast pipelines" would publish a
+        # clean zero for every stack.
+        "scrape_intervals_parsed": True,
     }
 
 

@@ -59,6 +59,13 @@ serialises the list into the collector task environment. Its empty default disab
 reporting; no selector or period is embedded in this module. Treat selectors as customer data and
 keep deployment-specific values in the consumer configuration.
 
+## Fleet Management default scrape interval
+
+`fleet_default_scrape_interval` (default `60s`) is the cadence Fleet Management pipelines are compared
+against. An enabled pipeline that reaches live collectors and declares a shorter `scrape_interval` is
+counted on the Risk dashboard's Fleet tab and by the paused `fleet_fast_scrape` alert rule, because it
+raises DPM. Set it to the organisation's agreed cadence; it accepts Go durations such as `30s` or `1m`.
+
 ## Optional ECS task logs through Data Firehose
 
 The collector already writes its structured application records to Loki. The optional Firehose path is

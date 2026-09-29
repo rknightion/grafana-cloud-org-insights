@@ -798,6 +798,8 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         ratecard=rate_card,
         score_weights=getattr(cfg, "coverage_score_weights", None),
         expected_retention_policy=getattr(cfg, "expected_retention_policy", ()),
+        fleet_default_scrape_interval_seconds=getattr(
+            cfg, "fleet_default_scrape_interval_seconds", 60.0),
         **inputs,
     )
     scan_inputs = prov
@@ -1004,6 +1006,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         ratecard=rate_card,
         score_weights=getattr(cfg, "coverage_score_weights", None),
         expected_retention_policy=getattr(cfg, "expected_retention_policy", ()),
+        fleet_default_scrape_interval_seconds=getattr(
+            cfg, "fleet_default_scrape_interval_seconds", 60.0),
         **inputs,
     )
     scan_inputs = prov
@@ -1055,6 +1059,8 @@ def run_t3(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         ratecard=rate_card,
         score_weights=getattr(cfg, "coverage_score_weights", None),
         expected_retention_policy=getattr(cfg, "expected_retention_policy", ()),
+        fleet_default_scrape_interval_seconds=getattr(
+            cfg, "fleet_default_scrape_interval_seconds", 60.0),
         **inputs,
     )
     scan_inputs = prov

@@ -199,6 +199,10 @@ configured prefix.
 `expected_retention_policy` list. Leave it empty to disable selector-policy findings. See
 `docs/configuration.md` for the JSON shape; never put an organisation's selectors in this repository.
 
+`GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL` defaults to `60s` and is supplied by Terraform's
+`fleet_default_scrape_interval`. Fleet pipelines scraping faster than it are DPM findings; see
+`docs/configuration.md`.
+
 `GCINSIGHT_READER_PRODUCT_READS` is optional and defaults to empty. The only accepted values are
 `slo` and `synthetic-monitoring`, comma-separated. An unknown value stops the provisioner before any
 write. Enabling a family reconciles its exact read and plugin-access pairs on the per-stack custom

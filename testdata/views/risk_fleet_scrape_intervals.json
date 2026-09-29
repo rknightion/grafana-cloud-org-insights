@@ -1,0 +1,154 @@
+{
+  "meta": {
+    "generated_at": "2026-09-29T16:25:46.546457+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack036",
+      "Pipeline": "pipeline-020",
+      "Enabled": true,
+      "Source": "user",
+      "Config type": "CONFIG_TYPE_ALLOY",
+      "Shortest interval (s)": 15,
+      "Intervals": "15s, 1m",
+      "Default (s)": 60,
+      "Direction": "faster",
+      "DPM factor": 4,
+      "Faster than default": true,
+      "Unparsed intervals": 0,
+      "Enabled collectors targeted": 8,
+      "Updated at": "2026-05-07T14:40:55Z"
+    },
+    {
+      " Stack": "stack037",
+      "Pipeline": "pipeline-003",
+      "Enabled": true,
+      "Source": "SOURCE_TYPE_GRAFANA",
+      "Config type": "CONFIG_TYPE_ALLOY",
+      "Shortest interval (s)": 30,
+      "Intervals": "30s",
+      "Default (s)": 60,
+      "Direction": "faster",
+      "DPM factor": 2,
+      "Faster than default": true,
+      "Unparsed intervals": 0,
+      "Enabled collectors targeted": 26,
+      "Updated at": "2026-04-27T16:06:39Z"
+    },
+    {
+      " Stack": "stack020",
+      "Pipeline": "pipeline-012",
+      "Enabled": false,
+      "Source": "user",
+      "Config type": "CONFIG_TYPE_ALLOY",
+      "Shortest interval (s)": 10,
+      "Intervals": "10s",
+      "Default (s)": 60,
+      "Direction": "faster",
+      "DPM factor": 6,
+      "Faster than default": false,
+      "Unparsed intervals": 0,
+      "Enabled collectors targeted": 0,
+      "Updated at": "2026-02-23T05:48:26Z"
+    },
+    {
+      " Stack": "stack001b",
+      "Pipeline": "pipeline-003",
+      "Enabled": true,
+      "Source": "SOURCE_TYPE_GRAFANA",
+      "Config type": "CONFIG_TYPE_ALLOY",
+      "Shortest interval (s)": 300,
+      "Intervals": "5m",
+      "Default (s)": 60,
+      "Direction": "slower",
+      "DPM factor": 0.2,
+      "Faster than default": false,
+      "Unparsed intervals": 0,
+      "Enabled collectors targeted": 0,
+      "Updated at": "2026-04-30T01:57:14Z"
+    },
+    {
+      " Stack": "obs-hub",
+      "Pipeline": "pipeline-014",
+      "Enabled": true,
+      "Source": "user",
+      "Config type": "CONFIG_TYPE_ALLOY",
+      "Shortest interval (s)": null,
+      "Intervals": null,
+      "Default (s)": 60,
+      "Direction": "unparsed",
+      "DPM factor": null,
+      "Faster than default": false,
+      "Unparsed intervals": 1,
+      "Enabled collectors targeted": 1,
+      "Updated at": "2026-02-26T13:46:41Z"
+    }
+  ]
+}

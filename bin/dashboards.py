@@ -1599,6 +1599,7 @@ def d_risk(ds: str):
     fleet_detail_views_live = _published_views_exist(
         "risk_fleet_attributes", "risk_fleet_pipelines",
     )
+    fleet_scrape_view_live = _published_views_exist("risk_fleet_scrape_intervals")
     public_dashboard_view_live = _published_views_exist("risk_public_dashboards")
     alert_routing_views_live = _published_views_exist(
         "risk_alert_routing", "risk_alert_routing_findings",
@@ -1720,6 +1721,38 @@ def d_risk(ds: str):
                         "'collectors targeted' figure is UNKNOWN rather than small**, and the affected "
                         "pipeline reports no count rather than a wrong one. It should be zero; if it is "
                         "not, Fleet Management has grown a matcher shape the evaluator needs teaching."),
+        "n_scrape_fast_stacks": build.stat_panel(
+            "Stacks scraping faster than default",
+            "gcinsight_risk_fleet_fast_scrape_stacks",
+            description="Stacks with at least one ENABLED Fleet Management pipeline, reaching live "
+                        "collectors, whose shortest declared `scrape_interval` is below the default. "
+                        "Faster scrapes raise DPM, and a high-DPM stack bills across the whole "
+                        "organisation. Only Fleet-managed configuration is visible: local Alloy or "
+                        "collector configs can over-scrape without appearing here."),
+        "n_scrape_fast_pipelines": build.stat_panel(
+            "Pipelines scraping faster than default",
+            "sum(gcinsight_stack_fleet_fast_scrape_pipelines)",
+            description="The pipelines behind the stack count. A disabled pipeline, or one whose "
+                        "matchers reach no active collector, configures nothing and is not counted. "
+                        "The table on this tab names them with their DPM factor against the default."),
+        "n_scrape_default": build.stat_panel(
+            "Default scrape interval", "gcinsight_risk_fleet_scrape_interval_default_seconds",
+            unit="s",
+            description="The comparison point, from `GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL` (60s "
+                        "unless the deployment overrides it). Published so the panels and the collector "
+                        "provably use the same number."),
+        "n_scrape_unparsed": build.stat_panel(
+            "Scrape intervals not understood",
+            "gcinsight_risk_fleet_scrape_intervals_unparsed",
+            description="Declared intervals that are not literal durations: a module argument or an "
+                        "environment lookup. **Any value above zero means at least one pipeline's "
+                        "cadence is UNKNOWN**, and it is not counted as fast. An omitted interval is "
+                        "not unparsed; it is the component default of 60s."),
+        "t_scrape_fast": build.timeseries_panel(
+            "Faster-than-default pipelines by stack",
+            [("topk(10, gcinsight_stack_fleet_fast_scrape_pipelines > 0)", "{{stack}}")],
+            description="Direction of travel for the remediation queue. A line falling to nothing is a "
+                        "stack whose fast pipelines were slowed, disabled or retargeted."),
         "t_collectors": build.timeseries_panel(
             "Collector registrations: active vs inactive",
             [("gcinsight_risk_collectors_active", "active"),
@@ -2202,6 +2235,20 @@ def d_risk(ds: str):
                             "review queue. Target counts are DERIVED by evaluating matchers against "
                             "active collectors."),
         })
+    if fleet_scrape_view_live:
+        el["fleet_scrape_intervals"] = build.table_panel(
+            "Pipeline scrape intervals against the default", "risk_fleet_scrape_intervals", ds,
+            schema=risk_pillar.VIEW_SCHEMAS["risk_fleet_scrape_intervals"],
+            columns=["Stack", "Pipeline", "Faster than default", "Shortest interval (s)", "Intervals",
+                     "Default (s)", "DPM factor", "Direction", "Enabled",
+                     "Enabled collectors targeted", "Unparsed intervals", "Source", "Config type",
+                     "Updated at"],
+            description="Every pipeline whose declared scrape intervals differ from the default, "
+                        "counted rows first. `Faster than default` is the counted set: enabled, "
+                        "reaching active collectors, and below the default. `DPM factor` is the default "
+                        "divided by the shortest interval, so 4 means four times the default cadence "
+                        "per target. Slower and unparsed rows are context, not findings. Intervals are "
+                        "parsed from the pipeline body in memory; the body is never stored.")
     if public_dashboard_view_live:
         el["public_dashboards"] = build.table_panel(
             "Public dashboards that exist", "risk_public_dashboards", ds,
@@ -2256,7 +2303,16 @@ def d_risk(ds: str):
                   max_columns=5, row_height="short"),
         build.row("Trend", ["t_collectors", "t_coll_top"], max_columns=1),
         build.row("Configured and dead", ["fleet"], max_columns=1),
+        build.row("Scrape intervals against the default",
+                  ["n_scrape_fast_stacks", "n_scrape_fast_pipelines", "n_scrape_default",
+                   "n_scrape_unparsed"],
+                  max_columns=4, row_height="short"),
+        build.row("Scrape interval trend", ["t_scrape_fast"], max_columns=1),
     ]
+    if fleet_scrape_view_live:
+        collector_rows.append(
+            build.row("Pipelines scraping off the default", ["fleet_scrape_intervals"],
+                      max_columns=1, row_height="tall"))
     if fleet_detail_views_live:
         collector_rows.extend([
             build.row("Active collector attributes", ["fleet_attributes"],

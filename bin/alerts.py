@@ -83,6 +83,7 @@ RULE_UIDS: dict[str, str] = identity.json_mapping("GCINSIGHT_ALERT_RULE_UIDS_JSO
     "staleness_t4": "gcinsight-stale-t4",
     "input": "gcinsight-input",
     "credential_gap": "gcinsight-credential-gap",
+    "fleet_fast_scrape": "gcinsight-fleet-fast-scrape",
 })
 
 # How often the group is evaluated. One minute would be waste: the fastest tier writes hourly, so
@@ -375,6 +376,59 @@ def credential_gap_rule(*, paused: bool = True, receiver: str | None = None) -> 
     }
 
 
+def fleet_fast_scrape_rule(*, paused: bool = True, receiver: str | None = None) -> dict:
+    """A stack runs an enabled Fleet Management pipeline that scrapes faster than the default (GCI-0046).
+
+    **An estate finding, not platform health**, unlike every other rule here. It exists because a
+    high-DPM stack bills across the whole organisation and a faster-than-default scrape interval is one
+    of the few DPM drivers visible centrally. Local Alloy and collector configs outside Fleet Management
+    are invisible to it, so silence is not proof that no stack over-scrapes.
+
+    Per stack, so the alert names which one. `last_over_time` over a window longer than two hourly T1
+    runs: Mimir's 5 minute lookback leaves a bare instant selector empty most of the time, and the LAST
+    sample rather than the maximum lets the rule clear on the first run after a remediation.
+    `noDataState: OK` because a stack without Fleet Management has no series and must not page.
+    """
+    return {
+        "uid": RULE_UIDS["fleet_fast_scrape"],
+        "title": alert_title("a Fleet pipeline scrapes faster than the default interval"),
+        "ruleGroup": RULE_GROUP,
+        "folderUID": FOLDER_UID,
+        "condition": "threshold",
+        # Two hourly runs. A pipeline edited and reverted within the hour should not page.
+        "for": "2h",
+        "noDataState": "OK",
+        "execErrState": "OK",
+        "isPaused": paused,
+        "notification_settings": {"receiver": receiver} if receiver else None,
+        "labels": {"service": SERVICE_LABEL, "severity": "warning"},
+        "annotations": {
+            "summary": "A stack has an enabled Fleet Management pipeline, reaching live collectors, "
+                       "that scrapes faster than the organisation's default interval and so raises DPM.",
+            "description": (
+                "`gcinsight_stack_fleet_fast_scrape_pipelines` counts, for the stack in this alert's "
+                "labels, enabled pipelines whose shortest declared `scrape_interval` is below "
+                "`gcinsight_risk_fleet_scrape_interval_default_seconds`, the deployment's configured "
+                "default (`GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL`, 60s unless overridden).\n\n"
+                "Read `views/risk_fleet_scrape_intervals.json` (Risk dashboard, Fleet tab, scrape "
+                "interval table) for which pipelines, their intervals, the DPM factor against the "
+                "default and how many active collectors they reach.\n\n"
+                "Remediate in Fleet Management by raising the interval, or record the exception. A "
+                "pipeline whose interval is an argument or environment lookup is counted as UNPARSED, "
+                "not fast; check `gcinsight_risk_fleet_scrape_intervals_unparsed` before reading a "
+                "quiet rule as a clean estate.\n\n"
+                "This rule must route only to the receiver explicitly nominated at activation and must "
+                "never inherit the stack's notification policy."
+            ),
+        },
+        "data": [
+            _expr_node("max by (stack) "
+                       "(last_over_time(gcinsight_stack_fleet_fast_scrape_pipelines[3h]))"),
+            _threshold_node("query", gt=0),
+        ],
+    }
+
+
 def build_all(*, paused: bool = True, receiver: str | None = None) -> list[dict]:
     """Paused by DEFAULT, and that default is a safety property rather than timidity.
 
@@ -391,6 +445,7 @@ def build_all(*, paused: bool = True, receiver: str | None = None) -> list[dict]
         + [coverage_rule(paused=paused, receiver=receiver)]
         + [input_rule(paused=paused, receiver=receiver)]
         + [credential_gap_rule(paused=paused, receiver=receiver)]
+        + [fleet_fast_scrape_rule(paused=paused, receiver=receiver)]
     )
     return identity.map_tree(rules)
 
@@ -518,6 +573,10 @@ RENAMED_TITLES: dict[str, str] = {
     "Estate insights - a stack has been without its Assistant credential for 48h":
         "Estate insights: a stack has been without its Assistant credential for 48h",
 }
+
+
+# Rules created after the title rename. They never had an old title, so there is nothing to migrate.
+BORN_AFTER_RENAME: frozenset[str] = frozenset({"fleet_fast_scrape"})
 
 
 def migrate_titles(token: str, *, dry_run: bool = False) -> int:
