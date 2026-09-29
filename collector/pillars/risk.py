@@ -171,8 +171,8 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
         ("Shortest interval (s)", "number"), ("Intervals", "string"),
         ("Interval attributes", "string"), ("Default (s)", "number"), ("Direction", "string"),
         ("DPM factor", "number"), ("Faster than default", "boolean"),
-        ("Unparsed intervals", "number"), ("Enabled collectors targeted", "number"),
-        ("Updated at", "string"),
+        ("Unparsed intervals", "number"), ("Imported modules", "number"),
+        ("Enabled collectors targeted", "number"), ("Updated at", "string"),
     ),
     "risk_public_dashboards": (
         (" Stack", "string"), ("Dashboard", "string"),
@@ -282,8 +282,14 @@ def _label_cardinality(
     return measured, findings, finding_metrics
 
 
-def _scrape_direction(intervals: list[float], unparsed: int, default: float) -> str | None:
-    """How a pipeline's declared intervals sit against the default, or None when they all match it."""
+def _scrape_direction(
+    intervals: list[float], unparsed: int, default: float, opaque: int = 0,
+) -> str | None:
+    """How a pipeline's declared intervals sit against the default, or None when they all match it.
+
+    A pipeline importing modules is "partly visible" rather than None: an imported component can scrape
+    at any cadence without it showing in the body, so it must not read as matching the default.
+    """
     faster = any(v < default for v in intervals)
     slower = any(v > default for v in intervals)
     if faster and slower:
@@ -292,7 +298,9 @@ def _scrape_direction(intervals: list[float], unparsed: int, default: float) -> 
         return "faster"
     if slower:
         return "slower"
-    return "unparsed" if unparsed else None
+    if unparsed:
+        return "unparsed"
+    return "partly visible" if opaque else None
 
 
 def _scrape_counts(pipeline: dict[str, Any], default: float) -> bool:
@@ -338,7 +346,8 @@ def _fleet_scrape_intervals(
             unparsed_total += unparsed
             counts = _scrape_counts(pipeline, default)
             fast += counts
-            direction = _scrape_direction(intervals, unparsed, default)
+            opaque = pipeline.get("opaque_modules")
+            direction = _scrape_direction(intervals, unparsed, default, int(opaque or 0))
             if direction is None:
                 continue
             shortest = pipeline.get("scrape_interval_min_seconds")
@@ -359,6 +368,8 @@ def _fleet_scrape_intervals(
                 "DPM factor": round(default / shortest, 2) if shortest else None,
                 "Faster than default": counts,
                 "Unparsed intervals": unparsed,
+                # GCI-0049. Absent on a payload predating it, so unknown rather than zero.
+                "Imported modules": opaque,
                 "Enabled collectors targeted": pipeline.get("targeted_enabled"),
                 "Updated at": pipeline.get("updated_at"),
             })

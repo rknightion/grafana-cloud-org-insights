@@ -122,6 +122,80 @@ class AlloyTest(unittest.TestCase):
                          ([10.0], 0))
 
 
+IMPORTED = '''
+import.git "k8s" {
+  repository     = "https://example.invalid/modules.git"
+  path           = "metrics.alloy"
+  pull_frequency = "5m"
+}
+
+k8s.pods "fast" {
+  forward_to      = [prometheus.remote_write.default.receiver]
+  scrape_interval = "15s"
+}
+
+k8s.nodes "templated" {
+  forward_to      = [prometheus.remote_write.default.receiver]
+  scrape_interval = sys.env("NODE_INTERVAL")
+}
+
+k8s.logs "unscraped" {
+  forward_to = [loki.write.default.receiver]
+}
+'''
+
+DECLARED = '''
+declare "scraper" {
+  argument "interval" {
+    optional = true
+    default  = "30s"
+  }
+  argument "targets" { }
+
+  prometheus.scrape "inner" {
+    targets         = argument.targets.value
+    forward_to      = [prometheus.remote_write.default.receiver]
+    scrape_interval = argument.interval.value
+  }
+}
+
+scraper "fast" {
+  targets  = discovery.kubernetes.pods.targets
+  interval = "10s"
+}
+
+scraper "defaulted" {
+  targets = discovery.kubernetes.pods.targets
+}
+'''
+
+
+class WrappedComponentTest(unittest.TestCase):
+    """GCI-0049. A scrape wrapped in a declared or imported component still sets a cadence."""
+
+    def test_an_imported_invocation_interval_is_read_and_an_expression_is_unparsed(self):
+        # 15s from the literal, the sys.env expression is unparsed, and neither the import's own
+        # pull_frequency nor the log component (no interval) is a scrape cadence.
+        self.assertEqual(SI.alloy_intervals(IMPORTED), ([15.0], 1))
+
+    def test_a_declared_argument_resolves_at_each_call_site_or_to_its_default(self):
+        self.assertEqual(sorted(SI.alloy_intervals(DECLARED)[0]), [10.0, 30.0])
+        self.assertEqual(SI.alloy_intervals(DECLARED)[1], 0)
+
+    def test_an_argument_with_no_literal_at_the_call_site_or_default_is_unparsed(self):
+        body = DECLARED.replace('default  = "30s"', "")
+        self.assertEqual(SI.alloy_intervals(body), ([10.0], 1))
+
+    def test_a_declared_component_nobody_calls_scrapes_nothing(self):
+        """Dead configuration adds no DPM, so its default must not become a finding."""
+        body = DECLARED.split('scraper "fast"')[0]
+        self.assertEqual(SI.alloy_intervals(body), ([], 0))
+
+    def test_imported_modules_are_counted_so_the_pipeline_reads_as_partly_visible(self):
+        self.assertEqual(SI.summarise(IMPORTED, "CONFIG_TYPE_ALLOY")["opaque_modules"], 1)
+        self.assertEqual(SI.summarise(ALLOY, "CONFIG_TYPE_ALLOY")["opaque_modules"], 0)
+
+
 class OtelTest(unittest.TestCase):
     def test_it_reads_wired_prometheus_receivers_with_inheritance(self):
         intervals, unparsed = SI.otel_intervals(OTEL)
@@ -229,6 +303,17 @@ class PillarTest(unittest.TestCase):
         self.assertEqual(rows["fast"]["DPM factor"], 4.0)
         self.assertEqual(rows["slow"]["Direction"], "slower")
         self.assertFalse(rows["off"]["Faster than default"])
+
+    def test_a_pipeline_with_opaque_modules_is_listed_rather_than_read_as_default(self):
+        """An imported module can scrape at any cadence; with no interval visible, that is unknown."""
+        opaque = _pipe("imports", [])
+        opaque["opaque_modules"] = 2
+        per_stack, _, views = self._build({"a": _fm([opaque, _pipe("plain", [])])})
+        self.assertEqual(per_stack["a"], 0.0)
+        rows = {r["Pipeline"]: r for r in views["risk_fleet_scrape_intervals"]}
+        self.assertEqual(set(rows), {"imports"})
+        self.assertEqual(rows["imports"]["Direction"], "partly visible")
+        self.assertEqual(rows["imports"]["Imported modules"], 2)
 
     def test_unknown_reach_counts_so_an_unparsed_matcher_cannot_hide_a_fast_pipeline(self):
         pipe = _pipe("fast", [15.0])

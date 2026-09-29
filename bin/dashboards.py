@@ -2242,16 +2242,19 @@ def d_risk(ds: str):
             schema=risk_pillar.VIEW_SCHEMAS["risk_fleet_scrape_intervals"],
             columns=["Stack", "Pipeline", "Faster than default", "Shortest interval (s)", "Intervals",
                      "Interval attributes", "Default (s)", "DPM factor", "Direction", "Enabled",
-                     "Enabled collectors targeted", "Unparsed intervals", "Source", "Config type",
-                     "Updated at"],
+                     "Enabled collectors targeted", "Unparsed intervals", "Imported modules", "Source",
+                     "Config type", "Updated at"],
             description="Every pipeline whose declared scrape intervals differ from the default, "
                         "counted rows first. `Faster than default` is the counted set: enabled, "
                         "reaching active collectors, and below the default. `DPM factor` is the default "
                         "divided by the shortest interval, so 4 means four times the default cadence "
                         "per target. Slower and unparsed rows are context, not findings. Intervals are "
                         "Alloy and OTel `scrape_interval` plus explicit OTel `collection_interval` on "
-                        "other pull receivers; `Interval attributes` says which. They are parsed from "
-                        "the pipeline body in memory; the body is never stored.")
+                        "other pull receivers; `Interval attributes` says which. A scrape inside a declared "
+                        "component is resolved at each call site. `partly visible` rows import modules "
+                        "whose own scrape cadence cannot be read here, so check the module before "
+                        "reading them as compliant. Intervals are parsed from the pipeline body in "
+                        "memory; the body is never stored.")
     if public_dashboard_view_live:
         el["public_dashboards"] = build.table_panel(
             "Public dashboards that exist", "risk_public_dashboards", ds,

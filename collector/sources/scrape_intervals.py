@@ -22,6 +22,12 @@ OTel pull receivers other than prometheus (hostmetrics, kubeletstats, database r
 the default differs per receiver (1m for most, 10s for some), and guessing it would invent a finding or
 hide one. Each pipeline records which attributes its intervals came from.
 
+A scrape can be wrapped in a custom component (GCI-0049). Inside a local `declare`, a
+`scrape_interval = argument.x.value` is resolved at each call site, falling back to the argument's
+`default`, and stays unparsed when neither is a literal. A component from an `import.*` module is
+opaque: an interval-named literal on its invocation is read, and the pipeline records how many modules
+it imports so a missing interval there reads as partly visible rather than as the default.
+
 Deliberately out of scope: `pyroscope.scrape` (profiles do not add DPM) and local configuration outside
 Fleet Management, which this platform cannot read.
 """
@@ -133,11 +139,85 @@ def _component(blocks: list[tuple[int, int, str]], pos: int) -> str | None:
     return best[1] if best else None
 
 
+# A labelled block header, read from the ORIGINAL text so the label survives string masking.
+_LABELLED = re.compile(r'^([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s*"([^"\n]*)"\s*$')
+_ANY_ASSIGN = re.compile(r"(?<![\w.])([A-Za-z_]\w*)\s*=(?!=)\s*")
+_ARGUMENT_REF = re.compile(r"argument\.([A-Za-z_]\w*)\.value\b")
+# Interval-named attributes on an opaque module's invocation. `manual_scrape_interval` is already read
+# wherever it appears, so it is left to the main pass rather than counted twice.
+_WRAPPED_ATTRIBUTE = re.compile(r"\w*scrape_interval")
+
+
+class _Alloy:
+    """One masked Alloy body with its block structure and the custom components it defines."""
+
+    def __init__(self, contents: str) -> None:
+        self.contents = contents
+        self.masked, strings = _mask_alloy(contents)
+        self.string_at = {start: end for start, end in strings}
+        self.blocks = _alloy_blocks(self.masked)
+        self.labelled: list[tuple[int, int, str, str]] = []
+        for start, stop, _header in self.blocks:
+            line_start = self.masked.rfind("\n", 0, start) + 1
+            cut = max(self.masked.rfind("{", line_start, start), self.masked.rfind("}", line_start, start))
+            m = _LABELLED.match(self.contents[max(cut + 1, line_start):start].strip())
+            if m:
+                self.labelled.append((start, stop, m.group(1), m.group(2)))
+        self.declares = {label: (start, stop) for start, stop, name, label in self.labelled
+                         if name == "declare"}
+        self.namespaces = {label for _s, _e, name, label in self.labelled if name.startswith("import.")}
+
+    def innermost(self, pos: int) -> int | None:
+        starts = [start for start, stop, _h in self.blocks if start < pos < stop]
+        return max(starts) if starts else None
+
+    def declare_at(self, pos: int) -> str | None:
+        inside = [(start, label) for label, (start, stop) in self.declares.items() if start < pos < stop]
+        return max(inside)[1] if inside else None
+
+    def attributes(self, start: int, stop: int) -> dict[str, str | None]:
+        """Attributes set directly in one block: the literal string value, or None for an expression."""
+        out: dict[str, str | None] = {}
+        for m in _ANY_ASSIGN.finditer(self.masked, start + 1, stop):
+            if self.innermost(m.start()) != start:
+                continue
+            end = self.string_at.get(m.end())
+            out[m.group(1)] = self.contents[m.end() + 1:end - 1] if end else None
+        return out
+
+    def calls(self, component: str) -> list[tuple[int, int]]:
+        return [(start, stop) for start, stop, name, _label in self.labelled if name == component]
+
+    def resolve_argument(self, component: str, argument: str) -> tuple[list[float], int]:
+        """Every value a declared component's argument takes: per call site, else its default.
+
+        A component nobody calls runs nothing, so it contributes neither an interval nor an unparsed one.
+        """
+        default: float | None = None
+        for start, stop, name, label in self.labelled:
+            if name == "argument" and label == argument and self.declare_at(start) == component:
+                default = parse_duration(self.attributes(start, stop).get("default"))
+        sites = self.calls(component)
+        intervals: list[float] = []
+        unparsed = 0
+        for start, stop in sites:
+            attributes = self.attributes(start, stop)
+            value = parse_duration(attributes[argument]) if argument in attributes else default
+            if value is None:
+                unparsed += 1
+            else:
+                intervals.append(value)
+        return intervals, unparsed
+
+    def opaque_invocations(self) -> list[tuple[int, int]]:
+        return [(start, stop) for start, stop, name, _label in self.labelled
+                if "." in name and name.split(".")[0] in self.namespaces]
+
+
 def alloy_intervals(contents: str) -> tuple[list[float], int]:
     """(interval seconds, unparsed count) for one Alloy configuration."""
-    masked, strings = _mask_alloy(contents)
-    blocks = _alloy_blocks(masked)
-    string_at = {start: end for start, end in strings}
+    doc = _Alloy(contents)
+    masked, blocks = doc.masked, doc.blocks
     intervals: list[float] = []
     unparsed = 0
     explicit_blocks: set[int] = set()
@@ -146,12 +226,19 @@ def alloy_intervals(contents: str) -> tuple[list[float], int]:
         component = _component(blocks, m.start())
         if name != "manual_scrape_interval" and not (component or "").startswith("prometheus."):
             continue  # pyroscope.scrape and friends do not add DPM
-        end = string_at.get(pos)
-        seconds = parse_duration(contents[pos + 1:end - 1]) if end else None
-        if seconds is None:
-            unparsed += 1
+        end = doc.string_at.get(pos)
+        reference = None if end else _ARGUMENT_REF.match(masked, pos)
+        declared = doc.declare_at(m.start()) if reference else None
+        if declared:
+            found, missing = doc.resolve_argument(declared, reference.group(1))
+            intervals.extend(found)
+            unparsed += missing
         else:
-            intervals.append(seconds)
+            seconds = parse_duration(contents[pos + 1:end - 1]) if end else None
+            if seconds is None:
+                unparsed += 1
+            else:
+                intervals.append(seconds)
         for start, stop, header in blocks:
             if start < m.start() < stop and header.startswith("prometheus.scrape"):
                 explicit_blocks.add(start)
@@ -159,7 +246,21 @@ def alloy_intervals(contents: str) -> tuple[list[float], int]:
         m = _ALLOY_HEADER.search(header)
         if m and m.group(1) == "prometheus.scrape" and start not in explicit_blocks:
             intervals.append(IMPLICIT_DEFAULT_SECONDS)
+    for start, stop in doc.opaque_invocations():
+        for attribute, value in doc.attributes(start, stop).items():
+            if attribute == "manual_scrape_interval" or not _WRAPPED_ATTRIBUTE.fullmatch(attribute):
+                continue
+            seconds = parse_duration(value)
+            if seconds is None:
+                unparsed += 1
+            else:
+                intervals.append(seconds)
     return intervals, unparsed
+
+
+def alloy_opaque_modules(contents: str) -> int:
+    """How many `import.*` modules a configuration loads. Their components are not visible here."""
+    return len(_Alloy(contents).namespaces)
 
 
 # --- OTel YAML --------------------------------------------------------------------------------------
@@ -341,8 +442,9 @@ def summarise(contents: Any, config_type: Any) -> dict[str, Any]:
     """
     if not isinstance(contents, str) or not contents.strip():
         return {"scrape_intervals": [], "scrape_interval_min_seconds": None,
-                "scrape_intervals_unparsed": 0, "interval_attributes": []}
-    if str(config_type or "").upper().endswith("OTEL"):
+                "scrape_intervals_unparsed": 0, "interval_attributes": [], "opaque_modules": 0}
+    otel = str(config_type or "").upper().endswith("OTEL")
+    if otel:
         parts = {"scrape_interval": otel_intervals(contents),
                  "collection_interval": otel_collection_intervals(contents)}
     else:
@@ -355,6 +457,8 @@ def summarise(contents: Any, config_type: Any) -> dict[str, Any]:
         "scrape_interval_min_seconds": distinct[0] if distinct else None,
         "scrape_intervals_unparsed": unparsed,
         "interval_attributes": sorted(name for name, (values, n) in parts.items() if values or n),
+        # GCI-0049. Imported modules can scrape at any cadence without showing it here.
+        "opaque_modules": 0 if otel else alloy_opaque_modules(contents),
     }
 
 

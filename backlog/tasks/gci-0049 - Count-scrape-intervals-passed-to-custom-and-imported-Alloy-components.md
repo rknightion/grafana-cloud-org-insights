@@ -1,10 +1,10 @@
 ---
 id: GCI-0049
 title: Count scrape intervals passed to custom and imported Alloy components
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-29 21:55'
-updated_date: '2026-09-29 21:58'
+updated_date: '2026-09-29 22:08'
 labels: []
 dependencies: []
 priority: high
@@ -20,10 +20,10 @@ An Alloy pipeline can wrap its scrape in a custom component: a local declare blo
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 An interval-named literal on a custom or imported component invocation is counted as an interval, and a non-literal one as unparsed, proven by a failing-then-passing test
-- [ ] #2 A declare whose prometheus.scrape reads argument.<name>.value resolves the call-site literal or the argument default, and stays unparsed when neither is a literal
-- [ ] #3 A pipeline that uses import.* is marked as only partly visible in the risk_fleet_scrape_intervals view, so a missing interval there never reads as compliant
-- [ ] #4 Pipelines with only built-in components produce the same intervals as before
+- [x] #1 An interval-named literal on a custom or imported component invocation is counted as an interval, and a non-literal one as unparsed, proven by a failing-then-passing test
+- [x] #2 A declare whose prometheus.scrape reads argument.<name>.value resolves the call-site literal or the argument default, and stays unparsed when neither is a literal
+- [x] #3 A pipeline that uses import.* is marked as only partly visible in the risk_fleet_scrape_intervals view, so a missing interval there never reads as compliant
+- [x] #4 Pipelines with only built-in components produce the same intervals as before
 <!-- AC:END -->
 
 ## Definition of Done
@@ -32,3 +32,9 @@ An Alloy pipeline can wrap its scrape in a custom component: a local declare blo
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Alloy parsing now builds a per-body block model (_Alloy). Inside a declare, scrape_interval = argument.<name>.value resolves per call site, falls back to the argument default, and is unparsed when neither is a literal; a declare nobody calls contributes nothing (CodeRabbit). Interval-named literals on invocations of import.* module components are read, expressions unparsed. summarise records opaque_modules; the pillar lists a pipeline with imports and no deviating interval as Direction 'partly visible' with an Imported modules column (null on older payloads). AC4 proof: old and new parser compared in memory over all 935 pipelines of a large production estate, 935 identical, parse time 0.37s to 0.62s, slowest pipeline 36ms.
+<!-- SECTION:NOTES:END -->

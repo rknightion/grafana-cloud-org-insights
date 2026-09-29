@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-29T16:40:49.987627+00:00",
+    "generated_at": "2026-09-29T22:02:38.250754+00:00",
     "tier": "t3",
     "stacks_total": 44,
     "stacks_scannable": 40,
@@ -84,6 +84,7 @@
       "DPM factor": 4,
       "Faster than default": true,
       "Unparsed intervals": 0,
+      "Imported modules": null,
       "Enabled collectors targeted": 8,
       "Updated at": "2026-05-07T14:40:55Z"
     },
@@ -101,6 +102,7 @@
       "DPM factor": 2,
       "Faster than default": true,
       "Unparsed intervals": 0,
+      "Imported modules": null,
       "Enabled collectors targeted": 26,
       "Updated at": "2026-04-27T16:06:39Z"
     },
@@ -118,6 +120,7 @@
       "DPM factor": 6,
       "Faster than default": false,
       "Unparsed intervals": 0,
+      "Imported modules": null,
       "Enabled collectors targeted": 0,
       "Updated at": "2026-02-23T05:48:26Z"
     },
@@ -135,6 +138,7 @@
       "DPM factor": 0.2,
       "Faster than default": false,
       "Unparsed intervals": 0,
+      "Imported modules": null,
       "Enabled collectors targeted": 0,
       "Updated at": "2026-04-30T01:57:14Z"
     },
@@ -152,6 +156,7 @@
       "DPM factor": null,
       "Faster than default": false,
       "Unparsed intervals": 1,
+      "Imported modules": null,
       "Enabled collectors targeted": 1,
       "Updated at": "2026-02-26T13:46:41Z"
     }
