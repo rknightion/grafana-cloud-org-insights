@@ -206,7 +206,10 @@ def columns_for(view: dict[str, Any],
     Required: without it the backend parser 500s. Generated rather than written by hand so a pillar
     adding a column cannot leave a dashboard rendering the old set.
 
-    `fallback` is for a view that can legitimately be EMPTY - a condition-matched list where finding
+    `fallback` is the pillar's declared schema. It supplies the columns of a view that can legitimately
+    be EMPTY, and any declared column a view published before the pillar gained it does not carry yet.
+
+    It is for a view that can legitimately be EMPTY - a condition-matched list where finding
     nothing is the good outcome, like "MCP integrations whose authentication failed". Without it, a
     healthy estate fails the dashboard build: `columns_for` raises, and the raise takes down the whole
     dashboard rather than one panel. With it, the panel renders an empty table, which is the honest
@@ -234,6 +237,12 @@ def columns_for(view: dict[str, Any],
             "text": key.strip(),
             "type": _infer_type([r.get(key) for r in rows]),
         })
+    # A declared column the live rows lack is a view published before the pillar gained it: an upgrade
+    # publishes dashboards before the next scan rewrites the view. The column renders blank until then
+    # rather than failing the whole dashboard. A panel naming a column in neither still fails the build.
+    for key, kind in fallback or ():
+        if key not in keys:
+            out.append({"selector": key, "text": key.strip(), "type": kind})
     return out
 
 

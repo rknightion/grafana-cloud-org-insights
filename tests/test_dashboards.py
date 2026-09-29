@@ -126,6 +126,21 @@ class ColumnGenerationTest(unittest.TestCase):
             [" Stack", "Values", "Worst"],
         )
 
+    @mock.patch.object(build, "read_view", return_value={"rows": [{" Stack": "a", "Pipeline": "p"}]})
+    @mock.patch.object(build, "BUCKET", "test-bucket")
+    def test_a_declared_column_the_live_view_predates_still_builds(self, _read_view):
+        """An upgrade publishes dashboards before the next scan writes the pillar's new column."""
+        schema = ((" Stack", "string"), ("Pipeline", "string"), ("Imported modules", "number"))
+        panel = build.table_panel("Scrape intervals", "v", "infinity", schema=schema,
+                                  columns=["Stack", "Pipeline", "Imported modules"])
+        query = panel["spec"]["data"]["spec"]["queries"][0]
+        columns = query["spec"]["query"]["spec"]["columns"]
+        self.assertEqual([c["selector"] for c in columns], [" Stack", "Pipeline", "Imported modules"])
+        self.assertEqual(columns[-1]["type"], "number")
+        with self.assertRaisesRegex(ValueError, "not in the view"):
+            build.table_panel("Scrape intervals", "v", "infinity", schema=schema,
+                              columns=["Stack", "Never declared"])
+
     def test_the_leading_space_is_stripped_from_the_display_text(self):
         """The space forces order in Infinity's alphabetising parser; it must not reach the header."""
         cols = build.columns_for({"rows": [{" Stack": "a"}]})
