@@ -407,7 +407,8 @@ def fleet_fast_scrape_rule(*, paused: bool = True, receiver: str | None = None) 
                        "that scrapes faster than the organisation's default interval and so raises DPM.",
             "description": (
                 "`gcinsight_stack_fleet_fast_scrape_pipelines` counts, for the stack in this alert's "
-                "labels, enabled pipelines whose shortest declared `scrape_interval` is below "
+                "labels, enabled pipelines whose shortest declared `scrape_interval` (or explicit OTel "
+                "`collection_interval`) is below "
                 "`gcinsight_risk_fleet_scrape_interval_default_seconds`, the deployment's configured "
                 "default (`GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL`, 60s unless overridden).\n\n"
                 "Read `views/risk_fleet_scrape_intervals.json` (Risk dashboard, Fleet tab, scrape "

@@ -433,7 +433,9 @@ shape. Read the schema at `/openapi/v3/apis/dashboard.grafana.app/v2` rather tha
 - **Fleet Management has no scrape-interval field.** Intervals exist only inside pipeline `contents`,
  as Alloy `scrape_interval = "15s"` or the OTel prometheus receiver's `scrape_interval: 15s`. An
  omitted Alloy `prometheus.scrape` interval is 60s; `pyroscope.scrape` also takes `scrape_interval`
- and adds no DPM, so match on the enclosing component, never on the attribute name alone.
+ and adds no DPM, so match on the enclosing component, never on the attribute name alone. OTel pull
+ receivers other than prometheus sample on `collection_interval`, whose default differs per receiver
+ (10s for some), and an unwired receiver collects nothing.
 - **`remotecfg_*` is NOT a Fleet Management sentinel.** Measured against `ListCollectors` ground truth
  it has recall 0.47 under both a has-collectors and a checked-in-recently definition: it misses more
  than half of the stacks genuinely using Fleet Management, and it fires on stacks with no

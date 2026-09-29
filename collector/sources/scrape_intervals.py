@@ -17,9 +17,13 @@ exists to find as compliant.
 `prometheus.scrape` and 1m for the OTel prometheus receiver's `global.scrape_interval`. Omission is the
 common case, and treating it as "no interval" would make a stack full of default scrapes look unmeasured.
 
-Deliberately out of scope: `pyroscope.scrape` (profiles do not add DPM), OTel `collection_interval` on
-host and other pull receivers, and local configuration outside Fleet Management, which this platform
-cannot read.
+OTel pull receivers other than prometheus (hostmetrics, kubeletstats, database receivers) sample on
+`collection_interval` instead, which sets DPM the same way (GCI-0047). Only an EXPLICIT value is read:
+the default differs per receiver (1m for most, 10s for some), and guessing it would invent a finding or
+hide one. Each pipeline records which attributes its intervals came from.
+
+Deliberately out of scope: `pyroscope.scrape` (profiles do not add DPM) and local configuration outside
+Fleet Management, which this platform cannot read.
 """
 
 from __future__ import annotations
@@ -261,22 +265,50 @@ def _interval(value: Any) -> float | None | bool:
     return False if seconds is None else seconds
 
 
-def otel_intervals(contents: str) -> tuple[list[float], int]:
-    """(interval seconds, unparsed count) for one OTel collector configuration."""
+def _otel_doc(contents: str) -> dict[str, Any] | None:
     try:
         doc = parse_yaml(contents)
     except (IndexError, ValueError, RecursionError):
-        doc = None
-    if not isinstance(doc, dict):
+        return None
+    return doc if isinstance(doc, dict) else None
+
+
+def _wired_receivers(doc: dict[str, Any]) -> list[tuple[str, Any]]:
+    in_use = _receivers_in_use(doc)
+    receivers = doc.get("receivers")
+    return [(str(name), receiver)
+            for name, receiver in (receivers.items() if isinstance(receivers, dict) else ())
+            if in_use is None or str(name) in in_use]
+
+
+def otel_collection_intervals(contents: str) -> tuple[list[float], int]:
+    """(explicit `collection_interval` seconds, unparsed count) on wired non-prometheus receivers."""
+    doc = _otel_doc(contents)
+    if doc is None:
+        return [], len(re.findall(r"(?m)^\s*collection_interval\s*:", contents))
+    intervals: list[float] = []
+    unparsed = 0
+    for name, receiver in _wired_receivers(doc):
+        if name.split("/", 1)[0] == "prometheus" or not isinstance(receiver, dict):
+            continue
+        value = _interval(receiver.get("collection_interval"))
+        if value is False:
+            unparsed += 1
+        elif value is not None:
+            intervals.append(value)
+    return intervals, unparsed
+
+
+def otel_intervals(contents: str) -> tuple[list[float], int]:
+    """(interval seconds, unparsed count) for one OTel collector's prometheus receivers."""
+    doc = _otel_doc(contents)
+    if doc is None:
         # Unreadable structure: every interval key present is unknown, not absent.
         return [], len(re.findall(r"(?m)^\s*(?:- )?scrape_interval\s*:", contents))
     intervals: list[float] = []
     unparsed = 0
-    in_use = _receivers_in_use(doc)
-    receivers = doc.get("receivers")
-    for name, receiver in (receivers.items() if isinstance(receivers, dict) else ()):
-        base = str(name).split("/", 1)[0]
-        if base != "prometheus" or (in_use is not None and str(name) not in in_use):
+    for name, receiver in _wired_receivers(doc):
+        if name.split("/", 1)[0] != "prometheus":
             continue
         config = (receiver or {}).get("config") if isinstance(receiver, dict) else None
         config = config if isinstance(config, dict) else {}
@@ -301,19 +333,28 @@ def otel_intervals(contents: str) -> tuple[list[float], int]:
 
 
 def summarise(contents: Any, config_type: Any) -> dict[str, Any]:
-    """The bounded per-pipeline record: distinct intervals, the shortest, and the unparsed count."""
+    """The bounded per-pipeline record: distinct intervals, the shortest, and the unparsed count.
+
+    The `scrape_*` keys predate GCI-0047 and keep their names so hydrated payloads stay comparable; on
+    an OTel pipeline they now also carry `collection_interval` values, and `interval_attributes` says
+    which attributes contributed (a value or an unparsed expression).
+    """
     if not isinstance(contents, str) or not contents.strip():
         return {"scrape_intervals": [], "scrape_interval_min_seconds": None,
-                "scrape_intervals_unparsed": 0}
+                "scrape_intervals_unparsed": 0, "interval_attributes": []}
     if str(config_type or "").upper().endswith("OTEL"):
-        found, unparsed = otel_intervals(contents)
+        parts = {"scrape_interval": otel_intervals(contents),
+                 "collection_interval": otel_collection_intervals(contents)}
     else:
-        found, unparsed = alloy_intervals(contents)
+        parts = {"scrape_interval": alloy_intervals(contents)}
+    found = [v for values, _ in parts.values() for v in values]
+    unparsed = sum(n for _, n in parts.values())
     distinct = sorted(set(found))
     return {
         "scrape_intervals": distinct[:MAX_INTERVALS],
         "scrape_interval_min_seconds": distinct[0] if distinct else None,
         "scrape_intervals_unparsed": unparsed,
+        "interval_attributes": sorted(name for name, (values, n) in parts.items() if values or n),
     }
 
 

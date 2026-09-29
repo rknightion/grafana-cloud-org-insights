@@ -135,6 +135,45 @@ class OtelTest(unittest.TestCase):
         self.assertIn(1.0, SI.otel_intervals(body)[0])
 
 
+class OtelCollectionIntervalTest(unittest.TestCase):
+    BODY = """
+receivers:
+  host_metrics:
+    collection_interval: 15s
+  host_metrics/unwired:
+    collection_interval: 1s
+  host_metrics/defaulted:
+    scrapers:
+      cpu: {}
+  kubeletstats:
+    collection_interval: ${env:KUBELET_INTERVAL}
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: own
+          scrape_interval: 30s
+service:
+  pipelines:
+    metrics:
+      receivers: [host_metrics, host_metrics/defaulted, kubeletstats, prometheus]
+"""
+
+    def test_only_explicit_values_on_wired_receivers_are_read(self):
+        """Receiver defaults differ (1m for most, 10s for some), so an omitted value is not guessed."""
+        self.assertEqual(SI.otel_collection_intervals(self.BODY), ([15.0], 1))
+
+    def test_the_record_merges_both_attributes_and_says_which_contributed(self):
+        rec = SI.summarise(self.BODY, "CONFIG_TYPE_OTEL")
+        self.assertEqual(rec["scrape_intervals"], [15.0, 30.0])
+        self.assertEqual(rec["scrape_interval_min_seconds"], 15.0)
+        self.assertEqual(rec["scrape_intervals_unparsed"], 1)
+        self.assertEqual(rec["interval_attributes"], ["collection_interval", "scrape_interval"])
+
+    def test_an_alloy_body_names_only_scrape_interval(self):
+        self.assertEqual(SI.summarise(ALLOY, "CONFIG_TYPE_ALLOY")["interval_attributes"],
+                         ["scrape_interval"])
+
+
 class PipelineRecordTest(unittest.TestCase):
     def test_intervals_are_kept_and_the_body_is_not(self):
         pipe = {"name": "p", "enabled": True, "matchers": [], "configType": "CONFIG_TYPE_ALLOY",

@@ -67,10 +67,12 @@ duration such as `60s`, `1m` or `1m30s`. It defaults to `60s`. Terraform exposes
 `fleet_default_scrape_interval`.
 
 The hourly tier already lists every Fleet Management pipeline; it parses each pipeline's declared
-`scrape_interval` values in memory and compares them with this default, so the check adds no Fleet
+`scrape_interval` values, plus any explicit `collection_interval` on other wired OTel pull receivers,
+in memory and compares them with this default, so the check adds no Fleet
 Management calls. An enabled pipeline that reaches active collectors and declares a shorter interval
 raises DPM and is counted per stack, listed in `risk_fleet_scrape_intervals` and raises the paused
-`fleet_fast_scrape` alert rule. An omitted interval is the component default of 60s. An interval that
+`fleet_fast_scrape` alert rule. An omitted `scrape_interval` is the component default of 60s; an omitted
+`collection_interval` is not read, because its default differs per receiver. An interval that
 is not a literal (a module argument or an environment lookup) is counted as unparsed, never as the
 default. Local Alloy and collector configs outside Fleet Management are not visible.
 

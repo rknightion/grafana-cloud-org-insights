@@ -169,7 +169,7 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
         (" Stack", "string"), ("Pipeline", "string"), ("Enabled", "boolean"),
         ("Source", "string"), ("Config type", "string"),
         ("Shortest interval (s)", "number"), ("Intervals", "string"),
-        ("Default (s)", "number"), ("Direction", "string"),
+        ("Interval attributes", "string"), ("Default (s)", "number"), ("Direction", "string"),
         ("DPM factor", "number"), ("Faster than default", "boolean"),
         ("Unparsed intervals", "number"), ("Enabled collectors targeted", "number"),
         ("Updated at", "string"),
@@ -350,6 +350,8 @@ def _fleet_scrape_intervals(
                 "Config type": pipeline.get("config_type"),
                 "Shortest interval (s)": shortest,
                 "Intervals": SI.format_seconds(intervals) or None,
+                # scrape_interval, collection_interval or both. Absent on a payload predating GCI-0047.
+                "Interval attributes": ", ".join(pipeline.get("interval_attributes") or []) or None,
                 "Default (s)": default,
                 "Direction": direction,
                 # How many times the default cadence the shortest scrape writes. Per target, not per

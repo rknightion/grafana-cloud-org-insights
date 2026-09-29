@@ -1725,7 +1725,8 @@ def d_risk(ds: str):
             "Stacks scraping faster than default",
             "gcinsight_risk_fleet_fast_scrape_stacks",
             description="Stacks with at least one ENABLED Fleet Management pipeline, reaching live "
-                        "collectors, whose shortest declared `scrape_interval` is below the default. "
+                        "collectors, whose shortest declared `scrape_interval` or explicit OTel "
+                        "`collection_interval` is below the default. "
                         "Faster scrapes raise DPM, and a high-DPM stack bills across the whole "
                         "organisation. Only Fleet-managed configuration is visible: local Alloy or "
                         "collector configs can over-scrape without appearing here."),
@@ -2240,7 +2241,7 @@ def d_risk(ds: str):
             "Pipeline scrape intervals against the default", "risk_fleet_scrape_intervals", ds,
             schema=risk_pillar.VIEW_SCHEMAS["risk_fleet_scrape_intervals"],
             columns=["Stack", "Pipeline", "Faster than default", "Shortest interval (s)", "Intervals",
-                     "Default (s)", "DPM factor", "Direction", "Enabled",
+                     "Interval attributes", "Default (s)", "DPM factor", "Direction", "Enabled",
                      "Enabled collectors targeted", "Unparsed intervals", "Source", "Config type",
                      "Updated at"],
             description="Every pipeline whose declared scrape intervals differ from the default, "
@@ -2248,7 +2249,9 @@ def d_risk(ds: str):
                         "reaching active collectors, and below the default. `DPM factor` is the default "
                         "divided by the shortest interval, so 4 means four times the default cadence "
                         "per target. Slower and unparsed rows are context, not findings. Intervals are "
-                        "parsed from the pipeline body in memory; the body is never stored.")
+                        "Alloy and OTel `scrape_interval` plus explicit OTel `collection_interval` on "
+                        "other pull receivers; `Interval attributes` says which. They are parsed from "
+                        "the pipeline body in memory; the body is never stored.")
     if public_dashboard_view_live:
         el["public_dashboards"] = build.table_panel(
             "Public dashboards that exist", "risk_public_dashboards", ds,
