@@ -362,7 +362,7 @@ def probe_all(
     """Iterate the LIVE INVENTORY and look each stack's credential up - never the other way round.
 
     The golden rule in one line (CLAUDE.md): a stack that appeared this morning gets a row with
-    `reason: no_credential` until the 03:35 provisioner reaches it, and a stack that left the estate has
+    `reason: no_credential` until the 03:15 provisioner reaches it, and a stack that left the estate has
     no row at all whatever the credential store still holds. Iterating `credentials` would invert both.
 
     **This function takes no `Coverage`, on purpose.** A tier's coverage means "did we get this stack's

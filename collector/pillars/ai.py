@@ -405,7 +405,7 @@ def _summary(**f: Any) -> list[dict[str, Any]]:
          "Value": " / ".join(str(f["est_investigations"][o]) for o in INVESTIGATION_ORIGINS)},
         {" Metric": "Category x surface combinations in use", "Value": f["combos"]},
         {" Metric": "Stacks awaiting a credential",
-         "Value": f"{f['missing']} - provisioned nightly at 03:35 UTC; see the coverage table"},
+         "Value": f"{f['missing']} - provisioned nightly at 03:15 UTC; see the coverage table"},
         {" Metric": "Watcher agents", "Value": f"NOT MEASURABLE. {WATCHERS_NOT_MEASURABLE}"},
         {" Metric": "Investigation inventory",
          "Value": f"NOT MEASURABLE. {INVESTIGATION_INVENTORY_NOT_MEASURABLE}"},

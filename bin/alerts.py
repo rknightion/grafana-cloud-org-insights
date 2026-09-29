@@ -115,7 +115,7 @@ TIERS: dict[str, tuple[str, int, str]] = {
 COVERAGE_FLOOR = 0.90
 COVERAGE_WINDOW = "36h"
 
-# Two missed provisioner runs (it is daily, at 03:35 UTC). Deliberately not a count threshold - see
+# Two missed provisioner runs (it is daily, at 03:15 UTC). Deliberately not a count threshold - see
 # `credential_gap_rule`.
 CREDENTIAL_GAP_SECONDS = 48 * 3600
 
@@ -323,7 +323,7 @@ def credential_gap_rule(*, paused: bool = True, receiver: str | None = None) -> 
 
     **Alerts on the AGE of the oldest individual gap, never on the count**, and that distinction is the
     whole rule. A count above zero is the NORMAL state for hours after the organisation creates a stack: the daily
-    provisioner at 03:35 UTC fixes it on its next pass. Worse, `count > 0 FOR 48h` never resets while
+    provisioner at 03:15 UTC fixes it on its next pass. Worse, `count > 0 FOR 48h` never resets while
     stacks keep appearing, so it would eventually fire having never seen one gap last two days.
     `collector/emit/gapstate.py` stamps when each gap was first observed and the collector emits the
     maximum, so this rule watches exactly the thing that matters.
@@ -352,7 +352,7 @@ def credential_gap_rule(*, paused: bool = True, receiver: str | None = None) -> 
                        "so the nightly provisioner is not fixing it on its own.",
             "description": (
                 "`gcinsight_missing_credential_age_seconds` is the age of the OLDEST individual gap, "
-                "not a count. A count above zero is normal and clears at the next 03:35 UTC provisioner "
+                "not a count. A count above zero is normal and clears at the next 03:15 UTC provisioner "
                 "run; a gap that survives two runs will not clear by itself.\n\n"
                 "Read `views/ai_credential_coverage.json` (Assistant dashboard, coverage table) for "
                 "which stacks, since when, and whether the state is actionable. Paused and opted-out "

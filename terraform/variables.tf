@@ -345,9 +345,10 @@ variable "tiers" {
       deadline_seconds    = 900
       description         = "Hourly inventory + carry-forward of slower-tier series"
     }
-    # Daily. The heaviest user of gcom by far (~813 calls), which is why it is not hourly.
+    # Daily. The heaviest user of gcom by far (~813 calls), which is why it is not hourly. Runs after the
+    # 03:15 provisioner so a stack it mints a reader for that night is scanned the same day.
     t2 = {
-      schedule_expression = "cron(20 3 * * ? *)"
+      schedule_expression = "cron(30 3 * * ? *)"
       cpu                 = 1024
       memory              = 2048
       deadline_seconds    = 3600
@@ -567,9 +568,9 @@ variable "provisioner_secret_key" {
 }
 
 variable "provisioner_schedule_expression" {
-  description = "When to reconcile per-stack credentials. Daily, not hourly: provisioning is a gcom write path and gcom is paced at 6 req/s per credential. Healthy steady state is reads and zero writes."
+  description = "When to reconcile per-stack credentials. Daily, not hourly: provisioning is a gcom write path and gcom is paced at 6 req/s per credential. Healthy steady state is reads and zero writes. Keep it clear of T1 (:05) and before T2 (03:30): T2 loads reader credentials once at start, so an overlapping run misses a stack minted or repaired mid-run until the next day."
   type        = string
-  default     = "cron(35 3 * * ? *)"
+  default     = "cron(15 3 * * ? *)"
 }
 
 variable "provisioner_enabled" {
