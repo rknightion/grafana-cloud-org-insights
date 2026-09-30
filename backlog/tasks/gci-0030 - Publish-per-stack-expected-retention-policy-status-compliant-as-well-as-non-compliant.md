@@ -3,11 +3,11 @@ id: GCI-0030
 title: >-
   Publish per-stack expected-retention-policy status, compliant as well as
   non-compliant
-status: In Progress
+status: Parked
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 08:35'
-updated_date: '2026-09-30 19:45'
+updated_date: '2026-09-30 21:08'
 labels:
   - retention
   - dashboards
@@ -64,4 +64,6 @@ loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own
 loop3 P-0030-a1 candidate accepted locally: selector winner precedes overlap ambiguity, malformed lists atomic, missing status view assembles. CodeRabbit terminal zero findings/all8 files; patch ef9ed0dce986f6c52a63a5cb891fba8a329bf581faacc572e59eeaa13fbf7610. Root exact diff reviewed and integration just check passed (1588 passed,2 existing skipped). Local root commit prepared, push/hosted CI held for independent pytest OpenTofu prerequisite repair. AC5 signed release/digest and live rollout not claimed. Request queue and effective Loki limits are independent per newer docs/traps: request-route failure alone does not invalidate readable limits. Existing tests changed to reflect newly requested per-stack unreadable statuses and confirmed-readable gap count rather than suppressing the whole partial population. Fresh a2 remains unused, infra retries0.
 
 Loop3 dev image/source6eb verified, actual status view5 rows all unreadable for configured expectation, never false compliance. New status panel GET-rendered. Old gap/stream empty copies remain visibly stale rather than claiming current zeros. V-dev six-hour Mimir range found historical measured/unreadable/change-request series but current gap/compliant outcomes and fresh retention gauges remain unproved. AC5 signed auto-RC/stable release not claimed; release remains gated by incomplete full dev proof. No new source attempt used after accepted a1.
+
+Release proof remainsblocked: v0.4.0-rc.8 GitHub prerelease exists fromb60e19c(code6ebancestor), but advertised GHCR0.4.0-rc.8 image verification returned MANIFEST_UNKNOWN; no digest/signature consumer pin proved. First cosign shim failedno configuredversion; retry used existinginstalled3.1.3withoutinstall/pin/authmutation and failedexit11 missingimage. No unchangedretry/no signedautoRCAC5check. Livepartialfreshmetric/unreadable limits retained.
 <!-- SECTION:NOTES:END -->

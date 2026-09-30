@@ -1,11 +1,11 @@
 ---
 id: GCI-0018
 title: Detect PII and unbounded-cardinality label patterns as a risk finding
-status: In Progress
+status: Done
 assignee:
   - '@loop3-root'
 created_date: '2026-08-25 13:12'
-updated_date: '2026-09-30 20:24'
+updated_date: '2026-09-30 21:08'
 labels:
   - risk
   - privacy
@@ -75,9 +75,9 @@ An estate owner cannot grep their own label space at this scale, and the two con
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 python3 -m pytest tests -q
-- [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
-- [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
+- [x] #1 python3 -m pytest tests -q
+- [x] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
+- [x] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -114,4 +114,6 @@ Root counter correction: prior state already recorded original collection source
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 No product implementation was accepted. A draft classifier test was archived under codex/backups and excluded from the product tree. The task is parked at the missing key-only label-name source contract; no acceptance criterion is claimed.
+
+Daily bounded four-signal source and generic versioned classifier shipped; actual dev raw-match18-row S3 view and20-row coverage plus rendered/read-back dashboard prove public boundary. Enforced exactrawview90/scans90/noncurrent7/Enabledversioning/AES256/publicblock/TLS/unchangedIAM proved beforedailyT2; existingfiveNone readers unchanged IDs/SSM/pairs. No new businessseries or metric identities, no rawmatch outsideapprovedS3 in proof. Finalintegratedgate1649pass2skips7971subtests, rootexact7998CI36768983974success; source6ebCR0/SecPASS. Sourceattempt cumulative3(notfresha2), fourthunused; route/accountingdeviation disclosed. Task doneondev/source; campaigncustomerrollout remainsblockedpermissionfence, notclaimed.
 <!-- SECTION:FINAL_SUMMARY:END -->
