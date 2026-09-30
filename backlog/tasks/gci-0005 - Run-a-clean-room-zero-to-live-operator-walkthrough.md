@@ -4,7 +4,7 @@ title: Run a clean-room zero-to-live operator walkthrough
 status: To Do
 assignee: []
 created_date: '2026-08-24 12:02'
-updated_date: '2026-08-25 08:28'
+updated_date: '2026-09-30 21:58'
 labels: []
 dependencies: []
 references:
@@ -54,4 +54,6 @@ What was missing or wrong, all now fixed in durable documentation:
 Two product defects the walkthrough surfaced are tracked separately: GCI-0010 (Firehose subscription unusable for a new deployment) and the empty-view dashboard build failure on a small estate.
 
 The strongest single finding for this task: every one of these is invisible to an established deployment. Ordering only matters once, a region is only chosen once, a folder only created once, and a subscription filter trust condition is only evaluated once. An existing healthy deployment is not evidence that any of it works.
+
+2026-09-30 Rob lifted the deferral; admissible as loop4 reserve.
 <!-- SECTION:NOTES:END -->

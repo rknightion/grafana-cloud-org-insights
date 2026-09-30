@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-30 21:39'
+updated_date: '2026-09-30 21:58'
 labels:
   - feature-usage
   - follow-on
@@ -51,4 +51,6 @@ Parked at Wave 1 boundary pending GCI-0041 reader scope decision and exact safe 
 D1a accepted operational reader sufficiency and positive Admin control on staff dev. Existing separately approved slo pairs stay unchanged; strict subtract-one minimality is unproven and no removal is authorised. Reader None and query pins remain frozen. No AC completion yet.
 
 Loop3 source inventory shipped and dev proved five live rows including a positive configured SLO under existing None readers; original authentication/schema blockers cleared at96b. Strong hard DNS/connect wall-time criterion remains unmet after four cumulative attempts (worker2, rootwiring rescue, specialist); no fifth attempt or criterion waiver. Resume only the named timing concern under new owner direction, not source-count reinvention.
+
+2026-09-30 Rob: the hard DNS/connect wall-time criterion is split into GCI-0053 (collector-wide). GCI-0036 closes on its own three ACs once the next loop re-checks them against loop3 dev evidence.
 <!-- SECTION:NOTES:END -->

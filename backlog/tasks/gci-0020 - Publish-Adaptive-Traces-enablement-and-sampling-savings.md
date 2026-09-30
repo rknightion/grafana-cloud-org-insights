@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@loop3-root'
 created_date: '2026-08-25 14:11'
-updated_date: '2026-09-30 21:39'
+updated_date: '2026-09-30 21:58'
 labels:
   - cost
   - value
@@ -142,4 +142,6 @@ Not actioned here - this task stays Parked and out of the 2026-09-11 wave 1 scop
 resume does not start by re-deriving the technique.
 
 Loop3 Adaptive Traces minimized inventory source shipped and dev produced five scalar rows; health is status-only and guarded HTTPS/no redirects. Preserve explicit partial outcome, not achieved savings/adoption from configured or recommendation counts. Historical CI failed/cancelled/inherited wrapper failures and unchanged reruns remain disclosed. Final full campaign/runtime proof not automatically green from unit/integrated CI; source safeguard release gates and customer boundary remain parked.
+
+2026-09-30 Rob: the hard DNS/connect wall-time criterion is split into GCI-0053; it no longer gates this task.
 <!-- SECTION:NOTES:END -->
