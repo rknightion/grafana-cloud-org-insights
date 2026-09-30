@@ -499,6 +499,7 @@ class T2SourceHealthTest(unittest.TestCase):
             mock.patch.object(scan, "gather_dashboard_inventory", return_value=unavailable),
             mock.patch.object(scan, "gather_datasource_query_cost", return_value=unavailable),
             mock.patch.object(scan, "gather_adaptive_logs", return_value=unavailable),
+            mock.patch.object(scan, "gather_adaptive_traces", return_value=unavailable),
             mock.patch.object(scan, "gather_public_dashboards", return_value=unavailable),
             mock.patch.object(scan, "gather_alert_routing", return_value=unavailable),
             mock.patch.object(scan, "gather_signal_inventory", return_value=unavailable),
@@ -517,7 +518,7 @@ class T2SourceHealthTest(unittest.TestCase):
         self.assertFalse(result["meta"]["scan_healthy"])
         self.assertEqual(
             set(result["meta"]["source_failures"]),
-            {"service_accounts", "assistant", "insights", "adaptive_logs", "public_dashboards",
+            {"service_accounts", "assistant", "insights", "adaptive_logs", "adaptive_traces", "public_dashboards",
              "alert_routing", "dashboard_inventory", "datasource_query_cost", "signal_inventory",
              "capability_adoption", "loki_config_limits",
              "loki_config_change_requests"},

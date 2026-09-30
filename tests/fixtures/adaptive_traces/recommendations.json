@@ -1,0 +1,162 @@
+[
+  {
+    "id": "synthetic",
+    "message": "synthetic",
+    "tags": [
+      "synthetic"
+    ],
+    "labels": {
+      "type": "synthetic"
+    },
+    "created_at": "synthetic",
+    "applied": true,
+    "applied_at": "synthetic",
+    "dismissed": false,
+    "dismissed_at": null,
+    "stale": false,
+    "actions": [
+      {
+        "action": "synthetic",
+        "policy_id": "synthetic",
+        "recommendation_seed_id": "synthetic",
+        "seed": {
+          "id": "synthetic",
+          "type": "volumetric",
+          "name": "synthetic",
+          "body": {
+            "sampling_percentage": 1
+          },
+          "expires_in_seconds": null
+        }
+      }
+    ]
+  },
+  {
+    "id": "synthetic",
+    "message": "synthetic",
+    "tags": [
+      "synthetic"
+    ],
+    "labels": {
+      "type": "synthetic"
+    },
+    "created_at": "synthetic",
+    "applied": true,
+    "applied_at": "synthetic",
+    "dismissed": false,
+    "dismissed_at": null,
+    "stale": false,
+    "actions": [
+      {
+        "action": "synthetic",
+        "policy_id": null,
+        "recommendation_seed_id": "synthetic",
+        "seed": {
+          "id": "synthetic",
+          "type": "synthetic",
+          "name": "synthetic",
+          "body": {
+            "sampling_percentage": 1
+          },
+          "expires_in_seconds": null
+        }
+      }
+    ]
+  },
+  {
+    "id": "synthetic",
+    "message": "synthetic",
+    "tags": [
+      "synthetic"
+    ],
+    "labels": {
+      "type": "synthetic"
+    },
+    "created_at": "synthetic",
+    "applied": true,
+    "applied_at": "synthetic",
+    "dismissed": false,
+    "dismissed_at": null,
+    "stale": false,
+    "actions": [
+      {
+        "action": "synthetic",
+        "policy_id": null,
+        "recommendation_seed_id": "synthetic",
+        "seed": {
+          "id": "synthetic",
+          "type": "status_code",
+          "name": "synthetic",
+          "body": {
+            "status_codes": [
+              "synthetic"
+            ]
+          },
+          "expires_in_seconds": null
+        }
+      }
+    ]
+  },
+  {
+    "id": "synthetic",
+    "message": "synthetic",
+    "tags": [
+      "synthetic"
+    ],
+    "labels": {
+      "type": "synthetic"
+    },
+    "created_at": "synthetic",
+    "applied": true,
+    "applied_at": "synthetic",
+    "dismissed": false,
+    "dismissed_at": null,
+    "stale": false,
+    "actions": [
+      {
+        "action": "synthetic",
+        "policy_id": null,
+        "recommendation_seed_id": "synthetic",
+        "seed": {
+          "id": "synthetic",
+          "type": "latency",
+          "name": "synthetic",
+          "body": {
+            "threshold_ms": 1
+          },
+          "expires_in_seconds": null
+        }
+      }
+    ]
+  },
+  {
+    "id": "synthetic",
+    "message": "synthetic",
+    "tags": [
+      "synthetic"
+    ],
+    "labels": {
+      "type": "diversity"
+    },
+    "created_at": "synthetic",
+    "applied": true,
+    "applied_at": "synthetic",
+    "dismissed": false,
+    "dismissed_at": null,
+    "stale": false,
+    "actions": [
+      {
+        "action": "synthetic",
+        "policy_id": null,
+        "recommendation_seed_id": "synthetic",
+        "seed": {
+          "id": "synthetic",
+          "type": "diversity",
+          "name": "synthetic",
+          "body": {},
+          "expires_in_seconds": null
+        }
+      }
+    ]
+  }
+]

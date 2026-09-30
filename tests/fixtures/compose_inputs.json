@@ -32651,5 +32651,25 @@
     "staff_access": null
    }
   ]
+ },
+ "adaptive_traces": {
+  "stack158": {
+   "available": true,
+   "health_state": "not_found_404",
+   "config_state": "ok",
+   "config_available": true,
+   "policies_state": "ok",
+   "policy_count": 4,
+   "policy_type_counts": {
+    "status_code": 1,
+    "latency": 1,
+    "volumetric": 1,
+    "diversity": 1,
+    "other": 0
+   },
+   "recommendations_state": "ok",
+   "recommendation_count": 5,
+   "pending_recommendation_count": 0
+  }
  }
 }

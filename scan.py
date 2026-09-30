@@ -31,6 +31,7 @@ from collector.resolver import InstanceResolver
 from collector.pillars import ai as ai_pillar, compose, findings as findings_mod
 from collector import credentials
 from collector.sources import adaptive_logs as adaptive_logs_src
+from collector.sources import adaptive_traces as adaptive_traces_src
 from collector.sources import alert_routing as alert_routing_src
 from collector.sources import public_dashboards as public_dashboards_src
 from collector.sources import stack_catalog
@@ -321,6 +322,17 @@ def gather_adaptive_logs(
         + (f", not available: {reasons}" if reasons else ""),
     )
     return data, errors
+
+
+def gather_adaptive_traces(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]]
+) -> tuple[dict[str, Any], list[str]]:
+    """T2 count-only plugin inventory; no raw fields or exception text in scan/log output."""
+    try:
+        creds = credentials.load_all()
+    except credentials.StoreUnavailable:
+        return {}, ["adaptive_traces: credential store unavailable"]
+    return adaptive_traces_src.probe_all(client, stacks, creds), []
 
 
 def gather_public_dashboards(
@@ -884,6 +896,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     errors += datasource_query_cost_errors
     adaptive_logs, adaptive_logs_errors = gather_adaptive_logs(client, cfg, selected)
     errors += adaptive_logs_errors
+    adaptive_traces, adaptive_traces_errors = gather_adaptive_traces(client, cfg, selected)
+    errors += adaptive_traces_errors
     pubdash, pubdash_errors = gather_public_dashboards(client, cfg, selected)
     errors += pubdash_errors
     alert_routing, alert_routing_errors = gather_alert_routing(client, cfg, selected)
@@ -911,6 +925,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "dashboard_inventory": dashboard_inventory,
         "datasource_query_cost": datasource_query_cost,
         "adaptive_logs": adaptive_logs,
+        "adaptive_traces": adaptive_traces,
         "public_dashboards": pubdash,
         "alert_routing": alert_routing,
         "signal_inventory": signal_inventory,
@@ -946,6 +961,10 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "adaptive_logs": source_report(
             expected, adaptive_logs, available=lambda r: bool(r.get("available")),
             errors=adaptive_logs_errors,
+        ),
+        "adaptive_traces": source_report(
+            expected, adaptive_traces, available=lambda r: bool(r.get("available")),
+            errors=adaptive_traces_errors,
         ),
         "public_dashboards": source_report(
             expected, pubdash, available=lambda r: bool(r.get("available")),

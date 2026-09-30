@@ -1,0 +1,4 @@
+{
+  "anomaly_rate_limit_bytes_per_sec": 1,
+  "span_name_semconv_transform_enabled": true
+}

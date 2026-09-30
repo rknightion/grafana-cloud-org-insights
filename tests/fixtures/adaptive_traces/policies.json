@@ -1,0 +1,62 @@
+[
+  {
+    "id": "synthetic",
+    "type": "status_code",
+    "name": "synthetic",
+    "body": {
+      "status_codes": [
+        "synthetic"
+      ]
+    },
+    "labels": {
+      "type": "synthetic"
+    },
+    "expires_at": null,
+    "version_recommendation_id": "synthetic",
+    "version_created_at": "synthetic",
+    "version_created_by": "synthetic"
+  },
+  {
+    "id": "synthetic",
+    "type": "latency",
+    "name": "synthetic",
+    "body": {
+      "threshold_ms": 1
+    },
+    "labels": {
+      "type": "synthetic"
+    },
+    "expires_at": null,
+    "version_recommendation_id": "synthetic",
+    "version_created_at": "synthetic",
+    "version_created_by": "synthetic"
+  },
+  {
+    "id": "synthetic",
+    "type": "volumetric",
+    "name": "synthetic",
+    "body": {
+      "sampling_percentage": 1
+    },
+    "labels": {
+      "type": "synthetic"
+    },
+    "expires_at": null,
+    "version_recommendation_id": "synthetic",
+    "version_created_at": "synthetic",
+    "version_created_by": "synthetic"
+  },
+  {
+    "id": "synthetic",
+    "type": "diversity",
+    "name": "synthetic",
+    "body": {},
+    "labels": {
+      "type": "diversity"
+    },
+    "expires_at": null,
+    "version_recommendation_id": "synthetic",
+    "version_created_at": "synthetic",
+    "version_created_by": "synthetic"
+  }
+]

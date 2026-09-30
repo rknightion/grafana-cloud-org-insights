@@ -21,6 +21,7 @@ from typing import Any
 from collector.coverage import Coverage
 from collector.emit import guard
 from collector.pillars import (
+    adaptive_traces as adaptive_traces_pillar,
     ai,
     cost,
     coverage as coverage_pillar,
@@ -80,6 +81,7 @@ def build_all(
     insights: dict[str, Any] | None = None,
     fleet: dict[str, Any] | None = None,
     adaptive_logs: dict[str, Any] | None = None,
+    adaptive_traces: dict[str, Any] | None = None,
     public_dashboards: dict[str, Any] | None = None,
     alert_routing: dict[str, Any] | None = None,
     org_members: dict[str, Any] | None = None,
@@ -130,6 +132,7 @@ def build_all(
             score_weights=score_weights,
         ),
         producing_signals.build(stacks, capability_adoption),
+        adaptive_traces_pillar.build(stacks, adaptive_traces),
     ):
         metrics.extend(pillar_metrics)
         for name, rows in pillar_views.items():

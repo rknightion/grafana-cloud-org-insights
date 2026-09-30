@@ -101,6 +101,7 @@ INPUT_OWNER: dict[str, str] = {
     # DIFFERENT hosts, so it shares no rate limit with gcom. Hydrated into T1 for the usual reason - the
     # dashboards default to a 6-hour window and a daily input would otherwise have at most one sample.
     "adaptive_logs": "t2",
+    "adaptive_traces": "t2",
     # Public-dashboard ENUMERATION per stack (PLAN 18.17). T2's fifth gatherer, one GET per stack against
     # each stack's own API with the per-stack reader token - measured 269 stacks in 94s. Daily is right:
     # this is a compliance check against a policy of zero, and the remediation conversation is measured
@@ -168,6 +169,8 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     # reasoned about: it needs `adaptive_logs` alone and notably NOT `dataplane`, so a T1 run that has
     # hydrated the daily logs sweep publishes it correctly even when T3 has never run.
     "cost_adaptive_logs": frozenset({"adaptive_logs"}),
+    # Derived against the anonymized captured-contract compose fixture.
+    "coverage_adaptive_traces_inventory": frozenset({"adaptive_traces"}),
     "risk_public_dashboards": frozenset({"public_dashboards"}),
     "risk_alert_routing": frozenset({"alert_routing"}),
     "risk_alert_routing_findings": frozenset({"alert_routing"}),

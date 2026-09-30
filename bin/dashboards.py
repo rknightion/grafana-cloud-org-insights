@@ -30,6 +30,7 @@ from collector import identity, observability_score
 from collector import ratecard as ratecard_model
 from collector.dashboards import build
 from collector.dashboards.retention_panels import retention_panels
+from collector.pillars import adaptive_traces as adaptive_traces_pillar
 from collector.pillars import (
     ai as ai_pillar,
     coverage as coverage_pillar,
@@ -3633,6 +3634,16 @@ def d_coverage(ds: str):
                         "type, then use this register to scope the stack owners and Pillar J to confirm "
                         "current demand."),
 
+        "tbl_at_inventory": build.table_panel(
+            "Adaptive Traces configured inventory and pending recommendations",
+            adaptive_traces_pillar.VIEW, ds,
+            schema=adaptive_traces_pillar.VIEW_SCHEMAS[adaptive_traces_pillar.VIEW],
+            description="Point-in-time configured policies, including policies inactive in the usage "
+                        "window. Pending excludes applied, dismissed and stale recommendations; it is "
+                        "not achieved savings. Config availability proves a readable configuration, "
+                        "not enablement. Unknown dimensions remain blank; unreadable stacks are omitted. "
+                        "Policy names, bodies and recommendation prose are never persisted. Achieved "
+                        "byte reduction and enabled-population denominators stay on the usage panels."),
         "n_at_enabled": build.stat_panel(
             "Stacks reporting Adaptive Traces (24h)", ADAPTIVE_TRACES_STACKS,
             ds_uid=build.USAGE_UID,
@@ -3841,6 +3852,8 @@ def d_coverage(ds: str):
                       max_columns=1, row_height="tall"),
         ]),
         build.rows_tab("Adaptive Traces", [
+            build.row("Configured inventory and pending work", ["tbl_at_inventory"],
+                      max_columns=1, row_height="tall"),
             build.row("Enablement and its matched denominator",
                       ["n_at_enabled", "n_at_trace_population"], max_columns=2,
                       row_height="short"),

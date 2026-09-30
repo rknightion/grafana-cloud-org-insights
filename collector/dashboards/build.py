@@ -938,7 +938,7 @@ DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     # Pillar K combines the daily signal-label sweep with the existing dashboard and alert inventories.
     # The live usage panels carry datasource-native freshness and are called out separately in the banner.
     "coverage": (
-        "alert_routing", "capability_adoption", "dashboard_inventory", "insights",
+        "adaptive_traces", "alert_routing", "capability_adoption", "dashboard_inventory", "insights",
         "signal_inventory",
     ),
 }
@@ -1046,6 +1046,7 @@ INPUT_LABELS = {
     "datasource_query_cost": "Datasource query-cost sweep",
     "fleet": "Fleet Management sweep",
     "adaptive_logs": "Adaptive Logs sweep",
+    "adaptive_traces": "Adaptive Traces inventory sweep",
     "public_dashboards": "Public-dashboard inventory",
     "alert_routing": "Alert-routing inventory",
     "service_accounts": "Service-account inventory",
@@ -1077,6 +1078,8 @@ INPUT_DESCRIPTIONS = {
     "datasource_query_cost": "Age of the per-stack datasource query-cost sweep. It resolves query "
                              "activity to datasource identity and preserves unavailable stacks as "
                              "unknown rows, so read the named costs with their coverage state.",
+    "adaptive_traces": "Age of the daily count-only Adaptive Traces config, policy and recommendation "
+                       "inventory. This is not the usage panels' time window or achieved savings.",
     "adaptive_logs": "Age of the Adaptive Logs recommendation sweep, read through each stack's own app-plugin proxy. Gathered daily, so this reads up to 24 hours when healthy. Note that the recommendation VOLUMES on this page are totals over a window the Adaptive Logs API does not name and cannot be asked to change, so this age tells you how current the recommendation SET is, not what period the bytes cover.",
     "public_dashboards": "Age of the per-stack public-dashboard inventory behind the policy counters. "
                          "The endpoint returns a permission-filtered list, so read this with the "
