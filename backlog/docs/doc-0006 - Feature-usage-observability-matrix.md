@@ -3,7 +3,7 @@ id: doc-0006
 title: Feature usage observability matrix
 type: specification
 created_date: '2026-09-23 18:33'
-updated_date: '2026-09-23 18:56'
+updated_date: '2026-09-30 12:36'
 ---
 # Feature usage observability matrix - wave 1 evidence, 2026-09-23
 
@@ -352,52 +352,348 @@ Each row below is one live-enumerated name from the union of the two write-stack
 | `grafanacloud_profiles_instance_retention_overage` | Profiles | profiles instance retention overage | billing quantity, window unverified | C | yes/- |
 | `grafanacloud_profiles_instance_retention_usage` | Profiles | profiles instance retention usage | billing quantity, window unverified | C | yes/- |
 | `grafanacloud_profiles_instance_usage` | Profiles | profiles instance usage | billing quantity, window unverified | C | yes/- |
-| `grafanacloud_profiles_instance_usage_group_bytes_received_per_second` | Profiles | profiles instance usage group bytes received per second | rate | D | -/yes |
-| `grafanacloud_profiles_instance_usage_group_estimated_billable_bytes_received_per_second` | Profiles | profiles instance usage group estimated billable bytes received per second | rate | D | -/yes |
-| `grafanacloud_sm_billable_check_executions_per_second` | Synthetic Monitoring | sm billable check executions per second | rate | CD | yes/yes |
-| `grafanacloud_sm_billable_usage` | Synthetic Monitoring | sm billable usage | billing quantity, window unverified | C | yes/- |
-| `grafanacloud_sm_browser_overage` | Synthetic Monitoring | sm browser overage | billing quantity, window unverified | C | yes/- |
-| `grafanacloud_sm_overage` | Synthetic Monitoring | sm overage | billing quantity, window unverified | C | yes/- |
-| `grafanacloud_traces_instance_adaptivetraces_bytes_dropped_per_second` | Traces | traces instance adaptivetraces bytes dropped per second | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_adaptivetraces_bytes_received_per_second` | Traces | traces instance adaptivetraces bytes received per second | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_adaptivetraces_discarded_spans_total:rate5m` | Traces | traces instance adaptivetraces discarded spans total:rate5m | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_adaptivetraces_global_sampled_traces_total:rate5m` | Traces | traces instance adaptivetraces global sampled traces total:rate5m | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_adaptivetraces_policy_sampled_bytes_total:rate5m` | Traces | traces instance adaptivetraces policy sampled bytes total:rate5m | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_adaptivetraces_policy_sampled_spans_total:rate5m` | Traces | traces instance adaptivetraces policy sampled spans total:rate5m | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_adaptivetraces_policy_sampled_traces_total:rate5m` | Traces | traces instance adaptivetraces policy sampled traces total:rate5m | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_adaptivetraces_preprocessing_span_name_cardinality_after_transform` | Traces | traces instance adaptivetraces preprocessing span name cardinality after transform | unknown | D | -/yes |
-| `grafanacloud_traces_instance_adaptivetraces_preprocessing_span_name_cardinality_before_transform` | Traces | traces instance adaptivetraces preprocessing span name cardinality before transform | unknown | D | -/yes |
-| `grafanacloud_traces_instance_adaptivetraces_preprocessing_spans_transformed_total:rate5m` | Traces | traces instance adaptivetraces preprocessing spans transformed total:rate5m | rate | D | -/yes |
-| `grafanacloud_traces_instance_adaptivetraces_spans_received_total:rate5m` | Traces | traces instance adaptivetraces spans received total:rate5m | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_attributed_bytes_received_per_second` | Traces | traces instance attributed bytes received per second | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_attributed_overage` | Traces | traces instance attributed overage | billing quantity, window unverified | C | yes/- |
-| `grafanacloud_traces_instance_attributed_usage` | Traces | traces instance attributed usage | billing quantity, window unverified | C | yes/- |
-| `grafanacloud_traces_instance_bytes_processed_per_second` | Traces | traces instance bytes processed per second | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_bytes_received_per_second` | Traces | traces instance bytes received per second | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_created_date` | Traces | traces instance created date | gauge candidate | CD | yes/yes |
-| `grafanacloud_traces_instance_discarded_spans_total:rate5m` | Traces | traces instance discarded spans total:rate5m | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_distributor_attributes_truncated_total` | Traces | traces instance distributor attributes truncated total | counter candidate | CD | yes/yes |
-| `grafanacloud_traces_instance_info` | Traces | traces instance info | gauge candidate | CD | yes/yes |
-| `grafanacloud_traces_instance_ingress_bytes_per_second` | Traces | traces instance ingress bytes per second | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_limits` | Traces | traces instance limits | gauge candidate | CD | yes/yes |
-| `grafanacloud_traces_instance_metrics_generator_active_series_demand_estimate` | Traces | traces instance metrics generator active series demand estimate | gauge candidate | CD | yes/yes |
-| `grafanacloud_traces_instance_metrics_generator_discarded_spans_per_second` | Traces | traces instance metrics generator discarded spans per second | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_metrics_generator_label_cardinality_demand_estimate` | Traces | traces instance metrics generator label cardinality demand estimate | unknown | CD | yes/yes |
-| `grafanacloud_traces_instance_metrics_generator_post_sanitization_demand_estimate` | Traces | traces instance metrics generator post sanitization demand estimate | unknown | D | -/yes |
-| `grafanacloud_traces_instance_metrics_generator_received_spans_per_second` | Traces | traces instance metrics generator received spans per second | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_metrics_generator_series_dropped_per_second` | Traces | traces instance metrics generator series dropped per second | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_metrics_generator_series_limit_percentage_used` | Traces | traces instance metrics generator series limit percentage used | gauge candidate | CD | yes/yes |
-| `grafanacloud_traces_instance_metrics_generator_spans_sanitized_per_second` | Traces | traces instance metrics generator spans sanitized per second | rate | D | -/yes |
-| `grafanacloud_traces_instance_overage` | Traces | traces instance overage | billing quantity, window unverified | C | yes/- |
-| `grafanacloud_traces_instance_percentage_complete_traces_flushed` | Traces | traces instance percentage complete traces flushed | unknown | CD | yes/yes |
-| `grafanacloud_traces_instance_percentage_traces_with_root_spans_flushed` | Traces | traces instance percentage traces with root spans flushed | unknown | CD | yes/yes |
-| `grafanacloud_traces_instance_process_overage` | Traces | traces instance process overage | billing quantity, window unverified | C | yes/- |
-| `grafanacloud_traces_instance_process_usage` | Traces | traces instance process usage | billing quantity, window unverified | C | yes/- |
-| `grafanacloud_traces_instance_queries_per_second` | Traces | traces instance queries per second | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_retention_overage` | Traces | traces instance retention overage | billing quantity, window unverified | C | yes/- |
-| `grafanacloud_traces_instance_retention_usage` | Traces | traces instance retention usage | billing quantity, window unverified | C | yes/- |
-| `grafanacloud_traces_instance_spans_more_than_30m_in_past_percent` | Traces | traces instance spans more than 30m in past percent | unknown | CD | yes/yes |
-| `grafanacloud_traces_instance_spans_more_than_5m_in_past_percent` | Traces | traces instance spans more than 5m in past percent | unknown | CD | yes/yes |
-| `grafanacloud_traces_instance_spans_more_than_60m_in_past_percent` | Traces | traces instance spans more than 60m in past percent | unknown | CD | yes/yes |
-| `grafanacloud_traces_instance_spans_received_total:rate5m` | Traces | traces instance spans received total:rate5m | rate | CD | yes/yes |
-| `grafanacloud_traces_instance_usage` | Traces | traces instance usage | billing quantity, window unverified | C | yes/- |
+| `grafanacloud_profiles_instance_usage_group_bytes_received_per_second` | Profiles | profiles instance
+
+## Loop3 metric-semantics correction and re-enumeration, 2026-09-30
+
+This section supersedes the older shape annotations above where they disagree. Historical customer measurements are historical only; this loop queried the staff development write datasource with fresh live inventory, explicit 24h range reads and an additional calendar-month diagnostic read. Five live staff stacks had samples; this is one org datasource, not five independent datasource probes. The fresh roster adds two names to the old 325-name union, making 327 entries. 26 have exact or partial vendor contracts; 309 still have unresolved normalization. Unknowns remain unknown. No AC1 completion is claimed.
+
+The vendor OnCall table says: `alert_groups_total | Gauge | Total count of alert groups for each integration by state (firing, acknowledged, resolved, silenced)`. It also defines response and resolution histograms over the last seven days. Source: https://grafana.com/docs/grafana-cloud/observe-and-act/respond-to-incidents/measure-and-improve/alert-group-insights/ . An increasing observed level does not turn this gauge into a cumulative counter. The existing collector reads its level; do not derive rate/increase or current-period activity from this evidence.
+
+Resource-quota usage is a current dashboard/folder count, not monthly billable usage (https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/). Cost Management's month-to-date hourly-refreshed gauge model does not establish every similarly named metric's recording contract (https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/metrics/). Trace completeness/root-span ratios are 0-1; creation dates are milliseconds. Live metadata returned success with an empty data object, so it supplied no HELP/TYPE contracts. Absent staff billing data cannot validate monthly resets or prove zero customer use.
+
+The remaining acceptance blocker is an authoritative vendor catalogue of HELP/TYPE, recording expressions/cadence, producer windows and billing-period/reset definitions for unresolved entries. Another unchanged name search or an instant query is not a discriminating next attempt. No role, scope or access policy was changed by this mapping.
+
+### Revised per-name semantics roster
+
+Consumer diagnostic window: 24h, five-minute evaluation steps for every row. Producer window is separate. Semantic gauge inferences are labelled, not claimed as wire TYPE. Rows with unknowns were checked against current vendor product/usage/pricing docs, exact-name mentions, empty metadata, fresh names, explicit range data and the selected month window.
+
+| Metric | Type/normalization | Producer window | Billing-period contract | Citation |
+|---|---|---|---|---|
+| `grafanacloud_ai_tokens_active_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_ai_tokens_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_ai_tokens_total_tokens` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_ai_tokens_user_total_tokens` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_app_observability_billable_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_app_observability_hostless_service_entity_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_app_observability_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_app_observability_service_entity_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_asserts_instance_active_entities` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_asserts_instance_total_entities` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_assistant_active_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_assistant_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_assistant_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_frontend_observability_billable_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_frontend_observability_instance_app_logs_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_frontend_observability_instance_app_traces_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_frontend_observability_instance_logs_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_frontend_observability_instance_sessions_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_frontend_observability_instance_traces_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_frontend_observability_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_active_user_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_active_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_alerting_alertmanager_alerts` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_alerting_alerts` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_alerting_rule_evaluation_failures_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_alerting_rule_evaluations_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_alerting_rule_group_rules` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_alerting_silences` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_alerting_state_history_writes_failed_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_billable_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_created_date` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_custom_datasource_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_dashboard_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_info` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_plugin_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_grafana_instance_resource_quota_limit` | gauge (semantic inference: configured dashboard or folder limit; wire TYPE unknown) | Configured dashboard or folder limit; refresh unknown | Resource protection; not billed consumption | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_grafana_instance_resource_quota_usage` | gauge (semantic inference: current dashboard or folder count; wire TYPE unknown) | Current dashboard or folder count; refresh unknown | Resource protection; not billed consumption | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_grafana_pdc_connected_agents` | gauge (semantic inference: current connections; wire TYPE unknown) | Connected agents by stack and tunnelID; averaging/cadence unknown | Not billed data-source request usage | https://grafana.com/docs/grafana-cloud/observe-and-act/connect-externally-hosted/private-data-source-connect/configure-pdc/ |
+| `grafanacloud_infra_observability_containers_billable_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_infra_observability_containers_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_infra_observability_hosts_billable_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_infra_observability_hosts_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_asserts_alerts` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_asserts_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_caas_targets_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_cadvisor_version_info_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_collector_spanmetrics_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_dbo11y_instance_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_dbo11y_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_dbo11y_stats` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_faas_targets_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_host_info_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_influx_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_integration_host_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_integration_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_kube_node_info_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_kube_pod_container_info_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_kube_pod_info_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_legacy_collector_spanmetrics_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_native_histogram_buckets` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_native_histogram_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_node_uname_info_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_otlp_series` | gauge (semantic inference from active-population description; wire TYPE unknown) | Active OTLP series; 20-minute general definition; OTLP-specific recording window unknown | Standard metrics pricing; not a billable monthly total | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/metrics/ |
+| `grafanacloud_instance_active_series` | gauge (semantic inference from active-population definition; wire TYPE unknown) | Active means data received within previous 20 minutes; recording averaging/cadence unknown | Input to calendar-month p95; not itself month-total | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/metrics/ |
+| `grafanacloud_instance_active_service_graph_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_servicegraphmetrics_classic_histograms_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_servicegraphmetrics_native_histograms_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_spanmetrics_classic_histograms_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_spanmetrics_native_histograms_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_spanmetrics_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_target_info_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_traces_host_info_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_traces_target_info_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_active_unidentifiable_targets_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_aggregation_aggregated_samples_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_aggregation_aggregated_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_aggregation_raw_samples_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_aggregation_raw_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_alertmanager_alerts` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_alertmanager_config_last_reload_successful` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_alertmanager_created_date` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_alertmanager_info` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_alertmanager_invalid_config` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_alertmanager_notifications_failed_per_integration_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_alertmanager_notifications_failed_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_alertmanager_notifications_failed_total` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_alertmanager_notifications_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_alertmanager_notifications_total` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_alertmanager_silences` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_app_o11y_host_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_app_o11y_host_v2_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_app_o11y_host_v3_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_attributed_active_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_attributed_billable_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_attributed_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_attributed_samples_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_billable_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_created_date` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_exemplars_discarded_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_exemplars_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_ha_tracker_elected_replica_changes_total` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_info` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_memory_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_metadata_discarded_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_metadata_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_metrics_limits` | gauge (semantic inference: continuously supplied configured limit; wire TYPE unknown) | Current configured limit by limit_name; refresh unknown | Not a billed consumption total | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_instance_native_histogram_buckets_multiplier_wip` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_product_active_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_product_samples_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_queries_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_recommendations_estimated_savings_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_rule_config_last_reload_successful` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_rule_evaluation_failures_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_rule_evaluations_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_rule_group_interval_seconds` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_rule_group_iterations_missed_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_rule_group_iterations_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_rule_group_last_duration_seconds` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_rule_group_last_evaluation_timestamp_seconds` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_rule_group_rules` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_ruler_notifications_errors_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_ruler_notifications_latency_seconds:50quantile` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_ruler_notifications_latency_seconds:99quantile` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_ruler_notifications_queue_capacity` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_ruler_notifications_queue_length` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_ruler_notifications_sent_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_ruler_queries_failed_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_ruler_queries_zero_fetched_series_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_samples_discarded` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_samples_discarded_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_samples_per_second` | rate (documented samples/s; underlying gauge TYPE unknown) | Per-second unit; producer smoothing window unknown | DPM = samples/s x60; calendar-month p95 with included-DPM divisor | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/metrics/ |
+| `grafanacloud_irm_active_user_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_irm_billable_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_irm_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_k6_stack_static_ip_billable_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_k6_stack_virtual_user_hours_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_k6_static_ip_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_k6_virtual_user_hours_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_active_streams` | gauge (semantic inference: stream count; wire TYPE unknown) | Count of active log streams; active/smoothing window unknown | No metric-specific billing semantics documented | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_logs_instance_adaptivelogs_bytes_dropped_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_adaptivelogs_policy_bytes_dropped_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_adaptivelogs_policy_lines_dropped_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_attributed_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_attributed_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_attributed_retention_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_attributed_retention_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_attributed_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_billable_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_bytes_processed_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_cloud_logs_export_exported_bytes` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_cloud_logs_export_last_synced_file_timestamp` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_cloud_logs_export_status` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_created_date` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_discarded_bytes_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_info` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_limits` | gauge (semantic inference: continuously supplied configured limit; wire TYPE unknown) | Current configured limit by limit_name; refresh unknown | Not a billed consumption total | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_logs_instance_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_process_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_process_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_query_bytes:rate1m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_query_bytes:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_query_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_retention_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_retention_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_rule_config_last_reload_successful` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_samples_discarded_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_logs_instance_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_oncall_instance_alert_groups_resolution_time_seconds_bucket` | unknown counter/gauge; documented rolling histogram family | Last 7 days (vendor histogram family definition); exact component TYPE and eviction/reset behavior unknown | Not monthly billing consumption | https://grafana.com/docs/grafana-cloud/observe-and-act/respond-to-incidents/measure-and-improve/alert-group-insights/ |
+| `grafanacloud_oncall_instance_alert_groups_resolution_time_seconds_count` | unknown counter/gauge; documented rolling histogram family | Last 7 days (vendor histogram family definition); exact component TYPE and eviction/reset behavior unknown | Not monthly billing consumption | https://grafana.com/docs/grafana-cloud/observe-and-act/respond-to-incidents/measure-and-improve/alert-group-insights/ |
+| `grafanacloud_oncall_instance_alert_groups_resolution_time_seconds_sum` | unknown counter/gauge; documented rolling histogram family | Last 7 days (vendor histogram family definition); exact component TYPE and eviction/reset behavior unknown | Not monthly billing consumption | https://grafana.com/docs/grafana-cloud/observe-and-act/respond-to-incidents/measure-and-improve/alert-group-insights/ |
+| `grafanacloud_oncall_instance_alert_groups_response_time_seconds_bucket` | unknown counter/gauge; documented rolling histogram family | Last 7 days (vendor histogram family definition); exact component TYPE and eviction/reset behavior unknown | Not monthly billing consumption | https://grafana.com/docs/grafana-cloud/observe-and-act/respond-to-incidents/measure-and-improve/alert-group-insights/ |
+| `grafanacloud_oncall_instance_alert_groups_response_time_seconds_count` | unknown counter/gauge; documented rolling histogram family | Last 7 days (vendor histogram family definition); exact component TYPE and eviction/reset behavior unknown | Not monthly billing consumption | https://grafana.com/docs/grafana-cloud/observe-and-act/respond-to-incidents/measure-and-improve/alert-group-insights/ |
+| `grafanacloud_oncall_instance_alert_groups_response_time_seconds_sum` | unknown counter/gauge; documented rolling histogram family | Last 7 days (vendor histogram family definition); exact component TYPE and eviction/reset behavior unknown | Not monthly billing consumption | https://grafana.com/docs/grafana-cloud/observe-and-act/respond-to-incidents/measure-and-improve/alert-group-insights/ |
+| `grafanacloud_oncall_instance_alert_groups_total` | gauge (explicit vendor TYPE) | Counts alert groups by state; no fixed lookback/retention period documented | Not a monthly total; IRM bills active users, not alert groups | https://grafana.com/docs/grafana-cloud/observe-and-act/respond-to-incidents/measure-and-improve/alert-group-insights/ |
+| `grafanacloud_oncall_instance_user_was_notified_of_alert_groups_total` | counter (explicit vendor TYPE) | Cumulative notifications; start/reset/retention horizon unknown | Not IRM monthly-active-user billing | https://grafana.com/docs/grafana-cloud/observe-and-act/respond-to-incidents/measure-and-improve/alert-group-insights/ |
+| `grafanacloud_org_agent_o11y_generations_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_ai_tokens_active_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_ai_tokens_additional_tokens` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_ai_tokens_included_additional_tokens` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_ai_tokens_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_app_o11y_billable_host_hours` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_app_o11y_included_host_hours` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_app_o11y_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_assistant_included_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_assistant_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_assistant_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_billable_users_grafana` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_contract_end_date` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_contract_start_date` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_db_o11y_billable_host_hours` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_db_o11y_included_host_hours` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_db_o11y_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_fe_o11y_billable_sessions` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_fe_o11y_included_sessions` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_fe_o11y_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_forecast_months_remaining` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_grafana_billable_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_grafana_included_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_grafana_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_grafana_plugin_included_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_grafana_plugin_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_grafana_plugin_users_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_info` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_infra_o11y_billable_container_hours` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_infra_o11y_billable_host_hours` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_infra_o11y_container_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_infra_o11y_host_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_infra_o11y_included_container_hours` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_infra_o11y_included_host_hours` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_irm_included_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_irm_users` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_irm_users_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_k6_ip_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_k6_ip_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_k6_ip_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_k6_static_ips` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_k6_virtual_user_hours_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_k6_virtual_user_hours_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_k6_virtual_user_hours_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_logs_included_query_to_ingest_ratio` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_logs_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_logs_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_logs_process_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_logs_process_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_logs_process_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_logs_query_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_logs_retention_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_logs_retention_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_logs_retention_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_logs_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_metrics_billable_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_metrics_included_dpm_per_series` | gauge (semantic inference: plan parameter; wire TYPE unknown) | Configured included DPM, not measured consumption; refresh unknown | Contract divisor (1 or 4 described), not cumulative monthly usage | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/metrics/ |
+| `grafanacloud_org_metrics_included_series` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_metrics_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_profiles_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_profiles_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_profiles_process_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_profiles_process_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_profiles_process_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_profiles_retention_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_profiles_retention_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_profiles_retention_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_profiles_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_sm_billable_check_executions` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_sm_browser_billable_check_executions` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_sm_browser_included_check_executions` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_sm_browser_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_sm_included_check_executions` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_sm_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_spend_commit_balance_total` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_spend_commit_credit_total` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_total_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_traces_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_traces_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_traces_process_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_traces_process_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_traces_process_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_traces_retention_included_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_traces_retention_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_traces_retention_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_org_traces_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_product_activation_status` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_billable_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_bytes_processed_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_bytes_received_per_second_by_stage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_created_date` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_info` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_process_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_process_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_retention_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_retention_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_usage_group_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_profiles_instance_usage_group_estimated_billable_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_sm_billable_check_executions_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_sm_billable_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_sm_browser_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_sm_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_adaptivetraces_bytes_dropped_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_adaptivetraces_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_adaptivetraces_discarded_spans_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_adaptivetraces_global_sampled_traces_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_adaptivetraces_policy_sampled_bytes_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_adaptivetraces_policy_sampled_spans_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_adaptivetraces_policy_sampled_traces_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_adaptivetraces_preprocessing_span_name_cardinality_after_transform` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_adaptivetraces_preprocessing_span_name_cardinality_before_transform` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_adaptivetraces_preprocessing_spans_transformed_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_adaptivetraces_spans_received_total:rate5m` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_attributed_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_attributed_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_attributed_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_bytes_processed_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_bytes_received_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_created_date` | gauge (semantic inference: date, not counter; wire TYPE unknown) | Fixed creation date in milliseconds since epoch | Not billing-period consumption | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_traces_instance_discarded_spans_total:rate5m` | unknown normalization; doc describes number in 5-minute periods | 5-minute periods documented; per-second vs period-total not explicit in checked table | Discard signal, not billed usage | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_traces_instance_distributor_attributes_truncated_total` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_info` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_ingress_bytes_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_limits` | gauge (semantic inference: continuously supplied configured limit; wire TYPE unknown) | Current configured limit by limit_name; refresh unknown | Not a billed consumption total | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_traces_instance_metrics_generator_active_series_demand_estimate` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_metrics_generator_discarded_spans_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_metrics_generator_label_cardinality_demand_estimate` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_metrics_generator_post_sanitization_demand_estimate` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_metrics_generator_received_spans_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_metrics_generator_series_dropped_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_metrics_generator_series_limit_percentage_used` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_metrics_generator_spans_sanitized_per_second` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_percentage_complete_traces_flushed` | gauge (semantic inference: ratio 0-1; wire TYPE unknown) | Traces without orphan spans when flushed; aggregation window unknown | Not a billable trace quantity | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_traces_instance_percentage_traces_with_root_spans_flushed` | gauge (semantic inference: ratio 0-1; wire TYPE unknown) | Traces with root spans when flushed; aggregation window unknown | Not a billable trace quantity | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_traces_instance_process_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_process_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_queries_per_second` | rate (explicitly documented per-second) | Per-second unit; smoothing window unknown | Not documented as billed query quantity | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_traces_instance_retention_overage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_retention_usage` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_spans_more_than_30m_in_past_percent` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_spans_more_than_5m_in_past_percent` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_spans_more_than_60m_in_past_percent` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_traces_instance_spans_received_total:rate5m` | rate (explicitly documented per-second) | 5-minute producer window; consumer 24h observation | Span ingestion rate, not monthly usage | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_traces_instance_usage` | unknown wire type; documented billable quantity | Billable trace usage over last month; rolling month vs calendar MTD unresolved | Pricing bills processed/written/retained GB per month; exact legacy metric boundary not proven | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
+| `grafanacloud_instance_app_o11y_service_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+| `grafanacloud_instance_app_o11y_service_instance_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |

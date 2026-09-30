@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 17:50'
-updated_date: '2026-09-30 12:26'
+updated_date: '2026-09-30 12:36'
 labels:
   - research
   - adoption
@@ -129,4 +129,6 @@ Wave 1 matrix doc-0006 covers 34 product/subfeature groups and an exact 325-name
 Criterion audit correction: AC2 and AC4 also stay open. Several candidate plugin routes are wildcard or unverified and their exact reader action/scope pairs are unknown; GCI-0041 is the explicit scope-decision and route-validation boundary. The matrix labels these gaps rather than presenting candidate routes as confirmed contracts.
 
 loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
+
+loop3 D1c mapping accepted and durable matrix updated via CLI: 327-name roster across 19 families, 26 partial/exact contracts and 309 unresolved normalizations. OnCall alert_groups_total corrected to explicit gauge; response/resolution histograms last 7d; quota_usage current count not billing. AC1 remains unproven pending vendor HELP/TYPE/recording windows/reset catalogue; no guesses, no role changes in research. D1a route/pair proof remains active root follow-up. Discovery attempts 0, implementation attempts 0, infra retries 0 for this research criterion.
 <!-- SECTION:NOTES:END -->

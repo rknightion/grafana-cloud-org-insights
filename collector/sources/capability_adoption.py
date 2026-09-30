@@ -41,8 +41,8 @@ QUERIES: Mapping[str, str] = {
     "service_graphs": _windowed("grafanacloud_instance_active_service_graph_series"),
     "native_histograms": _windowed("grafanacloud_instance_active_native_histogram_series"),
     "exemplars": _windowed("grafanacloud_instance_exemplars_per_second"),
-    # A cumulative counter. Presence identifies the provisioned OnCall population; a positive value
-    # identifies stacks that have actually raised an alert group.
+    # A vendor-documented gauge of alert groups by state, not a cumulative event counter.
+    # Presence identifies the reporting population; a positive level is not current-period activity.
     "irm_oncall": "sum by(stack_id)(grafanacloud_oncall_instance_alert_groups_total)",
     # Current billing-period cumulative usage, not a momentary rate.
     "k6": "sum by(stack_id)(grafanacloud_k6_stack_virtual_user_hours_usage)",
