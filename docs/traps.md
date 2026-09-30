@@ -160,11 +160,65 @@ is already a datasource on the target stack, a panel beats a pipeline.**
  six unknown requests. These are sample counts, not estate totals or unique users. The query was
  `sum by (source) (count_over_time({instance_type="grafana", instance_id="<current stack id>"}
  | logfmt | eventName="data-request" [7d]))`, run separately per stack.
-- **`scenes` cannot presently identify one app.** Inspected live scenes lines had datasource type,
- datasource and dashboard fields, and `userId`, but no plugin or URL field. A grouped
- `source,datasourceType` query found Prometheus, Loki, Tempo and Pyroscope types; a datasource is
- compatible with several apps, so it is only a weak inference. A known Drilldown user's exact
- request was not independently identified in this probe. Do not label `scenes` as one Drilldown app.
+- **The observed `scenes` field alone does not identify one app.** Inspected live scenes lines had
+ datasource type, datasource and dashboard fields, and `userId`, but no plugin or URL field. A grouped
+ `source,datasourceType` query found Prometheus, Loki, Tempo and Pyroscope types; those describe
+ backends, not app identity. A known Drilldown user's exact request was not independently identified
+ in that probe. The later known Logs frontend control below reported generic `app`, not `scenes`.
+ Do not label either bucket as one Drilldown app or attribute an app by datasource type.
+- **A successful backend query is not a frontend `data-request` event.** On 2026-09-30, three
+ controlled development-stack `POST /api/ds/query` reads (a Metrics-style query, a Logs-style query
+ and the same Logs query with `X-Query-Tags: Source=grafana-lokiexplore-app`) each returned HTTP 200,
+ result status 200 and one frame. Guarded usage-insights readbacks before, immediately after and
+ approximately ten minutes after the requests found no `data-request` events in the controlled
+ request window; the seven-day source counts stayed unchanged. These requests did not run a
+ Drilldown frontend or send a frontend analytics event. The candidate header propagation path is
+ therefore **unavailable from this tested backend-only experiment**, not disproven for a real
+ frontend query. This does not prove that a header was stripped from a known Drilldown event, that
+ every ingestion delay was covered, or that per-app attribution is universally impossible.
+- **Backend plugin headers and frontend app identity are different seams.** In the deployed Grafana
+ source, `DataSourceWithBackend` sets `X-Plugin-Id` from datasource plugin IDs and
+ `X-Datasource-Uid` from datasource UIDs. `queryAnalytics.ts` instead takes the analytics `source`
+ from frontend `data.request.app` and calls `reportMetaAnalytics` on query completion. See the
+ [backend request builder](https://github.com/grafana/grafana/blob/1daf74a0ce11ca6c5555c6deea667a9ec5e10cc8/packages/grafana-runtime/src/utils/DataSourceWithBackend.ts#L242-L244)
+ and [frontend analytics emitter](https://github.com/grafana/grafana/blob/1daf74a0ce11ca6c5555c6deea667a9ec5e10cc8/public/app/features/query/state/queryAnalytics.ts#L23-L48).
+ The installed Logs Drilldown 2.6.0 source adds the source-tag header on resource reads, but its
+ [ordinary query path](https://github.com/grafana/logs-drilldown/blob/e894c0eb6a6d3924b1cdba5aca4bcaccf51cab05/src/services/datasource.ts#L155-L179)
+ delegates to `ds.query` without adding that header. Adding it to a controlled backend POST tests
+ propagation, not the request shape or analytics emission of every real Logs Drilldown query.
+- **A refreshed staff sample does not replace known-app proof.** Five separately guarded seven-day
+ staff-stack probes on 2026-09-30 observed `dashboard`, `app`, `scenes` and `explore` across three
+ active stacks; the other two returned no events. Nonempty, non-anonymous `userId` counts matched
+ the observed source counts on those active stacks, proving field presence in this sample, not
+ human identity or distinct people. Twenty recent scenes events on the controlled stack had no
+ `panelPluginId`, `pluginId` or URL key. No sampled non-dashboard event had a nonempty `dashboardUid`
+ that week; that bounded negative does not invalidate the older positive stale-dashboard evidence
+ below. This discovery sample alone did not identify a known frontend Drilldown query. No per-app
+ discriminator is accepted from the backend requests.
+- **Known Logs Drilldown frontend queries can report generic `app`, not `scenes`.** On 2026-09-30,
+ an isolated headless Chrome control loaded the genuine Logs Drilldown 2.6.0 UI on a staff stack,
+ authenticated with an existing Admin service account. The page was logged in and titled Grafana
+ Logs Drilldown. During 15:17:55-15:18:56 UTC it made 40 actual `/api/ds/query` POSTs; its own
+ `/api/ma/events` batch contained 43 `data-request` events, all with `source="app"`, and returned
+ HTTP 201. The captured event keys were `type`, `eventName`, `source`, `datasourceName`,
+ `datasourceUid`, `datasourceType`, `dataSize`, `panelId`, `duration`, `totalQueries`, `cachedQueries`
+ and `meta`, with no app-specific plugin ID or URL key. A subsequent usage-insights readback,
+ guarded by `instance_type="grafana"` and that stack's exact `instance_id`, found 43 events with
+ `source="app"` in the controlled window, no plugin ID or URL field, and empty dashboard UIDs.
+ Request POST count and analytics-event count are different quantities, not a one-to-one contract.
+ The machine-local evidence packet retains `browser-summary.json` and
+ `guarded-browser-readback.json`; no raw identity or datasource UID is reproduced here.
+- **That frontend control proves the known app, not human adoption or a working discriminator.**
+ The principal was a service account, not an independently observed human Drilldown user. App
+ identity is established by the controlled frontend page, not inferred from its datasource type;
+ the ingested generic `app` value does not itself distinguish Logs from other apps. The source
+ explanation above and the installed Logs
+ [SceneApp construction](https://github.com/grafana/logs-drilldown/blob/e894c0eb6a6d3924b1cdba5aca4bcaccf51cab05/src/Components/LogExplorationPage.tsx#L11-L18)
+ support the capture, but do not establish every app's runtime source. An earlier browser control
+ blocked `/api/ma/events`, so that first run cannot prove actual analytics propagation or source
+ absence. The successful second run resolves known-frontend transport proof; it does not retest
+ the backend source-tag candidate, prove universal per-app impossibility, or measure human users.
+ No working per-app discriminator was established for this tested UI and ingested schema.
 - **Distinct people require a filtered `userId`, not request volume.** Nonempty, non-anonymous IDs
  occurred on four of five development and 41 of 50 sampled customer stacks. Aggregate distinct IDs
  inside Loki; do not put an identity or raw plugin-chosen `source` into a metric label.
