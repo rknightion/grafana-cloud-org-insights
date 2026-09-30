@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-08-25 13:12'
-updated_date: '2026-09-30 19:45'
+updated_date: '2026-09-30 20:24'
 labels:
   - risk
   - privacy
@@ -106,6 +106,8 @@ Owner override 2026-09-30 goal D2 replaces the historical key-only restriction: 
 Loop3 deployment hold: new independent privacy prerequisite review found latest raw-match view has no current-object expiry; scan90/noncurrent7 do not bound stale current view. D2 permits full matched values but not indefinite retention. Targeted repaira2 admitted: lifecycle exact full raw-view filename prefix only, reuse positive whole scan-retention90 defaults, preserve other last-good views, scans/noncurrent7/IAM. Policy is eligibility since last publication plus version expiry/async processing, not strict observation-age erasure. No collector execution on new source before actual controls pass. Customer rollout requires a bucket-owner equivalent rule; lifecycle writes exceed current customer write fence, so that prerequisite remains a run-end authorization question rather than implicit Terraform drift.
 
 Loop3 dev source6ebedd3dccc59ad1bf43a9a7a6cc421abe4b66bc/imagebc024b60cce3917441e679f7b9a423ce3199d978a01923d26ce7b15dc4a2f4f4 exercised on actual dailyT2 and hydratedT1/T3: riskview18 rows, coverage20 rows; full raw matches remained approved S3-only, no raw values printed/persisted in proof. Actual dedicated full-filename currentexpiry90/scans90/globalversionexpiry7/versioningEnabled/AES256/publicblocking/TLSdeny and unchanged view/task IAM verified before publication. Independent source retention repaira2 PASS, fullgate1649passed2existing skips7971subtests/CR0all6/CI36745573818success; both sourceattempts consumed. Five readerNone/IDs/tokens/SSMversions/fullpairsets identical pre/post provisioner. Dashboard risk/raw coverage refs GET-confirmed. Customer publication not exercised: existing policy lacks current-view expiry and bucket write exceeds owner fence; retain run-end authority question. Local source fences/required regression gates passed, actual privacy readbacks separate.
+
+Root counter correction: prior state already recorded original collection source attempts a1 and a2. The later new raw-view retention repair was incorrectly briefed/returned as a2; cumulative task/criterion accounting is a3, with a4 unused within the goal four-attempt ceiling. Root rescoped/delegated this repair to complex-worker-push rather than treating it as a fresh worker counter; this labelling/routing deviation is disclosed, not a counter reset. Source repair/independent review proof remains exact6eb. No implementation was admitted after18:30.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
