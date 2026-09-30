@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 08:35'
-updated_date: '2026-09-30 12:20'
+updated_date: '2026-09-30 12:26'
 labels:
   - retention
   - dashboards
@@ -48,6 +48,8 @@ Generic mechanism only: no expectation value, selector or stack identity is hard
 
 <!-- SECTION:PLAN:BEGIN -->
 Implement generic status view and aggregate coverage metrics with unreadable kept separate; test the mixed readable/unreadable case, render dashboard, run just check including private identifier pattern, review, then release by exact SHA and signed auto-RC.
+
+loop3 P-0030-a1 owner fresh grant: recover preserved patch read-only, reproduce selector-priority, malformed-stream and absent-status-view regressions; correct one retention contract; full gate and CodeRabbit candidate, root landing/CI/release.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

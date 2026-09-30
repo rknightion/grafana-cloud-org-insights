@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-09-11 14:15'
-updated_date: '2026-09-30 12:24'
+updated_date: '2026-09-30 12:26'
 labels:
   - security
   - capabilities
@@ -53,6 +53,12 @@ Mint an access policy carrying `traces:read` and nothing else, on a control orga
 - [x] #2 just tf-validate
 - [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+loop3 R-0025: live inventory, isolated single-scope stack-realm policy per traces/profiles, bounded content read, recorded-ID policy delete and GET404; I-0025doc captures verified scope breadth without raw content.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 

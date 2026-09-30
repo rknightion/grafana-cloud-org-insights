@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-08-25 08:27'
-updated_date: '2026-09-30 12:20'
+updated_date: '2026-09-30 12:26'
 labels:
   - bug
 dependencies: []
@@ -61,6 +61,8 @@ Found while standing up a second deployment beside an existing one in a shared a
 
 <!-- SECTION:PLAN:BEGIN -->
 Fix the Firehose trust SourceArn condition using the bare log-group ARN, validate both Terraform roots, update troubleshooting documentation, and park the live first-filter criterion with its exact operator command because AWS writes are forbidden.
+
+loop3 R-0010: targeted ephemeral instance of exact generic module on staff dev, new log group proven absent beforehand. Create stream, prove delivery, then enable real module subscription filter without manual intervention; read back trust/filter, remove only recorded probe resources by reviewed saved destroy plan.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

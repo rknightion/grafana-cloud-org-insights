@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 17:50'
-updated_date: '2026-09-30 12:20'
+updated_date: '2026-09-30 12:26'
 labels:
   - research
   - adoption
@@ -110,6 +110,12 @@ The first concrete strand is already scoped as subtask GCI-0032.01: the `source`
 - [x] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+loop3 D1a/c: family-route and minimal-pair packets plus cited billing/window semantics matrix; root CLI matrix update, keep unknown semantics explicit, no evidence-free completion.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 

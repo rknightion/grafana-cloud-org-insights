@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-09-29 17:05'
-updated_date: '2026-09-30 12:20'
+updated_date: '2026-09-30 12:26'
 labels: []
 dependencies: []
 priority: medium
@@ -31,6 +31,12 @@ GCI-0045 review F2/F5: Terraform coerces JSON values through module variable typ
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+loop3 P-0048: reproduce JSON coercion/digest mismatch against real module variable types; reject or normalize values and prove offline tofu-rendered task-env parity; gate, CodeRabbit, exact-SHA CI.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 

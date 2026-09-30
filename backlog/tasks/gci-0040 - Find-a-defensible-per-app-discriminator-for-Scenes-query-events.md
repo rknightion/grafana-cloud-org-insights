@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-30 12:20'
+updated_date: '2026-09-30 12:26'
 labels:
   - feature-usage
   - follow-on
@@ -36,6 +36,12 @@ Rank 7 - valuable but upstream-dependent. In a live 55-stack sample, scenes line
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+loop3 D1b: controlled known-app read queries and guarded delayed usage-insights observations; implement proven discriminator or document unavailable with exact evidence, never attribute by datasource type.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 

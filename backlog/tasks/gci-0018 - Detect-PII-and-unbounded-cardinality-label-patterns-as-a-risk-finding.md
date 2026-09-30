@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-08-25 13:12'
-updated_date: '2026-09-30 12:24'
+updated_date: '2026-09-30 12:26'
 labels:
   - risk
   - privacy
@@ -84,6 +84,8 @@ An estate owner cannot grep their own label space at this scale, and the two con
 
 <!-- SECTION:PLAN:BEGIN -->
 Implement the versioned generic label-name pattern data and pure classifier with focused tests, then integrate its bounded metrics, view, dashboard and hydration wiring before security review.
+
+loop3 D1b then I-0018: prove all-signal label names/value routes, window, limits and payload bounds; implement daily bounded raw-match risk view under D2, no value/name metric labels; coverage, fixtures, dashboard, gate/review/CI, dev proof.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
