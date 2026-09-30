@@ -46,11 +46,11 @@ tf-validate:
     cd terraform/examples/standalone && tofu init -backend=false && tofu validate
     tofu fmt -check -recursive terraform
 
-# scan tracked files (and, with --history, all reachable git history) for leaked customer identifiers
+# scan files and origin history locally; CI retains its all-ref history scan
 # requires GCINSIGHT_CUSTOMER_IDENTIFIER_PATTERN in the environment (a repository secret in CI)
 [group('check')]
 check-identifiers *args:
-    bin/check-customer-identifiers --history {{ args }}
+    bin/check-customer-identifiers --history {{ if env_var_or_default("CI", "") == "true" { "" } else { "--origin-refs" } }} {{ args }}
 
 # refuse em dashes in shipped text; private gitignored codex state is not shipped
 [group('check')]

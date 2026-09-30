@@ -16,11 +16,13 @@ if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 HISTORY=0
+ORIGIN_REFS=0
 TARGET="$ROOT"
 PATTERNS_FILE=""
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --history) HISTORY=1; shift ;;
+    --origin-refs) HISTORY=1; ORIGIN_REFS=1; shift ;;
     --patterns-file)
       if [ "$#" -lt 2 ]; then
         echo "error: --patterns-file requires a path" >&2
@@ -30,7 +32,7 @@ while [ "$#" -gt 0 ]; do
       shift 2
       ;;
     -h|--help)
-      echo "usage: bin/check-customer-identifiers [--history] [--patterns-file path] [target]"
+      echo "usage: bin/check-customer-identifiers [--history] [--origin-refs] [--patterns-file path] [target]"
       exit 0
       ;;
     *) TARGET="$1"; shift ;;
@@ -80,8 +82,28 @@ if [ "$HISTORY" -eq 1 ]; then
     exit 2
   fi
 
+  # CI retains its all-ref scan. Local callers can select only the published origin lineage,
+  # including unpushed HEAD commits only when the current branch tracks an origin branch.
+  # Materialise the list first so a failed rev-list cannot silently become a clean empty scan.
+  if [ "$ORIGIN_REFS" -eq 1 ]; then
+    refs="$(git -C "$ROOT" for-each-ref --format='%(refname)' refs/remotes/origin/)"
+    if [ -z "$refs" ]; then
+      echo "error: --origin-refs requires origin refs; fetch origin first" >&2
+      exit 2
+    fi
+    upstream="$(git -C "$ROOT" rev-parse --symbolic-full-name '@{upstream}' 2>/dev/null || true)"
+    case "$upstream" in
+      refs/remotes/origin/*) refs="${refs}
+HEAD" ;;
+    esac
+    commits="$(printf '%s\n' "$refs" | git -C "$ROOT" rev-list --stdin)"
+  else
+    commits="$(git -C "$ROOT" rev-list --all)"
+  fi
+
   history_hits=""
   while IFS= read -r commit; do
+    [ -n "$commit" ] || continue
     set +e
     commit_hits="$(git -C "$ROOT" grep -I -l -i -E "$PATTERNS" "$commit" -- . 2>/dev/null)"
     status=$?
@@ -106,7 +128,7 @@ if [ "$HISTORY" -eq 1 ]; then
       history_hits="${history_hits}${commit}: historical path name
 "
     fi
-  done < <(git -C "$ROOT" rev-list --all)
+  done <<< "$commits"
 
   if [ -n "$history_hits" ]; then
     printf '%s' "$history_hits" >&2

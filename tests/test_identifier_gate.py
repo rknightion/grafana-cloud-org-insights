@@ -19,6 +19,7 @@ class IdentifierGateTest(unittest.TestCase):
         self.repo = pathlib.Path(self.tmp.name)
         (self.repo / "bin").mkdir()
         shutil.copy(ROOT / "bin" / "check-customer-identifiers", self.repo / "bin")
+        shutil.copy(ROOT / "justfile", self.repo / "justfile")
         subprocess.run(["git", "init", "-q"], cwd=self.repo, check=True)
         subprocess.run(["git", "config", "commit.gpgsign", "false"], cwd=self.repo, check=True)
         subprocess.run(["git", "config", "user.name", "Test"], cwd=self.repo, check=True)
@@ -138,6 +139,61 @@ class IdentifierGateTest(unittest.TestCase):
         self.assertEqual(history.returncode, 1)
         self.assertIn("historical path name", history.stderr)
         self.assertNotIn("forbidden-customer", history.stderr)
+
+    def git(self, *args: str) -> str:
+        return subprocess.check_output(["git", *args], cwd=self.repo, text=True).strip()
+
+    def test_origin_history_ignores_local_only_refs_but_rejects_origin_history(self):
+        (self.repo / "artifact.txt").write_text("synthetic fixture\n")
+        self.commit("clean origin fixture")
+        clean = self.git("rev-parse", "HEAD")
+        self.git("update-ref", "refs/remotes/origin/main", clean)
+        (self.repo / "artifact.txt").write_text("forbidden-customer\n")
+        self.commit("unsafe local fixture")
+        unsafe = self.git("rev-parse", "HEAD")
+        self.git("tag", "local-only-fixture", unsafe)
+        self.git("checkout", "--detach", clean)
+
+        result = self.run_gate("--history", "--origin-refs")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.git("rev-parse", "refs/tags/local-only-fixture"), unsafe)
+        for ci, expected in (("", 0), ("true", 1)):
+            env = os.environ.copy()
+            env["CI"] = ci
+            env["GCINSIGHT_CUSTOMER_IDENTIFIER_PATTERN"] = "forbidden-customer"
+            recipe = subprocess.run(
+                ["just", "check-identifiers"], cwd=self.repo, env=env,
+                capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(recipe.returncode, expected, recipe.stderr)
+        self.git("update-ref", "refs/remotes/origin/topic", unsafe)
+        result = self.run_gate("--history", "--origin-refs")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("historical file content", result.stderr)
+
+    def test_origin_history_includes_unpushed_head_only_on_origin_tracking_branch(self):
+        (self.repo / "artifact.txt").write_text("synthetic fixture\n")
+        self.commit("clean origin fixture")
+        self.git("update-ref", "refs/remotes/origin/main", "HEAD")
+        self.git("config", "remote.origin.url", "https://example.invalid/synthetic.git")
+        self.git("config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
+        self.git("branch", "--set-upstream-to=origin/main")
+        (self.repo / "artifact.txt").write_text("updated synthetic fixture\n")
+        self.commit("mention forbidden-customer in local metadata")
+
+        result = self.run_gate("--history", "--origin-refs")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("commit metadata", result.stderr)
+        self.git("branch", "--unset-upstream")
+        result = self.run_gate("--history", "--origin-refs")
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_origin_history_fails_closed_without_origin_refs(self):
+        (self.repo / "artifact.txt").write_text("synthetic fixture\n")
+        self.commit("clean local fixture")
+        result = self.run_gate("--history", "--origin-refs")
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("requires origin refs", result.stderr)
 
     def test_history_mode_accepts_a_clean_lineage(self):
         (self.repo / "artifact.txt").write_text("synthetic fixture\n")
