@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import tempfile
+from decimal import Decimal
 from typing import Any
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -94,6 +95,47 @@ def github_repo(value: str) -> str:
     raise ManifestError(f"unsupported GitHub repository URL: {value}")
 
 
+def validate_json_runtime_types(runtime: dict[str, Any]) -> None:
+    """Reject JSON that the module's typed inputs would change before env rendering.
+
+    Keep the manifest immutable: dropping object attributes or coercing a scalar here would also
+    require rewriting its overlay digest. The offline variables.tf contract test guards these shapes.
+    Decimal parsing detects precision lost by identity's float-to-integer canonicalisation.
+    """
+    scan = runtime["scan"]
+    retention_env = "GCINSIGHT_EXPECTED_RETENTION_POLICY"
+    weights_env = "GCINSIGHT_COVERAGE_SCORE_WEIGHTS"
+    for env in (retention_env, weights_env):
+        try:
+            value = json.loads(scan[env], parse_float=Decimal, parse_constant=Decimal)
+        except (ValueError, TypeError):
+            raise ManifestError(f"runtime.scan.{env} must contain valid JSON") from None
+        if env == retention_env:
+            if not isinstance(value, list) or any(
+                not isinstance(item, dict)
+                or set(item) != {"selector", "minimum_period"}
+                or any(not isinstance(field, str) for field in item.values())
+                for item in value
+            ):
+                raise ManifestError(
+                    f"runtime.scan.{env} must be a list of objects containing exactly "
+                    "selector and minimum_period strings"
+                )
+        else:
+            keys = {"metrics", "logs", "traces", "profiles", "dashboard", "alert", "slo"}
+            if not isinstance(value, dict) or set(value) != keys or any(
+                type(weight) not in (int, Decimal)
+                or (isinstance(weight, Decimal) and not weight.is_finite())
+                for weight in value.values()
+            ):
+                raise ManifestError(f"runtime.scan.{env} must contain exactly the seven numeric weights")
+            canonical_value = json.loads(
+                identity.canonical_json_text(scan[env]), parse_float=Decimal, parse_constant=Decimal
+            )
+            if value != canonical_value:
+                raise ManifestError(f"runtime.scan.{env} loses numeric precision during digest rendering")
+
+
 def validate(manifest: dict[str, Any]) -> None:
     if not isinstance(manifest, dict) or set(manifest) != TOP_LEVEL_KEYS:
         raise ManifestError(f"manifest top-level keys differ: expected {sorted(TOP_LEVEL_KEYS)}")
@@ -126,6 +168,8 @@ def validate(manifest: dict[str, Any]) -> None:
                 raise ManifestError(f"runtime.{kind}.{name} must be explicit and non-empty")
             if "\n" in value or "\x00" in value:
                 raise ManifestError(f"runtime.{kind}.{name} is not environment-safe")
+
+    validate_json_runtime_types(runtime)
 
     # Values Terraform cannot round-trip. The consumer wiring renders the flag as `== "1"`, so "true"
     # (which the collector accepts) renders "0"; and both tasks render OPT_OUT from ONE module input,
@@ -207,6 +251,13 @@ def regenerate(manifest: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(manifest, dict) or not isinstance(manifest.get("runtime"), dict):
         raise ManifestError("manifest must contain a runtime projection object")
     updated = dict(manifest)
+    # Validate before digest calculation too: an overflowing JSON number must be a contract error,
+    # not an exception in identity's canonicalisation. Leave malformed projection shapes to validate.
+    scan = updated["runtime"].get("scan")
+    if isinstance(scan, dict) and all(isinstance(scan.get(env), str) for env in (
+        "GCINSIGHT_EXPECTED_RETENTION_POLICY", "GCINSIGHT_COVERAGE_SCORE_WEIGHTS"
+    )):
+        validate_json_runtime_types(updated["runtime"])
     try:
         updated["overlay_digest"], updated["runtime_projection_digests"] = calculated_digests(updated)
     except KeyError as exc:

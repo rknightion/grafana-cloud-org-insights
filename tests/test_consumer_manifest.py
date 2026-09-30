@@ -44,6 +44,10 @@ def fixture(revision: str | None = None) -> dict:
     runtime["provisioner"]["GCINSIGHT_OPT_OUT"] = ""
     runtime["provisioner"]["GCINSIGHT_READER_PRODUCT_READS"] = ""
     runtime["scan"]["GCINSIGHT_DASHBOARD_DETAIL_ENABLED"] = "0"
+    runtime["scan"]["GCINSIGHT_EXPECTED_RETENTION_POLICY"] = "[]"
+    runtime["scan"]["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"] = json.dumps({
+        key: 1 for key in ("metrics", "logs", "traces", "profiles", "dashboard", "alert", "slo")
+    })
     body = {
         "schema_version": 1,
         "generic_source": {
@@ -191,15 +195,120 @@ class RenderedEnvironmentParityTest(unittest.TestCase):
         body = fixture()
         body["runtime"]["scan"]["GCINSIGHT_EXPECTED_RETENTION_POLICY"] = (
             '[{"selector": "{kind=\\"auditing\\"}", "minimum_period": "120d"}]')
-        body["runtime"]["scan"]["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"] = '{"metrics": 1.0, "logs": 2}'
+        weights = json.loads(body["runtime"]["scan"]["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"])
+        weights.update(metrics=1.0, logs=2)
+        body["runtime"]["scan"]["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"] = json.dumps(weights)
         body = consumer_manifest.regenerate(body)
         rendered = dict(body["runtime"]["scan"])
         # Exactly what `jsonencode(jsondecode(value))` emits for these two values.
         rendered["GCINSIGHT_EXPECTED_RETENTION_POLICY"] = (
             '[{"minimum_period":"120d","selector":"{kind=\\"auditing\\"}"}]')
-        rendered["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"] = '{"logs":2,"metrics":1}'
+        rendered["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"] = (
+            '{"alert":1,"dashboard":1,"logs":2,"metrics":1,"profiles":1,"slo":1,"traces":1}'
+        )
         self.assertEqual(body["runtime_projection_digests"]["scan"],
                          identity.projection_digest("scan", rendered))
+
+
+class TerraformVariableTypeParityTest(unittest.TestCase):
+    def test_coerced_or_lossy_json_is_rejected_before_digesting(self):
+        weights = json.loads(fixture()["runtime"]["scan"]["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"])
+        cases = [
+            ("GCINSIGHT_EXPECTED_RETENTION_POLICY", '[{"selector":"{}","minimum_period":"24h","extra":1}]'),
+            ("GCINSIGHT_EXPECTED_RETENTION_POLICY", '[{"selector":2,"minimum_period":"24h"}]'),
+            ("GCINSIGHT_EXPECTED_RETENTION_POLICY", '[{"selector":"{}"}]'),
+            ("GCINSIGHT_EXPECTED_RETENTION_POLICY", '{}'),
+            ("GCINSIGHT_EXPECTED_RETENTION_POLICY", 'not-json'),
+            ("GCINSIGHT_COVERAGE_SCORE_WEIGHTS", json.dumps(dict(weights, metrics="2"))),
+            ("GCINSIGHT_COVERAGE_SCORE_WEIGHTS", json.dumps(dict(weights, metrics=True))),
+            ("GCINSIGHT_COVERAGE_SCORE_WEIGHTS", json.dumps(dict(weights, extra=1))),
+            ("GCINSIGHT_COVERAGE_SCORE_WEIGHTS", '{}'),
+            ("GCINSIGHT_COVERAGE_SCORE_WEIGHTS", json.dumps(weights).replace('"metrics": 1', '"metrics": 1e100')),
+            ("GCINSIGHT_COVERAGE_SCORE_WEIGHTS", json.dumps(weights).replace('"metrics": 1', '"metrics": 1e-1000')),
+            ("GCINSIGHT_COVERAGE_SCORE_WEIGHTS", json.dumps(dict(weights, metrics=float("nan")))),
+        ]
+        for env, raw in cases:
+            with self.subTest(env=env, raw=raw):
+                body = fixture()
+                body["runtime"]["scan"][env] = raw
+                body["overlay_digest"], body["runtime_projection_digests"] = (
+                    consumer_manifest.calculated_digests(body)
+                )
+                for operation in (consumer_manifest.validate, consumer_manifest.regenerate):
+                    with self.assertRaisesRegex(consumer_manifest.ManifestError, env):
+                        operation(body)
+
+    def test_cli_commands_reject_bad_types_without_writing_or_checking_checkout(self):
+        with tempfile.TemporaryDirectory() as name:
+            path = pathlib.Path(name) / "manifest.json"
+            body = fixture()
+            body["runtime"]["scan"]["GCINSIGHT_EXPECTED_RETENTION_POLICY"] = (
+                '[{"selector":"{}","minimum_period":"24h","extra":1}]'
+            )
+            path.write_text(consumer_manifest.json_text(body))
+            original = path.read_bytes()
+            for command in ("regenerate", "check"):
+                with contextlib.redirect_stderr(io.StringIO()):
+                    self.assertEqual(consumer_manifest.main([
+                        command, "--manifest", str(path)
+                    ]), 2)
+                self.assertEqual(path.read_bytes(), original)
+
+    def test_real_module_types_and_env_expressions_round_trip_offline(self):
+        # No provider, backend, network, or apply: console evaluates the actual variable declarations
+        # and the same jsonencode expressions used by the ECS task definition.
+        weights = json.loads(fixture()["runtime"]["scan"]["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"])
+        retention = [{"selector": '{kind="auditing"}', "minimum_period": "24h"}]
+        cases = [
+            ([], dict(weights, metrics=1.0, logs=2), [], dict(weights, metrics=1.0, logs=2)),
+            (retention, dict(weights, metrics=0.125, logs=2),
+             retention, dict(weights, metrics=0.125, logs=2)),
+            ([], dict(weights, metrics=9007199254740993),
+             [], dict(weights, metrics=9007199254740993)),
+            # Coercible input is rejected, but its explicitly corrected manifest hashes exactly as
+            # the module renders the original input (extra attributes removed, strings converted).
+            (retention, weights, [dict(retention[0], extra="discarded")], weights),
+            ([], dict(weights, metrics=2), [], dict(weights, metrics="2")),
+        ]
+        inputs = consumer_manifest.module_env_inputs(ROOT / "terraform")["scan"]
+        with tempfile.TemporaryDirectory() as name:
+            temp = pathlib.Path(name)
+            shutil.copyfile(ROOT / "terraform" / "variables.tf", temp / "variables.tf")
+            for retention, scores, tofu_retention, tofu_scores in cases:
+                body = fixture()
+                scan = body["runtime"]["scan"]
+                scan["GCINSIGHT_EXPECTED_RETENTION_POLICY"] = json.dumps(retention)
+                scan["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"] = json.dumps(scores)
+                body = consumer_manifest.regenerate(body)
+                if (retention, scores) != (tofu_retention, tofu_scores):
+                    rejected = fixture()
+                    rejected["runtime"]["scan"].update({
+                        "GCINSIGHT_EXPECTED_RETENTION_POLICY": json.dumps(tofu_retention),
+                        "GCINSIGHT_COVERAGE_SCORE_WEIGHTS": json.dumps(tofu_scores),
+                    })
+                    with self.assertRaises(consumer_manifest.ManifestError):
+                        consumer_manifest.regenerate(rejected)
+                (temp / "contract.auto.tfvars.json").write_text(json.dumps({
+                    "name_prefix": "example-insights", "grafana_org_id": "123456",
+                    "write_stack_slug": "example", "mimir_write_url": "https://example.invalid",
+                    "mimir_tenant": "1", "loki_write_url": "https://example.invalid",
+                    "loki_tenant": "1", "subnet_ids": ["subnet-example"],
+                    "expected_retention_policy": tofu_retention, "coverage_score_weights": tofu_scores,
+                }))
+                expressions = {env: inputs[env][1] for env in (
+                    "GCINSIGHT_EXPECTED_RETENTION_POLICY", "GCINSIGHT_COVERAGE_SCORE_WEIGHTS"
+                )}
+                expression = "jsonencode({" + ",".join(
+                    f'{env} = {expr}' for env, expr in expressions.items()
+                ) + "})"
+                result = subprocess.run(
+                    ["tofu", "console", "-no-color"], cwd=temp, input=expression + "\n",
+                    text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                rendered = dict(scan, **json.loads(json.loads(result.stdout)))
+                self.assertEqual(body["runtime_projection_digests"]["scan"],
+                                 identity.projection_digest("scan", rendered))
 
 
 CONSUMER_TF = """
