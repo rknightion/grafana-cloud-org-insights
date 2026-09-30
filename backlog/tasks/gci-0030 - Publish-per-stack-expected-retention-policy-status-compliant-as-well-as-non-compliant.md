@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 08:35'
-updated_date: '2026-09-30 12:26'
+updated_date: '2026-09-30 12:51'
 labels:
   - retention
   - dashboards
@@ -30,18 +30,18 @@ Generic mechanism only: no expectation value, selector or stack identity is hard
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A new view lists every measured stack against each configured expectation entry with Status exactly one of compliant, below policy or unreadable, and its schema is declared in VIEW_SCHEMAS
-- [ ] #2 Unreadable stacks are never reported compliant or below policy, and an empty expectation list yields no status rows
-- [ ] #3 The Logs retention tab carries the status table and a compliant-count stat beside the existing measured and gap stats, and the generated dashboards match a fresh render
-- [ ] #4 No expectation value, selector or stack identity is hardcoded, the selector is never a metric label, and any new metric is in budget.py CATALOGUE
+- [x] #1 A new view lists every measured stack against each configured expectation entry with Status exactly one of compliant, below policy or unreadable, and its schema is declared in VIEW_SCHEMAS
+- [x] #2 Unreadable stacks are never reported compliant or below policy, and an empty expectation list yields no status rows
+- [x] #3 The Logs retention tab carries the status table and a compliant-count stat beside the existing measured and gap stats, and the generated dashboards match a fresh render
+- [x] #4 No expectation value, selector or stack identity is hardcoded, the selector is never a metric label, and any new metric is in budget.py CATALOGUE
 - [ ] #5 Released as a signed auto-RC whose digest a consumer can pin
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -60,4 +60,6 @@ Wave 8 parked by owner before commit or push. Local staged implementation and un
 Wave 2 exhausted the two authorised attempts without shipping. The recovered patch and the second correction pass are preserved in the isolated L1 worktree and private codex backup; no GCI-0030 code was committed. Focused tests passed (242 passed, 2 skipped), but CodeRabbit found a remaining major accuracy issue: a lower-priority overlapping Loki selector is classified unreadable even when it cannot govern retention. Do not count AC1-5 or release proof as complete. Resume from that exact selector-priority case with a new explicit attempt budget.
 
 loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
+
+loop3 P-0030-a1 candidate accepted locally: selector winner precedes overlap ambiguity, malformed lists atomic, missing status view assembles. CodeRabbit terminal zero findings/all8 files; patch ef9ed0dce986f6c52a63a5cb891fba8a329bf581faacc572e59eeaa13fbf7610. Root exact diff reviewed and integration just check passed (1588 passed,2 existing skipped). Local root commit prepared, push/hosted CI held for independent pytest OpenTofu prerequisite repair. AC5 signed release/digest and live rollout not claimed. Request queue and effective Loki limits are independent per newer docs/traps: request-route failure alone does not invalidate readable limits. Existing tests changed to reflect newly requested per-stack unreadable statuses and confirmed-readable gap count rather than suppressing the whole partial population. Fresh a2 remains unused, infra retries0.
 <!-- SECTION:NOTES:END -->
