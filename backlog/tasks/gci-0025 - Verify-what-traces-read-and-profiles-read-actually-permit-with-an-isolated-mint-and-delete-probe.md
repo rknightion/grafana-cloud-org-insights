@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-09-11 14:15'
-updated_date: '2026-09-30 12:20'
+updated_date: '2026-09-30 12:24'
 labels:
   - security
   - capabilities
@@ -60,6 +60,8 @@ Mint an access policy carrying `traces:read` and nothing else, on a control orga
 Wave 2 attended probe did not run because the operator did not supply the control-organisation identity. No organisation was inferred and no access policy was minted, read, modified or deleted.
 
 loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
+
+loop3 R-0025 live proof on staff control org: two stack-realm single-scope policies, traces:read and profiles:read, minted separately; Tempo 24h search and fetched trace batches returned 200; Pyroscope ProfileTypes and SelectMergeStacktraces returned 200 with nonempty flamegraph. Both created policy IDs were deleted then re-read as 404. No preexisting policy modified and no collector scopes changed. Evidence is private codex/loop3-evidence/R-0025; documentation lane I-0025doc active. AC1/2/3/5 root evidence accepted, formal checks after documentation integration.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

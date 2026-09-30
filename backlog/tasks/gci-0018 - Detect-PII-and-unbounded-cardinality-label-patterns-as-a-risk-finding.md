@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-08-25 13:12'
-updated_date: '2026-09-30 12:20'
+updated_date: '2026-09-30 12:24'
 labels:
   - risk
   - privacy
@@ -65,11 +65,11 @@ An estate owner cannot grep their own label space at this scale, and the two con
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Detection matches label keys only; no label value is read, stored, logged or emitted
-- [ ] #2 Label names never become metric labels; they go to a view and Loki
+- [ ] #1 Daily label-name and label-value reads detect identity-bearing patterns per signal and publish raw matched values in a bounded risk view under the owner-approved deployment privacy policy
+- [ ] #2 Label names and values never become metric labels; matched detail is view-only
 - [ ] #3 High-confidence and possible findings are reported separately
-- [ ] #4 Pattern set is a versioned data file with a test and contains nothing estate-specific
-- [ ] #5 Findings carry a measured-stack denominator
+- [ ] #4 Pattern set is versioned, tested, generic and contains nothing estate-specific
+- [ ] #5 Findings carry measured-stack coverage and sampled/matched counts; unreadable inputs are absent, never clean zeros
 - [ ] #6 The platform reports only and never proposes or performs remediation
 <!-- AC:END -->
 
@@ -98,6 +98,8 @@ What is genuinely missing is narrower than the note claimed: the payload is Mimi
 This task is therefore split. The unbounded-cardinality half is commissioned as GCI-0018.01 over the existing payload with no new source contract. This parent stays Parked for the identity-bearing half only, and resumes after an all-signal key-only label-name source contract exists across Mimir, Loki, Tempo and Pyroscope.
 
 loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
+
+Owner override 2026-09-30 goal D2 replaces the historical key-only restriction: daily reads may inspect label names AND values and publish raw matched values in full, capped at a stated per-stack/label/class bound. Values remain forbidden as metric labels. Historical description is retained as provenance, not the active privacy contract. No AC is claimed yet.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
