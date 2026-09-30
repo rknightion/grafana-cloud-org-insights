@@ -2,6 +2,11 @@
 
 ## Standing up a new deployment
 
+Before starting these live phases, follow [Clean-room validation](docs/clean-room-validation.md).
+It requires fresh clones, distinguishes Terraform validation from a credentialed plan, and records
+the private identifier gate and rollback prerequisites. Stop at the live-change approval gate;
+this runbook describes operations but does not grant authority to perform them.
+
 This section is the whole procedure for a named organisation, in the order it must actually happen.
 Each phase states what to collect, what to run, and what proves the phase finished. Do not skip
 forward: several steps look independent and are not, and phase 6 in particular fails in a way that

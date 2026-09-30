@@ -238,6 +238,10 @@ like before anything is provisioned.
 
 ## Deploying it
 
+Start with [Clean-room validation](docs/clean-room-validation.md) to rehearse from fresh product and
+deployment clones without live mutation. It distinguishes local validation from the credentialed
+candidate-plan and go-live approval gates, including the private CI identifier-pattern prerequisite.
+
 `terraform/` is a reusable module with no provider block: ECS Fargate, one EventBridge schedule per
 tier, S3, IAM, and a Secrets Manager container for the credentials.
 `terraform/examples/standalone/` is the copy-and-edit root. Read `terraform/README.md` for the

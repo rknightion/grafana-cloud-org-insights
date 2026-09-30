@@ -56,13 +56,26 @@ ECS agent, so they never appear in Terraform state, a plan diff, or the task rol
 Doing these out of order gives four tasks an hour failing to start, and the first symptom is a
 CloudWatch bill rather than an error anyone reads.
 
-1. `terraform apply` with `schedules_enabled = false`. Everything exists; nothing fires.
-2. Write the tokens into the secret (`aws secretsmanager put-secret-value`, shape in `secrets.tf`).
+Before any live operation, follow [Clean-room validation](../docs/clean-room-validation.md) and obtain
+separate live-change approval. The sequence below is not approval to apply or mint credentials.
+
+1. Apply with `schedules_enabled = false` and `provisioner_enabled = false` wired in the deployment
+   root. Everything exists; nothing fires.
+2. Write reader, writer and provisioner tokens into the secret out of band (shape in `secrets.tf`).
 3. Build and push the image. **It must match `task_architecture`** - the default is ARM64, and an x86
    image on an ARM64 task definition fails at runtime with `exec format error`, not at plan time.
-4. Run one tier by hand (`terraform output run_task_command`) and read its logs.
-5. Mint the access key for the views reader and wire the Grafana Infinity datasource to it.
-6. Set `schedules_enabled = true` and apply again.
+   Pin the reviewed immutable digest in the deployment root and apply again.
+4. Run the provisioner first, before any scan tier, to establish per-stack reader credentials.
+5. Run tiers serially T2, T3, T1, T4 and verify logs plus advanced scan envelopes.
+6. Mint the access key for the views reader and wire the Grafana Infinity datasource to it.
+7. Publish dashboards and paused, unrouted alerts. Enable collector schedules after verification,
+   and enable the write-capable provisioner schedule last.
+
+See [Standing up a new deployment](../RUNBOOK.md#standing-up-a-new-deployment) for the full sequence.
+The standalone example is a starting point, not complete consumer wiring. It exposes `image` and
+`provisioner_enabled`, with the provisioner schedule defaulting off independently of collector
+schedules. Set `image` to the reviewed registry manifest digest before runtime approval. Its
+`next_steps` output describes the same provisioner-first sequence, not authorization to execute it.
 
 ## Service observability completeness weights
 
@@ -185,7 +198,8 @@ module "insights" {
   loki_tenant      = "..."
   subnet_ids       = ["subnet-...", "subnet-..."]
 
-  schedules_enabled = false # until step 6 above
+  schedules_enabled  = false # until the manual tiers and dashboards are verified
+  provisioner_enabled = false # enable independently, last
 
   # Optional staged ECS-log delivery. Both switches default false.
   firehose_logs_enabled             = false

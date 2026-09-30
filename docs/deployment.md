@@ -29,6 +29,11 @@ Both live as JSON keys in one Secrets Manager secret and are injected by the ECS
 
 ## First deployment, in order
 
+First complete [Clean-room validation](clean-room-validation.md). That rehearsal stops before live
+change and documents the private identifier-pattern prerequisite, first manifest construction,
+local-build provenance, AWS plan assumptions and rollback evidence. The steps below require separate
+live-change approval.
+
 Doing these out of order gives four tasks an hour failing to start, and the first symptom is a CloudWatch bill rather than an error anyone reads.
 
 1. `terraform apply` with `schedules_enabled = false` and `provisioner_enabled = false`. Everything exists; nothing fires.
@@ -49,7 +54,9 @@ just image --repo <ecr-uri>   # ARM64, no Python dependencies
 just publish-image --repo <ecr-uri> # confirm, then push immutable :sha-<commit>
 ```
 
-Fargate pulls at task start, so a pushed image is picked up by the next scheduled run with no apply.
+Fargate pulls at task start, but an immutable task-definition digest does not change when an image
+is pushed. Update the deployment's reviewed image digest and task definition before the next run;
+a push alone changes neither the pinned consumer nor its rollback baseline.
 
 The build script refuses a dirty push unless the override is explicit, and reports the uncommitted paths. A normal build does not move `latest`; doing so requires the explicit compatibility flag.
 

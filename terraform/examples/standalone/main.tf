@@ -57,12 +57,11 @@ module "insights" {
   subnet_ids       = var.subnet_ids
   assign_public_ip = var.assign_public_ip
 
-  # FIRST APPLY SHOULD LEAVE THIS FALSE.
-  #
-  # The order that avoids a broken first run: apply with schedules off, write the two tokens into the
-  # secret, push the image, run one tier by hand with `aws ecs run-task`, read its logs, confirm the
-  # dashboards populate - then set this true. Turning schedules on before the secret has values gives
-  # four tasks an hour failing to start, and the first thing anyone sees is a CloudWatch bill.
+  # First deployment keeps both schedules off. After separate live-change approval, write all three
+  # tokens, pin the image digest, run the provisioner first, then T2 -> T3 -> T1 -> T4 serially.
+  # Verify the published views and dashboards before enabling scans; enable the provisioner last.
+  image                         = var.image
+  provisioner_enabled           = var.provisioner_enabled
   schedules_enabled             = var.schedules_enabled
   coverage_score_weights        = var.coverage_score_weights
   dashboard_detail_enabled      = var.dashboard_detail_enabled
@@ -80,23 +79,34 @@ module "insights" {
 
 output "next_steps" {
   value = <<-EOT
-    1. Write the tokens (values are never managed by Terraform):
-         aws secretsmanager put-secret-value --region ${var.region} \
-           --secret-id ${module.insights.secret_name} \
-           --secret-string '{"GCINSIGHT_READ_TOKEN":"<reader>","GCINSIGHT_WRITE_TOKEN":"<writer>","GCINSIGHT_ORG_ID":"${var.grafana_org_id}"}'
+    These operations require separate live-change approval. A plan is not approval to execute them.
+    First apply keeps schedules_enabled=false and provisioner_enabled=false.
 
-    2. Build and push the image (must match the task architecture, ARM64 by default):
-         aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${try(split("/", module.insights.ecr_repository_url)[0], "<registry>")}
-         docker build --platform linux/arm64 -t ${try(module.insights.ecr_repository_url, "<repo>")}:latest ../../..
-         docker push ${try(module.insights.ecr_repository_url, "<repo>")}:latest
+    1. Write all three token keys into ${module.insights.secret_name} out of band:
+         GCINSIGHT_READ_TOKEN, GCINSIGHT_WRITE_TOKEN, GCINSIGHT_PROVISION_TOKEN.
+       Use a protected local JSON input with Secrets Manager; never put token values in shell history,
+       Terraform variables/state, a plan, or the deployment manifest. GCINSIGHT_ORG_ID is not a token.
 
-    3. Smoke-test one tier by hand and read its logs:
+    2. Use the reviewed immutable image for ARM64, the standalone task architecture.
+       For a consumer, commit and check the deployment manifest/module ref, then use consumer-build.
+       Publish only with separate approval and record the registry manifest digest.
+       Set image="<registry>/<repository>@sha256:<reviewed-manifest-digest>" and apply the reviewed
+       task-definition update with both schedules still disabled. A push alone does not change it.
+
+    3. A full deployment needs an explicitly approved provisioner task in its deployment-owned root
+       (module create_provisioner=true). This standalone example leaves that module default off;
+       provisioner_enabled controls scheduling only and does not create the task.
+       Once that prerequisite is reviewed, run ${var.name_prefix}-provisioner FIRST for stack readers.
+       Then run T2 -> T3 -> T1 -> T4 serially, using the exact reviewed task-definition revisions:
          ${module.insights.run_task_command}
-         aws logs tail ${module.insights.log_group_name} --follow --region ${var.region}
+       Replace the task-definition placeholder with the provisioner revision first, then each tier.
+       Verify task logs and advanced scan envelopes after each run. Do not run the provisioner
+       concurrently with scans. Consult RUNBOOK.md for provisioning and publication proof.
 
-    4. Mint the Grafana datasource credential:
-         aws iam create-access-key --user-name ${try(module.insights.views_reader_user_name, "<user>")}
+    4. Wire the views-only Infinity datasource, publish dashboards and paused/unrouted alerts.
+       Mint any datasource credential out of band only with explicit approval.
 
-    5. Only then set schedules_enabled = true and apply again.
+    5. After verification enable collector schedules, keeping provisioner_enabled=false.
+       Enable the write-capable provisioner schedule last, with separate approval.
   EOT
 }

@@ -51,6 +51,18 @@ variable "assign_public_ip" {
   default     = false
 }
 
+variable "image" {
+  description = "Full immutable image reference for the tasks. Pin a reviewed registry digest; empty uses the created ECR repository's latest tag for initial infrastructure only."
+  type        = string
+  default     = ""
+}
+
+variable "provisioner_enabled" {
+  description = "Enable the write-capable reconciliation schedule independently, only after manual verification. Safe first-deployment default is off."
+  type        = bool
+  default     = false
+}
+
 variable "schedules_enabled" {
   description = "Leave false for the first apply. See the comment in main.tf for the ordering that avoids a broken first run."
   type        = bool
