@@ -72,13 +72,19 @@ def overlay(manifest: dict[str, Any]) -> dict[str, Any]:
     return {key: manifest[key] for key in OVERLAY_KEYS}
 
 
-def calculated_digests(manifest: dict[str, Any]) -> tuple[str, dict[str, str]]:
+def calculated_digests(manifest: dict[str, Any], *, legacy_scan_policy: bool = False
+                       ) -> tuple[str, dict[str, str]]:
     # The SAME function the task runs at startup. A second implementation here is how the manifest and
     # the rendered environment came to disagree about a policy they both held (GCI-0045).
     projections = {
         kind: identity.projection_digest(kind, manifest["runtime"][kind])
         for kind in sorted(identity.PROJECTION_ENVS)
     }
+    if legacy_scan_policy:
+        # Verify the old contract before upgrading it; the old scan digest did not contain this key.
+        scan = identity.canonical_projection("scan", manifest["runtime"]["scan"])
+        scan.pop("GCINSIGHT_READER_PRODUCT_READS")
+        projections["scan"] = digest(scan)
     return digest(overlay(manifest)), projections
 
 
@@ -136,7 +142,7 @@ def validate_json_runtime_types(runtime: dict[str, Any]) -> None:
                 raise ManifestError(f"runtime.scan.{env} loses numeric precision during digest rendering")
 
 
-def validate(manifest: dict[str, Any]) -> None:
+def validate(manifest: dict[str, Any], *, allow_legacy_scan_policy: bool = False) -> None:
     if not isinstance(manifest, dict) or set(manifest) != TOP_LEVEL_KEYS:
         raise ManifestError(f"manifest top-level keys differ: expected {sorted(TOP_LEVEL_KEYS)}")
     if manifest.get("schema_version") != 1:
@@ -153,7 +159,12 @@ def validate(manifest: dict[str, Any]) -> None:
     runtime = manifest.get("runtime")
     if not isinstance(runtime, dict) or set(runtime) != set(identity.PROJECTION_ENVS):
         raise ManifestError("runtime projections differ from collector.identity.PROJECTION_ENVS")
+    product_env = "GCINSIGHT_READER_PRODUCT_READS"
+    legacy_scan_policy = (allow_legacy_scan_policy and isinstance(runtime.get("scan"), dict)
+                          and product_env not in runtime["scan"])
     for kind, expected_names in identity.PROJECTION_ENVS.items():
+        if kind == "scan" and legacy_scan_policy:
+            expected_names = tuple(name for name in expected_names if name != product_env)
         values = runtime.get(kind)
         if not isinstance(values, dict) or set(values) != set(expected_names):
             present = set(values) if isinstance(values, dict) else set()
@@ -178,6 +189,12 @@ def validate(manifest: dict[str, Any]) -> None:
         raise ManifestError("runtime.scan.GCINSIGHT_DASHBOARD_DETAIL_ENABLED must be 1 or 0")
     if runtime["scan"]["GCINSIGHT_OPT_OUT"] != runtime["provisioner"]["GCINSIGHT_OPT_OUT"]:
         raise ManifestError("runtime.scan and runtime.provisioner GCINSIGHT_OPT_OUT must be identical")
+
+    if (not legacy_scan_policy
+            and runtime["scan"][product_env] != runtime["provisioner"][product_env]):
+        raise ManifestError(
+            "runtime.scan and runtime.provisioner GCINSIGHT_READER_PRODUCT_READS must be identical"
+        )
 
     for section in ("aws", "policy"):
         values = manifest.get(section)
@@ -237,7 +254,9 @@ def validate(manifest: dict[str, Any]) -> None:
     if runtime["scan"]["GCINSIGHT_ORG_ID"] != runtime["provisioner"]["GCINSIGHT_ORG_ID"]:
         raise ManifestError("scan and provisioner organization identities differ")
 
-    expected_overlay, expected_projections = calculated_digests(manifest)
+    expected_overlay, expected_projections = calculated_digests(
+        manifest, legacy_scan_policy=legacy_scan_policy
+    )
     if not DIGEST.fullmatch(str(manifest["overlay_digest"])) or manifest["overlay_digest"] != expected_overlay:
         raise ManifestError("overlay_digest does not match canonical overlay content")
     recorded = manifest.get("runtime_projection_digests")
@@ -251,6 +270,15 @@ def regenerate(manifest: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(manifest, dict) or not isinstance(manifest.get("runtime"), dict):
         raise ManifestError("manifest must contain a runtime projection object")
     updated = dict(manifest)
+    product_env = "GCINSIGHT_READER_PRODUCT_READS"
+    scan = updated["runtime"].get("scan")
+    provisioner = updated["runtime"].get("provisioner")
+    if isinstance(scan, dict) and product_env not in scan and isinstance(provisioner, dict):
+        if product_env in provisioner:
+            # Copy only the added seam. Regenerate is explicit; check never rewrites legacy input.
+            updated["runtime"] = dict(updated["runtime"], scan=dict(
+                scan, **{product_env: provisioner[product_env]}
+            ))
     # Validate before digest calculation too: an overflowing JSON number must be a contract error,
     # not an exception in identity's canonicalisation. Leave malformed projection shapes to validate.
     scan = updated["runtime"].get("scan")
@@ -632,7 +660,7 @@ def command_upgrade(args: argparse.Namespace) -> int:
     generic = args.generic_source.resolve()
     run_git(generic, "cat-file", "-e", f"{args.revision}^{{commit}}")
     manifest = load_json(args.manifest)
-    validate(manifest)
+    validate(manifest, allow_legacy_scan_policy=True)
     repository = manifest["generic_source"]["repository"]
     if github_repo(run_git(generic, "remote", "get-url", "origin")) != github_repo(repository):
         raise ManifestError("generic checkout origin differs from the manifest repository")

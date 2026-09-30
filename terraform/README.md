@@ -124,6 +124,18 @@ does require a stack-realm `logs:write` token represented by the adopted access-
 - **Tiers share one rate-limit quota.** `grafana.com` meters per credential, so two tiers running at
   once halve each other's effective pacing. The default cron expressions are staggered for this reason.
 
+## Reader product policy
+
+`provisioner_product_reads` remains default-off (`[]`) and selects only the existing `slo` and
+`synthetic-monitoring` reader families. The module mirrors this one policy into both provisioner and
+scan tasks as `GCINSIGHT_READER_PRODUCT_READS`; no separate scanner grant or family list exists.
+The scan runtime digest includes this value, so update consumer manifests and module/image pins
+together before rollout. `bin/consumer_manifest.py upgrade` verifies an older manifest's existing
+digests, then carries its provisioner policy into the added scan field. Explicit `regenerate` also
+carries the policy when the scan field is absent; `check` requires the current projection and never
+rewrites it. An explicit scan/provisioner mismatch is rejected rather than silently changed. This
+wiring does not add reader permission pairs or change credentials.
+
 ## Consuming it
 
 The normal image source is the public multi-architecture image at

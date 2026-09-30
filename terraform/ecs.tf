@@ -117,6 +117,7 @@ resource "aws_ecs_task_definition" "scan" {
         { name = "GCINSIGHT_LOKI_JOB", value = var.loki_job },
         { name = "GCINSIGHT_USER_AGENT", value = var.collector_user_agent },
         { name = "GCINSIGHT_OPT_OUT", value = join(",", var.provision_opt_out) },
+        { name = "GCINSIGHT_READER_PRODUCT_READS", value = join(",", var.provisioner_product_reads) },
         { name = "GCINSIGHT_COVERAGE_SCORE_WEIGHTS", value = jsonencode(var.coverage_score_weights) },
         { name = "GCINSIGHT_DASHBOARD_DETAIL_ENABLED", value = var.dashboard_detail_enabled ? "1" : "0" },
         { name = "GCINSIGHT_EXPECTED_RETENTION_POLICY", value = jsonencode(var.expected_retention_policy) },
