@@ -3,11 +3,11 @@ id: GCI-0010
 title: >-
   Firehose log subscription cannot be created by a new deployment - trust policy
   demands a SourceArn CloudWatch Logs never sends
-status: In Progress
+status: Done
 assignee:
   - '@loop3-root'
 created_date: '2026-08-25 08:27'
-updated_date: '2026-09-30 12:26'
+updated_date: '2026-09-30 15:05'
 labels:
   - bug
 dependencies: []
@@ -46,7 +46,7 @@ Found while standing up a second deployment beside an existing one in a shared a
 <!-- AC:BEGIN -->
 - [x] #1 The logs-subscription role trust policy matches the SourceArn CloudWatch Logs actually sends, so a first-time apply creates the subscription filter without manual intervention
 - [x] #2 The condition still constrains the role to this deployment log group and account - the fix is not to drop the condition
-- [ ] #3 Verified by creating the filter against a log group that has never had one, not by an existing deployment where the condition is no longer evaluated
+- [x] #3 Verified by creating the filter against a log group that has never had one, not by an existing deployment where the condition is no longer evaluated
 - [x] #4 RUNBOOK and troubleshooting entries describing the misleading ACTIVE-state error are updated or removed once the fix lands
 <!-- AC:END -->
 
@@ -81,4 +81,6 @@ loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own
 The trust policy now matches the bare log-group ARN CloudWatch Logs sends while retaining SourceAccount and the deployment-specific log-group constraint. RUNBOOK and troubleshooting guidance were corrected. Terraform tests and both validate roots passed at b6cf849614054894e2bea49d0154d958fc016d7b. Parked only on the required first-filter live AWS apply.
 
 Wave 2 left the task Parked: the required consumer deployment and fresh log group were not supplied, so no first-time subscription-filter creation was attempted or observed.
+
+loop3 R-0010 completed the missing first-time proof using exact generic57d39ed7f3ae0bacf9630990f7437f293fa7a91b in an isolated staff-dev module. Fresh log group witnessed absent before create; real saved module plan/apply created its first subscription filter without manual intervention, then actual filter and exact bare log-group/account trust read back. Targeted replan No changes. Synthetic delivery read back in Loki by service_name (endpoint reserves job=cloud/aws), failed backup empty. Three reviewed applies created9, created3, destroyed12 probe resources only; post-teardown loggroup/stream/bucket/both roles absence verified. No baseline deployment changed. Evidence codex/loop3-evidence/R-0010; expected tiny-probe cost under1 dollar, no recurring resource left.
 <!-- SECTION:FINAL_SUMMARY:END -->
