@@ -104,6 +104,31 @@ None approved; ask at preparation.
 
 ## Grafana stacks
 
-Named per goal at preparation. This file does not name a stack. Never touch a customer stack; treat
-the loop's own write-capable dev stack as the serial resource described under Resource mutexes
-(`goal-2026-09-23-wave1.md` §3).
+Named per goal at preparation. This file does not name a stack. The original wave default is no
+customer writes. A later owner goal can authorize a narrow customer rollout; follow its explicit
+write fence, not a blanket interpretation of Terraform apply authority. Reader-role, image and
+publication grants do not implicitly authorize bucket lifecycle changes. Treat each authorized live
+deployment and its write stack as the serial resource described under Resource mutexes.
+
+## Verified loop3 operational lessons
+
+- Raw label-risk matches need the dedicated current-object expiry under the reserved full-filename
+  prefix `views/risk_label_hygiene.json`, in addition to scan and noncurrent-version expiry. Verify
+  the actual bucket policy, versioning, encryption, public/TLS controls and effective view/task IAM
+  before running a daily collector. A source gate is not that deployment proof. Adopted buckets need
+  their owner's equivalent rule; do not add a competing lifecycle resource or infer new write rights.
+- Rollback is the saved old manifest/module/immutable-image triplet with matching old tooling. The
+  target-schema guard rejects incompatible projections before recovery writes; it is not a general
+  downgrade converter. Never regenerate the saved old manifest blindly with new tooling.
+- A real Logs Drilldown frontend control emitted generic `app` events. A backend query alone does
+  not prove frontend analytics, human adoption or per-app attribution. Keep the service-account and
+  before/after-discriminator limits explicit; datasource type is not an app identity.
+- A safe IRM counter response does not make its credential narrow: captured integration read
+  permissions also cover configuration, and client-side URL masking is not server-side redaction.
+  Defer a new grant until its broader credential reach is proven safe.
+- Run consumer publication with a supported Python executable. A login shell can resolve the system
+  Python rather than the verified Homebrew Python. Commit deployment pins before starting a consumer
+  build; the build correctly refuses uncommitted wiring.
+- Capture ECS task descriptors promptly. Stopped-task records can disappear before a delayed
+  readback; retain the exact immutable definition, task ID, live terminal output and S3 advancement,
+  and name any missing descriptor proof instead of restarting a completed task.

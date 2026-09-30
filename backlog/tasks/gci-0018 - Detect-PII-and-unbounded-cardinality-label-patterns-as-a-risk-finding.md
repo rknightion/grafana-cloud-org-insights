@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-08-25 13:12'
-updated_date: '2026-09-30 16:36'
+updated_date: '2026-09-30 19:45'
 labels:
   - risk
   - privacy
@@ -65,12 +65,12 @@ An estate owner cannot grep their own label space at this scale, and the two con
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Daily label-name and label-value reads detect identity-bearing patterns per signal and publish raw matched values in a bounded risk view under the owner-approved deployment privacy policy
-- [ ] #2 Label names and values never become metric labels; matched detail is view-only
-- [ ] #3 High-confidence and possible findings are reported separately
-- [ ] #4 Pattern set is versioned, tested, generic and contains nothing estate-specific
-- [ ] #5 Findings carry measured-stack coverage and sampled/matched counts; unreadable inputs are absent, never clean zeros
-- [ ] #6 The platform reports only and never proposes or performs remediation
+- [x] #1 Daily label-name and label-value reads detect identity-bearing patterns per signal and publish raw matched values in a bounded risk view under the owner-approved deployment privacy policy
+- [x] #2 Label names and values never become metric labels; matched detail is view-only
+- [x] #3 High-confidence and possible findings are reported separately
+- [x] #4 Pattern set is versioned, tested, generic and contains nothing estate-specific
+- [x] #5 Findings carry measured-stack coverage and sampled/matched counts; unreadable inputs are absent, never clean zeros
+- [x] #6 The platform reports only and never proposes or performs remediation
 <!-- AC:END -->
 
 ## Definition of Done
@@ -104,6 +104,8 @@ loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own
 Owner override 2026-09-30 goal D2 replaces the historical key-only restriction: daily reads may inspect label names AND values and publish raw matched values in full, capped at a stated per-stack/label/class bound. Values remain forbidden as metric labels. Historical description is retained as provenance, not the active privacy contract. No AC is claimed yet.
 
 Loop3 deployment hold: new independent privacy prerequisite review found latest raw-match view has no current-object expiry; scan90/noncurrent7 do not bound stale current view. D2 permits full matched values but not indefinite retention. Targeted repaira2 admitted: lifecycle exact full raw-view filename prefix only, reuse positive whole scan-retention90 defaults, preserve other last-good views, scans/noncurrent7/IAM. Policy is eligibility since last publication plus version expiry/async processing, not strict observation-age erasure. No collector execution on new source before actual controls pass. Customer rollout requires a bucket-owner equivalent rule; lifecycle writes exceed current customer write fence, so that prerequisite remains a run-end authorization question rather than implicit Terraform drift.
+
+Loop3 dev source6ebedd3dccc59ad1bf43a9a7a6cc421abe4b66bc/imagebc024b60cce3917441e679f7b9a423ce3199d978a01923d26ce7b15dc4a2f4f4 exercised on actual dailyT2 and hydratedT1/T3: riskview18 rows, coverage20 rows; full raw matches remained approved S3-only, no raw values printed/persisted in proof. Actual dedicated full-filename currentexpiry90/scans90/globalversionexpiry7/versioningEnabled/AES256/publicblocking/TLSdeny and unchanged view/task IAM verified before publication. Independent source retention repaira2 PASS, fullgate1649passed2existing skips7971subtests/CR0all6/CI36745573818success; both sourceattempts consumed. Five readerNone/IDs/tokens/SSMversions/fullpairsets identical pre/post provisioner. Dashboard risk/raw coverage refs GET-confirmed. Customer publication not exercised: existing policy lacks current-view expiry and bucket write exceeds owner fence; retain run-end authority question. Local source fences/required regression gates passed, actual privacy readbacks separate.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
