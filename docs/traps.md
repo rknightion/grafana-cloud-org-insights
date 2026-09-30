@@ -672,3 +672,46 @@ paths are allowed; GET-only transport and other RPC helpers are unchanged. Loki 
 Pyroscope ignore the guessed `limit` field. Mimir warnings mark truncation. Tempo intrinsics
 are virtual vocabulary and must not count as measured attributes; preserve resource/span scope.
 Unknown server completeness stays partial even for an empty successful result.
+
+## Collector HTTP wall-time fences
+
+`urllib`'s socket timeout does not bound DNS and is renewed across socket operations.
+`ReadOnlyClient` now fences each complete attempt (host pacing/queue, DNS, TCP/TLS,
+headers and body) with `collector.netbound`. Each attempt gets at most the configured
+HTTP timeout, clamped to the tier's remaining budget. Retries/backoff still consume
+the tier budget; with no tier deadline the finite attempt/backoff limits bound the
+whole call. Guarded GET remains a single attempt. The two approved label-risk POST
+reads use the same helper after their unchanged method/path/body validation.
+
+This is a **caller wait bound, not hard termination**. Python cannot interrupt a
+running stdlib resolver/HTTP operation. The fixed, process-wide pool has at most 32
+daemon workers, including survivors, with at most 32 admitted operations in total;
+there is no replacement worker or new thread per timed-out request. A surviving
+GET retains its per-host concurrency slot until its transport exits. Once all workers
+are stuck, new callers time out during admission rather than leaking more threads.
+Queued work is cancelled on abandonment; running work can still complete a read
+later. Survivors can retain request credentials and transient response bytes in
+process memory until they finish or the process exits. Daemon shutdown does not wait
+for them, and no hard cleanup/termination guarantee is made. Slow-drip normal/label
+responses can also survive the caller fence; guarded sockets additionally enforce
+the remaining read budget. This helper must not be used to disguise a live write
+as cancellable. The general client remains GET-only.
+
+These fences cover the shared GET client and label-risk native reads, not legacy
+sources bypassing that client: `dataplane._connect_rpc` still uses direct `urlopen`
+for Fleet list reads, and the no-client `usage_insights._query` probe seam does too.
+Those paths require a separately owned call-site change before claiming every
+collector HTTP path has the same wall-time fence.
+
+Follow-up transport repair supersedes the two uncovered-source exceptions immediately
+above: `dataplane._connect_rpc` and the no-client `usage_insights._query` seam now
+fence their complete existing transport (open, body read and JSON decode) with the
+same `bounded_call` and their existing timeout. Their path/instance-id guards,
+request payloads and HTTP-error semantics are unchanged. In particular, this does
+not tighten or newly approve the legacy substring-based Connect-RPC path guard;
+that guard is not a template for new POST permissions. Source discovery found no
+other direct HTTP transports outside these helpers, the GET client and label-risk
+transport. Loki/Mimir publishing transports remain outside this source-call repair.
+The fixed-pool survivor, credential-memory and no-hard-termination caveats above
+apply equally to these legacy transports. Stalled DNS and stalled body reads were
+exercised locally; dedicated stalled TCP/TLS handshake probes were not exercised.

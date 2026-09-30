@@ -19,6 +19,7 @@ from typing import Any, Callable, Mapping
 
 from collector import pii
 from collector.httpclient import DeadlineExceeded, ReadOnlyClient, Response, _basic_auth
+from collector.netbound import bounded_call
 
 PROFILE_PATHS = frozenset({
     "/querier.v1.QuerierService/LabelNames", "/querier.v1.QuerierService/LabelValues",
@@ -100,7 +101,7 @@ def profile_read(
     req.add_header("Content-Type", "application/json")
     req.add_header("Accept", "application/json; allow-utf8-labelnames=true")
     req.add_header("Authorization", _basic_auth(str(stack["hpInstanceId"]), cap))
-    return transport(req, timeout)
+    return bounded_call(lambda: transport(req, timeout), timeout)
 
 
 def _failure_reason(exc: Exception) -> str:

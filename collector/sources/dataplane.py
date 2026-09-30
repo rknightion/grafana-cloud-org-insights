@@ -28,6 +28,7 @@ from typing import Any, Callable, Mapping
 
 from collector.coverage import Coverage
 from collector.httpclient import ReadOnlyClient
+from collector.netbound import bounded_call
 
 # Which inventory field supplies the basic-auth user, per signal. Fleet Management uses the STACK id,
 # not a signal instance id  -  an easy and silent mistake.
@@ -73,11 +74,14 @@ def _connect_rpc(
     req = urllib.request.Request(url, data=data, method="POST")
     req.add_header("Authorization", f"Basic {token}")
     req.add_header("Content-Type", "application/json")
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as fh:
-            return json.loads(fh.read() or b"{}")
-    except urllib.error.HTTPError as exc:
-        return {"_http": exc.code}
+    def read():
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as fh:
+                return json.loads(fh.read() or b"{}")
+        except urllib.error.HTTPError as exc:
+            return {"_http": exc.code}
+
+    return bounded_call(read, timeout)
 
 
 def cardinality(client: ReadOnlyClient, stack: dict[str, Any], cap: str, limit: int = 20) -> dict[str, Any]:

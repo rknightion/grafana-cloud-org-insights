@@ -25,6 +25,8 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Callable, Mapping
 
+from collector.netbound import bounded_call
+
 RETRY_STATUSES = frozenset({408, 429, 500, 502, 503, 504})
 
 
@@ -148,6 +150,8 @@ class ReadOnlyClient:
             raise ValueError("host_concurrency must be >= 1")
         if max_attempts < 1:
             raise ValueError("max_attempts must be >= 1")
+        if not 0 < timeout < float("inf"):
+            raise ValueError("timeout must be finite and > 0")
         self._host_concurrency = host_concurrency
         # gcom is one shared control plane and needs a lower cap than a per-tenant data-plane host.
         self._host_overrides = {h.lower(): n for h, n in (host_concurrency_overrides or {}).items()}
@@ -240,12 +244,19 @@ class ReadOnlyClient:
             return sem
 
     def _send_guarded(self, req: urllib.request.Request, host: str, *, status_only: bool) -> Response:
-        """One fixed-route attempt, with one total budget including the host queue.
+        """One fixed-route attempt; caller wait includes queue, DNS, connect and reads."""
+        timeout = min(self._timeout, self.remaining())
+        end = self._clock() + timeout
+        try:
+            return bounded_call(
+                lambda: self._guarded_attempt(req, host, end, status_only=status_only), timeout)
+        except TimeoutError:
+            raise DeadlineExceeded("guarded GET deadline") from None
 
-        No retry on schema/size/time failures or on health status: callers report a gap.
-        The normal client's retry policy and transport defaults remain unchanged.
-        """
-        end = self._clock() + min(self._timeout, self.remaining())
+    def _guarded_attempt(self, req: urllib.request.Request, host: str, end: float,
+                         *, status_only: bool) -> Response:
+        # The worker owns the host slot, including if its caller has timed out.
+        # Guarded socket reads additionally clamp to the remaining total budget.
         remaining = lambda: end - self._clock()
         limiter = self._limiter(host)
         if limiter is not None:
@@ -281,13 +292,10 @@ class ReadOnlyClient:
             if self.remaining() <= 0:
                 raise DeadlineExceeded(f"tier deadline reached before {req.full_url}")
             limiter = self._limiter(host)
-            if limiter is not None:
-                limiter.acquire()
-            sem = self._semaphore(host)
-            sem.acquire()
+            timeout = min(self._timeout, self.remaining())
+            end = self._clock() + timeout
             try:
-                self.attempts.requests += 1
-                resp = self._transport(req, self._timeout)
+                resp = bounded_call(lambda end=end: self._attempt(req, host, end), timeout)
             except Exception as exc:  # transport-level: connection reset, DNS, timeout
                 last = exc
             else:
@@ -295,8 +303,6 @@ class ReadOnlyClient:
                 if resp.ok or resp.status not in RETRY_STATUSES:
                     return resp
                 last = resp
-            finally:
-                sem.release()
 
             if attempt == self._max_attempts:
                 break
@@ -317,6 +323,28 @@ class ReadOnlyClient:
         if isinstance(last, Response):
             return last
         raise RuntimeError(f"GET {req.full_url} failed after {self._max_attempts} attempts: {last}")
+
+
+    def _attempt(self, req: urllib.request.Request, host: str, end: float) -> Response:
+        """A worker owns pacing and the host slot until the transport actually exits."""
+        limiter = self._limiter(host)
+        if limiter is not None:
+            limiter.acquire(deadline=end)
+        sem = self._semaphore(host)
+        wait = end - self._clock()
+        if wait <= 0 or not sem.acquire(timeout=wait):
+            raise DeadlineExceeded("GET host queue deadline")
+        try:
+            wait = end - self._clock()
+            if wait <= 0:
+                raise DeadlineExceeded("GET deadline")
+            self.attempts.requests += 1
+            response = self._transport(req, wait)
+            if self._clock() >= end:
+                raise DeadlineExceeded("GET deadline")
+            return response
+        finally:
+            sem.release()
 
 
 def _with_params(url: str, params: Mapping[str, object] | None) -> str:
@@ -408,8 +436,8 @@ class _GuardedHTTPSHandler(urllib.request.HTTPSHandler):
 def _guarded_transport(req, remaining, *, status_only):
     """No redirect or error body. Read at most 2 MiB plus one overflow sentinel.
 
-    DNS resolution and the initial TCP/TLS connect are platform blocking operations;
-    their socket timeout is clamped at entry, but DNS is not interruptible by urllib.
+    DNS resolution and initial TCP/TLS connect run behind netbound's caller fence;
+    urllib cannot interrupt DNS. A surviving worker retains its bounded pool/host slot.
     Header/body socket receives use the remaining total budget, not a renewed timeout.
     JSON parsing is subsequent bounded local work, not part of the network deadline.
     """

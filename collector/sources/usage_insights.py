@@ -41,6 +41,8 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence
 
+from collector.netbound import bounded_call
+
 if TYPE_CHECKING:
     from collector.httpclient import ReadOnlyClient
 
@@ -385,8 +387,11 @@ def _query(base: str, token: str, expr: str, *, expected_instance_id: str,
             raise urllib.error.HTTPError(url, response.status, f"HTTP {response.status}", None, None)
         return response.json()
     req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read())
+    def read():
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read())
+
+    return bounded_call(read, timeout)
 
 
 def _execute_query(
