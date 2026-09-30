@@ -4,7 +4,7 @@ title: Inventory IRM OnCall configuration and Incident counts safely
 status: Parked
 assignee: []
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-23 19:52'
+updated_date: '2026-09-30 16:11'
 labels:
   - feature-usage
   - follow-on
@@ -40,4 +40,6 @@ Rank 6 - medium value, higher access and privacy cost. OnCall group counters exi
 
 <!-- SECTION:NOTES:BEGIN -->
 Parked at Wave 1 boundary pending GCI-0041 reader scope decision and exact safe read-route verification. No new scope, policy or credential was granted during research.
+
+loop3 exact-pair probe: disposable basic-None integration counters GET200 matched Admin25, baseline403; token/SA/role cleaned by recorded IDs with GET404. Alert-group stats remained403 under its exact pair despiteAdmin200. IRM implementation/grants remain DEFER: independent V-IRM-grant found archived backend maps list/retrieve/counters to the same integrations:read permission and serializers include ingress URLs; installed UI masking is cosmetic. Hosted server redaction/usable routing credentials unproven, no narrower proven permission. Do not fetch secret-bearing lists or adopt broader grant for count-only output. No Incident POST/identity/routing detail approved.
 <!-- SECTION:NOTES:END -->

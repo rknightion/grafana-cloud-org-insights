@@ -3,7 +3,7 @@ id: doc-0006
 title: Feature usage observability matrix
 type: specification
 created_date: '2026-09-23 18:33'
-updated_date: '2026-09-30 12:36'
+updated_date: '2026-09-30 16:11'
 ---
 # Feature usage observability matrix - wave 1 evidence, 2026-09-23
 
@@ -697,3 +697,10 @@ Consumer diagnostic window: 24h, five-minute evaluation steps for every row. Pro
 | `grafanacloud_traces_instance_usage` | unknown wire type; documented billable quantity | Billable trace usage over last month; rolling month vs calendar MTD unresolved | Pricing bills processed/written/retained GB per month; exact legacy metric boundary not proven | https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/ |
 | `grafanacloud_instance_app_o11y_service_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
 | `grafanacloud_instance_app_o11y_service_instance_count` | unknown | unknown | unknown; product pricing alone does not establish exact series contract | No exact contract established |
+
+
+## loop3 bounded frontend and IRM permission outcomes (2026-09-30)
+
+A genuine Logs Drilldown 2.6.0 Chrome UI control, authenticated as an existing Admin service account, made 40 backend query POSTs and emitted 43 actual data-request events with generic source `app`. Exact-stack guarded usage-insights readback confirmed all 43, with no app-specific plugin or URL field and empty dashboard UIDs. Known app identity comes from the controlled frontend page, never datasource type. This proves frontend analytics transport, not human adoption or a working per-app discriminator. Generic app/scenes aggregation remains; no new per-app series. Backend-only source tags and the first browser run that blocked analytics are not a frontend before/after discriminator trial. Per-app use inside generic app/scenes remains unestablished by the tested schemas, not universally impossible. Shipped limits and pinned source are in docs/traps.md.
+
+IRM integration counters work under exact plugin-access plus integrations:read pairs on a disposable basic-role-None identity and matched the Admin visible population (25). Alert-group stats remained denied. Safe counter projection is not safe permission breadth: captured archived backend grants list/retrieve/counters the same read action and serializes ingress URLs, while installed UI masking is cosmetic. Hosted backend redaction or usable ingress credentials under the read grant are unproven. No narrower permission is proven. All new IRM grants and collector implementation remain deferred; no known secret-bearing list or Incident read POST is approved. Disposable objects were removed by recorded IDs with GET404 verification.

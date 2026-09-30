@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-30 12:26'
+updated_date: '2026-09-30 16:11'
 labels:
   - feature-usage
   - scope-decision
@@ -53,4 +53,6 @@ Wave 2 decision: dev-only default-off approval for SLO and Synthetic Monitoring 
 Live R4: manual provisioner task dc4142d1fc5f4e77a2294877b156987e exited 1 after its immediate post-repair verification reported two stacks stale. A fresh root readback of all five roles matched exactly the six approved added pairs, with no removals, unchanged datasource query pins, basic role None, identical service account/token IDs and SSM versions, and reader GET 200. SLO list GET returned 200 on all five dev stacks. Synthetic Monitoring check-list GET returned 403 on the three stacks with its datasource; two stacks had no Synthetic datasource. This is an access-route gap under the approved D8 boundary, not authority to widen datasource query or mint another token. Dev rolled back after a separate T2 projection failure; the six approved read-only role pairs remain present.
 
 loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
+
+loop3 IRM decision: DEFER all new IRM grants. Exact P(IRM)+integrations:read counters proof succeeds but permission breadth fails approval prerequisite; static archived source and installed frontend imply routing credential exposure, hosted equivalence unproven. Exact P(IRM)+alert-groups:read remains403. Schedules/Incident content lists remain unapproved; no readRPC added. BasicNone/query pins/refused secret/write actions unchanged; no current reader was modified. SLO/Adaptive existing approved route boundaries remain the only implemented feature-inventory reads; remaining D1a families retain individual deferred verdicts.
 <!-- SECTION:NOTES:END -->

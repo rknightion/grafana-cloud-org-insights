@@ -1,11 +1,11 @@
 ---
 id: GCI-0040
 title: Find a defensible per-app discriminator for Scenes query events
-status: In Progress
+status: Parked
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-30 12:26'
+updated_date: '2026-09-30 16:11'
 labels:
   - feature-usage
   - follow-on
@@ -26,15 +26,15 @@ Rank 7 - valuable but upstream-dependent. In a live 55-stack sample, scenes line
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 A known app query is observed before and after any proposed discriminator
-- [ ] #2 A single source value is never attributed to a specific app by datasource type alone
-- [ ] #3 The result is documented as supported or unavailable with the exact evidence
+- [x] #2 A single source value is never attributed to a specific app by datasource type alone
+- [x] #3 The result is documented as supported or unavailable with the exact evidence
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -49,4 +49,6 @@ loop3 D1b: controlled known-app read queries and guarded delayed usage-insights 
 Parked pending a defensible app discriminator: 55 guarded usage-insights stack probes saw scenes, but log lines carried no plugin or URL and datasourceType is ambiguous. Resume with a known Drilldown user query or upstream event enrichment evidence.
 
 loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
+
+Docs d0b5bb0210870f4ce54031455397be5411e21f74 CI36737688385success, gate1647passed2existing skips7966subtests, CRdocs exemption. Genuine Logs2.6 Chrome frontend40queryPOSTs emitted43actual sourceapp analytics events; exact-stack guarded usage-insights confirmed43. ExistingAdminSA browser control, not human adoption; no app-specific plugin/URL field. AC1 remains partial: no genuine frontend before/after proposed-discriminator trial. First browser blocked analytics so is not absence/before proof; backend-only header trial not substitute. Generic app/scenes remain unsplit; no datasource-type attribution or universal impossibility claim.
 <!-- SECTION:NOTES:END -->
