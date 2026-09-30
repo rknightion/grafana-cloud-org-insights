@@ -1,11 +1,11 @@
 ---
 id: GCI-0036
 title: 'Inventory SLO objects, alerting and source after a reader-scope decision'
-status: In Progress
+status: Parked
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-30 12:32'
+updated_date: '2026-09-30 21:39'
 labels:
   - feature-usage
   - follow-on
@@ -49,4 +49,6 @@ loop3 I-0036: implement the accepted existing-reader SLO list seam and count-onl
 Parked at Wave 1 boundary pending GCI-0041 reader scope decision and exact safe read-route verification. No new scope, policy or credential was granted during research.
 
 D1a accepted operational reader sufficiency and positive Admin control on staff dev. Existing separately approved slo pairs stay unchanged; strict subtract-one minimality is unproven and no removal is authorised. Reader None and query pins remain frozen. No AC completion yet.
+
+Loop3 source inventory shipped and dev proved five live rows including a positive configured SLO under existing None readers; original authentication/schema blockers cleared at96b. Strong hard DNS/connect wall-time criterion remains unmet after four cumulative attempts (worker2, rootwiring rescue, specialist); no fifth attempt or criterion waiver. Resume only the named timing concern under new owner direction, not source-count reinvention.
 <!-- SECTION:NOTES:END -->

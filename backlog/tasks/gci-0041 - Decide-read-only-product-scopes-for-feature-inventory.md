@@ -1,11 +1,11 @@
 ---
 id: GCI-0041
 title: Decide read-only product scopes for feature inventory
-status: In Progress
+status: Parked
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-30 16:11'
+updated_date: '2026-09-30 21:39'
 labels:
   - feature-usage
   - scope-decision
@@ -55,4 +55,6 @@ Live R4: manual provisioner task dc4142d1fc5f4e77a2294877b156987e exited 1 after
 loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
 
 loop3 IRM decision: DEFER all new IRM grants. Exact P(IRM)+integrations:read counters proof succeeds but permission breadth fails approval prerequisite; static archived source and installed frontend imply routing credential exposure, hosted equivalence unproven. Exact P(IRM)+alert-groups:read remains403. Schedules/Incident content lists remain unapproved; no readRPC added. BasicNone/query pins/refused secret/write actions unchanged; no current reader was modified. SLO/Adaptive existing approved route boundaries remain the only implemented feature-inventory reads; remaining D1a families retain individual deferred verdicts.
+
+Loop3 final scoped decision table: retain existing approved SLO/Synthetic pairs without widening query pins; SLO/Adaptive operational read seams implemented, Synthetic datasource-query denial unresolved. No additional families granted. IRM counter access proved but credential breadth blocked; ML/Faro/IRM secret/content lists and Incident/schedules not approved. Remaining D1a families retain explicit defer packets. Five live dev None readers/SA-role-token IDs/SSM versions/pairs identical pre/post provisioner; no new customer grant. Scope research remains partial rather than claiming every candidate pair minimally proven.
 <!-- SECTION:NOTES:END -->
