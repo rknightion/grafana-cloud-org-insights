@@ -1,5 +1,57 @@
 # Changelog
 
+## [0.4.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.3.0...v0.4.0) (2026-09-30)
+
+
+### Features
+
+* **adaptive-traces:** add count-only policy inventory and pending queue ([cfe9f43](https://github.com/rknightion/grafana-cloud-org-insights/commit/cfe9f4308d1ab27252219a9dc0fbf153cbe48a2c))
+* **retention:** publish per-stack policy status ([462e5e6](https://github.com/rknightion/grafana-cloud-org-insights/commit/462e5e6f64362fbbe263af6081de74cc3ac1f9ec))
+* **risk:** add bounded daily label privacy findings ([658707c](https://github.com/rknightion/grafana-cloud-org-insights/commit/658707c19d7adaaf3dd562417b29da0d4aa031ff))
+* **slo:** inventory definitions configured alerting and source ([ba6141d](https://github.com/rknightion/grafana-cloud-org-insights/commit/ba6141d70c6c5c98a30892ab9a1048d6154ba93f))
+
+
+### Bug Fixes
+
+* **ci:** install OpenTofu before offline module tests ([4b31143](https://github.com/rknightion/grafana-cloud-org-insights/commit/4b3114315a1b56519f29677389efa39ba5542d92))
+* **ci:** use real OpenTofu for pipe-driven console tests ([bb1b16c](https://github.com/rknightion/grafana-cloud-org-insights/commit/bb1b16cffc2fd63e4d60577879899f76f8f28c11))
+* **consumer:** reject unsupported target projection schemas ([ada40b7](https://github.com/rknightion/grafana-cloud-org-insights/commit/ada40b7d6efc3337075b9caeee01096f41e7b494))
+* **http:** bound all collector source caller wall time ([47f9705](https://github.com/rknightion/grafana-cloud-org-insights/commit/47f9705527eb1ca575bc0e9101922e31b763ba52))
+* **identifiers:** scope local history checks to origin refs ([2e901eb](https://github.com/rknightion/grafana-cloud-org-insights/commit/2e901eb0106de1c9c775487611e9c3ca891fcdfb))
+* **image:** pin fixed OpenSSL security packages ([a589c4b](https://github.com/rknightion/grafana-cloud-org-insights/commit/a589c4b0aac7e369b9dccf686212a156adffd767))
+* **manifest:** reject JSON values changed by module types ([5a89980](https://github.com/rknightion/grafana-cloud-org-insights/commit/5a899807e6d749949c40649d5b8c98942346576d))
+* **policy:** mirror reader product policy into scanner runtime ([1fae864](https://github.com/rknightion/grafana-cloud-org-insights/commit/1fae864a1d6b2e4e52f6dc935216159f0efb6c46))
+* **sources:** fence count-only reader transports and schemas ([96b798a](https://github.com/rknightion/grafana-cloud-org-insights/commit/96b798ac10c6aa448056c36659d285cdd87c778e))
+* **storage:** bound raw label-risk current view retention ([6ebedd3](https://github.com/rknightion/grafana-cloud-org-insights/commit/6ebedd3dccc59ad1bf43a9a7a6cc421abe4b66bc))
+
+
+### Documentation
+
+* **backlog:** accept fail-closed target schema guard ([91625c9](https://github.com/rknightion/grafana-cloud-org-insights/commit/91625c93d3f21da1df380e255cfad1c0d21462e4))
+* **backlog:** accept first-time Firehose subscription proof ([b4e67e2](https://github.com/rknightion/grafana-cloud-org-insights/commit/b4e67e2e1677623d68d3cab833cf0070b6d9543e))
+* **backlog:** accept isolated trace and profile scope probe ([bfcab5c](https://github.com/rknightion/grafana-cloud-org-insights/commit/bfcab5c256e43d3ea401e83ea45ccb423b6811b8))
+* **backlog:** accept origin-ref identifier gate fix ([1d14f48](https://github.com/rknightion/grafana-cloud-org-insights/commit/1d14f48df642ed20d70e5a4933ef6e5a91634e88))
+* **backlog:** accept signed RC proof and retention disposition ([cad122b](https://github.com/rknightion/grafana-cloud-org-insights/commit/cad122baa28b0dfd83d385b568c1f87655d367e0))
+* **backlog:** add image-publish and DNS-bound tasks, record owner decisions ([e60ad69](https://github.com/rknightion/grafana-cloud-org-insights/commit/e60ad699582f9434c9fe63b142215015b25c8c4d))
+* **backlog:** correct cumulative privacy repair accounting ([6944396](https://github.com/rknightion/grafana-cloud-org-insights/commit/69443962916733eb657ad8713eeac17a8724a5a4))
+* **backlog:** park incomplete research and runtime criteria ([bd5348c](https://github.com/rknightion/grafana-cloud-org-insights/commit/bd5348c4ff1d6bf1e6dd96c8d4f5d132b7461293))
+* **backlog:** reconcile source fixes and parked release proof ([2698cde](https://github.com/rknightion/grafana-cloud-org-insights/commit/2698cdef67b4b23a9bbded1f2722ee5cf2119483))
+* **backlog:** record approved PII contract and scope probe ([de764dc](https://github.com/rknightion/grafana-cloud-org-insights/commit/de764dcd5561f60079688beedae18987351e86c5))
+* **backlog:** record frontend limits and defer unsafe IRM grant ([d33212a](https://github.com/rknightion/grafana-cloud-org-insights/commit/d33212a0e097e2a38957e9bd697e720ad5dbc42a))
+* **backlog:** record loop3 admission ([9df042e](https://github.com/rknightion/grafana-cloud-org-insights/commit/9df042ea756b90e6ac257e35dad6f4671582a99f))
+* **backlog:** record loop3 verification plans ([8b0a97d](https://github.com/rknightion/grafana-cloud-org-insights/commit/8b0a97d5c656082cb282f0c3d4a8a5e080ea7e69))
+* **backlog:** record loop4 admission and bounded evidence maps ([7a5f504](https://github.com/rknightion/grafana-cloud-org-insights/commit/7a5f504bf08d7fd757eed9a096cc0a0faad82f76))
+* **backlog:** record raw-view privacy deployment hold ([120c3de](https://github.com/rknightion/grafana-cloud-org-insights/commit/120c3de026969f7ad40d0ab8384be3c5f7b81a0f))
+* **backlog:** record retention candidate proof and CI repair ([77b65fe](https://github.com/rknightion/grafana-cloud-org-insights/commit/77b65fedf4dcdaf38180c00f321501f75f3048b4))
+* **backlog:** record wrapper diagnosis and root rescue ([b65d841](https://github.com/rknightion/grafana-cloud-org-insights/commit/b65d841d78dc2eb28280a91828e120735ee35458))
+* **backlog:** track target schema downgrade guard ([c019cae](https://github.com/rknightion/grafana-cloud-org-insights/commit/c019cae2955b4925ae572d0694402824de3cbd0e))
+* **capabilities:** record isolated trace and profile content reads ([1f5acd5](https://github.com/rknightion/grafana-cloud-org-insights/commit/1f5acd5e5fa84de06add8e0045c08bb3ad6b7783))
+* **insights:** record known Logs frontend attribution evidence ([d0b5bb0](https://github.com/rknightion/grafana-cloud-org-insights/commit/d0b5bb0210870f4ce54031455397be5411e21f74))
+* **loop:** record bounded dispatch and saved-plan operations ([53a74f3](https://github.com/rknightion/grafana-cloud-org-insights/commit/53a74f38e485cf5de52058cd0379ce61eb744912))
+* **loop:** retain verified privacy and rollout boundaries ([7998de7](https://github.com/rknightion/grafana-cloud-org-insights/commit/7998de73f5a2b46c5a7f6b9c1573b8cd38691404))
+* publish canonical agent documents ([b60e19c](https://github.com/rknightion/grafana-cloud-org-insights/commit/b60e19ca91f8b9dc308844548ad259359eda5d8e))
+* **usage:** correct OnCall gauge and record metric semantics ([23ae440](https://github.com/rknightion/grafana-cloud-org-insights/commit/23ae440c9b825a4542b41365d84a91abf406760b))
+
 ## [0.3.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.2.1...v0.3.0) (2026-09-29)
 
 
