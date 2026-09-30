@@ -1,7 +1,11 @@
 """Behavioral contracts for the shipped Terraform IAM policies."""
 
+import json
+import os
 from pathlib import Path
 import re
+import subprocess
+import tempfile
 import unittest
 
 
@@ -266,6 +270,67 @@ class FirehoseLogPathTest(unittest.TestCase):
     def test_generated_manual_task_command_propagates_cost_tags(self):
         command = _block(OUTPUTS, 'output "run_task_command"')
         self.assertIn("--propagate-tags TASK_DEFINITION", command)
+
+
+class LabelRiskRetentionTest(unittest.TestCase):
+    """Render the shipped lifecycle rule expressions without a provider or backend."""
+
+    def render(self, days=90):
+        storage = (ROOT / "terraform" / "storage.tf").read_text()
+        lifecycle = _block(storage, 'resource "aws_s3_bucket_lifecycle_configuration" "data"')
+        # Keep the real HCL attribute expressions. Only translate repeated nested blocks
+        # into console object/list syntax; no policy values are supplied by this harness.
+        rules = []
+        offset = 0
+        while match := re.search(r"\brule\s*\{", lifecycle[offset:]):
+            start = offset + match.start()
+            rule = _block(lifecycle[start:], "rule")
+            rules.append(re.sub(
+                r"\b(filter|expiration|noncurrent_version_expiration|abort_incomplete_multipart_upload)\s*\{",
+                r"\1 = {", rule,
+            ))
+            offset = start + len("rule") + len(rule)
+        with tempfile.TemporaryDirectory() as temp:
+            Path(temp, "variables.tf").write_text(VARIABLES)
+            Path(temp, "terraform.tfvars.json").write_text(json.dumps({
+                "name_prefix": "synthetic-retention", "grafana_org_id": "synthetic",
+                "write_stack_slug": "synthetic", "mimir_write_url": "https://example.invalid",
+                "mimir_tenant": "synthetic", "loki_write_url": "https://example.invalid",
+                "loki_tenant": "synthetic", "subnet_ids": ["subnet-synthetic"],
+                "scan_retention_days": days,
+            }))
+            env = {k: v for k, v in os.environ.items() if not k.startswith("TF_VAR_")}
+            rendered = subprocess.run(
+                ["tofu", "console", "-no-color"], cwd=temp, env=env,
+                input="jsonencode([" + ",\n".join(rules) + "])\n",
+                text=True, capture_output=True, timeout=30,
+            )
+        return rendered
+
+    def test_raw_match_current_view_expires_without_expiring_other_last_good_views(self):
+        for days in (90, 12):
+            with self.subTest(days=days):
+                rendered = self.render(days)
+                self.assertEqual(0, rendered.returncode, rendered.stderr)
+                rules = json.loads(json.loads(rendered.stdout))
+                expirations = {
+                    rule["filter"].get("prefix", ""): rule["expiration"]["days"]
+                    for rule in rules if "expiration" in rule and rule["status"] == "Enabled"
+                }
+                self.assertEqual(
+                    {"scans/": days, "views/risk_label_hygiene.json": days}, expirations,
+                    "raw matches must not survive indefinitely in the current view; other views stay last-good",
+                )
+                noncurrent = [r for r in rules if "noncurrent_version_expiration" in r]
+                self.assertEqual(1, len(noncurrent))
+                self.assertEqual({}, noncurrent[0]["filter"])
+                self.assertEqual(7, noncurrent[0]["noncurrent_version_expiration"]["noncurrent_days"])
+
+    def test_retention_rejects_nonpositive_and_fractional_days(self):
+        for days in (0, -1, 1.5):
+            with self.subTest(days=days):
+                rendered = self.render(days)
+                self.assertIn("scan_retention_days must be a positive whole number of days", rendered.stderr)
 
 
 if __name__ == "__main__":

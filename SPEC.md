@@ -222,8 +222,16 @@ and unavailable/partial coverage. No backend completeness guarantee is proven, s
 reads remain partial and a no-match sample is not clean. This does not inspect log bodies,
 structured metadata, trace/profile contents or the full retention history. Ordinary values and
 decoded JWT claims do not persist. The private daily scan input may retain the same bounded
-classified matches for cross-tier hydration under existing access/encryption/90-day controls;
-latest views overwrite normally. Root deployment validation must prove those controls before
-use. Diagnostic scan export excludes this input. Generic Loki findings explicitly deny these
+classified matches for cross-tier hydration under existing access/encryption controls.
+Current `scans/` objects and the reserved full-key prefix `views/risk_label_hygiene.json`
+become eligible for expiry after `scan_retention_days` (positive whole days, default 90)
+since last publication. Hydrated republication resets that age; withholding on stale inputs
+leaves the last copy subject to expiry. Other last-good views and reader IAM are unchanged.
+In the versioned bucket, expiry makes the version noncurrent, then the existing seven-day
+noncurrent expiry applies, with asynchronous AWS processing. This is not strict erasure
+90 days after observation. For adopted buckets (`create_bucket = false`), the owner must
+configure equivalent targeted retention in its existing lifecycle policy before raw publication;
+no competing lifecycle resource is created. Root deployment validation must prove effective
+lifecycle, versioning, encryption and reader access before use. Diagnostic scan export excludes this input. Generic Loki findings explicitly deny these
 views, and no business series are added. One input enum adds at most eight existing input-health
 series across four tiers, with no stack multiplier.

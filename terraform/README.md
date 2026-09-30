@@ -10,13 +10,34 @@ Works on OpenTofu and Terraform. Requires the AWS provider v6.
 
 | | |
 |---|---|
-| S3 bucket | `scans/` (raw, expiring), `views/` (dashboard tables, permanent), `locks/` (single-run locks) |
+| S3 bucket | `scans/` (raw, expiring), `views/` (last-good tables, permanent except raw label-risk view), `locks/` (single-run locks) |
 | ECS | Fargate cluster, one task definition per tier, CloudWatch log group |
 | EventBridge Scheduler | one schedule per enabled tier |
 | IAM | execution role, task role, scheduler role, and a `views/`-only reader for the Grafana datasource |
 | Secrets Manager | the container for the two Grafana Cloud tokens - **values are never managed here** |
 | ECR | optional repository for the collector image |
 | Data Firehose | optional, default-off ECS-log delivery to the same Grafana Cloud Loki target, with failed-record S3 backup |
+
+## Raw label-risk retention
+
+`scan_retention_days` is a positive whole number of days (default 90). In the existing
+bucket lifecycle configuration it expires current `scans/` objects and, separately, current
+`views/risk_label_hygiene.json` objects. The latter filter is the full key, not `views/`:
+all other last-good views remain permanent, and IAM/readers are unchanged. Reserve this
+full-key prefix; S3 prefix matching also covers keys with suffixes after `.json`.
+
+Expiry eligibility is measured since **last publication**, not original observation.
+Cross-tier hydration can republish the same matches and reset that age. Withholding a view
+when inputs are stale leaves its last good copy, which this targeted rule can then expire.
+In the versioned bucket, current-object expiry makes the version noncurrent; the existing
+seven-day noncurrent-version rule then applies. AWS lifecycle processing is asynchronous.
+This is not a strict 90-day-from-observation erasure guarantee.
+
+With `create_bucket = false`, the bucket owner must configure and verify equivalent targeted
+retention in the bucket's existing lifecycle policy **before publishing raw matches**. This
+module does not manage an adopted bucket's lifecycle; do not add a competing lifecycle
+configuration resource. Root deployment validation must read back the effective bucket policy,
+versioning, encryption and reader access before allowing publication.
 
 ## The two credentials
 

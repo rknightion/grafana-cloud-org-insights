@@ -151,3 +151,13 @@ is granted. `collector/httpclient.py` remains GET-only. Clear classified matches
 only in `risk_label_hygiene` and the private `label_risk` hydration input, never in Loki, stdout,
 diagnostic `--out`, errors or metric labels. Ordinary/unmatched values and decoded JWT claims
 are transient. This is a bounded daily label-API sample, never an exhaustive privacy audit.
+
+Raw-match retention uses `scan_retention_days` (positive whole days, default 90) for current
+`scans/` objects and the reserved full-key prefix `views/risk_label_hygiene.json` in the same
+bucket lifecycle configuration. Do not reuse that prefix for other keys or expire all views.
+Eligibility starts at last publication; hydration resets it. Current expiry is followed by
+seven-day noncurrent-version expiry and asynchronous AWS processing, not strict erasure
+90 days from observation. Other last-good views and IAM remain unchanged. For adopted buckets
+(`create_bucket = false`), owners must configure equivalent targeted retention in the existing
+lifecycle policy before raw publication; root must verify effective retention, versioning,
+encryption and reader access. Never add a competing lifecycle configuration resource.

@@ -117,9 +117,14 @@ variable "bucket_name" {
 }
 
 variable "scan_retention_days" {
-  description = "Lifecycle expiry for the `scans/` prefix. `views/` never expires - the dashboards read it live."
+  description = "Positive whole days until current objects in scans/ and the reserved views/risk_label_hygiene.json prefix become eligible for lifecycle expiry since last publication. Other last-good views do not expire."
   type        = number
   default     = 90
+
+  validation {
+    condition     = var.scan_retention_days > 0 && floor(var.scan_retention_days) == var.scan_retention_days
+    error_message = "scan_retention_days must be a positive whole number of days."
+  }
 }
 
 variable "coverage_score_weights" {

@@ -6,7 +6,8 @@
 #   scans/  raw envelopes. Replay, audit, and the input the T4 diff reads. Holds per-user identity
 #           detail, so Grafana must NOT be able to read it. Expires.
 #   views/  pre-shaped tables the dashboards render directly. Readable by the Grafana datasource user.
-#           Never expires - a dashboard reads the current object, and an expired view is a blank panel.
+#           Last-good views never expire, except risk_label_hygiene.json: raw classified matches
+#           require expiry even when stale-input withholding leaves the last copy in place.
 #   locks/  one small object per tier, the single-run lock. Never expires: a lock is deleted by its
 #           holder, and an expiry racing a live scan would silently permit the double run the lock
 #           exists to prevent.
@@ -64,6 +65,22 @@ resource "aws_s3_bucket_lifecycle_configuration" "data" {
 
     filter {
       prefix = "scans/"
+    }
+
+    expiration {
+      days = var.scan_retention_days
+    }
+  }
+
+  # Reserve this full-key prefix: S3 prefix matching also includes any suffixed keys.
+  # This raw-match view ages from its last publication, including hydrated republication,
+  # not from the original observation. Other last-good views remain permanent.
+  rule {
+    id     = "expire-label-risk-view"
+    status = "Enabled"
+
+    filter {
+      prefix = "views/risk_label_hygiene.json"
     }
 
     expiration {
