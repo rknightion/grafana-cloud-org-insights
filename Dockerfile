@@ -46,9 +46,15 @@ ARG TARGETARCH
 ARG AWSCLI_VERSION=2.36.28
 ARG AWSCLI_SHA256_AARCH64=5e5013af7d1996d78a842ee8f8e5010bfd2ca663e5f5f9487d1f1cb2c290f327
 ARG AWSCLI_SHA256_X86_64=1e050540227bc4dca8c2e9d503e358758dc4edd647f68e7f1a3899be6fc74bf6
+# The pinned base predates the OpenSSL security fixes. Pin the matching binary packages so
+# both platforms take the fixed version and a missing version fails closed.
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y --no-install-recommends ca-certificates curl unzip; \
+    apt-get install -y --no-install-recommends \
+      openssl=3.5.7-1~deb13u3 \
+      openssl-provider-legacy=3.5.7-1~deb13u3 \
+      libssl3t64=3.5.7-1~deb13u3 \
+      ca-certificates curl unzip; \
     case "${TARGETARCH:-arm64}" in \
       arm64) awscli_arch=aarch64; awscli_sha256="${AWSCLI_SHA256_AARCH64}" ;; \
       amd64) awscli_arch=x86_64; awscli_sha256="${AWSCLI_SHA256_X86_64}" ;; \
