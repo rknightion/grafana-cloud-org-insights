@@ -3,9 +3,11 @@ id: GCI-0052
 title: >-
   Unblock image publishing: Trivy fails every auto-rc on two HIGH openssl CVEs
   with a Debian fix
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop4-root'
 created_date: '2026-09-30 21:58'
+updated_date: '2026-09-30 22:37'
 labels:
   - release
   - container
@@ -34,3 +36,9 @@ Every auto-rc and release-please image publish since 2026-09-30T12:27Z failed at
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+loop4 admitted 2026-09-30: root owns tracker; isolated implementation lane owns packet, gate and review. Acceptance pending exact candidate/hosted/live evidence; no completion claimed.
+<!-- SECTION:NOTES:END -->

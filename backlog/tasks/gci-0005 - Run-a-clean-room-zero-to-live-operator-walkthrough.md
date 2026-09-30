@@ -1,10 +1,11 @@
 ---
 id: GCI-0005
 title: Run a clean-room zero-to-live operator walkthrough
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop4-root'
 created_date: '2026-08-24 12:02'
-updated_date: '2026-09-30 21:58'
+updated_date: '2026-09-30 22:37'
 labels: []
 dependencies: []
 references:
@@ -56,4 +57,6 @@ Two product defects the walkthrough surfaced are tracked separately: GCI-0010 (F
 The strongest single finding for this task: every one of these is invisible to an established deployment. Ordering only matters once, a region is only chosen once, a folder only created once, and a subscription filter trust condition is only evaluated once. An existing healthy deployment is not evidence that any of it works.
 
 2026-09-30 Rob lifted the deferral; admissible as loop4 reserve.
+
+loop4 admitted 2026-09-30: root owns tracker; isolated implementation lane owns packet, gate and review. Acceptance pending exact candidate/hosted/live evidence; no completion claimed.
 <!-- SECTION:NOTES:END -->

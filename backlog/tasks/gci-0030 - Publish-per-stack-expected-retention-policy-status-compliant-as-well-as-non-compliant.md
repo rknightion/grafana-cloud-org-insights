@@ -7,7 +7,7 @@ status: Parked
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 08:35'
-updated_date: '2026-09-30 21:08'
+updated_date: '2026-09-30 22:37'
 labels:
   - retention
   - dashboards
@@ -66,4 +66,6 @@ loop3 P-0030-a1 candidate accepted locally: selector winner precedes overlap amb
 Loop3 dev image/source6eb verified, actual status view5 rows all unreadable for configured expectation, never false compliance. New status panel GET-rendered. Old gap/stream empty copies remain visibly stale rather than claiming current zeros. V-dev six-hour Mimir range found historical measured/unreadable/change-request series but current gap/compliant outcomes and fresh retention gauges remain unproved. AC5 signed auto-RC/stable release not claimed; release remains gated by incomplete full dev proof. No new source attempt used after accepted a1.
 
 Release proof remainsblocked: v0.4.0-rc.8 GitHub prerelease exists fromb60e19c(code6ebancestor), but advertised GHCR0.4.0-rc.8 image verification returned MANIFEST_UNKNOWN; no digest/signature consumer pin proved. First cosign shim failedno configuredversion; retry used existinginstalled3.1.3withoutinstall/pin/authmutation and failedexit11 missingimage. No unchangedretry/no signedautoRCAC5check. Livepartialfreshmetric/unreadable limits retained.
+
+loop4 V-ret source and dev 26h read: every successful limits record omits retention_stream; unreadable/null policy rows and absent gap/compliant gauges are correct-by-design, stale stream/gap copies deliberately retained. Root live task config confirms nonempty expectation and deployed image, schedule witness retained. No repair indicated; signed digest AC5 pending.
 <!-- SECTION:NOTES:END -->

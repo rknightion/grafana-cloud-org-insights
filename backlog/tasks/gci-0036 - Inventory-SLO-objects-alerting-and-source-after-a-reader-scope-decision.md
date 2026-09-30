@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-30 21:58'
+updated_date: '2026-09-30 22:37'
 labels:
   - feature-usage
   - follow-on
@@ -53,4 +53,6 @@ D1a accepted operational reader sufficiency and positive Admin control on staff 
 Loop3 source inventory shipped and dev proved five live rows including a positive configured SLO under existing None readers; original authentication/schema blockers cleared at96b. Strong hard DNS/connect wall-time criterion remains unmet after four cumulative attempts (worker2, rootwiring rescue, specialist); no fifth attempt or criterion waiver. Resume only the named timing concern under new owner direction, not source-count reinvention.
 
 2026-09-30 Rob: the hard DNS/connect wall-time criterion is split into GCI-0053 (collector-wide). GCI-0036 closes on its own three ACs once the next loop re-checks them against loop3 dev evidence.
+
+loop4 M-ac mapped three criteria: role approval and minimized five-row dev view supported by existing artifacts. Positive authorized reader/Admin comparison exists in private D1a slo-comparison witness (18/18, equal UUID set, same payload except allowedActions). Current live rollout revalidation remains separate; DNS criterion belongs to GCI-0053.
 <!-- SECTION:NOTES:END -->

@@ -7,7 +7,7 @@ status: Parked
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 17:50'
-updated_date: '2026-09-30 21:39'
+updated_date: '2026-09-30 22:37'
 labels:
   - research
   - adoption
@@ -133,4 +133,6 @@ loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own
 loop3 D1c mapping accepted and durable matrix updated via CLI: 327-name roster across 19 families, 26 partial/exact contracts and 309 unresolved normalizations. OnCall alert_groups_total corrected to explicit gauge; response/resolution histograms last 7d; quota_usage current count not billing. AC1 remains unproven pending vendor HELP/TYPE/recording windows/reset catalogue; no guesses, no role changes in research. D1a route/pair proof remains active root follow-up. Discovery attempts 0, implementation attempts 0, infra retries 0 for this research criterion.
 
 Loop3 matrix updated via CLI:327 discovered metric names,26 partial contracts,309 unresolved normalizations. Authoritative HELP/TYPE/window/reset contracts unavailable; no guessed normalizations or semantic-zero claims. Real Logs frontend sourceapp transport proved underSA control, not human or per-app discriminator. Resume from vendor contract publication and strict known-user proof, not repeated searches with no new premise.
+
+loop4 M-0032 admitted read-only with new premise: live grafanacloud-usage metadata HELP/TYPE endpoint, followed by named official sources if needed. No guessed normalization, grants, or acceptance yet.
 <!-- SECTION:NOTES:END -->

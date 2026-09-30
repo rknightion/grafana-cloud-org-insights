@@ -6,7 +6,7 @@ title: >-
 status: Parked
 assignee: []
 created_date: '2026-09-11 14:15'
-updated_date: '2026-09-11 15:25'
+updated_date: '2026-09-30 22:37'
 labels:
   - retention
   - validation
@@ -60,6 +60,8 @@ Authorised by the operator on 2026-09-11 for wave 2.
 
 <!-- SECTION:NOTES:BEGIN -->
 Wave 2 attended validation did not run because the operator did not supply the development-deployment identity. No deployment or bucket was inferred, and no collector, S3, Loki, metric-label or dashboard observation was made.
+
+loop4 V-ret observed all three retained retention view objects (AC2 evidence); fresh measured/populated render and natural fixed-label Loki change event remain gaps, latest scan manifest healthy5/5 but full execution/image binding separate. Metric-label audit bounded to six retention families, not an exhaustive identity/pixel audit. No fabricated event or zero.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
