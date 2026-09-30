@@ -3,11 +3,11 @@ id: GCI-0010
 title: >-
   Firehose log subscription cannot be created by a new deployment - trust policy
   demands a SourceArn CloudWatch Logs never sends
-status: Parked
+status: In Progress
 assignee:
-  - '@codex'
+  - '@loop3-root'
 created_date: '2026-08-25 08:27'
-updated_date: '2026-09-11 15:24'
+updated_date: '2026-09-30 12:20'
 labels:
   - bug
 dependencies: []
@@ -69,6 +69,8 @@ Fix the Firehose trust SourceArn condition using the bare log-group ARN, validat
 Wave 1 implementation and deterministic verification completed. Acceptance criterion 3 requires a write to an AWS deployment and was outside the run authority. Resume by applying a consumer deployment with firehose_logs_enabled=true and firehose_log_subscription_enabled=true against a log group that has never carried a subscription filter, then verify aws_cloudwatch_log_subscription_filter.ecs_logs is created without manual intervention.
 
 Wave 2 attended acceptance did not run because the operator did not supply the required consumer deployment and fresh log-group identity during the run. No deployment was inferred. Acceptance criterion 3 remains unproved.
+
+loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

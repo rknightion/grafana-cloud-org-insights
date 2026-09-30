@@ -1,10 +1,11 @@
 ---
 id: GCI-0040
 title: Find a defensible per-app discriminator for Scenes query events
-status: Parked
-assignee: []
+status: In Progress
+assignee:
+  - '@loop3-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-23 19:52'
+updated_date: '2026-09-30 12:20'
 labels:
   - feature-usage
   - follow-on
@@ -40,4 +41,6 @@ Rank 7 - valuable but upstream-dependent. In a live 55-stack sample, scenes line
 
 <!-- SECTION:NOTES:BEGIN -->
 Parked pending a defensible app discriminator: 55 guarded usage-insights stack probes saw scenes, but log lines carried no plugin or URL and datasourceType is ambiguous. Resume with a known Drilldown user query or upstream event enrichment evidence.
+
+loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
 <!-- SECTION:NOTES:END -->

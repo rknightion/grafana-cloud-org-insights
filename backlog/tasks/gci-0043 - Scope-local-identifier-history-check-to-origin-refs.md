@@ -1,9 +1,11 @@
 ---
 id: GCI-0043
 title: Scope local identifier history check to origin refs
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop3-root'
 created_date: '2026-09-23 22:22'
+updated_date: '2026-09-30 12:20'
 labels: []
 dependencies: []
 priority: high
@@ -28,3 +30,9 @@ The local history checker scans every local Git ref. Eight pre-scrub commits rem
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
+<!-- SECTION:NOTES:END -->

@@ -1,11 +1,11 @@
 ---
 id: GCI-0018
 title: Detect PII and unbounded-cardinality label patterns as a risk finding
-status: Parked
+status: In Progress
 assignee:
-  - '@codex'
+  - '@loop3-root'
 created_date: '2026-08-25 13:12'
-updated_date: '2026-09-11 14:13'
+updated_date: '2026-09-30 12:20'
 labels:
   - risk
   - privacy
@@ -96,6 +96,8 @@ CORRECTION, 2026-09-11 wave 1 closeout. The wave 1 audit finding above is WRONG 
 What is genuinely missing is narrower than the note claimed: the payload is Mimir only, and it is the top N by cardinality rather than a complete label-name set. That is a good input for the unbounded-cardinality class and a poor one for the PII class, because a low-cardinality identity label such as an owner slug never enters the top N.
 
 This task is therefore split. The unbounded-cardinality half is commissioned as GCI-0018.01 over the existing payload with no new source contract. This parent stays Parked for the identity-bearing half only, and resumes after an all-signal key-only label-name source contract exists across Mimir, Loki, Tempo and Pyroscope.
+
+loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

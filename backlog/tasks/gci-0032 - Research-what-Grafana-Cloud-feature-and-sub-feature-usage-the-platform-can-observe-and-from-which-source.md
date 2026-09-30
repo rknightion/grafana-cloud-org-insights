@@ -3,10 +3,11 @@ id: GCI-0032
 title: >-
   Research what Grafana Cloud feature and sub-feature usage the platform can
   observe, and from which source
-status: Parked
-assignee: []
+status: In Progress
+assignee:
+  - '@loop3-root'
 created_date: '2026-09-23 17:50'
-updated_date: '2026-09-23 19:51'
+updated_date: '2026-09-30 12:20'
 labels:
   - research
   - adoption
@@ -120,4 +121,6 @@ Existing reader scopes (collector/provision.py READER permissions) at task creat
 Wave 1 matrix doc-0006 covers 34 product/subfeature groups and an exact 325-name live grafanacloud_* union from two write-stack usage datasources. It records verified scope, explicit unknown billing/window semantics, nine-stack API route probes and 55 guarded usage-insights stack probes. CAPABILITIES and docs/traps updated; GCI-0034 through GCI-0041 capture follow-ons and the scope decision. AC1 remains unproven because vendor contracts for many billable gauges and counters did not establish rate/counter/billing-period window semantics; the appendix marks these unknown instead of guessing. Resume with authoritative metric-definition or billing export evidence for each unknown family, then complete AC1. Exact-SHA CI 35908750277 passed; historical identifier gate remains red on eight pre-wave commits, while current-file and hosted gates passed.
 
 Criterion audit correction: AC2 and AC4 also stay open. Several candidate plugin routes are wildcard or unverified and their exact reader action/scope pairs are unknown; GCI-0041 is the explicit scope-decision and route-validation boundary. The matrix labels these gaps rather than presenting candidate routes as confirmed contracts.
+
+loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
 <!-- SECTION:NOTES:END -->

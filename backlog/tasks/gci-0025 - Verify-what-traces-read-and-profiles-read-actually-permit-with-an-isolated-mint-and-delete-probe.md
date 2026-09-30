@@ -3,10 +3,11 @@ id: GCI-0025
 title: >-
   Verify what traces:read and profiles:read actually permit, with an isolated
   mint-and-delete probe
-status: Parked
-assignee: []
+status: In Progress
+assignee:
+  - '@loop3-root'
 created_date: '2026-09-11 14:15'
-updated_date: '2026-09-11 15:25'
+updated_date: '2026-09-30 12:20'
 labels:
   - security
   - capabilities
@@ -57,6 +58,8 @@ Mint an access policy carrying `traces:read` and nothing else, on a control orga
 
 <!-- SECTION:NOTES:BEGIN -->
 Wave 2 attended probe did not run because the operator did not supply the control-organisation identity. No organisation was inferred and no access policy was minted, read, modified or deleted.
+
+loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

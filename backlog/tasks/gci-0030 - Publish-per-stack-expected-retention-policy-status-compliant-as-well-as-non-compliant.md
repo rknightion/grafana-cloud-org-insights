@@ -3,11 +3,11 @@ id: GCI-0030
 title: >-
   Publish per-stack expected-retention-policy status, compliant as well as
   non-compliant
-status: Parked
+status: In Progress
 assignee:
-  - '@codex'
+  - '@loop3-root'
 created_date: '2026-09-23 08:35'
-updated_date: '2026-09-23 23:08'
+updated_date: '2026-09-30 12:20'
 labels:
   - retention
   - dashboards
@@ -56,4 +56,6 @@ Implement generic status view and aggregate coverage metrics with unreadable kep
 Wave 8 parked by owner before commit or push. Local staged implementation and unstaged attempt-4 regression tests remain in checkout. Two new tests currently fail: malformed retention_stream leaks a partial row; dashboard assembly fails when the status view is absent. Resume with fixes for those two cases, targeted tests and full just check, then exact-SHA CI and release. CodeRabbit slice used two passes; do not call those findings resolved without fixes.
 
 Wave 2 exhausted the two authorised attempts without shipping. The recovered patch and the second correction pass are preserved in the isolated L1 worktree and private codex backup; no GCI-0030 code was committed. Focused tests passed (242 passed, 2 skipped), but CodeRabbit found a remaining major accuracy issue: a lower-priority overlapping Loki selector is classified unreadable even when it cannot govern retention. Do not count AC1-5 or release proof as complete. Resume from that exact selector-priority case with a new explicit attempt budget.
+
+loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
 <!-- SECTION:NOTES:END -->
