@@ -89,5 +89,14 @@ Rollback restores the recorded deployment commit, generic module ref, immutable 
 task-definition targets, schedule states, and provisioner gate. Re-run the rendered-definition and
 schedule checks after apply.
 
+Keep the original manifest, Terraform module ref and immutable image digest as a saved rollback
+triplet. The current `consumer_manifest.py upgrade` statically inspects the requested commit's
+projection names before writing and rejects a different or unsupported schema. It does not execute
+target code or convert manifests across arbitrary versions. For an incompatible target, use
+target-matched tooling or restore that saved triplet; never blindly run a newer `regenerate` on the
+saved rollback manifest. The guard does not replace the recorded rollback procedure or prove target
+runtime behavior. Supported forward legacy migration still verifies old digests before carrying the
+existing provisioner product policy into the scanner projection.
+
 Rollback does not automatically delete or overwrite scan, carry, or view objects. If a candidate wrote
 bad state, preserve it as evidence and assess data recovery separately from source rollback.

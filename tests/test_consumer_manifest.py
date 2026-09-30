@@ -415,7 +415,7 @@ class UpgradeTest(unittest.TestCase):
                 git.side_effect = lambda _root, *parts: (
                     body["generic_source"]["repository"] if parts[:3] == (
                         "remote", "get-url", "origin"
-                    ) else ""
+                    ) else (ROOT / "collector/identity.py").read_text() if parts[0] == "show" else ""
                 )
                 consumer_manifest.command_upgrade(args)
             remote.assert_called_once_with(
@@ -466,7 +466,7 @@ class UpgradeTest(unittest.TestCase):
                 git.side_effect = lambda _root, *parts: (
                     body["generic_source"]["repository"] if parts[:3] == (
                         "remote", "get-url", "origin"
-                    ) else ""
+                    ) else (ROOT / "collector/identity.py").read_text() if parts[0] == "show" else ""
                 )
                 with self.assertRaisesRegex(consumer_manifest.ManifestError, "rolled back"):
                     consumer_manifest.command_upgrade(args)

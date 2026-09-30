@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import os
@@ -653,12 +654,88 @@ def command_regenerate(args: argparse.Namespace) -> int:
     return 0
 
 
+def static_projection_schema(source: str) -> dict[str, frozenset[str]]:
+    """Read only literal projection names from an identity Git artifact, never execute it.
+
+    Unsupported syntax fails closed: this is a compatibility guard, not a cross-version evaluator.
+    """
+    try:
+        if len(source) > 262_144:
+            raise ValueError("identity artifact is too large")
+        tree = ast.parse(source)
+        assignments: dict[str, ast.expr] = {}
+        declaration_targets: dict[str, ast.Name] = {}
+        for node in tree.body:
+            if isinstance(node, ast.Assign) and len(node.targets) == 1:
+                target = node.targets[0]
+                if isinstance(target, ast.Name):
+                    if target.id in assignments:
+                        raise ValueError("repeated assignment")
+                    assignments[target.id] = node.value
+                    declaration_targets[target.id] = target
+        projections = assignments.get("PROJECTION_ENVS")
+        if not isinstance(projections, ast.Dict):
+            raise ValueError("projection mapping must be a static dictionary")
+        result: dict[str, frozenset[str]] = {}
+        for key, value in zip(projections.keys, projections.values):
+            if not isinstance(key, ast.Constant) or not isinstance(key.value, str):
+                raise ValueError("projection kind must be a literal string")
+            if key.value in result or not isinstance(value, ast.Name):
+                raise ValueError("projection must refer to one literal environment tuple")
+            names_node = assignments.get(value.id)
+            if not isinstance(names_node, (ast.Tuple, ast.List)):
+                raise ValueError("environment names must be literal")
+            names = ast.literal_eval(names_node)
+            if (not names or any(not isinstance(name, str) for name in names)
+                    or len(names) != len(set(names))):
+                raise ValueError("environment names must be unique strings")
+            result[key.value] = frozenset(names)
+        if not result:
+            raise ValueError("projection mapping is empty")
+        protected = {"PROJECTION_ENVS"} | {
+            value.id for value in projections.values if isinstance(value, ast.Name)
+        }
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
+                    and node.id in protected and node is not declaration_targets[node.id]):
+                raise ValueError("projection collection has an unsupported write")
+            if (isinstance(node, (ast.Subscript, ast.Attribute))
+                    and isinstance(node.ctx, ast.Store)
+                    and any(isinstance(part, ast.Name) and part.id in protected
+                            for part in ast.walk(node))):
+                raise ValueError("projection collection has an unsupported mutation")
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                    and any(isinstance(part, ast.Name) and part.id in protected
+                            for part in ast.walk(node.func))):
+                raise ValueError("projection collection has an unsupported method call")
+        return result
+    except (SyntaxError, ValueError, TypeError, RecursionError) as exc:
+        raise ManifestError("unsupported target projection schema: static literals required") from exc
+
+
+def verify_target_projection_schema(generic: pathlib.Path, revision: str) -> None:
+    try:
+        source = run_git(generic, "show", f"{revision}:collector/identity.py")
+        target = static_projection_schema(source)
+        current = {kind: frozenset(names) for kind, names in identity.PROJECTION_ENVS.items()}
+        if target != current:
+            raise ManifestError("unsupported target projection schema: differs from this tool")
+    except ManifestError as exc:
+        raise ManifestError(
+            "Cannot upgrade with this tool: unsupported target projection schema. "
+            "Use target-matched tooling or restore the saved rollback triplet "
+            "(manifest, Terraform module ref, immutable image digest); do not blindly regenerate."
+        ) from exc
+
+
 def command_upgrade(args: argparse.Namespace) -> int:
     if not FULL_SHA.fullmatch(args.revision):
         raise ManifestError("revision must be a full lowercase commit SHA")
-    recover_incomplete_upgrade(args.manifest, args.terraform)
     generic = args.generic_source.resolve()
     run_git(generic, "cat-file", "-e", f"{args.revision}^{{commit}}")
+    # Inspect the exact existing commit artifact before even journal recovery can write either file.
+    verify_target_projection_schema(generic, args.revision)
+    recover_incomplete_upgrade(args.manifest, args.terraform)
     manifest = load_json(args.manifest)
     validate(manifest, allow_legacy_scan_policy=True)
     repository = manifest["generic_source"]["repository"]

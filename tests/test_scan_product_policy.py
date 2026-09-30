@@ -59,7 +59,9 @@ def test_legacy_cli_regenerate_upgrade_and_real_scan_eligibility(policy):
                              + original["generic_source"]["revision"] + '"\n}\n')
         git = temp / "git"
         git.write_text('#!/bin/sh\ncase "$*" in\n*"remote get-url origin"*) echo '
-                       'https://github.com/rknightion/grafana-cloud-org-insights.git;;\nesac\n')
+                       'https://github.com/rknightion/grafana-cloud-org-insights.git;;\n'
+                       '*"show "*) exec "' + shutil.which("git") + '" -C "' + str(ROOT)
+                       + '" show HEAD:collector/identity.py;;\nesac\n')
         git.chmod(0o755)
         result = cli("upgrade", "b" * 40, "--manifest", str(manifest), "--terraform",
                      str(terraform), env=dict(os.environ, PATH=str(temp) + ":" + os.environ["PATH"]))
