@@ -6,7 +6,7 @@ title: >-
 status: Parked
 assignee: []
 created_date: '2026-09-11 14:15'
-updated_date: '2026-09-30 22:37'
+updated_date: '2026-09-30 22:51'
 labels:
   - retention
   - validation
@@ -43,7 +43,7 @@ Authorised by the operator on 2026-09-11 for wave 2.
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 One read-only full-estate collector execution completes against an authorised development deployment
-- [ ] #2 All three retention view artifacts are observed retained on the bucket
+- [x] #2 All three retention view artifacts are observed retained on the bucket
 - [ ] #3 One Loki change event is observed with stream labels exactly tier, pillar=E and event=change, and identity detail only in the line body
 - [ ] #4 The five Operations retention elements are observed rendering against populated data
 - [ ] #5 No identity-bearing content is found in any metric label, and no deployment-specific detail reaches any file
@@ -62,6 +62,8 @@ Authorised by the operator on 2026-09-11 for wave 2.
 Wave 2 attended validation did not run because the operator did not supply the development-deployment identity. No deployment or bucket was inferred, and no collector, S3, Loki, metric-label or dashboard observation was made.
 
 loop4 V-ret observed all three retained retention view objects (AC2 evidence); fresh measured/populated render and natural fixed-label Loki change event remain gaps, latest scan manifest healthy5/5 but full execution/image binding separate. Metric-label audit bounded to six retention families, not an exhaustive identity/pixel audit. No fabricated event or zero.
+
+loop4 root bound archived T2 STOPPED exit0 task588c176e08c549aa920731652a6b1299 to definition17, source6ebedd3 and deployed immutable ECR digestbc024b60; V-ret latest healthy manifest corresponds17:39:34Z within that execution. Current daily schedule04:35UTC witnessed, 26h lookback sufficient. AC2 all three retained objects proven, though stream/gap copies explicitly stale. Natural change event/populated render remain unproved.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

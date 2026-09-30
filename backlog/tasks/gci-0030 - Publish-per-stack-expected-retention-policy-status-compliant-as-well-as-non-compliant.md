@@ -3,11 +3,11 @@ id: GCI-0030
 title: >-
   Publish per-stack expected-retention-policy status, compliant as well as
   non-compliant
-status: Parked
+status: Done
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 08:35'
-updated_date: '2026-09-30 22:37'
+updated_date: '2026-09-30 22:51'
 labels:
   - retention
   - dashboards
@@ -34,7 +34,7 @@ Generic mechanism only: no expectation value, selector or stack identity is hard
 - [x] #2 Unreadable stacks are never reported compliant or below policy, and an empty expectation list yields no status rows
 - [x] #3 The Logs retention tab carries the status table and a compliant-count stat beside the existing measured and gap stats, and the generated dashboards match a fresh render
 - [x] #4 No expectation value, selector or stack identity is hardcoded, the selector is never a metric label, and any new metric is in budget.py CATALOGUE
-- [ ] #5 Released as a signed auto-RC whose digest a consumer can pin
+- [x] #5 Released as a signed auto-RC whose digest a consumer can pin
 <!-- AC:END -->
 
 ## Definition of Done
@@ -68,4 +68,12 @@ Loop3 dev image/source6eb verified, actual status view5 rows all unreadable for 
 Release proof remainsblocked: v0.4.0-rc.8 GitHub prerelease exists fromb60e19c(code6ebancestor), but advertised GHCR0.4.0-rc.8 image verification returned MANIFEST_UNKNOWN; no digest/signature consumer pin proved. First cosign shim failedno configuredversion; retry used existinginstalled3.1.3withoutinstall/pin/authmutation and failedexit11 missingimage. No unchangedretry/no signedautoRCAC5check. Livepartialfreshmetric/unreadable limits retained.
 
 loop4 V-ret source and dev 26h read: every successful limits record omits retention_stream; unreadable/null policy rows and absent gap/compliant gauges are correct-by-design, stale stream/gap copies deliberately retained. Root live task config confirms nonempty expectation and deployed image, schedule witness retained. No repair indicated; signed digest AC5 pending.
+
+loop4 AC5 proved using same RC.11 at a589c4b and signed verified GHCR digest sha256:19ae79eb8e5e64e764f9a56491daaadbbaa754c02864f3b4fec427c598943d6d, auto-rc36786981438. Correct-by-design unreadable/absent gauges independently disposed, no repair attempt. Stable rollout is separate from this signed auto-RC criterion.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Generic per-stack retention status and dashboard criteria previously met; signed pinnable RC.11 digest independently verified in loop4 closes remaining AC5. Undisclosed per-stream limits stay unreadable with gauges absent and prior views visibly stale, never false zero/compliance.
+<!-- SECTION:FINAL_SUMMARY:END -->

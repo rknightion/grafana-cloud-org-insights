@@ -7,7 +7,7 @@ status: Parked
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 17:50'
-updated_date: '2026-09-30 22:37'
+updated_date: '2026-09-30 22:51'
 labels:
   - research
   - adoption
@@ -135,4 +135,6 @@ loop3 D1c mapping accepted and durable matrix updated via CLI: 327-name roster a
 Loop3 matrix updated via CLI:327 discovered metric names,26 partial contracts,309 unresolved normalizations. Authoritative HELP/TYPE/window/reset contracts unavailable; no guessed normalizations or semantic-zero claims. Real Logs frontend sourceapp transport proved underSA control, not human or per-app discriminator. Resume from vendor contract publication and strict known-user proof, not repeated searches with no new premise.
 
 loop4 M-0032 admitted read-only with new premise: live grafanacloud-usage metadata HELP/TYPE endpoint, followed by named official sources if needed. No guessed normalization, grants, or acceptance yet.
+
+loop4 metadata premise exhausted with complete5/5 direct discovered usage datasource metadata GETs across fresh staff inventory: every HTTP200 success has empty data, zero HELP/TYPE contracts. Four existing official partial pricing contracts revalidated, zero net-new contracts. Unsupported proxy404s from pass1 corrected with explicitly authorised stored per-stack SA direct reads. AC1/AC2 remain parked pending vendor recording/window/reset catalogue, no repeated unchanged search planned.
 <!-- SECTION:NOTES:END -->
