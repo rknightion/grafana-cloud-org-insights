@@ -30,7 +30,7 @@ class Proxy:
         self.responses.update(overrides or {})
         self.calls = []
 
-    def get(self, url, *, bearer):
+    def get(self, url, *, bearer, guarded=False, status_only=False):
         self.calls.append((url, bearer))
         response = self.responses[url.rsplit("/", 1)[-1]]
         if isinstance(response, Exception):
@@ -129,6 +129,22 @@ def test_t2_gatherer_uses_inventory_and_sanitizes_store_errors():
     with mock.patch.object(scan.credentials, "load_all", side_effect=scan.credentials.StoreUnavailable("private")):
         data, errors = scan.gather_adaptive_traces(Proxy(), None, [STACK])
     assert data == {} and "private" not in json.dumps(errors)
+
+
+def test_credential_schema_defer_preserves_independent_domains():
+    from collector.httpclient import ReadOnlyClient, Response as HTTPResponse
+    def transport(req, timeout):
+        resource = req.full_url.rsplit("/", 1)[-1]
+        body = {"health": {}, "config": {"nested": {"apiKey": "synthetic"}},
+                "policies": [{"body": "password apiKey are uninterpreted text"}],
+                "recommendations": [{"accessToken": "synthetic"}]}[resource]
+        return HTTPResponse(200, json.dumps(body).encode(), req.full_url)
+    result = source.probe_stack(ReadOnlyClient(transport=transport), STACK, "synthetic")
+    assert result["config_state"] == result["recommendations_state"] == "unsafe_schema"
+    assert result["config_available"] is None
+    assert "recommendation_count" not in result
+    assert result["available"] and result["policy_count"] == 1
+    assert "synthetic" not in json.dumps(result)
 
 
 def test_inventory_panel_is_on_existing_adaptive_traces_tab():

@@ -13,6 +13,7 @@ from typing import Any, Mapping, Sequence
 
 from collector.httpclient import ReadOnlyClient
 from collector.sources.stack_catalog import validated_base_url
+from collector.sources.resource_schema import UnsafeSchema, guard_resource
 
 PLUGIN = "grafana-adaptivetraces-app"
 PATH = f"api/plugin-proxy/{PLUGIN}"
@@ -22,11 +23,17 @@ POLICY_TYPES = ("status_code", "latency", "volumetric", "diversity", "other")
 def _read(client: ReadOnlyClient, base: str, resource: str, token: str) -> tuple[Any, str]:
     """Never return or log exception text or error response bodies."""
     try:
-        response = client.get(f"{base}/{PATH}/{resource}", bearer=token)
+        status_only = resource == "health"
+        response = client.get(f"{base}/{PATH}/{resource}", bearer=token,
+                              guarded=True, status_only=status_only)
         if not response.ok:
             return None, {401: "token_401", 403: "forbidden_403", 404: "not_found_404"}.get(
                 response.status, "http_error")
-        return response.json(), "ok"
+        if status_only:
+            return None, "ok"
+        return guard_resource(response.json()), "ok"
+    except UnsafeSchema:
+        return None, "unsafe_schema"
     except Exception:  # noqa: BLE001 - isolate each resource without leaking payloads
         return None, "transport_error"
 

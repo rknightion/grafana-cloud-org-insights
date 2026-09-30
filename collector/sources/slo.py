@@ -11,6 +11,8 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 from collector.httpclient import ReadOnlyClient
+from collector.sources.resource_schema import UnsafeSchema, guard_resource
+from collector.sources.stack_catalog import validated_base_url
 
 PATH = "/api/plugins/grafana-slo-app/resources/v1/slo"
 PROVENANCES = ("api", "asserts", "unknown")
@@ -29,13 +31,13 @@ def fetch_slo_inventory(
     Never guess a hostname, log an upstream error body, or persist raw SLO records.
     The deployed list has no pagination contract; unexpected envelopes are rejected.
     """
-    url = stack.get("url")
-    if not reader or not isinstance(url, str) or not url:
+    url, error = validated_base_url(stack)
+    if not reader or error:
         return None
-    response = client.get(url.rstrip("/") + PATH, bearer=reader)
+    response = client.get(url + PATH, bearer=reader, guarded=True)
     if not response.ok:
         return None
-    body = response.json()
+    body = guard_resource(response.json())
     if not isinstance(body, Mapping) or set(body) != {"slos"}:
         return None
     items = body["slos"]
@@ -90,6 +92,8 @@ def probe_all(
         if token:
             try:
                 result = fetch_slo_inventory(client, stack, token)
+            except UnsafeSchema:
+                reason = "unsafe_schema"
             except Exception:  # noqa: BLE001 - raw exception text may contain product content
                 reason = "transport_error"
         if result is None:

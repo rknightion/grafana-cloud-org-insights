@@ -13,6 +13,8 @@ Two properties the rest of the collector depends on (SPEC §5.2, §8):
 from __future__ import annotations
 
 import base64
+import http.client
+import io
 import json
 import random
 import threading
@@ -92,16 +94,20 @@ class RateLimiter:
         self._last = clock()
         self._lock = threading.Lock()
 
-    def acquire(self) -> None:
+    def acquire(self, *, deadline: float | None = None) -> None:
         while True:
             with self._lock:
                 now = self._clock()
+                if deadline is not None and now >= deadline:
+                    raise DeadlineExceeded("rate limiter deadline")
                 self._tokens = min(self._capacity, self._tokens + (now - self._last) * self._rate)
                 self._last = now
                 if self._tokens >= 1.0:
                     self._tokens -= 1.0
                     return
                 wait = (1.0 - self._tokens) / self._rate
+                if deadline is not None:
+                    wait = min(wait, deadline - now)
             self._sleep(wait)
 
     def penalise(self, seconds: float) -> None:
@@ -170,8 +176,11 @@ class ReadOnlyClient:
         headers: Mapping[str, str] | None = None,
         bearer: str | None = None,
         basic: tuple[str, str] | None = None,
+        guarded: bool = False,
+        status_only: bool = False,
     ) -> Response:
-        return self.request("GET", url, params=params, headers=headers, bearer=bearer, basic=basic)
+        return self.request("GET", url, params=params, headers=headers, bearer=bearer, basic=basic,
+                            guarded=guarded, status_only=status_only)
 
     def request(
         self,
@@ -182,7 +191,11 @@ class ReadOnlyClient:
         headers: Mapping[str, str] | None = None,
         bearer: str | None = None,
         basic: tuple[str, str] | None = None,
+        guarded: bool = False,
+        status_only: bool = False,
     ) -> Response:
+        if status_only and not guarded:
+            raise ValueError("status_only requires guarded transport")
         if method.upper() != "GET":
             raise MethodNotAllowed(
                 f"{method} refused: this collector is read-only by construction (SPEC §8)"
@@ -195,6 +208,8 @@ class ReadOnlyClient:
             req.add_header("Authorization", f"Bearer {bearer}")
         if basic:
             req.add_header("Authorization", _basic_auth(*basic))
+        if guarded:
+            return self._send_guarded(req, _host_of(full), status_only=status_only)
         return self._send_with_retries(req, _host_of(full))
 
     def remaining(self) -> float:
@@ -223,6 +238,42 @@ class ReadOnlyClient:
                 sem = threading.Semaphore(limit)
                 self._semaphores[host] = sem
             return sem
+
+    def _send_guarded(self, req: urllib.request.Request, host: str, *, status_only: bool) -> Response:
+        """One fixed-route attempt, with one total budget including the host queue.
+
+        No retry on schema/size/time failures or on health status: callers report a gap.
+        The normal client's retry policy and transport defaults remain unchanged.
+        """
+        end = self._clock() + min(self._timeout, self.remaining())
+        remaining = lambda: end - self._clock()
+        limiter = self._limiter(host)
+        if limiter is not None:
+            limiter.acquire(deadline=end)
+        sem = self._semaphore(host)
+        wait = remaining()
+        if wait <= 0 or not sem.acquire(timeout=wait):
+            raise DeadlineExceeded("guarded GET deadline")
+        try:
+            wait = remaining()
+            if wait <= 0:
+                raise DeadlineExceeded("guarded GET deadline")
+            self.attempts.requests += 1
+            if self._transport is _urllib_transport:
+                resp = _guarded_transport(req, remaining, status_only=status_only)
+            else:
+                # Injected network edge is trusted; enforce the output fences as well.
+                resp = self._transport(req, wait)
+                if status_only or not resp.ok:
+                    resp = Response(resp.status, b"", resp.url, resp.headers)
+                elif len(resp.body) > MAX_GUARDED_BYTES:
+                    raise ValueError("guarded GET response too large")
+            if remaining() <= 0:
+                raise DeadlineExceeded("guarded GET deadline")
+            self.attempts.record(resp.status)
+            return resp
+        finally:
+            sem.release()
 
     def _send_with_retries(self, req: urllib.request.Request, host: str) -> Response:
         last: Response | Exception | None = None
@@ -283,6 +334,121 @@ def _with_params(url: str, params: Mapping[str, object] | None) -> str:
 
 def _host_of(url: str) -> str:
     return urllib.parse.urlparse(url).netloc.lower()
+
+
+MAX_GUARDED_BYTES = 2 * 1024 * 1024
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+class _DeadlineReader(io.RawIOBase):
+    """Clamp every socket receive, including header reads, to the total budget."""
+
+    def __init__(self, raw, sock, remaining):
+        self.raw, self.sock, self.remaining = raw, sock, remaining
+
+    def readable(self):
+        return True
+
+    def readinto(self, buffer):
+        wait = self.remaining()
+        if wait <= 0:
+            raise DeadlineExceeded("guarded GET deadline")
+        self.sock.settimeout(wait)
+        result = self.raw.readinto(buffer)
+        if self.remaining() <= 0:
+            raise DeadlineExceeded("guarded GET deadline")
+        return result
+
+    def close(self):
+        try:
+            self.raw.close()
+        finally:
+            super().close()
+
+
+class _DeadlineSocket:
+    def __init__(self, sock, remaining):
+        self.sock, self.remaining = sock, remaining
+
+    def __getattr__(self, name):
+        return getattr(self.sock, name)
+
+    def makefile(self, mode, buffering=None):
+        # HTTPResponse uses rb; retain socket.makefile's ownership/reference counting.
+        if mode != "rb":
+            raise ValueError("unexpected guarded socket mode")
+        raw = self.sock.makefile("rb", buffering=0)
+        return io.BufferedReader(_DeadlineReader(raw, self.sock, self.remaining))
+
+
+class _GuardedHTTPSHandler(urllib.request.HTTPSHandler):
+    def __init__(self, remaining):
+        super().__init__()
+        self.remaining = remaining
+
+    def https_open(self, req):
+        remaining = self.remaining
+
+        class Connection(http.client.HTTPSConnection):
+            def connect(self):
+                super().connect()
+                if remaining() <= 0:
+                    self.close()
+                    raise DeadlineExceeded("guarded GET deadline")
+                self.sock.settimeout(remaining())
+                self.sock = _DeadlineSocket(self.sock, remaining)
+
+        return self.do_open(Connection, req, context=self._context)
+
+
+def _guarded_transport(req, remaining, *, status_only):
+    """No redirect or error body. Read at most 2 MiB plus one overflow sentinel.
+
+    DNS resolution and the initial TCP/TLS connect are platform blocking operations;
+    their socket timeout is clamped at entry, but DNS is not interruptible by urllib.
+    Header/body socket receives use the remaining total budget, not a renewed timeout.
+    JSON parsing is subsequent bounded local work, not part of the network deadline.
+    """
+    if urllib.parse.urlsplit(req.full_url).scheme != "https":
+        raise ValueError("guarded GET requires HTTPS")
+    opener = urllib.request.build_opener(_NoRedirect(), _GuardedHTTPSHandler(remaining))
+    try:
+        response = opener.open(req, timeout=remaining())
+    except urllib.error.HTTPError as exc:
+        response = exc
+    with response as fh:
+        status = fh.code
+        if status_only or not 200 <= status < 300:
+            return Response(status, b"", req.full_url, dict(fh.headers))
+        # read1 deliberately does not wait to fill its buffer, but unlike read() it
+        # does not enforce Content-Length completeness itself. Preserve that fence.
+        raw_length = fh.headers.get("Content-Length")
+        expected = None
+        if raw_length is not None:
+            if not raw_length.isascii() or not raw_length.isdigit():
+                raise ValueError("invalid guarded GET content length")
+            expected = int(raw_length)
+            if expected > MAX_GUARDED_BYTES:
+                raise ValueError("guarded GET response too large")
+        body = bytearray()
+        while True:
+            if remaining() <= 0:
+                raise DeadlineExceeded("guarded GET deadline")
+            chunk = fh.read1(min(64 * 1024, MAX_GUARDED_BYTES + 1 - len(body)))
+            if remaining() <= 0:
+                raise DeadlineExceeded("guarded GET deadline")
+            if not chunk:
+                break
+            body.extend(chunk)
+            if len(body) > MAX_GUARDED_BYTES:
+                raise ValueError("guarded GET response too large")
+        if expected is not None and len(body) != expected:
+            raise ValueError("incomplete guarded GET response")
+        return Response(status, bytes(body), req.full_url, dict(fh.headers))
 
 
 def _urllib_transport(req: urllib.request.Request, timeout: float) -> Response:

@@ -29,8 +29,9 @@ class ReadOnlyTest(unittest.TestCase):
     def test_non_get_is_refused(self):
         client = ReadOnlyClient(transport=responder(200))
         for method in ("POST", "PUT", "PATCH", "DELETE", "post"):
-            with self.assertRaises(MethodNotAllowed):
-                client.request(method, "https://example.test/x")
+            for guarded in (False, True):
+                with self.assertRaises(MethodNotAllowed):
+                    client.request(method, "https://example.test/x", guarded=guarded)
 
     def test_get_returns_body(self):
         client = ReadOnlyClient(transport=responder(200))
@@ -104,6 +105,22 @@ class ReadOnlyTest(unittest.TestCase):
         )
         with self.assertRaises(DeadlineExceeded):
             client.get("https://example.test/x")
+
+    def test_guarded_rate_wait_and_socket_budget_share_caller_deadline(self):
+        now = [0.0]
+        waits = []
+        def transport(req, timeout):
+            waits.append(timeout)
+            return Response(200, b"{}", req.full_url)
+        client = ReadOnlyClient(
+            transport=transport, timeout=30, deadline=0.5,
+            host_rate_limits={"example.test": 1}, clock=lambda: now[0],
+            sleep=lambda seconds: now.__setitem__(0, now[0] + seconds))
+        assert client.get("https://example.test/x", guarded=True).ok
+        with self.assertRaises(DeadlineExceeded):
+            client.get("https://example.test/x", guarded=True)
+        assert waits == [0.5]
+        assert now[0] == 0.5
 
     # -- concurrency ---------------------------------------------------------------
 
