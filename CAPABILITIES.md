@@ -37,12 +37,12 @@ other read routes.
   values, and planned log analytics will need log reads outright. The collector does not call a log
   query endpoint: its Loki reads are fixed label and effective-limit routes. That restraint is an
   implementation property enforced by source review, not a credential boundary.
-- **`traces:read` breadth beyond the two tag routes is unverified.** The isolating probe is a
-  throwaway org-realm policy carrying only `traces:read`, followed by a Tempo search and trace fetch
-  over synthetic data, then deletion and a residual-policy check.
-- **`profiles:read` breadth beyond `LabelValues` is unverified.** The isolating probe is a throwaway
-  org-realm policy carrying only `profiles:read`, followed by a Pyroscope profile query over synthetic
-  data, then deletion and a residual-policy check.
+- **`traces:read` permits trace content reads, not just tag inventory.** An isolated stack-realm
+  policy carrying only this scope returned Tempo search results and a nonempty fetched trace. See
+  the route-level observations and realm limits below; the collector still calls only tag routes.
+- **`profiles:read` permits profile content reads, not just label inventory.** An isolated
+  stack-realm policy carrying only this scope returned profile types and a populated merged
+  flamegraph. See the observations below; the collector still calls only `LabelValues`.
 - **`rules:read` reaches rule definitions and firing alert payloads.** The latter include full customer
   label sets. The collector reduces those payloads to bounded counts and never republishes the labels.
 
@@ -97,6 +97,37 @@ config data all remain reachable on the Mimir host with the org token and need n
 so a stack with segments has rules that are not estate-wide and its savings arithmetic must be read
 per segment rather than globally. Both segment routes above were verified 200 with a live segment
 present.
+
+### Scope-isolated trace and profile content reads
+
+On 2026-09-30, a control-organisation probe used one live-inventory stack and two temporary access
+policies. Each policy had exactly one scope (`traces:read` or `profiles:read`), exactly one **stack
+realm**, and no label policies. Signal-specific basic-auth users came from that stack's inventory.
+No raw trace IDs, span content, profile names or flamegraph content are reproduced here.
+
+| Isolated scope | Method and route | Observed result |
+|---|---|---|
+| `traces:read` | GET `/tempo/api/search` with a 24-hour window | HTTP 200 with returned trace IDs |
+| `traces:read` | GET `/tempo/api/traces/<returned-ID>` | HTTP 200 with nonempty trace batches |
+| `profiles:read` | POST `/querier.v1.QuerierService/ProfileTypes` with the same 24-hour window | HTTP 200 with nonempty profile types |
+| `profiles:read` | POST `/querier.v1.QuerierService/SelectMergeStacktraces` with a returned `profileTypeID` and `labelSelector={}` | HTTP 200 with populated flamegraph names and levels, and a positive total |
+
+The Pyroscope POSTs are read-only RPC methods, not profile ingestion or mutation. These are probe
+observations, not new collector calls; the collector's HTTP client and declared scopes are unchanged.
+Both temporary policies were deleted by their recorded object IDs (HTTP 204), then re-read by those
+same IDs (HTTP 404). No preexisting policy was modified or deleted.
+
+**Realm applicability and remaining ambiguity:** the positive content reads above were isolated in
+stack-realm policies, not org-realm policies. The collector grants the same scope names in an org
+realm, so its tag/label-only implementation must not be described as a credential-enforced content
+boundary. However, this probe did not establish these content routes with a single-scope org-realm
+token, across other stacks or regions, or under label policies. It tested no denied-route controls
+and establishes no exhaustive scope boundary. Availability and content coverage outside the tested
+stack remain unverified; a missing result must not be interpreted as permission denial or zero data.
+
+Reference contracts: [Grafana Cloud access policies and tokens](https://grafana.com/docs/grafana/latest/developer-resources/api-reference/cloud-api/#access-policies-and-tokens)
+and [Pyroscope HTTP API](https://grafana.com/docs/pyroscope/latest/reference-server-api/).
+The observations above are from the scope-isolated live probe, not inferred from those documents.
 
 ### The two scopes that reach beyond inventory
 
