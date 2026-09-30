@@ -124,6 +124,8 @@ INPUT_OWNER: dict[str, str] = {
     # the approval path is measured in business days, and their independent availability is retained
     # inside each per-stack record rather than flattened into a structural zero.
     "loki_config": "t2",
+    # SLO definitions and configured burn alerting: minimized counts, never firing instances.
+    "slo_inventory": "t2",
 }
 
 # What each view actually needs, beyond inventory.
@@ -134,6 +136,8 @@ INPUT_OWNER: dict[str, str] = {
 # alternate inputs. `tests/test_hydrate.py::ViewInputsAreDerivedNotAssumed` caps that proof before
 # composing any subsets, so adding inputs cannot turn the gate into an exponential resource failure.
 VIEW_INPUTS: dict[str, frozenset[str]] = {
+    # Derived from the anonymized captured SLO projection in compose_inputs.json.
+    "coverage_slo_inventory": frozenset({"slo_inventory"}),
     # Pillar J. These views need the per-stack usage-insights sweep; none can be computed without it,
     # so they are withheld rather than published as zeros by a tier that did not gather it.
     "insights_dashboard_usage": frozenset({"insights"}),

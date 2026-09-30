@@ -1148,6 +1148,8 @@ class EnvelopePersistenceTest(unittest.TestCase):
             mock.patch.object(scan, "gather_adaptive_traces", return_value=available),
             mock.patch.object(scan, "gather_public_dashboards", return_value=available),
             mock.patch.object(scan, "gather_alert_routing", return_value=available),
+            mock.patch.object(scan, "gather_slo_inventory", return_value=available),
+            mock.patch.object(scan, "slo_reads_enabled", return_value=True),
             mock.patch.object(scan, "gather_signal_inventory", return_value=available),
             mock.patch.object(
                 scan, "gather_capability_adoption",

@@ -1,0 +1,268 @@
+{
+  "slos": [
+    {
+      "uuid": "synthetic-sensitive",
+      "name": "synthetic-sensitive",
+      "destinationDatasource": {
+        "uid": "synthetic-sensitive"
+      },
+      "description": "synthetic-sensitive",
+      "query": {
+        "type": "synthetic-sensitive",
+        "ratio": {
+          "successMetric": {
+            "prometheusMetric": "synthetic-sensitive"
+          },
+          "totalMetric": {
+            "prometheusMetric": "synthetic-sensitive"
+          }
+        }
+      },
+      "objectives": [
+        {
+          "value": 0.99,
+          "window": "synthetic-sensitive"
+        }
+      ],
+      "labels": [
+        {
+          "key": "synthetic-sensitive",
+          "value": "synthetic-sensitive"
+        },
+        {
+          "key": "synthetic-sensitive",
+          "value": "synthetic-sensitive"
+        },
+        {
+          "key": "synthetic-sensitive",
+          "value": "synthetic-sensitive"
+        }
+      ],
+      "alerting": {
+        "fastBurn": {
+          "annotations": [
+            {
+              "key": "synthetic-sensitive",
+              "value": "synthetic-sensitive"
+            },
+            {
+              "key": "synthetic-sensitive",
+              "value": "synthetic-sensitive"
+            }
+          ]
+        },
+        "slowBurn": {
+          "annotations": [
+            {
+              "key": "synthetic-sensitive",
+              "value": "synthetic-sensitive"
+            },
+            {
+              "key": "synthetic-sensitive",
+              "value": "synthetic-sensitive"
+            }
+          ]
+        }
+      },
+      "readOnly": {
+        "status": {
+          "type": "updated"
+        },
+        "drillDownDashboardRef": {
+          "UID": "synthetic-sensitive"
+        },
+        "provenance": "api",
+        "parsesAsRatio": true,
+        "allowedActions": [
+          "synthetic-sensitive"
+        ],
+        "sourceDatasource": {
+          "uid": "synthetic-sensitive",
+          "type": "mimir"
+        },
+        "creationTimestamp": 1780390227000
+      }
+    },
+    {
+      "uuid": "synthetic-sensitive",
+      "name": "synthetic-sensitive",
+      "destinationDatasource": {
+        "uid": "synthetic-sensitive"
+      },
+      "description": "synthetic-sensitive",
+      "query": {
+        "type": "synthetic-sensitive",
+        "ratio": {
+          "groupByLabels": [
+            "synthetic-sensitive"
+          ],
+          "successMetric": {
+            "prometheusMetric": "synthetic-sensitive"
+          },
+          "totalMetric": {
+            "prometheusMetric": "synthetic-sensitive"
+          }
+        }
+      },
+      "objectives": [
+        {
+          "value": 0.99,
+          "window": "synthetic-sensitive"
+        }
+      ],
+      "labels": [
+        {
+          "key": "synthetic-sensitive",
+          "value": "synthetic-sensitive"
+        },
+        {
+          "key": "synthetic-sensitive",
+          "value": "synthetic-sensitive"
+        },
+        {
+          "key": "synthetic-sensitive",
+          "value": "synthetic-sensitive"
+        },
+        {
+          "key": "synthetic-sensitive",
+          "value": "synthetic-sensitive"
+        }
+      ],
+      "alerting": {
+        "fastBurn": {
+          "annotations": [
+            {
+              "key": "synthetic-sensitive",
+              "value": "synthetic-sensitive"
+            },
+            {
+              "key": "synthetic-sensitive",
+              "value": "synthetic-sensitive"
+            }
+          ]
+        },
+        "slowBurn": {
+          "annotations": [
+            {
+              "key": "synthetic-sensitive",
+              "value": "synthetic-sensitive"
+            },
+            {
+              "key": "synthetic-sensitive",
+              "value": "synthetic-sensitive"
+            }
+          ]
+        }
+      },
+      "readOnly": {
+        "status": {
+          "type": "created"
+        },
+        "drillDownDashboardRef": {
+          "UID": "synthetic-sensitive"
+        },
+        "provenance": "api",
+        "parsesAsRatio": true,
+        "allowedActions": [
+          "synthetic-sensitive"
+        ],
+        "sourceDatasource": {
+          "uid": "synthetic-sensitive",
+          "type": "mimir"
+        },
+        "creationTimestamp": 1787053598000
+      }
+    },
+    {
+      "uuid": "synthetic-sensitive",
+      "name": "synthetic-sensitive",
+      "destinationDatasource": {
+        "uid": "synthetic-sensitive"
+      },
+      "description": "synthetic-sensitive",
+      "query": {
+        "type": "synthetic-sensitive",
+        "failureRatio": {
+          "groupByLabels": [
+            "synthetic-sensitive",
+            "synthetic-sensitive",
+            "synthetic-sensitive"
+          ],
+          "failureMetric": {
+            "prometheusMetric": "synthetic-sensitive",
+            "type": "synthetic-sensitive"
+          },
+          "totalMetric": {
+            "prometheusMetric": "synthetic-sensitive",
+            "type": "synthetic-sensitive"
+          }
+        }
+      },
+      "objectives": [
+        {
+          "value": 0.99,
+          "window": "synthetic-sensitive"
+        }
+      ],
+      "labels": [
+        {
+          "key": "synthetic-sensitive",
+          "value": "synthetic-sensitive"
+        },
+        {
+          "key": "synthetic-sensitive",
+          "value": "synthetic-sensitive"
+        },
+        {
+          "key": "synthetic-sensitive",
+          "value": "synthetic-sensitive"
+        }
+      ],
+      "searchExpression": "synthetic-sensitive",
+      "alerting": {
+        "fastBurn": {
+          "annotations": [
+            {
+              "key": "synthetic-sensitive",
+              "value": "synthetic-sensitive"
+            },
+            {
+              "key": "synthetic-sensitive",
+              "value": "synthetic-sensitive"
+            }
+          ]
+        },
+        "slowBurn": {
+          "annotations": [
+            {
+              "key": "synthetic-sensitive",
+              "value": "synthetic-sensitive"
+            },
+            {
+              "key": "synthetic-sensitive",
+              "value": "synthetic-sensitive"
+            }
+          ]
+        }
+      },
+      "readOnly": {
+        "status": {
+          "type": "created"
+        },
+        "drillDownDashboardRef": {
+          "UID": "synthetic-sensitive"
+        },
+        "provenance": "asserts",
+        "parsesAsRatio": true,
+        "allowedActions": [
+          "synthetic-sensitive"
+        ],
+        "sourceDatasource": {
+          "uid": "synthetic-sensitive",
+          "type": "mimir"
+        },
+        "creationTimestamp": 1753947469000
+      }
+    }
+  ]
+}

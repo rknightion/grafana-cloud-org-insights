@@ -502,6 +502,8 @@ class T2SourceHealthTest(unittest.TestCase):
             mock.patch.object(scan, "gather_adaptive_traces", return_value=unavailable),
             mock.patch.object(scan, "gather_public_dashboards", return_value=unavailable),
             mock.patch.object(scan, "gather_alert_routing", return_value=unavailable),
+            mock.patch.object(scan, "gather_slo_inventory", return_value=unavailable),
+            mock.patch.object(scan, "slo_reads_enabled", return_value=True),
             mock.patch.object(scan, "gather_signal_inventory", return_value=unavailable),
             mock.patch.object(scan, "gather_capability_adoption", return_value=unavailable),
             mock.patch.object(scan, "gather_loki_config", return_value=unavailable),
@@ -521,7 +523,7 @@ class T2SourceHealthTest(unittest.TestCase):
             {"service_accounts", "assistant", "insights", "adaptive_logs", "adaptive_traces", "public_dashboards",
              "alert_routing", "dashboard_inventory", "datasource_query_cost", "signal_inventory",
              "capability_adoption", "loki_config_limits",
-             "loki_config_change_requests"},
+             "loki_config_change_requests", "slo_inventory"},
         )
         for name in result["meta"]["source_failures"]:
             with self.subTest(source=name):
@@ -633,6 +635,8 @@ class T2SourceHealthTest(unittest.TestCase):
             mock.patch.object(scan, "gather_adaptive_logs", return_value=(healthy, [])),
             mock.patch.object(scan, "gather_public_dashboards", return_value=(healthy, [])),
             mock.patch.object(scan, "gather_alert_routing", return_value=(healthy, [])),
+            mock.patch.object(scan, "gather_slo_inventory", return_value=(healthy, [])),
+            mock.patch.object(scan, "slo_reads_enabled", return_value=True),
             mock.patch.object(scan, "gather_signal_inventory", return_value=(healthy, [])),
             mock.patch.object(
                 scan, "gather_capability_adoption",
@@ -916,6 +920,8 @@ class RateCardLoadingTest(unittest.TestCase):
             mock.patch.object(scan, "gather_adaptive_logs", return_value=available),
             mock.patch.object(scan, "gather_public_dashboards", return_value=available),
             mock.patch.object(scan, "gather_alert_routing", return_value=available),
+            mock.patch.object(scan, "gather_slo_inventory", return_value=available),
+            mock.patch.object(scan, "slo_reads_enabled", return_value=True),
             mock.patch.object(scan, "gather_signal_inventory", return_value=available),
             mock.patch.object(
                 scan, "gather_capability_adoption",

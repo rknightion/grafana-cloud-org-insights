@@ -31,6 +31,7 @@ from collector import ratecard as ratecard_model
 from collector.dashboards import build
 from collector.dashboards.retention_panels import retention_panels
 from collector.pillars import adaptive_traces as adaptive_traces_pillar
+from collector.pillars import slo as slo_pillar
 from collector.pillars import (
     ai as ai_pillar,
     coverage as coverage_pillar,
@@ -3601,6 +3602,14 @@ def d_coverage(ds: str):
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.ADOPTION_TARGET_VIEW],
             description="Stacks showing no use inside the stated capability population, ranked by "
                         "active series so the largest existing telemetry footprints lead the queue."),
+        "tbl_slo_inventory": build.table_panel(
+            "SLO definitions, configured alerting and source",
+            slo_pillar.VIEW, ds, schema=slo_pillar.SCHEMA,
+            description="Count of definitions, not generated SLI series. Configured alerting counts "
+                        "definitions with fast or slow burn configuration, not firing instances. "
+                        "Knowledge graph is explicit asserts provenance; metrics requires a known "
+                        "source datasource type. API provenance alone remains unknown. Unreadable "
+                        "stacks are omitted, never presented as zero."),
         "tbl_producing_signals": build.table_panel(
             "Backend producing signals by stack",
             producing_signals_pillar.VIEW, ds,
@@ -3836,6 +3845,10 @@ def d_coverage(ds: str):
             build.row("Identity evidence", ["n_legacy", "b_identity"], max_columns=2),
             build.row("Where the assets sit", ["b_stack_services", "b_stack_technologies",
                                                 "b_stack_clusters"], max_columns=3),
+        ]),
+        build.rows_tab("SLO inventory", [
+            build.row("Definitions and configured alerting", ["tbl_slo_inventory"],
+                      max_columns=1, row_height="tall"),
         ]),
         build.rows_tab("Adoption opportunities", [
             build.row("Documented backend production", ["tbl_producing_signals"],

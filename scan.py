@@ -30,10 +30,12 @@ from collector.httpclient import ReadOnlyClient
 from collector.resolver import InstanceResolver
 from collector.pillars import ai as ai_pillar, compose, findings as findings_mod
 from collector import credentials
+from collector.provision import PRODUCT_READS_ENV, parse_product_reads
 from collector.sources import adaptive_logs as adaptive_logs_src
 from collector.sources import adaptive_traces as adaptive_traces_src
 from collector.sources import alert_routing as alert_routing_src
 from collector.sources import public_dashboards as public_dashboards_src
+from collector.sources import slo as slo_src
 from collector.sources import stack_catalog
 from collector.sources import assistant as assistant_src
 from collector.sources import fleet as fleet_src
@@ -512,6 +514,31 @@ def gather_insights(
     return data, errors
 
 
+def slo_reads_enabled() -> bool:
+    """The provisioner's existing default-off policy defines SLO read eligibility."""
+    return "slo" in parse_product_reads(os.environ.get(PRODUCT_READS_ENV))
+
+
+def gather_slo_inventory(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[str]]:
+    """Daily count-only SLO definition inventory using the existing approved reader."""
+    if not slo_reads_enabled():
+        return {}, []
+    errors: list[str] = []
+    try:
+        creds = credentials.load_all()
+    except credentials.StoreUnavailable:
+        return {}, ["slo_inventory: credential_store_unavailable"]
+    data = slo_src.probe_all(
+        client, stacks, creds, concurrency=cfg.concurrency,
+        on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
+    )
+    measured = sum(bool(record.get("available")) for record in data.values())
+    console_log("warn" if errors else "info", f"SLO inventory: {measured}/{len(data)} stacks read")
+    return data, errors
+
+
 def gather_signal_inventory(
     client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], list[str]]:
@@ -902,6 +929,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     errors += pubdash_errors
     alert_routing, alert_routing_errors = gather_alert_routing(client, cfg, selected)
     errors += alert_routing_errors
+    slo_inventory, slo_inventory_errors = gather_slo_inventory(client, cfg, selected)
+    errors += slo_inventory_errors
     signal_inventory, signal_inventory_errors = gather_signal_inventory(client, cfg, selected)
     errors += signal_inventory_errors
     capability_adoption, capability_adoption_errors = gather_capability_adoption(
@@ -928,6 +957,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "adaptive_traces": adaptive_traces,
         "public_dashboards": pubdash,
         "alert_routing": alert_routing,
+        "slo_inventory": slo_inventory,
         "signal_inventory": signal_inventory,
         "capability_adoption": capability_adoption,
         "loki_config": loki_config,
@@ -973,6 +1003,11 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "alert_routing": source_report(
             expected, alert_routing, available=lambda r: bool(r.get("available")),
             errors=alert_routing_errors,
+        ),
+        "slo_inventory": source_report(
+            expected if slo_reads_enabled() else 0,
+            slo_inventory, available=lambda r: bool(r.get("available")),
+            errors=slo_inventory_errors,
         ),
         "signal_inventory": source_report(
             expected, signal_inventory, available=lambda r: bool(r.get("available")),

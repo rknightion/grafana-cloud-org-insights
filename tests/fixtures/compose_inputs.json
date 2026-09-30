@@ -32671,5 +32671,27 @@
    "recommendation_count": 5,
    "pending_recommendation_count": 0
   }
+ },
+ "slo_inventory": {
+  "stack158": {
+   "available": true,
+   "count": 3,
+   "configured_alerting_count": 3,
+   "provenance_counts": {
+    "api": 2,
+    "asserts": 1,
+    "unknown": 0
+   },
+   "status_counts": {
+    "created": 2,
+    "updated": 1,
+    "unknown": 0
+   },
+   "source_counts": {
+    "metrics": 2,
+    "knowledge_graph": 1,
+    "unknown": 0
+   }
+  }
  }
 }
