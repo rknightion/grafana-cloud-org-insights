@@ -112,6 +112,13 @@ deployment and its write stack as the serial resource described under Resource m
 
 ## Verified loop3 operational lessons
 
+- The loop3 burn-fast home dispatches each lane as its own async subagent, never a workflow; keep
+  the goal's frozen model/authority routes and one writer per worktree. It does not waive attempt,
+  review, privacy or task-surface gates.
+- Use `just plan-out` to save a reviewed plan and `just apply-plan-auto` to apply that same plan,
+  never an implicit replan. Temporary dev schedule suspension must be restored to the saved states;
+  verify them live and finish with a no-change plan. This recipe is not broader customer authority.
+
 - Raw label-risk matches need the dedicated current-object expiry under the reserved full-filename
   prefix `views/risk_label_hygiene.json`, in addition to scan and noncurrent-version expiry. Verify
   the actual bucket policy, versioning, encryption, public/TLS controls and effective view/task IAM
