@@ -507,6 +507,7 @@ class T2SourceHealthTest(unittest.TestCase):
             mock.patch.object(scan, "gather_signal_inventory", return_value=unavailable),
             mock.patch.object(scan, "gather_capability_adoption", return_value=unavailable),
             mock.patch.object(scan, "gather_loki_config", return_value=unavailable),
+            mock.patch.object(scan.label_risk_src, "probe_all", return_value={}),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=hydrate_own),
             mock.patch.object(scan.compose, "build_all", return_value=([], {})),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
@@ -522,7 +523,7 @@ class T2SourceHealthTest(unittest.TestCase):
             set(result["meta"]["source_failures"]),
             {"service_accounts", "assistant", "insights", "adaptive_logs", "adaptive_traces", "public_dashboards",
              "alert_routing", "dashboard_inventory", "datasource_query_cost", "signal_inventory",
-             "capability_adoption", "loki_config_limits",
+             "capability_adoption", "label_risk", "loki_config_limits",
              "loki_config_change_requests", "slo_inventory"},
         )
         for name in result["meta"]["source_failures"]:
@@ -643,6 +644,7 @@ class T2SourceHealthTest(unittest.TestCase):
                 return_value=({"available": True, "values": {}}, []),
             ),
             mock.patch.object(scan, "gather_loki_config", return_value=(loki_healthy, [])),
+            mock.patch.object(scan.label_risk_src, "probe_all", return_value=healthy),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=local_hydrate),
             mock.patch.object(scan.compose, "build_all", side_effect=compose),
             mock.patch.object(scan, "assistant_gaps", return_value={}) as assistant_gaps,
@@ -928,6 +930,7 @@ class RateCardLoadingTest(unittest.TestCase):
                 return_value=({"available": True, "values": {}}, []),
             ),
             mock.patch.object(scan, "gather_loki_config", return_value=loki_available),
+            mock.patch.object(scan.label_risk_src, "probe_all", return_value=available[0]),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=lambda _t, own, **_kw: (own, hydrate.Provenance())),
             mock.patch.object(scan.compose, "build_all", side_effect=compose),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
@@ -938,6 +941,8 @@ class RateCardLoadingTest(unittest.TestCase):
         self.assertIs(seen.get("ratecard"), card)
         self.assertIs(seen.get("signal_inventory"), available[0])
         self.assertIs(seen.get("loki_config"), loki_available[0])
+        self.assertIs(seen.get("label_risk"), available[0])
+        self.assertIs(result["data"].get("label_risk"), available[0])
         self.assertIs(result["data"].get("signal_inventory"), available[0])
 
     def test_a_malformed_present_card_is_an_honest_configuration_error(self):

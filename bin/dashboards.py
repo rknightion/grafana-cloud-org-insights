@@ -43,6 +43,7 @@ from collector.pillars import (
     producing_signals as producing_signals_pillar,
     retention as retention_pillar,
     risk as risk_pillar,
+    label_risk as label_risk_pillar,
     usage as usage_pillar,
 )
 from collector.sources import assistant as assistant_src
@@ -2322,6 +2323,23 @@ def d_risk(ds: str):
                         "with its owner.",
         )
 
+    label_hygiene_rows = []
+    if _published_views_exist("risk_label_hygiene", "risk_label_hygiene_coverage"):
+        for view in ("risk_label_hygiene_coverage", "risk_label_hygiene"):
+            el[view] = build.table_panel(
+                "Bounded label risk coverage" if view.endswith("coverage") else "Classified label risk",
+                view, ds, schema=label_risk_pillar.VIEW_SCHEMAS[view],
+                description="Daily bounded label API sample, not an exhaustive privacy audit. "
+                            "Unknown server completeness and all caps remain partial; missing reads "
+                            "are not clean. Confidence describes format or key context, not proof of "
+                            "personal data or a valid secret. Full classified matches are retained "
+                            "only in this approved S3 view and private scan hydration, not Loki or "
+                            "metrics. Report only. Treat this table as sensitive clear-value data.",
+            )
+            label_hygiene_rows.append(build.row(
+                "Measured population and limits" if view.endswith("coverage") else "Risk detail",
+                [view], max_columns=1, row_height="tall"))
+
     collector_rows = [
         build.row("The fleet that exists",
                   ["n_coll_active", "n_coll_inactive", "n_coll_inactive_share", "n_coll"],
@@ -2446,6 +2464,7 @@ def d_risk(ds: str):
         ]),
         build.rows_tab("Access", access_rows),
         build.rows_tab("Label cardinality", label_cardinality_rows),
+        *([build.rows_tab("Label privacy risk", label_hygiene_rows)] if label_hygiene_rows else []),
         build.rows_tab("Credentials", [
             build.row("Headline", ["n_sa_custom", "n_sa_extsvc"],
                       max_columns=2, row_height="short"),

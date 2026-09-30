@@ -32,6 +32,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Iterable, Mapping, Sequence
 
+from collector.pillars.label_risk import S3_ONLY_VIEWS
+
 # Views carry the stack under a LEADING-SPACE key. That is deliberate upstream: Infinity's backend parser
 # orders columns alphabetically, and the space forces the stack column to sort first. It also means a
 # naive `row["Stack"]` silently finds nothing.
@@ -234,6 +236,10 @@ def derive(views: Mapping[str, Any]) -> tuple[list[dict[str, Any]], dict[str, in
     totals: dict[str, int] = {}
 
     for spec in SPECS:
+        # Privacy fence: even an accidentally added spec cannot republish raw label matches to Loki
+        # or add a business metric. These views have only the approved S3 audience.
+        if spec.view in S3_ONLY_VIEWS:
+            continue
         if spec.view not in views:
             # The tier that ran cannot compute this. Say nothing at all about it.
             continue

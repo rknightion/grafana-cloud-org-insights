@@ -1,0 +1,307 @@
+{
+  "meta": {
+    "generated_at": "2026-09-30T13:17:57.981886+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_traces": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "slo_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_risk": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "obs-hub",
+      "Signal": "metrics",
+      "Scope": "",
+      "Label name": "user_email",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "key_context",
+      "Sampled values": null,
+      "Matched values": null,
+      "Retained values": 0,
+      "Raw matched values": "[]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    },
+    {
+      " Stack": "obs-hub",
+      "Signal": "metrics",
+      "Scope": "",
+      "Label name": "user_email",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "value_format",
+      "Sampled values": 2,
+      "Matched values": 1,
+      "Retained values": 1,
+      "Raw matched values": "[\"reader@example.test\"]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    },
+    {
+      " Stack": "obs-hub",
+      "Signal": "metrics",
+      "Scope": "",
+      "Label name": "service_name",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "value_format",
+      "Sampled values": 2,
+      "Matched values": 1,
+      "Retained values": 1,
+      "Raw matched values": "[\"reader@example.test\"]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    },
+    {
+      " Stack": "obs-hub",
+      "Signal": "logs",
+      "Scope": "",
+      "Label name": "user_email",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "key_context",
+      "Sampled values": null,
+      "Matched values": null,
+      "Retained values": 0,
+      "Raw matched values": "[]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    },
+    {
+      " Stack": "obs-hub",
+      "Signal": "logs",
+      "Scope": "",
+      "Label name": "user_email",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "value_format",
+      "Sampled values": 2,
+      "Matched values": 1,
+      "Retained values": 1,
+      "Raw matched values": "[\"reader@example.test\"]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    },
+    {
+      " Stack": "obs-hub",
+      "Signal": "logs",
+      "Scope": "",
+      "Label name": "service_name",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "value_format",
+      "Sampled values": 2,
+      "Matched values": 1,
+      "Retained values": 1,
+      "Raw matched values": "[\"reader@example.test\"]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    },
+    {
+      " Stack": "obs-hub",
+      "Signal": "traces",
+      "Scope": "resource",
+      "Label name": "user_email",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "key_context",
+      "Sampled values": null,
+      "Matched values": null,
+      "Retained values": 0,
+      "Raw matched values": "[]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    },
+    {
+      " Stack": "obs-hub",
+      "Signal": "traces",
+      "Scope": "resource",
+      "Label name": "user_email",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "value_format",
+      "Sampled values": 2,
+      "Matched values": 1,
+      "Retained values": 1,
+      "Raw matched values": "[\"reader@example.test\"]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    },
+    {
+      " Stack": "obs-hub",
+      "Signal": "traces",
+      "Scope": "span",
+      "Label name": "user_email",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "key_context",
+      "Sampled values": null,
+      "Matched values": null,
+      "Retained values": 0,
+      "Raw matched values": "[]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    },
+    {
+      " Stack": "obs-hub",
+      "Signal": "traces",
+      "Scope": "span",
+      "Label name": "user_email",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "value_format",
+      "Sampled values": 2,
+      "Matched values": 1,
+      "Retained values": 1,
+      "Raw matched values": "[\"reader@example.test\"]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    },
+    {
+      " Stack": "obs-hub",
+      "Signal": "profiles",
+      "Scope": "",
+      "Label name": "user_email",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "key_context",
+      "Sampled values": null,
+      "Matched values": null,
+      "Retained values": 0,
+      "Raw matched values": "[]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    },
+    {
+      " Stack": "obs-hub",
+      "Signal": "profiles",
+      "Scope": "",
+      "Label name": "user_email",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "value_format",
+      "Sampled values": 2,
+      "Matched values": 1,
+      "Retained values": 1,
+      "Raw matched values": "[\"reader@example.test\"]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    },
+    {
+      " Stack": "obs-hub",
+      "Signal": "profiles",
+      "Scope": "",
+      "Label name": "otel.scope.name",
+      "Class": "email",
+      "Confidence": "high",
+      "Evidence": "value_format",
+      "Sampled values": 2,
+      "Matched values": 1,
+      "Retained values": 1,
+      "Raw matched values": "[\"reader@example.test\"]",
+      "Coverage": "partial",
+      "Pattern version": "1.0.0",
+      "Window start (s)": 1790683200,
+      "Window end (s)": 1790769600
+    }
+  ]
+}

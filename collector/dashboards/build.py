@@ -919,7 +919,7 @@ DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     "cost": ("adaptive_logs", "dataplane"),
     "usage": ("stack_detail",),
     "maturity": ("dataplane", "stack_detail"),
-    "risk": ("access_policies", "alert_routing", "dataplane", "fleet", "loki_config",
+    "risk": ("access_policies", "alert_routing", "dataplane", "fleet", "label_risk", "loki_config",
              "org_members", "public_dashboards", "service_accounts", "stack_detail"),
     "value": ("dataplane",),
     # Operations and Commercial read `grafanacloud-usage` DIRECTLY - no collector, no view, no input.
@@ -1037,6 +1037,7 @@ def banner_elements(dashboard: str = "estate") -> dict[str, Any]:
 
 
 INPUT_LABELS = {
+    "label_risk": "Bounded label privacy sample",
     "dataplane": "Data plane",
     "stack_detail": "Per-stack detail",
     "access_policies": "Access policies",
@@ -1057,6 +1058,9 @@ INPUT_LABELS = {
 }
 
 INPUT_DESCRIPTIONS = {
+    "label_risk": "Age of the daily bounded four-signal label privacy sample. This measures when "
+                  "the input was gathered, not exhaustive backend coverage. Partial and unavailable "
+                  "signal populations and sampling limits are shown in the S3 risk coverage table.",
     "dataplane": "Age of the data-plane sweep these figures were computed from - cardinality, Adaptive "
                  "Metrics recommendations and Fleet Management. Gathered every 6 hours, so this reads "
                  "up to 6 hours even when everything is healthy. Past the staleness cap the panels "

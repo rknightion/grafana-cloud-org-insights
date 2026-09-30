@@ -601,3 +601,20 @@ the collector already uses for cardinality: `<per-signal instance id>:<CAP>`, th
 - **A view can legitimately be a whole table rather than a finding set.** A table of 4,964 rows with a
  `Flag` column marking the two that matter is not 4,964 findings. Filter deliberately, and do not
  filter twice.
+
+## Bounded label risk source
+
+The 2026-09-30 owner decision supersedes the older key-only/unpublishable-values instruction
+above for this one source: classify values in process, retain full classified matches only in the
+approved S3 risk view and private scan hydration. Do not republish them through generic Loki
+findings, error diagnostics or stdout. Latest views overwrite normally; private scans retain
+the existing 90-day lifecycle. Deployment access, encryption and retention controls are a
+separate prerequisite, not proof supplied by a cardinality guard.
+
+Native Pyroscope LabelNames AND LabelValues use `names` arrays; a successful `{}` is empty.
+Send `application/json; allow-utf8-labelnames=true` in Accept or non-legacy key names can
+silently disappear. Both request timestamps are integer milliseconds. Only those two POST
+paths are allowed; GET-only transport and other RPC helpers are unchanged. Loki and native
+Pyroscope ignore the guessed `limit` field. Mimir warnings mark truncation. Tempo intrinsics
+are virtual vocabulary and must not count as measured attributes; preserve resource/span scope.
+Unknown server completeness stays partial even for an empty successful result.

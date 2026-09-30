@@ -1,0 +1,14 @@
+{
+  "_provenance": "Anonymised response envelopes from D1b label-probes.json, label-limits-windows.json, pyroscope-probes.json and pyroscope-boundary-probes.json (2026-09-30). Shapes and null/empty/warnings semantics preserved; keys/values below replaced with synthetic risk examples, not claims of observed PII.",
+  "metrics_names": {"status": "success", "data": ["user_email", "service_name"]},
+  "metrics_values": {"status": "success", "data": ["reader@example.test", "orders"]},
+  "metrics_truncated": {"status": "success", "data": ["user_email"], "warnings": ["results truncated due to limit"]},
+  "logs_names": {"status": "success", "data": ["user_email", "service_name"]},
+  "logs_values": {"status": "success", "data": ["reader@example.test", "orders"]},
+  "logs_empty": {"status": "success", "data": null},
+  "traces_names": {"scopes": [{"name": "intrinsic", "tags": ["name", "status"]}, {"name": "resource", "tags": ["user_email"]}, {"name": "span", "tags": ["user_email"]}], "metrics": {"inspectedBytes": 1000}},
+  "traces_values": {"tagValues": [{"type": "string", "value": "reader@example.test"}, {"type": "string", "value": "orders"}], "metrics": {"inspectedBytes": 1000}},
+  "profiles_names": {"names": ["user_email", "otel.scope.name"]},
+  "profiles_values": {"names": ["reader@example.test", "orders"]},
+  "profiles_empty": {}
+}

@@ -1151,6 +1151,7 @@ class EnvelopePersistenceTest(unittest.TestCase):
             mock.patch.object(scan, "gather_slo_inventory", return_value=available),
             mock.patch.object(scan, "slo_reads_enabled", return_value=True),
             mock.patch.object(scan, "gather_signal_inventory", return_value=available),
+            mock.patch.object(scan.label_risk_src, "probe_all", return_value=available[0]),
             mock.patch.object(
                 scan, "gather_capability_adoption",
                 return_value=({"available": True, "values": {}}, []),

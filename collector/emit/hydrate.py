@@ -126,6 +126,8 @@ INPUT_OWNER: dict[str, str] = {
     "loki_config": "t2",
     # SLO definitions and configured burn alerting: minimized counts, never firing instances.
     "slo_inventory": "t2",
+    # Bounded classified label matches. Clear values stay in this private input and S3-only risk views.
+    "label_risk": "t2",
 }
 
 # What each view actually needs, beyond inventory.
@@ -138,6 +140,8 @@ INPUT_OWNER: dict[str, str] = {
 VIEW_INPUTS: dict[str, frozenset[str]] = {
     # Derived from the anonymized captured SLO projection in compose_inputs.json.
     "coverage_slo_inventory": frozenset({"slo_inventory"}),
+    "risk_label_hygiene": frozenset({"label_risk"}),
+    "risk_label_hygiene_coverage": frozenset({"label_risk"}),
     # Pillar J. These views need the per-stack usage-insights sweep; none can be computed without it,
     # so they are withheld rather than published as zeros by a tier that did not gather it.
     "insights_dashboard_usage": frozenset({"insights"}),

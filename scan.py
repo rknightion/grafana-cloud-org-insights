@@ -40,6 +40,8 @@ from collector.sources import stack_catalog
 from collector.sources import assistant as assistant_src
 from collector.sources import fleet as fleet_src
 from collector.sources import serviceaccounts as sa_src
+from collector.sources import label_risk as label_risk_src
+from collector.pillars import label_risk as label_risk_pillar
 from collector.sources import loki_config as loki_config_src
 from collector.sources import signal_inventory as signal_inventory_src
 from collector.sources import capability_adoption as capability_adoption_src
@@ -905,6 +907,10 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
 
     selected = [s for s in stacks if str(s["slug"]) in set(slugs)]
     coverage = Coverage(tier=cfg.tier, total=len(selected))
+    # Reserve the bounded privacy sample before slower daily gatherers can consume the tier deadline.
+    # The source spends at most a quarter of remaining time (and at most 15 minutes), leaving the
+    # existing daily inputs their budget. Exhausted/partial reads are explicit, never a clean audit.
+    label_risk = label_risk_src.probe_all(client, selected, cfg.cap, concurrency=cfg.concurrency)
     errors: list[str] = []
     detail = gcom.fetch_all_stack_detail(
         client, cfg, selected, coverage, on_error=lambda slug, msg: errors.append(f"{slug}: {msg}")
@@ -961,8 +967,10 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "signal_inventory": signal_inventory,
         "capability_adoption": capability_adoption,
         "loki_config": loki_config,
+        "label_risk": label_risk,
     }
     sources = {
+        "label_risk": source_report(expected, label_risk, available=lambda r: bool(r.get("available"))),
         "stack_detail": source_report(expected, detail, available=lambda _r: True),
         "service_accounts": source_report(
             expected, service_accounts, available=lambda r: r.get("state") == sa_src.OK,
@@ -1382,7 +1390,7 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
         console_log("info", f"  {uri}")
 
     if args.out:
-        payload = json.dumps(scan, indent=2, default=str)
+        payload = json.dumps(label_risk_pillar.diagnostic_scan(scan), indent=2, default=str)
         with open(args.out, "w") as fh:
             fh.write(payload)
         console_log("info", f"wrote {args.out} ({len(payload):,} bytes)")

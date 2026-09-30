@@ -32693,5 +32693,261 @@
     "unknown": 0
    }
   }
+ },
+ "label_risk": {
+ "obs-hub": {
+  "available": true,
+  "window_start": 1790683200,
+  "window_end": 1790769600,
+  "pattern_version": "1.0.0",
+  "bounds": {
+   "keys": 64,
+   "values": 256,
+   "matches": 64,
+   "response_bytes": 2097152,
+   "retained_bytes": 2097152
+  },
+  "signals": {
+   "metrics": {
+    "state": "partial",
+    "reason": "unknown_server_completeness",
+    "keys_returned": 2,
+    "keys_selected": 2,
+    "keys_sampled": 2,
+    "values_sampled": 4,
+    "value_reads_failed": 0,
+    "value_failure_reasons": {},
+    "server_cap": false,
+    "local_key_cap": false,
+    "local_value_cap": false
+   },
+   "logs": {
+    "state": "partial",
+    "reason": "unknown_server_completeness",
+    "keys_returned": 2,
+    "keys_selected": 2,
+    "keys_sampled": 2,
+    "values_sampled": 4,
+    "value_reads_failed": 0,
+    "value_failure_reasons": {},
+    "server_cap": false,
+    "local_key_cap": false,
+    "local_value_cap": false
+   },
+   "traces": {
+    "state": "partial",
+    "reason": "unknown_server_completeness",
+    "keys_returned": 2,
+    "keys_selected": 2,
+    "keys_sampled": 2,
+    "values_sampled": 4,
+    "value_reads_failed": 0,
+    "value_failure_reasons": {},
+    "server_cap": false,
+    "local_key_cap": false,
+    "local_value_cap": false
+   },
+   "profiles": {
+    "state": "partial",
+    "reason": "unknown_server_completeness",
+    "keys_returned": 2,
+    "keys_selected": 2,
+    "keys_sampled": 2,
+    "values_sampled": 4,
+    "value_reads_failed": 0,
+    "value_failure_reasons": {},
+    "server_cap": false,
+    "local_key_cap": false,
+    "local_value_cap": false
+   }
+  },
+  "findings": [
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "metrics",
+    "scope": "",
+    "key": "user_email",
+    "evidence": "key_context",
+    "sampled_count": null,
+    "matched_count": null,
+    "values": [],
+    "retained_count": 0
+   },
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "metrics",
+    "scope": "",
+    "key": "user_email",
+    "evidence": "value_format",
+    "sampled_count": 2,
+    "matched_count": 1,
+    "values": [
+     "reader@example.test"
+    ],
+    "retained_count": 1
+   },
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "metrics",
+    "scope": "",
+    "key": "service_name",
+    "evidence": "value_format",
+    "sampled_count": 2,
+    "matched_count": 1,
+    "values": [
+     "reader@example.test"
+    ],
+    "retained_count": 1
+   },
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "logs",
+    "scope": "",
+    "key": "user_email",
+    "evidence": "key_context",
+    "sampled_count": null,
+    "matched_count": null,
+    "values": [],
+    "retained_count": 0
+   },
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "logs",
+    "scope": "",
+    "key": "user_email",
+    "evidence": "value_format",
+    "sampled_count": 2,
+    "matched_count": 1,
+    "values": [
+     "reader@example.test"
+    ],
+    "retained_count": 1
+   },
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "logs",
+    "scope": "",
+    "key": "service_name",
+    "evidence": "value_format",
+    "sampled_count": 2,
+    "matched_count": 1,
+    "values": [
+     "reader@example.test"
+    ],
+    "retained_count": 1
+   },
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "traces",
+    "scope": "resource",
+    "key": "user_email",
+    "evidence": "key_context",
+    "sampled_count": null,
+    "matched_count": null,
+    "values": [],
+    "retained_count": 0
+   },
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "traces",
+    "scope": "resource",
+    "key": "user_email",
+    "evidence": "value_format",
+    "sampled_count": 2,
+    "matched_count": 1,
+    "values": [
+     "reader@example.test"
+    ],
+    "retained_count": 1
+   },
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "traces",
+    "scope": "span",
+    "key": "user_email",
+    "evidence": "key_context",
+    "sampled_count": null,
+    "matched_count": null,
+    "values": [],
+    "retained_count": 0
+   },
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "traces",
+    "scope": "span",
+    "key": "user_email",
+    "evidence": "value_format",
+    "sampled_count": 2,
+    "matched_count": 1,
+    "values": [
+     "reader@example.test"
+    ],
+    "retained_count": 1
+   },
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "profiles",
+    "scope": "",
+    "key": "user_email",
+    "evidence": "key_context",
+    "sampled_count": null,
+    "matched_count": null,
+    "values": [],
+    "retained_count": 0
+   },
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "profiles",
+    "scope": "",
+    "key": "user_email",
+    "evidence": "value_format",
+    "sampled_count": 2,
+    "matched_count": 1,
+    "values": [
+     "reader@example.test"
+    ],
+    "retained_count": 1
+   },
+   {
+    "class": "email",
+    "confidence": "high",
+    "pattern_version": "1.0.0",
+    "signal": "profiles",
+    "scope": "",
+    "key": "otel.scope.name",
+    "evidence": "value_format",
+    "sampled_count": 2,
+    "matched_count": 1,
+    "values": [
+     "reader@example.test"
+    ],
+    "retained_count": 1
+   }
+  ]
  }
+}
 }

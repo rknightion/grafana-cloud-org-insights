@@ -141,3 +141,13 @@ class of bug that looks like working code:
   hand-edited.
 - `terraform/README.md` - read before changing the module or ordering a first deployment.
 - `LOOP.md` - read at loop preparation: gates, release rules, environments and credential conventions, standing route exceptions, traps, cross-harness eligibility, resource mutexes and Grafana stacks for this repository's loops.
+
+## Bounded daily label privacy risk (GCI-0018)
+
+`collector/sources/label_risk.py` alone may POST the native Pyroscope
+`/querier.v1.QuerierService/LabelNames` and `/querier.v1.QuerierService/LabelValues`
+read RPCs on each live inventory `hpInstanceUrl`, with `hpInstanceId`. No other path or method
+is granted. `collector/httpclient.py` remains GET-only. Clear classified matches are approved
+only in `risk_label_hygiene` and the private `label_risk` hydration input, never in Loki, stdout,
+diagnostic `--out`, errors or metric labels. Ordinary/unmatched values and decoded JWT claims
+are transient. This is a bounded daily label-API sample, never an exhaustive privacy audit.

@@ -26,6 +26,7 @@ from collector.pillars import (
     cost,
     coverage as coverage_pillar,
     estate,
+    label_risk as label_risk_pillar,
     maturity,
     producing_signals,
     retention,
@@ -93,6 +94,7 @@ def build_all(
     capability_adoption: dict[str, Any] | None = None,
     slo_inventory: dict[str, Any] | None = None,
     loki_config: dict[str, Any] | None = None,
+    label_risk: dict[str, Any] | None = None,
     expected_retention_policy: tuple[dict[str, str], ...] = (),
     fleet_default_scrape_interval_seconds: float = 60.0,
     score_weights: dict[str, float] | None = None,
@@ -136,6 +138,7 @@ def build_all(
         producing_signals.build(stacks, capability_adoption),
         adaptive_traces_pillar.build(stacks, adaptive_traces),
         slo_pillar.build(stacks, slo_inventory),
+        label_risk_pillar.build(stacks, label_risk),
     ):
         metrics.extend(pillar_metrics)
         for name, rows in pillar_views.items():

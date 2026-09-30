@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "description": "Generic risk hints only. Format confidence does not establish personal data or a valid secret.",
+  "keys": {
+    "email": ["email", "e_mail", "mail", "user_email", "owner_email", "customer_email", "tenant_email"],
+    "identity": ["user", "username", "user_name", "user_id", "userid", "login", "account", "account_name", "person", "employee", "employee_id", "staff_id", "upn", "principal", "subject"],
+    "person_name": ["full_name", "first_name", "last_name", "given_name", "surname", "display_name", "customer_name"],
+    "phone": ["phone", "mobile", "msisdn", "telephone"],
+    "ip_address": ["ip", "ip_address", "client_ip", "remote_addr", "source_ip", "x_forwarded_for"],
+    "secret": ["cookie", "token", "api_key", "authorization", "secret", "password", "access_token", "auth_token"],
+    "sensitive_identifier": ["patient", "patient_id", "mrn", "nhs_number", "ssn", "national_id", "dob", "date_of_birth"]
+  },
+  "email": "[^\\s@]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\\.)+[A-Za-z]{2,63}",
+  "international_phone": "\\+[0-9 ()-]{8,24}",
+  "token": "[A-Za-z0-9_+/=-]{20,4096}"
+}

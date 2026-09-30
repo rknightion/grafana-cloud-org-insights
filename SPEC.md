@@ -194,3 +194,36 @@ An installation is acceptable when:
 
 Still unresolved: Synthetic Monitoring result inventory, Adaptive Profiles, and any Adaptive Traces
 collection requiring permissions beyond the declared read-only role.
+
+## Daily bounded label privacy risk
+
+T2 discovers the estate every run and reads signal label names then a deterministic bounded
+subset of values. Risk-context keys take precedence, then scope/key lexical order. Default
+bounds: 64 keys per signal/stack, 256 distinct returned values per selected key, 64 retained
+full matches per stack/key/class, 2 MiB per response, and 2 MiB aggregate retained JSON-value
+bytes per stack. Keys longer than 512 characters and values longer than 8192 characters are
+unexamined and explicitly partial, not shortened. Bounds are source tunables, not estate config.
+The sample runs immediately after inventory discovery, before other daily gatherers, and reserves
+at most a quarter of the tier's remaining budget capped at 15 minutes. Up to eight concurrent
+stack workers make sequential requests; each request has a 10-second socket timeout and bounded chunk-reading deadline checks, and no retry. The caller tier
+deadline prevents starting more requests. A blocking read can exceed its remaining budget by
+one socket-timeout interval; it cannot become an exhaustive unbounded enumeration.
+
+The separate label-source transport reads at most the byte cap plus one sentinel byte and
+refuses redirects. GET reads use the unchanged GET-only client; only the inventory-host native
+Pyroscope LabelNames/LabelValues POST exception is added. Errors contain no source body or
+exception text. Classification is generic and versioned; confidence expresses format/key
+context, never confirmed personal data or a valid secret. No remediation is proposed or performed.
+
+`risk_label_hygiene` is an S3-only finding table with full raw classified matches, separate
+confidence/evidence, sampled/matched/retained counts, window and pattern version.
+`risk_label_hygiene_coverage` shows per-signal measured/scannable stack denominators, limits
+and unavailable/partial coverage. No backend completeness guarantee is proven, so successful
+reads remain partial and a no-match sample is not clean. This does not inspect log bodies,
+structured metadata, trace/profile contents or the full retention history. Ordinary values and
+decoded JWT claims do not persist. The private daily scan input may retain the same bounded
+classified matches for cross-tier hydration under existing access/encryption/90-day controls;
+latest views overwrite normally. Root deployment validation must prove those controls before
+use. Diagnostic scan export excludes this input. Generic Loki findings explicitly deny these
+views, and no business series are added. One input enum adds at most eight existing input-health
+series across four tiers, with no stack multiplier.

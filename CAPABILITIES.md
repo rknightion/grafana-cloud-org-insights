@@ -288,3 +288,18 @@ The runtime writer carries only `metrics:write` and `logs:write` in the nominate
 stack's realm. The provisioner carries `stacks:read` and
 `stack-service-accounts:write` but is a separate scheduled task and secret key. Build-time Grafana
 credentials are supplied only to dashboard/alert publication tools and should be short-lived.
+
+## Bounded label-risk reads
+
+The daily label-risk source uses the existing `metrics:read`, `logs:read`, `traces:read` and
+`profiles:read` scopes with inventory per-signal tenant IDs. No scope, role or credential is
+changed. GET label routes are Mimir `/api/prom/api/v1/labels` and `/label/<key>/values`,
+Loki `/loki/api/v1/labels` and `/label/<key>/values`, and Tempo
+`/tempo/api/v2/search/tags` and `/tag/<scoped-key>/values`. Pyroscope exclusively uses the two
+read-only native POST paths `/querier.v1.QuerierService/LabelNames` and `/LabelValues`
+on inventory `hpInstanceUrl`, authenticated as `hpInstanceId`. Responses use `names` for both
+operations. This is not authority for another QuerierService method or a write.
+
+These four source shapes were mapped in staff discovery; directly isolated label-path scope
+sufficiency and customer-estate precision/recall are not proven by the offline contract suite.
+Raw matches have only the approved S3 view/private hydration audience, never Loki or metrics.
