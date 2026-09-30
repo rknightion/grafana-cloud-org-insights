@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop4-root'
 created_date: '2026-08-24 12:02'
-updated_date: '2026-09-30 22:37'
+updated_date: '2026-09-30 23:37'
 labels: []
 dependencies: []
 references:
@@ -26,17 +26,17 @@ Prove a new operator can start with only this product repository and a deploymen
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Walkthrough starts from fresh clones and empty Terraform plugin/state directories
-- [ ] #2 Every required credential and private-repository assumption is documented without storing secrets
-- [ ] #3 The operator reaches a reviewed candidate plan and rollback package without live mutation
-- [ ] #4 Every missing instruction found during the walkthrough is fixed in durable product or deployment documentation
+- [x] #1 Walkthrough starts from fresh clones and empty Terraform plugin/state directories
+- [x] #2 Every required credential and private-repository assumption is documented without storing secrets
+- [x] #3 The operator reaches a reviewed candidate plan and rollback package without live mutation
+- [x] #4 Every missing instruction found during the walkthrough is fixed in durable product or deployment documentation
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 python3 -m pytest tests -q
-- [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
-- [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
+- [x] #1 python3 -m pytest tests -q
+- [x] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
+- [x] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -59,4 +59,6 @@ The strongest single finding for this task: every one of these is invisible to a
 2026-09-30 Rob lifted the deferral; admissible as loop4 reserve.
 
 loop4 admitted 2026-09-30: root owns tracker; isolated implementation lane owns packet, gate and review. Acceptance pending exact candidate/hosted/live evidence; no completion claimed.
+
+loop4 a2 locally accepted94ddfda: fresh exact clone gate1649pass2existing skips, real synthetic manifest regenerate/check and consumer-build with4in-container projections, deployment8c8f2ed/overlayf1d3880/localARM64imagea0f57fe verified. Root actual backend-free standalone plan exit0 reviewed30prospectivecreates0updates/deletes,4DISABLED ARM64 schedules/tasks, no provisioner/Firehose create, privacy retention/view-reader bounds and apply-time unknowns named; no apply. Real dev network read context with independently verified RC digest override, synthetic target .invalid, not a live deployment/consumer adapter plan. Synthetic rollback source package saved, no baseline invented. Independent RV pass2 PASS and Python/PATHminor fixed. ACs local approval-boundary proof met; task stays In Progress until root landing exactCI. Declarative/docs-only CR exemption.
 <!-- SECTION:NOTES:END -->
