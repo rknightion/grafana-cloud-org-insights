@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop3-root'
 created_date: '2026-08-25 13:12'
-updated_date: '2026-09-30 12:26'
+updated_date: '2026-09-30 16:36'
 labels:
   - risk
   - privacy
@@ -102,6 +102,8 @@ This task is therefore split. The unbounded-cardinality half is commissioned as 
 loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
 
 Owner override 2026-09-30 goal D2 replaces the historical key-only restriction: daily reads may inspect label names AND values and publish raw matched values in full, capped at a stated per-stack/label/class bound. Values remain forbidden as metric labels. Historical description is retained as provenance, not the active privacy contract. No AC is claimed yet.
+
+Loop3 deployment hold: new independent privacy prerequisite review found latest raw-match view has no current-object expiry; scan90/noncurrent7 do not bound stale current view. D2 permits full matched values but not indefinite retention. Targeted repaira2 admitted: lifecycle exact full raw-view filename prefix only, reuse positive whole scan-retention90 defaults, preserve other last-good views, scans/noncurrent7/IAM. Policy is eligibility since last publication plus version expiry/async processing, not strict observation-age erasure. No collector execution on new source before actual controls pass. Customer rollout requires a bucket-owner equivalent rule; lifecycle writes exceed current customer write fence, so that prerequisite remains a run-end authorization question rather than implicit Terraform drift.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
