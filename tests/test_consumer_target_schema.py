@@ -3,6 +3,7 @@ import json
 import os
 import pathlib
 import shutil
+import subprocess
 import tempfile
 
 import pytest
@@ -10,7 +11,20 @@ import pytest
 from tests.test_consumer_manifest import ROOT, consumer_manifest, fixture
 from tests.test_scan_product_policy import KEY, cli, legacy_manifest
 
-OLD = "57d39ed7f3ae0bacf9630990f7437f293fa7a91b"
+def old_target_repository(temp):
+    # CI is shallow. Retain the captured old declarations instead of fetching history in an offline test.
+    product = temp / "old-product"
+    (product / "collector").mkdir(parents=True)
+    shutil.copyfile(ROOT / "tests/fixtures/consumer_identity_v030.txt",
+                    product / "collector/identity.py")
+    for args in (("init", "-q"), ("add", "collector/identity.py"),
+                 ("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                  "-c", "commit.gpgsign=false", "commit", "-qm", "Captured old projection schema")):
+        subprocess.run([shutil.which("git"), "-C", str(product), *args],
+                       check=True, capture_output=True, timeout=30)
+    target = subprocess.run([shutil.which("git"), "-C", str(product), "rev-parse", "HEAD"],
+                            check=True, capture_output=True, text=True, timeout=30).stdout.strip()
+    return product, target
 
 
 def offline_git(temp):
@@ -41,8 +55,9 @@ def test_real_cli_old_target_rejected_before_either_file_changes():
         # Even an existing recovery journal must not trigger writes for an unsupported target.
         journal = consumer_manifest.journal_path(manifest)
         journal.write_text("saved recovery evidence")
-        result = cli("upgrade", OLD, "--manifest", str(manifest), "--terraform", str(terraform),
-                     env=offline_git(temp))
+        product, target = old_target_repository(temp)
+        result = cli("upgrade", target, "--manifest", str(manifest), "--terraform", str(terraform),
+                     "--generic-source", str(product), env=offline_git(temp))
         # Against the original implementation this reports 0 and replaces both inputs.
         after = (manifest.read_bytes(), terraform.read_bytes())
         assert result.returncode == 2, (result.stdout, result.stderr, after != before)
