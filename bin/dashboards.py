@@ -1608,6 +1608,7 @@ def d_risk(ds: str):
     )
     org_members_view_live = _published_views_exist("risk_org_members")
     label_cardinality_view_live = _published_views_exist("risk_label_cardinality")
+    retention_policy_status_view_live = _published_views_exist("risk_retention_policy_status")
     el = {
         "n_org_admins": build.stat_panel(
             "Organisation members with Admin role",
@@ -1918,8 +1919,18 @@ def d_risk(ds: str):
         "n_retention_policy_gaps": build.stat_panel(
             "Stacks below configured retention policy",
             "gcinsight_risk_retention_policy_gap_stacks",
-            description="Present only when the deployment supplies selector expectations and at least "
-                        "one effective retention_stream is readable. No repository default is assumed."),
+            description="Confirmed breaches among stacks with readable policy evidence. Unreadable "
+                        "stacks are counted separately. No repository default is assumed."),
+        "n_retention_policy_compliant": build.stat_panel(
+            "Stacks compliant with configured retention policy",
+            "gcinsight_risk_retention_policy_compliant_stacks",
+            description="Stacks satisfying every deployment-supplied selector expectation. "
+                        "Unreadable stacks are excluded and no repository default is assumed."),
+        "n_retention_policy_unreadable": build.stat_panel(
+            "Stacks unreadable for configured retention policy",
+            "gcinsight_risk_retention_policy_unreadable_stacks",
+            description="Live stacks where Loki limits are unreadable or overlapping selector rules "
+                        "prevent a reliable policy classification. Absent without expectations."),
         "retention_requests": build.table_panel(
             "Self-serve retention change requests",
             "risk_retention_change_requests",
@@ -2215,6 +2226,16 @@ def d_risk(ds: str):
                         "counters were empty in the evidence sweep, so a panel would read 0 for ever. "
                         "Recheck with bin/probe_usage_signals.py before assuming that negative result holds."),
     }
+    if retention_policy_status_view_live:
+        el["retention_policy_status"] = build.table_panel(
+            "Configured retention policy status by stack",
+            "risk_retention_policy_status",
+            ds,
+            schema=retention_pillar.VIEW_SCHEMAS["risk_retention_policy_status"],
+            units={"Expected days": "d", "Effective days": "d"},
+            description="Every live stack for each deployment-supplied selector expectation. "
+                        "Unreadable Loki limits or ambiguous selector overlap stay unclassified; "
+                        "the self-serve request route is independent.")
     if fleet_detail_views_live:
         el.update({
             "fleet_attributes": build.table_panel(
@@ -2409,15 +2430,18 @@ def d_risk(ds: str):
         build.rows_tab("Alert routing", alert_routing_rows),
         build.rows_tab("Logs retention", [
             build.row("Coverage and policy", ["n_retention_measured",
-                                               "n_retention_requests_measured",
-                                               "n_retention_policy_gaps"],
-                      max_columns=3, row_height="short"),
+                                               "n_retention_policy_compliant",
+                                               "n_retention_policy_gaps",
+                                               "n_retention_policy_unreadable",
+                                               "n_retention_requests_measured"],
+                      max_columns=5, row_height="short"),
             build.row("Request status", ["b_retention_requests"], max_columns=1),
             build.row("What is in force", ["retention_stream"], max_columns=1,
                       row_height="tall"),
             build.row("Self-serve history", ["retention_requests"], max_columns=1,
                       row_height="tall"),
-            build.row("Policy gaps", ["retention_policy_gaps"], max_columns=1,
+            build.row("Policy status", (["retention_policy_status"] if retention_policy_status_view_live else [])
+                      + ["retention_policy_gaps"], max_columns=2,
                       row_height="tall"),
         ]),
         build.rows_tab("Access", access_rows),

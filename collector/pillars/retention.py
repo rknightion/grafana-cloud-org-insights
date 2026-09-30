@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from collections.abc import Mapping, Sequence
 from typing import Any
@@ -30,9 +31,47 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
         (" Stack", "string"), ("Selector", "string"), ("Expected days", "number"),
         ("Effective days", "number"),
     ),
+    "risk_retention_policy_status": (
+        (" Stack", "string"), ("Selector", "string"), ("Expected days", "number"),
+        ("Effective days", "number"), ("Status", "string"),
+    ),
 }
 
 _PERIOD = re.compile(r"^(\d+(?:\.\d+)?)([dh])$")
+_EQUALITY_MATCHER = re.compile(r'\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*("(?:\\.|[^"\\])*")\s*')
+
+
+def _exact_matchers(selector: str) -> dict[str, str] | None:
+    """Parse only equality selectors we can use to prove two stream sets cannot overlap."""
+    if not selector.startswith("{") or not selector.endswith("}"):
+        return None
+    body = selector[1:-1]
+    matchers: dict[str, str] = {}
+    position = 0
+    while position < len(body):
+        match = _EQUALITY_MATCHER.match(body, position)
+        if match is None or match.group(1) in matchers:
+            return None
+        try:
+            value = json.loads(match.group(2))
+        except json.JSONDecodeError:
+            return None
+        matchers[match.group(1)] = value
+        position = match.end()
+        if position == len(body):
+            break
+        if body[position] != ",":
+            return None
+        position += 1
+    return matchers
+
+
+def _provably_disjoint(first: str, second: str) -> bool:
+    first_matchers = _exact_matchers(first)
+    second_matchers = _exact_matchers(second)
+    return (first_matchers is not None and second_matchers is not None
+            and any(first_matchers[key] != second_matchers[key]
+                    for key in first_matchers.keys() & second_matchers.keys()))
 
 
 def period_days(value: Any) -> float | None:
@@ -40,13 +79,19 @@ def period_days(value: Any) -> float | None:
     if isinstance(value, bool):
         return None
     if isinstance(value, (int, float)):
-        return float(value) if value >= 0 else None
+        try:
+            amount = float(value)
+        except OverflowError:
+            return None
+        return amount if math.isfinite(amount) and amount >= 0 else None
     if not isinstance(value, str):
         return None
     match = _PERIOD.fullmatch(value.strip())
     if not match:
         return None
     amount = float(match.group(1))
+    if not math.isfinite(amount):
+        return None
     return amount if match.group(2) == "d" else amount / 24.0
 
 
@@ -94,13 +139,19 @@ def build(
     change_rows: list[dict[str, Any]] = []
     stream_rows: list[dict[str, Any]] = []
     gap_rows: list[dict[str, Any]] = []
+    policy_status_rows: list[dict[str, Any]] = []
     policy = _policy_rows(expected_policy)
+    # An empty live inventory is unknown, not an estate with zero policy findings. Withhold the
+    # configured-policy view and metrics so the last good view keeps its older timestamp.
+    if policy and not stacks:
+        return [], {}
     measured_limits = 0
     measured_requests = 0
     status_counts = {status: 0 for status in REQUEST_STATUSES}
     gaps: set[str] = set()
+    compliant_stacks: set[str] = set()
+    unreadable_stacks: set[str] = set()
     any_policy_measurement = False
-    readable_policy_population_complete = True
     readable_requests = False
     readable_limits = False
 
@@ -109,8 +160,23 @@ def build(
         record = loki_config.get(slug) or {}
         limits = record.get("limits") if isinstance(record, Mapping) else None
         requests = record.get("change_requests") if isinstance(record, Mapping) else None
+        requests_readable = isinstance(requests, Mapping) and bool(requests.get("available"))
 
-        if isinstance(requests, Mapping) and requests.get("available"):
+        def unreadable_policy_rows() -> None:
+            if policy:
+                unreadable_stacks.add(slug)
+            for selector, minimum in policy:
+                unreadable_policy_row(selector, minimum)
+
+        def unreadable_policy_row(selector: str, minimum: float) -> None:
+            unreadable_stacks.add(slug)
+            policy_status_rows.append({
+                " Stack": slug, "Selector": selector,
+                "Expected days": _display_days(minimum), "Effective days": None,
+                "Status": "unreadable",
+            })
+
+        if requests_readable:
             measured_requests += 1
             readable_requests = True
             for request in requests.get("items") or []:
@@ -132,44 +198,64 @@ def build(
                 })
 
         if not isinstance(limits, Mapping) or not limits.get("available"):
+            unreadable_policy_rows()
             continue
-        measured_limits += 1
-        readable_limits = True
         # Omitted means the response lacked the field, unlike an explicit [] which is a measurable
         # absence of per-stream overrides.  Do not promote a missing field into a policy breach.
         if "retention_stream" not in limits:
             # A readable response can still omit the field entirely. It supplies no selector-level
-            # evidence, so a configured policy result remains absent rather than becoming a false zero.
+            # evidence, so this stack is unreadable rather than a false breach or compliance result.
             if policy:
-                readable_policy_population_complete = False
+                unreadable_policy_rows()
             continue
         raw_streams = limits.get("retention_stream")
         if not isinstance(raw_streams, list):
+            if policy:
+                unreadable_policy_rows()
             continue
         streams: list[tuple[str, float, float]] = []
+        stack_stream_rows: list[dict[str, Any]] = []
+        valid_streams = True
         for stream in raw_streams:
             if not isinstance(stream, Mapping):
+                valid_streams = False
                 continue
             selector = stream.get("selector")
             period = period_days(stream.get("period"))
-            if not isinstance(selector, str) or period is None:
+            if not isinstance(selector, str) or not selector.strip() or period is None:
+                valid_streams = False
                 continue
-            priority = stream.get("priority")
-            stream_rows.append({
+            # Loki defaults an omitted priority to zero. A supplied malformed priority is unknown,
+            # not zero: coercing it could hide an overlapping rule that actually wins.
+            priority = stream.get("priority", 0)
+            if not isinstance(priority, (int, float)) or isinstance(priority, bool):
+                valid_streams = False
+                continue
+            try:
+                numeric_priority = float(priority)
+            except OverflowError:
+                valid_streams = False
+                continue
+            if not math.isfinite(numeric_priority):
+                valid_streams = False
+                continue
+            stack_stream_rows.append({
                 " Stack": slug,
                 "Period days": _display_days(period),
                 "Priority": priority,
                 "Selector": selector,
             })
-            numeric_priority = (
-                float(priority)
-                if isinstance(priority, (int, float)) and not isinstance(priority, bool)
-                else 0.0
-            )
             streams.append((selector, period, numeric_priority))
 
+        if not valid_streams:
+            unreadable_policy_rows()
+            continue
+        measured_limits += 1
+        readable_limits = True
+        stream_rows.extend(stack_stream_rows)
+
         if policy:
-            any_policy_measurement = True
+            stack_compliant = True
             for selector, minimum in policy:
                 matching = [
                     (period, priority)
@@ -183,8 +269,29 @@ def build(
                         period for period, priority in matching if priority == highest_priority
                     )
                 else:
+                    highest_priority = None
                     effective = None
+                # An exact-selector winner covers the whole expected stream set. Overlapping
+                # rules at lower priority cannot govern any of it; tied rules can change the
+                # period only when shorter. Unknown overlap remains unreadable if it can win.
+                if any(candidate != selector
+                       and (highest_priority is None or priority > highest_priority
+                            or (priority == highest_priority and period < effective))
+                       and not _provably_disjoint(selector, candidate)
+                       for candidate, period, priority in streams):
+                    unreadable_policy_row(selector, minimum)
+                    stack_compliant = False
+                    continue
+                any_policy_measurement = True
+                status = "compliant" if effective is not None and effective >= minimum else "below policy"
+                policy_status_rows.append({
+                    " Stack": slug, "Selector": selector,
+                    "Expected days": _display_days(minimum),
+                    "Effective days": _display_days(effective) if effective is not None else None,
+                    "Status": status,
+                })
                 if effective is None or effective < minimum:
+                    stack_compliant = False
                     gaps.add(slug)
                     gap_rows.append({
                         " Stack": slug,
@@ -192,6 +299,8 @@ def build(
                         "Expected days": _display_days(minimum),
                         "Effective days": _display_days(effective) if effective is not None else None,
                     })
+            if stack_compliant:
+                compliant_stacks.add(slug)
 
     if readable_limits:
         metrics.append(("gcinsight_risk_retention_stacks_measured", {}, float(measured_limits)))
@@ -199,8 +308,14 @@ def build(
         metrics.append(("gcinsight_risk_retention_change_request_stacks", {}, float(measured_requests)))
         metrics.extend(("gcinsight_risk_retention_change_requests", {"status": status},
                         float(status_counts[status])) for status in REQUEST_STATUSES)
-    if policy and any_policy_measurement and readable_policy_population_complete:
+    if policy and any_policy_measurement:
         metrics.append(("gcinsight_risk_retention_policy_gap_stacks", {}, float(len(gaps))))
+    if policy and any_policy_measurement:
+        metrics.append(("gcinsight_risk_retention_policy_compliant_stacks", {},
+                        float(len(compliant_stacks))))
+    if policy:
+        metrics.append(("gcinsight_risk_retention_policy_unreadable_stacks", {},
+                        float(len(unreadable_stacks))))
 
     views: Views = {}
     if readable_requests:
@@ -212,4 +327,5 @@ def build(
         # deployment that has intentionally configured no expectation.  It is withheld only during a
         # complete limits outage, preserving the last good view rather than clearing it.
         views["risk_retention_policy_gaps"] = gap_rows
+    views["risk_retention_policy_status"] = policy_status_rows
     return metrics, views

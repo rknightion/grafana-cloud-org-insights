@@ -1807,6 +1807,51 @@ class RecentDashboardPresentationContractsTest(unittest.TestCase):
         self.assertIn("gcinsight_risk_collectors_inactive", expr)
         self.assertIn("gcinsight_risk_collectors_active", expr)
 
+    def test_retention_status_table_and_coverage_stats_are_placed_and_typed(self):
+        _uid, dashboard = self.dash.assemble("risk", "infinity-uid")
+        panels = dashboard["spec"]["elements"]
+        logs_tab = next(tab for tab in dashboard["spec"]["layout"]["spec"]["tabs"]
+                        if tab["spec"]["title"] == "Logs retention")
+        placed = _placed_names(logs_tab)
+        self.assertIn("retention_policy_status", placed)
+        self.assertIn("retention_policy_gaps", placed)
+        query = panels["retention_policy_status"]["spec"]["data"]["spec"]["queries"][0][
+            "spec"]["query"]["spec"]
+        self.assertTrue(query["url"].endswith("/views/risk_retention_policy_status.json"))
+        self.assertEqual(query["parser"], "backend")
+        self.assertEqual(query["root_selector"], "rows")
+        self.assertEqual([(col["text"], col["type"]) for col in query["columns"]], [
+            ("Stack", "string"), ("Selector", "string"), ("Expected days", "number"),
+            ("Effective days", "number"), ("Status", "string"),
+        ])
+        for key, metric in {
+            "n_retention_measured": "gcinsight_risk_retention_stacks_measured",
+            "n_retention_policy_compliant": "gcinsight_risk_retention_policy_compliant_stacks",
+            "n_retention_policy_gaps": "gcinsight_risk_retention_policy_gap_stacks",
+            "n_retention_policy_unreadable": "gcinsight_risk_retention_policy_unreadable_stacks",
+        }.items():
+            self.assertIn(key, placed)
+            self.assertEqual(panels[key]["spec"]["data"]["spec"]["queries"][0][
+                "spec"]["query"]["spec"]["expr"], metric)
+
+    def test_retention_status_table_is_withheld_until_view_is_published(self):
+        from unittest.mock import patch
+
+        real_read_view = build.read_view
+
+        def read_view(name):
+            if name == "risk_retention_policy_status":
+                raise FileNotFoundError(name)
+            return real_read_view(name)
+
+        with patch.object(build, "read_view", side_effect=read_view):
+            _uid, dashboard = self.dash.assemble("risk", "infinity-uid")
+        self.assertNotIn("retention_policy_status", dashboard["spec"]["elements"])
+        tabs = dashboard["spec"]["layout"]["spec"]["tabs"]
+        logs_tab = next(tab for tab in tabs if tab["spec"]["title"] == "Logs retention")
+        self.assertNotIn("retention_policy_status", _placed_names(logs_tab))
+        self.assertIn("retention_policy_gaps", _placed_names(logs_tab))
+
     def test_alert_routing_counters_keep_findings_and_denominator_separate(self):
         expected = {
             "n_routing_measured": "gcinsight_risk_alert_routing_stacks_measured",
