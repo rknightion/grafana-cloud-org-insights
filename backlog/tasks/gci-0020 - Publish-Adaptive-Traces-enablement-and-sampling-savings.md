@@ -1,11 +1,11 @@
 ---
 id: GCI-0020
 title: Publish Adaptive Traces enablement and sampling savings
-status: Parked
+status: In Progress
 assignee:
-  - '@codex'
+  - '@loop3-root'
 created_date: '2026-08-25 14:11'
-updated_date: '2026-09-11 10:06'
+updated_date: '2026-09-30 12:32'
 labels:
   - cost
   - value
@@ -97,6 +97,8 @@ Adaptive Profiles. The estate has one stack with any profiling data at all, so t
 2. Add the stack-reader source only after the panel commit, probing plugin health before config, policy and recommendation routes and withholding unavailable stacks rather than publishing zeros.
 3. Publish identity-bearing policy/recommendation detail only as S3 views, emit only bounded aggregate metrics if a trend is justified, derive VIEW_INPUTS and update capability/privacy documentation.
 4. Run the full gates and CodeRabbit for the collector slice, finalize Backlog, commit, push and continue to Phase 3.
+
+loop3 I-0020: preserve and validate already-shipped panel-first slice, add accepted plugin-proxy GET config/policies/recommendations count-only inventory and pending-state projection; unavailable config stays unknown, no invented savings numerator; synthetic captured-artifact contract, gate/review/CI, root dev proof.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

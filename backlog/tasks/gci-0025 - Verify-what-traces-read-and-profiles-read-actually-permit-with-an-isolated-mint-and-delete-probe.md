@@ -3,11 +3,11 @@ id: GCI-0025
 title: >-
   Verify what traces:read and profiles:read actually permit, with an isolated
   mint-and-delete probe
-status: In Progress
+status: Done
 assignee:
   - '@loop3-root'
 created_date: '2026-09-11 14:15'
-updated_date: '2026-09-30 12:26'
+updated_date: '2026-09-30 12:35'
 labels:
   - security
   - capabilities
@@ -40,11 +40,11 @@ Mint an access policy carrying `traces:read` and nothing else, on a control orga
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A single-scope traces:read policy is minted on a control organisation and content-bearing Tempo routes are probed with it
-- [ ] #2 A single-scope profiles:read policy is minted and content-bearing Pyroscope routes are probed with it
-- [ ] #3 Both policies are deleted by recorded object ID and absence is verified by re-reading, not assumed from the delete response
-- [ ] #4 CAPABILITIES.md records observed behaviour per route, and states where a result remains ambiguous
-- [ ] #5 No access policy this project did not create was read-modified or deleted, and no declared collector scope changed
+- [x] #1 A single-scope traces:read policy is minted on a control organisation and content-bearing Tempo routes are probed with it
+- [x] #2 A single-scope profiles:read policy is minted and content-bearing Pyroscope routes are probed with it
+- [x] #3 Both policies are deleted by recorded object ID and absence is verified by re-reading, not assumed from the delete response
+- [x] #4 CAPABILITIES.md records observed behaviour per route, and states where a result remains ambiguous
+- [x] #5 No access policy this project did not create was read-modified or deleted, and no declared collector scope changed
 <!-- AC:END -->
 
 ## Definition of Done
@@ -74,4 +74,6 @@ loop3 R-0025 live proof on staff control org: two stack-realm single-scope polic
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Parked without live mutation. The control organisation was not supplied, so traces:read and profiles:read remain explicitly unverified, no content-bearing route result was claimed, and CAPABILITIES.md was not changed.
+
+SUPERSEDES the old parked outcome: loop3 completed the staff control-org single-scope probe. traces:read returned a 24h Tempo search and nonempty fetched trace; profiles:read returned types and a populated flamegraph. Both stack-realm policies were deleted by recorded IDs, then GET returned 404. No existing policy or collector scope changed. CAPABILITIES documents route results and untested org-realm/other-stack/label-policy boundaries at 1f5acd5e5fa84de06add8e0045c08bb3ad6b7783. Full just check green (1571 passed, 2 skipped), exact-SHA CI 36715056370 success; documentation-only CodeRabbit exemption. R-0025 and I-0025doc evidence retained privately; all live read content excluded from public docs.
 <!-- SECTION:FINAL_SUMMARY:END -->

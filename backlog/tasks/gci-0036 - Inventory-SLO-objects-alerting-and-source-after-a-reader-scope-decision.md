@@ -1,10 +1,11 @@
 ---
 id: GCI-0036
 title: 'Inventory SLO objects, alerting and source after a reader-scope decision'
-status: Parked
-assignee: []
+status: In Progress
+assignee:
+  - '@loop3-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-23 19:52'
+updated_date: '2026-09-30 12:32'
 labels:
   - feature-usage
   - follow-on
@@ -36,8 +37,16 @@ Rank 3 - high value, low code cost after authorization. The documented SLO GET r
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+loop3 I-0036: implement the accepted existing-reader SLO list seam and count-only view, compare positive dev control, preserve source unknowns, integrate source/tier/hydration/schema/dashboard, synthetic captured-artifact contract, gate/CodeRabbit/exact-SHA CI; root live rollout proof remains separate.
+<!-- SECTION:PLAN:END -->
+
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Parked at Wave 1 boundary pending GCI-0041 reader scope decision and exact safe read-route verification. No new scope, policy or credential was granted during research.
+
+D1a accepted operational reader sufficiency and positive Admin control on staff dev. Existing separately approved slo pairs stay unchanged; strict subtract-one minimality is unproven and no removal is authorised. Reader None and query pins remain frozen. No AC completion yet.
 <!-- SECTION:NOTES:END -->
