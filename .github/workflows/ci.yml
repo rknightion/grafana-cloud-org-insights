@@ -36,6 +36,7 @@ jobs:
         run: just lint
       - name: Install test runner
         run: just setup
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
       - name: Tests
         # Offline by construction - no AWS, no network, no credentials. If this needs either, the
         # fixture wiring has regressed and the suite has stopped being reproducible.
