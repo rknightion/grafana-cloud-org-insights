@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.4.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.4.0...v0.4.1) (2026-10-01)
+
+
+### Bug Fixes
+
+* **docker:** pin fixed PCRE2 package on both platforms ([3225853](https://github.com/rknightion/grafana-cloud-org-insights/commit/32258533d7e2e1fa006460224dca53135d975e98))
+
+
+### Build and CI
+
+* **actionlint:** recognize ubuntu-26.04 in repository config ([f767fad](https://github.com/rknightion/grafana-cloud-org-insights/commit/f767fad63ad92d9ca63ddea6777765125770e287))
+
+
+### Documentation
+
+* **backlog:** accept actionlint candidate for integration ([4b2f2b2](https://github.com/rknightion/grafana-cloud-org-insights/commit/4b2f2b2198409b7dcc3b83bd173106df3dc2ca76))
+* **backlog:** accept both-platform PCRE2 publishing fix ([de9d9e9](https://github.com/rknightion/grafana-cloud-org-insights/commit/de9d9e951eb099555ba73c6f5352029a8e6f3913))
+* **backlog:** accept transport and clean-room approval-boundary proofs ([8e96edb](https://github.com/rknightion/grafana-cloud-org-insights/commit/8e96edb5e876d8ad4386622e5b1ff10b94991ff7))
+* **backlog:** admit loop5 committed lanes ([c09c9a5](https://github.com/rknightion/grafana-cloud-org-insights/commit/c09c9a5967c13957d7d9dfead9e9b21f8c414aeb))
+* **backlog:** close PCRE2 and actionlint repairs ([846d6a7](https://github.com/rknightion/grafana-cloud-org-insights/commit/846d6a7444d7188cfa640fe886320d7f26aabd09))
+* **backlog:** close retention live validation on owner decision ([e3a1619](https://github.com/rknightion/grafana-cloud-org-insights/commit/e3a16196b45ce3f8a9b2eb8daec5c6b54be610e4))
+* **backlog:** close screenshots and park new PCRE2 publishing blocker ([29c0ff3](https://github.com/rknightion/grafana-cloud-org-insights/commit/29c0ff367b8bbe992d4b9fbbe7129d066e1f9e46))
+* **backlog:** close verified clean-room approval boundary ([8323e15](https://github.com/rknightion/grafana-cloud-org-insights/commit/8323e15561c624212e457bf640443f52adc8dcef))
+* **backlog:** file actionlint runner-label failure ([7a8d397](https://github.com/rknightion/grafana-cloud-org-insights/commit/7a8d397cb05a27c2f4d13c1f5910d88fa7400038))
+* **backlog:** park adopted-bucket TLS prerequisite ([edddec1](https://github.com/rknightion/grafana-cloud-org-insights/commit/edddec1d44a493202d7ea8c01244701243689867))
+* **backlog:** reconcile adaptive render and screenshot proofs ([5cedec5](https://github.com/rknightion/grafana-cloud-org-insights/commit/5cedec505ac4ee20918321edb0f153e001ead6c0))
+* **backlog:** reconcile live inventory acceptance and rendering limits ([3a5ca44](https://github.com/rknightion/grafana-cloud-org-insights/commit/3a5ca4472a7714a23a5c7d434af3f47c9631883b))
+* **backlog:** record adopted-bucket TLS policy enforcement ([2bebe1d](https://github.com/rknightion/grafana-cloud-org-insights/commit/2bebe1de840668a7cc55e38b453ea271d40cefa3))
+* **backlog:** record current deployed image exposure ([391bca1](https://github.com/rknightion/grafana-cloud-org-insights/commit/391bca1261bfaa8132a6405c599a9ec1e4f5a06d))
+* **backlog:** record RC signature and hosted actionlint proof ([775af7d](https://github.com/rknightion/grafana-cloud-org-insights/commit/775af7dcc4e604aa63ca266e59438d627527f2d7))
+* **backlog:** retain bounded Drilldown attribution gap ([c9caebd](https://github.com/rknightion/grafana-cloud-org-insights/commit/c9caebda1145c0ba72497cf498608d7e7005bf60))
+* **deployment:** validate clean-room consumer and safe-off standalone wiring ([889c12e](https://github.com/rknightion/grafana-cloud-org-insights/commit/889c12e11552317536f3a33625479f313e263716))
+* **loop:** preserve loop5 fixes and evidence limits ([4c772ec](https://github.com/rknightion/grafana-cloud-org-insights/commit/4c772eca9bcd9dd6f648f909550e186c0e74db97))
+* **loop:** record bounded transport and rollout safety lessons ([e16f6cb](https://github.com/rknightion/grafana-cloud-org-insights/commit/e16f6cb87077756ced5f2b1032550c514e265232))
+* **screenshots:** capture published query mix and backend production panels ([542a871](https://github.com/rknightion/grafana-cloud-org-insights/commit/542a871383eaea5d2dd5be6bb9494b14609ec887))
+* **traps:** record bounded known-human Drilldown observation ([35a2733](https://github.com/rknightion/grafana-cloud-org-insights/commit/35a273338b03a0a041301d8f2d04910ea97ffff8))
+
 ## [0.4.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.3.0...v0.4.0) (2026-09-30)
 
 
