@@ -1,0 +1,6 @@
+# The latest shared reusable release, v1.25.3, pins actionlint 1.7.12,
+# which does not recognize ubuntu-26.04. Declare it here until a released
+# reusable supports it natively; this does not change the hosted job runners.
+self-hosted-runner:
+  labels:
+    - ubuntu-26.04
