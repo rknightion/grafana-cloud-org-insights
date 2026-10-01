@@ -99,8 +99,10 @@ None approved; ask at preparation.
   (`goal-2026-09-23-wave1.md` §"Shared resources"; `goal-2026-09-23-wave2.md`: "Worktrees isolate
   files only. They do not isolate the [cloud] account, the OpenTofu state lock, the [dev] stack, Git
   refs or credentials; those stay serial on the root").
-- Publishing (commit/push to a release-eligible branch, tagging, releasing) is root-only; lanes never
-  write a tag or release by hand (`goal-2026-09-23-wave2.md` §"Forbidden everywhere").
+- Publishing is root-owned unless the current goal grants a bounded lane commit/push authority.
+  A lane with that grant owns its exact landed-SHA CI through a terminal result; the root never
+  pushes across an in-flight lane landing. Tags and releases remain root-only unless explicitly
+  granted; no lane writes either by hand.
 
 ## Grafana stacks
 
@@ -208,3 +210,27 @@ deployment and its write stack as the serial resource described under Resource m
 - IAM simulation groups multi-resource object decisions under `ResourceSpecificResults`; its
   top-level aggregate is not the individual resource decision. Inspect every resource/action pair,
   including version reads and deletes, and test bucket-list prefixes separately.
+
+## Verified loop6 parity and audit decisions
+
+- Dev mirrors the customer tier cadence, UTC timezone and caller deadlines. Staggered start times
+  may remain when current shared-egress topology and observed durations justify them; offsets reduce
+  coincident demand, never guarantee non-overlap. Smaller dev task sizing may remain when the live
+  estate and healthy runs justify it. Record retained differences in the deployment source comments,
+  rather than silently treating every unequal value as drift.
+- A deliberate dev policy-validation case may differ from an undeclared customer policy. Preserve
+  honest unreadable/null outcomes; neither false compliance nor a guessed customer policy is parity.
+  Created versus adopted resource ownership is also intentional. Org, write stack, bucket, roles,
+  secret selectors, reader credentials and consumer identities must remain isolated.
+- A deadline-only apply can refresh scheduler targets and plan a computed scheduler IAM policy.
+  Verify the actual post-apply policy against the prior semantic document. An unknown plan value is
+  not evidence of equality. ECS compatibility enum order may vary; compare the full capability set,
+  while retaining exact comparisons for image, environment, command, resources and role bindings.
+- Closeout audit grants support a per-repository object with `refs` and `allow_non_fast_forward`.
+  Explicitly grant expected release-please and dependency-bot branch rewrites under the latter,
+  together with their permitted ref changes. This does not grant the root a force push or history
+  rewrite, and it does not excuse an unlisted remote mutation.
+- Documentation audit acceptance separates factual review, the offline gate, exact landed CI and
+  live proof. A code or CLI discrepancy outside the doc lane is tracked for later work, not repaired
+  implicitly. Shipped examples must describe both side effects and the separate authority gate;
+  invoking help must not be assumed safe for a legacy live-probe script.

@@ -1,11 +1,11 @@
 ---
 id: GCI-0057
 title: Audit and refresh operator documentation across the product
-status: In Progress
+status: Done
 assignee:
   - '@loop6-root'
 created_date: '2026-10-01 09:58'
-updated_date: '2026-10-01 12:01'
+updated_date: '2026-10-01 12:59'
 labels:
   - documentation
   - operations
@@ -29,17 +29,17 @@ Owner requested a dedicated documentation freshness audit during loop5 on 2026-1
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 README, RUNBOOK, SPEC, configuration, infrastructure and consumer upgrade/rollback documentation are checked against current supported behavior; every discrepancy is corrected or explicitly tracked
-- [ ] #2 All five scheduled jobs have a consistent purpose, cadence and timezone-aware schedule explanation, clearly distinguishing module defaults from deployment-specific overrides
-- [ ] #3 Operator command examples and publication/credential/privacy/rollback constraints match current CLI contracts and named authority gates
-- [ ] #4 Documentation changes contain no customer identifiers and pass proportionate documentation/text/link validation, with exact evidence and remaining gaps recorded
+- [x] #1 README, RUNBOOK, SPEC, configuration, infrastructure and consumer upgrade/rollback documentation are checked against current supported behavior; every discrepancy is corrected or explicitly tracked
+- [x] #2 All five scheduled jobs have a consistent purpose, cadence and timezone-aware schedule explanation, clearly distinguishing module defaults from deployment-specific overrides
+- [x] #3 Operator command examples and publication/credential/privacy/rollback constraints match current CLI contracts and named authority gates
+- [x] #4 Documentation changes contain no customer identifiers and pass proportionate documentation/text/link validation, with exact evidence and remaining gaps recorded
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -59,3 +59,9 @@ Loop6 L-docref accepted4f0b5fa53a60317b39f9f7fc9cdefd54846aade6 CI36857820932 su
 
 R-xdoc at4f0b5fa reviewed24/24files and found2must-fix contradictions: obsolete Adaptive Traces absence in credential guide and claiming unused ruler/Alertmanager routes as current calls in credential/security guides. L-docref-a2 repair commissioned on those2files only. Schedule/default/timezone/rollout/privacy detailed contracts otherwise consistent. Note on excluded docs/traps fixed90day wording explicitly tracked separately To Do; no broad extra implementation admitted.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Loop6 audited23ownedfiles through3doclanes, corrected shipped documentation and Terraform descriptions, then reviewed24files including traps. Two consent-relevant contradictions caught and repaired in3ce8ac9; independent delta review PASS. All lane landings have exact greenCI or the packet-authorized first green descendant; repair CI cancellation retained as superseded, not passed. Full final integrated justcheck passed; seven out-of-scope discrepancies explicitly tracked ToDo GCI0059-GCI0065, not implemented. Live source/browser/screenshots not renewed by doc lanes, and fixed90day phrasing in excluded traps remains tracked. No customer identifier published.
+<!-- SECTION:FINAL_SUMMARY:END -->
