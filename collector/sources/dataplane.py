@@ -12,7 +12,7 @@ Endpoints, all verified 2026-08-17:
 - Pyroscope          Connect-RPC, 400s without a time range
 
 Fleet Management and Pyroscope are Connect-RPC and want POST. The collector's client is GET-only by
-construction, so those two are read via a narrowly-scoped helper that does exactly one POST shape and
+construction, so those two are read via a helper allowlisting exactly three read-POST routes and
 nothing else  -  see `_connect_rpc`.
 """
 
@@ -22,6 +22,7 @@ import base64
 import decimal
 import json
 import urllib.error
+import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Mapping
@@ -39,6 +40,12 @@ AUTH_FIELD = {
     "profiles": "hpInstanceId",
     "fleet": "id",
 }
+
+CONNECT_RPC_READ_ROUTES = frozenset({
+    "/collector.v1.CollectorService/ListCollectors",
+    "/pipeline.v1.PipelineService/ListPipelines",
+    "/querier.v1.QuerierService/LabelValues",
+})
 
 AUTO_APPLY_ENABLED = "enabled"
 AUTO_APPLY_ABSENT = "absent"
@@ -61,14 +68,19 @@ def _connect_rpc(
     *,
     payload: Mapping[str, Any] | None = None,
 ) -> Any:
-    """One narrowly-scoped POST for Connect-RPC list calls (Fleet Management, Pyroscope).
+    """POST only the three exact read routes in `CONNECT_RPC_READ_ROUTES`.
 
     Deliberately NOT part of `ReadOnlyClient`: that class refuses non-GET on purpose and must stay that
-    way. This helper reaches only `*Service/List*` and `QuerierService` paths. The latter accepts a
-    bounded read-query payload for Pyroscope label values; the path guard remains the mutation barrier.
+    way. A base-path prefix is permitted, but queries, fragments and percent-encoded paths are not.
+    Pyroscope LabelValues accepts a bounded read-query payload. This guard is distinct from
+    label_risk's own two-path native Pyroscope exception.
     """
-    if "Service/List" not in url and "QuerierService" not in url:
-        raise ValueError(f"refusing non-list Connect-RPC call: {url}")
+    parsed = urllib.parse.urlsplit(url)
+    if (
+        "?" in url or "#" in url or "%" in parsed.path
+        or not any(parsed.path.endswith(route) for route in CONNECT_RPC_READ_ROUTES)
+    ):
+        raise ValueError(f"refusing unapproved Connect-RPC call: {url}")
     token = base64.b64encode(f"{user}:{cap}".encode()).decode()
     data = json.dumps(dict(payload or {}), separators=(",", ":")).encode()
     req = urllib.request.Request(url, data=data, method="POST")

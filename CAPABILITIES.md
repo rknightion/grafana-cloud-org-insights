@@ -51,10 +51,11 @@ from `dataplane.AUTH_FIELD`; Fleet Management and the Alertmanager are the two t
 instance id.
 
 The Fleet calls use POST because that is the RPC transport; the scope and methods remain reads.
-The label-risk source has an exact two-path native Pyroscope read-POST exception. The observed-name
-source's older `dataplane._connect_rpc` helper also reads Pyroscope LabelValues; its legacy substring
-path guard is not an exact allow-list and is not authority for additional RPC methods. The shared
-HTTP client stays GET-only. All these source transports fence caller waits with `collector.netbound`,
+The `dataplane._connect_rpc` helper permits only parsed paths ending in exactly
+`/collector.v1.CollectorService/ListCollectors`, `/pipeline.v1.PipelineService/ListPipelines`, or
+`/querier.v1.QuerierService/LabelValues`, with no query, fragment or percent-encoded path. This
+three-route allowlist is distinct from the label-risk source's own two-path native Pyroscope
+read-POST exception for LabelNames and LabelValues. The shared HTTP client stays GET-only. All these source transports fence caller waits with `collector.netbound`,
 not hard cancellation of surviving reads; see [resource fences](docs/source-resource-fences.md).
 Grafana.com is paced at six requests per second. Paused stacks are skipped when the control plane
 answers with its paused-stack conflict response.

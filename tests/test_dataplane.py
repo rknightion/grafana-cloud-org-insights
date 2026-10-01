@@ -210,6 +210,60 @@ class AutoApplyConfigTest(unittest.TestCase):
 
 
 class ConnectRpcTest(unittest.TestCase):
+    def test_unapproved_routes_are_refused_before_transport(self):
+        paths = (
+            "/collector.v1.CollectorService/DeleteCollector",
+            "/pipeline.v1.PipelineService/ListPipelinesX",
+            "/querier.v1.QuerierService/SelectMergeStacktraces",
+            "/querier.v1.QuerierService/LabelNames",
+            "/collector.v1.CollectorService/ListCollectors?x=1",
+            "/collector.v1.CollectorService/ListCollectors#f",
+            "/collector.v1.CollectorService/ListCollectors/../Delete",
+            "/collector.v1.CollectorService%2FListCollectors",
+            "/other.v1.OtherService/ListAnything",
+            "/prefixcollector.v1.CollectorService/ListCollectors",
+            "/collector.v1.CollectorService/%4cistCollectors",
+            "/querier.v1.QuerierService%2fLabelValues",
+        )
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = b"{}"
+        for path in paths:
+            with self.subTest(path=path):
+                with mock.patch("urllib.request.urlopen", return_value=response) as open_url:
+                    with self.assertRaises(ValueError):
+                        dataplane._connect_rpc("https://rpc.example" + path, "123", "cap")
+                    open_url.assert_not_called()
+
+    def test_each_exact_read_route_accepts_a_base_path_prefix(self):
+        for route in (
+            "/collector.v1.CollectorService/ListCollectors",
+            "/pipeline.v1.PipelineService/ListPipelines",
+            "/querier.v1.QuerierService/LabelValues",
+        ):
+            for prefix in ("", "/rpc"):
+                with self.subTest(route=route, prefix=prefix):
+                    response = mock.MagicMock()
+                    response.__enter__.return_value.read.return_value = b'{"result":[]}'
+                    url = "https://rpc.example" + prefix + route
+                    with mock.patch("urllib.request.urlopen", return_value=response) as open_url:
+                        out = dataplane._connect_rpc(url, "123", "cap")
+                    self.assertEqual(out, {"result": []})
+                    open_url.assert_called_once()
+                    request = open_url.call_args.args[0]
+                    self.assertEqual(request.full_url, url)
+                    self.assertEqual(request.method, "POST")
+                    self.assertEqual(json.loads(request.data), {})
+
+    def test_http_error_keeps_the_existing_return_shape(self):
+        import urllib.error
+
+        with mock.patch("urllib.request.urlopen", side_effect=urllib.error.HTTPError(
+            "https://rpc.example", 403, "Forbidden", {}, None,
+        )):
+            self.assertEqual(dataplane._connect_rpc(
+                "https://rpc.example/collector.v1.CollectorService/ListCollectors", "123", "cap",
+            ), {"_http": 403})
+
     def test_read_payload_is_sent_without_relaxing_the_path_guard(self):
         response = mock.MagicMock()
         response.__enter__.return_value.read.return_value = b'{"names":[]}'
