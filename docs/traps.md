@@ -709,9 +709,11 @@ the collector already uses for cardinality: `<per-signal instance id>:<CAP>`, th
 The 2026-09-30 owner decision supersedes the older key-only/unpublishable-values instruction
 above for this one source: classify values in process, retain full classified matches only in the
 approved S3 risk view and private scan hydration. Do not republish them through generic Loki
-findings, error diagnostics or stdout. Latest views overwrite normally; private scans retain
-the existing 90-day lifecycle. Deployment access, encryption and retention controls are a
-separate prerequisite, not proof supplied by a cardinality guard.
+findings, error diagnostics or stdout. Latest views overwrite normally; 90 days is the module
+default of configurable `scan_retention_days`, not a fixed erasure deadline. See the canonical
+[current/noncurrent retention contract](configuration.md#schedules-and-retention) for targeted
+prefixes, publication-age resets and asynchronous expiry. Deployment access, encryption and
+retention controls are a separate prerequisite, not proof supplied by a cardinality guard.
 
 Native Pyroscope LabelNames AND LabelValues use `names` arrays; a successful `{}` is empty.
 Send `application/json; allow-utf8-labelnames=true` in Accept or non-legacy key names can
