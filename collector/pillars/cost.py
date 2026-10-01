@@ -142,8 +142,9 @@ def build(
         if am:
             metrics.append(("gcinsight_adaptive_recommendations", {"stack": slug, "status": "pending"},
                             float(am["recommendations_pending"])))
-            metrics.append(("gcinsight_adaptive_recommendations", {"stack": slug, "status": "applied"},
-                            float(am["rules_applied"])))
+            if am.get("rules_applied") is not None:
+                metrics.append(("gcinsight_adaptive_recommendations", {"stack": slug, "status": "applied"},
+                                float(am["rules_applied"])))
 
     # --- Estate rollups. `cost_billed_users` is Pillar A's; recomputing it here would duplicate a
     # --- series (guard.check_no_duplicates), so this pillar owns the ratio, not the total.
@@ -162,17 +163,23 @@ def build(
             sum(_num(s, current_field) for s in stacks),
         ))
 
-    adaptive = [(_adaptive(dataplane, str(s["slug"])), s) for s in stacks]
+    in_scope = [s for s in stacks if s.get("status") != "paused"]
+    adaptive = [(_adaptive(dataplane, str(s["slug"])), s) for s in in_scope]
     measured = [(am, s) for am, s in adaptive if am]
-    unadopted = [(am, s) for am, s in measured if not am["adopted"] and am["recommendations_pending"]]
+    rules_measured = [(am, s) for am, s in measured if am.get("rules_applied") is not None]
+    # An unqualified additive estate total needs every live, non-paused inventory stack.
+    # Payload membership alone cannot prove coverage: missing live stacks are unknown too.
+    rules_complete = bool(in_scope) and len(rules_measured) == len(in_scope)
+    unadopted = [(am, s) for am, s in rules_measured
+                 if am["adopted"] is False and am["recommendations_pending"]]
 
     # Emit ONLY if the data plane was actually measured. Without it these are both structurally 0, and a
     # 0 published at a later timestamp than the real T3 value overwrites it - so an hourly T1 would erase
     # the estate's single largest finding every hour. The carry-forward cannot save a series the live
     # tier claims to own (PLAN 5.3).
-    if measured:
+    if rules_complete:
         metrics.append(("gcinsight_cost_adaptive_rules_applied_total", {},
-                        float(sum(am["rules_applied"] for am, _ in measured))))
+                        float(sum(am["rules_applied"] for am, _ in rules_measured))))
         metrics.append(("gcinsight_cost_stacks_without_adaptive", {}, float(len(unadopted))))
 
     # --- Adaptive LOGS. A separate input from a separate tier, so it gets its own guard: the same
@@ -255,22 +262,23 @@ def build(
             ],
             key=lambda row: (-(row["Removable series"] or 0), row[" Stack"], row["Metric"] or ""),
         )
-        # Sorted by remediable volume, not by spend - the point is what to fix first.
-        views["cost_adaptive_headroom"] = sorted(
-            [
-                {
-                    " Stack": str(s["slug"]),
-                    "Active series": int(_num(s, "hmInstancePromCurrentActiveSeries")),
-                    "Recs pending": am["recommendations_pending"],
-                    "Rules applied": am["rules_applied"],
-                    "Share of org series %": round(
-                        100 * _num(s, "hmInstancePromCurrentActiveSeries") / total_series, 2
-                    ) if total_series else None,
-                }
-                for am, s in unadopted
-            ],
-            key=lambda r: -(r["Active series"] or 0),
-        )
+        # Withhold unknown headroom, but retain a legitimate measured empty finding set.
+        if rules_measured:
+            views["cost_adaptive_headroom"] = sorted(
+                [
+                    {
+                        " Stack": str(s["slug"]),
+                        "Active series": int(_num(s, "hmInstancePromCurrentActiveSeries")),
+                        "Recs pending": am["recommendations_pending"],
+                        "Rules applied": am["rules_applied"],
+                        "Share of org series %": round(
+                            100 * _num(s, "hmInstancePromCurrentActiveSeries") / total_series, 2
+                        ) if total_series else None,
+                    }
+                    for am, s in unadopted
+                ],
+                key=lambda r: -(r["Active series"] or 0),
+            )
         views["cost_cardinality_outliers"] = sorted(
             [
                 {
@@ -303,24 +311,25 @@ def build(
             # The denominator, first row, because every figure below it is measured over this many
             # stacks and not over 271. A partial T3 must not read as a small estate (SPEC §5.2).
             " Metric": "Stacks measured for Adaptive",
-            "Value": f"{len(measured)} of {coverage.scannable} scannable ({coverage.total} total)",
+            "Value": f"{len(rules_measured)} of {coverage.scannable} scannable ({coverage.total} total)",
         }, {
             " Metric": "Adaptive recommendations pending (measured stacks)",
             "Value": sum(am["recommendations_pending"] for am, _ in measured),
         }, {
             " Metric": "Adaptive rules applied",
-            "Value": sum(am["rules_applied"] for am, _ in measured),
+            "Value": sum(am["rules_applied"] for am, _ in rules_measured) if rules_complete else None,
         }, {
             " Metric": "Stacks with recommendations and zero rules applied",
-            "Value": len(unadopted),
+            "Value": len(unadopted) if rules_complete else None,
         }, {
             " Metric": "Active series on those stacks",
-            "Value": int(sum(_num(s, "hmInstancePromCurrentActiveSeries") for _, s in unadopted)),
+            "Value": int(sum(_num(s, "hmInstancePromCurrentActiveSeries") for _, s in unadopted))
+                     if rules_complete else None,
         }, {
             " Metric": "Their share of org series %",
             "Value": round(
                 100 * sum(_num(s, "hmInstancePromCurrentActiveSeries") for _, s in unadopted) / total_series, 1
-            ) if total_series else None,
+            ) if total_series and rules_complete else None,
         }, {
             " Metric": "Series per billed user (estate)",
             "Value": round(total_series / total_billed, 1) if total_billed else None,

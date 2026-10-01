@@ -186,14 +186,17 @@ def summarise(scan: Mapping[str, Any]) -> dict[str, float]:
         out["alert_rules"] = float(sum(s.get("alertCnt") or 0 for s in stacks))
     if dataplane:
         adaptive = [
-            (v.get("adaptive_metrics") or {}) for v in dataplane.values()
+            ((dataplane.get(str(s["slug"])) or {}).get("adaptive_metrics") or {}) for s in stacks
+            if s.get("status") != "paused"
         ]
         measured = [a for a in adaptive if a.get("available")]
         if measured:
             out["adaptive_pending"] = float(
                 sum(a.get("recommendations_pending") or 0 for a in measured)
             )
-            out["adaptive_applied"] = float(sum(a.get("rules_applied") or 0 for a in measured))
+        rules_measured = [a for a in measured if a.get("rules_applied") is not None]
+        if adaptive and len(rules_measured) == len(adaptive):
+            out["adaptive_applied"] = float(sum(a["rules_applied"] for a in rules_measured))
         fleet = [(v.get("fleet") or {}) for v in dataplane.values()]
         if any(f.get("available") for f in fleet):
             out["collectors"] = float(sum(f.get("collectors") or 0 for f in fleet))

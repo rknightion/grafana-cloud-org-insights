@@ -316,9 +316,10 @@ def _auto_apply_config(
 
 def adaptive_metrics(client: ReadOnlyClient, stack: dict[str, Any], cap: str) -> dict[str, Any]:
     """Applied aggregation rules vs waiting recommendations = the unrealised saving."""
+    unknown_rules = {"rules_available": False, "rules_applied": None, "adopted": None}
     base = stack.get("hmInstancePromUrl")
     if not base:
-        return {"available": False}
+        return {"available": False, **unknown_rules}
     auth = auth_for(stack, "metrics", cap)
     rules = client.get(f"{base}/aggregations/rules", basic=auth)
     # `?verbose=true` is LOAD-BEARING. Without it the response carries only `metric`, `drop_labels`
@@ -331,17 +332,26 @@ def adaptive_metrics(client: ReadOnlyClient, stack: dict[str, Any], cap: str) ->
     recs = client.get(f"{base}/aggregations/recommendations?verbose=true", basic=auth)
     auto_apply = _auto_apply_config(client, base, auth)
     if not rules.ok and not recs.ok:
-        return {"available": False, "http": rules.status}
+        return {"available": False, "http": rules.status, **unknown_rules}
 
     try:
-        rule_list = rules.json() if rules.ok else []
+        rule_list = rules.json() if rules.ok else None
+    except (TypeError, ValueError):
+        rule_list = None
+    rules_available = rules.ok and isinstance(rule_list, list)
+    try:
         raw_recommendations = recs.json() if recs.ok else None
     except (TypeError, ValueError):
         return {"available": False, "recommendations_available": False,
-                "series_counts_complete": False, "reason": "invalid_json"}
+                "series_counts_complete": False, "reason": "invalid_json",
+                "rules_available": rules_available,
+                "rules_applied": len(rule_list) if rules_available else None,
+                "adopted": bool(rule_list) if rules_available else None}
     recommendations_available = recs.ok and isinstance(raw_recommendations, list)
+    if not rules_available and not recommendations_available:
+        return {"available": False, "recommendations_available": False,
+                "series_counts_complete": False, **unknown_rules}
     rec_list = raw_recommendations if recommendations_available else []
-    rule_list = rule_list if isinstance(rule_list, list) else []
     summary = summarise_recommendations(rec_list)
     if not recommendations_available:
         # An empty successful payload proves there are zero recommendations. A failed request proves
@@ -349,9 +359,10 @@ def adaptive_metrics(client: ReadOnlyClient, stack: dict[str, Any], cap: str) ->
         summary["series_counts_complete"] = False
     return {
         "available": True,
-        "rules_applied": len(rule_list),
-        # A stack with recommendations and zero applied rules has taken none of the saving on offer.
-        "adopted": len(rule_list) > 0,
+        "rules_available": rules_available,
+        "rules_applied": len(rule_list) if rules_available else None,
+        # Only a successful rules read can establish adoption or non-adoption.
+        "adopted": bool(rule_list) if rules_available else None,
         "recommendations_available": recommendations_available,
         **auto_apply,
         **summary,

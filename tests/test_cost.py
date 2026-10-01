@@ -26,6 +26,78 @@ def _load():
     return stacks, dataplane, coverage
 
 
+class UnknownAdaptiveRulesTest(unittest.TestCase):
+    def test_mixed_estate_excludes_unknown_rules_from_sums_and_adoption(self):
+        from collector.pillars.compose import build_all
+
+        stacks = [
+            {"slug": slug, "hmInstancePromUrl": "https://prom.example",
+             "hmInstancePromCurrentActiveSeries": 10000, "currentActiveUsers": 10,
+             "billingActiveUsers": 10, "dashboardCnt": 20, "alertCnt": 10}
+            for slug in ("unknown", "empty", "adopted")
+        ]
+        coverage = Coverage(tier="t3", total=3)
+        for stack in stacks:
+            coverage.record_ok(stack["slug"])
+        payload = {
+            slug: {"adaptive_metrics": {
+                "available": True, "rules_available": applied is not None,
+                "rules_applied": applied, "adopted": bool(applied) if applied is not None else None,
+                "recommendations_pending": 2,
+            }}
+            for slug, applied in (("unknown", None), ("empty", 0), ("adopted", 2))
+        }
+        metrics, views = build_all(stacks, coverage, dataplane=payload)
+        by = {(name, tuple(sorted(labels.items()))): value for name, labels, value in metrics}
+        for name in ("gcinsight_cost_adaptive_rules_applied_total", "gcinsight_cost_stacks_without_adaptive"):
+            with self.subTest(estate_metric=name):
+                self.assertNotIn((name, ()), by)
+        self.assertNotIn(("gcinsight_adaptive_recommendations",
+                          (("stack", "unknown"), ("status", "applied"))), by)
+        self.assertEqual([r[" Stack"] for r in views["cost_adaptive_headroom"]], ["empty"])
+        summary = {r[" Metric"]: r["Value"] for r in views["cost_summary"]}
+        self.assertEqual(summary["Stacks measured for Adaptive"], "2 of 3 scannable (3 total)")
+        for key in ("Adaptive rules applied", "Stacks with recommendations and zero rules applied",
+                    "Active series on those stacks", "Their share of org series %"):
+            with self.subTest(summary=key):
+                self.assertIsNone(summary[key])
+        self.assertEqual(summary["Adaptive recommendations pending (measured stacks)"], 6)
+        benchmark = next(r for r in views["value_benchmarks"]
+                         if r[" Dimension"] == "adaptive_adoption")
+        self.assertEqual(benchmark["Stacks with data"], 2)
+        self.assertEqual(benchmark["Median"], 50)
+        dimension = next(r for r in views["maturity_dimensions"]
+                         if r[" Stack"] == "unknown" and r["Dimension"] == "adaptive_adoption")
+        self.assertIsNone(dimension["Score"])
+        self.assertFalse(dimension["Applicable"])
+        savings = {r[" Metric"]: r["Value"] for r in views["value_savings"]}
+        with self.subTest(consumer="value"):
+            self.assertIsNone(savings["Stacks with pending recommendations and zero rules applied"])
+
+        from collector.emit.diff import summarise
+        with self.subTest(consumer="diff"):
+            self.assertNotIn("adaptive_applied",
+                             summarise({"data": {"stacks": stacks, "dataplane": payload}}))
+        # Missing live members cannot be replaced by an equally sized payload containing departed stacks.
+        payload.pop("unknown")
+        payload["departed"] = payload["adopted"]
+        metrics, views = build_all(stacks, coverage, dataplane=payload)
+        self.assertNotIn("gcinsight_cost_adaptive_rules_applied_total", {n for n, _, _ in metrics})
+        self.assertNotIn("gcinsight_cost_stacks_without_adaptive", {n for n, _, _ in metrics})
+        self.assertIsNone(next(r["Value"] for r in views["value_savings"]
+                               if r[" Metric"] == "Stacks with pending recommendations and zero rules applied"))
+        self.assertNotIn("adaptive_applied",
+                         summarise({"data": {"stacks": stacks, "dataplane": payload}}))
+        # A recovered, measured-empty live member restores honest estate totals, including zeros.
+        payload["unknown"] = payload["empty"]
+        metrics, views = build_all(stacks, coverage, dataplane=payload)
+        by = {(n, tuple(sorted(labels.items()))): v for n, labels, v in metrics}
+        self.assertEqual(by[("gcinsight_cost_adaptive_rules_applied_total", ())], 2)
+        self.assertEqual(by[("gcinsight_cost_stacks_without_adaptive", ())], 2)
+        self.assertEqual(summarise({"data": {"stacks": stacks, "dataplane": payload}})
+                         ["adaptive_applied"], 2)
+
+
 class CostMathsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:

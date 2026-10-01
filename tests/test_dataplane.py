@@ -165,6 +165,121 @@ class RecommendationCoverageTest(unittest.TestCase):
         self.assertFalse(out["series_counts_complete"])
 
 
+class AdaptiveRulesAvailabilityTest(unittest.TestCase):
+    def test_no_readable_payload_does_not_claim_adaptive_available(self):
+        class Response:
+            def __init__(self, ok, body, status):
+                self.ok, self.body, self.status = ok, body, status
+
+            def json(self):
+                if isinstance(self.body, Exception):
+                    raise self.body
+                return self.body
+
+        class Client:
+            def get(self, url, basic=None):
+                if url.endswith('/aggregations/rules'):
+                    return Response(True, ValueError('invalid JSON'), 200)
+                return Response(False, {}, 503)
+
+        out = dataplane.adaptive_metrics(Client(), {
+            'slug': 'synthetic', 'hmInstancePromUrl': 'https://prom.example',
+            'hmInstancePromId': '1',
+        }, 'cap')
+        self.assertFalse(out['available'])
+        self.assertFalse(out['rules_available'])
+        self.assertIsNone(out['rules_applied'])
+        self.assertIsNone(out['adopted'])
+        self.assertFalse(out['recommendations_available'])
+        self.assertFalse(out['series_counts_complete'])
+        self.assertNotIn('recommendations_pending', out)
+
+    def test_unreadable_rules_stay_unknown_through_composition(self):
+        from collector.coverage import Coverage
+        from collector.emit.diff import summarise
+        from collector.pillars.compose import build_all
+
+        class Response:
+            def __init__(self, ok, body, status=200):
+                self.ok, self.body, self.status = ok, body, status
+
+            def json(self):
+                if isinstance(self.body, Exception):
+                    raise self.body
+                return self.body
+
+        class Client:
+            def __init__(self, rules):
+                self.rules = rules
+
+            def get(self, url, basic=None):
+                if url.endswith('/aggregations/rules'):
+                    return self.rules
+                if 'verbose=true' in url:
+                    return Response(True, [_record('synthetic_metric', 100, 10)])
+                return Response(True, {})
+
+        stack = {'slug': 'synthetic', 'hmInstancePromUrl': 'https://prom.example',
+                 'hmInstancePromId': '1', 'hmInstancePromCurrentActiveSeries': 10000,
+                 'hmInstancePromCurrentUsage': 10000, 'currentActiveUsers': 10,
+                 'billingActiveUsers': 10, 'dashboardCnt': 20, 'alertCnt': 10}
+        coverage = Coverage(tier='t3', total=1)
+        coverage.record_ok('synthetic')
+        cases = ((Response(False, {}, 503), False), (Response(True, {}), False),
+                 (Response(True, ValueError('invalid JSON')), False),
+                 (Response(True, []), True), (Response(True, [{}]), True))
+        for response, known in cases:
+            with self.subTest(status=response.status, body=response.body):
+                am = dataplane.adaptive_metrics(Client(response), stack, 'cap')
+                applied = len(response.body) if known else None
+                self.assertEqual(am.get('rules_applied'), applied)
+                self.assertEqual(am.get('adopted'), bool(applied) if known else None)
+                self.assertIs(am.get('rules_available'), known)
+                self.assertTrue(am['recommendations_available'])
+                payload = {'synthetic': {'adaptive_metrics': am}}
+                metrics, views = build_all([stack], coverage, dataplane=payload)
+                by = {(name, tuple(sorted(labels.items()))): value
+                      for name, labels, value in metrics}
+                row = views['cost'][0]
+                self.assertEqual(row['Adaptive rules applied'], applied)
+                self.assertEqual(row['Adaptive adopted'], bool(applied) if known else None)
+                unadopted = int(known and not applied)
+                if known:
+                    self.assertEqual(len(views['cost_adaptive_headroom']), unadopted)
+                else:
+                    self.assertNotIn('cost_adaptive_headroom', views)
+                self.assertIn('cost_adaptive_metric_recommendations', views)
+                savings = {r[' Metric']: r['Value'] for r in views['value_savings']}
+                self.assertEqual(savings['Stacks with pending recommendations and zero rules applied'],
+                                 unadopted if known else None)
+                benchmark = next(r for r in views['value_benchmarks']
+                                 if r[' Dimension'] == 'adaptive_adoption')
+                self.assertEqual(benchmark['Stacks with data'], int(known))
+                self.assertEqual(benchmark['Median'], 100 * applied / (applied + 1)
+                                 if known else None)
+                dimension = next(r for r in views['maturity_dimensions']
+                                 if r['Dimension'] == 'adaptive_adoption')
+                self.assertEqual(dimension['Applicable'], known)
+                self.assertEqual(dimension['Score'], round(100 * applied / (applied + 1), 1)
+                                 if known else None)
+                for key, expected in (
+                    (('gcinsight_adaptive_recommendations',
+                      (('stack', 'synthetic'), ('status', 'applied'))), applied),
+                    (('gcinsight_cost_adaptive_rules_applied_total', ()), applied),
+                    (('gcinsight_cost_stacks_without_adaptive', ()), unadopted),
+                ):
+                    if known:
+                        self.assertEqual(by[key], expected)
+                    else:
+                        self.assertNotIn(key, by)
+                summary = summarise({'data': {'stacks': [stack], 'dataplane': payload}})
+                self.assertEqual(summary['adaptive_pending'], 1)
+                if known:
+                    self.assertEqual(summary['adaptive_applied'], applied)
+                else:
+                    self.assertNotIn('adaptive_applied', summary)
+
+
 class AutoApplyConfigTest(unittest.TestCase):
     class Response:
         def __init__(self, ok: bool, body: object, status: int = 200) -> None:

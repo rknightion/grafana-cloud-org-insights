@@ -164,8 +164,9 @@ def build(
             elif key == "maturity_score":
                 value = scored[slug]["score"]
             elif key == "adaptive_adoption":
-                total = (am.get("rules_applied") or 0) + (am.get("recommendations_pending") or 0)
-                value = 100 * (am.get("rules_applied") or 0) / total if total else None
+                applied = am.get("rules_applied")
+                total = (applied or 0) + (am.get("recommendations_pending") or 0)
+                value = 100 * applied / total if am.get("available") and applied is not None and total else None
             else:
                 value = None
             if value is not None:
@@ -204,10 +205,14 @@ def build(
         for s in adaptive_stacks_in_scope
     ]
     available_adaptive = [am for am in adaptive if am.get("available")]
+    rules_complete = bool(adaptive_stacks_in_scope) and all(
+        am.get("available") and am.get("rules_applied") is not None for am in adaptive
+    )
     unadopted_stacks = [
         s for s in adaptive_stacks_in_scope
         if (am := (dataplane.get(str(s["slug"])) or {}).get("adaptive_metrics") or {}).get("available")
-        and not am.get("adopted") and (am.get("recommendations_pending") or 0)
+        and am.get("rules_applied") is not None
+        and am.get("adopted") is False and (am.get("recommendations_pending") or 0)
     ]
     remediable_series = sum(am.get("remediable_series") or 0 for am in available_adaptive)
     remediable_unused = sum(am.get("remediable_series_unused") or 0 for am in available_adaptive)
@@ -303,7 +308,7 @@ def build(
         )
         rows = [{
             " Metric": "Stacks with pending recommendations and zero rules applied",
-            "Value": len(unadopted_stacks),
+            "Value": len(unadopted_stacks) if rules_complete else None,
         }, {
             " Metric": "Stacks with complete recommendation series counts",
             "Value": f"{len(complete_stacks)} of {len(adaptive_stacks_in_scope)} in scope",
