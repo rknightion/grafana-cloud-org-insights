@@ -270,29 +270,25 @@ class OwnershipTest(unittest.TestCase):
         for identity in ("eva.rossi23@example.com", "someone", None, ""):
             self.assertFalse(is_staff(identity), identity)
 
-    def test_configured_staff_logins_are_excluded_too(self):
-        """`STAFF_LOGINS` is deliberately EMPTY by default: a shipped list would be whoever happened to
-        set up one deployment, and counting them as owners attributes a customer's estate to a
-        contractor. This tests the mechanism, not a list of people."""
-        import collector.pillars.maturity as m
-        original = m.STAFF_LOGINS
-        m.STAFF_LOGINS = frozenset({"setupcontractor"})
-        try:
-            self.assertTrue(m.is_staff("setupcontractor"))
-            self.assertTrue(m.is_staff("SetupContractor"))
-            self.assertFalse(m.is_staff("a.real.user@example.com"))
-        finally:
-            m.STAFF_LOGINS = original
+    def test_vendor_login_is_an_owner_but_grafana_domain_is_excluded(self):
+        """Only the Grafana domain excludes an Admin from the published owner directory."""
+        stack = {"slug": "synthetic-stack"}
+        coverage = Coverage(tier="t3", total=1)
+        coverage.record_ok(stack["slug"])
+        detail = {stack["slug"]: {"users": [
+            {"role": "Admin", "login": "setupcontractor", "email": "vendor@example.com"},
+            {"role": "Admin", "login": "staff@Grafana.com", "email": "alias@example.com"},
+            {"role": "Admin", "login": "staff-alias", "email": "staff@grafana.com"},
+        ]}}
 
-    def test_an_unconfigured_deployment_excludes_nobody_by_login(self):
-        """Empty is the honest default. It must not accidentally match everything."""
-        import collector.pillars.maturity as m
-        original = m.STAFF_LOGINS
-        m.STAFF_LOGINS = frozenset()
-        try:
-            self.assertFalse(m.is_staff("anyone"))
-        finally:
-            m.STAFF_LOGINS = original
+        _, views = maturity.build(
+            [stack], coverage, {stack["slug"]: {"available": True}}, detail)
+
+        row = views["maturity_owners"][0]
+        self.assertEqual(row["Owner candidates"], "setupcontractor")
+        self.assertEqual(row["Owner emails"], "vendor@example.com")
+        self.assertEqual(row["Admins"], 3)
+        self.assertEqual(row["Staff admins excluded"], 2)
 
     def test_owners_come_from_admin_users_not_from_created_by(self):
         stacks, dataplane, coverage = _load()

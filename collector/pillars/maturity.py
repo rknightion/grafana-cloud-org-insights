@@ -35,8 +35,6 @@ are the stack's own Admin users, with Grafana staff filtered out of anything cus
 
 from __future__ import annotations
 
-import os
-
 from dataclasses import dataclass
 from typing import Any, Callable
 
@@ -75,21 +73,15 @@ TIERS = (("leading", 75.0), ("solid", 50.0), ("lagging", 25.0), ("dormant", 0.0)
 # Closed vocabulary, so it can be a metric label and a dashboard breakdown.
 UNSCORED_REASONS = ("paused", "too_few_users", "no_signal_above_floor", "insufficient_rubric_coverage")
 
-# Grafana staff must never appear as an owner in customer-facing output.
+# The Grafana domain is the sole ownership exclusion, with no configurable login list.
 STAFF_DOMAINS = ("@grafana.com",)
-# Logins to exclude from ownership: vendor or partner staff who created a stack on the org's behalf.
-# Counting them as owners attributes the customer's estate to whoever set it up. Populate for your own
-# deployment - empty is the honest default, because this cannot be guessed.
-STAFF_LOGINS: frozenset[str] = frozenset(
-    s.strip() for s in os.environ.get("GCINSIGHT_STAFF_LOGINS", "").split(",") if s.strip()
-)
 
 
 def is_staff(identity: str | None) -> bool:
     if not identity:
         return False
     low = identity.strip().lower()
-    return low in STAFF_LOGINS or any(d in low for d in STAFF_DOMAINS)
+    return any(d in low for d in STAFF_DOMAINS)
 
 
 def _clamp(x: float) -> float:

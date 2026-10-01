@@ -45,7 +45,10 @@ Secret values are populated outside Terraform; the module manages the container 
 | `GCINSIGHT_COVERAGE_SCORE_WEIGHTS` | equal weights; partial JSON overrides for `metrics`, `logs`, `traces`, `profiles`, `dashboard`, `alert`, `slo`; finite non-negative numbers with positive total |
 | `GCINSIGHT_DASHBOARD_DETAIL_ENABLED` | false; `true`/`1` or `false`/`0`; opt-in dashboard JSON inspection for service attribution, with no retained query text |
 | `GCINSIGHT_READER_PRODUCT_READS` | empty; comma-separated `slo` and/or `synthetic-monitoring`; scan and provisioner must agree; selected reader grants do not prove route availability |
-| `GCINSIGHT_STAFF_LOGINS` | empty; comma-separated lowercase logins excluded from ownership attribution in maturity views; not part of the immutable consumer projection |
+
+Maturity ownership attribution excludes only identities containing `@grafana.com` (case-insensitive)
+in an Admin's login or email. Vendor and partner logins otherwise remain owner candidates; there is no
+configurable login exclusion list.
 
 Expected retention and Fleet scrape policy are described below. The Terraform module exposes
 `coverage_score_weights`, `dashboard_detail_enabled`, `provision_opt_out` and
