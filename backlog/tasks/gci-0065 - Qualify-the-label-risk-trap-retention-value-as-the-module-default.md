@@ -1,9 +1,11 @@
 ---
 id: GCI-0065
 title: Qualify the label-risk trap retention value as the module default
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop7-root'
 created_date: '2026-10-01 12:01'
+updated_date: '2026-10-01 13:51'
 labels:
   - documentation
   - privacy
@@ -35,3 +37,9 @@ Loop6 independent cross-document review at4f0b5fa found docs/traps.md:712-714 st
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Loop7 frozen packets: bounded implementation or AC1 research; public-boundary proof, offline gate and CodeRabbit before landing, exact landed CI. Root security review/guard landing, research staff GET probe and conditional reserve decision, integrated review, stable release and dev-only rollout proof. Tracker remains root-owned.
+<!-- SECTION:PLAN:END -->

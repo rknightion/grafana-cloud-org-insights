@@ -1,9 +1,11 @@
 ---
 id: GCI-0061
 title: Replace the legacy Connect-RPC substring guard with exact read routes
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop7-root'
 created_date: '2026-10-01 11:45'
+updated_date: '2026-10-01 13:51'
 labels:
   - security
   - transport
@@ -35,3 +37,15 @@ The loop6 documentation audit at fb5803a found collector/sources/dataplane.py:70
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Loop7 frozen packets: bounded implementation or AC1 research; public-boundary proof, offline gate and CodeRabbit before landing, exact landed CI. Root security review/guard landing, research staff GET probe and conditional reserve decision, integrated review, stable release and dev-only rollout proof. Tracker remains root-owned.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Owner correction Rob 2026-10-01: three current helper routes, not two: CollectorService/ListCollectors, PipelineService/ListPipelines, QuerierService/LabelValues (signal_inventory.py). Exact frozen S-RPC guard; GET-only general client and label-risk two-path exception unchanged. Published AGENTS wording is tracked separately, never hand-edited.
+<!-- SECTION:NOTES:END -->

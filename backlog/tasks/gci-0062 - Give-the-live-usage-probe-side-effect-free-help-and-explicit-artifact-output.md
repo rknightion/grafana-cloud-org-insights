@@ -1,9 +1,11 @@
 ---
 id: GCI-0062
 title: Give the live usage probe side-effect-free help and explicit artifact output
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop7-root'
 created_date: '2026-10-01 11:48'
+updated_date: '2026-10-01 13:51'
 labels:
   - cli
   - safety
@@ -34,3 +36,9 @@ The loop6 operator-doc audit found bin/probe_usage_signals.py has no argument pa
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Loop7 frozen packets: bounded implementation or AC1 research; public-boundary proof, offline gate and CodeRabbit before landing, exact landed CI. Root security review/guard landing, research staff GET probe and conditional reserve decision, integrated review, stable release and dev-only rollout proof. Tracker remains root-owned.
+<!-- SECTION:PLAN:END -->

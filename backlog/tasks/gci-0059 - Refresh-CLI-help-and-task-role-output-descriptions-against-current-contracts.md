@@ -1,9 +1,11 @@
 ---
 id: GCI-0059
 title: Refresh CLI help and task-role output descriptions against current contracts
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop7-root'
 created_date: '2026-10-01 11:45'
+updated_date: '2026-10-01 13:51'
 labels:
   - documentation
   - operations
@@ -37,3 +39,9 @@ The loop6 documentation audit found shipped CLI docstrings and an output descrip
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Loop7 frozen packets: bounded implementation or AC1 research; public-boundary proof, offline gate and CodeRabbit before landing, exact landed CI. Root security review/guard landing, research staff GET probe and conditional reserve decision, integrated review, stable release and dev-only rollout proof. Tracker remains root-owned.
+<!-- SECTION:PLAN:END -->
