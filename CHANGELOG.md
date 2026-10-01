@@ -1,5 +1,44 @@
 # Changelog
 
+## [0.4.2](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.4.1...v0.4.2) (2026-10-01)
+
+
+### Bug Fixes
+
+* **cli:** describe scan credentials and normalize configuration exits ([b073f91](https://github.com/rknightion/grafana-cloud-org-insights/commit/b073f9182dc73613005e32b4d3d694dbdd84a613))
+* **dataplane:** restrict Connect RPC to three exact read routes ([ccd9b77](https://github.com/rknightion/grafana-cloud-org-insights/commit/ccd9b77ec933d174b3e49342b280058fdcdfcb24))
+* **maturity:** retire configurable staff login exclusions ([ea48162](https://github.com/rknightion/grafana-cloud-org-insights/commit/ea481625a8c66df74de2b865a4bd54ef0326850d))
+* **probe:** require explicit context and safe artifact output ([72bcf29](https://github.com/rknightion/grafana-cloud-org-insights/commit/72bcf2943ac1408094e115147f08814c73869977))
+* **transport:** refuse RPC redirects and plaintext authorities ([bd2d0cd](https://github.com/rknightion/grafana-cloud-org-insights/commit/bd2d0cd5c9431f264951fd013927463fcb2bdd1c))
+
+
+### Documentation
+
+* **backlog:** accept CLI fixes and record security repair ([cf764c7](https://github.com/rknightion/grafana-cloud-org-insights/commit/cf764c7c98ac6464a8121d05cb8a1dcac3d78270))
+* **backlog:** accept probe CLI safety with execution disclosure ([173ec86](https://github.com/rknightion/grafana-cloud-org-insights/commit/173ec867f47e467f68b06014a5114a2394d2e17e))
+* **backlog:** accept staff retirement and retention wording ([b8f5cbb](https://github.com/rknightion/grafana-cloud-org-insights/commit/b8f5cbbb72d9bf08cb349b496f7bc317bd98801f))
+* **backlog:** close witnessed stable customer rollout ([743a572](https://github.com/rknightion/grafana-cloud-org-insights/commit/743a572804203cb6c805cd7074356164cae6d015))
+* **backlog:** queue intentional dev deployment parity ([87dc977](https://github.com/rknightion/grafana-cloud-org-insights/commit/87dc977c618a557f1e549427a4f4b86795cd9683))
+* **backlog:** record adaptive segment research and admission gap ([f7222d1](https://github.com/rknightion/grafana-cloud-org-insights/commit/f7222d13a676a1b280354031f6b1395d25f1d6c5))
+* **backlog:** record loop6 admissions and documentation findings ([07d1145](https://github.com/rknightion/grafana-cloud-org-insights/commit/07d1145598d11e841e3ff2cb981b0e1f3738f6a7))
+* **backlog:** record loop7 admission and boundary decisions ([08addbe](https://github.com/rknightion/grafana-cloud-org-insights/commit/08addbe2496de130d919ad6b3333839026239aa1))
+* **backlog:** record parity proof and cross-document review findings ([0f8fb4c](https://github.com/rknightion/grafana-cloud-org-insights/commit/0f8fb4cad03c2636c7b84e8906ef161848696b41))
+* **backlog:** retain doc audit evidence and probe safety follow-up ([623632c](https://github.com/rknightion/grafana-cloud-org-insights/commit/623632cc0f67ac1461026370fe82b254194f007b))
+* **backlog:** track synthetic hydration proof gap ([b14512c](https://github.com/rknightion/grafana-cloud-org-insights/commit/b14512c4857c4af1b03e904d557d68998acf7496))
+* **credentials:** align source calls and Adaptive Traces contract ([3ce8ac9](https://github.com/rknightion/grafana-cloud-org-insights/commit/3ce8ac98a46e9e43a03791d6d43042b7a97d5587))
+* **loop:** record accepted documentation audit and dev parity ([4f652f2](https://github.com/rknightion/grafana-cloud-org-insights/commit/4f652f2305c4e7ff1eb4cf6d4da97ea56d5303b5))
+* **loop:** record completed stable rollout verification ([22e6beb](https://github.com/rknightion/grafana-cloud-org-insights/commit/22e6beb0fb6f7b8efc85c4b59ddfb828c71f1da3))
+* **operations:** refresh rollout, schedules and rollback guidance ([2698d25](https://github.com/rknightion/grafana-cloud-org-insights/commit/2698d251f1d31eeb26184c023d8164cceae074a1))
+* **probe:** distinguish explicit live output from synthetic proof ([38c3c82](https://github.com/rknightion/grafana-cloud-org-insights/commit/38c3c828fe701c2eeff7b2f01170aec4372df233))
+* publish canonical agent documents ([1cceee7](https://github.com/rknightion/grafana-cloud-org-insights/commit/1cceee747cd8b9de23cfa26cf72d23d5db0b0cc7))
+* publish canonical agent documents ([ceda095](https://github.com/rknightion/grafana-cloud-org-insights/commit/ceda0950758fabd78c5924d28be761828ad3a3ec))
+* **reference:** align operator guides with current runtime contracts ([364a101](https://github.com/rknightion/grafana-cloud-org-insights/commit/364a101ec5b082aea66cc8de4696247a40641fb6))
+* **reference:** correct the manual scan runbook link ([4f0b5fa](https://github.com/rknightion/grafana-cloud-org-insights/commit/4f0b5fa53a60317b39f9f7fc9cdefd54846aade6))
+* **runbook:** explain all scheduled jobs and queue freshness audit ([3d74061](https://github.com/rknightion/grafana-cloud-org-insights/commit/3d74061e635cea5b7422ee85b744a81f22e3afd1))
+* **spec:** align capabilities and infrastructure with supported runtime ([fb5803a](https://github.com/rknightion/grafana-cloud-org-insights/commit/fb5803aac17251403f02d06c4a939374bd148ef3))
+* **transport:** reconcile the exact RPC contract and proof status ([a2ce07f](https://github.com/rknightion/grafana-cloud-org-insights/commit/a2ce07f5feb95bd17e19e44a5307444c44b9332c))
+* **traps:** qualify the configurable scan retention default ([b1ab9ef](https://github.com/rknightion/grafana-cloud-org-insights/commit/b1ab9ef4e1cbabf222ff46f69437678514eaa975))
+
 ## [0.4.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.4.0...v0.4.1) (2026-10-01)
 
 
