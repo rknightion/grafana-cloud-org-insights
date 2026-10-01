@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop6-root'
 created_date: '2026-10-01 10:05'
-updated_date: '2026-10-01 11:27'
+updated_date: '2026-10-01 11:53'
 labels:
   - deployment
   - parity
@@ -45,3 +45,9 @@ Owner requested this follow-up during loop5 on 2026-10-01 after reviewing the de
 <!-- SECTION:PLAN:BEGIN -->
 Fresh read-only comparison of both deployments and module inputs; classify every difference. Root alone aligns dev drift through saved reviewed plans, preserves isolation, verifies no-change plan and affected-tier runtime. Retain evidence-backed exceptions in private infra comments; no customer writes expected.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Loop6 R-cmp/R-par accepted live:193 classified difference rows (165 isolation,26 justified,2 deadline drift) in root-private evidence. Only dev T2/T3 deadlines aligned1800->3600; smaller CPU/memory retained with five-stack healthy-run evidence, UTC cadence unchanged and start offsets justified by shared live NAT topology. Nonempty dev retention expectation intentionally tests unreadable/null status; ownership and equivalent wiring exceptions retained in private infra comments. Infra097e0c68ff873fc9cd7a589802bc51d763b8ddef OpenTofu CI36856022636 success. Saved reviewed plan applied once; two definitions and two scheduler targets changed, scheduler IAM actual policy identical. Final targeted plan No changes. Both new revisions ran once, STOPPED0 with S3 advancing; healthy T2/T3 scan durations74.54s/37.61s. Pre/post source/environment/roles/secret metadata/SSM versions/bucket controls unchanged except approved deadline/revision deltas; no schedule suspension, no customer write. Product final integration gate/tracker landing remains pending.
+<!-- SECTION:NOTES:END -->
