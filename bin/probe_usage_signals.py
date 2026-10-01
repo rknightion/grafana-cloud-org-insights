@@ -7,9 +7,10 @@ Needs nothing but a working `gcx` context on a stack in the org - `grafanacloud-
 every one of them and carries the whole org's billing/usage series. No service account, no CAP, no token
 to tear down afterwards.
 
-The dashboard panels these numbers back read the same datasource LIVE, so this file is not an input to
-anything: it is the committed proof that the panel expressions returned what the docs claim, on a date.
-Re-run it before quoting any figure from `IDEAS.md`, `PLAN.md` Stage 11 or a panel description.
+Dashboard panels read the datasource LIVE; this probe writes a separate, explicitly selected live
+measurement artifact. The committed `testdata/usage-datasource-signals.json` is synthetic and consumed
+by dashboard tests, not evidence of a live estate. Keep live outputs separate and re-measure before
+quoting a figure from a panel description.
 
 **Rate-shaped series are windowed, never compared instantaneously.** Every `*_per_second` and `*:rate5m`
 series here is momentary, so `> 0` answers "is this happening in the current scrape window" rather than

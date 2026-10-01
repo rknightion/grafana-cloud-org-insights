@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@loop7-root'
 created_date: '2026-10-01 11:48'
-updated_date: '2026-10-01 14:12'
+updated_date: '2026-10-01 15:07'
 labels:
   - cli
   - safety
@@ -42,6 +42,12 @@ The loop6 operator-doc audit found bin/probe_usage_signals.py has no argument pa
 <!-- SECTION:PLAN:BEGIN -->
 Loop7 frozen packets: bounded implementation or AC1 research; public-boundary proof, offline gate and CodeRabbit before landing, exact landed CI. Root security review/guard landing, research staff GET probe and conditional reserve decision, integrated review, stable release and dev-only rollout proof. Tracker remains root-owned.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+R-int-r1 no must-fix, 168 targeted tests/82 subtests green; two non-blocking wording mismatches corrected by root before freeze: configuration table now limits GCINSIGHT_GCX_CONTEXT to tracer, and probe module help clearly separates explicit live artifact from committed synthetic dashboard-test input. Executable probe AST unchanged; actual --help inspected. Canonical AGENTS wording remains GCI-0066.
+<!-- SECTION:NOTES:END -->
 
 ## Final Summary
 

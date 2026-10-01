@@ -105,7 +105,7 @@ See [Consumer upgrades and rollback](../consumer/MIGRATION-RUNBOOK.md).
 | `GCINSIGHT_PROM_DS_UID` | alert Prometheus datasource uid; generic default `grafanacloud-prom` |
 | `GCINSIGHT_ALERT_RULE_GROUP`, `GCINSIGHT_ALERT_RULE_UIDS_JSON` | alert group and JSON mapping from rule keys to stable uids |
 | `GCINSIGHT_ALERT_TITLE_PREFIX`, `GCINSIGHT_ALERT_TITLE_SEPARATOR`, `GCINSIGHT_ALERT_SERVICE_LABEL` | alert title and service-label identity |
-| `GCINSIGHT_GCX_CONTEXT` | existing authenticated gcx context for live trace and billing probes; not a collector credential |
+| `GCINSIGHT_GCX_CONTEXT` | optional context default for `bin/trace.py --live`; the usage probe requires explicit `--context` and `--out` and ignores this variable; not a collector credential |
 
 Generic identity defaults live in `collector.identity`, `collector.provision`, `bin/dashboards.py`,
 `bin/alerts.py` and the emitters. Changing provisioner names affects live reconciliation; changing
