@@ -3,10 +3,10 @@ id: GCI-0026
 title: >-
   Validate the Loki retention surface against an authorised development
   deployment
-status: Parked
+status: Done
 assignee: []
 created_date: '2026-09-11 14:15'
-updated_date: '2026-10-01 03:09'
+updated_date: '2026-10-01 06:53'
 labels:
   - retention
   - validation
@@ -44,9 +44,9 @@ Authorised by the operator on 2026-09-11 for wave 2.
 <!-- AC:BEGIN -->
 - [x] #1 One read-only full-estate collector execution completes against an authorised development deployment
 - [x] #2 All three retention view artifacts are observed retained on the bucket
-- [ ] #3 One Loki change event is observed with stream labels exactly tier, pillar=E and event=change, and identity detail only in the line body
+- [x] #3 One Loki change event is observed with stream labels exactly tier, pillar=E and event=change, and identity detail only in the line body
 - [x] #4 The five Operations retention elements are observed rendering against populated data
-- [ ] #5 No identity-bearing content is found in any metric label, and no deployment-specific detail reaches any file
+- [x] #5 No identity-bearing content is found in any metric label, and no deployment-specific detail reaches any file
 <!-- AC:END -->
 
 ## Definition of Done
@@ -66,6 +66,8 @@ loop4 V-ret observed all three retained retention view objects (AC2 evidence); f
 loop4 root bound archived T2 STOPPED exit0 task588c176e08c549aa920731652a6b1299 to definition17, source6ebedd3 and deployed immutable ECR digestbc024b60; V-ret latest healthy manifest corresponds17:39:34Z within that execution. Current daily schedule04:35UTC witnessed, 26h lookback sufficient. AC2 all three retained objects proven, though stream/gap copies explicitly stale. Natural change event/populated render remain unproved.
 
 loop4 freshfullestateT2 healthy5/5/no failures tiedSTOPPED0/imageCD/source9ba andscan_complete; all3retentionobjectsretained. VdevliveOperations5retentionpanelsPNG rendered (no divergentcandidate genuineemptyaccepted), datasourceexpressionshavepositiveglobaldenominator/modal samples, notfabricatedgapzero. NaturalLokiEchangeeventabsentin30dread soAC3stillopen; AC5boundedfixedlabels/sourceprivacyonly, no exhaustivewholefilesystemnegative. Unreadablepolicy/absentgapgaugescorrect-by-design; stream/gaplastgoodstale16:16 retainedexplicitly. TaskremainsParked.
+
+Owner decision (Rob, 2026-10-01, loop5 preparation): the retention surface is receiving data, so close the task. Evidence of receipt from loop4: a fresh full-estate T2 (healthy 5/5) retained all three retention view objects, and the five Operations retention panels rendered over populated data with a positive measured denominator. AC3 is accepted on the owner's instruction without a natural fixed-label change event; none occurred in loop4's 30-day Loki read and none was fabricated. AC5 is accepted on the owner's instruction on the bounded loop4 check (six retention metric families and source privacy); this is not an exhaustive identity or pixel audit.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
