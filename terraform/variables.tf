@@ -101,10 +101,9 @@ variable "loki_tenant" {
 
 variable "create_bucket" {
   description = <<-EOT
-    Create the S3 bucket. Set false to adopt a bucket that already exists - which is the case for the
-    first production deployment, where the bucket was provisioned by hand before this module existed.
-    Adopting means Terraform manages neither the lifecycle rules nor the public-access block, so
-    verify those separately.
+    Create the S3 bucket. Set false to adopt a bucket that already exists. Adoption leaves lifecycle,
+    public-access blocking, versioning, encryption and bucket policy outside this module. Verify those
+    separately, including targeted raw label-risk retention and a non-TLS deny before raw publication.
   EOT
   type        = bool
   default     = true
@@ -203,8 +202,11 @@ variable "create_secret" {
     never managed here - Terraform state is not a secret store, and a token in a plan output is a
     token in a CI log. Write them out of band:
 
-      aws secretsmanager put-secret-value --secret-id <name> --secret-string \
-        '{"GCINSIGHT_READ_TOKEN":"...","GCINSIGHT_WRITE_TOKEN":"...","GCINSIGHT_ORG_ID":"..."}'
+      aws secretsmanager put-secret-value --secret-id <name> --secret-string file://<protected-token-json>
+
+    The JSON uses reader_secret_key and writer_secret_key; include provisioner_secret_key when the
+    provisioner is created. GCINSIGHT_ORG_ID is configured separately, not a token. Never put token
+    values in shell history, Terraform variables or state. Live writes require separate approval.
   EOT
   type        = bool
   default     = true
@@ -262,7 +264,7 @@ variable "image" {
 }
 
 variable "task_architecture" {
-  description = "Fargate CPU architecture. ARM64 is ~20% cheaper for identical work and the collector is pure Python."
+  description = "Fargate CPU architecture, default ARM64. Must match the selected image; the collector is pure Python and the published image supports ARM64 and X86_64."
   type        = string
   default     = "ARM64"
 
@@ -304,32 +306,36 @@ variable "assign_public_ip" {
 
 variable "schedules_enabled" {
   description = <<-EOT
-    Master switch for every schedule. When false the tasks, roles and storage are all created but
-    nothing fires, so `terraform apply` is safe to run before anyone has reviewed what the collector
-    would write. Individual tiers can also be disabled in `var.tiers`.
+    Master switch for all collector schedules and the provisioner schedule when created. When false
+    the schedules do not fire; this does not authorize an apply or prevent manual task invocation.
+    Individual tiers can also be disabled in var.tiers. Provisioner scheduling additionally requires
+    provisioner_enabled; create_provisioner independently controls whether that task exists.
   EOT
   type        = bool
   default     = true
 }
 
 variable "schedule_timezone" {
-  description = "Timezone for the cron expressions. UTC keeps the T4 diff intervals honest across DST."
+  description = "EventBridge Scheduler timezone for all scan and provisioner cron expressions, default UTC. Deployment overrides must account for DST; T4 validates elapsed baseline intervals independently. See RUNBOOK.md's scheduled-jobs table."
   type        = string
   default     = "UTC"
 }
 
 variable "tiers" {
   description = <<-EOT
-    The four scan tiers. Each becomes one task definition and one EventBridge schedule.
+    The four scan tiers. Each becomes one task definition and one EventBridge schedule, retained even
+    when disabled. Module defaults: T1 hourly at :05, T2 daily, T3 six-hourly, T4 daily, interpreted in
+    schedule_timezone (default UTC). Deployment expressions may override these cadences; RUNBOOK.md
+    holds the canonical operator timetable.
 
     Separate task definitions rather than one shared definition with per-schedule overrides, because
     EventBridge Scheduler's ECS target has NO container_overrides field - the AWS `EcsParameters` type
     does not support it. That constraint turns out to be useful: each tier gets its own sizing, and T3
     genuinely needs more memory than T1.
 
-    `deadline_seconds` is the collector's own internal deadline and must stay shorter than the
-    interval, so a slow scan cannot still be running when the next one fires. ECS has no max-runtime
-    setting, so this is the only thing that bounds a run.
+    deadline_seconds is the collector's internal caller-wait/work-admission budget and must stay
+    shorter than the interval. ECS has no max-runtime setting: this budget does not hard-terminate
+    local computation or surviving HTTP reads. See docs/source-resource-fences.md.
   EOT
   type = map(object({
     schedule_expression = string
@@ -473,7 +479,7 @@ variable "create_views_reader_user" {
 # --- Per-stack reader credentials (PLAN 17D) -------------------------------------------------------
 
 variable "stack_token_prefix" {
-  description = "SSM Parameter Store path prefix holding one SecureString per stack, each carrying that stack's read-only Assistant/service-account reader token. Must match `collector/provision.py::SSM_PREFIX` - the collector reads these by computed path, so a mismatch fails as an auth error against Grafana rather than as a missing parameter."
+  description = "SSM Parameter Store prefix holding one SecureString per stack with its read-only reader token and reconciliation IDs. Passed as GCINSIGHT_STACK_TOKEN_PREFIX to both scan and provisioner tasks; keep external provisioning and IAM paths aligned."
   type        = string
   default     = "/gcinsight/stack-token"
 
@@ -573,13 +579,13 @@ variable "provisioner_secret_key" {
 }
 
 variable "provisioner_schedule_expression" {
-  description = "When to reconcile per-stack credentials. Daily, not hourly: provisioning is a gcom write path and gcom is paced at 6 req/s per credential. Healthy steady state is reads and zero writes. Keep it clear of T1 (:05) and before T2 (03:30): T2 loads reader credentials once at start, so an overlapping run misses a stack minted or repaired mid-run until the next day."
+  description = "Per-stack reader reconciliation cron expression, module default daily in schedule_timezone (default UTC); deployments may override it. The task is opt-in through create_provisioner. Healthy steady state is reads and zero writes. Keep reconciliation clear of scans and before T2 credential loading; see RUNBOOK.md's scheduled-jobs table."
   type        = string
   default     = "cron(15 3 * * ? *)"
 }
 
 variable "provisioner_enabled" {
-  description = "Whether the daily reconciliation schedule is ENABLED. Disable to pause reconciliation without destroying it - existing credentials keep working, and new stacks simply go unprovisioned until it is re-enabled."
+  description = "Enable the reconciliation schedule when create_provisioner and schedules_enabled are also true. Module default true does not create the opt-in task. Disable to pause reconciliation without destroying it; existing credentials keep working, while new stacks wait."
   type        = bool
   default     = true
 }

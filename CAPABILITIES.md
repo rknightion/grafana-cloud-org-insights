@@ -18,14 +18,12 @@ turning an unavailable source into zero.
 | `metrics:read` | Mimir cardinality API **and the whole Prometheus query API** | `hmInstancePromId` |
 | `logs:read` | `/loki/api/v1/labels`, `/loki/api/v1/label/<name>/values`, `/config/tenant/v1/limits` | `hlInstanceId` |
 | `traces:read` | `/tempo/api/v2/search/tags`, `/tempo/api/v2/search/tag/<t>/values` | `htInstanceId` |
-| `profiles:read` | `querier.v1.QuerierService/LabelValues` | `hpInstanceId` |
-| `rules:read` | `/api/prom/api/v1/rules`, `/api/prom/api/v1/alerts`, Loki `/prometheus/api/v1/rules` | signal instance id |
-| `alerts:read` | `/alertmanager/api/v2/{status,alerts,silences}`, `/api/v1/alerts` | `amInstanceId` |
+| `profiles:read` | native `querier.v1.QuerierService/LabelNames` and `LabelValues` | `hpInstanceId` |
+| `rules:read` | declared but no current source call; verified rule/alert routes discussed below | signal instance id |
+| `alerts:read` | declared but no current source call; verified Alertmanager routes discussed below | `amInstanceId` |
 | `adaptive-metrics-rules:read` | `/aggregations/rules` | `hmInstancePromId` |
 | `adaptive-metrics-recommendations:read` | `/aggregations/recommendations?verbose=true` | `hmInstancePromId` |
 | `adaptive-metrics-config:read` | `/aggregations/recommendations/config` | `hmInstancePromId` |
-| `adaptive-metrics-rules:read` (segments) | `/aggregations/rules/segments`, `/aggregations/rules?segment=<id>` | `hmInstancePromId` |
-| `adaptive-metrics-recommendations:read` (segments) | `/aggregations/recommendations?segment=<id>` | `hmInstancePromId` |
 | `fleet-management:read` | Fleet Management Connect-RPC list methods | stack `id` |
 
 The route column is an implementation inventory. It is not a claim that the credential cannot call
@@ -42,9 +40,10 @@ other read routes.
   the route-level observations and realm limits below; the collector still calls only tag routes.
 - **`profiles:read` permits profile content reads, not just label inventory.** An isolated
   stack-realm policy carrying only this scope returned profile types and a populated merged
-  flamegraph. See the observations below; the collector still calls only `LabelValues`.
+  flamegraph. See the observations below; the collector calls only `LabelNames` and `LabelValues`.
 - **`rules:read` reaches rule definitions and firing alert payloads.** The latter include full customer
-  label sets. The collector reduces those payloads to bounded counts and never republishes the labels.
+  label sets. These routes are not currently called; any future reader must reduce payloads to
+  bounded counts and never republish the labels.
 
 One org-realm token reaches all four signal databases in every region of the estate. The region hint in
 the token payload does not constrain the data plane. The basic-auth user differs per signal and comes
@@ -52,6 +51,11 @@ from `dataplane.AUTH_FIELD`; Fleet Management and the Alertmanager are the two t
 instance id.
 
 The Fleet calls use POST because that is the RPC transport; the scope and methods remain reads.
+The label-risk source has an exact two-path native Pyroscope read-POST exception. The observed-name
+source's older `dataplane._connect_rpc` helper also reads Pyroscope LabelValues; its legacy substring
+path guard is not an exact allow-list and is not authority for additional RPC methods. The shared
+HTTP client stays GET-only. All these source transports fence caller waits with `collector.netbound`,
+not hard cancellation of surviving reads; see [resource fences](docs/source-resource-fences.md).
 Grafana.com is paced at six requests per second. Paused stacks are skipped when the control plane
 answers with its paused-stack conflict response.
 
@@ -93,10 +97,11 @@ So reading exemptions means adding `grafana-adaptive-metrics-app.exemptions:read
 uses for Adaptive Logs - not widening the org credential. The rules, recommendations, segments and
 config data all remain reachable on the Mimir host with the org token and need no plugin role.
 
-**Segments are a real and previously unrecorded surface.** A segment scopes a rule set to a selector,
-so a stack with segments has rules that are not estate-wide and its savings arithmetic must be read
-per segment rather than globally. Both segment routes above were verified 200 with a live segment
-present.
+**Segments are an uncollected surface.** `/aggregations/rules/segments`,
+`/aggregations/rules?segment=<id>` and `/aggregations/recommendations?segment=<id>` were verified
+200 with a live segment present, but `dataplane.adaptive_metrics` does not enumerate or select
+segments. A segment scopes a rule set to a selector; the collector's unsegmented aggregate must not
+be claimed as a verified segment-aware estate saving.
 
 ### Scope-isolated trace and profile content reads
 
@@ -154,6 +159,9 @@ The role can read:
 
 - Assistant aggregate usage, tenant-scoped inventory and investigations counts;
 - Adaptive Logs recommendations through the plugin-proxy route;
+- count-only Adaptive Traces config availability, policies and recommendations through
+  `/api/plugin-proxy/grafana-adaptivetraces-app/{config,policies,recommendations}`;
+  the preliminary `health` GET is status-only and does not gate these domains;
 - retention change requests through the Databases Configuration app resource route;
 - service-account inventory and permission metadata;
 - datasource metadata and caching state;
@@ -170,14 +178,15 @@ The role can read:
 arbitrary production datasources.
 
 An optional, default-off `GCINSIGHT_READER_PRODUCT_READS` setting accepts `slo` and
-`synthetic-monitoring`. In the dev deployment, `slo` adds unscoped
+`synthetic-monitoring`. When selected, `slo` adds unscoped
 `grafana-slo-app.orgpreferences:read` and `grafana-slo-app.slo:read`, plus `plugins.app:access` scoped
 to `plugins:id:grafana-slo-app`. `synthetic-monitoring` adds unscoped
 `grafana-synthetic-monitoring-app:read` and `grafana-synthetic-monitoring-app.checks:read`, plus
 `plugins.app:access` scoped to `plugins:id:grafana-synthetic-monitoring-app`. These pairs were checked
 against live role metadata on 2026-09-23. Unsetting the option removes those product pairs during
-reconciliation without replacing a working reader token. The customer deployment grants neither
-family until a separate explicit decision.
+reconciliation without replacing a working reader token. A deployment must explicitly approve and
+select a family; generic defaults grant neither. T2 gathers count-only SLO definitions when `slo` is
+selected, but the Synthetic Monitoring app grant does not establish a reachable check-list route.
 
 The declaration explicitly refuses decrypted alert secrets, secure values, user session tokens,
 Grafana auth settings, support bundles, provisioning writes and Adaptive Traces mutation actions.
@@ -215,6 +224,16 @@ The default response is structurally complete-looking but insufficient for savin
 The working read route is the Adaptive Logs plugin proxy. Frontend app resource paths can return 500
 and datasource-proxy calls can report authentication failure even when the reader role is correct.
 Recommendation volume has no declared or settable time window.
+
+### SLO and Adaptive Traces
+
+T2's optional SLO list GET is `/api/plugins/grafana-slo-app/resources/v1/slo`. It projects definition
+counts, configured-alerting counts and closed provenance/status/source enums, not SLI time series
+or firing alerts. Adaptive Traces projects config availability, closed policy-type counts and pending
+recommendation counts through the routes above with the existing reader; this is operational
+sufficiency of the full role, not proof of isolated minimum permissions. Config availability does not
+prove enablement, and recommendation counts do not measure achieved saving. Both readers discard
+raw objects and use the [guarded transport/schema fences](docs/source-resource-fences.md).
 
 ### Loki retention
 
@@ -273,12 +292,13 @@ automatically labelled broken.
  returned 403 before the optional product grant on 2026-09-23. The reader's datasource query scope
  intentionally excludes this datasource, so the optional app read pairs alone do not establish a
  reachable check-list route. The backend's separate REST API requires a Synthetic Monitoring token.
- Do not add a datasource query grant or mint that token under this wave's D8 boundary. See the
+ Do not add a datasource query grant or mint that token without a separate explicit deployment
+ decision. See the
  [plugin source](https://github.com/grafana/synthetic-monitoring-app/blob/97fefc26fac1abd508f753ec41807a448e957ae5/src/datasource/DataSource.ts)
  and [Grafana API documentation](https://grafana.com/docs/grafana-cloud/observe-and-act/testing/synthetic-monitoring/api-reference/).
 - Adaptive Profiles endpoints have not produced a verified read contract.
-- Adaptive Traces collection is absent until a concrete read-only consumer and permission contract
-  exist.
+- Adaptive Traces detail and mutation are not collected. The count-only GET consumer described above
+  uses the existing reader without adding the plugin's bundled admin role.
 - Regional usage-insights datasources on one central stack are not a substitute for per-stack readers.
 - Grafana.com dashboard lists are incomplete or empty; stack-local APIs own that inventory.
 
@@ -293,10 +313,11 @@ credentials are supplied only to dashboard/alert publication tools and should be
 
 The daily label-risk source uses the existing `metrics:read`, `logs:read`, `traces:read` and
 `profiles:read` scopes with inventory per-signal tenant IDs. No scope, role or credential is
-changed. GET label routes are Mimir `/api/prom/api/v1/labels` and `/label/<key>/values`,
-Loki `/loki/api/v1/labels` and `/label/<key>/values`, and Tempo
-`/tempo/api/v2/search/tags` and `/tag/<scoped-key>/values`. Pyroscope exclusively uses the two
-read-only native POST paths `/querier.v1.QuerierService/LabelNames` and `/LabelValues`
+changed. GET label routes are Mimir `/api/prom/api/v1/labels` and `/api/prom/api/v1/label/<key>/values`,
+Loki `/loki/api/v1/labels` and `/loki/api/v1/label/<key>/values`, and Tempo
+`/tempo/api/v2/search/tags` and `/tempo/api/v2/search/tag/<scoped-key>/values`. Pyroscope exclusively
+uses the two read-only native POST paths `/querier.v1.QuerierService/LabelNames` and
+`/querier.v1.QuerierService/LabelValues`
 on inventory `hpInstanceUrl`, authenticated as `hpInstanceId`. Responses use `names` for both
 operations. This is not authority for another QuerierService method or a write.
 

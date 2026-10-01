@@ -10,9 +10,9 @@ Works on OpenTofu and Terraform. Requires the AWS provider v6.
 
 | | |
 |---|---|
-| S3 bucket | `scans/` (raw, expiring), `views/` (last-good tables, permanent except raw label-risk view), `locks/` (single-run locks) |
+| S3 bucket | `scans/` (raw, expiring), `views/` (last-good tables, permanent except raw label-risk view), `locks/` (single-run locks), `state/` (carry-forward), optional deployment-owned `config/ratecard.csv` |
 | ECS | Fargate cluster, one task definition per tier, CloudWatch log group |
-| EventBridge Scheduler | one schedule per enabled tier |
+| EventBridge Scheduler | one schedule per configured tier, retained when disabled; optional separate provisioner task/role/schedule |
 | IAM | execution role, task role, scheduler role, and a `views/`-only reader for the Grafana datasource |
 | Secrets Manager | the container for the two Grafana Cloud tokens - **values are never managed here** |
 | ECR | optional repository for the collector image |
@@ -36,8 +36,9 @@ This is not a strict 90-day-from-observation erasure guarantee.
 With `create_bucket = false`, the bucket owner must configure and verify equivalent targeted
 retention in the bucket's existing lifecycle policy **before publishing raw matches**. This
 module does not manage an adopted bucket's lifecycle; do not add a competing lifecycle
-configuration resource. Root deployment validation must read back the effective bucket policy,
-versioning, encryption and reader access before allowing publication.
+configuration resource. Deployment validation must read back effective lifecycle, versioning, encryption and reader access,
+plus a fresh effective bucket-policy witness denying non-TLS access, before allowing publication.
+Missing controls block raw publication; this prerequisite is not authority to add an adopted bucket policy.
 
 ## The two credentials
 
@@ -53,14 +54,15 @@ ECS agent, so they never appear in Terraform state, a plan diff, or the task rol
 
 ## First deployment, in order
 
-Doing these out of order gives four tasks an hour failing to start, and the first symptom is a
+Doing these out of order can leave scheduled tasks failing to start, and the first symptom can be a
 CloudWatch bill rather than an error anyone reads.
 
 Before any live operation, follow [Clean-room validation](../docs/clean-room-validation.md) and obtain
 separate live-change approval. The sequence below is not approval to apply or mint credentials.
 
-1. Apply with `schedules_enabled = false` and `provisioner_enabled = false` wired in the deployment
-   root. Everything exists; nothing fires.
+1. After approval, apply with `schedules_enabled = false` and `provisioner_enabled = false` wired in
+   the deployment root. These disable schedules, not manual invocation. A full deployment also needs
+   an explicitly approved `create_provisioner = true`; its module default is false.
 2. Write reader, writer and provisioner tokens into the secret out of band (shape in `secrets.tf`).
 3. Build and push the image. **It must match `task_architecture`** - the default is ARM64, and an x86
    image on an ARM64 task definition fails at runtime with `exec format error`, not at plan time.
@@ -68,7 +70,7 @@ separate live-change approval. The sequence below is not approval to apply or mi
 4. Run the provisioner first, before any scan tier, to establish per-stack reader credentials.
 5. Run tiers serially T2, T3, T1, T4 and verify logs plus advanced scan envelopes.
 6. Mint the access key for the views reader and wire the Grafana Infinity datasource to it.
-7. Publish dashboards and paused, unrouted alerts. Enable collector schedules after verification,
+7. Publish dashboards and new paused, unrouted alerts (ordinary updates preserve existing pause/routing). Enable collector schedules after verification,
    and enable the write-capable provisioner schedule last.
 
 See [Standing up a new deployment](../RUNBOOK.md#standing-up-a-new-deployment) for the full sequence.
@@ -76,6 +78,62 @@ The standalone example is a starting point, not complete consumer wiring. It exp
 `provisioner_enabled`, with the provisioner schedule defaulting off independently of collector
 schedules. Set `image` to the reviewed registry manifest digest before runtime approval. Its
 `next_steps` output describes the same provisioner-first sequence, not authorization to execute it.
+
+## Schedules and module interface
+
+The module defaults are T1 hourly at :05, T2 daily, T3 six-hourly, T4 daily and an opt-in daily
+provisioner, all interpreted in `schedule_timezone` (default `UTC`). Deployment expressions/timezone
+may override these. See the [RUNBOOK scheduled-jobs table](../RUNBOOK.md#scheduled-jobs) for the
+canonical five-job purpose and timetable rather than treating module defaults as live state.
+`create_provisioner = false` means no provisioner task, role or schedule exists. When created,
+its schedule requires both `schedules_enabled` and `provisioner_enabled`. Each scan schedule requires
+`schedules_enabled` and its tier's `enabled`; disabling a tier retains its task and schedule.
+
+`variables.tf` and `outputs.tf` are the complete interface. The tables below group inputs by operator
+purpose; omitted defaults in the required row mean Terraform requires an explicit value.
+
+| Inputs | Module default / contract |
+|---|---|
+| `name_prefix`, `grafana_org_id`, `write_stack_slug`, `mimir_write_url`, `mimir_tenant`, `loki_write_url`, `loki_tenant`, `subnet_ids` | required; deployment identity, signal tenants and egress subnets |
+| `tags` | `{}`; merged over provider defaults |
+| `create_bucket`, `bucket_name` | `true`, empty; empty name resolves to `<name_prefix>-data`, explicit name required for adoption |
+| `scan_retention_days` | `90` positive whole days; current scans and reserved raw-match view prefix |
+| `coverage_score_weights`, `dashboard_detail_enabled` | seven equal weights, `false`; detailed dashboard selector evidence is opt-in |
+| `expected_retention_policy`, `fleet_default_scrape_interval` | `[]`, `60s`; genuine deployment policy, not configured estate inventory |
+| `create_secret`, `tag_adopted_secret`, `secret_name` | `true`, `false`, empty; empty resolves to `<name_prefix>/tokens`, adopted tags are opt-in |
+| `reader_secret_key`, `writer_secret_key` | `GCINSIGHT_READ_TOKEN`, `GCINSIGHT_WRITE_TOKEN`; JSON keys, never token values |
+| `create_ecr_repository`, `image`, `task_architecture` | `true`, empty, `ARM64`; empty image uses created ECR `:latest`, unsuitable for reviewed runtime rollout |
+| `security_group_ids`, `assign_public_ip` | `[]`, `false`; empty creates HTTPS-egress group |
+| `schedules_enabled`, `schedule_timezone`, `tiers` | `true`, `UTC`, four default tiers; disable schedules explicitly for first deployment |
+| `schedule_retry_attempts`, `log_retention_days` | `2`, `30`; invocation retry count and CloudWatch retention |
+| `firehose_logs_enabled`, `firehose_log_subscription_enabled` | both `false`; staged stream creation then subscription |
+| `firehose_access_key_secret_arn`, `firehose_access_key_secret_kms_key_arn` | both empty; dedicated adopted secret ARN required when enabled, KMS ARN only for a CMK |
+| `firehose_failed_record_retention_days` | `7`; failed-delivery object retention |
+| `create_views_reader_user` | `true`; views-only IAM user, no access key in state |
+| `stack_token_prefix` | `/gcinsight/stack-token`; shared scan/provisioner SSM credential prefix |
+| `metric_prefix`, `loki_job`, `collector_user_agent` | `gcinsight`, `gcinsight`, `gcinsight-collector/1 (+grafana-ps)`; consumer publication identity |
+| `role_name`, `role_display`, `role_group` | `custom:gcinsight.reader`, `Grafana Cloud Org Insights reader`, `Grafana Cloud Org Insights`; stable reader role identity |
+| `reader_service_account_name`, `admin_service_account_name`, `token_name_prefix` | `gcinsight-data`, `gcinsight-insights-provisioner`, `gcinsight-data`; recorded provisioning identities |
+| `scan_runtime_config_digest`, `provisioner_runtime_config_digest`, `require_explicit_consumer_config` | empty, empty, `false`; consumer projections may require both validated digests |
+| `create_provisioner`, `provisioner_secret_key` | `false`, `GCINSIGHT_PROVISION_TOKEN`; independent opt-in write-capable task |
+| `provisioner_schedule_expression`, `provisioner_enabled` | daily module default, `true`; see RUNBOOK timetable and both schedule gates above |
+| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring` read families |
+| `provisioner_cpu`, `provisioner_memory` | `256`, `512` MiB; separate provisioner sizing |
+
+| Outputs | Use / availability |
+|---|---|
+| `bucket_name`, `cluster_arn`, `cluster_name`, `log_group_name` | resolved storage, compute and task-log targets |
+| `task_definition_arns`, `task_definition_families` | per-scan-tier revision ARNs and moving families; use reviewed revisions for controlled runs |
+| `schedule_names`, `schedule_states` | per-scan-tier names and effective enabled/disabled states, not provisioner outputs |
+| `ecr_repository_url`, `views_reader_user_name` | null when the corresponding resource is not created |
+| `secret_name`, `task_role_arn` | resolved token container and collector IAM identity; task role also reads SSM and decrypts scoped parameters |
+| `firehose_delivery_stream_name`, `firehose_delivery_stream_arn`, `firehose_failed_record_bucket_name`, `firehose_loki_endpoint` | null until Firehose is enabled |
+| `firehose_log_subscription_enabled` | subscription switch, distinct from stream existence |
+| `run_task_command` | command template with a task-definition placeholder; not live-run authority |
+
+The standalone example leaves collector and provisioner schedules off, unlike the module's schedule
+switch defaults. It does not wire `create_provisioner`, so enabling its provisioner schedule switch
+alone cannot create that task. Complete deployment wiring belongs to the approved deployment root.
 
 ## Service observability completeness weights
 
@@ -150,8 +208,10 @@ does require a stack-realm `logs:write` token represented by the adopted access-
   any scheduler setting. The task role therefore needs `s3:DeleteObject` on `locks/*`; without it every
   run leaves its lock behind and the next one refuses to start, which looks exactly like a scheduling
   bug.
-- **ECS has no max-runtime setting.** A run is bounded only by the collector's own
-  `--deadline-seconds`, passed from `var.tiers`. Keep it shorter than the tier's interval.
+- **ECS has no max-runtime setting.** The collector's `--deadline-seconds`, passed from `var.tiers`,
+  fences source caller waits and prevents starting more work; it is not hard termination of all local
+  computation or surviving HTTP reads. Keep it shorter than the tier's interval. See
+  [source resource fences](../docs/source-resource-fences.md).
 - **`scans/` must stay unreadable by Grafana.** It holds per-user identity detail that no dashboard
   needs. The reader user is scoped to `views/*`; verify with `aws iam simulate-principal-policy`, not
   by reading the policy JSON, because a prefix typo looks fine and denies everything.
@@ -164,7 +224,8 @@ does require a stack-realm `logs:write` token represented by the adopted access-
 `synthetic-monitoring` reader families. The module mirrors this one policy into both provisioner and
 scan tasks as `GCINSIGHT_READER_PRODUCT_READS`; no separate scanner grant or family list exists.
 The scan runtime digest includes this value, so update consumer manifests and module/image pins
-together before rollout. `bin/consumer_manifest.py upgrade` verifies an older manifest's existing
+together before rollout. Selecting `slo` enables count-only SLO definition collection on T2; selecting
+`synthetic-monitoring` does not grant its datasource query scope or establish check/result collection. `bin/consumer_manifest.py upgrade` verifies an older manifest's existing
 digests, then carries its provisioner policy into the added scan field. Explicit `regenerate` also
 carries the policy when the scan field is absent; `check` requires the current projection and never
 rewrites it. An explicit scan/provisioner mismatch is rejected rather than silently changed. This
@@ -215,8 +276,8 @@ Or copy `examples/standalone/`, which owns its own provider and backend.
 
 `create_bucket`, `create_secret`, `create_ecr_repository` and `create_views_reader_user` all default
 to true and can be turned off to adopt something provisioned earlier. When `create_bucket = false`
-Terraform manages neither the lifecycle rules nor the public-access block, so verify both separately -
-an adopted bucket is not a validated one.
+Terraform manages neither lifecycle, public-access blocking, versioning, encryption nor bucket policy,
+so verify all separately; an adopted bucket is not a validated one.
 
 The Firehose access-key secret is different: it is **always adopted** and supplied by ARN. There is no
 create switch and no secret data source because even reading the value would put the credential on the

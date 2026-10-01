@@ -58,7 +58,7 @@ variable "image" {
 }
 
 variable "provisioner_enabled" {
-  description = "Enable the write-capable reconciliation schedule independently, only after manual verification. Safe first-deployment default is off."
+  description = "Enable reconciliation scheduling only after manual verification and separate approval. Example default false; this does not create the opt-in provisioner task, which requires create_provisioner in a deployment-owned root, and schedules_enabled must also be true."
   type        = bool
   default     = false
 }

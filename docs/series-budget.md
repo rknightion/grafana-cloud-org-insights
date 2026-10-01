@@ -8,10 +8,13 @@ Everything lands on the configured write stack alone. That stack's own series ov
 
 | | Series |
 |---|---:|
-| Declared, all phases | 7,828 |
+| Declared, all phases | 9,654 |
 | Runaway ceiling | 100,000 |
 
-Declared capacity reserves every bounded enum at its ceiling, so it exceeds the series present at any particular instant. **Do not quote it as live use.** Re-measure with a range query and a matching denominator before reporting a footprint.
+These declarations use the catalogue's synthetic 271-stack and eight-region planning baselines, not
+live inventory. Declared capacity reserves every bounded enum at its ceiling, so it exceeds the series
+present at any particular instant under those assumptions; a larger estate can exceed the planning
+figure without breaching the runaway ceiling. **Do not quote it as live use.** Re-measure with a range query and a matching denominator before reporting a footprint.
 
 The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels. `guard.ALLOWED_LABELS` and the per-metric shape checks are the real controls.
 
@@ -21,13 +24,14 @@ The 100,000 ceiling is a runaway backstop, not a target and not a licence for un
 |---|---:|
 | A - estate | 296 |
 | B - cost | 1,101 |
-| C - usage | 62 |
+| C - usage | 14 |
 | D - maturity | 582 |
-| E - risk | 301 |
+| E - risk | 1,126 |
 | F - value | 21 |
 | I - AI | 895 |
-| J - dashboards | 4,368 |
-| scan self-telemetry | 202 |
+| J - dashboards | 4,400 |
+| K - observed estate coverage | 969 |
+| scan self-telemetry | 250 |
 
 ## The three rules
 
@@ -39,7 +43,8 @@ Identities, metric names, dashboard uids, rule names and service-account names n
 
 ## Deliberately views, not metrics
 
-Roughly thirty surfaces are published as S3 tables rather than as series, and each one is a recorded decision rather than an omission. A few that show why:
+The catalogue records S3 table surfaces rather than series, and each one is a recorded decision rather
+than an omission. The generated `BUDGET.md` lists them; their count changes as capabilities are added. A few that show why:
 
 | View | Series if emitted | Why a view |
 |---|---:|---|
@@ -50,7 +55,7 @@ Roughly thirty surfaces are published as S3 tables rather than as series, and ea
 | `cost_adaptive_metric_recommendations` | 1 | bounded top-ten-per-stack action queue; metric names stay out of labels |
 | `insights_coverage` | 1 | the denominator: why a stack has no figures |
 
-Two of those rows carry a second lesson. `ai_credential_coverage` exists so that paused and opted-out stacks read as **skipped**, not as failures. And `ai_config_disabled` counts only an explicit `false` - `enabled` is absent on skills, and unknown is not disabled.
+Two other declared views carry a second lesson. `ai_credential_coverage` exists so that paused and opted-out stacks read as **skipped**, not as failures. And `ai_config_disabled` counts only an explicit `false` - `enabled` is absent on skills, and unknown is not disabled.
 
 ## Measuring the real footprint
 

@@ -12,8 +12,9 @@ Every panel and view names the source it uses.
 
 ## 2. Scope
 
-The dashboard registry contains ten surfaces: estate health, consumption and cost, consumer behaviour,
-maturity, risk and hygiene, business value, operations, commercial, Assistant/AI and dashboard usage.
+The dashboard registry contains eleven surfaces: estate health, consumption and cost, consumer behaviour,
+maturity, risk and hygiene, business value, operations, commercial, Assistant/AI, dashboard usage and
+observed estate coverage.
 
 Deliberately out of scope:
 
@@ -28,8 +29,8 @@ Deliberately out of scope:
 | Source | Credential | Collection shape |
 |---|---|---|
 | Grafana.com control plane: stack inventory, users, plugins, org members and access policies | org-realm read token | collector |
-| Per-stack data plane: Mimir cardinality, Adaptive Metrics and Fleet Management | org-realm read token with signal-instance basic auth | collector |
-| Each stack's Grafana API and datasource proxy: Assistant, service accounts, usage insights, Adaptive Logs, public dashboards, dashboard/folder/team/role inventory and alert routing | stack-local reader token | collector |
+| Per-stack data plane: Mimir cardinality, Adaptive Metrics, Fleet Management and four-signal observed-name/label-risk inventory | org-realm read token with signal-instance basic auth | collector |
+| Each stack's Grafana API and datasource proxy: Assistant, service accounts, usage insights, Adaptive Logs/Traces, optional SLO definitions, public dashboards, dashboard/folder/team/role inventory and alert routing | stack-local reader token | collector |
 | `grafanacloud-usage` on the write stack | write-stack reader, exact datasource query scope | live panels plus bounded capability-adoption collector input |
 | Optional `config/ratecard.csv` in S3 | task-role read of that single object | collector pricing seam |
 | Mimir, Loki and S3 on the nominated write stack/account | stack-realm writer token and AWS task role | emit path |
@@ -63,38 +64,51 @@ Mutation and secret-bearing actions remain absent. A healthy reconciliation perf
 does not mint a replacement token.
 
 `GCINSIGHT_READER_PRODUCT_READS` is an optional deployment setting. It defaults to empty and accepts
-only `slo` and `synthetic-monitoring`. The dev deployment may grant the corresponding read and plugin
-access pairs; a customer deployment needs a separate decision. This setting does not widen datasource
-query scope or grant any write action. Product object collection is a separate change: retain bounded
-counts and state only, and discard names, URLs, scripts, headers and expressions at collection time.
+only `slo` and `synthetic-monitoring`. A deployment must explicitly select the corresponding read and
+plugin access pairs; no product family is granted by default. This setting does not widen datasource
+query scope or grant any write action. SLO definition collection runs only when `slo` is selected;
+it retains counts and closed enums,
+not names, URLs, scripts, headers or expressions. Synthetic Monitoring check/result collection remains
+unavailable; its optional app permissions do not widen datasource query scope.
 
 The collector's HTTP client rejects every method except GET. Some read APIs are implemented as
 Connect-RPC POSTs; those calls live outside the collector HTTP client and are authorised by read scopes.
+The label-risk source permits exactly the native Pyroscope LabelNames and LabelValues POST reads.
+The older observed-name source also uses the legacy `_connect_rpc` LabelValues helper; its substring
+path guard is not an exact method allow-list and must not be copied as authority for new RPCs.
 
 ## 5. Runtime and scan tiers
 
-The shipped runtime is one stdlib-only ARM64 image on ECS Fargate, started by EventBridge Scheduler.
+The shipped runtime is a stdlib-only multi-architecture image on ECS Fargate, started by EventBridge
+Scheduler. The module defaults to ARM64; the image and configured task architecture must match.
 Every tier has its own task definition because Scheduler does not support container overrides.
 
 | Tier | Default cadence | Owns |
 |---|---|---|
-| T1 | hourly | fresh inventory, access policies, org members and Fleet Management |
-| T2 | daily | stack detail, service accounts, Assistant, usage insights, capability adoption, Adaptive Logs, public dashboards, alert routing, dashboard inventory and datasource query cost |
+| T1 | hourly at :05 | fresh inventory, access policies, org members and Fleet Management |
+| T2 | daily | stack detail, service accounts, Assistant, usage insights, signal inventory, label risk, capability adoption, Adaptive Logs/Traces, optional SLO definitions, Loki retention, public dashboards, alert routing, dashboard inventory and datasource query cost |
 | T3 | every 6 hours | Mimir cardinality and Adaptive Metrics |
 | T4 | daily | independent one-day and seven-day estate diffs from S3 |
-| provisioner | daily | per-stack reader reconciliation |
+| provisioner | daily, opt-in | per-stack reader reconciliation |
+
+These are module-default cadences in `schedule_timezone` (default `UTC`), not a deployment timetable.
+See the [RUNBOOK timetable](RUNBOOK.md#scheduled-jobs) for all five jobs and schedule
+controls. Deployment roots may override expressions and timezone. `create_provisioner` defaults false;
+when created, its schedule requires both `schedules_enabled` and `provisioner_enabled`.
 
 Every deadline is strictly shorter than its interval. Staleness alerts move with the schedules, and
 carry-forward expires after alerts have had time to fire.
 
-Every scan discovers the current estate first. Per-stack inputs are left-joined onto that inventory;
+T1, T2 and T3 discover the current estate first; T4 compares recorded S3 scan populations without
+calling the estate APIs. Per-stack inputs are left-joined onto that inventory;
 payload keys never define the estate. A removed stack cannot survive through carry-forward, while an
 empty inventory result means unknown and cannot blank all state.
 
 ## 6. Hydration, output and cardinality
 
-Every tier composes from the full optional-input set. Inputs it does not own are hydrated from the owning
-tier's latest envelope. `VIEW_INPUTS` is derived by composing subsets of the fixture, not
+T1, T2 and T3 compose from the full optional-input set. Inputs a tier does not own are hydrated from
+the owning tier's latest envelope. T4 publishes independent historical diff views rather than composing
+this optional-input set. `VIEW_INPUTS` is derived by composing subsets of the fixture, not
 hand-written. A view with unsatisfied inputs is withheld so the last good S3 object remains visible with
 its older timestamp. A metric the tier cannot compute is absent, never a structural zero.
 
@@ -116,7 +130,9 @@ Adaptive Metrics recommendations are requested with `?verbose=true`. The default
 series counts and cannot support a saving. Remediable series are the sum of positive
 `current_series_count - recommended_series_count` reductions for `add` and `update`
 actions. `keep` and `remove` do not represent an unrealised reduction. An unknown action or
-a missing before/after pair makes the aggregate unavailable rather than zero.
+a missing before/after pair on a savings-bearing action makes the aggregate unavailable rather than
+zero. Missing, duplicate or invalid metric identities and invalid count fields also withhold savings;
+count-less `keep`/`remove` rows do not invalidate otherwise complete savings.
 
 The optional rate card prices ten supported dimensions. `price()` returns `None`, never
 `0.0`, when a dimension is not priced. A partially priced card discloses which components are
@@ -168,10 +184,12 @@ blank panel.
 ## 9. Security and privacy
 
 Deployment identifiers have no defaults. Build-time Grafana credentials are separate from runtime
-credentials and should be short-lived. Alert rules publish paused and unrouted; activation requires an
-explicit receiver so rules cannot inherit an unrelated production notification policy.
+credentials and should be short-lived. New alert rules publish paused and unrouted; ordinary publication
+preserves existing rules' pause state and routing. Activation requires an explicit receiver so rules
+cannot inherit an unrelated production notification policy.
 
-Identities may be stored in clear when the deploying organisation has approved that policy. The
+Identities may be stored in clear only when the deploying organisation has approved that policy and
+enforces minimization, access control, encryption and retention for the receiving S3/Loki stores. The
 cardinality rule remains absolute: no identity reaches a metric label. The Infinity reader is allowed
 only on `views/` and denied on `scans/` and `locks/`. Raw scans expire by lifecycle policy.
 
@@ -192,8 +210,10 @@ An installation is acceptable when:
 8. operators can rotate credentials, migrate alert titles, roll back an image and tear down recorded
    objects without name-pattern deletion.
 
-Still unresolved: Synthetic Monitoring result inventory, Adaptive Profiles, and any Adaptive Traces
-collection requiring permissions beyond the declared read-only role.
+Still unresolved: Synthetic Monitoring check/result inventory and Adaptive Profiles. Adaptive Traces
+config availability, policy-type counts and pending recommendation counts are collected through the
+existing stack reader without permission expansion. Config availability is not enablement, and these
+counts cannot measure achieved savings; those remain live `grafanacloud-usage` panels.
 
 ## Daily bounded label privacy risk
 
@@ -205,9 +225,12 @@ bytes per stack. Keys longer than 512 characters and values longer than 8192 cha
 unexamined and explicitly partial, not shortened. Bounds are source tunables, not estate config.
 The sample runs immediately after inventory discovery, before other daily gatherers, and reserves
 at most a quarter of the tier's remaining budget capped at 15 minutes. Up to eight concurrent
-stack workers make sequential requests; each request has a 10-second socket timeout and bounded chunk-reading deadline checks, and no retry. The caller tier
-deadline prevents starting more requests. A blocking read can exceed its remaining budget by
-one socket-timeout interval; it cannot become an exhaustive unbounded enumeration.
+stack workers make sequential requests; each request has a 10-second timeout clamped to the remaining
+sample budget, bounded chunk-reading checks, and no retry. `collector.netbound` fences caller waits
+including DNS and complete reads. It does not terminate surviving reads: a timed-out operation retains
+one of the fixed 32 daemon worker/admission slots until completion, and may retain credentials and
+transient bytes in memory. Exhaustion times out new admission rather than creating replacement workers.
+The sample is not an exhaustive enumeration or a hard process-termination guarantee.
 
 The separate label-source transport reads at most the byte cap plus one sentinel byte and
 refuses redirects. GET reads use the unchanged GET-only client; only the inventory-host native
@@ -231,7 +254,9 @@ In the versioned bucket, expiry makes the version noncurrent, then the existing 
 noncurrent expiry applies, with asynchronous AWS processing. This is not strict erasure
 90 days after observation. For adopted buckets (`create_bucket = false`), the owner must
 configure equivalent targeted retention in its existing lifecycle policy before raw publication;
-no competing lifecycle resource is created. Root deployment validation must prove effective
-lifecycle, versioning, encryption and reader access before use. Diagnostic scan export excludes this input. Generic Loki findings explicitly deny these
+no competing lifecycle resource is created. Deployment validation must prove effective
+lifecycle, versioning, encryption and reader access, including a fresh bucket-policy witness denying
+non-TLS access, before use. Missing controls block raw publication; these prerequisites do not authorize
+adding a bucket policy to an adopted bucket. Diagnostic scan export excludes this input. Generic Loki findings explicitly deny these
 views, and no business series are added. One input enum adds at most eight existing input-health
 series across four tiers, with no stack multiplier.
