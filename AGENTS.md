@@ -147,10 +147,15 @@ class of bug that looks like working code:
 
 ## Bounded daily label privacy risk (GCI-0018)
 
-`collector/sources/label_risk.py` alone may POST the native Pyroscope
+`collector/sources/label_risk.py` may POST the native Pyroscope
 `/querier.v1.QuerierService/LabelNames` and `/querier.v1.QuerierService/LabelValues`
-read RPCs on each live inventory `hpInstanceUrl`, with `hpInstanceId`. No other path or method
-is granted. `collector/httpclient.py` remains GET-only. Clear classified matches are approved
+read RPCs on each live inventory `hpInstanceUrl`, with `hpInstanceId`. This dedicated two-route
+exception is separate from `collector/sources/dataplane.py`'s `CONNECT_RPC_READ_ROUTES` helper:
+Fleet `/collector.v1.CollectorService/ListCollectors`, Fleet
+`/pipeline.v1.PipelineService/ListPipelines`, and Pyroscope
+`/querier.v1.QuerierService/LabelValues`. The helper admits only these exact parsed-path suffixes
+over HTTPS without redirects, with a nonempty host and no userinfo, query, fragment or percent-encoded
+path. No other path or method is granted. `collector/httpclient.py` remains GET-only. Clear classified matches are approved
 only in `risk_label_hygiene` and the private `label_risk` hydration input, never in Loki, stdout,
 diagnostic `--out`, errors or metric labels. Ordinary/unmatched values and decoded JWT claims
 are transient. This is a bounded daily label-API sample, never an exhaustive privacy audit.
