@@ -1,11 +1,11 @@
 ---
 id: GCI-0065
 title: Qualify the label-risk trap retention value as the module default
-status: In Progress
+status: Done
 assignee:
   - '@loop7-root'
 created_date: '2026-10-01 12:01'
-updated_date: '2026-10-01 13:51'
+updated_date: '2026-10-01 14:08'
 labels:
   - documentation
   - privacy
@@ -27,15 +27,15 @@ Loop6 independent cross-document review at4f0b5fa found docs/traps.md:712-714 st
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The trap states90days is a module default and links to the canonical configurable current/noncurrent retention contract
-- [ ] #2 No fixed observation-age erasure promise or broader view-expiry claim is introduced
+- [x] #1 The trap states90days is a module default and links to the canonical configurable current/noncurrent retention contract
+- [x] #2 No fixed observation-age erasure promise or broader view-expiry claim is introduced
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -43,3 +43,9 @@ Loop6 independent cross-document review at4f0b5fa found docs/traps.md:712-714 st
 <!-- SECTION:PLAN:BEGIN -->
 Loop7 frozen packets: bounded implementation or AC1 research; public-boundary proof, offline gate and CodeRabbit before landing, exact landed CI. Root security review/guard landing, research staff GET probe and conditional reserve decision, integrated review, stable release and dev-only rollout proof. Tracker remains root-owned.
 <!-- SECTION:PLAN:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Qualified 90 days as configurable scan_retention_days module default and linked canonical current/noncurrent targeted retention, publication-age resets and asynchronous expiry, without a fixed erasure promise. Landed b1ab9ef4e1cbabf222ff46f69437678514eaa975, exact CI 36872675362 all four required jobs successful, shared L-staff-a1 offline gate/CodeRabbit completed. Root reviewed final diff and exact CI readback; effective AWS retention remains outside this documentation criterion.
+<!-- SECTION:FINAL_SUMMARY:END -->
