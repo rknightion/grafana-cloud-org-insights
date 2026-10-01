@@ -234,3 +234,41 @@ deployment and its write stack as the serial resource described under Resource m
   live proof. A code or CLI discrepancy outside the doc lane is tracked for later work, not repaired
   implicitly. Shipped examples must describe both side effects and the separate authority gate;
   invoking help must not be assumed safe for a legacy live-probe script.
+
+## Verified loop7 release and boundary lessons
+
+- `dataplane._connect_rpc` admits exactly three parsed-path suffixes: Fleet
+  `collector.v1.CollectorService/ListCollectors`, Fleet
+  `pipeline.v1.PipelineService/ListPipelines` and Pyroscope
+  `querier.v1.QuerierService/LabelValues`. It requires HTTPS, a nonempty host without userinfo,
+  and no query, fragment or percent-encoded path. Its helper-local opener refuses redirects and
+  returns their HTTP status without a second request. The former urllib redirect behavior could
+  forward Basic credentials across origins; this was reproduced offline with synthetic credentials,
+  not demonstrated as a live disclosure. The general client remains GET-only and label-risk keeps
+  its separate two-route native read-POST exception. Published AGENTS wording must be corrected at
+  its canonical publisher, not by hand here.
+- Maturity ownership has no configurable staff-login list. The case-insensitive `@grafana.com`
+  identity exclusion remains the sole exclusion; vendor and partner Admins are otherwise owner
+  candidates. The retired environment variable is not a consumer policy.
+- Closeout grants never include `refs/pull/*`: ungranted pull refs are FOREIGN, not violations,
+  while granting them subjects their rewrites to a branch-only non-fast-forward exception.
+  Grant the release-please branch and permitted tag refs instead. Discover dependency-bot branch
+  names before writing grants; UpdateCLI names do not necessarily contain a slash.
+- Stable v0.4.2 was read back and its immutable GHCR index independently verified with cosign
+  against the pinned reusable identity, GitHub issuer, repository and exact source SHA. The public
+  container tag uses the semver without the leading `v`; Git tags and Releases retain it. The
+  separate unsigned consumer image was built from committed deployment wiring and verified inside
+  the image, then proven on dev. No customer action was taken.
+- An image-only deployment can replace task definitions, refresh schedule revision targets and
+  recompute the scheduler policy document. Classify full task and schedule inputs, prove the IAM
+  source and revision-wildcard families unchanged, then compare the actual effective policy after
+  apply. An unknown plan value is never semantic equality. Dev Fleet and profiles reads through
+  the guard stayed fully available in the live proof; schedules were restored and the final
+  targeted plan reported no changes.
+- The legacy ECS observer can ignore failed AWS CLI reads and keep waiting through an expired SSO
+  session. A successful watcher exit is not proof of uninterrupted observation. Retain the task's
+  actual start/stop timestamps, observer exit and promptly captured descriptor, plus S3 advancement;
+  disclose the observation lag and never launch a second task to replace missing proof.
+- A very short blocked-DNS probe may exhaust its budget while starting the fixed worker pool before
+  entering DNS under host contention. Keep both the resolver-entry and wall-time assertions; record
+  the failing phase and preserve an independent discriminator instead of relaxing the deadline.

@@ -1,11 +1,11 @@
 ---
 id: GCI-0061
 title: Replace the legacy Connect-RPC substring guard with exact read routes
-status: In Progress
+status: Done
 assignee:
   - '@loop7-root'
 created_date: '2026-10-01 11:45'
-updated_date: '2026-10-01 14:53'
+updated_date: '2026-10-01 17:27'
 labels:
   - security
   - transport
@@ -55,3 +55,9 @@ Root rescue L-guard-a3 corrected only deadline-test RPC mock boundary, preservin
 
 Exact landed CI 36879569443 at bd2d0cd5c9431f264951fd013927463fcb2bdd1c completed success, all four required jobs freshly read back by root. Code criteria/DoD proved; goal-specific live Fleet/profiles source-report comparison remains pending dev rollout, task remains In Progress until that proof is resolved.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Exact three-route HTTPS/no-redirect Connect-RPC guard landed bd2d0cd5c9431f264951fd013927463fcb2bdd1c with exact CI 36879569443, completed CodeRabbit zero findings four files, independent security r2 no must-fix and integrated review no must-fix. Root rescue preserves transport/body deadline assertions. Stable source b0d3b308c05d3fed3dd70990e217da2b81461ef0 CI 36883254984; v0.4.2 signed GHCR index verified independently. Dev image-only apply and live T1/T2 each exit 0, full stopped descriptors captured within 16s/15s of watcher exits, S3 advanced and Fleet/profiles remained 5/5 with no new refusal/ValueError. T1 observer had expired-SSO read failures until external cache became usable; task stopped earlier, lag disclosed, no relaunch. Scheduler restored and targeted final plan No changes.
+<!-- SECTION:FINAL_SUMMARY:END -->
