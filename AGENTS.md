@@ -31,6 +31,9 @@ off anything but the live inventory.
   protocol-adoption numbers this platform then publishes.
 - `collector/httpclient.py` refuses any method other than GET. Read-only by construction, and that
   property is load-bearing in what you can tell an org about what this runs.
+- Source HTTP deadlines fence caller waits, including DNS and complete reads, through
+  `collector/netbound.py`. They do not terminate surviving daemon reads or bound response memory.
+  The fixed pool accounts for survivors; publishers are outside this read-source fence.
 - Metric labels carry bounded dimensions only: `stack`, `region`, fixed enums. Metric names, dashboard
   uids, user identities and rule names never become labels. Identity-bearing detail may enter Loki or
   S3 only when the deployment explicitly accepts it and enforces minimization, access control,
@@ -160,4 +163,6 @@ seven-day noncurrent-version expiry and asynchronous AWS processing, not strict 
 90 days from observation. Other last-good views and IAM remain unchanged. For adopted buckets
 (`create_bucket = false`), owners must configure equivalent targeted retention in the existing
 lifecycle policy before raw publication; root must verify effective retention, versioning,
-encryption and reader access. Never add a competing lifecycle configuration resource.
+encryption and reader access. This includes a fresh effective bucket-policy witness denying
+non-TLS access. A missing policy blocks raw publication; a lifecycle grant does not authorize
+adding a bucket policy. Never add a competing lifecycle configuration resource.

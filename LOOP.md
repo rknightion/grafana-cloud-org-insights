@@ -139,3 +139,44 @@ deployment and its write stack as the serial resource described under Resource m
 - Capture ECS task descriptors promptly. Stopped-task records can disappear before a delayed
   readback; retain the exact immutable definition, task ID, live terminal output and S3 advancement,
   and name any missing descriptor proof instead of restarting a completed task.
+
+## Verified loop4 decisions and traps
+
+- Rob ratified the bounded label-risk native Pyroscope read-POST exception on 2026-09-30:
+  only `querier.v1.QuerierService/LabelNames` and `LabelValues` in
+  `collector/sources/label_risk.py`, on freshly discovered inventory endpoints. The general client
+  remains GET-only. This is not a template for any other POST permission.
+- Rob's 2026-09-30 D-L1 grant was one additive lifecycle write preserving all existing rules on
+  the named adopted deployment bucket, plus at most one restore. It was loop4-only, not standing
+  bucket-write authority. That write did not authorize a bucket-policy addition. A fresh missing
+  TLS-deny policy blocks raw-label publication even when versioning, encryption, public-access
+  controls and targeted retention pass; park the rollout rather than inventing authority.
+- A pinned Python base digest can still contain fixed-version Debian CVEs. In loop4 the upstream
+  `python:3.14-slim` tag still resolved to the pinned pre-fix digest, so the reproducible fallback
+  pinned the matching OpenSSL binary packages to the fixed version. Prove both image architectures
+  through the unchanged real Trivy gate; never add a fixed CVE to the ignore file. Exact package
+  versions can retire from a rolling repository, in which case the build fails closed.
+- Use the installed cosign executable, not an unconfigured mise shim. Verification binds the
+  immutable GHCR digest to the pinned reusable signing-workflow identity, GitHub OIDC issuer,
+  expected repository and exact source SHA. A signing job's success is not that readback. An ECR
+  consumer build has different content/provenance and is not thereby a signed image.
+- `consumer-exec` requires the manifest, deployment root, Terraform file, kind and command. The
+  abbreviated loop3 publication command omitted two required arguments and fails before writing.
+  Use its current CLI help and a supported `python3` on PATH.
+- Capture and validate the full ECS `run-task` response and task ARN before arming a watcher.
+  `tasks[0]` can be absent while the CLI exits successfully. On a watcher timeout, inspect and adopt
+  the same recorded ARN, never launch a second task. Preserve the original run deadline and capture
+  the stopped-task descriptor within two minutes of watcher exit.
+- The loop4 tool schema exposed a 3600-second `watch_start` ceiling despite Appendix C's stated
+  no-ceiling contract. Record the effective tool cap instead of claiming a 70-minute observation.
+- ECS readback adds empty optional arrays and a zero container CPU that the submitted definition
+  can omit. Classify those defaults against deployed source and verify every other image, role,
+  environment, secret selector, command and task resource unchanged. A computed scheduler-policy
+  refresh also needs an actual post-apply semantic equality witness, not a permissive type check.
+- Grafana effective permissions can include narrower datasource metadata reads and the
+  `sharedwithme` folder grant already covered by approved metadata-read wildcards. Retain the full
+  pre/post action-scope sets and compare them, rather than reminting a working reader or treating
+  redundant read scopes as query widening. Datasource query UID pins remain exact.
+- IAM simulation groups multi-resource object decisions under `ResourceSpecificResults`; its
+  top-level aggregate is not the individual resource decision. Inspect every resource/action pair,
+  including version reads and deletes, and test bucket-list prefixes separately.
