@@ -1,11 +1,11 @@
 ---
 id: GCI-0020
 title: Publish Adaptive Traces enablement and sampling savings
-status: Parked
+status: Done
 assignee:
   - '@loop3-root'
 created_date: '2026-08-25 14:11'
-updated_date: '2026-10-01 03:09'
+updated_date: '2026-10-01 06:09'
 labels:
   - cost
   - value
@@ -148,4 +148,12 @@ Loop3 Adaptive Traces minimized inventory source shipped and dev produced five s
 loop4 M-ac found AC1-4 panel-first slice present: matched 24h windows, enabled/reporting-population ratio and separate discards. No L-0020p implementation indicated. Existing minimized dev inventory supports AC5/6, AC7 health-first proof still being independently bound; no live completion claim from source presence alone.
 
 loop4 AC audit at9ba/CI36790758947: liveCoverageusagepanelsmatched24h enabled/ingestingwindows2/3, dropped/receivedratio0.4327onlyenabledpopulation,discardrate0.00123separate,24policygroupseriesliveDatasource(notcollectorlabels). FreshS3scalarinventory5rows,2readableconfigs,positivepolicy/recommendationcounts,no policyname/prosebodyretained. SourceGEThealthfirstunconditional; rootfreshT2statewitnesshealth4045(configok2,policy/recommendationsok5), unsupportedhealthneverconcludesresourceabsent. Approvedreadonlyactions/BasicNone/projectroleunchanged/noadminbundlerole; AdaptiveProfilesuncollectedexplicitcontract. Renderresidual: twoCoverage discard/policy500 in02:28batch, policyearlier200, datasourcequeriespositive; notsourceabsence. ACsmetboundedsemantics; keepParkedpendingrootdispositionofintermittentvisible-render residual ratherthanclaimallpixelshealthy.
+
+Root03:13:34/03:13:40Zsinglelater-readload-discriminator returnedPNG200for exactCoveragepanels1413874481 and1783207463,version4. DiscardedPNGvisuallyreviewedshowspositive0.00138ops/s,separatefromsampledspans; policybodyprocessedinmemoryonlyneverpersisted. Prior02:29two500sdisclosed, intermittentrenderer/servicecauseunfixed, laterpositiveendpointproofclosescurrentrenderacceptance not reliability claim. No source/panel changes or unchangedretryloop. All8AC/DoDclosedwithboundedlive/source/exactCI proof.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Adaptive Traces panel-first enablement, enabled-population reduction, matched windows and separate discards are live-proved. Current minimized policy/recommendation inventory, unchanged read-only reader roles and health-first source witness complete the remaining source criteria; profiles remain explicitly uncollected. Exact stable CI green. Two intermittent solo-render500s were observed and later exact-endpointPNG200s verified; renderer reliability is not claimed fixed.
+<!-- SECTION:FINAL_SUMMARY:END -->
