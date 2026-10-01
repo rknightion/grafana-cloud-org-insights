@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+import base64
+import io
 import json
 import unittest
+import urllib.request
+import urllib.response
+from email.message import Message
 from unittest import mock
 
 from collector.sources import dataplane
@@ -210,6 +215,50 @@ class AutoApplyConfigTest(unittest.TestCase):
 
 
 class ConnectRpcTest(unittest.TestCase):
+    def test_redirects_never_send_a_second_authenticated_request(self):
+        url = "https://rpc.example/collector.v1.CollectorService/ListCollectors"
+        target = "http://attacker.example/nonallowlisted"
+        authorization = "Basic " + base64.b64encode(b"123:cap").decode()
+        for code in (301, 302, 303, 307, 308):
+            with self.subTest(code=code):
+                requests = []
+
+                def wire(request):
+                    requests.append((
+                        request.full_url, request.get_method(),
+                        request.get_header("Authorization"),
+                    ))
+                    headers = Message()
+                    if request.full_url == url:
+                        headers["Location"] = target
+                        status, body = code, b""
+                    else:
+                        status, body = 200, b"{}"
+                    response = urllib.response.addinfourl(
+                        io.BytesIO(body), headers, request.full_url, status,
+                    )
+                    response.msg = "offline response"
+                    return response
+
+                # Keep the real opener, HTTPErrorProcessor and redirect handlers;
+                # replace only the wire boundary so neither origin is contacted.
+                with mock.patch.object(urllib.request.HTTPSHandler, "https_open", side_effect=wire), \
+                        mock.patch.object(urllib.request.HTTPHandler, "http_open", side_effect=wire):
+                    out = dataplane._connect_rpc(url, "123", "cap")
+                self.assertEqual(requests, [(url, "POST", authorization)])
+                self.assertEqual(out, {"_http": code})
+
+    def test_unsafe_authorities_are_refused_before_transport(self):
+        route = "/collector.v1.CollectorService/ListCollectors"
+        response = mock.MagicMock()
+        response.__enter__.return_value.read.return_value = b"{}"
+        for base in ("http://rpc.example", "https://", "https://user:pass@rpc.example"):
+            with self.subTest(base=base):
+                with mock.patch("urllib.request.OpenerDirector.open", return_value=response) as open_url:
+                    with self.assertRaises(ValueError):
+                        dataplane._connect_rpc(base + route, "123", "cap")
+                    open_url.assert_not_called()
+
     def test_unapproved_routes_are_refused_before_transport(self):
         paths = (
             "/collector.v1.CollectorService/DeleteCollector",
@@ -229,7 +278,7 @@ class ConnectRpcTest(unittest.TestCase):
         response.__enter__.return_value.read.return_value = b"{}"
         for path in paths:
             with self.subTest(path=path):
-                with mock.patch("urllib.request.urlopen", return_value=response) as open_url:
+                with mock.patch("urllib.request.OpenerDirector.open", return_value=response) as open_url:
                     with self.assertRaises(ValueError):
                         dataplane._connect_rpc("https://rpc.example" + path, "123", "cap")
                     open_url.assert_not_called()
@@ -244,8 +293,8 @@ class ConnectRpcTest(unittest.TestCase):
                 with self.subTest(route=route, prefix=prefix):
                     response = mock.MagicMock()
                     response.__enter__.return_value.read.return_value = b'{"result":[]}'
-                    url = "https://rpc.example" + prefix + route
-                    with mock.patch("urllib.request.urlopen", return_value=response) as open_url:
+                    url = "https://fleet-management-prod-gb-south-1.grafana.net" + prefix + route
+                    with mock.patch("urllib.request.OpenerDirector.open", return_value=response) as open_url:
                         out = dataplane._connect_rpc(url, "123", "cap")
                     self.assertEqual(out, {"result": []})
                     open_url.assert_called_once()
@@ -257,7 +306,7 @@ class ConnectRpcTest(unittest.TestCase):
     def test_http_error_keeps_the_existing_return_shape(self):
         import urllib.error
 
-        with mock.patch("urllib.request.urlopen", side_effect=urllib.error.HTTPError(
+        with mock.patch("urllib.request.OpenerDirector.open", side_effect=urllib.error.HTTPError(
             "https://rpc.example", 403, "Forbidden", {}, None,
         )):
             self.assertEqual(dataplane._connect_rpc(
@@ -267,7 +316,7 @@ class ConnectRpcTest(unittest.TestCase):
     def test_read_payload_is_sent_without_relaxing_the_path_guard(self):
         response = mock.MagicMock()
         response.__enter__.return_value.read.return_value = b'{"names":[]}'
-        with mock.patch("urllib.request.urlopen", return_value=response) as open_url:
+        with mock.patch("urllib.request.OpenerDirector.open", return_value=response) as open_url:
             out = dataplane._connect_rpc(
                 "https://profiles.example/querier.v1.QuerierService/LabelValues",
                 "123", "cap", payload={"name": "service_name", "start": 1, "end": 2},

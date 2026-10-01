@@ -79,7 +79,9 @@ def test_legacy_complete_transport_body_read_has_wall_time_bound(mode):
                 entered.set()
                 threading.Event().wait()  # body read never returns after open succeeds
         started = time.monotonic()
-        with mock.patch('urllib.request.urlopen', return_value=Response()):
+        open_boundary = ('urllib.request.OpenerDirector.open'
+                         if MODE == 'rpc' else 'urllib.request.urlopen')
+        with mock.patch(open_boundary, return_value=Response()):
             try:
                 if MODE == 'rpc':
                     _connect_rpc('https://example.test/collector.v1.CollectorService/ListCollectors',

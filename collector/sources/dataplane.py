@@ -13,7 +13,7 @@ Endpoints, all verified 2026-08-17:
 
 Fleet Management and Pyroscope are Connect-RPC and want POST. The collector's client is GET-only by
 construction, so those two are read via a helper allowlisting exactly three read-POST routes and
-nothing else  -  see `_connect_rpc`.
+nothing else, over HTTPS without redirects  -  see `_connect_rpc`.
 """
 
 from __future__ import annotations
@@ -60,6 +60,13 @@ def auth_for(stack: dict[str, Any], signal: str, cap: str) -> tuple[str, str]:
     return (str(value), cap)
 
 
+class _ConnectRpcNoRedirect(urllib.request.HTTPRedirectHandler):
+    """Never forward an authenticated RPC to a redirect target, even a read route."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
 def _connect_rpc(
     url: str,
     user: str,
@@ -71,13 +78,17 @@ def _connect_rpc(
     """POST only the three exact read routes in `CONNECT_RPC_READ_ROUTES`.
 
     Deliberately NOT part of `ReadOnlyClient`: that class refuses non-GET on purpose and must stay that
-    way. A base-path prefix is permitted, but queries, fragments and percent-encoded paths are not.
+    way. HTTPS and a nonempty host without userinfo are required; hosts come from inventory, not
+    a static allowlist. A base-path prefix is permitted, but queries, fragments and percent-encoded
+    paths are not. Redirects are refused and returned as HTTP errors, never followed with credentials.
     Pyroscope LabelValues accepts a bounded read-query payload. This guard is distinct from
     label_risk's own two-path native Pyroscope exception.
     """
     parsed = urllib.parse.urlsplit(url)
     if (
-        "?" in url or "#" in url or "%" in parsed.path
+        parsed.scheme != "https" or not parsed.hostname or parsed.username is not None
+        or parsed.password is not None
+        or "?" in url or "#" in url or "%" in parsed.path
         or not any(parsed.path.endswith(route) for route in CONNECT_RPC_READ_ROUTES)
     ):
         raise ValueError(f"refusing unapproved Connect-RPC call: {url}")
@@ -88,7 +99,8 @@ def _connect_rpc(
     req.add_header("Content-Type", "application/json")
     def read():
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as fh:
+            opener = urllib.request.build_opener(_ConnectRpcNoRedirect())
+            with opener.open(req, timeout=timeout) as fh:
                 return json.loads(fh.read() or b"{}")
         except urllib.error.HTTPError as exc:
             return {"_http": exc.code}
