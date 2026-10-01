@@ -1,11 +1,11 @@
 ---
 id: GCI-0005
 title: Run a clean-room zero-to-live operator walkthrough
-status: In Progress
+status: Done
 assignee:
   - '@loop4-root'
 created_date: '2026-08-24 12:02'
-updated_date: '2026-09-30 23:37'
+updated_date: '2026-10-01 02:20'
 labels: []
 dependencies: []
 references:
@@ -61,4 +61,12 @@ The strongest single finding for this task: every one of these is invisible to a
 loop4 admitted 2026-09-30: root owns tracker; isolated implementation lane owns packet, gate and review. Acceptance pending exact candidate/hosted/live evidence; no completion claimed.
 
 loop4 a2 locally accepted94ddfda: fresh exact clone gate1649pass2existing skips, real synthetic manifest regenerate/check and consumer-build with4in-container projections, deployment8c8f2ed/overlayf1d3880/localARM64imagea0f57fe verified. Root actual backend-free standalone plan exit0 reviewed30prospectivecreates0updates/deletes,4DISABLED ARM64 schedules/tasks, no provisioner/Firehose create, privacy retention/view-reader bounds and apply-time unknowns named; no apply. Real dev network read context with independently verified RC digest override, synthetic target .invalid, not a live deployment/consumer adapter plan. Synthetic rollback source package saved, no baseline invented. Independent RV pass2 PASS and Python/PATHminor fixed. ACs local approval-boundary proof met; task stays In Progress until root landing exactCI. Declarative/docs-only CR exemption.
+
+loop4 cumulative candidate94ddfda landed889c12e11552317536f3a33625479f313e263716, exact CI36792243170 success and requiredwatch exit0. Integratedgate1659pass2existing skips, puredeclarative/docs independentRVpass2PASS. Actualfreshsyntheticmanifest/check/localconsumer4projections and rootreviewed backend-free standaloneAWSplan reach the required approval boundary; no syntheticdeploymentapply or inventedrollback baseline. Externalprivateauth/backend/runtime obligations remain documented, not claims of a live new deployment.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Clean-room walkthrough completed to the planned live-change approval gate: fresh clones and empty state/provider beginnings, real validated first manifest and immutable local consumer build/projections, reviewed standalone plan with real authorised read-only network context, source rollback package and documented no-baseline limit. Fixed all bounded instruction/wiring gaps and supported interpreter selection. Exact landed-SHA CI green; no AWS apply in the rehearsal.
+<!-- SECTION:FINAL_SUMMARY:END -->
