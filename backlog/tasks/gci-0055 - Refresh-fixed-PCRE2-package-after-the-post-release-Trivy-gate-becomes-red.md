@@ -1,7 +1,7 @@
 ---
 id: GCI-0055
 title: Refresh fixed PCRE2 package after the post-release Trivy gate becomes red
-status: In Progress
+status: Done
 assignee:
   - '@loop5-root'
 created_date: '2026-10-01 06:16'
@@ -47,3 +47,9 @@ loop5 L-0055-a1 landed32258533d7e2e1fa006460224dca53135d975e98 at07:40:13Z. Root
 
 loop5 R-rc accepted: v0.4.1-rc.3 annotated tag peeled to32258533d7e2e1fa006460224dca53135d975e98; independent GHCR0.4.1-rc.3 readback digestsha256:5a7665f5e21f15ae75cca814b21eff7eb21006a10e823707bbb294270a010213 arm64+amd64. Installed cosign3.1.3 verify exit0, strict pinned reusable container-publish@f32275a workflow identity/GitHub OIDC issuer/expected repository/exact sourceSHA. Initial read incorrectly included v in container tag and returned not found; actual tag derived from publication log, no publication retry. Stable release and deployment still pending.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+loop5 PCRE2 fixed by exact package pin at32258533d7e2e1fa006460224dca53135d975e98; both-platform package readbacks and unchanged Trivy gate/auto-rc36831756263 green, CI36831669276 green. RC.3 digest independently verified with strict installed cosign. Current dev/customer exposure assessed, stable0.4.1 rollout selected but not yet completed. All four task criteria proven; rollout outcome separately tracked.
+<!-- SECTION:FINAL_SUMMARY:END -->

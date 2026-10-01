@@ -3,7 +3,7 @@ id: GCI-0056
 title: >-
   Make actionlint green: runner label ubuntu-26.04 is unknown to the pinned
   linter
-status: In Progress
+status: Done
 assignee:
   - '@loop5-root'
 created_date: '2026-10-01 07:03'
@@ -44,3 +44,9 @@ loop5 L-alint-a1 landing-ready candidate71a16c17f3dd219cd85940cfa7677cd800642a87
 
 loop5 exact landed actionlint36832334419 completed success atf767fad63ad92d9ca63ddea6777765125770e287; hosted runner-label proof now met. CI36832333607 still watched before final task close/next push.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+loop5 repository actionlint label declaration landedf767fad63ad92d9ca63ddea6777765125770e287, exact CI36832333607 and actionlint36832334419 successful. Latest shared releasev1.25.3 has no native runner-label support, so explicit config chosen without changing any hosted runner, job or permission. One implementation attempt, zero review repairs/retries; CRconfiguration exemption.
+<!-- SECTION:FINAL_SUMMARY:END -->
