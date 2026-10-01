@@ -177,6 +177,26 @@ deployment and its write stack as the serial resource described under Resource m
   `sharedwithme` folder grant already covered by approved metadata-read wildcards. Retain the full
   pre/post action-scope sets and compare them, rather than reminting a working reader or treating
   redundant read scopes as query widening. Datasource query UID pins remain exact.
+
+## Verified loop5 decisions and corrections
+
+- The upstream Python base still resolved to the existing pinned digest on 2026-10-01. The PCRE2
+  fallback pins `libpcre2-8-0=10.46-1~deb13u3` beside the existing fixed OpenSSL packages.
+  Both architectures read back the fixed versions and passed the unchanged real Trivy gate in
+  auto-rc run `36831756263` at `32258533d7e2e1fa006460224dca53135d975e98`. Exact versions still
+  fail closed if Debian retires them. A historical green scan is not current exposure proof.
+- The actionlint failure was an unknown `ubuntu-26.04` runner label, not a harden-runner timeout.
+  The latest shared reusable release, v1.25.3, pins actionlint 1.7.12. The repository's
+  `.github/actionlint.yaml` declares that label without changing hosted job runners, permissions
+  or steps; hosted actionlint run `36832334419` passed at `f767fad63ad92d9ca63ddea6777765125770e287`.
+- The adopted deployment bucket's owner added and verified a Terraform-managed TLS-only policy
+  during loop5 preparation. This is not standing bucket-write authority. A rollout must freshly
+  witness the effective policy and all privacy prerequisites before apply and again after the
+  provisioner, before daily raw-label publication; no bucket configuration write is granted in loop5.
+- Loop4's root gap from 2026-10-01 03:13:59 to 06:08:19 UTC was shared with a concurrent pi root
+  on the same Mac: their pending tool batches completed within 0.1 seconds at 06:07:48 UTC, and
+  `pmset` showed no machine sleep. It was not established as a loop4-specific stall. If another
+  gap occurs, record its UTC bounds and continue; do not diagnose it inside a rollout loop.
 - IAM simulation groups multi-resource object decisions under `ResourceSpecificResults`; its
   top-level aggregate is not the individual resource decision. Inspect every resource/action pair,
   including version reads and deletes, and test bucket-list prefixes separately.
