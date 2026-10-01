@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop5-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-10-01 07:31'
+updated_date: '2026-10-01 07:37'
 labels:
   - feature-usage
   - follow-on
@@ -53,4 +53,6 @@ loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own
 Docs d0b5bb0210870f4ce54031455397be5411e21f74 CI36737688385success, gate1647passed2existing skips7966subtests, CRdocs exemption. Genuine Logs2.6 Chrome frontend40queryPOSTs emitted43actual sourceapp analytics events; exact-stack guarded usage-insights confirmed43. ExistingAdminSA browser control, not human adoption; no app-specific plugin/URL field. AC1 remains partial: no genuine frontend before/after proposed-discriminator trial. First browser blocked analytics so is not absence/before proof; backend-only header trial not substitute. Generic app/scenes remain unsplit; no datasource-type attribution or universal impossibility claim.
 
 Admitted under owner loop5 goal, 2026-10-01. Root owns tracker writes; isolated lanes own only named seams. Acceptance pending terminal evidence.
+
+loop5 L-drill-a1 known-human sample documented in candidate90fef5891dff8ef74e6d20ead5f412d731c28d90. source separates observed app/scenes groups but independent exact Logs/Metrics request correlation absent; backend type never used as app attribution. AC1 remains open: known-app before observed, no validated discriminator. No implementation of collector classification admitted. Observation/documentation attempt1, review-repair0, shared infrastructure retry1 (missing venv, setup repaired). Resume only from correlated frontend requests or new authoritative enrichment evidence.
 <!-- SECTION:NOTES:END -->
