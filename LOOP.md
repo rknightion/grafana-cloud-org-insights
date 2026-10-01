@@ -197,6 +197,14 @@ deployment and its write stack as the serial resource described under Resource m
   on the same Mac: their pending tool batches completed within 0.1 seconds at 06:07:48 UTC, and
   `pmset` showed no machine sleep. It was not established as a loop4-specific stall. If another
   gap occurs, record its UTC bounds and continue; do not diagnose it inside a rollout loop.
+- Stable v0.4.1 source `ef2033b7d9711b150ae3aa7a6ba5ab3ce2907327` has signed, independently
+  verified GHCR index `sha256:d029d6a5bd84b3829b274e646d5f8513cbef68a1058a6bffc99c238a12d13d6f`.
+  Both dev and the owner-authorized customer rollout built separate unsigned ECR consumer images
+  from that source. Each manual tier used one recorded ARN with prompt stopped-task capture;
+  the customer provisioner preserved every live reader identity, token ID, SSM version, permission
+  pair and query pin. Dev schedules were restored; customer schedules were never suspended.
+  Customer dashboard and alert publication was read back, preserving existing rule routing and pause
+  states without activation. Deployment-specific digests and identities stay in private records.
 - IAM simulation groups multi-resource object decisions under `ResourceSpecificResults`; its
   top-level aggregate is not the individual resource decision. Inspect every resource/action pair,
   including version reads and deletes, and test bucket-list prefixes separately.
