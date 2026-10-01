@@ -1,9 +1,11 @@
 ---
 id: GCI-0057
 title: Audit and refresh operator documentation across the product
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop6-root'
 created_date: '2026-10-01 09:58'
+updated_date: '2026-10-01 11:27'
 labels:
   - documentation
   - operations
@@ -39,3 +41,9 @@ Owner requested a dedicated documentation freshness audit during loop5 on 2026-1
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Audit three disjoint documentation sets in isolated lanes; each owns final local gate, landing and hosted CI. Independently review the integrated docs for schedule, CLI, rollback, authority and privacy contradictions. Track code discrepancies as To Do only and reconcile exact evidence.
+<!-- SECTION:PLAN:END -->

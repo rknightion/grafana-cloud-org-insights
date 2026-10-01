@@ -1,9 +1,11 @@
 ---
 id: GCI-0058
 title: Align dev deployment policy and schedules with the customer baseline
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop6-root'
 created_date: '2026-10-01 10:05'
+updated_date: '2026-10-01 11:27'
 labels:
   - deployment
   - parity
@@ -37,3 +39,9 @@ Owner requested this follow-up during loop5 on 2026-10-01 after reviewing the de
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Fresh read-only comparison of both deployments and module inputs; classify every difference. Root alone aligns dev drift through saved reviewed plans, preserves isolation, verifies no-change plan and affected-tier runtime. Retain evidence-backed exceptions in private infra comments; no customer writes expected.
+<!-- SECTION:PLAN:END -->
