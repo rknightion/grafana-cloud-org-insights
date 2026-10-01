@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop7-root'
 created_date: '2026-10-01 11:45'
-updated_date: '2026-10-01 13:51'
+updated_date: '2026-10-01 14:18'
 labels:
   - security
   - transport
@@ -48,4 +48,6 @@ Loop7 frozen packets: bounded implementation or AC1 research; public-boundary pr
 
 <!-- SECTION:NOTES:BEGIN -->
 Owner correction Rob 2026-10-01: three current helper routes, not two: CollectorService/ListCollectors, PipelineService/ListPipelines, QuerierService/LabelValues (signal_inventory.py). Exact frozen S-RPC guard; GET-only general client and label-risk two-path exception unchanged. Published AGENTS wording is tracked separately, never hand-edited.
+
+SR-guard-r1 at candidate 20dad3b8f61877139297cb7929208fd0761a486b FAIL: inherited urllib 301/302/303 redirect follows authenticated allowed POST as GET to nonallowlisted HTTP destination, forwarding Basic CAP cross-origin. Offline real-opener fake-wire proof, no live leak demonstrated. L-guard-a2 commissioned: helper-local redirect refusal preserving HTTPError code, plus HTTPS/nonempty authority/no userinfo, no hardcoded estate hosts. Root amended unaccepted seam on medium security judgment. Direct route tests/gate/CodeRabbit had passed a1; do not land until repair and r2 review.
 <!-- SECTION:NOTES:END -->

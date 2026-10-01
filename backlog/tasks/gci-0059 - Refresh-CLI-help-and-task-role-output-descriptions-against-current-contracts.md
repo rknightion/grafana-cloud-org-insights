@@ -1,11 +1,11 @@
 ---
 id: GCI-0059
 title: Refresh CLI help and task-role output descriptions against current contracts
-status: In Progress
+status: Done
 assignee:
   - '@loop7-root'
 created_date: '2026-10-01 11:45'
-updated_date: '2026-10-01 13:51'
+updated_date: '2026-10-01 14:18'
 labels:
   - documentation
   - operations
@@ -28,16 +28,16 @@ The loop6 documentation audit found shipped CLI docstrings and an output descrip
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 CLI help accurately describes supported credentials, source API reads and tier cadence without deployment identifiers
-- [ ] #2 Task-role output description agrees with the actual IAM boundaries, including rate-card, credential-store and KMS reads
-- [ ] #3 Changes remain description/comment-only and pass the relevant repository gate
+- [x] #1 CLI help accurately describes supported credentials, source API reads and tier cadence without deployment identifiers
+- [x] #2 Task-role output description agrees with the actual IAM boundaries, including rate-card, credential-store and KMS reads
+- [x] #3 Changes remain description/comment-only and pass the relevant repository gate
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -45,3 +45,9 @@ The loop6 documentation audit found shipped CLI docstrings and an output descrip
 <!-- SECTION:PLAN:BEGIN -->
 Loop7 frozen packets: bounded implementation or AC1 research; public-boundary proof, offline gate and CodeRabbit before landing, exact landed CI. Root security review/guard landing, research staff GET probe and conditional reserve decision, integrated review, stable release and dev-only rollout proof. Tracker remains root-owned.
 <!-- SECTION:PLAN:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+CLI help names supported read/write/build credentials and SSM source readers, source API reads and module-default hourly/daily/six-hourly/daily cadence; task-role output matches four storage prefixes, exact rate-card read, SSM path and scoped KMS decrypt, distinguishing execution role secret injection. Restricted files retain executable AST, description-only. Landed b073f9182dc73613005e32b4d3d694dbdd84a613, exact CI 36874121093 all four jobs successful. L-cli-a1 just check rebased candidate 1671 passed, 2 existing skips, 7977 subtests; CodeRabbit complete zero findings seven files. Root diff and exact CI readback reviewed.
+<!-- SECTION:FINAL_SUMMARY:END -->

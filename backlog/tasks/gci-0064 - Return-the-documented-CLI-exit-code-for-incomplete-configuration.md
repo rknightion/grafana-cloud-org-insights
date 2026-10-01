@@ -1,11 +1,11 @@
 ---
 id: GCI-0064
 title: Return the documented CLI exit code for incomplete configuration
-status: In Progress
+status: Done
 assignee:
   - '@loop7-root'
 created_date: '2026-10-01 11:57'
-updated_date: '2026-10-01 13:51'
+updated_date: '2026-10-01 14:18'
 labels:
   - cli
   - configuration
@@ -27,16 +27,16 @@ The loop6 reference audit found MissingConfig and MissingCredential are siblings
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Incomplete required identifiers and credentials consistently produce a concise configuration diagnostic and intended exit2 before any network or publication
-- [ ] #2 Unexpected runtime errors are not swallowed as configuration failures
-- [ ] #3 An offline CLI reproduction fails against the old behavior and proves the corrected public exit contract
+- [x] #1 Incomplete required identifiers and credentials consistently produce a concise configuration diagnostic and intended exit2 before any network or publication
+- [x] #2 Unexpected runtime errors are not swallowed as configuration failures
+- [x] #3 An offline CLI reproduction fails against the old behavior and proves the corrected public exit contract
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -44,3 +44,9 @@ The loop6 reference audit found MissingConfig and MissingCredential are siblings
 <!-- SECTION:PLAN:BEGIN -->
 Loop7 frozen packets: bounded implementation or AC1 research; public-boundary proof, offline gate and CodeRabbit before landing, exact landed CI. Root security review/guard landing, research staff GET probe and conditional reserve decision, integrated review, stable release and dev-only rollout proof. Tracker remains root-owned.
 <!-- SECTION:PLAN:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+CLI catches shared IncompleteConfig base (both subclasses) before metadata/source/publication calls: actual cleared-environment subprocess missing identifier exits 2 with one JSON stderr record and no stdout. Unexpected error propagates unchanged. Three added boundary tests and two publication-guard tests updated because S-EXIT requires config validation before metadata. Failing-first watched missing identifier traceback/exit 1. Landed b073f9182dc73613005e32b4d3d694dbdd84a613, exact CI 36874121093 all four jobs successful; 57 targeted tests, final just check, completed CodeRabbit zero findings. No live calls.
+<!-- SECTION:FINAL_SUMMARY:END -->
