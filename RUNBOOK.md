@@ -215,6 +215,26 @@ role; disabling it removes those pairs without re-minting a working reader token
 may enable both. A customer deployment needs a separate explicit grant decision. This setting grants
 read access; it does not add SLO or Synthetic Monitoring object collection to a scan.
 
+## Scheduled jobs
+
+T2 is **daily**, not hourly or six-hourly. T1 is hourly; T3 is six-hourly. The reusable
+module defaults below come from `terraform/variables.tf`; deployments can override every cron
+expression. Read the deployment manifest and live EventBridge Scheduler state for its actual
+schedule, timezone and enabled state rather than assuming these defaults apply.
+
+| Job | Cadence | Default start times (UTC) | Purpose |
+| --- | --- | --- | --- |
+| Provisioner | Daily | 03:15 | Reconcile per-stack read-only readers and their credentials; healthy steady state does not mint tokens |
+| T1 | Hourly | Five minutes past every hour | Refresh inventory and hourly inputs; hydrate slower inputs and carry their metric series forward |
+| T2 | Daily | 03:30 | Gather per-stack identity, plugins, service accounts, usage insights, retention and other daily inputs |
+| T3 | Every six hours | 02:40, 08:40, 14:40, 20:40 | Gather data-plane cardinality and Adaptive Metrics recommendations |
+| T4 | Daily | 09:00 | Compare completed estate scans over the one-day and seven-day windows |
+
+These are scheduled start times, not completion times. Runtime depends on the discovered estate,
+source pacing and retries. An hourly T1 publication does not make T2 or T3 observations hourly:
+check each view's input provenance and age. A manual run is an additional run, not a schedule change.
+Deployment-specific timetables belong in the deployment's private operator documentation, not here.
+
 ## Manual scans
 
 Local development uses `--dry-run`. A live manual run should use the deployed ECS task definition,
