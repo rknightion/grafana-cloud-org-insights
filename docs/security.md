@@ -8,7 +8,10 @@ have explicitly consented to the declared read capabilities. Read-only does not 
 the label inventory requires it and no narrower Grafana Cloud scope reaches label names and values.
 
 The collector's HTTP client **rejects every method except GET**. Its org-reader Loki sources call fixed
-label, effective-limit and ruler routes, not log query endpoints. Usage insights separately runs
+label and effective-limit routes, not ruler or log query endpoints. The org reader still declares
+`rules:read` and `alerts:read`, but no executable source calls the ruler or Alertmanager routes.
+Those unused grants retain their breadth and must be included in deployment consent. Stack-local
+Grafana rule and receiver inventory uses the separate stack reader. Usage insights separately runs
 bounded aggregate LogQL reads through each stack's datasource proxy. These restraints are reviewed
 implementation properties, not credential properties. Fleet list APIs use read-only Connect-RPC
 POSTs outside that client. The bounded daily label-risk
@@ -53,10 +56,12 @@ claims are transient. Partial sampling is not an exhaustive privacy audit or pro
 
 Two payloads are treated as radioactive:
 
-- **The raw Alertmanager configuration** returned in `config.original` by `/alertmanager/api/v2/status`, `http_config` included. Where contact points live in Alertmanager rather than in Grafana, that YAML can carry webhook URLs and tokens. Nothing derived from it is stored, logged or emitted beyond bounded counts.
+- **The raw Alertmanager configuration** reachable through the declared but unused `alerts:read` grant, returned in `config.original` by `/alertmanager/api/v2/status`, `http_config` included. Where contact points live in Alertmanager rather than in Grafana, that YAML can carry webhook URLs and tokens. The collector does not call this route; nothing derived from that body may be stored, logged or emitted beyond bounded counts.
 - **`accessToken` on a public dashboard**, which is the live public URL. It is never stored, logged or emitted.
 
-Firing alert instances carry full customer label sets. They are counted, never carried into a label.
+The Prometheus firing-instance route reachable through the declared but unused `rules:read` grant
+carries full customer label sets. The collector does not call it. Any future consumer must count
+instances without carrying those label sets into metric labels.
 
 ## S3 boundaries
 

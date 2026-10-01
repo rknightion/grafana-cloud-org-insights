@@ -20,7 +20,7 @@ Region does not constrain what an org-realm token can then reach: it reaches eve
 
 `collector.config.READER_SCOPES` is authoritative. One org-realm token reaches all four signal databases in every region of the estate - the region hint in the token payload does not constrain the data plane.
 
-| Scope | Routes this collector calls, not the scope boundary | Basic-auth user |
+| Scope | Current source calls or unused declared grants, not the scope boundary | Basic-auth user |
 |---|---|---|
 | `stacks:read` | Grafana.com stack inventory | bearer |
 | `stack-users:read` | per-stack users through Grafana.com | bearer |
@@ -31,8 +31,8 @@ Region does not constrain what an org-realm token can then reach: it reaches eve
 | `logs:read` | Loki label and label-value endpoints plus effective tenant limits | `hlInstanceId` |
 | `traces:read` | Tempo search-tag endpoints | `htInstanceId` |
 | `profiles:read` | Pyroscope label inventory; label-risk `LabelNames` and `LabelValues` | `hpInstanceId` |
-| `rules:read` | Prometheus and Loki ruler inventory | signal instance id |
-| `alerts:read` | Alertmanager status, alerts and silences | `amInstanceId` |
+| `rules:read` | Declared grant for Prometheus and Loki ruler inventory; no current source calls | signal instance id |
+| `alerts:read` | Declared grant for Alertmanager status, alerts and silences; no current source calls | `amInstanceId` |
 | `adaptive-metrics-rules:read` | `/aggregations/rules` | `hmInstancePromId` |
 | `adaptive-metrics-recommendations:read` | `/aggregations/recommendations?verbose=true` | `hmInstancePromId` |
 | `adaptive-metrics-config:read` | `/aggregations/recommendations/config` | `hmInstancePromId` |
@@ -40,7 +40,8 @@ Region does not constrain what an org-realm token can then reach: it reaches eve
 
 The basic-auth user differs per signal and comes from `dataplane.AUTH_FIELD`. Fleet Management and the Alertmanager are the two that do not use a signal instance id.
 
-The route column describes current implementation. It is not a credential boundary. In particular,
+The route column distinguishes current source calls from unused declared grants. It is not a
+credential boundary. In particular,
 `logs:read` is a full Loki read scope and can return log content. It is retained deliberately for the
 label inventory, with explicit deployment consent. `CAPABILITIES.md` records
 the verified breadth, unverified scope probes and the implementation restraints.
@@ -69,7 +70,12 @@ content. Those latter probes do not establish an exhaustive org-realm content bo
 collector's restrained routes are an implementation property, not a credential-enforced restriction.
 See `CAPABILITIES.md` before consenting to these grants.
 
-`alerts:read` and `rules:read` also expose sensitive payloads:
+`alerts:read` and `rules:read` remain declared but have no executable ruler or Alertmanager source
+calls. Their breadth still matters to credential consent; the following payload warnings describe
+what the grants can reach, not what currently enters the collector. Stack-local Grafana rule and
+receiver inventory is a separate source using the stack reader.
+
+These unused grants expose sensitive payloads:
 
 - **`/alertmanager/api/v2/status` returns the stack's raw Alertmanager configuration** in `config.original`, `http_config` included. Where a stack's contact points live in Alertmanager rather than in Grafana, that YAML can carry webhook URLs and tokens. Nothing derived from that body may be stored, logged or emitted beyond bounded counts.
 - **`/api/prom/api/v1/alerts` returns firing instances with their full customer label sets.** Unbounded and identity-bearing. Count them; never carry them into a metric label.
@@ -146,6 +152,18 @@ The label is the stack `id` for Grafana events, not its Prometheus tenant id. Th
 
 The working read route is the Adaptive Logs plugin proxy. Frontend app resource paths can return 500, and datasource-proxy calls can report authentication failure even when the reader role is correct. Recommendation volume has no declared or settable time window.
 
+### Adaptive Traces
+
+T2 uses the existing stack-local reader for count-only GETs at
+`/api/plugin-proxy/grafana-adaptivetraces-app/{config,policies,recommendations}`. A preliminary
+`health` GET is status-only and does not gate those resources. The source retains config
+availability, total and closed policy-type counts, and total and pending recommendation counts;
+config tunables, policy bodies and recommendation prose are discarded before scan/log output.
+Config availability does not prove enablement, and recommendation counts do not measure achieved
+savings; achieved savings remain on usage-datasource panels. The full existing reader role is
+operationally sufficient, not proof of isolated minimum permissions. No bundled plugin admin role
+or mutation actions are added.
+
 ### Loki retention
 
 Effective `retention_stream` entries come from the Loki dataplane under the existing org
@@ -170,6 +188,6 @@ The reader collects rule and receiver names, not decrypted receiver configuratio
 
 - Synthetic Monitoring result inventory has no verified safe unattended read route.
 - Adaptive Profiles endpoints have not produced a verified read contract.
-- Adaptive Traces collection is absent until a concrete read-only consumer and permission contract exist.
+- Adaptive Traces detail and mutation are not collected; the count-only GET contract above uses the existing reader.
 - Regional usage-insights datasources on one central stack are not a substitute for per-stack readers.
 - Grafana.com dashboard lists are incomplete or empty; stack-local APIs own that inventory.
