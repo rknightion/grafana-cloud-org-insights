@@ -3,11 +3,11 @@ id: GCI-0066
 title: >-
   Correct published AGENTS Pyroscope read-POST wording to distinguish the exact
   three-route helper
-status: In Progress
+status: Done
 assignee:
   - '@loop8-root'
 created_date: '2026-10-01 13:51'
-updated_date: '2026-10-01 21:12'
+updated_date: '2026-10-01 21:37'
 labels: []
 dependencies: []
 references:
@@ -27,15 +27,15 @@ AGENTS.md is maintained directly in this repository. Loop7 found its label-risk-
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Repository AGENTS.md distinguishes the exact three CONNECT_RPC_READ_ROUTES helper routes from the dedicated label-risk two-route native read-POST exception
-- [ ] #2 Root-edited AGENTS.md agrees with implemented HTTPS/no-redirect boundaries without widening route or live-write authority; just check and exact landed CI pass
+- [x] #1 Repository AGENTS.md distinguishes the exact three CONNECT_RPC_READ_ROUTES helper routes from the dedicated label-risk two-route native read-POST exception
+- [x] #2 Root-edited AGENTS.md agrees with implemented HTTPS/no-redirect boundaries without widening route or live-write authority; just check and exact landed CI pass
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -48,4 +48,12 @@ Root edit exact boundaries; validate against source; run just check; land under 
 
 <!-- SECTION:NOTES:BEGIN -->
 Loop8 D-0066 corrects the external canonical publisher premise: AGENTS.md is maintained here; the external publisher writes only backlog/docs/doc-0001.
+
+Loop8 root corrected repository AGENTS.md directly under D-0066: exact three Connect-RPC helper parsed-path suffixes over HTTPS/no redirects versus separate label-risk native two-route exception. General HTTP client stays GET-only; no new route/live-write authority. Landed afafa2271480094abfe314671fcb405e73d30762; final local just check passed before push; exact CI 36929717903 success with all four jobs, one watcher and one terminal readback. CodeRabbit skipped documentation-only clarification, independent R-int will review boundaries against implemented source.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Corrected external-publisher premise and boundary wording without broadening authority. Exact landed CI 36929717903 and offline gate green; evidence codex/loop8-evidence/R-agents.
+<!-- SECTION:FINAL_SUMMARY:END -->
