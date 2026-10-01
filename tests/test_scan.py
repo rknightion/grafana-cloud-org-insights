@@ -11,8 +11,10 @@ import ast
 import contextlib
 import io
 import json
+import os
 import pathlib
 import subprocess
+import sys
 import tempfile
 import unittest
 from types import SimpleNamespace
@@ -138,6 +140,63 @@ class ConsoleLoggingTest(unittest.TestCase):
         record = json.loads(lines[0])
         self.assertEqual(record["level"], "error")
         self.assertIn("unexpected boom", record["message"])
+
+
+class ConfigurationExitTest(unittest.TestCase):
+    def test_missing_identifier_cli_exits_2_with_one_diagnostic(self):
+        proc = subprocess.run(
+            [sys.executable, str(pathlib.Path(scan.__file__)), "--tier", "t1", "--dry-run"],
+            env={"GCINSIGHT_READ_TOKEN": "synthetic-read-token"},
+            capture_output=True, text=True, timeout=15,
+        )
+        self.assertEqual(proc.returncode, 2, proc.stderr)
+        self.assertEqual(proc.stdout, "")
+        lines = proc.stderr.splitlines()
+        self.assertEqual(len(lines), 1)
+        record = json.loads(lines[0])
+        self.assertEqual(record["level"], "error")
+        self.assertIn("GCINSIGHT_ORG_ID is not set", record["message"])
+
+    def test_all_configuration_errors_stop_before_source_or_publication(self):
+        for error_type, dry_run in (
+            (error_type, dry_run)
+            for error_type in (config.IncompleteConfig, config.MissingConfig, config.MissingCredential)
+            for dry_run in (True, False)
+        ):
+            with self.subTest(error=error_type.__name__, dry_run=dry_run):
+                stderr = io.StringIO()
+                with (
+                    mock.patch.dict(os.environ, {}, clear=True),
+                    mock.patch.object(config, "load", side_effect=error_type("invalid configuration")),
+                    mock.patch.object(scan, "ReadOnlyClient") as client,
+                    mock.patch.object(scan.gcom, "fetch_inventory") as inventory,
+                    mock.patch.object(scan, "run") as run,
+                    mock.patch.object(scan, "_verified_ecs_runtime") as ecs,
+                    contextlib.redirect_stderr(stderr),
+                ):
+                    argv = ["--tier", "t1"] + (["--dry-run"] if dry_run else [])
+                    self.assertEqual(scan.main(argv), 2)
+                client.assert_not_called()
+                inventory.assert_not_called()
+                run.assert_not_called()
+                ecs.assert_not_called()
+                self.assertEqual(len(stderr.getvalue().splitlines()), 1)
+                self.assertEqual(json.loads(stderr.getvalue())["message"], "error: invalid configuration")
+
+    def test_unexpected_configuration_error_propagates_unchanged(self):
+        error = RuntimeError("unexpected configuration bug")
+        stderr = io.StringIO()
+        with (
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(config, "load", side_effect=error),
+            mock.patch.object(scan, "ReadOnlyClient") as client,
+            contextlib.redirect_stderr(stderr),
+            self.assertRaises(RuntimeError) as caught,
+        ):
+            scan.main(["--tier", "t1", "--dry-run"])
+        self.assertIs(caught.exception, error)
+        client.assert_not_called()
+        self.assertEqual(stderr.getvalue(), "")
 
 
 class T3CarryPublicationOrderTest(unittest.TestCase):
@@ -963,15 +1022,17 @@ class RateCardLoadingTest(unittest.TestCase):
 
 
 class LocalPublicationGuardTest(unittest.TestCase):
-    def test_local_publication_is_refused_before_configuration_is_loaded(self):
+    def test_local_publication_is_refused_after_configuration_is_validated(self):
         with (
             mock.patch.dict("os.environ", {}, clear=True),
-            mock.patch.object(scan.config, "load") as load,
+            mock.patch.object(scan.config, "load", return_value=cfg_for()) as load,
+            mock.patch.object(scan, "ReadOnlyClient") as client,
         ):
             rc = scan.main(["--tier", "t1"])
 
         self.assertEqual(rc, 2)
-        load.assert_not_called()
+        load.assert_called_once()
+        client.assert_not_called()
 
     def test_local_dry_run_still_reaches_configuration_loading(self):
         with (
@@ -1013,13 +1074,15 @@ class LocalPublicationGuardTest(unittest.TestCase):
                 clear=True,
             ),
             mock.patch.object(scan.urllib.request, "urlopen") as urlopen,
-            mock.patch.object(scan.config, "load") as load,
+            mock.patch.object(scan.config, "load", return_value=cfg_for()) as load,
+            mock.patch.object(scan, "ReadOnlyClient") as client,
         ):
             rc = scan.main(["--tier", "t1"])
 
         self.assertEqual(rc, 2)
         urlopen.assert_not_called()
-        load.assert_not_called()
+        load.assert_called_once()
+        client.assert_not_called()
 
     def test_the_publication_seam_rechecks_the_verified_ecs_runtime(self):
         cfg = SimpleNamespace(tier="t1", dry_run=False)

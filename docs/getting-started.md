@@ -78,6 +78,11 @@ A run limited with `--stack` or `--limit` cannot publish. That is deliberate: a 
 | `3` | the scan gathered everything but could not publish |
 | `4` | lock collision - another scan holds the lock |
 
+All `collector.config` configuration errors, including missing credentials, missing deployment
+identifiers and invalid policy values, produce one stderr diagnostic and exit `2` before source,
+metadata or publication calls. Unexpected exceptions are not configuration refusals: they retain
+their traceback and non-`2` exit.
+
 `3` is separate on purpose. "The estate is unreachable" and "we cannot write to the target stack" need different responses. `4` is not a failed scan; see [Running scans](operations.md).
 
 ## Build the dashboards without deploying anything

@@ -6,7 +6,8 @@
     python3 bin/alerts.py --publish             # create or update all rules
 
 Needs a Grafana token with alerting write on the target stack, in `GCINSIGHT_GRAFANA_TOKEN`. Like
-`bin/dashboards.py` this is a BUILD-time credential - the scheduled scan never touches the Grafana API.
+`bin/dashboards.py` this is a BUILD-time publishing credential. Scheduled scans use separate per-stack
+reader tokens for Grafana source API reads; they never use this token to publish Grafana resources.
 
 WHY THESE ALERT ON AGE AND NOT ON EXIT CODE
 -------------------------------------------
@@ -20,7 +21,8 @@ itself the alarm rather than something to suppress.
 
 THE QUERY SHAPE IS NOT INCIDENTAL - `max_over_time` IS LOAD-BEARING
 ------------------------------------------------------------------
-The collector writes hourly at best and weekly at worst, and Mimir's lookback-delta is 5 minutes. A
+Module-default scan cadences are T1 hourly, T2 daily, T3 six-hourly and T4 daily; deployments may
+override them. Mimir's lookback-delta is 5 minutes. A
 plain instant query on one of these series therefore returns an EMPTY result at almost any evaluation
 time, which the same trap already cost this project once on the dashboards. Every rule below wraps the
 selector in `max_over_time(...[window])`, so the series has a value at every evaluation regardless of

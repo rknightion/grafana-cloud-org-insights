@@ -1,7 +1,9 @@
 """Runtime configuration.
 
-The credential comes from the **environment** locally and AWS Secrets Manager in deployment  -  never
-from a path inside this repo (SPEC §3). `../.env` is a convenience store for interactive work;
+The org-realm read CAP (GCINSIGHT_READ_TOKEN) and stack-realm write CAP
+(GCINSIGHT_WRITE_TOKEN) come from the environment locally and AWS Secrets Manager injection in
+deployment, never from a path inside this repo (SPEC §3). Per-stack Grafana source API reader tokens
+are read from SSM; GCINSIGHT_GRAFANA_TOKEN is reserved for build-time dashboard/alert publishing. `../.env` is a convenience store for interactive work;
 reading it automatically would put a `set:cloud-admin` token on the collector's happy path.
 """
 

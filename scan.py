@@ -1,13 +1,24 @@
 #!/usr/bin/env python3
 """the organisation estate insight scan.
 
-    ./scan.py --tier t1 --dry-run                       # inventory only, writes nothing
+    ./scan.py --tier t1 --dry-run                       # inventory, identities and Fleet; no writes
     ./scan.py --tier t2 --dry-run --limit 5             # bounded local diagnostic
-    ./scan.py --tier t2 --dry-run --stack obs-hub     # one-stack local diagnostic
+    ./scan.py --tier t2 --dry-run --stack <slug>        # one-stack local diagnostic
 
-Production/manual publishing runs happen only through the deployed ECS task definitions; see RUNBOOK.md.
+Module-default cadence: T1 hourly, T2 daily, T3 six-hourly, T4 daily.
+Deployment overrides may differ; --tier selects work, not a schedule.
 
-Credential comes from `GCINSIGHT_ORG_CAP` in the environment. See SPEC.md for the tier model.
+Reads use the org-realm CAP in GCINSIGHT_READ_TOKEN and per-stack Grafana reader
+service-account tokens from SSM. Scans read Grafana Cloud control-plane and signal
+APIs and each stack's Grafana source APIs (including usage insights and inventory).
+T4 gathers its comparison inputs from S3, not Grafana source APIs.
+GCINSIGHT_WRITE_TOKEN is the stack-realm CAP for native Mimir/Loki publication;
+it falls back to GCINSIGHT_READ_TOKEN locally. Deployment sets both CAPs.
+GCINSIGHT_GRAFANA_TOKEN is a separate build-time dashboard/alert publishing token,
+not a scan credential. Dry-run prevents publication, not source or S3 reads.
+
+Production/manual publishing runs happen only through deployed ECS task definitions;
+see RUNBOOK.md and SPEC.md.
 """
 
 from __future__ import annotations
@@ -1429,7 +1440,8 @@ def main(argv: list[str] | None = None) -> int:
     ap = StructuredArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    ap.add_argument("--tier", required=True, choices=TIERS)
+    ap.add_argument("--tier", required=True, choices=TIERS,
+                    help="tier to run (module defaults: T1 hourly, T2 daily, T3 six-hourly, T4 daily)")
     ap.add_argument("--dry-run", action="store_true", help="write nothing to S3, Mimir or Loki")
     ap.add_argument("--limit", type=int, help="only scan the first N stacks")
     ap.add_argument("--stack", help="only scan this stack slug")
@@ -1456,14 +1468,6 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
-    if not args.dry_run and not _verified_ecs_runtime():
-        console_log(
-            "error",
-            "error: refusing to publish from a local process; production and manual publishing "
-            "must use a deployed ECS task definition. Use --dry-run for local diagnostics.",
-        )
-        return 2
-
     try:
         cfg = config.load(
             tier=args.tier,
@@ -1473,8 +1477,16 @@ def main(argv: list[str] | None = None) -> int:
             concurrency=args.concurrency,
             deadline_seconds=args.deadline_seconds,
         )
-    except config.MissingCredential as exc:
+    except config.IncompleteConfig as exc:
         console_log("error", f"error: {exc}")
+        return 2
+
+    if not args.dry_run and not _verified_ecs_runtime():
+        console_log(
+            "error",
+            "error: refusing to publish from a local process; production and manual publishing "
+            "must use a deployed ECS task definition. Use --dry-run for local diagnostics.",
+        )
         return 2
 
     client = ReadOnlyClient(

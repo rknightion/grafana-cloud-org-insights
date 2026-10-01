@@ -7,8 +7,11 @@
     python3 bin/dashboards.py --publish all # publish all
 
 A publish needs a build-time Grafana token in `GCINSIGHT_GRAFANA_TOKEN` (an Admin service account on the
-stack). That is **not** a runtime credential: the scheduled scan writes only to Mimir/Loki/S3 via the
-two CAPs and never touches the Grafana API. Local JSON output is offline when `--ds-uid` is supplied.
+stack). That is **not** a runtime credential: scheduled scans use the org-realm GCINSIGHT_READ_TOKEN
+CAP plus per-stack reader tokens from SSM for Grafana source API reads, and GCINSIGHT_WRITE_TOKEN
+for native Mimir/Loki publication (S3 uses IAM). Scans never use the build-time publishing token.
+Module-default cadences are T1 hourly, T2 daily, T3 six-hourly and T4 daily; deployments may override
+them. Local JSON output is offline when `--ds-uid` is supplied and views come from a local directory.
 
 Datasource uid comes from `--ds-uid` or is resolved by name, never hardcoded (PLAN 0.6).
 """

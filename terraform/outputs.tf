@@ -1,5 +1,5 @@
 output "bucket_name" {
-  description = "S3 bucket holding scans/, views/ and locks/."
+  description = "S3 bucket holding scans/, views/, locks/, state/ and the optional config/ratecard.csv."
   value       = local.bucket_name
 }
 
@@ -44,7 +44,7 @@ output "secret_name" {
 }
 
 output "task_role_arn" {
-  description = "The collector's own identity. S3 on three prefixes and nothing else."
+  description = "Collector task identity: S3 object read/write/delete on scans/, views/, locks/ and state/, bucket listing, read-only config/ratecard.csv access, SSM reader-credential path reads and KMS decrypt scoped by the parameter ARN encryption context. CAP secrets are injected by the execution role, not read by this role."
   value       = aws_iam_role.task.arn
 }
 
