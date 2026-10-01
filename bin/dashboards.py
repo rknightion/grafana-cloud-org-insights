@@ -868,10 +868,13 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
                         "owners whose changes can materially move the total; do not preserve a dated share "
                         "in the tooltip."),
         "t_adaptive": build.timeseries_panel(
-            "Adaptive Metrics - applied vs pending",
-            [('sum(gcinsight_adaptive_recommendations{status="applied",stack=~"$stack"})', "applied"),
-             ('sum(gcinsight_adaptive_recommendations{status="pending",stack=~"$stack"})', "pending")],
-            description="The gap is the unrealised saving. Watch `applied` rise as remediation lands."),
+            "Adaptive Metrics - measured applied and pending subtotals",
+            [('sum(gcinsight_adaptive_recommendations{status="applied",stack=~"$stack"})', "applied (measured stacks)"),
+             ('sum(gcinsight_adaptive_recommendations{status="pending",stack=~"$stack"})', "pending (measured stacks)")],
+            description="Subtotals over measured stacks within the selected stack set, not estate totals "
+                        "or an adoption percentage. Unreadable rules are excluded from applied; the two "
+                        "series can cover different populations. A change can reflect source coverage, "
+                        "not remediation. Use complete-estate totals and measured coverage to assess adoption."),
         "t_unadopted": build.timeseries_panel(
             "Stacks with recommendations and zero rules applied",
             [("gcinsight_cost_stacks_without_adaptive", "stacks")],

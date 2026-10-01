@@ -29,6 +29,7 @@ def _load():
 class UnknownAdaptiveRulesTest(unittest.TestCase):
     def test_mixed_estate_excludes_unknown_rules_from_sums_and_adoption(self):
         from collector.pillars.compose import build_all
+        from collector.pillars import findings
 
         stacks = [
             {"slug": slug, "hmInstancePromUrl": "https://prom.example",
@@ -54,7 +55,13 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
                 self.assertNotIn((name, ()), by)
         self.assertNotIn(("gcinsight_adaptive_recommendations",
                           (("stack", "unknown"), ("status", "applied"))), by)
-        self.assertEqual([r[" Stack"] for r in views["cost_adaptive_headroom"]], ["empty"])
+        # The scan derives an unqualified estate finding gauge from each admitted view.
+        # Partial headroom would turn an unknown live member into a partial/zero total.
+        self.assertNotIn("cost_adaptive_headroom", views)
+        _, totals = findings.derive(views)
+        self.assertNotIn("adaptive_headroom", totals)
+        self.assertNotIn(("gcinsight_findings", {"kind": "adaptive_headroom"}, 1.0),
+                         findings.metrics(totals))
         summary = {r[" Metric"]: r["Value"] for r in views["cost_summary"]}
         self.assertEqual(summary["Stacks measured for Adaptive"], "2 of 3 scannable (3 total)")
         for key in ("Adaptive rules applied", "Stacks with recommendations and zero rules applied",
@@ -96,6 +103,30 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
         self.assertEqual(by[("gcinsight_cost_stacks_without_adaptive", ())], 2)
         self.assertEqual(summarise({"data": {"stacks": stacks, "dataplane": payload}})
                          ["adaptive_applied"], 2)
+        self.assertEqual([r[" Stack"] for r in views["cost_adaptive_headroom"]],
+                         ["unknown", "empty"])
+        _, totals = findings.derive(views)
+        self.assertEqual(totals["adaptive_headroom"], 2)
+        self.assertIn(("gcinsight_findings", {"kind": "adaptive_headroom"}, 2.0),
+                      findings.metrics(totals))
+        # Known adopted plus unknown must not manufacture a zero finding gauge either.
+        payload["empty"] = payload["adopted"]
+        payload["unknown"] = {"adaptive_metrics": {
+            "available": True, "rules_available": False, "rules_applied": None,
+            "adopted": None, "recommendations_pending": 2,
+        }}
+        _, views = build_all(stacks, coverage, dataplane=payload)
+        self.assertNotIn("cost_adaptive_headroom", views)
+        _, totals = findings.derive(views)
+        self.assertNotIn("adaptive_headroom", totals)
+        # Once every live member is measured and adopted, empty really means zero.
+        payload["unknown"] = payload["adopted"]
+        _, views = build_all(stacks, coverage, dataplane=payload)
+        self.assertEqual(views["cost_adaptive_headroom"], [])
+        _, totals = findings.derive(views)
+        self.assertEqual(totals["adaptive_headroom"], 0)
+        self.assertIn(("gcinsight_findings", {"kind": "adaptive_headroom"}, 0.0),
+                      findings.metrics(totals))
 
 
 class CostMathsTest(unittest.TestCase):

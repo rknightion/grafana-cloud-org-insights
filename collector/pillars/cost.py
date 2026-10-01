@@ -262,8 +262,9 @@ def build(
             ],
             key=lambda row: (-(row["Removable series"] or 0), row[" Stack"], row["Metric"] or ""),
         )
-        # Withhold unknown headroom, but retain a legitimate measured empty finding set.
-        if rules_measured:
+        # Findings derives an unqualified estate count from this view. Partial coverage
+        # must not become a zero/subtotal there; fully measured empty remains legitimate.
+        if rules_complete:
             views["cost_adaptive_headroom"] = sorted(
                 [
                     {

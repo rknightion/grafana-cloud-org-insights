@@ -1,11 +1,11 @@
 ---
 id: GCI-0067
 title: Preserve unreadable Adaptive Metrics rules instead of reporting zero adoption
-status: Done
+status: In Progress
 assignee:
   - '@loop8-root'
 created_date: '2026-10-01 14:18'
-updated_date: '2026-10-01 21:55'
+updated_date: '2026-10-01 22:07'
 labels: []
 dependencies: []
 references:
@@ -26,7 +26,7 @@ Loop7 read-only M-seg found adaptive_metrics converts an unsuccessful rules resp
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 A failed or malformed applied-rules read is distinguished from a successful empty list
-- [x] #2 Consumers do not present unreadable applied-rule state as measured zero or nonadoption
+- [ ] #2 Consumers do not present unreadable applied-rule state as measured zero or nonadoption
 - [x] #3 Offline source-to-consumer public-boundary reproduction fails before the correction and proves unknown versus measured empty
 <!-- AC:END -->
 
@@ -51,6 +51,10 @@ L-am-a2: fix all-unknown headroom withholding and full-in-scope estate completen
 Root loop8 disposition S-AMR-R1 (medium materiality): CodeRabbit major finding on incomplete estate aggregates accepted. Strengthen the unlanded seam: measured per-stack values, measured-population benchmarks and explicitly labelled measured summary subtotals remain useful; unqualified estate additive rules/adoption totals are withheld/null unless every live in-scope stack has readable rule input. Unknown stacks stay excluded from unadopted lists and adoption scoring. All-unknown cost_adaptive_headroom is withheld, preserving last good view; recommendations view remains independently available. No new metric/label/catalogue or route. Existing new mixed-estate test expectations change because intended completeness contract changes, never to mask a defect. Rejected retaining unqualified partial total because it could mislead. Rejected discarding measurable per-stack inputs because source availability is independent. Reversal cost local guard/test changes before any accepted consumer; no landing yet. L-am-a1 blocked with final gate green and two unresolved majors; L-am-a2 authorized for these bounded repairs, two attempts remain afterward.
 
 Loop8 L-am-a2 landed a889d7492732decd01f382814a79543f4632e85a, exact CI 36931046877 success. Final pre-push gate 1685 passed, 2 skipped, 8016 subtests; CodeRabbit completed zero findings all seven changed files. Both a1 major findings repaired under root S-AMR-R1 with failing-first source-to-compose and mixed/missing-live-member proofs, unchanged hydration table/fixtures/dashboard gates. Unknown rule metrics absent; incomplete unqualified estate totals withheld/null; all-unknown headroom withheld preserving last good; measured per-stack/benchmarks remain. a1/a2 consumed, zero infra retries; no live proof yet. Intermediate a2 probes red for URL overfiltering/paused population fixed without weakening tests. Evidence codex/loop8-evidence/L-am/a2-*.
+
+R-int-r1 rejected a889d749: downstream findings derive partial headroom view into an unqualified zero/partial estate gauge; dashboard sums applied per-stack series without measured-population qualification. Root rescue L-am-a3 expands root-owned repair to cost headroom completeness, existing test_cost public compose-to-findings proof, and bin/dashboards.py panel qualification. Changed premise: source/cost-only tests stopped before findings collaborator. Withhold headroom unless complete live scope so findings stays absent; fully measured empty yields zero. Explicit measured subtotal title/legends/description preserve stack selector without claiming estate adoption or remediation from changing coverage. a1+a2 used, a3 root rescue now; a4 specialist remains, integration review rounds 2/3 available. Release not merged, no deployments.
+
+Root L-am-a3 repaired R-int majors: headroom now requires full live-scope readable rules before publishing its findings source view; compose-to-real-findings test proves absent partial gauge and recovered true-empty zero. Selected-stack applied/pending chart now explicitly measured subtotals, not estate adoption/remediation; query remains selector-aware. Failing-first a3/findings-red.log then narrow and full gate green (1685 passed, 2 skipped, 8016 subtests); offline real dashboard CLI artifact readback passed after supplying synthetic bucket config. CodeRabbit complete zero findings, all three changed code/test files reviewed. Evidence codex/loop8-evidence/L-am/a3. a3 root rescue consumed, no infra retry; a4 specialist remains; R-int round2 still required.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
