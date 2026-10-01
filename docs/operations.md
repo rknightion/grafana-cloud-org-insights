@@ -7,11 +7,17 @@ Tell the write-stack owner that this platform adds active series to that one sta
 Do not enable schedules until:
 
 1. the Secrets Manager object contains separate read, write and provisioner token keys;
-2. the image is available under the immutable tag referenced by Terraform;
+2. the image is available at the immutable digest pinned by Terraform;
 3. the S3 bucket and stack-token SSM path exist with the intended IAM boundaries;
-4. one manual run of each scan tier has advanced its envelope;
-5. the provisioner has reconciled and verified the stack-local readers;
-6. the dashboards and paused alert rules have been published with a short-lived build token.
+4. the provisioner has reconciled and verified the stack-local readers;
+5. one manual run of each scan tier has advanced its envelope;
+6. the dashboards and new paused, unrouted alert rules have been published with a short-lived build token.
+
+These are prerequisites, not authority to perform live changes. Each live scan, provisioning run,
+publish or schedule change needs separate authorization. See the [runbook timetable](../RUNBOOK.md#scheduled-jobs)
+for all five jobs: module defaults are T1 hourly at :05, T2 daily, T3 six-hourly, T4 daily and a daily
+opt-in provisioner. Deployment cron and timezone overrides must be checked in the manifest and live
+Scheduler state; the module timezone default is UTC.
 
 ## Manual scans
 
@@ -33,11 +39,12 @@ Verify a run from both sides:
 - input ages on the dashboards are plausible for their owning schedules;
 - coverage separates paused and skipped stacks from failures.
 
-Exit `4` is a lock collision, not a failed scan. Do not disable a schedule to work around it. A limited `--stack` or `--limit` run cannot publish.
+Exit `4` is a lock collision, not a failed scan. Do not disable a schedule to work around it. A limited `--stack` or `--limit` run requires `--dry-run` for diagnostics; without it the scanner refuses publication.
+With it, no S3, Mimir or Loki writes occur.
 
 ## The provisioner
 
-The daily provisioner reconciles a basic-role-`None` service account and the `custom:gcinsight.reader` role on every provisionable live stack. Drift is compared as action/scope pairs, not action names.
+The provisioner (daily by module default, opt-in with `create_provisioner = true`) reconciles a basic-role-`None` service account and the `custom:gcinsight.reader` role on every provisionable live stack. Drift is compared as action/scope pairs, not action names.
 
 **Healthy steady state is reads with no token mint.** A repair creates a transient Admin identity, records its ids, repairs the role and assignment, verifies them, and deletes the Admin identity last.
 
@@ -51,7 +58,9 @@ After changing the role:
 - prove writes remain refused, using harmless write requests against test endpoints;
 - confirm the basic role is still `None` and `chats:access` is absent.
 
-Rotation is an explicit provisioner operation. Confirm the new SSM value works before deleting the old token. Teardown and repair use recorded ids, never a name pattern.
+The provisioner CLI has no rotation or teardown command. Separately authorized rotation must verify
+the replacement SSM value before deleting the old token. Teardown and repair use recorded ids, never
+a name pattern; retain authorized Admin access until custom roles are removed.
 
 ## Credential and policy checks
 
@@ -64,8 +73,8 @@ For `ssm:GetParametersByPath`, test the bare path ARN as well as a child ARN. Th
 ## Cost allocation
 
 ```bash
-just check-tags          # audit the cost-allocation tag
-just check-tags --fix    # repair it
+just check-tags          # live read-only audit; requires NAME_PREFIX and GCINSIGHT_S3_BUCKET
+just check-tags --fix    # live repair; requires separate authorization
 ```
 
 ## Proving a headline
@@ -74,4 +83,8 @@ just check-tags --fix    # repair it
 python3 bin/trace.py --live --context <gcx-context>
 ```
 
-Every headline figure reproduces from the raw scan. `bin/probe_usage_signals.py` re-measures the `grafanacloud-usage` panels and needs no credential.
+The tracer independently recomputes its declared headline figures from the raw scan and exits 1 on
+mismatch; it does not cover every panel. `bin/probe_usage_signals.py` re-measures the
+`grafanacloud-usage` signals through an authenticated `GCINSIGHT_GCX_CONTEXT`. It needs no additional
+service-account or CAP token, but it is a live read and overwrites its committed measurement artifact;
+do not run it as a harmless help or offline validation command.

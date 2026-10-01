@@ -78,10 +78,39 @@ replacement outside task definitions, adopted-resource mutation, permission wide
 secret-selector change, schedule/default change, identity drift, missing rollback digest, or output
 difference without an owner and explanation.
 
+Use the deployment root's approved saved-plan workflow. With the selected Terraform-compatible
+engine, the underlying flow is:
+
+```bash
+terraform -chdir=/path/to/deployment plan -out=/path/to/private/candidate.tfplan
+# Stop here for explicit live-change approval and review of this exact saved plan.
+terraform -chdir=/path/to/deployment apply /path/to/private/candidate.tfplan
+```
+
+Use `tofu` instead of `terraform` when that is the deployment's selected engine. The plan can contain
+sensitive data; keep it private. Apply only the reviewed plan for the exact committed inputs, not a
+fresh implicit plan. Deployment wrappers named `plan-out` or `apply-plan-auto` are not product
+recipes: inspect their local help and approval contract; an automatic apply is still a live change.
+
+For build-time tooling, supply the manifest, deployment root, Terraform file, projection kind and
+command explicitly:
+
+```bash
+just consumer-exec /path/to/deployment/consumer.json /path/to/deployment \
+  /path/to/deployment/consumer.tf dashboards python3 bin/dashboards.py \
+  --out /tmp/dashboards --ds-uid <infinity-datasource-uid>
+```
+
+Local dashboard output also needs local views (`GCINSIGHT_VIEWS_DIR`). `consumer-exec` validates
+configuration, not authority: a supplied publish or provisioning command can write to live systems.
+
 Deploy collectors with the provisioner independently disabled. Inspect the rendered task definitions and
 runtime digests before any run. Run tiers serially in dependency order using deployed task definitions,
-verifying both a log stream and the advanced scan envelope. Enable the write-capable provisioner last,
-after its no-write result is understood.
+verifying both a log stream and the advanced scan envelope. For a new deployment, reconcile
+stack-local readers with separate authorization before T2; otherwise its stack-local sources cannot
+publish. Enable the provisioner schedule last, after its no-write
+steady-state result is understood. Module defaults and timezone are in the
+[runbook timetable](../RUNBOOK.md#scheduled-jobs); deployment overrides need separate comparison.
 
 ## Rollback
 

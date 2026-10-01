@@ -8,13 +8,21 @@ The module provisions the platform. It does **not** provision the Grafana dashbo
 
 | | |
 |---|---|
-| S3 bucket | `scans/` (raw, expiring), `views/` (dashboard tables, permanent), `locks/` (single-run locks) |
+| S3 bucket | `scans/` (raw, expiring), `views/` (last-good dashboard tables; raw label-risk view expires), `locks/` (single-run locks) |
 | ECS | Fargate cluster, one task definition per tier, CloudWatch log group |
-| EventBridge Scheduler | one schedule per enabled tier |
+| EventBridge Scheduler | one schedule per configured tier, with enabled state controlled separately; optional provisioner schedule |
 | IAM | execution role, task role, scheduler role, and a `views/`-only reader for the Grafana datasource |
 | Secrets Manager | the container for the Grafana Cloud tokens - **values are never managed here** |
 | ECR | optional repository for the collector image |
 | Data Firehose | optional, default-off ECS-log delivery to the same Loki target, with failed-record S3 backup |
+
+For module-created buckets, `scan_retention_days` (default 90) covers current `scans/` objects and
+the reserved full-key prefix `views/risk_label_hygiene.json`, measured from last publication (including
+hydrated republication). Noncurrent versions expire after seven days; AWS processing is asynchronous,
+not strict erasure 90 days after observation. Other last-good views do not expire. Adopted buckets
+need equivalent targeted lifecycle rules in their existing configuration before raw-match publication,
+plus verified versioning, encryption, reader access and an effective non-TLS deny policy. Do not add a
+competing lifecycle configuration or expire all views.
 
 ## Why the credentials are split
 
@@ -34,16 +42,26 @@ change and documents the private identifier-pattern prerequisite, first manifest
 local-build provenance, AWS plan assumptions and rollback evidence. The steps below require separate
 live-change approval.
 
-Doing these out of order gives four tasks an hour failing to start, and the first symptom is a CloudWatch bill rather than an error anyone reads.
+Doing these out of order starts tasks before their image and credentials are ready. Failure frequency
+follows the configured schedules. See the [runbook timetable](../RUNBOOK.md#scheduled-jobs): module
+defaults are T1 hourly at :05, T2 daily, T3 six-hourly, T4 daily and a daily opt-in provisioner, all in
+UTC by default. Deployment cron and timezone overrides must be checked separately.
 
-1. `terraform apply` with `schedules_enabled = false` and `provisioner_enabled = false`. Everything exists; nothing fires.
+1. Opt in to stack-local reader provisioning with `create_provisioner = true` (default false).
+   Apply the approved saved plan with `schedules_enabled = false`, `provisioner_enabled = false`
+   and `firehose_log_subscription_enabled = false`. Infrastructure exists; no schedule fires.
 2. Write the tokens into the secret. The shape is in `secrets.tf`.
 3. Build and push the image. **It must match `task_architecture`** - the default is ARM64, and an x86 image on an ARM64 task definition fails at runtime with `exec format error`, not at plan time. Pin the pushed digest and apply again.
 4. **Run the provisioner by hand, before any scan tier.** It writes one per-stack reader token to SSM, and T2 cannot pass without them: every stack-local source returns `no_credential`, coverage is `0.0`, and the tier exits `1` refusing all writes. That failure reads like a broken reader token and is not one.
-5. Run the tiers by hand (`terraform output run_task_command`), serially, T2 → T3 → T1 → T4, and read their logs.
+5. Run the tiers serially, T2 → T3 → T1 → T4, and verify logs plus advanced scan envelopes.
+   The module's `run_task_command` output is a template: fill in the task definition and use the
+   recorded revision from `task_definition_arns` for an exact candidate run. A consumer root must
+   expose the module output explicitly; `terraform output` reads only root outputs.
 6. Mint the access key for the views reader and wire the Grafana Infinity datasource to it.
-7. Publish the dashboards, then the alert rules, which publish paused.
-8. Set `schedules_enabled = true`, and enable the provisioner schedule last - it is the only scheduled job that can write.
+7. Publish the dashboards, then the alert rules. New rules publish paused and unrouted; ordinary
+   publication preserves existing pause and routing state. Verify live state after publication.
+   Activation needs separate authority and an explicit receiver.
+8. Set `schedules_enabled = true`, and enable the provisioner schedule last - it is the only scheduled job that can write to Grafana's control plane. Collectors write S3, Mimir and Loki.
 
 The full procedure for a named organisation - which credentials to create in which region, the folder that must exist before a dashboard build, and what proves each phase finished - is *Standing up a new deployment* in the runbook. [Running scans](operations.md) lists what else must be true before the first scheduled scan.
 
@@ -86,9 +104,12 @@ Customer consumers pin both the module commit and the image digest, so changing 
 
 ## Rollback
 
-Images are published under immutable `sha-<commit>` tags. Roll back by restoring the previous Terraform image value and applying.
+Local ECR publication uses immutable `sha-<commit>` tags; public images also have release tags.
+Roll back to the saved immutable image digest and matching configuration, not a moving tag.
 
-Customer consumers use the stronger contract in `consumer/MIGRATION-RUNBOOK.md`: the deployment manifest, generic module ref and registry digest move together, and the image records both repository revisions plus the overlay digest. Capture current task definitions and schedule targets before applying that rollback.
+Customer consumers use the stronger contract in `consumer/MIGRATION-RUNBOOK.md`: the deployment manifest, generic module ref and registry digest move together, and the image records both repository revisions plus the overlay digest. Capture current task definitions and schedule targets before applying that rollback. Restore the saved
+manifest, module ref and digest triplet; never regenerate an old manifest with new tooling. Preserve
+both candidate and rollback digests against registry expiry for the agreed rollback window.
 
 Source rollback never deletes or overwrites S3 state automatically.
 
@@ -102,7 +123,9 @@ A new target is not a dashboard-only change.
 
 1. Disable schedules first.
 2. Deactivate or delete the platform alert rules and dashboards using recorded uids.
-3. Run the provisioner teardown against recorded role, service-account and token ids.
+3. Perform separately authorized reader cleanup using recorded role, service-account and token ids.
+   `bin/provision.py` has no teardown mode; retain authorized Admin access until custom roles are
+   removed and delete the transient Admin identity last.
 4. Revoke only this project's three access-policy tokens, and delete only its policies.
 5. Destroy Terraform-managed AWS resources.
 6. Handle adopted resources separately - they are deliberately outside Terraform ownership.

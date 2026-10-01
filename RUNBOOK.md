@@ -9,8 +9,8 @@ this runbook describes operations but does not grant authority to perform them.
 
 This section is the whole procedure for a named organisation, in the order it must actually happen.
 Each phase states what to collect, what to run, and what proves the phase finished. Do not skip
-forward: several steps look independent and are not, and phase 6 in particular fails in a way that
-reads like a broken credential if phase 5 has not run.
+forward: several steps look independent and are not. Phase 6 prepares the per-stack credentials
+without which the first T2 scan in phase 7 refuses publication.
 
 ### 0. Collect the inputs
 
@@ -74,7 +74,7 @@ curl -X POST -H "Authorization: Bearer $ADMIN" -H 'Content-Type: application/jso
   -d '{"name":"gcinsight-build","role":"Admin"}' \
   https://grafana.com/api/instances/<write-stack-slug>/api/serviceaccounts
 curl -X POST -H "Authorization: Bearer $ADMIN" -H 'Content-Type: application/json' \
-  -d '{"name":"gcinsight-build-<date>","secondsToLive":0}' \
+  -d '{"name":"gcinsight-build-<date>","secondsToLive":3600}' \
   https://grafana.com/api/instances/<write-stack-slug>/api/serviceaccounts/<sa-id>/tokens
 
 curl -X POST -H "Authorization: Bearer $BUILD" -H 'Content-Type: application/json' \
@@ -99,10 +99,11 @@ that one.
 
 ### 4. First apply, with everything scheduled turned off
 
+For stack-local collection, opt in with `create_provisioner = true` (the module default is false).
 Apply with `schedules_enabled = false`, `provisioner_enabled = false` and
 `firehose_log_subscription_enabled = false`. Everything exists; nothing fires. Doing this out of order
-gives four tasks an hour failing to start, and the first symptom is a CloudWatch bill rather than an
-error anyone reads.
+starts tasks before their credentials and image are ready. The failure frequency follows the
+configured schedules, not four runs an hour.
 
 Leave `image` empty on this first apply if the module is creating the ECR repository - there is nothing
 to pin yet and the task definitions fall back to `<repo>:latest`.
@@ -144,8 +145,10 @@ T2, then T3, then T1, then T4 - the order in *Manual scans* below, and for the r
 
 Verify each from both sides: the ECS task produced a log stream, and `scans/<tier>/latest.json`
 advanced and names the expected input keys. Expect earlier tiers to withhold views whose inputs the
-later tiers own; by the end of T1 nothing should be withheld. T4 declining to diff is correct on a
-young deployment - it needs two scans in a window before it can compute one.
+later tiers own; by the end of T1 all views with fresh, satisfied inputs should publish. Optional
+unavailable inputs still withhold dependent views; check provenance rather than expecting every view
+unconditionally. T4 declining to diff is correct on a young deployment - it needs two scans in a
+window before it can compute one.
 
 ### 8. Wire the Infinity datasource
 
@@ -171,19 +174,20 @@ with `GET /api/datasources/uid/<uid>/health` before publishing anything.
 
 ### 9. Publish dashboards, then alert rules
 
-Dashboards need live views, so this cannot precede phase 7. Alert rules publish paused and unrouted;
-leave them that way until the schedules have been on long enough for one run of each tier to land, or
+Dashboards need live views, so this cannot precede phase 7. New alert rules publish paused and
+unrouted; ordinary publication preserves existing pause and routing state. Keep new rules paused until the schedules have been on long enough for one run of each tier to land, or
 the staleness rules are correctly in breach the moment they are activated.
 
-**A small or clean estate can fail this phase.** See *Empty views on a small estate* below - it is a
-current product limitation, not a misconfiguration.
+If a build fails on a missing or empty view, see *Empty or missing views* below. A clean estate's
+empty finding lists are supported; a never-published view still needs its owning scan.
 
 Delete the build service account when this phase is done.
 
 ### 10. Turn it on, in this order
 
 Firehose log subscription (only after a deliberate test record has been delivered), then the collector
-schedules, then the provisioner schedule last - it is the only scheduled job that can write.
+schedules, then the provisioner schedule last - it is the only scheduled job that writes to Grafana's
+control plane. Scan tiers write to S3, Mimir and Loki.
 
 Confirm afterwards that any other deployment sharing the account is untouched: its task-definition
 revisions, schedule states and image digest should all be unchanged.
@@ -211,16 +215,18 @@ configured prefix.
 `GCINSIGHT_READER_PRODUCT_READS` is optional and defaults to empty. The only accepted values are
 `slo` and `synthetic-monitoring`, comma-separated. An unknown value stops the provisioner before any
 write. Enabling a family reconciles its exact read and plugin-access pairs on the per-stack custom
-role; disabling it removes those pairs without re-minting a working reader token. The dev deployment
-may enable both. A customer deployment needs a separate explicit grant decision. This setting grants
-read access; it does not add SLO or Synthetic Monitoring object collection to a scan.
+role; disabling it removes those pairs without re-minting a working reader token. Each deployment
+needs a separate explicit grant decision. The scanner also consumes this setting:
+`slo` enables the stack-local SLO inventory used by Coverage; `synthetic-monitoring` grants reader
+permissions but does not enable a Synthetic Monitoring object collector.
 
 ## Scheduled jobs
 
-T2 is **daily**, not hourly or six-hourly. T1 is hourly; T3 is six-hourly. The reusable
-module defaults below come from `terraform/variables.tf`; deployments can override every cron
-expression. Read the deployment manifest and live EventBridge Scheduler state for its actual
-schedule, timezone and enabled state rather than assuming these defaults apply.
+The reusable module defaults are T1 hourly at :05, T2 daily, T3 six-hourly and T4 daily,
+with a daily opt-in provisioner. The timetable below comes from `terraform/variables.tf`;
+deployments can override every cron expression and `schedule_timezone` (default `UTC`). Read the
+deployment manifest and live EventBridge Scheduler state for its actual schedule, timezone and enabled
+state rather than assuming these defaults apply.
 
 | Job | Cadence | Default start times (UTC) | Purpose |
 | --- | --- | --- | --- |
@@ -229,6 +235,11 @@ schedule, timezone and enabled state rather than assuming these defaults apply.
 | T2 | Daily | 03:30 | Gather per-stack identity, plugins, service accounts, usage insights, retention and other daily inputs |
 | T3 | Every six hours | 02:40, 08:40, 14:40, 20:40 | Gather data-plane cardinality and Adaptive Metrics recommendations |
 | T4 | Daily | 09:00 | Compare completed estate scans over the one-day and seven-day windows |
+
+The four collector schedules default to enabled (`schedules_enabled = true` and each tier's
+`enabled = true`). The provisioner is absent unless `create_provisioner = true`; once created,
+its schedule needs both `schedules_enabled` and `provisioner_enabled` (default true). Set both
+schedule switches false for initial deployment.
 
 These are scheduled start times, not completion times. Runtime depends on the discovered estate,
 source pacing and retries. An hourly T1 publication does not make T2 or T3 observations hourly:
@@ -259,7 +270,9 @@ Verify a run from both sides:
 - coverage separates paused/skipped stacks from failures.
 
 Exit `4` is a lock collision, not a failed scan. Do not disable a schedule to work around it.
-A limited `--stack` or `--limit` run cannot publish.
+A limited `--stack` or `--limit` run requires `--dry-run` for diagnostics; without it the scanner
+refuses publication.
+With it, no S3, Mimir or Loki writes occur.
 
 The query-mix view needs a fresh T2 `insights` input with `query_mix_complete`. Hydrated older inputs
 without that marker withhold the new view while keeping the last good copy on S3. A failed optional
@@ -267,8 +280,8 @@ query-mix request preserves the core insights input and withholds only this view
 
 ## Provisioner
 
-The daily provisioner reconciles a basic-role-None service account and
-`custom:gcinsight.reader` on every provisionable live stack. Healthy steady state is reads with
+The provisioner (daily by module default; see [Scheduled jobs](#scheduled-jobs)) reconciles a
+basic-role-None service account and `custom:gcinsight.reader` on every provisionable live stack. Healthy steady state is reads with
 no token mint. A repair creates a transient Admin identity, records its ids, repairs the role and
 assignment, verifies them, and deletes the Admin identity last.
 
@@ -284,8 +297,9 @@ After changing the role:
 - prove writes remain refused with harmless write requests against test endpoints;
 - confirm basic role is still `None` and `chats:access` is absent.
 
-Rotation is an explicit provisioner operation. Confirm the new SSM value works before deleting the old
-token. Teardown and repair use recorded ids, never a name pattern.
+The provisioner CLI reconciles readers; it has no rotation or teardown command. A separately
+authorized credential rotation must verify the replacement SSM value before deleting the old token.
+Teardown and repair use recorded ids, never a name pattern.
 
 ## Dashboards
 
@@ -305,29 +319,18 @@ The builder needs live views to derive Infinity columns. A newly implemented vie
 its owning tier before a table panel references it. Legitimately empty finding views use explicit
 schemas; a never-published view remains a build failure.
 
-### Empty views on a small estate
+### Empty or missing views
 
-That last sentence describes the intent. The implementation does not currently hold it up, and a small
-or clean estate is where it shows.
+The S3 writer publishes empty row sets when composition supplies the view. A legitimately empty
+finding table uses its declared fallback schema, including idle estate leftovers and dead Fleet
+registrations. A measured but all-unscored maturity population still publishes its leaderboard and
+explanation when data-plane inputs are available.
 
-A view with zero rows is not written to S3 at all, and `build.columns_for` raises `EmptyView` when it
-cannot derive an Infinity column spec - Infinity's backend parser returns HTTP 500 for the whole panel
-on an empty `columns`, so refusing is correct. The fallback exists as each pillar's `VIEW_SCHEMAS`, but
-it has to be threaded through by hand at every call site, and not every call site does it.
-
-The result on a small estate is `--publish all` dying, in two shapes that are one cause:
-
-- a call site with no `schema=` raises `EmptyView` - `estate` on `estate_leftovers_idle` and `risk` on
-  `risk_fleet_dead`, while `estate_leftovers_billing` on the adjacent line passes its schema and is
-  fine;
-- a view that was never written 404s on read - `maturity`, whose leaderboard was empty.
-
-So "correctly empty" and "never wired up" are **not** currently distinguishable, which is the exact
-distinction the design intends. The reason it shipped is that `testdata/` holds a full synthetic estate,
-so no test has ever exercised a zero-row view.
-
-Nothing in a deployment can work around it: the schema has to travel from the pillar, so the fix is in
-the product. Until then, the affected dashboards are skipped and the rest publish normally.
+A missing object is different: schema fallback does not bypass reading the view. Check whether the
+owning tier ran successfully, whether its required inputs were available and fresh, and whether the
+view was withheld. Preserve the last good object rather than fabricating rows. `EmptyView` means an
+existing row set is empty without a usable fallback; identify the panel and view and report a missing
+schema if empty is legitimate. Do not skip a whole dashboard merely because the estate has no findings.
 
 ## Rate card
 
@@ -412,9 +415,9 @@ as a child ARN; the API authorises the path itself.
 
 ## Rollback
 
-Images are published under immutable `sha-<commit>` tags. Roll back by restoring the previous
-Terraform image value and applying. A normal image build does not move `latest`; doing so requires
-the explicit compatibility flag.
+Local ECR publication uses immutable `sha-<commit>` tags; public release images have release tags.
+In either case, roll back to the recorded immutable digest and matching configuration, not a moving
+tag. A normal image build does not move `latest`; doing so requires the explicit compatibility flag.
 
 Customer consumers use the stronger contract in `consumer/MIGRATION-RUNBOOK.md`: the deployment
 manifest, generic module ref, and registry digest move together, and the image records both repository
@@ -434,7 +437,9 @@ abandoned or migrated. A new target is not a dashboard-only change.
 
 1. Disable schedules first.
 2. Deactivate or delete the platform alert rules and dashboards using recorded uids.
-3. Run the provisioner teardown against recorded role, service-account and token ids.
+3. Perform separately authorized reader cleanup using recorded role, service-account and token ids;
+   `bin/provision.py` has no teardown mode. Keep an authorized Admin identity until custom roles
+   are removed, then remove the transient Admin identity last.
 4. Revoke only this project's three access-policy tokens and delete only its policies.
 5. Destroy Terraform-managed AWS resources.
 6. Handle adopted resources separately; they are deliberately outside Terraform ownership.

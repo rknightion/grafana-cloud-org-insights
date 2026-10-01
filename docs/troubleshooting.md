@@ -56,13 +56,15 @@ Coverage is a ratio against **scannable** stacks. Paused stacks answer the contr
 
 ## Tasks fail to start immediately after the first apply
 
-Almost always ordering. See [Deployment](deployment.md) for the steps in order. The two that bite hardest: an x86 image on an ARM64 task definition fails at runtime with `exec format error` rather than at plan time, and schedules enabled before the secret is populated produce four failing tasks an hour whose first symptom is a CloudWatch bill.
+Almost always ordering. See [Deployment](deployment.md) for the steps in order. The two that bite hardest: an x86 image on an ARM64 task definition fails at runtime with `exec format error` rather than at plan time, and schedules enabled before the secret is populated start failing tasks at the configured cadence. The module does not schedule four tasks every hour; see the [default timetable](../RUNBOOK.md#scheduled-jobs).
 
 ## T2 exits 1 at coverage 0.0 on a brand-new deployment
 
-The provisioner has not run yet, and the reader token is fine.
+First check whether the provisioner has run successfully and populated the configured SSM path.
+Missing stack-local credentials do not by themselves prove that the org-realm reader token is broken.
 
-Every stack-local source - service accounts, Assistant, usage insights, dashboard inventory, datasource query cost, Adaptive Logs, public dashboards, alert routing - reports `no_credential` and `0 of N available`, so the tier refuses all S3, Mimir and Loki writes. Those sources authenticate as the per-stack reader the provisioner mints into SSM, not as the org-realm reader, so none of them can work before it has run once. Run the provisioner, confirm one SSM parameter per stack, and re-run T2.
+Every stack-local source - service accounts, Assistant, usage insights, dashboard inventory, datasource query cost, Adaptive Logs, public dashboards, alert routing - reports `no_credential` and `0 of N available`, so the tier refuses all S3, Mimir and Loki writes. Those sources authenticate as the per-stack reader the provisioner mints into SSM, not as the org-realm reader, so none of them can work before it has run once. With separate live-run authorization, reconcile the provisionable stacks, confirm their SSM
+parameters and reader access, and re-run T2. Paused and opted-out stacks are not failures.
 
 ## `PutSubscriptionFilter` says the Firehose stream is not ACTIVE
 
@@ -77,4 +79,9 @@ re-evaluating the creation-time condition and is not acceptance evidence.
 
 ## `--publish all` raises `EmptyView`
 
-A view with zero rows, on an estate small or clean enough to produce one. See *Empty views on a small estate* in the runbook: it is a current product limitation rather than a misconfiguration, and it cannot be worked around from a deployment.
+An existing view has zero rows and the panel has no usable fallback schema. Legitimately empty
+finding tables, including idle leftovers and dead Fleet registrations, have declared schemas and are
+supported. Identify the failing view and panel; if empty is legitimate, report the missing schema.
+A missing S3 object instead fails during the view read: check the owning scan and input freshness.
+See [Empty or missing views](../RUNBOOK.md#empty-or-missing-views); do not fabricate rows or assume every
+small estate must skip affected dashboards.
