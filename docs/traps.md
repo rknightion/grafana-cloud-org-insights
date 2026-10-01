@@ -219,6 +219,54 @@ is already a datasource on the target stack, a panel beats a pipeline.**
  absence. The successful second run resolves known-frontend transport proof; it does not retest
  the backend source-tag candidate, prove universal per-app impossibility, or measure human users.
  No working per-app discriminator was established for this tested UI and ingested schema.
+- **A known-human sample still needs request-to-app correlation.** On 2026-10-01 a known human
+ operator used Logs Drilldown, then Metrics Drilldown, then plain Explore on a staff stack. A
+ guarded GET read for 06:45-07:10 UTC returned 211 `data-request` lines (limit 5,000), with this
+ observed chronology. Times below are Loki line timestamps, not measured frontend execution times:
+
+ | UTC line-time interval | source | datasourceType | Requests |
+ | --- | --- | --- | ---: |
+ | 06:57:09.313111-06:57:09.313139 | dashboard / app / scenes | prometheus | 1 / 3 / 3 |
+ | 06:57:39.378593-06:57:49.322687 | app | wrapped-loki-ds | 117 |
+ | 06:57:39.379147-06:57:49.322509 | app | grafana-knowledgegraph-datasource | 9 |
+ | 06:58:09.331005-06:58:19.800027 | scenes / dashboard | prometheus | 66 / 5 |
+ | 06:58:28.808948-06:58:48.549878 | explore | prometheus | 2 |
+ | 06:58:48.549907-06:58:58.536559 | explore | loki | 5 |
+
+ The exact LogQL was `{instance_type="grafana", instance_id="<current stack id>"}
+ | logfmt | eventName="data-request"`, with `start=2026-10-01T06:45:00Z`,
+ `end=2026-10-01T07:10:00Z`, `direction=forward`, `limit=5000`, through the guarded datasource
+ proxy `query_range` GET. The placeholder redacts the actual stack guard, which was supplied on
+ every request. Grouping all returned lines gives `app=129`, `scenes=69`, `dashboard=6`,
+ `explore=7`. Of 205 non-dashboard lines, **zero** had a nonempty `dashboardUid`.
+
+ Every line carried these field names: `cachedQueries`, `dashboardName`, `dashboardUid`,
+ `datasourceName`, `datasourceType`, `datasourceUid`, `eventName`, `folderName`, `insight_logs`,
+ `level`, `logger`, `msg`, `orgId`, `orgName`, `source`, `t`, `timestamp`, `tokenId`, `totalQueries`,
+ `userId`, `username`. `duration` was present on 210 of 211 lines; `panelId` was present on all seven
+ Explore lines and absent on the other 204. Thus `userId` presence is proven, without retaining
+ its value or claiming distinct people. No line had a query-text, metric-name, service-name,
+ plugin-ID or URL field with which to match the operator's exact requested content.
+
+ Comparing the 117 wrapped-Loki `app` lines with the 69 Prometheus `scenes` lines, fields other
+ than `datasourceType` whose value sets differed were `datasourceName`, `datasourceUid`, `duration`,
+ `source`, `t`, `timestamp`, `totalQueries`. Only `source` is a plausible app discriminator:
+ its sets were disjoint here (`app` versus `scenes`), but the other three early `app` Prometheus
+ lines prevent treating backend type as a known-app mapping. Datasource name/UID identify the
+ backend, not the app; duration and total query count overlapped; timestamps separate batches,
+ not apps. Comparing those 117 lines with the five Loki Explore lines, differing fields were
+ `datasourceName`, `datasourceUid`, `duration`, `panelId`, `source`, `t`, `timestamp`.
+ `source` separated those groups (`app` versus `explore`); `panelId` presence also separated them
+ on this sample, not as a universal app identifier. Datasource identities and timestamps were
+ disjoint but are not app discriminators; duration overlapped.
+
+ The middle and final bursts are consistent with the reported Logs-then-Metrics-then-Explore
+ order, but there are earlier mixed events, only ingestion-side timestamps, and five Loki Explore
+ events rather than a one-event-per-query control. **Exact A/B/C content attribution remains
+ unproven.** This is one known-human sample on one stack, not an estate finding. `source` is a
+ candidate separating the observed groups, not an accepted known-app discriminator until the
+ human session's exact frontend requests are correlated independently. Do not identify apps by
+ datasource type alone or promote this observation into collector classification.
 - **Distinct people require a filtered `userId`, not request volume.** Nonempty, non-anonymous IDs
  occurred on four of five development and 41 of 50 sampled customer stacks. Aggregate distinct IDs
  inside Loki; do not put an identity or raw plugin-chosen `source` into a metric label.
