@@ -85,6 +85,8 @@ python3 bin/trace.py --live --context <gcx-context>
 
 The tracer independently recomputes its declared headline figures from the raw scan and exits 1 on
 mismatch; it does not cover every panel. `bin/probe_usage_signals.py` re-measures the
-`grafanacloud-usage` signals through an authenticated `GCINSIGHT_GCX_CONTEXT`. It needs no additional
-service-account or CAP token, but it is a live read and overwrites its committed measurement artifact;
-do not run it as a harmless help or offline validation command.
+`grafanacloud-usage` signals with `python3 bin/probe_usage_signals.py --context <gcx-context> --out
+<new-artifact.json>`. It needs no additional service-account or CAP token, but it is a live read.
+`--help` is side-effect-free; a live run requires both arguments and refuses an existing output unless
+`--overwrite` explicitly permits replacement. Keep live output separate from committed synthetic
+artifacts.

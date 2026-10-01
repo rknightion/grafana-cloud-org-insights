@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Regenerate `testdata/usage-datasource-signals.json` from live `grafanacloud-usage` queries.
+"""Write an explicit artifact from live `grafanacloud-usage` queries.
 
-    GCINSIGHT_GCX_CONTEXT=<context> python3 bin/probe_usage_signals.py
+    python3 bin/probe_usage_signals.py --context <context> --out <new-artifact.json>
 
 Needs nothing but a working `gcx` context on a stack in the org - `grafanacloud-usage` is provisioned on
 every one of them and carries the whole org's billing/usage series. No service account, no CAP, no token
@@ -17,15 +17,27 @@ series here is momentary, so `> 0` answers "is this happening in the current scr
 `tests/test_dashboards.py` enforces the same rule on the panels.
 """
 
+import argparse
 import json
-import os
+from pathlib import Path
 import subprocess
 import sys
 
-DS = "grafanacloud-usage"
-CTX = os.environ.get("GCINSIGHT_GCX_CONTEXT", "").strip()
+# Parse and refuse unsafe invocations before resolving any live context or querying gcx.
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--context", required=True, help="explicit authenticated gcx context")
+parser.add_argument("--out", required=True, type=Path, help="destination JSON artifact")
+parser.add_argument("--overwrite", action="store_true", help="allow replacing an existing artifact")
+args = parser.parse_args()
+CTX = args.context.strip()
 if not CTX:
-    raise SystemExit("GCINSIGHT_GCX_CONTEXT is required; no deployment context is assumed")
+    parser.error("--context must not be blank")
+if args.out.exists() and not args.overwrite:
+    parser.error("--out already exists; use --overwrite to explicitly replace it")
+if args.out.is_dir() or not args.out.parent.is_dir():
+    parser.error("--out must name a file in an existing directory")
+
+DS = "grafanacloud-usage"
 INFO = "grafanacloud_grafana_instance_info"
 WINDOW = "24h"
 DEFECT = '{reason!="requested-by-configuration"}'
@@ -526,5 +538,11 @@ doc["label_cardinality"] = {
     )},
 }
 
-json.dump(doc, open("testdata/usage-datasource-signals.json", "w"), indent=2)
+# Exclusive creation also refuses a destination created while the queries were running.
+try:
+    with args.out.open("w" if args.overwrite else "x") as output:
+        json.dump(doc, output, indent=2)
+except FileExistsError:
+    parser.error("--out already exists; use --overwrite to explicitly replace it")
 print("written", file=sys.stderr)
+raise SystemExit(0)

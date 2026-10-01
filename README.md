@@ -272,7 +272,7 @@ just image --repo <ecr-uri> # build the image; ARM64, no Python dependencies
 just publish-image --repo <ecr-uri> # confirm, then push immutable :sha-<commit>
 python3 bin/alerts.py --list # the health alert rules and their routing
 python3 bin/trace.py --live --context <gcx-context> # independently recompute the declared trace figures
-GCINSIGHT_GCX_CONTEXT=<gcx-context> python3 bin/probe_usage_signals.py # live read using existing gcx auth
+python3 bin/probe_usage_signals.py --context <gcx-context> --out <new-artifact.json> # live read; existing output requires --overwrite
 just check-tags # audit the cost-allocation tag; pass --fix to repair
 ```
 
