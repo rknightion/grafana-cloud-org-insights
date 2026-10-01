@@ -13,10 +13,13 @@ def run_probe(script, *, timeout=3):
     except subprocess.TimeoutExpired:
         pytest.fail("blocked network edge exceeded the caller/process wall-time bound")
     assert result.returncode == 0, result.stderr
+    if result.stdout:
+        print(result.stdout, end="")
 
 
+@pytest.mark.parametrize("phase", ["pool_start", "dns"])
 @pytest.mark.parametrize("mode", ["get", "guarded", "label_get", "profile", "rpc", "legacy_query"])
-def test_never_returning_resolver_has_total_wall_time_bound(mode):
+def test_never_returning_resolver_has_total_wall_time_bound(mode, phase):
     script = textwrap.dedent("""
         import socket
         import threading
@@ -25,6 +28,7 @@ def test_never_returning_resolver_has_total_wall_time_bound(mode):
         from collector.sources.label_risk import bounded_transport, profile_read
         from collector.sources.dataplane import _connect_rpc
         from collector.sources.usage_insights import _query
+        from collector.netbound import MAX_WORKERS, _WORKERS, bounded_call
 
         entered = threading.Event()
         def resolver(*args, **kwargs):
@@ -32,6 +36,18 @@ def test_never_returning_resolver_has_total_wall_time_bound(mode):
             threading.Event().wait()  # never returns, including after caller timeout
         socket.getaddrinfo = resolver
         client = ReadOnlyClient(timeout=0.1, max_attempts=1, deadline=0.2)
+        if PHASE == 'pool_start':
+            # Hold the lazy-start lock at the process edge: admission must expire
+            # before a job can be submitted or any resolver can be entered.
+            assert not _WORKERS.threads
+            _WORKERS.lock.acquire()
+        else:
+            # Pool construction is setup, not DNS evidence. Prove readiness before
+            # starting the unchanged short caller deadline and wall-time clock.
+            bounded_call(lambda: None, timeout=1)
+            assert len(_WORKERS.threads) == MAX_WORKERS
+            assert all(thread.is_alive() for thread in _WORKERS.threads)
+        assert not entered.is_set()
         started = time.monotonic()
         try:
             if MODE == 'rpc':
@@ -51,13 +67,25 @@ def test_never_returning_resolver_has_total_wall_time_bound(mode):
                                transport=bounded_transport(100)).get('https://example.test/x')
             else:
                 client.get('https://example.test/x', guarded=MODE == 'guarded')
-        except (RuntimeError, TimeoutError):
-            assert entered.is_set(), 'did not exercise DNS'
-            assert time.monotonic() - started < 1, 'caller exceeded wall budget'
+        except (RuntimeError, TimeoutError) as exc:
+            elapsed = time.monotonic() - started
+            if PHASE == 'pool_start':
+                assert _WORKERS.lock.locked() and not _WORKERS.threads
+                assert not entered.is_set(), 'resolver entered before pool startup'
+                # Guarded GET intentionally replaces the underlying timeout with
+                # its public deadline error; phase evidence above is independent.
+                expected = ('guarded GET deadline' if MODE == 'guarded'
+                            else 'HTTP worker admission deadline')
+                assert expected in str(exc), str(exc)
+            else:
+                assert entered.is_set(), 'did not exercise DNS'
+            assert elapsed < 1, 'caller exceeded wall budget'
+            print(f'{MODE}: phase={PHASE}, resolver_entered={entered.is_set()}, '
+                  f'workers={len(_WORKERS.threads)}, elapsed={elapsed:.3f}s')
         else:
             raise AssertionError('blocked resolver did not fail the call')
     """)
-    run_probe("MODE = " + repr(mode) + "\n" + script)
+    run_probe("MODE = " + repr(mode) + "\nPHASE = " + repr(phase) + "\n" + script)
 
 
 @pytest.mark.parametrize("mode", ["rpc", "legacy_query"])
@@ -68,7 +96,9 @@ def test_legacy_complete_transport_body_read_has_wall_time_bound(mode):
         from unittest import mock
         from collector.sources.dataplane import _connect_rpc
         from collector.sources.usage_insights import _query
+        from collector.netbound import bounded_call
 
+        bounded_call(lambda: None, timeout=1)  # startup is outside the body-read clock
         entered = threading.Event()
         class Response:
             def __enter__(self):
@@ -105,8 +135,12 @@ def test_surviving_dns_work_is_bounded_and_admission_fails_closed():
         import threading
         import time
         from collector.httpclient import ReadOnlyClient
-        from collector.netbound import MAX_WORKERS
+        from collector.netbound import MAX_WORKERS, _WORKERS, bounded_call
 
+        # Separate lazy pool setup from the short per-call DNS budget.
+        bounded_call(lambda: None, timeout=1)
+        assert len(_WORKERS.threads) == MAX_WORKERS
+        assert all(thread.is_alive() for thread in _WORKERS.threads)
         calls = []
         def resolver(*args, **kwargs):
             calls.append(1)
@@ -131,7 +165,9 @@ def test_survivor_keeps_host_slot_then_releases_it_for_recovery():
     run_probe("""
         import threading
         from collector.httpclient import ReadOnlyClient, Response
+        from collector.netbound import bounded_call
 
+        bounded_call(lambda: None, timeout=1)  # startup is outside the transport budget
         entered = threading.Event()
         release = threading.Event()
         calls = []
