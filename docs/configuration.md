@@ -2,7 +2,12 @@
 
 Everything is supplied through the process environment. **No deployment identifier is defaulted.** A default org id or tenant would be one deployment's identifiers baked into everyone else's collector, and the failure is silent rather than loud: the scan authenticates, succeeds, and writes a plausible set of series into somebody else's tenant.
 
-## Required
+## Required scan configuration
+
+`collector.config.load()` requires the org, write stack, both endpoints and both tenants even with
+`--dry-run`. The bucket is required for S3-backed hydration, rate-card and diff reads and for
+publication. A dry run suppresses writes, not reads. Local publishing is refused; use deployed ECS
+task definitions for production or manual publishing.
 
 | Variable | Meaning |
 |---|---|
@@ -20,12 +25,49 @@ Everything is supplied through the process environment. **No deployment identifi
 |---|---|---|
 | `GCINSIGHT_READ_TOKEN` | collector | org |
 | `GCINSIGHT_WRITE_TOKEN` | collector | the write stack alone |
-| provision token | provisioner only | org |
+| `GCINSIGHT_PROVISION_TOKEN` | provisioner only | org |
 | `GCINSIGHT_STACK_TOKEN_PREFIX` | collector | SSM path holding per-stack reader tokens |
 
 `GCINSIGHT_WRITE_TOKEN` falls back to the read token when unset, so a single-credential interactive run works. A deployment sets both. Per-stack reader tokens are SSM `SecureString` values below the configured prefix. The provisioner alone reads the provision token; the collector never receives it.
 
-In a deployed setup the Secrets Manager object must contain separate read, write and provisioner token keys before any schedule is enabled.
+In a deployed setup the Secrets Manager object must contain separate read and write token keys
+before scan schedules are enabled, plus the provisioner key if that opt-in task is created.
+Secret values are populated outside Terraform; the module manages the container or adopts one.
+
+## Runtime policy and regions
+
+| Variable | Generic default and contract |
+|---|---|
+| `GCINSIGHT_S3_REGION` | `eu-west-1`; bucket region for AWS operations and generated S3 URLs |
+| `GCINSIGHT_SSM_REGION` | `eu-west-1`; region holding per-stack reader credentials |
+| `GCINSIGHT_STACK_TOKEN_PREFIX` | `/gcinsight/stack-token`; shared by scan and provisioner |
+| `GCINSIGHT_OPT_OUT` | empty; comma-separated stack slugs the owner asks not to provision |
+| `GCINSIGHT_COVERAGE_SCORE_WEIGHTS` | equal weights; partial JSON overrides for `metrics`, `logs`, `traces`, `profiles`, `dashboard`, `alert`, `slo`; finite non-negative numbers with positive total |
+| `GCINSIGHT_DASHBOARD_DETAIL_ENABLED` | false; `true`/`1` or `false`/`0`; opt-in dashboard JSON inspection for service attribution, with no retained query text |
+| `GCINSIGHT_READER_PRODUCT_READS` | empty; comma-separated `slo` and/or `synthetic-monitoring`; scan and provisioner must agree; selected reader grants do not prove route availability |
+| `GCINSIGHT_STAFF_LOGINS` | empty; comma-separated lowercase logins excluded from ownership attribution in maturity views; not part of the immutable consumer projection |
+
+Expected retention and Fleet scrape policy are described below. The Terraform module exposes
+`coverage_score_weights`, `dashboard_detail_enabled`, `provision_opt_out` and
+`provisioner_product_reads` for the corresponding runtime policies. Do not use these tunables to
+store discovered inventory. A consumer must populate every projection field, even where the generic
+runtime has a default.
+
+## Schedules and retention
+
+Module defaults are T1 hourly at :05, T2 daily, T3 six-hourly, T4 daily and the opt-in provisioner
+daily, with `schedule_timezone = "UTC"`. `tiers` and `provisioner_schedule_expression` can override
+those defaults. See the [operator timetable](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/RUNBOOK.md#scheduled-jobs)
+for the canonical times and enablement gates. Set `schedules_enabled = false` during initial setup:
+the module default is true. `create_provisioner` defaults to false; its schedule additionally depends
+on `provisioner_enabled`. Schedule changes require corresponding deadline, staleness-alert and
+carry-forward review, not just a cron edit.
+
+`scan_retention_days` defaults to 90 positive whole days. It governs current `scans/` objects and
+the reserved full-key prefix `views/risk_label_hygiene.json`, not all views. Age starts at last
+publication; hydration republishes and resets it. Noncurrent versions expire after seven days and
+AWS lifecycle processing is asynchronous. Adopted buckets need equivalent targeted retention in
+their existing lifecycle policy before raw-match publication. See [Security](security.md).
 
 ## Dashboard build
 
@@ -38,7 +80,34 @@ Build-time Grafana credentials are separate from runtime credentials and should 
 | `GCINSIGHT_WRITE_STACK_ID` | numeric stack id |
 | `GCINSIGHT_GRAFANA_TOKEN` | short-lived build token |
 
-The builder resolves the insights folder by title.
+The builder resolves the insights folder by title. An offline build supplies `--ds-uid`, local
+views and a synthetic bucket name for generated URLs; that placeholder JSON must not be published.
+
+## Immutable consumer identity
+
+`collector.identity.PROJECTION_ENVS` is the exact non-secret projection contract. A deployment owns
+these values in its manifest; use the consumer tools rather than editing a task's environment by
+hand. `GCINSIGHT_RUNTIME_CONFIG_DIGEST` verifies the resolved projection;
+`GCINSIGHT_REQUIRE_EXPLICIT_CONFIG=1` requires it and all non-optional projection values.
+See [Consumer upgrades and rollback](../consumer/MIGRATION-RUNBOOK.md).
+
+| Variables | Meaning |
+|---|---|
+| `GCINSIGHT_METRIC_PREFIX`, `GCINSIGHT_LOKI_JOB`, `GCINSIGHT_USER_AGENT` | emitted metric namespace, Loki job and publisher user agent |
+| `GCINSIGHT_ROLE_NAME`, `GCINSIGHT_ROLE_DISPLAY`, `GCINSIGHT_ROLE_GROUP` | per-stack custom-role identity |
+| `GCINSIGHT_READER_SA_NAME`, `GCINSIGHT_ADMIN_SA_NAME`, `GCINSIGHT_TOKEN_NAME_PREFIX` | persistent reader, transient provisioning Admin and minted-token names |
+| `GCINSIGHT_DASHBOARD_UID_PREFIX`, `GCINSIGHT_DASHBOARD_TITLE_PREFIX`, `GCINSIGHT_DASHBOARD_TAG` | generated dashboard identity |
+| `GCINSIGHT_DASHBOARD_DS_NAME`, `GCINSIGHT_DASHBOARD_FOLDER_TITLE` | Infinity datasource and insights-folder lookup names |
+| `GCINSIGHT_INSIGHTS_FOLDER_UID` | explicit target folder for alert publication; dashboard publication resolves the folder by title |
+| `GCINSIGHT_PROM_DS_UID` | alert Prometheus datasource uid; generic default `grafanacloud-prom` |
+| `GCINSIGHT_ALERT_RULE_GROUP`, `GCINSIGHT_ALERT_RULE_UIDS_JSON` | alert group and JSON mapping from rule keys to stable uids |
+| `GCINSIGHT_ALERT_TITLE_PREFIX`, `GCINSIGHT_ALERT_TITLE_SEPARATOR`, `GCINSIGHT_ALERT_SERVICE_LABEL` | alert title and service-label identity |
+| `GCINSIGHT_GCX_CONTEXT` | existing authenticated gcx context for live trace and billing probes; not a collector credential |
+
+Generic identity defaults live in `collector.identity`, `collector.provision`, `bin/dashboards.py`,
+`bin/alerts.py` and the emitters. Changing provisioner names affects live reconciliation; changing
+output identity affects dashboard queries and alerts. Treat either as a reviewed consumer change,
+not cosmetic renaming.
 
 ## The rate card
 
@@ -53,7 +122,9 @@ Configuration errors, all rejected rather than coerced:
 - mixed currencies;
 - duplicate dimensions;
 - unsupported units;
-- non-positive prices.
+- non-positive prices;
+- unsupported dimensions or billing bases, wrong fixed divisors, invalid included quantities, or a
+  period other than `month`.
 
 Currency and billing period come from the card. Metrics-series pricing is per 1,000 series where declared, and metrics support two explicit bases:
 

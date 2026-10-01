@@ -10,9 +10,8 @@ new deployment.
 Use Git, Python 3.14 with venv support (the repository's CI and container version), `just`, OpenTofu
 >= 1.6 and a running Docker daemon with BuildKit and support for the chosen task architecture.
 Before setup and consumer commands, run `python3 --version` and `command -v python3`; make sure
-`python3` on PATH resolves to the intended interpreter. The clean-room validation exercised Python
-3.14.7; an earlier documentation-only gate also passed on 3.13.15, which is not a lower-version
-support guarantee. `just setup` installs the pinned test runner; OpenTofu init downloads the AWS v6 provider. Those downloads and a Docker base-image pull require network
+`python3` on PATH resolves to the intended interpreter. Record the exact version used; a gate
+passing on another Python minor version is not a support guarantee. `just setup` installs the pinned test runner; OpenTofu init downloads the AWS v6 provider. Those downloads and a Docker base-image pull require network
 access even though the product tests require neither AWS nor Grafana credentials.
 
 You need two repositories: the public product and a deployment-owned repository. The latter may be
@@ -76,7 +75,9 @@ A first deployment has no manifest for `upgrade` to update. Create `deployment/c
 `PROJECTION_ENVS` in `collector/identity.py`; runtime meanings are described in
 [Configuration](configuration.md). These are non-secret values, not credentials. Keep reader product
 policy identical in scan and provisioner. Include explicit privacy acceptance rather than assuming
-bounded metric labels permit clear identity storage.
+bounded metric labels permit clear identity storage. Raw label-risk matches are restricted to the
+approved risk view and private hydration input, with targeted retention and adopted-bucket controls
+verified before publication; see [Security](security.md).
 
 Set `generic_source.repository` to the public product URL and `generic_source.revision` to the full
 checked-out commit. For initial construction only, use 64 zeroes as placeholders for `overlay_digest`
@@ -127,7 +128,10 @@ profile and call it an offline synthetic plan. Do not invent account or subnet r
 them as a validated deployment.
 
 For an owner-authorized read-only candidate plan, keep both collector and provisioner schedules
-disabled and Firehose subscription disabled. Save the plan in a private evidence directory:
+disabled and Firehose subscription disabled. Do not rely on module defaults: `schedules_enabled`
+defaults to true, while `create_provisioner` defaults to false. The five module-default cadences and
+UTC schedule interpretation are in the [operator timetable](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/RUNBOOK.md#scheduled-jobs);
+deployment overrides belong in the deployment repository. Save the plan in a private evidence directory:
 
 ```bash
 tofu -chdir=/path/to/deployment/root init -backend=false

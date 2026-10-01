@@ -10,19 +10,22 @@ Two audiences, two cadences. A platform team reads it weekly and wants to know w
 
 - **Not a replacement for showback.** If your org already emails per-owner cost reports, this answers "which lever moves that number", not "what did it cost".
 - **Not an agent on your stacks.** Nothing is installed anywhere. The collector runs in your AWS account and talks to `grafana.com` and to each stack's own API over HTTPS.
-- **Not a write path.** The scanning credential is read-only by scope, and the collector's HTTP client refuses any method other than GET. Publishing uses a second credential whose realm is a single stack.
+- **Not a customer mutation path.** The scanning credential has read scopes, and the general HTTP client refuses non-GET methods. Fleet list RPCs and the two native Pyroscope label-risk RPCs are read-only POST exceptions. Publishing uses a second credential whose realm is a single stack; provisioning is a separate, explicitly authorised operation.
 
 ## How it works
 
-Four scheduled scan tiers plus a provisioner, all ECS Fargate tasks on EventBridge schedules.
+Four scheduled scan tiers plus an opt-in provisioner, all ECS Fargate tasks on EventBridge schedules.
+These are module-default cadences; T1 runs at :05 and the schedule timezone defaults to UTC.
+Deployment overrides may differ. See the [operator timetable](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/RUNBOOK.md#scheduled-jobs)
+for schedule times and enablement gates.
 
-| Tier | Cadence | Gathers |
+| Tier | Module-default cadence | Gathers |
 |---|---|---|
 | T1 | hourly | org inventory, access policies, org members and Fleet Management |
 | T2 | daily | per-stack users, plugins, service accounts, Assistant, usage insights, public dashboards, alert routing, Loki retention, signal labels and capability adoption |
 | T3 | every 6h | the data plane: cardinality and Adaptive Metrics rules and recommendations |
 | T4 | daily | the estate diff, over two windows: 7 days and 1 day |
-| provisioner | daily | reconciles one read-only service account per stack |
+| provisioner | daily, opt-in | reconciles one read-only service account per stack |
 
 Results land in three places, each chosen for what it is good at. Mimir takes bounded metrics for trends and alerting. Loki takes finding detail; identity-bearing fields require deployment acceptance and privacy controls and never become metric labels. S3 takes pre-shaped tables the dashboards render directly, plus a raw scan archive for the diff and for audit.
 
@@ -35,7 +38,7 @@ consumption, AI usage, dashboard usage and observed coverage. [The dashboard gui
 lists each panel group, its source, window, caveats and screenshot. Use it to tell configured state,
 telemetry production and recorded human activity apart.
 
-The collector discovers the live estate on every run. Scan-fed dashboards include measured-population
+Inventory tiers discover the live estate on every run; T4 compares prior S3 scans. Scan-fed dashboards include measured-population
 and input-age context. Operations and Commercial read `grafanacloud-usage` directly;
 AI usage and Coverage mix live billing panels with collector output. Live billing panels are not
 filtered by the Stack selector.
@@ -43,7 +46,7 @@ filtered by the Stack selector.
 ### What it cannot see
 
 A provisioned datasource, plugin or capability does not prove a person used it. Usage insights sees
-dashboard opens and panel data requests, but a page visit without a query is invisible, and the
+dashboard opens and panel data requests, but a non-dashboard page visit without a query is invisible, and the
 `scenes` request bucket cannot identify individual apps. A missing series can mean an unavailable
 reader or stale input rather than zero use. See [Dashboard usage](dashboards.md#dashboard-usage)
 and the [interpretation guide](dashboards.md) before quoting an adoption figure.

@@ -1,8 +1,10 @@
 # Dashboards and alerts
 
 The builder publishes eleven dashboards on the nominated write stack. The table below describes
-their current panel groups. Each dashboard has a screenshot rendered on the robknight development
-stack over a 24-hour range and reviewed for identifiers.
+their current panel groups. Each dashboard has a development-stack screenshot rendered over a
+24-hour range and reviewed for identifiers, not a current estate measurement. Cadences below are
+module defaults; deployment overrides may differ. See the [operator timetable](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/RUNBOOK.md#scheduled-jobs)
+for schedule times and the default UTC timezone.
 
 Scan-fed dashboards include coverage and input-age panels. A blank or missing series is not a
 measured zero. The Stack selector does not filter panels that read the live `grafanacloud-usage`
@@ -66,6 +68,11 @@ A score covers measured and applicable components, not an assumed complete estat
 | Public dashboards, Delete protection, Access, Credentials | What exposure and access are configured? | Hourly org and daily stack inventories; daily public-share enumeration. |
 | Data loss, Alerting health, Alert routing, Logs retention, Collectors | Where are gaps in collection, response configuration and retention? | Daily routing and retention, hourly Fleet, 6-hour data plane. |
 | Label cardinality, Per stack | Which measured stacks need inspection? | Data-plane sweep and bounded finding views. |
+| Label hygiene | Which sampled label keys and values have classified privacy or cardinality risk? | Bounded daily label-API sample and per-signal coverage. |
+
+Label hygiene is a bounded sample, not an exhaustive audit. Full classified matches appear only in
+the approved S3 risk view and private hydration input, never in Loki or metric labels. The view
+requires explicit privacy acceptance and targeted retention; see [Security](security.md).
 
 Configured public shares include ones nobody opened. Dashboard usage separately records opens. Permission-filtered lists need their measured-stack denominator; an unreadable list is not empty. [Public dashboard and routing traps](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/docs/traps.md#public-dashboards-and-alert-routing).
 
@@ -125,13 +132,13 @@ The billing period and rolling plugin window cannot be reconciled as the same me
 | Query behaviour, Grafana surfaces | What panel requests ran, from which reported surface and datasource type? | Usage-insights data-request events in the same 24-hour window. |
 | Coverage | Which stacks had a readable datasource and usable events? | Per-stack reader and sweep status. |
 
-A dashboard open is a `dashboard-view` event; a `data-request` is a query, not a page visit. A visit without a request is invisible. `scenes` combines Scenes apps, and the source does not identify individual apps. Distinct viewers summed across stacks are not org-wide unique people. Anonymous opens carry no person identity. The datasource query is scoped by each stack's `instance_id`. [Usage-insights traps](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/docs/traps.md#per-stack-reader-and-usage-insights).
+A dashboard open is a `dashboard-view` event; a `data-request` is a query, not a page visit. A non-dashboard visit without a request is invisible. `scenes` combines Scenes apps, and the source does not identify individual apps. Distinct viewers summed across stacks are not org-wide unique people. Anonymous opens carry no person identity. The datasource query is scoped by each stack's `instance_id`. [Usage-insights traps](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/docs/traps.md#per-stack-reader-and-usage-insights).
 
 ### Query-mix panel
 
 ![Top datasource types and panel plugins by query request on the staff dev estate](assets/screenshots/gcinsight-dashboards-query-mix.png)
 
-Rendered on the `robk` staff development stack on 2026-10-01 from published dashboard
+Rendered on a staff development stack on 2026-10-01 from published dashboard
 `gcinsight-dashboards`, version 4, panel `1995666127`, with all stacks selected. This is the
 **Top datasource types and panel plugins by query request** table, not a whole-dashboard refresh.
 The displayed numeric request counts and backend names matched the actual backend data frame.
@@ -148,6 +155,7 @@ positive panel-plugin use; datasource type does not identify an app or a person.
 | Adoption opportunities, Adjacent datasource estate, Adaptive Traces | Where do measured signals, provisioned datasources and queried types diverge? | Daily inventory and usage insights; live billing panels use 24-hour windows. |
 | Outcome value, Unit economics | What recorded OnCall response and matched unit denominators exist? | Live billing datasource plus collector series. |
 | Technology and cluster registers, Classification evidence, Summary | Which sentinel matches are supported, and what remains unclassified? | Versioned technology registry and daily signal inventory. |
+| SLO inventory | How many SLO definitions were measured per stack, and where was the reader unavailable? | Optional, default-off daily count-only product read; no objectives, queries or history. |
 
 Canonical service identity is exact after trim and case-folding; a generic Mimir `service` value stays separate. Technology matches use unambiguous sentinels, and the unmatched metric-name share is visible. Unavailable evidence leaves components unscored. Live billing panels have their own population and ignore the Stack selector. [Signal and sentinel traps](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/docs/traps.md#signal-label-inventory-mimir-loki-tempo-pyroscope).
 
@@ -155,7 +163,7 @@ Canonical service identity is exact after trim and case-folding; a generic Mimir
 
 ![Backend producing signals by stack on the staff dev estate](assets/screenshots/gcinsight-coverage-producing-signals.png)
 
-Rendered on the `robk` staff development stack on 2026-10-01 from published dashboard
+Rendered on a staff development stack on 2026-10-01 from published dashboard
 `gcinsight-coverage`, version 4, panel `302633403`, with all stacks selected. This is the
 **Backend producing signals by stack** table. Its actual backend data frame matched the visible
 stack/signal rows, states and displayed values (rounded by Grafana). The rendered numeric-value

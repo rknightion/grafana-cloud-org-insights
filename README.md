@@ -21,20 +21,25 @@ is defensible and whether adoption is growing.
  lever moves that number", not "what did it cost".
 - Not an agent on your stacks. Nothing is installed anywhere. The collector runs in your AWS account and
  talks to `grafana.com` and to each stack's own API over HTTPS.
-- Not a write path. The scanning credential is read-only by scope, and the collector's HTTP client
- refuses any method other than GET. Publishing uses a second credential whose realm is a single stack.
+- Not a customer mutation path. The scanning credential has read scopes, and the general HTTP client
+ refuses any method other than GET. Fleet list RPCs and the two native Pyroscope label-risk RPCs are
+ read-only POST exceptions. Publishing uses a second credential whose realm is a single stack;
+ per-stack reader provisioning is a separate, explicitly authorised write operation.
 
 ## How it works
 
-Four scheduled scan tiers plus a provisioner, all ECS Fargate tasks on EventBridge schedules. The estate is discovered afresh on each run.
+Four scheduled scan tiers plus an opt-in provisioner, all ECS Fargate tasks on EventBridge schedules.
+The table gives module-default cadences; T1 runs at :05 and the schedule timezone defaults to UTC.
+Deployment overrides may differ. See the [operator timetable](RUNBOOK.md#scheduled-jobs) for the
+canonical schedule and enablement gates. The estate is discovered afresh on each inventory tier run.
 
-| | Cadence | Gathers |
+| | Module-default cadence | Gathers |
 |---|---|---|
 | T1 | hourly | org inventory, access policies, org members and Fleet Management |
 | T2 | daily | per-stack users, plugins, service accounts, Assistant, usage insights, public dashboards, alert routing, Loki retention, signal labels and capability adoption |
 | T3 | every 6h | the data plane: cardinality and Adaptive Metrics rules/recommendations |
 | T4 | daily | the estate diff, two windows: 7 days and 1 day |
-| provisioner | daily | reconciles one read-only service account per stack |
+| provisioner | daily, opt-in | reconciles one read-only service account per stack |
 
 Three landing zones, each chosen for what it is good at:
 
@@ -55,7 +60,8 @@ written as zeros, so a table that stops advancing is the signal that something u
 The eleven dashboards answer different questions. The source and window matter: configured inventory,
 telemetry production and human activity are different observations. Scan-fed dashboards include
 measured-population and input-age context; a missing value is not a measured zero. Each image below
-is a reviewed screenshot from the robknight development stack, rendered over a 24-hour range.
+is a reviewed development-stack screenshot, rendered over a 24-hour range, not a current measurement.
+Cadences below describe module defaults; deployment schedule overrides may differ.
 
 ### Estate
 
@@ -167,7 +173,7 @@ dashboards, because usage events cannot see a share nobody opens.
 
 - Provisioned plugins, datasources, dashboards and capabilities do not prove anyone uses them. A
   produced signal proves ingest or requests, not a person's intent or business value.
-- Usage insights records dashboard opens and panel data requests. A page visit without a request is
+- Usage insights records dashboard opens and panel data requests. A non-dashboard page visit without a request is
   invisible. A `source` value counts requests, not visits; the generic `scenes` bucket cannot identify
   individual Scenes apps. Panel-editor requests are suppressed upstream. Explore and correlation
   errors are not reliably populated.
@@ -194,21 +200,27 @@ export GCINSIGHT_LOKI_TENANT=... # the write stack's hlInstanceId
 export GCINSIGHT_S3_BUCKET=...
 export GCINSIGHT_STACK_TOKEN_PREFIX=/gcinsight/stack-token # per-stack reader tokens in SSM
 
-./scan.py --tier t1 --dry-run # inventory only, prints the meta block and writes nothing
-./scan.py --tier t1
+./scan.py --tier t1 --dry-run # inventory, org identities and Fleet; bounded completion record
 ./scan.py --tier t2 --limit 6 --dry-run # bounded diagnostic; publishing a subset is refused
-./scan.py --tier t3
-./scan.py --tier t4 # reads S3 only, makes no API calls
+./scan.py --tier t3 --dry-run
+./scan.py --tier t4 --dry-run # diff gathers from S3; no Grafana source API calls
 ./scan.py --tier t2 --stack <slug> --dry-run # one-stack diagnostic
 ```
 
-None of those have defaults. A default org id or tenant would be one deployment's identifiers baked
+The deployment identifiers above have no defaults. The generic SSM prefix defaults to
+`/gcinsight/stack-token`; set it explicitly for your deployment. Even a dry run requires the org,
+write stack, signal endpoints and tenants because `config.load()` validates the full configuration.
+S3-backed hydration and rate-card reads need a bucket and AWS read access where used. Dry-run means
+no publication, not no network reads. Local publishing is refused: production and manual publishing
+must use a verified deployed ECS task definition; see [Running scans](RUNBOOK.md#running-scans).
+
+No deployment identifier has a default. A default org id or tenant would be one deployment's identifiers baked
 into everyone else's collector, and the failure is silent rather than loud: the scan authenticates,
 succeeds, and writes a plausible set of series into somebody else's tenant.
 
 `GCINSIGHT_WRITE_TOKEN` publishes and falls back to the read token when unset, so a single-credential
 interactive run works. A deployment sets both, and the write token's realm should be the write stack
-alone. The daily provisioner uses a third org-realm token with only `stacks:read` and
+alone. The opt-in provisioner (daily by module default) uses a third org-realm token with only `stacks:read` and
 `stack-service-accounts:write`; the collector never receives it.
 
 Exit codes: `0` fine, `1` scan coverage or owner-input health below the publication floor, `2` configuration or unsafe publication, `3` gathering succeeded but publication failed, `4` lock collision. `3` is separate on purpose - "the estate is unreachable" and
@@ -233,16 +245,16 @@ these are the minimum versions verified as Grafana 13.3 compatible from their in
 They remain optional unless an adopted panel requires one of them.
 
 ```bash
-./bin/make_local_views.py # compose views from the committed fixture
-export GCINSIGHT_VIEWS_DIR=testdata/views
-export GCINSIGHT_WRITE_STACK_URL=https://<slug>.grafana.net
-export GCINSIGHT_WRITE_STACK_ID=<numeric-stack-id>
-export GCINSIGHT_GRAFANA_TOKEN=<short-lived-build-token>
-python3 bin/dashboards.py --publish all
+./bin/make_local_views.py --out /tmp/gcinsight-views # compose the committed fixture outside tracked files
+export GCINSIGHT_VIEWS_DIR=/tmp/gcinsight-views
+export GCINSIGHT_S3_BUCKET=gcinsight-test-bucket # synthetic URL placeholder, never publish this build
+python3 bin/dashboards.py --out /tmp/gcinsight-dashboards --ds-uid fixture-infinity
 ```
 
-That local path is how the test suite runs, and it is the quickest way to see what a dashboard looks
-like before anything is provisioned.
+That local path is how the test suite runs. It builds JSON offline and does not render a Grafana page.
+For an authorised live publication, use real published views and a configured Infinity datasource,
+set `GCINSIGHT_WRITE_STACK_URL`, `GCINSIGHT_WRITE_STACK_ID` and a short-lived
+`GCINSIGHT_GRAFANA_TOKEN`, then run `python3 bin/dashboards.py --publish all`.
 
 ## Deploying it
 
@@ -253,15 +265,14 @@ candidate-plan and go-live approval gates, including the private CI identifier-p
 `terraform/` is a reusable module with no provider block: ECS Fargate, one EventBridge schedule per
 tier, S3, IAM, and a Secrets Manager container for the credentials.
 `terraform/examples/standalone/` is the copy-and-edit root. Read `terraform/README.md` for the
-first-deployment order, because doing those steps out of sequence gives you four tasks an hour failing
-to start.
+first-deployment order and explicitly disable schedules until prerequisites have been verified.
 
 ```bash
 just image --repo <ecr-uri> # build the image; ARM64, no Python dependencies
 just publish-image --repo <ecr-uri> # confirm, then push immutable :sha-<commit>
 python3 bin/alerts.py --list # the health alert rules and their routing
-python3 bin/trace.py --live --context <gcx-context> # prove every headline reproduces from the raw scan
-python3 bin/probe_usage_signals.py # re-measure the grafanacloud-usage panels; needs no credential
+python3 bin/trace.py --live --context <gcx-context> # independently recompute the declared trace figures
+GCINSIGHT_GCX_CONTEXT=<gcx-context> python3 bin/probe_usage_signals.py # live read using existing gcx auth
 just check-tags # audit the cost-allocation tag; pass --fix to repair
 ```
 
@@ -294,7 +305,8 @@ generic product does not create or own that credential. Whether the chosen refer
 ECR-cached, the task definition must pin the reviewed manifest digest. Neither a moving tag nor a Git
 push changes an existing task definition.
 
-Alert rules are published **paused and unrouted**, and going live is a deliberate step that requires
+New alert rules are published **paused and unrouted**; ordinary publication preserves existing pause
+and routing state, and going live is a deliberate step that requires
 naming a receiver. The write stack is a real stack whose notification policy may route hundreds of rules
 that are not yours, some to production ticketing; a rule with no `notification_settings` inherits that
 policy. `python3 bin/alerts.py --activate --receiver <contact point>`.

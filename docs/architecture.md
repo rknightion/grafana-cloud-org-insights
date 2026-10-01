@@ -1,22 +1,30 @@
 # Architecture
 
-One stdlib-only ARM64 image runs on ECS Fargate, started by EventBridge Scheduler. Every tier has its own task definition, because Scheduler does not support container overrides.
+One stdlib-only image runs on ECS Fargate, started by EventBridge Scheduler. The module defaults to
+ARM64; public images support ARM64 and AMD64, and a consumer must match its image to the task architecture. Every tier has its own task definition, because Scheduler does not support container overrides.
 
 ## Scan tiers
+
+The table gives module-default cadences. T1 runs at :05 and the schedule timezone defaults to UTC;
+deployment overrides may differ. The provisioner is opt-in (`create_provisioner = false`). See the
+[operator timetable](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/RUNBOOK.md#scheduled-jobs)
+for canonical times and enablement gates.
 
 | Tier | Default cadence | Owns |
 |---|---|---|
 | T1 | hourly | fresh inventory, access policies, org members and Fleet Management |
-| T2 | daily | stack detail, service accounts, Assistant, usage insights, Adaptive Logs, public dashboards, alert routing, dashboard inventory and datasource query cost |
+| T2 | daily | stack detail, service accounts, Assistant, usage insights, Adaptive Logs, public dashboards, alert routing, Loki retention, signal labels, bounded label risk, adoption, optional SLO inventory, dashboard inventory and datasource query cost |
 | T3 | every 6 hours | Mimir cardinality and Adaptive Metrics |
 | T4 | daily | independent one-day and seven-day estate diffs, computed from S3 |
-| provisioner | daily | per-stack reader reconciliation |
+| provisioner | daily, opt-in | per-stack reader reconciliation |
 
 Every deadline is strictly shorter than its interval. Staleness alerts move with the schedules, and carry-forward expires after alerts have had time to fire.
 
 ## The estate is discovered, never declared
 
-Every scan discovers the current estate first, then left-joins per-stack inputs onto that inventory. Payload keys never define the estate.
+T1, T2 and T3 discover the current estate first, then left-join per-stack inputs onto that inventory.
+Payload keys never define the estate. T4 compares prior completed S3 scans rather than performing a
+fresh inventory sweep; carry-forward still rechecks live inventory before republishing stack series.
 
 Two failure modes fall out of that ordering. A removed stack cannot survive through carry-forward, because it is absent from the inventory the join runs against. And an empty inventory result means *unknown*, not *empty* - it cannot blank all state.
 
@@ -35,8 +43,17 @@ A view whose inputs are unsatisfied is **withheld**, leaving the last good S3 ob
 Each is chosen for what it is good at.
 
 - **Mimir** takes bounded time series, for trends and alerting. Labels carry `stack`, `region`, tier and fixed enums only.
-- **Loki** takes unbounded finding detail that benefits from retention and querying - including the offender names a metric label must never carry: metric names, dashboard uids, user logins, rule names.
-- **S3** takes wide current-state tables under `views/`, which the dashboards render directly, plus a private `scans/` archive used for hydration, replay and diffs. Long-term history lives in Mimir, not in the archive.
+- **Loki** takes finding detail that benefits from retention and querying - including names a metric
+ label must never carry. Identity-bearing detail requires explicit deployment acceptance and
+ minimisation, access, encryption and retention controls. Label-risk raw matches never enter Loki.
+- **S3** takes wide current-state tables under `views/`, which the dashboards render directly, plus a
+ private `scans/` archive used for hydration, replay and diffs. Label-risk raw matches are restricted
+ to their approved risk view and private hydration input, with targeted lifecycle retention. Other
+ last-good views do not expire. Long-term history lives in Mimir, not in the archive.
+
+Cardinality safety does not authorise identity retention. See [Security](security.md) for raw-match
+stores, retention and adopted-bucket prerequisites. Emit natively via Mimir remote_write and Loki
+push, never through the org's OTLP gateway.
 
 ## The cardinality rule
 
@@ -46,7 +63,7 @@ Identities, metric names, dashboard uids, rule names and service-account names n
 
 Two rules decide whether something is a metric or a view:
 
-- A per-stack metric carries **at most one** other label, and that label's enum is **at most 4** values. `stack` × `kind`(10) is 2,710 series - that is a table, not a trend.
+- A per-stack metric carries **at most one** other label, and that label's enum is **at most 4** values. A ten-value enum multiplies every live stack by ten - that is a table, not a trend.
 - A per-stack time series must carry a bounded, actionable trend. Identity-bearing or wide cross-product detail belongs in a view even where the total ceiling would allow it.
 
 [Series budget](series-budget.md) has the declared catalogue and the views that were deliberately not emitted.
@@ -70,6 +87,14 @@ Rate-shaped `grafanacloud-usage` series are compared over a window, and numerato
 Pillar J - the `dashboards` surface - queries each stack's own `grafanacloud-usage-insights` datasource. That datasource exposes a whole region, so every LogQL selector includes `instance_type="grafana"` and the current stack's `instance_id`. Selectors are created through one helper, and `_query` refuses a template without the regional guard. Without it, one stack's figures are silently repeated across every stack in its region.
 
 Usage events and inventory answer different questions, and both are published. Pillar J reports public dashboards **observed in use**; the Risk dashboard enumerates **configured** public dashboards whether or not anybody opened them. A share nobody opens is invisible to usage events and is exactly the one worth finding.
+
+## Source HTTP deadlines
+
+The shared GET transport, Fleet list RPCs, usage-insights reads and the two approved native
+Pyroscope label-risk POST reads fence complete source attempts through `collector.netbound`.
+These are caller-wait bounds, not hard transport termination: at most 32 daemon workers account for
+surviving reads, including credential and transient-response memory. No response-memory bound is
+claimed. Publishers are outside this source fence.
 
 ## Out of scope
 
