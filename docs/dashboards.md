@@ -127,6 +127,17 @@ The billing period and rolling plugin window cannot be reconciled as the same me
 
 A dashboard open is a `dashboard-view` event; a `data-request` is a query, not a page visit. A visit without a request is invisible. `scenes` combines Scenes apps, and the source does not identify individual apps. Distinct viewers summed across stacks are not org-wide unique people. Anonymous opens carry no person identity. The datasource query is scoped by each stack's `instance_id`. [Usage-insights traps](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/docs/traps.md#per-stack-reader-and-usage-insights).
 
+### Query-mix panel
+
+![Top datasource types and panel plugins by query request on the staff dev estate](assets/screenshots/gcinsight-dashboards-query-mix.png)
+
+Rendered on the `robk` staff development stack on 2026-10-01 from published dashboard
+`gcinsight-dashboards`, version 4, panel `1995666127`, with all stacks selected. This is the
+**Top datasource types and panel plugins by query request** table, not a whole-dashboard refresh.
+The displayed numeric request counts and backend names matched the actual backend data frame.
+The rendered backend-value column is labelled `A`. Zero-count remainder rows do not establish
+positive panel-plugin use; datasource type does not identify an app or a person.
+
 ## Coverage
 
 ![Coverage dashboard screenshot](assets/screenshots/gcinsight-coverage.png)
@@ -139,6 +150,26 @@ A dashboard open is a `dashboard-view` event; a `data-request` is a query, not a
 | Technology and cluster registers, Classification evidence, Summary | Which sentinel matches are supported, and what remains unclassified? | Versioned technology registry and daily signal inventory. |
 
 Canonical service identity is exact after trim and case-folding; a generic Mimir `service` value stays separate. Technology matches use unambiguous sentinels, and the unmatched metric-name share is visible. Unavailable evidence leaves components unscored. Live billing panels have their own population and ignore the Stack selector. [Signal and sentinel traps](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/docs/traps.md#signal-label-inventory-mimir-loki-tempo-pyroscope).
+
+### Backend producing-signal panel
+
+![Backend producing signals by stack on the staff dev estate](assets/screenshots/gcinsight-coverage-producing-signals.png)
+
+Rendered on the `robk` staff development stack on 2026-10-01 from published dashboard
+`gcinsight-coverage`, version 4, panel `302633403`, with all stacks selected. This is the
+**Backend producing signals by stack** table. Its actual backend data frame matched the visible
+stack/signal rows, states and displayed values (rounded by Grafana). The rendered numeric-value
+column is labelled `A`; long timestamp and explanation cells are truncated in this image.
+
+These are 24-hour peaks from the documented usage metrics: Metrics active-series count and
+Traces bytes received per second. `missing` means an absent series, not zero; `measured zero`
+means a returned zero. Positive backend production does not prove a Grafana UI visit or human use.
+See [backend production semantics](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/docs/traps.md#loki-retention-and-app-plugin-routes).
+
+Both panel images above were reviewed by eye for identifiers. Their dashboard/panel JSON and
+actual backend data-frame text were also checked for identifiers before publication. The text
+checker does **not** scan PNG pixels. These are dated staff-estate captures, not current estate
+measurements or exhaustive privacy evidence.
 
 ## Publishing and alerts
 

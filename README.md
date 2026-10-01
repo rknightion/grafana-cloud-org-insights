@@ -137,6 +137,10 @@ is a reviewed screenshot from the robknight development stack, rendered over a 2
 
 [![Dashboard usage screenshot](docs/assets/screenshots/gcinsight-dashboards.png)](docs/dashboards.md#dashboard-usage)
 
+[Query-mix panel capture](docs/dashboards.md#query-mix-panel) shows the published
+per-stack datasource-type and panel-plugin table from staff dev on 2026-10-01. Request counts
+are not page visits, and a datasource type is not an app identity.
+
 ### Coverage
 
 | Question it answers | Source | Cadence or window | Fidelity |
@@ -144,6 +148,10 @@ is a reviewed screenshot from the robknight development stack, rendered over a 2
 | Which services, technologies and infrastructure are observed? | Signal labels, stack inventory, S3 registers and live billing datasource | Daily sweep; explicit signal windows; live 24-hour panels | Producing, with configured context |
 
 [![Coverage dashboard screenshot](docs/assets/screenshots/gcinsight-coverage.png)](docs/dashboards.md#coverage)
+
+[Backend producing-signal panel capture](docs/dashboards.md#backend-producing-signal-panel)
+shows the published Metrics and Traces table from staff dev on 2026-10-01, including the
+difference between missing series and measured zero. Backend production is not proof of UI use.
 
 Two of them - `operations` and `commercial` - are panels only. They read `grafanacloud-usage`, a
 Prometheus datasource already provisioned on every Grafana Cloud stack, so those panels need no collector collection, credential or emitted series. If data is already a
