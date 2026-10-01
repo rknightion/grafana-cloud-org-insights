@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.3](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.4.2...v0.4.3) (2026-10-01)
+
+
+### Bug Fixes
+
+* **adaptive:** preserve unknown findings and qualify measured subtotals ([fbecf54](https://github.com/rknightion/grafana-cloud-org-insights/commit/fbecf541417508aac30b61e2266787dee3759d67))
+* **adaptive:** preserve unknown rules and require complete estate totals ([a889d74](https://github.com/rknightion/grafana-cloud-org-insights/commit/a889d7492732decd01f382814a79543f4632e85a))
+
+
+### Documentation
+
+* **agents:** distinguish approved read RPC boundaries ([afafa22](https://github.com/rknightion/grafana-cloud-org-insights/commit/afafa2271480094abfe314671fcb405e73d30762))
+* **backlog:** record verified Adaptive Metrics unknown-state fix ([ffbdedb](https://github.com/rknightion/grafana-cloud-org-insights/commit/ffbdedbd83c07c5e0c741bb74fd2353c5412290f))
+* **backlog:** record verified RPC boundary clarification ([1056f54](https://github.com/rknightion/grafana-cloud-org-insights/commit/1056f54cb45c09d5880999a639ff81680b682c27))
+
 ## [0.4.2](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.4.1...v0.4.2) (2026-10-01)
 
 
