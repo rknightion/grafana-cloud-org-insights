@@ -212,7 +212,7 @@ The deployment identifiers above have no defaults. The generic SSM prefix defaul
 write stack, signal endpoints and tenants because `config.load()` validates the full configuration.
 S3-backed hydration and rate-card reads need a bucket and AWS read access where used. Dry-run means
 no publication, not no network reads. Local publishing is refused: production and manual publishing
-must use a verified deployed ECS task definition; see [Running scans](RUNBOOK.md#running-scans).
+must use a verified deployed ECS task definition; see [Manual scans](RUNBOOK.md#manual-scans).
 
 No deployment identifier has a default. A default org id or tenant would be one deployment's identifiers baked
 into everyone else's collector, and the failure is silent rather than loud: the scan authenticates,
