@@ -765,3 +765,9 @@ transport. Loki/Mimir publishing transports remain outside this source-call repa
 The fixed-pool survivor, credential-memory and no-hard-termination caveats above
 apply equally to these legacy transports. Stalled DNS and stalled body reads were
 exercised locally; dedicated stalled TCP/TLS handshake probes were not exercised.
+
+The later Connect-RPC hardening supersedes the historical substring-guard description above:
+`dataplane._connect_rpc` now permits only the three exact read routes declared in
+`CONNECT_RPC_READ_ROUTES`, over HTTPS with no userinfo, query, fragment or encoded path. Its
+helper-local opener refuses redirects and preserves their HTTP status without forwarding credentials.
+This is separate from label-risk's two-path native read-POST exception; it grants no new POST route.
