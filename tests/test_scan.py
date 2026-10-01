@@ -1122,12 +1122,14 @@ class ComposeFixtureOrgMembersTest(unittest.TestCase):
 
     def test_fixture_preserves_the_t1_org_members_payload(self):
         scans = self.scans(include_org_members=True)
+        stderr = io.StringIO()
         with tempfile.TemporaryDirectory() as directory:
             out = pathlib.Path(directory) / "compose_inputs.json"
             with (
                 mock.patch.object(
                     compose_fixture, "fetch", side_effect=lambda tier: scans[tier]
                 ),
+                contextlib.redirect_stderr(stderr),
             ):
                 rc = compose_fixture.main(["--stacks", "1", "--output", str(out)])
 
@@ -1135,6 +1137,8 @@ class ComposeFixtureOrgMembersTest(unittest.TestCase):
 
         self.assertEqual(rc, 0)
         self.assertEqual(payload["org_members"], scans["t1"]["data"]["org_members"])
+        # This minimal exporter fixture intentionally has no Pillar J observations.
+        self.assertIn("no `insights` payload", stderr.getvalue())
 
     def test_fixture_warns_when_t1_has_no_org_members_payload(self):
         scans = self.scans(include_org_members=False)
@@ -1151,6 +1155,7 @@ class ComposeFixtureOrgMembersTest(unittest.TestCase):
 
         self.assertEqual(rc, 0)
         self.assertIn("no `org_members` payload", stderr.getvalue())
+        self.assertIn("no `insights` payload", stderr.getvalue())
 
     def test_fixture_treats_a_malformed_org_members_payload_as_absent(self):
         scans = self.scans(include_org_members=False)
@@ -1170,6 +1175,7 @@ class ComposeFixtureOrgMembersTest(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertEqual(payload["org_members"], {})
         self.assertIn("no `org_members` payload", stderr.getvalue())
+        self.assertIn("no `insights` payload", stderr.getvalue())
 
 
 if __name__ == "__main__":
