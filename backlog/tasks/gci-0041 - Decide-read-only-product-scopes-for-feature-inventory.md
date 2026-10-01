@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-30 22:37'
+updated_date: '2026-10-01 03:09'
 labels:
   - feature-usage
   - scope-decision
@@ -27,7 +27,7 @@ GCI-0032 found product object APIs beyond the existing basic-role-None stack rea
 <!-- AC:BEGIN -->
 - [ ] #1 Record an explicit approve, defer or reject decision per product read family, including exact action and scope pairs
 - [ ] #2 For each approved family, identify data minimization, access control, encryption and retention for identity-bearing detail
-- [ ] #3 Keep basic role None, datasource query uid pins, and refused secret/write actions unchanged
+- [x] #3 Keep basic role None, datasource query uid pins, and refused secret/write actions unchanged
 <!-- AC:END -->
 
 ## Definition of Done
@@ -59,4 +59,6 @@ loop3 IRM decision: DEFER all new IRM grants. Exact P(IRM)+integrations:read cou
 Loop3 final scoped decision table: retain existing approved SLO/Synthetic pairs without widening query pins; SLO/Adaptive operational read seams implemented, Synthetic datasource-query denial unresolved. No additional families granted. IRM counter access proved but credential breadth blocked; ML/Faro/IRM secret/content lists and Incident/schedules not approved. Remaining D1a families retain explicit defer packets. Five live dev None readers/SA-role-token IDs/SSM versions/pairs identical pre/post provisioner; no new customer grant. Scope research remains partial rather than claiming every candidate pair minimally proven.
 
 loop4 M-ac map: AC1 and AC2 remain partial (full per-family decision/pair table and effective privacy safeguards not independently evidenced); AC3 pre/post five-reader None/query-pin equality evidenced historically. No widening or blanket approval.
+
+loop4 freshpre/post5readerfullaction-scopepairs,IDs/tokenIDs/SSMversionsunchanged, basicNone/queryUIDpinsretained. MetadataUID/folderssharedwithme extras arealreadyexistingandcoveredbyapprovedmetadatareadwildcards, notquerywidening. AC1/2completefamilytable/privacydecisionremainpartial, no newfamilyapproved.
 <!-- SECTION:NOTES:END -->

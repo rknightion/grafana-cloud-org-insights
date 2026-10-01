@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@loop3-root'
 created_date: '2026-08-25 14:11'
-updated_date: '2026-09-30 22:37'
+updated_date: '2026-10-01 03:09'
 labels:
   - cost
   - value
@@ -73,21 +73,21 @@ Adaptive Profiles. The estate has one stack with any profiling data at all, so t
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Enablement and reduction panels ship first, over grafanacloud-usage, with no collector change
-- [ ] #2 Reduction ratio uses the enabled-stack denominator and states it
-- [ ] #3 Enablement denominator is windowed to match its numerator
-- [ ] #4 Discarded spans reported separately from sampled-out, never summed
-- [ ] #5 Policy detail is a view column; the policy label never becomes a metric label
-- [ ] #6 Policy inventory collection uses only the four read actions; the bundled admin role is never assigned
-- [ ] #7 Plugin proxy health is probed before concluding a route is absent
-- [ ] #8 Adaptive Profiles remains uncollected and the reason is recorded
+- [x] #1 Enablement and reduction panels ship first, over grafanacloud-usage, with no collector change
+- [x] #2 Reduction ratio uses the enabled-stack denominator and states it
+- [x] #3 Enablement denominator is windowed to match its numerator
+- [x] #4 Discarded spans reported separately from sampled-out, never summed
+- [x] #5 Policy detail is a view column; the policy label never becomes a metric label
+- [x] #6 Policy inventory collection uses only the four read actions; the bundled admin role is never assigned
+- [x] #7 Plugin proxy health is probed before concluding a route is absent
+- [x] #8 Adaptive Profiles remains uncollected and the reason is recorded
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 python3 -m pytest tests -q
-- [ ] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
-- [ ] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
+- [x] #1 python3 -m pytest tests -q
+- [x] #2 tofu fmt -check -recursive terraform; tofu init -backend=false and tofu validate pass for terraform/ and terraform/examples/standalone/
+- [x] #3 customer-identifier and shipped-text gates from .github/workflows/ci.yml return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -146,4 +146,6 @@ Loop3 Adaptive Traces minimized inventory source shipped and dev produced five s
 2026-09-30 Rob: the hard DNS/connect wall-time criterion is split into GCI-0053; it no longer gates this task.
 
 loop4 M-ac found AC1-4 panel-first slice present: matched 24h windows, enabled/reporting-population ratio and separate discards. No L-0020p implementation indicated. Existing minimized dev inventory supports AC5/6, AC7 health-first proof still being independently bound; no live completion claim from source presence alone.
+
+loop4 AC audit at9ba/CI36790758947: liveCoverageusagepanelsmatched24h enabled/ingestingwindows2/3, dropped/receivedratio0.4327onlyenabledpopulation,discardrate0.00123separate,24policygroupseriesliveDatasource(notcollectorlabels). FreshS3scalarinventory5rows,2readableconfigs,positivepolicy/recommendationcounts,no policyname/prosebodyretained. SourceGEThealthfirstunconditional; rootfreshT2statewitnesshealth4045(configok2,policy/recommendationsok5), unsupportedhealthneverconcludesresourceabsent. Approvedreadonlyactions/BasicNone/projectroleunchanged/noadminbundlerole; AdaptiveProfilesuncollectedexplicitcontract. Renderresidual: twoCoverage discard/policy500 in02:28batch, policyearlier200, datasourcequeriespositive; notsourceabsence. ACsmetboundedsemantics; keepParkedpendingrootdispositionofintermittentvisible-render residual ratherthanclaimallpixelshealthy.
 <!-- SECTION:NOTES:END -->

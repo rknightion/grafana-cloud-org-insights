@@ -1,11 +1,11 @@
 ---
 id: GCI-0036
 title: 'Inventory SLO objects, alerting and source after a reader-scope decision'
-status: Parked
+status: Done
 assignee:
   - '@loop3-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-30 22:37'
+updated_date: '2026-10-01 03:09'
 labels:
   - feature-usage
   - follow-on
@@ -25,16 +25,16 @@ Rank 3 - high value, low code cost after authorization. The documented SLO GET r
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Reader grants are approved separately and remain basic-role None
-- [ ] #2 Live list readback is compared with an authorized control before zero counts are trusted
-- [ ] #3 View reports SLO count, alerting and source without storing expression bodies
+- [x] #1 Reader grants are approved separately and remain basic-role None
+- [x] #2 Live list readback is compared with an authorized control before zero counts are trusted
+- [x] #3 View reports SLO count, alerting and source without storing expression bodies
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -55,4 +55,12 @@ Loop3 source inventory shipped and dev proved five live rows including a positiv
 2026-09-30 Rob: the hard DNS/connect wall-time criterion is split into GCI-0053 (collector-wide). GCI-0036 closes on its own three ACs once the next loop re-checks them against loop3 dev evidence.
 
 loop4 M-ac mapped three criteria: role approval and minimized five-row dev view supported by existing artifacts. Positive authorized reader/Admin comparison exists in private D1a slo-comparison witness (18/18, equal UUID set, same payload except allowedActions). Current live rollout revalidation remains separate; DNS criterion belongs to GCI-0053.
+
+loop4 acceptance reconciled at stable9ba3a4c CI36790758947. Freshfull-estateT2/currentSLOview5rows19definitions, source18Metrics1KnowledgeGraph,19configuredalerting, no expressionsstored; rootpre/post5None readersfullpairs/IDs/SSMversionsexactlyunchanged andqueryUIDpinsintact. SeparatelyapprovedD1agranthistoricalpositive18/18SLOreader/Admincontrol matchedUUIDsets/fullpayloadexceptallowedActions, independentlyrederived byroot; not a rolecount. DNScriterion splittoGCI0053 nowDone, no furtherGCI0036implementationattemptspent. Existing privacy/source scope boundary preserved.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Closed the three actual SLO criteria using separate approved unchanged reader grants, historical positive authorized reader/Admin control and fresh positive minimized live inventory under the stable image. No expression bodies or new credential/role grants. Exact-SHA CI green; hard caller deadline tracked separately in GCI0053.
+<!-- SECTION:FINAL_SUMMARY:END -->
