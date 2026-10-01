@@ -1,11 +1,11 @@
 ---
 id: GCI-0040
 title: Find a defensible per-app discriminator for Scenes query events
-status: Parked
+status: In Progress
 assignee:
-  - '@loop3-root'
+  - '@loop5-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-30 16:11'
+updated_date: '2026-10-01 07:31'
 labels:
   - feature-usage
   - follow-on
@@ -51,4 +51,6 @@ Parked pending a defensible app discriminator: 55 guarded usage-insights stack p
 loop3 admitted 2026-09-30 under owner goal: root owns tracker; bounded lanes own implementation/discovery, evidence pending. No acceptance claimed yet.
 
 Docs d0b5bb0210870f4ce54031455397be5411e21f74 CI36737688385success, gate1647passed2existing skips7966subtests, CRdocs exemption. Genuine Logs2.6 Chrome frontend40queryPOSTs emitted43actual sourceapp analytics events; exact-stack guarded usage-insights confirmed43. ExistingAdminSA browser control, not human adoption; no app-specific plugin/URL field. AC1 remains partial: no genuine frontend before/after proposed-discriminator trial. First browser blocked analytics so is not absence/before proof; backend-only header trial not substitute. Generic app/scenes remain unsplit; no datasource-type attribution or universal impossibility claim.
+
+Admitted under owner loop5 goal, 2026-10-01. Root owns tracker writes; isolated lanes own only named seams. Acceptance pending terminal evidence.
 <!-- SECTION:NOTES:END -->

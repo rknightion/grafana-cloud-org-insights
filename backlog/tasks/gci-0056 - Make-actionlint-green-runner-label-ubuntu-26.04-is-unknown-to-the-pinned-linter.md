@@ -3,9 +3,11 @@ id: GCI-0056
 title: >-
   Make actionlint green: runner label ubuntu-26.04 is unknown to the pinned
   linter
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop5-root'
 created_date: '2026-10-01 07:03'
+updated_date: '2026-10-01 07:31'
 labels:
   - ci
 dependencies: []
@@ -32,3 +34,9 @@ Every actionlint run on main has been red since before loop4 and every loop repo
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Admitted under owner loop5 goal, 2026-10-01. Root owns tracker writes; isolated lanes own only named seams. Acceptance pending terminal evidence.
+<!-- SECTION:NOTES:END -->

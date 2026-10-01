@@ -1,9 +1,11 @@
 ---
 id: GCI-0055
 title: Refresh fixed PCRE2 package after the post-release Trivy gate becomes red
-status: Parked
-assignee: []
+status: In Progress
+assignee:
+  - '@loop5-root'
 created_date: '2026-10-01 06:16'
+updated_date: '2026-10-01 07:31'
 labels:
   - container
   - release
@@ -33,3 +35,9 @@ At final loop4 SHA542a871383eaea5d2dd5be6bb9494b14609ec887, required CI368234253
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Admitted under owner loop5 goal, 2026-10-01. Root owns tracker writes; isolated lanes own only named seams. Acceptance pending terminal evidence.
+<!-- SECTION:NOTES:END -->
