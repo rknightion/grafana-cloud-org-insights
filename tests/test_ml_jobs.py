@@ -33,7 +33,7 @@ def client_for(body, status=200, calls=None):
     return ReadOnlyClient(transport=transport, max_attempts=1)
 
 
-@pytest.mark.parametrize("body,status,measured", [(BODY, 200, True),
+@pytest.mark.parametrize("body,status,measured", [(BODY, 200, True), (BODY, 206, False),
     ({"status": "success", "data": [{"id": PRIVATE, "password": PRIVATE}]}, 200, False),
     ({"error": PRIVATE}, 403, False)])
 def test_selected_full_t2_public_boundary(body, status, measured, capsys, caplog, tmp_path):
@@ -107,6 +107,7 @@ def test_empty_and_inventory_left_join(body, count):
 
 
 @pytest.mark.parametrize("body,status", [
+    (BODY, 206), ({"status": "success", "data": []}, 206),
     ({"status": "error", "data": [], "message": PRIVATE}, 200),
     ({"status": "success", "data": [], "pagination": {}}, 200),
     ({"status": "success", "data": [], "partial": False}, 200),
@@ -121,6 +122,9 @@ def test_failure_absent_private(body, status, capsys, caplog):
     errors = []
     records = source.probe_all(client_for(body, status), [STACK], {"obs-hub": {"token": "synthetic"}}, on_error=lambda slug, msg: errors.append(msg))
     assert records["obs-hub"]["available"] is False
+    if status == 206:
+        assert records["obs-hub"] == {"available": False, "reason": "unreadable"}
+        assert errors == ["ml_jobs: unreadable"]
     assert "ml_jobs" not in compose.build_all([STACK], Coverage(tier="t2", total=1), ml_jobs=records)[1]
     assert PRIVATE not in json.dumps([records, errors]) + caplog.text + capsys.readouterr().out
 

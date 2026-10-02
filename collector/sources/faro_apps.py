@@ -19,7 +19,7 @@ def fetch_faro_apps(client: ReadOnlyClient, stack: Mapping[str, Any], reader: st
         return {"available": False, "reason": "no_credential"}
     try:
         response = client.get(base + PATH, bearer=reader, guarded=True)
-        if not response.ok:
+        if response.status != 200:
             return {"available": False, "reason": "unreadable"}
         body = response.json()
         if not isinstance(body, list) or len(body) > MAX_APPS:

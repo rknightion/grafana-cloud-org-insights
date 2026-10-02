@@ -23,7 +23,7 @@ def fetch_ml_jobs(client: ReadOnlyClient, stack: Mapping[str, Any], reader: str)
         return {"available": False, "reason": "no_credential"}
     try:
         response = client.get(base + PATH, bearer=reader, guarded=True)
-        if not response.ok:
+        if response.status != 200:
             return {"available": False, "reason": "unreadable"}
         body = response.json()
         # The witnessed envelope has no pagination or partial-result contract.
