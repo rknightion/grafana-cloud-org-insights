@@ -1211,6 +1211,16 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
 
 
 def d_usage(ds: str):
+    cloud_panel = None
+    try:
+        cloud_panel = build.table_panel(
+            "Configured AWS accounts", "cloud_accounts", ds,
+            description="Point-in-time configured AWS accounts only. Other providers are unknown, not zero; "
+                        "not an all-provider total or account activity. Default-off selection; unreadable "
+                        "stacks are absent. Only the fixed accounts GET is permitted; backend write "
+                        "isolation of the credential remains unproven. No account details are stored.")
+    except FileNotFoundError:
+        pass
     ml_panel = None
     try:
         ml_panel = build.table_panel(
@@ -1482,6 +1492,8 @@ def d_usage(ds: str):
                         "those logs, or stopped shipping them - both are wins, and the per-stack chart "
                         "above says which."),
     }
+    if cloud_panel is not None:
+        el["cloud_accounts"] = cloud_panel
     if ml_panel is not None:
         el["ml_jobs"] = ml_panel
     if faro_panel is not None:
@@ -1491,6 +1503,9 @@ def d_usage(ds: str):
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
         build.tab("Adoption", ["t_signals", "plugins"]),
+        *([build.rows_tab("Configured AWS accounts", [
+            build.row("Configured AWS accounts", ["cloud_accounts"], max_columns=1),
+        ])] if cloud_panel is not None else []),
         *([build.rows_tab("Configured forecast jobs", [
             build.row("Configured forecast jobs", ["ml_jobs"], max_columns=1),
         ])] if ml_panel is not None else []),

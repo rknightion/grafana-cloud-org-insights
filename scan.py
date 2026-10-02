@@ -51,6 +51,7 @@ from collector.sources import synthetic as synthetic_src
 from collector.sources import irm_integrations as irm_integrations_src
 from collector.sources import faro_apps as faro_apps_src
 from collector.sources import ml_jobs as ml_jobs_src
+from collector.sources import cloud_accounts as cloud_accounts_src
 from collector.sources import stack_catalog
 from collector.sources import assistant as assistant_src
 from collector.sources import fleet as fleet_src
@@ -590,6 +591,28 @@ def gather_synthetic_inventory(
     return data, errors
 
 
+def cloud_accounts_reads_enabled() -> bool:
+    return "cloud-accounts" in parse_product_reads(os.environ.get(PRODUCT_READS_ENV))
+
+
+def gather_cloud_accounts(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[str]]:
+    """Default-off daily configured AWS account count only."""
+    if not cloud_accounts_reads_enabled():
+        return {}, []
+    errors: list[str] = []
+    try:
+        creds = credentials.load_all()
+    except credentials.StoreUnavailable:
+        return {}, ["cloud_accounts: credential_store_unavailable"]
+    data = cloud_accounts_src.probe_all(
+        client, stacks, creds, concurrency=cfg.concurrency,
+        on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
+    )
+    return data, errors
+
+
 def ml_jobs_reads_enabled() -> bool:
     return "ml-jobs" in parse_product_reads(os.environ.get(PRODUCT_READS_ENV))
 
@@ -1070,6 +1093,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     errors += irm_integrations_errors
     ml_jobs, ml_jobs_errors = gather_ml_jobs(client, cfg, selected)
     errors += ml_jobs_errors
+    cloud_accounts, cloud_accounts_errors = gather_cloud_accounts(client, cfg, selected)
+    errors += cloud_accounts_errors
     faro_apps, faro_apps_errors = gather_faro_apps(client, cfg, selected)
     errors += faro_apps_errors
     signal_inventory, signal_inventory_errors = gather_signal_inventory(client, cfg, selected)
@@ -1103,6 +1128,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "irm_integrations": irm_integrations,
         "faro_apps": faro_apps,
         "ml_jobs": ml_jobs,
+        "cloud_accounts": cloud_accounts,
         "signal_inventory": signal_inventory,
         "capability_adoption": capability_adoption,
         "loki_config": loki_config,
@@ -1150,6 +1176,11 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "alert_routing": source_report(
             expected, alert_routing, available=lambda r: bool(r.get("available")),
             errors=alert_routing_errors,
+        ),
+        "cloud_accounts": source_report(
+            expected if cloud_accounts_reads_enabled() else 0,
+            cloud_accounts, available=lambda r: bool(r.get("available")),
+            errors=cloud_accounts_errors,
         ),
         "ml_jobs": source_report(
             expected if ml_jobs_reads_enabled() else 0,

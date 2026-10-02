@@ -33695,5 +33695,167 @@
    "available": true,
    "job_count": 0
   }
+ },
+ "cloud_accounts": {
+  "stack158": {
+   "available": true,
+   "account_count": 0
+  },
+  "stack145": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack177": {
+   "available": true,
+   "account_count": 2
+  },
+  "stack125": {
+   "available": true,
+   "account_count": 0
+  },
+  "stack001": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack001b": {
+   "available": true,
+   "account_count": 2
+  },
+  "stack001c": {
+   "available": true,
+   "account_count": 0
+  },
+  "stack001a": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack019": {
+   "available": true,
+   "account_count": 2
+  },
+  "stack049": {
+   "available": true,
+   "account_count": 0
+  },
+  "stack110": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack020": {
+   "available": true,
+   "account_count": 2
+  },
+  "obs-hub": {
+   "available": true,
+   "account_count": 0
+  },
+  "obs-hub-dev": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack035": {
+   "available": true,
+   "account_count": 2
+  },
+  "stack036": {
+   "available": true,
+   "account_count": 0
+  },
+  "stack111": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack070": {
+   "available": true,
+   "account_count": 2
+  },
+  "stack037": {
+   "available": true,
+   "account_count": 0
+  },
+  "stack071": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack050": {
+   "available": true,
+   "account_count": 2
+  },
+  "stack112": {
+   "available": true,
+   "account_count": 0
+  },
+  "stack051": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack146": {
+   "available": true,
+   "account_count": 2
+  },
+  "stack147": {
+   "available": true,
+   "account_count": 0
+  },
+  "stack038": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack052": {
+   "available": true,
+   "account_count": 2
+  },
+  "stack053": {
+   "available": true,
+   "account_count": 0
+  },
+  "stack054": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack148": {
+   "available": true,
+   "account_count": 2
+  },
+  "stack126": {
+   "available": true,
+   "account_count": 0
+  },
+  "stack002": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack113": {
+   "available": true,
+   "account_count": 2
+  },
+  "stack097": {
+   "available": true,
+   "account_count": 0
+  },
+  "stack072": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack055": {
+   "available": true,
+   "account_count": 2
+  },
+  "stack193": {
+   "available": true,
+   "account_count": 0
+  },
+  "stack170": {
+   "available": true,
+   "account_count": 1
+  },
+  "stack201": {
+   "available": true,
+   "account_count": 2
+  },
+  "stack149": {
+   "available": true,
+   "account_count": 0
+  }
  }
 }

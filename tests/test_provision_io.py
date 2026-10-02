@@ -936,6 +936,8 @@ def test_legacy_synthetic_customer_safety():
             ("plugins.app:access", "plugins:id:grafana-kowalski-app"),
             ("grafana-ml-app.forecasting:read", ""),
             ("plugins.app:access", "plugins:id:grafana-ml-app"),
+            ("grafana-csp-app:read", ""),
+            ("plugins.app:access", "plugins:id:grafana-csp-app"),
         }
         assert set(removable) == expected_removable
         wanted = pr.permission_pairs(permissions)

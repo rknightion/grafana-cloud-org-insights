@@ -117,7 +117,7 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 | `scan_runtime_config_digest`, `provisioner_runtime_config_digest`, `require_explicit_consumer_config` | empty, empty, `false`; consumer projections may require both validated digests |
 | `create_provisioner`, `provisioner_secret_key` | `false`, `GCINSIGHT_PROVISION_TOKEN`; independent opt-in write-capable task |
 | `provisioner_schedule_expression`, `provisioner_enabled` | daily module default, `true`; see RUNBOOK timetable and both schedule gates above |
-| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query`/`irm-integrations`/`faro-apps`/`ml-jobs` read families |
+| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query`/`irm-integrations`/`faro-apps`/`ml-jobs`/`cloud-accounts` read families |
 | `provisioner_cpu`, `provisioner_memory` | `256`, `512` MiB; separate provisioner sizing |
 
 | Outputs | Use / availability |
@@ -221,10 +221,20 @@ does require a stack-realm `logs:write` token represented by the adopted access-
 ## Reader product policy
 
 `provisioner_product_reads` remains default-off (`[]`) and accepts `slo`, `synthetic-monitoring`,
-`synthetic-monitoring-query`, `irm-integrations`, `faro-apps` and `ml-jobs`. The query token requires `synthetic-monitoring`
+`synthetic-monitoring-query`, `irm-integrations`, `faro-apps`, `ml-jobs` and `cloud-accounts`. The query token requires `synthetic-monitoring`
 and adds query access only to the stack's single uniquely discovered, valid Synthetic datasource
 UID plus unscoped probes read. Ambiguous or invalid discovery grants neither pair. Without the
 query token, collection makes no Synthetic HTTP calls and legacy role grants stay unchanged.
+`cloud-accounts` adds only `grafana-csp-app:read` (empty scope) and
+`plugins.app:access` scoped to `plugins:id:grafana-csp-app` for T2 configured AWS
+account counts. Only GET `/api/plugin-proxy/grafana-csp-app/he-api/api/v2/stacks/<fresh stack.id>/aws/accounts`
+without query is permitted, using the fresh inventory HTTPS origin and numeric stack ID.
+The supported data-only array is validated with the unchanged structural credential guard;
+all account details are discarded. Genuine empty data measures zero; failed or partial responses
+are absent. Other providers are unknown, not zero, and this is not an all-provider total.
+The owner permits this GET while backend write isolation of the credential remains unproven;
+GET-only construction is not server-enforced credential isolation or a customer grant.
+
 `ml-jobs` adds only `grafana-ml-app.forecasting:read` (empty scope) and
 `plugins.app:access` scoped to `plugins:id:grafana-ml-app` for T2 configured forecast job
 counts only. The owner accepts transient receipt of job-top-level `grafanaApiKey` on GET

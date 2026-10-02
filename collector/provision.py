@@ -182,6 +182,10 @@ WRITE_STACK_PAIR = (WRITE_STACK_PERMISSION["action"], WRITE_STACK_PERMISSION["sc
 
 
 PRODUCT_READ_FAMILIES: dict[str, tuple[tuple[str, str], ...]] = {
+    "cloud-accounts": (
+        ("grafana-csp-app:read", ""),
+        ("plugins.app:access", "plugins:id:grafana-csp-app"),
+    ),
     "ml-jobs": (
         ("grafana-ml-app.forecasting:read", ""),
         ("plugins.app:access", "plugins:id:grafana-ml-app"),
