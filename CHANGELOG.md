@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.4.4](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.4.3...v0.4.4) (2026-10-02)
+
+
+### Documentation
+
+* **agents:** record opt-in Synthetic scope and family decisions ([eccc4b3](https://github.com/rknightion/grafana-cloud-org-insights/commit/eccc4b37d11bbaff7f7d3169314aca7cc1c8974c))
+* **backlog:** record product read scope decisions and loop9 tasks ([e5ac14f](https://github.com/rknightion/grafana-cloud-org-insights/commit/e5ac14fac3d8e367c29e8217f01be40cb2b9d54b))
+* **backlog:** record scope decision and audit spike evidence ([07a59e2](https://github.com/rknightion/grafana-cloud-org-insights/commit/07a59e205473742829c8315a5c66379db266a552))
+* **backlog:** record stable rollout runtime evidence ([5234021](https://github.com/rknightion/grafana-cloud-org-insights/commit/5234021b4a76baac2279fd2ba29112e69cc8db8d))
+* **backlog:** record verified Adaptive Metrics consumer repair ([d02e645](https://github.com/rknightion/grafana-cloud-org-insights/commit/d02e645d6dc02d38f4860a3180f386cce24083b2))
+* **backlog:** track bounded ECS observation call waits ([d56f3ab](https://github.com/rknightion/grafana-cloud-org-insights/commit/d56f3abe67689037bf370dbf4345b375d0fe9c34))
+* link repo-root runbooks by URL so the docs hub build resolves them ([9f2c066](https://github.com/rknightion/grafana-cloud-org-insights/commit/9f2c066ebd64ee2f9fd7e998c41536a3e360327e))
+* **loop:** record stable rollout and observer contracts ([73eed45](https://github.com/rknightion/grafana-cloud-org-insights/commit/73eed45cc61500548a00d1f7d5416308bcd64cca))
+
+
+### Miscellaneous
+
+* **deps:** update python:3.14-slim docker digest to 0741d10 ([#42](https://github.com/rknightion/grafana-cloud-org-insights/issues/42)) ([e362fb0](https://github.com/rknightion/grafana-cloud-org-insights/commit/e362fb054b78476731c1bbf3f6fcc88ed0c7cd07))
+
 ## [0.4.3](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.4.2...v0.4.3) (2026-10-01)
 
 
