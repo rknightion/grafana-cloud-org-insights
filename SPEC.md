@@ -58,24 +58,33 @@ of datasource types actually queried.
 
 The custom role is compared as `(action, scope)` pairs. `datasources:read` may list datasource
 metadata. Every reader can query exactly `datasources:uid:grafanacloud-usage-insights`; the write-stack
-reader alone also receives `datasources:uid:grafanacloud-usage`. Query is never widened to
-`datasources:*`.
-Mutation and secret-bearing actions remain absent. A healthy reconciliation performs reads only and
-does not mint a replacement token.
+reader alone also receives `datasources:uid:grafanacloud-usage`. The separately selected Synthetic
+query token can add only one uniquely discovered, valid Synthetic datasource UID. Query is never
+widened to `datasources:*`.
+Mutation actions remain absent. The named IRM and ML receipt risks below are explicit exceptions
+to a blanket claim that all readable payloads are secret-free. A healthy reconciliation performs
+reads only and does not mint a replacement token.
 
-`GCINSIGHT_READER_PRODUCT_READS` is an optional deployment setting. It defaults to empty and accepts
-only `slo` and `synthetic-monitoring`. A deployment must explicitly select the corresponding read and
-plugin access pairs; no product family is granted by default. This setting does not widen datasource
-query scope or grant any write action. SLO definition collection runs only when `slo` is selected;
-it retains counts and closed enums,
-not names, URLs, scripts, headers or expressions. Synthetic Monitoring check/result collection remains
-unavailable; its optional app permissions do not widen datasource query scope.
+`GCINSIGHT_READER_PRODUCT_READS` defaults to empty. Its selected families, exact pairs, routes and
+limits are described in [Configuration](docs/configuration.md#optional-product-readers) and
+[CAPABILITIES](CAPABILITIES.md#optional-count-only-product-inputs). SLO and Synthetic retain only
+counts and closed enums, not targets, scripts, headers or expressions. Synthetic collection requires
+both `synthetic-monitoring` and the independent `synthetic-monitoring-query` token. The latter adds
+only the uniquely discovered datasource UID matching `^[A-Za-z0-9_-]{1,40}$` plus unscoped probes read;
+ambiguity or invalid discovery adds no query pair. Without it scans make no Synthetic calls. On
+reconciliation, a legacy-correct role needs zero discovery; deselection can discover only to remove
+an already-held pair matching that exact Synthetic UID. Other extra query pairs remain dangerous.
+No product family or customer permission is granted by documentation. IRM count-integrity acceptance
+is parked because its source still accepts HTTP 206. ML's job-top-level `grafanaApiKey` is discarded
+before the unchanged generic credential guard; nested/other credentials remain rejected.
 
 The collector's HTTP client rejects every method except GET. Some read APIs are implemented as
 Connect-RPC POSTs; those calls live outside the collector HTTP client and are authorised by read scopes.
 The label-risk source permits exactly the native Pyroscope LabelNames and LabelValues POST reads.
-The older observed-name source also uses the legacy `_connect_rpc` LabelValues helper; its substring
-path guard is not an exact method allow-list and must not be copied as authority for new RPCs.
+The observed-name source uses `_connect_rpc`, whose exact parsed-path suffix allowlist is Fleet
+ListCollectors, Fleet ListPipelines and Pyroscope LabelValues. It requires HTTPS, a nonempty host,
+no userinfo, query, fragment or percent-encoded path and refuses redirects. The separate label-risk
+two-route exception does not expand this helper or authorise another POST.
 
 ## 5. Runtime and scan tiers
 
@@ -86,7 +95,7 @@ Every tier has its own task definition because Scheduler does not support contai
 | Tier | Default cadence | Owns |
 |---|---|---|
 | T1 | hourly at :05 | fresh inventory, access policies, org members and Fleet Management |
-| T2 | daily | stack detail, service accounts, Assistant, usage insights, signal inventory, label risk, capability adoption, Adaptive Logs/Traces, optional SLO definitions, Loki retention, public dashboards, alert routing, dashboard inventory and datasource query cost |
+| T2 | daily | stack detail, service accounts, Assistant, usage insights, signal inventory, label risk, capability adoption, Adaptive Logs/Traces, optional SLO/Synthetic and configured product counts, Loki retention, public dashboards, alert routing, dashboard inventory and datasource query cost |
 | T3 | every 6 hours | Mimir cardinality and Adaptive Metrics |
 | T4 | daily | independent one-day and seven-day estate diffs from S3 |
 | provisioner | daily, opt-in | per-stack reader reconciliation |
@@ -125,6 +134,16 @@ backstop; `guard.ALLOWED_LABELS` and per-metric shape checks are the primary con
 footprint is measured against the write stack over the same range, never against the whole org.
 
 ## 7. Savings and rate-card semantics
+
+Rules-read coverage travels separately in publication metadata. Partial coverage can publish an
+explicitly qualified measured subtotal, never an unqualified estate metric or finding gauge;
+carry-forward must not resurrect that incomplete tier's estate claim. Recommendation-count and
+pricing coverage are independent and cannot be inferred from readable rules. Current main discovers
+segmentation as unsegmented, segmented or unknown. Whole-stack confidence requires known
+unsegmented input; segmented, unknown and legacy inputs cannot establish whole-stack savings or
+Adaptive maturity from default-only values. Qualified unsegmented subtotals remain useful. Positive
+segment marginal counts do not prove disjointness or fallback additivity: no combined segment saving
+is emitted and no segment object is mutated.
 
 Adaptive Metrics recommendations are requested with `?verbose=true`. The default response has no
 series counts and cannot support a saving. Remediable series are the sum of positive
@@ -177,7 +196,11 @@ Usage events and inventory answer different questions. Pillar J reports public d
 use; the Risk dashboard enumerates configured public dashboards whether or not anybody opened them. The
 generic build presents both and leaves the policy target to the deploying organisation.
 
-Every published view must be rendered and every declared metric must be rendered or alerted. Table
+Every published view must have a rendered disposition and every declared metric must be rendered
+or alerted, with explicit reasons for exemptions. [View reference](docs/views.md) explains the
+publication families and their user meaning. Optional product tables are omitted only for genuinely
+missing views; retained older objects remain readable with advancing age. Access, transport and parse
+errors are explicit, not silently treated as missing. Table
 schemas cover legitimately empty finding views without turning a not-yet-published view into a silent
 blank panel.
 
@@ -210,7 +233,9 @@ An installation is acceptable when:
 8. operators can rotate credentials, migrate alert titles, roll back an image and tear down recorded
    objects without name-pattern deletion.
 
-Still unresolved: Synthetic Monitoring check/result inventory and Adaptive Profiles. Adaptive Traces
+Still unresolved: Synthetic Monitoring execution/result inventory and Adaptive Profiles. Optional
+Synthetic check/probe configuration counts are implemented, but deployed-reader proof is separate.
+Library/playlist visibility controls remain parked and k6 has no admitted collector route. Adaptive Traces
 config availability, policy-type counts and pending recommendation counts are collected through the
 existing stack reader without permission expansion. Config availability is not enablement, and these
 counts cannot measure achieved savings; those remain live `grafanacloud-usage` panels.

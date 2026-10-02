@@ -212,13 +212,19 @@ configured prefix.
 `fleet_default_scrape_interval`. Fleet pipelines scraping faster than it are DPM findings; see
 `docs/configuration.md`.
 
-`GCINSIGHT_READER_PRODUCT_READS` is optional and defaults to empty. The only accepted values are
-`slo` and `synthetic-monitoring`, comma-separated. An unknown value stops the provisioner before any
-write. Enabling a family reconciles its exact read and plugin-access pairs on the per-stack custom
-role; disabling it removes those pairs without re-minting a working reader token. Each deployment
-needs a separate explicit grant decision. The scanner also consumes this setting:
-`slo` enables the stack-local SLO inventory used by Coverage; `synthetic-monitoring` grants reader
-permissions but does not enable a Synthetic Monitoring object collector.
+`GCINSIGHT_READER_PRODUCT_READS` defaults to empty. Current main accepts `slo`,
+`synthetic-monitoring`, `synthetic-monitoring-query`, `irm-integrations`, `faro-apps`, `ml-jobs`,
+`cloud-accounts`, `pdc-networks` and `reports`. An unknown token stops the provisioner before writes.
+Use the [family meaning and limits](docs/configuration.md#optional-product-readers) and
+[exact route/pair map](CAPABILITIES.md#optional-count-only-product-inputs) before selection. IRM
+acceptance is parked on HTTP 206 partial-response handling; it is not an accepted delivered counter.
+Scan and provisioner must agree. No customer grant follows from an accepted setting.
+
+Synthetic configuration counts require both SM tokens, with query pinned only to a uniquely
+discovered, regex-valid Synthetic datasource UID and an empty-scope probes read pair. The old SM
+token alone causes no scan calls. Legacy-correct roles require zero discovery; absent-query-token
+deselection discovers only when a held extra query could match that one Synthetic UID. Other extra
+queries stay refused. Reconciliation changes approved pairs without re-minting a working token.
 
 ## Scheduled jobs
 
@@ -293,8 +299,9 @@ After changing the role:
 - compare action/scope pairs, not action names;
 - allow for partial RBAC propagation before testing the existing token;
 - verify `datasources:query` remains uid-scoped: usage-insights everywhere and the usage datasource on
-  the nominated write stack only;
-- prove writes remain refused with harmless write requests against test endpoints;
+  the nominated write stack only, plus the unique valid SM UID only with both Synthetic tokens;
+- where separate test-write authority exists, prove writes remain refused against test endpoints;
+  read-only scan authority does not authorise a write probe;
 - confirm basic role is still `None` and `chats:access` is absent.
 
 The provisioner CLI reconciles readers; it has no rotation or teardown command. A separately
@@ -306,8 +313,8 @@ Teardown and repair use recorded ids, never a name pattern.
 Create local views from the synthetic fixture:
 
 ```bash
-python3 bin/make_local_views.py
-export GCINSIGHT_VIEWS_DIR=testdata/views
+python3 bin/make_local_views.py --out /tmp/gcinsight-views
+export GCINSIGHT_VIEWS_DIR=/tmp/gcinsight-views
 ```
 
 For a live build set `GCINSIGHT_WRITE_STACK_URL`, `GCINSIGHT_WRITE_STACK_ID` and
@@ -317,7 +324,10 @@ envelopes.
 
 The builder needs live views to derive Infinity columns. A newly implemented view must be published by
 its owning tier before a table panel references it. Legitimately empty finding views use explicit
-schemas; a never-published view remains a build failure.
+schemas. A genuinely missing optional product view omits only its table or empty product tab;
+a missing required view remains a build failure. Retained older optional views are still read,
+with their original timestamp and advancing age. Access, transport and parse failures remain errors,
+not a licence to omit a panel.
 
 ### Empty or missing views
 
@@ -326,11 +336,26 @@ finding table uses its declared fallback schema, including idle estate leftovers
 registrations. A measured but all-unscored maturity population still publishes its leaderboard and
 explanation when data-plane inputs are available.
 
-A missing object is different: schema fallback does not bypass reading the view. Check whether the
+A missing object is different: schema fallback does not bypass reading required views. Optional
+product views can be genuinely absent before opt-in collection; only their own table/tab is omitted.
+Never interpret this as measured zero or ignore an access/parse failure. Check whether the
 owning tier ran successfully, whether its required inputs were available and fresh, and whether the
 view was withheld. Preserve the last good object rather than fabricating rows. `EmptyView` means an
 existing row set is empty without a usable fallback; identify the panel and view and report a missing
 schema if empty is legitimate. Do not skip a whole dashboard merely because the estate has no findings.
+
+### Adaptive coverage and product freshness
+
+The Cost rules-read panel measures readable rule input only, not recommendation-count validity or
+price completeness. Partial coverage yields explicitly qualified subtotals without an estate gauge;
+changing the measured population is not remediation. Current-main segmentation discovery must be
+known unsegmented for whole-stack savings/maturity confidence. Segmented, unknown or legacy inputs
+suppress default-only confidence; per-segment positive marginal counts do not establish additive
+savings. No segment creation/deletion is performed by scans.
+
+Optional product views depend on their own T2 inputs. Withholding leaves older S3 views intact:
+inspect observation time and input age rather than equating an hourly hydrated publication with
+fresh daily collection. See the [view reference](docs/views.md).
 
 ## Rate card
 

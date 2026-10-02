@@ -6,6 +6,11 @@ their current panel groups. Each dashboard has a development-stack screenshot re
 module defaults; deployment overrides may differ. See the [operator timetable](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/RUNBOOK.md#scheduled-jobs)
 for schedule times and the default UTC timezone.
 
+This page describes current-main assembly, not a deployed browser readback. Stable v0.5.0 includes
+Synthetic counts and qualified Adaptive totals, but later segmentation/product/dashboard changes are
+not retroactive stable-release content. See [version and evidence boundaries](../README.md#version-and-evidence-boundaries).
+The [view reference](views.md) describes every composed publication family.
+
 Scan-fed dashboards include coverage and input-age panels. A blank or missing series is not a
 measured zero. The Stack selector does not filter panels that read the live `grafanacloud-usage`
 datasource, which identifies stacks by numeric id rather than the selector's slug. See
@@ -31,8 +36,14 @@ Inventory is configured state. A stack missing from a scan is not a deleted stac
 | Row or tab | Question answered | Source and window |
 |---|---|---|
 | Overview, Biggest stacks, Signals | Where is consumption concentrated? | Collector cardinality and stack data plane, refreshed every 6 hours. |
-| Levers, Savings available, DPM-aware savings | Which Adaptive Metrics changes have a supported saving? | Rules and verbose recommendations from the data-plane sweep; optional complete price basis. |
+| Levers, Savings available (including conditional DPM-aware pricing) | Which Adaptive Metrics changes have a supported saving? | Rules and verbose recommendations from the data-plane sweep; optional complete price basis. |
 | Adaptive Logs | What reduction is proposed and already realised? | Daily recommendation sweep plus live billing datasource for realised drop. |
+
+The rules-read coverage panels use each view's publication metadata, not the latest scan. Their
+measured denominator proves neither recommendation-count validity nor pricing completeness. Partial
+coverage yields qualified subtotals, not estate metrics/gauges. Segmented, unknown or legacy inputs
+cannot qualify default-only figures as whole-stack savings; no additive segment saving is emitted.
+The conditional DPM-aware calculation requires that billing basis, not a fixture-only tab.
 
 Potential savings sum positive marginal reductions for add and update recommendations; active series is not the saving. Monetary estimates are absent without a complete rate card. Live billing panels have their own window and are not filtered by Stack. [Adaptive and pricing traps](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/docs/traps.md#adaptive-recommendations-and-rate-cards).
 
@@ -44,6 +55,8 @@ Potential savings sum positive marginal reductions for add and update recommenda
 |---|---|---|
 | Overview, Adoption, Engagement | Which datasource types and capabilities are provisioned, and where is there recorded use? | Daily stack inventory and collector signals. |
 | Protocol adoption, Unread telemetry, Workload | What telemetry arrives, through which protocol, and which resources carry it? | Explicitly windowed signal inventory and data-plane measurements. |
+| Configured Faro apps, Configured forecast jobs, Configured AWS accounts, Configured PDC private networks, Configured reports | What optional configured objects were measured? | Default-off T2 counts, with per-input age; reports include disabled objects, AWS excludes unknown other providers, and PDC requires complete realm/page reads. |
+| Configured IRM integrations | What counter implementation is present? | Acceptance is parked on HTTP 206 partial-response handling; this tab is not an accepted delivered inventory. |
 
 Provisioning and production are distinct from human use. A sentinel detects its declared technology from a curated metric-name registry; the unmatched share remains visible and generic names are not treated as proof. [Signal classification traps](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/docs/traps.md#signal-label-inventory-mimir-loki-tempo-pyroscope).
 
@@ -68,7 +81,7 @@ A score covers measured and applicable components, not an assumed complete estat
 | Public dashboards, Delete protection, Access, Credentials | What exposure and access are configured? | Hourly org and daily stack inventories; daily public-share enumeration. |
 | Data loss, Alerting health, Alert routing, Logs retention, Collectors | Where are gaps in collection, response configuration and retention? | Daily routing and retention, hourly Fleet, 6-hour data plane. |
 | Label cardinality, Per stack | Which measured stacks need inspection? | Data-plane sweep and bounded finding views. |
-| Label hygiene | Which sampled label keys and values have classified privacy or cardinality risk? | Bounded daily label-API sample and per-signal coverage. |
+| Label privacy risk | Which sampled label keys and values have classified privacy or cardinality risk? | Bounded daily label-API sample and per-signal coverage. |
 
 Label hygiene is a bounded sample, not an exhaustive audit. Full classified matches appear only in
 the approved S3 risk view and private hydration input, never in Loki or metric labels. The view
@@ -156,6 +169,7 @@ positive panel-plugin use; datasource type does not identify an app or a person.
 | Outcome value, Unit economics | What recorded OnCall response and matched unit denominators exist? | Live billing datasource plus collector series. |
 | Technology and cluster registers, Classification evidence, Summary | Which sentinel matches are supported, and what remains unclassified? | Versioned technology registry and daily signal inventory. |
 | SLO inventory | How many SLO definitions were measured per stack, and where was the reader unavailable? | Optional, default-off daily count-only product read; no objectives, queries or history. |
+| Synthetic inventory | Which check types/enabled counts and public/private probe classes are configured? | Default-off T2 counts requiring both Synthetic tokens and the exact discovered query UID; no targets, scripts, execution or result detail. |
 
 Canonical service identity is exact after trim and case-folding; a generic Mimir `service` value stays separate. Technology matches use unambiguous sentinels, and the unmatched metric-name share is visible. Unavailable evidence leaves components unscored. Live billing panels have their own population and ignore the Stack selector. [Signal and sentinel traps](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/docs/traps.md#signal-label-inventory-mimir-loki-tempo-pyroscope).
 
@@ -181,6 +195,11 @@ measurements or exhaustive privacy evidence.
 
 ## Publishing and alerts
 
-The builder needs published S3 views for scan-fed tables; a missing view is a build failure. Legitimately empty finding views use explicit schemas. See [Getting started](getting-started.md#build-the-dashboards-without-deploying-anything) for a synthetic local build. Publishing writes dashboards to the chosen stack and reads them back to verify the v2 resource envelopes.
+The builder needs published S3 views for required scan-fed tables; a missing required view is a build
+failure. Genuinely missing optional product objects omit only their table or empty product tab.
+Readable older objects remain eligible and visibly age. Access, transport and parse errors are not
+missing-object exemptions. Metadata-only coverage selectors guard missing fields to return no rows,
+not fabricated zero coverage. Offline assembly and the upstream jsonframer API proof do not establish
+installed-plugin, browser or deployed-binary behaviour. Legitimately empty finding views use explicit schemas. See [Getting started](getting-started.md#build-the-dashboards-without-deploying-anything) for a synthetic local build. Publishing writes dashboards to the chosen stack and reads them back to verify the v2 resource envelopes.
 
 New alert rules publish paused and unrouted. Activation requires an explicit receiver; a plain publish preserves an existing rule's pause and routing. See [Operations](operations.md) before activating a rule on a live write stack.

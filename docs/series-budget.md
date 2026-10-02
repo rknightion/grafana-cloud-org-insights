@@ -8,7 +8,7 @@ Everything lands on the configured write stack alone. That stack's own series ov
 
 | | Series |
 |---|---:|
-| Declared, all phases | 9,654 |
+| Declared, all phases | 9,710 |
 | Runaway ceiling | 100,000 |
 
 These declarations use the catalogue's synthetic 271-stack and eight-region planning baselines, not
@@ -31,7 +31,11 @@ The 100,000 ceiling is a runaway backstop, not a target and not a licence for un
 | I - AI | 895 |
 | J - dashboards | 4,400 |
 | K - observed estate coverage | 969 |
-| scan self-telemetry | 250 |
+| scan self-telemetry | 306 |
+
+Optional product counts remain point-in-time views, not product time-series metrics. Each new
+input adds at most eight bounded freshness series across the four tiers, with no stack multiplier.
+The figures above reflect current main, not the stable v0.5.0 release or a measured deployment.
 
 ## The three rules
 
@@ -51,7 +55,7 @@ than an omission. The generated `BUDGET.md` lists them; their count changes as c
 | `ai_category_surface` | 5,691 | per-stack human-vs-machine detail; a stack-by-taxonomy metric is a cross product |
 | `maturity_dimensions` | 2,439 | a table shows every dimension's contribution; only the composite needs trending |
 | `estate` | 271 | wide per-stack inventory: region, cluster, status, users by role, admin share, age, idle, drift |
-| `risk_sa_and_token_inventory` | 271 | named service-account and token inventory stays out of metric labels |
+| `risk_service_accounts` | 271 | named service-account and token inventory stays out of metric labels |
 | `cost_adaptive_metric_recommendations` | 1 | bounded top-ten-per-stack action queue; metric names stay out of labels |
 | `insights_coverage` | 1 | the denominator: why a stack has no figures |
 

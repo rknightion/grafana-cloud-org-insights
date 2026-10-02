@@ -6,11 +6,21 @@ It exists because past a couple of dozen stacks nobody can answer simple questio
 
 Two audiences, two cadences. A platform team reads it weekly and wants to know who is struggling, who is over-alerting and who needs help. Leadership reads it quarterly and wants to know whether the spend is defensible and whether adoption is growing.
 
+## Version and acceptance boundaries
+
+These pages describe current main, not a deployment claim. Stable v0.5.0 includes Synthetic
+configuration counts and qualified Adaptive totals. Segment handling, Faro/ML/AWS/PDC/report
+counters and later dashboard improvements landed afterward, not in that stable release. Dev
+v0.5.0 execution remains unproven after AWS authentication blocked rollout. Optional families
+are default-off and require separate deployment permission decisions. IRM counter acceptance is
+parked on HTTP 206 handling; library/playlist controls remain parked and k6 has no admitted route.
+No customer grant or new stable-release/deployment authority follows these docs.
+
 ## What it is not
 
 - **Not a replacement for showback.** If your org already emails per-owner cost reports, this answers "which lever moves that number", not "what did it cost".
 - **Not an agent on your stacks.** Nothing is installed anywhere. The collector runs in your AWS account and talks to `grafana.com` and to each stack's own API over HTTPS.
-- **Not a customer mutation path.** The scanning credential has read scopes, and the general HTTP client refuses non-GET methods. Fleet list RPCs and the two native Pyroscope label-risk RPCs are read-only POST exceptions. Publishing uses a second credential whose realm is a single stack; provisioning is a separate, explicitly authorised operation.
+- **Not a customer mutation path.** The scanning credential has read scopes, and the general HTTP client refuses non-GET methods. Fleet list RPCs and native Pyroscope label reads have exact read-only POST exceptions, not general POST authority. Publishing uses a second credential whose realm is a single stack; provisioning is a separate, explicitly authorised operation.
 
 ## How it works
 
@@ -22,7 +32,7 @@ for schedule times and enablement gates.
 | Tier | Module-default cadence | Gathers |
 |---|---|---|
 | T1 | hourly | org inventory, access policies, org members and Fleet Management |
-| T2 | daily | per-stack users, plugins, service accounts, Assistant, usage insights, public dashboards, alert routing, Loki retention, signal labels and capability adoption |
+| T2 | daily | per-stack users, plugins, service accounts, Assistant, usage insights, public dashboards, alert routing, Loki retention, signal labels, bounded label risk, Adaptive Logs/Traces, capability adoption and optional configured product counts |
 | T3 | every 6h | the data plane: cardinality and Adaptive Metrics rules and recommendations |
 | T4 | daily | the estate diff, over two windows: 7 days and 1 day |
 | provisioner | daily, opt-in | reconciles one read-only service account per stack |
@@ -54,6 +64,8 @@ and the [interpretation guide](dashboards.md) before quoting an adoption figure.
 ## Start here
 
 - [Getting started](getting-started.md) - run a scan against your own org and build the dashboards from a synthetic fixture.
+- [Published views](views.md) - table meanings, populations, freshness and optional product limits.
+- [Configuration](configuration.md#optional-product-readers) - default-off family tokens and approval boundaries.
 - [Credentials and permissions](credentials.md) - every identity, what it reaches, and what it is deliberately refused.
 - [Deployment](deployment.md) - the Terraform module, the signed container image, and how a customer deployment pins it.
 - [Operations](operations.md) - manual scans, the provisioner, rotation, rollback and teardown.

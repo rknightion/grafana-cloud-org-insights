@@ -8,7 +8,7 @@ Confirm it is a range query reduced with `lastNotNull`. An instant query against
 
 ## T2 or T3 data missing in a six-hour dashboard window
 
-Inspect hydration and the owning scan envelope. Every tier composes the full view set by hydrating inputs it does not own from the owning tier's latest envelope, so a stalled T3 shows up as gaps in a T1-published view.
+Inspect hydration and the owning scan envelope. T1/T2/T3 compose the full view set by hydrating inputs they do not own from the owning tier's latest envelope, so a stalled T3 shows up as gaps in a T1-published view.
 
 A view whose inputs are unsatisfied is withheld, leaving the last good S3 object visible with its older timestamp. A table that stops advancing is the signal.
 
@@ -27,6 +27,13 @@ Inspect the `instance_id` selector immediately. Each stack's usage-insights data
 Confirm the recommendations were requested with `?verbose=true`, and check the marginal arithmetic. Remediable series are the sum of positive `current_series_count - recommended_series_count` reductions for `add` and `update` actions only. `keep` and `remove` are not unrealised reductions.
 
 An unknown action or a missing before/after pair makes the aggregate unavailable, not zero.
+
+## Rules coverage looks complete but savings are absent
+
+Rules-read coverage does not establish recommendation-count or price completeness. Check each
+separately. Current-main segment discovery also requires known unsegmented state for whole-stack
+confidence; segmented/unknown/legacy input cannot qualify default-only savings. Qualified measured
+subtotals are not estate totals and changing coverage is not remediation.
 
 ## Currency missing from a value panel
 
@@ -82,6 +89,8 @@ re-evaluating the creation-time condition and is not acceptance evidence.
 An existing view has zero rows and the panel has no usable fallback schema. Legitimately empty
 finding tables, including idle leftovers and dead Fleet registrations, have declared schemas and are
 supported. Identify the failing view and panel; if empty is legitimate, report the missing schema.
-A missing S3 object instead fails during the view read: check the owning scan and input freshness.
+A missing required S3 object fails during the view read: check the owning scan and input freshness.
+Only genuinely missing optional product objects omit their table/tab. Older retained views remain
+readable and age; access, transport and parse errors are explicit, never missing-object exemptions.
 See [Empty or missing views](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/RUNBOOK.md#empty-or-missing-views); do not fabricate rows or assume every
 small estate must skip affected dashboards.

@@ -15,9 +15,12 @@ Grafana rule and receiver inventory uses the separate stack reader. Usage insigh
 bounded aggregate LogQL reads through each stack's datasource proxy. These restraints are reviewed
 implementation properties, not credential properties. Fleet list APIs use read-only Connect-RPC
 POSTs outside that client. The bounded daily label-risk
-source alone may POST native Pyroscope `LabelNames` and `LabelValues` on inventory `hpInstanceUrl`,
+source may POST native Pyroscope `LabelNames` and `LabelValues` on inventory `hpInstanceUrl`,
 using `hpInstanceId`; no other native Pyroscope path or method is granted. These read exceptions do
-not weaken the general GET-only client.
+not weaken the general GET-only client. Separately, the observed-name/Fleet helper permits only
+exact parsed-path suffixes for Fleet ListCollectors/ListPipelines and Pyroscope LabelValues over
+HTTPS with a nonempty host, no userinfo/query/fragment/percent-encoded path and no redirects.
+That three-route helper and the label-risk two-route transport remain distinct exceptions.
 
 `traces:read` and `profiles:read` are not credential-enforced metadata boundaries either: isolated
 stack-realm probes returned trace and profile content. The collector keeps to its approved label/tag
@@ -35,6 +38,18 @@ It publishes S3 objects and uses a runtime writer scoped to one nominated stack 
 The opt-in provisioner is a separate write task with a separate secret key; dashboard and alert
 publication tools are also explicit build-time write paths. The provisioner runs daily by module
 default, with deployment overrides possible; see the [operator timetable](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/RUNBOOK.md#scheduled-jobs). See [Credentials and permissions](credentials.md) for every identity and its scopes.
+
+## Named optional receipt risks
+
+Default-off product families are not blanket secret-free credentials. IRM integrations read also
+reaches secret-bearing configuration, but the collector calls counters only; its HTTP 206
+count-integrity acceptance is parked. ML job items can contain job-top-level `grafanaApiKey`, which
+is dropped before the unchanged structural credential guard; nested/other known credentials still
+reject input. These owner-approved named risks do not admit lists, schedules, expressions or other
+product routes. AWS credential backend write isolation remains unknown despite GET-only collection.
+PDC's read action also reaches tokens GET, which is never called; connections POST is not admitted.
+All identity/detail is discarded from count outputs, not guaranteed erased from transient memory.
+See [the exact route/pair map](../CAPABILITIES.md#optional-count-only-product-inputs).
 
 ## No defaulted identifiers
 

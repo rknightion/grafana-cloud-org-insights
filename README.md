@@ -15,6 +15,20 @@ Two audiences, two cadences. A platform team reads it weekly and wants to know w
 is over-alerting and who needs help. Leadership reads it quarterly and wants to know whether the spend
 is defensible and whether adoption is growing.
 
+## Version and evidence boundaries
+
+These docs describe current main unless a release is named. Stable v0.5.0 includes Synthetic
+configuration counts and coverage-qualified Adaptive totals. Conservative segmentation discovery,
+Faro/ML/AWS/PDC/report counters and later dashboard improvements landed afterward; they are not
+retroactively part of that stable release or evidence of a deployed upgrade. Dev v0.5.0 runtime
+acceptance remains unproven because AWS authentication blocked rollout before execution.
+A signed image or automated RC is not a deployment proof or authority for another stable release.
+
+Optional families default off and require separate deployment/read-permission approval. IRM's counter
+implementation exists but count-integrity acceptance is parked on its HTTP 206 handling. Library and
+playlist empty controls remain parked; k6 has no admitted collector route. No new customer read
+grant, token replacement, feature activation or deployment follows from this documentation.
+
 ## What it is not
 
 - Not a replacement for showback. If your org already emails per-owner cost reports, this answers "which
@@ -22,8 +36,9 @@ is defensible and whether adoption is growing.
 - Not an agent on your stacks. Nothing is installed anywhere. The collector runs in your AWS account and
  talks to `grafana.com` and to each stack's own API over HTTPS.
 - Not a customer mutation path. The scanning credential has read scopes, and the general HTTP client
- refuses any method other than GET. Fleet list RPCs and the two native Pyroscope label-risk RPCs are
- read-only POST exceptions. Publishing uses a second credential whose realm is a single stack;
+ refuses any method other than GET. Fleet list RPCs and native Pyroscope label reads are
+ exact read-only POST exceptions: the three-route observed-name/Fleet helper and the separate
+ two-route label-risk source are not general POST authority. Publishing uses a second credential whose realm is a single stack;
  per-stack reader provisioning is a separate, explicitly authorised write operation.
 
 ## How it works
@@ -36,7 +51,7 @@ canonical schedule and enablement gates. The estate is discovered afresh on each
 | | Module-default cadence | Gathers |
 |---|---|---|
 | T1 | hourly | org inventory, access policies, org members and Fleet Management |
-| T2 | daily | per-stack users, plugins, service accounts, Assistant, usage insights, public dashboards, alert routing, Loki retention, signal labels and capability adoption |
+| T2 | daily | per-stack users, plugins, service accounts, Assistant, usage insights, public dashboards, alert routing, Loki retention, signal labels, bounded label risk, Adaptive Logs/Traces, capability adoption and optional configured product counts |
 | T3 | every 6h | the data plane: cardinality and Adaptive Metrics rules/recommendations |
 | T4 | daily | the estate diff, two windows: 7 days and 1 day |
 | provisioner | daily, opt-in | reconciles one read-only service account per stack |
@@ -51,9 +66,13 @@ Three landing zones, each chosen for what it is good at:
 - **S3** takes pre-shaped tables the dashboards render directly, plus a raw scan archive for the diff
  and for audit. Long-term history lives in Mimir, not in the archive.
 
-Every tier composes the full view set from the full input set, hydrating whatever it did not gather
-itself from the other tiers' latest scans. A view whose inputs are unsatisfied is withheld rather than
-written as zeros, so a table that stops advancing is the signal that something upstream has stopped.
+T1, T2 and T3 compose the full view set from the full input set, hydrating whatever they did not
+gather from the other tiers' latest scans. T4 publishes independent historical diff views. A view whose inputs are unsatisfied is withheld rather than
+written as zeros, retaining the last-good object and its older observation timestamp. An hourly
+publication is not a fresh daily observation. Optional product tables omit only genuinely missing
+objects; older retained objects remain readable and visibly age, while access/parse errors stay
+explicit. See the [published view reference](docs/views.md) and
+[optional reader settings](docs/configuration.md#optional-product-readers).
 
 ## What you can observe
 
@@ -323,6 +342,7 @@ No AWS credentials, no network, no live estate. `testdata/` holds a synthetic es
 ## Read next
 
 - `SPEC.md` - the design: capability model, architecture, correlation traps, security posture.
+- `docs/views.md` - published table meanings, populations, optional counters and freshness limits.
 - `docs/traps.md` - the API and dashboard behaviour that has cost real time. Read it before writing a
  panel, a PromQL expression or an Infinity query.
 - `CAPABILITIES.md` - what an org-realm token reaches and what it does not, endpoint by endpoint.

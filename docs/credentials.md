@@ -101,13 +101,28 @@ The role can read:
   `grafanacloud-usage` on the nominated write stack for the bounded adoption input.
 
 `datasources:read` uses `datasources:*` because it lists metadata. `datasources:query` is separately
-uid-pinned and is never widened to `datasources:*`. The reader cannot query arbitrary production
-datasources.
+uid-pinned and is never widened to `datasources:*`. The separately opted-in Synthetic query token
+adds only the discovered valid SM UID, not arbitrary production datasource access.
 
-The default-off `GCINSIGHT_READER_PRODUCT_READS` policy accepts `slo` and `synthetic-monitoring`.
-It selects additional read action/scope pairs, not a guarantee that every product endpoint works.
-Scan and provisioner must use the same policy. Unsetting it removes the optional grants during
-reconciliation without replacing a working reader token.
+The default-off `GCINSIGHT_READER_PRODUCT_READS` policy accepts the families listed in
+[Configuration](configuration.md#optional-product-readers). Scan and provisioner must agree.
+These select exact pairs, not a guarantee of universal visibility or a customer grant. Synthetic's
+independent query token requires the old app token and permits only one uniquely discovered,
+regex-valid datasource UID plus empty-scope probes read. Without it scans make no Synthetic calls;
+legacy-correct roles make no reconciliation discovery calls. Unsetting the query token permits
+bounded discovery only for a held extra query that could be the Synthetic pair; other arbitrary
+queries stay dangerous. Pair repairs must not replace a working token.
+
+Faro, ML, AWS accounts, PDC and reports require HTTP 200 and complete validated envelopes. IRM
+implementation still admits HTTP 206; count-integrity acceptance is parked, not delivered. Its
+integrations read permission also reaches secret-bearing configuration, although only counters
+are called. ML job-top-level `grafanaApiKey` is dropped before the unchanged generic credential
+guard; nested/other credential fields remain rejected. All other identities and detail are dropped
+from count outputs; this is not memory erasure. PDC counts only exact stack-realm/signing-scope
+policies after the full region/control-realm/page sweep and never calls tokens GET or connections
+POST. AWS is not an all-provider count, and backend write isolation remains unknown. Reports
+include disabled configured objects, not executions or delivery. See the
+[exact current route/pair map](../CAPABILITIES.md#optional-count-only-product-inputs).
 
 The declaration explicitly refuses decrypted alert secrets, secure values, user session tokens, Grafana auth settings, support bundles, provisioning writes and Adaptive Traces mutation actions. `chats:access` is not granted.
 

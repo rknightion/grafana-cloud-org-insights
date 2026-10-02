@@ -13,7 +13,7 @@ for canonical times and enablement gates.
 | Tier | Default cadence | Owns |
 |---|---|---|
 | T1 | hourly | fresh inventory, access policies, org members and Fleet Management |
-| T2 | daily | stack detail, service accounts, Assistant, usage insights, Adaptive Logs, public dashboards, alert routing, Loki retention, signal labels, bounded label risk, adoption, optional SLO inventory, dashboard inventory and datasource query cost |
+| T2 | daily | stack detail, service accounts, Assistant, usage insights, Adaptive Logs, public dashboards, alert routing, Loki retention, signal labels, bounded label risk, adoption, Adaptive Traces, optional SLO/Synthetic and configured product counts, dashboard inventory and datasource query cost |
 | T3 | every 6 hours | Mimir cardinality and Adaptive Metrics |
 | T4 | daily | independent one-day and seven-day estate diffs, computed from S3 |
 | provisioner | daily, opt-in | per-stack reader reconciliation |
@@ -32,7 +32,8 @@ Paused stacks answer the control plane with a conflict response and are **skippe
 
 ## Hydration
 
-Every tier composes the full view set from the full input set. Inputs a tier does not own are hydrated from the owning tier's latest envelope, so an hourly T1 run publishes views built from the newest T2 and T3 data as well as its own.
+T1, T2 and T3 compose the full view set from the full input set; T4 publishes independent historical
+diff views. Inputs a tier does not own are hydrated from the owning tier's latest envelope, so an hourly T1 run publishes views built from the newest T2 and T3 data as well as its own.
 
 `VIEW_INPUTS` is derived by composing subsets of the fixture rather than being hand-written, so a view cannot quietly disagree with the inputs it actually reads.
 
@@ -75,6 +76,11 @@ Adaptive Metrics recommendations are requested with `?verbose=true`. The default
 Remediable series are the sum of positive `current_series_count - recommended_series_count` reductions for `add` and `update` actions. `keep` and `remove` do not represent an unrealised reduction. An unknown action, or a missing before/after pair, makes the aggregate **unavailable** rather than zero.
 
 Adaptive Logs recommendation volume is the residual volume still flowing, and has no declared window. It can rank pending work; it cannot be converted into a monthly applied saving. Applied drops are read directly by dashboard panels from `grafanacloud-usage`.
+
+Partial Adaptive rules-read coverage publishes explicitly qualified subtotals, not estate metrics
+or finding gauges; recommendation and price coverage are separate. Current main discovers segments
+and admits whole-stack confidence only for known unsegmented inputs. Segmented/unknown/legacy inputs
+suppress default-only savings and Adaptive maturity; segment marginals are never added together.
 
 ## Dashboard contracts
 

@@ -6,7 +6,7 @@ Tell the write-stack owner that this platform adds active series to that one sta
 
 Do not enable schedules until:
 
-1. the Secrets Manager object contains separate read, write and provisioner token keys;
+1. the Secrets Manager object contains separate read/write keys, plus the provisioner key if enabled;
 2. the image is available at the immutable digest pinned by Terraform;
 3. the S3 bucket and stack-token SSM path exist with the intended IAM boundaries;
 4. the provisioner has reconciled and verified the stack-local readers;
@@ -54,8 +54,10 @@ After changing the role:
 
 - compare action/scope pairs, not action names;
 - allow for partial RBAC propagation before testing the existing token;
-- verify `datasources:query` remains uid-scoped;
-- prove writes remain refused, using harmless write requests against test endpoints;
+- verify `datasources:query` remains uid-scoped: usage-insights everywhere, usage only on the write
+  stack, and only the uniquely discovered valid SM UID when both Synthetic tokens are selected;
+- only with separate test-write authority, prove writes remain refused against test endpoints;
+  a read-only scan grant does not authorise a write probe;
 - confirm the basic role is still `None` and `chats:access` is absent.
 
 The provisioner CLI has no rotation or teardown command. Separately authorized rotation must verify

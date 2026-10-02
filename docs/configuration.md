@@ -44,7 +44,7 @@ Secret values are populated outside Terraform; the module manages the container 
 | `GCINSIGHT_OPT_OUT` | empty; comma-separated stack slugs the owner asks not to provision |
 | `GCINSIGHT_COVERAGE_SCORE_WEIGHTS` | equal weights; partial JSON overrides for `metrics`, `logs`, `traces`, `profiles`, `dashboard`, `alert`, `slo`; finite non-negative numbers with positive total |
 | `GCINSIGHT_DASHBOARD_DETAIL_ENABLED` | false; `true`/`1` or `false`/`0`; opt-in dashboard JSON inspection for service attribution, with no retained query text |
-| `GCINSIGHT_READER_PRODUCT_READS` | `reports` opts in to T2 configured report counts (including disabled objects), not execution/delivery/scheduling activity; exactly `reports:read` at `reports:*`, only guarded GET `/api/reports` on the fresh inventory HTTPS origin with HTTP 200, no query/redirects; complete bare arrays only, unchanged credential guard, all report details discarded, empty measures zero and unreadable/partial is absent; no customer grant or universal visibility claim. Default empty; comma-separated `slo`, `synthetic-monitoring`, `synthetic-monitoring-query`, `irm-integrations`, `faro-apps`, `ml-jobs`, `cloud-accounts`, `pdc-networks` and/or `reports`; query token requires `synthetic-monitoring` and explicitly opts in to exact discovered SM datasource query plus probes read and count-only T2 collection; scan and provisioner must agree; legacy SM token alone makes no SM calls; missing or unreadable coverage is absent. `irm-integrations` enables T2 configured counts, not usage/activity; its permission also reaches secret-bearing configuration, but only the projected counters GET is permitted; no customer grant is implied. `faro-apps` adds only apps read (empty scope) and Kowalski plugin access, enabling T2 point-in-time web/mobile/unknown app counts; all app details are dropped at parse, unreadable stacks remain absent, and visibility is conditional on product permissions. `ml-jobs` adds only forecasting read (empty scope) and ML plugin access for T2 configured forecast job counts on the named jobs GET route; job-top-level `grafanaApiKey` is dropped before the unchanged structural credential guard, all other details are discarded, unknown coverage is absent, and transient key receipt is an accepted named-route risk, not a customer grant. `cloud-accounts` adds only CSP read (empty scope) and CSP plugin access for T2 configured AWS account counts on the fixed accounts GET, with validated fresh inventory origin and numeric stack ID, no query or redirects. It requires a data-only array and unchanged structural credential validation; account details are discarded. Genuine empty data measures zero; unknown/failed/partial inputs are absent. Other providers remain unknown, not zero; this is not an all-provider total. Backend write isolation of this credential remains unproven; the GET permission does not authorize live writes or customer rollout. `pdc-networks` adds only private-networks read (empty scope) and PDC plugin access for T2 stack-attributed policy counts on the fixed guarded accesspolicies GET. It requires complete reads of fresh inventory regions plus control realms, validating exact current stack realm and `set:pdc-signing` independently of server filtering. Complete empty reads measure zero; malformed/partial/unknown coverage is absent. All details are discarded; no tokens route, connections POST, policy writes or product metric. The permission also reaches tokens GET, which the collector never uses; staff conditional visibility is not universal completeness or a customer grant |
+| `GCINSIGHT_READER_PRODUCT_READS` | empty; comma-separated family tokens described under [Optional product readers](#optional-product-readers); scan and provisioner must agree, with separate deployment approval |
 
 Maturity ownership attribution excludes only identities containing `@grafana.com` (case-insensitive)
 in an Admin's login or email. Vendor and partner logins otherwise remain owner candidates; there is no
@@ -55,6 +55,40 @@ Expected retention and Fleet scrape policy are described below. The Terraform mo
 `provisioner_product_reads` for the corresponding runtime policies. Do not use these tunables to
 store discovered inventory. A consumer must populate every projection field, even where the generic
 runtime has a default.
+
+## Optional product readers
+
+All families default off. Selecting a token changes desired reader permissions only through separately
+authorised reconciliation; it does not grant customer rollout authority. Counts are point-in-time
+configured inventory, not use, executions or business outcomes. Inputs join fresh live inventory;
+unreadable stacks are absent, not zero. Each input adds at most eight bounded input-freshness series
+across four tiers, not a product-count time series or a stack multiplier.
+
+| Token | Operator meaning |
+|---|---|
+| `slo` | SLO definition and configured-alerting counts with bounded source/status enums; not objectives, SLI history or firing alerts. |
+| `synthetic-monitoring` | Existing app/check read and plugin-access pairs only; alone it causes no Synthetic collection calls. |
+| `synthetic-monitoring-query` | Requires the preceding token. Adds only query access to the single uniquely discovered `synthetic-monitoring-datasource` UID matching `^[A-Za-z0-9_-]{1,40}$` and empty-scope probes read. Counts checks by type/enabled state and probes by public/private class, not probe execution. Ambiguous/invalid discovery grants nothing. |
+| `faro-apps` | Configured apps by web/mobile/unknown type. Apps read plus Kowalski plugin access; no names, ingest keys or endpoints leave the source. |
+| `ml-jobs` | Configured forecast jobs. Forecasting read plus ML plugin access; only job-top-level `grafanaApiKey` is discarded before the unchanged credential guard. Nested/other credential fields still reject the input. |
+| `cloud-accounts` | Configured AWS accounts only. CSP read plus plugin access; numeric fresh stack ID and data-only array required. Other providers are unknown, not zero; no all-provider total. Backend write isolation of the credential remains unknown. |
+| `pdc-networks` | Policies matching exactly the current stack realm and `set:pdc-signing`, after complete reads of live inventory regions unioned with control realms and every validated page. Private-networks read plus PDC plugin access; server realm filtering is not trusted. Continuations are reconstructed on the fixed proxy, never fetched as supplied credential-bearing URLs. No tokens GET, connections POST or policy write is called. |
+| `reports` | Configured report objects, including disabled reports. Only `reports:read` at `reports:*`; no executions, delivery or scheduling activity. |
+| `irm-integrations` | Implementation exists for counters only, but acceptance is parked: its current transport still accepts HTTP 206. Do not enable it as an accepted delivered counter. Its permission also reaches secret-bearing integration configuration; lists, schedules and alert groups are not admitted. |
+
+Faro, ML, AWS, PDC and reports require exact HTTP 200 and complete validated envelopes; valid empty
+collections measure zero, partial or unsupported responses are unavailable. General `Response.ok`
+is not this contract. All raw identities and details are discarded from these count outputs, not
+guaranteed erased from memory. ML transient-key receipt and IRM credential breadth are named owner
+risk decisions, not permission to call other routes. Staff reader/Admin controls do not establish
+universal visibility or strict minimum permissions. See the [exact route/pair map](../CAPABILITIES.md#optional-count-only-product-inputs)
+and [resource fences](source-resource-fences.md) for transport and schema limits.
+
+With the Synthetic query token absent, scans make zero Synthetic calls. Reconciliation also makes
+zero discovery calls for a legacy-correct role. A held query outside the approved telemetry baseline
+can trigger one bounded discovery for deselection; only the pair matching the uniquely discovered
+valid Synthetic UID is removable. Ambiguous/invalid discovery removes nothing and reports it; any
+other extra query remains dangerous. Working reader tokens are never re-minted just to change pairs.
 
 ## Schedules and retention
 

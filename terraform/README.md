@@ -220,6 +220,16 @@ does require a stack-realm `logs:write` token represented by the adopted access-
 
 ## Reader product policy
 
+The following optional families describe current main, not retroactive stable v0.5.0 content or
+proof of a deployed upgrade. Dev v0.5.0 execution remains unproven after an AWS authentication block.
+No new customer product-read grant follows module support. See the
+[operator family reference](../docs/configuration.md#optional-product-readers).
+
+Faro, ML, AWS accounts, PDC and reports require exact HTTP 200 and complete validated responses.
+IRM implementation still admits HTTP 206; its count-integrity acceptance is parked and it must not
+be treated as an accepted delivered counter. Library/playlist controls remain parked, and k6 has
+no admitted route. Optional counters add input-freshness series only, not product metrics.
+
 `provisioner_product_reads` remains default-off (`[]`) and accepts `slo`, `synthetic-monitoring`,
 `synthetic-monitoring-query`, `irm-integrations`, `faro-apps`, `ml-jobs`, `cloud-accounts`, `pdc-networks` and `reports`.
 `reports` adds exactly `reports:read` at `reports:*`, no plugin, send, settings,
