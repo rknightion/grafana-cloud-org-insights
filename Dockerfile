@@ -21,7 +21,7 @@
 #
 #   docker run --rm -e GCINSIGHT_READ_TOKEN -e AWS_* gcinsight:dev --tier t1 --dry-run
 
-FROM python:3.14-slim@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d
+FROM python:3.14-slim@sha256:0741d101873c12ab927e6f8653feb8862b9bd58771177acb1b885b95141f91b4
 
 # The collector is stdlib-only and the image never installs Python packages. Remove pip and the
 # ensurepip bootstrap from the runtime image so their bundled build tooling and vendored libraries
