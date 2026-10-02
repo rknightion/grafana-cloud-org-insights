@@ -128,6 +128,7 @@ INPUT_OWNER: dict[str, str] = {
     "slo_inventory": "t2",
     # Opt-in minimized point-in-time Synthetic Monitoring check and probe counts.
     "synthetic_inventory": "t2",
+    "irm_integrations": "t2",
     # Bounded classified label matches. Clear values stay in this private input and S3-only risk views.
     "label_risk": "t2",
 }
@@ -140,6 +141,8 @@ INPUT_OWNER: dict[str, str] = {
 # alternate inputs. `tests/test_hydrate.py::ViewInputsAreDerivedNotAssumed` caps that proof before
 # composing any subsets, so adding inputs cannot turn the gate into an exponential resource failure.
 VIEW_INPUTS: dict[str, frozenset[str]] = {
+    # Derived from the offline minimized IRM projection in compose_inputs.json.
+    "irm_integrations": frozenset({"irm_integrations"}),
     # Derived from the anonymized captured SLO projection in compose_inputs.json.
     "coverage_slo_inventory": frozenset({"slo_inventory"}),
     # Mechanically derived from full fixture versus absent and all singleton inputs.

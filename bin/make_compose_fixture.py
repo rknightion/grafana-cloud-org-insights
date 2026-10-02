@@ -51,12 +51,40 @@ def fetch(tier: str) -> dict:
     return json.loads(proc.stdout)
 
 
+def add_synthetic_irm() -> int:
+    """Offline, minimized schema projection only; never reads deployment scans."""
+    original = COMMITTED_FIXTURE.read_text()
+    payload = json.loads(original)
+    active = [s for s in payload["stacks"] if s.get("status") != "paused"]
+    projection = {
+        str(stack["slug"]): {"available": True, "integration_count": index % 3}
+        for index, stack in enumerate(active)
+    }
+    if "irm_integrations" in payload:
+        if payload["irm_integrations"] != projection:
+            raise ValueError("existing IRM fixture differs from the synthetic projection")
+        return 0
+    # Append only our top-level field; preserve all existing values and formatting.
+    end = original.rfind("}")
+    field = json.dumps({"irm_integrations": projection}, indent=1)[2:-2]
+    COMMITTED_FIXTURE.write_text(original[:end].rstrip() + ",\n" + field + "\n" + original[end:])
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--stacks", type=int, default=40)
-    ap.add_argument("--output", required=True,
+    ap.add_argument("--synthetic-irm", action="store_true",
+                    help="add only synthetic minimized IRM counts to the committed fixture, offline")
+    ap.add_argument("--output",
                     help="export path outside the committed synthetic fixture")
     args = ap.parse_args(argv)
+    if args.synthetic_irm:
+        if args.output:
+            ap.error("--synthetic-irm cannot be combined with --output")
+        return add_synthetic_irm()
+    if not args.output:
+        ap.error("--output is required for live exports")
     try:
         out = output_path(args.output)
     except ValueError as exc:

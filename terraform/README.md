@@ -117,7 +117,7 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 | `scan_runtime_config_digest`, `provisioner_runtime_config_digest`, `require_explicit_consumer_config` | empty, empty, `false`; consumer projections may require both validated digests |
 | `create_provisioner`, `provisioner_secret_key` | `false`, `GCINSIGHT_PROVISION_TOKEN`; independent opt-in write-capable task |
 | `provisioner_schedule_expression`, `provisioner_enabled` | daily module default, `true`; see RUNBOOK timetable and both schedule gates above |
-| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query` read families |
+| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query`/`irm-integrations` read families |
 | `provisioner_cpu`, `provisioner_memory` | `256`, `512` MiB; separate provisioner sizing |
 
 | Outputs | Use / availability |
@@ -220,11 +220,17 @@ does require a stack-realm `logs:write` token represented by the adopted access-
 
 ## Reader product policy
 
-`provisioner_product_reads` remains default-off (`[]`) and accepts `slo`, `synthetic-monitoring`
-and `synthetic-monitoring-query`. The new query token requires `synthetic-monitoring` and adds
-query access only to the stack's single uniquely discovered, valid Synthetic datasource UID plus
-unscoped probes read. Ambiguous or invalid discovery grants neither pair. Without the query token,
-collection makes no Synthetic HTTP calls and legacy role grants stay unchanged. The module mirrors this one policy into both provisioner and
+`provisioner_product_reads` remains default-off (`[]`) and accepts `slo`, `synthetic-monitoring`,
+`synthetic-monitoring-query` and `irm-integrations`. The query token requires `synthetic-monitoring`
+and adds query access only to the stack's single uniquely discovered, valid Synthetic datasource
+UID plus unscoped probes read. Ambiguous or invalid discovery grants neither pair. Without the
+query token, collection makes no Synthetic HTTP calls and legacy role grants stay unchanged.
+`irm-integrations` adds only `grafana-irm-app.integrations:read` (empty scope) and
+`plugins.app:access` (`plugins:id:grafana-irm-app`) for T2 configured integration counts, not activity.
+That credential also reaches secret-bearing configuration; the collector is restricted to GET
+`/api/plugins/grafana-irm-app/resources/alert_receive_channels/counters/` without query.
+No configuration lists, retrieve routes, schedules or test-alert calls are permitted. This opt-in
+is not a customer grant. The module mirrors this one policy into both provisioner and
 scan tasks as `GCINSIGHT_READER_PRODUCT_READS`; no separate scanner grant or family list exists.
 The scan runtime digest includes this value, so update consumer manifests and module/image pins
 together before rollout. Selecting `slo` enables count-only SLO definition collection on T2; selecting

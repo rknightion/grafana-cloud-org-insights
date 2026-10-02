@@ -48,6 +48,7 @@ from collector.sources import alert_routing as alert_routing_src
 from collector.sources import public_dashboards as public_dashboards_src
 from collector.sources import slo as slo_src
 from collector.sources import synthetic as synthetic_src
+from collector.sources import irm_integrations as irm_integrations_src
 from collector.sources import stack_catalog
 from collector.sources import assistant as assistant_src
 from collector.sources import fleet as fleet_src
@@ -587,6 +588,28 @@ def gather_synthetic_inventory(
     return data, errors
 
 
+def irm_integrations_reads_enabled() -> bool:
+    return "irm-integrations" in parse_product_reads(os.environ.get(PRODUCT_READS_ENV))
+
+
+def gather_irm_integrations(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[str]]:
+    """Default-off daily configured integration count; no activity data leaves the source."""
+    if not irm_integrations_reads_enabled():
+        return {}, []
+    errors: list[str] = []
+    try:
+        creds = credentials.load_all()
+    except credentials.StoreUnavailable:
+        return {}, ["irm_integrations: credential_store_unavailable"]
+    data = irm_integrations_src.probe_all(
+        client, stacks, creds, concurrency=cfg.concurrency,
+        on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
+    )
+    return data, errors
+
+
 def gather_signal_inventory(
     client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], list[str]]:
@@ -997,6 +1020,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     errors += slo_inventory_errors
     synthetic_inventory, synthetic_inventory_errors = gather_synthetic_inventory(client, cfg, selected)
     errors += synthetic_inventory_errors
+    irm_integrations, irm_integrations_errors = gather_irm_integrations(client, cfg, selected)
+    errors += irm_integrations_errors
     signal_inventory, signal_inventory_errors = gather_signal_inventory(client, cfg, selected)
     errors += signal_inventory_errors
     capability_adoption, capability_adoption_errors = gather_capability_adoption(
@@ -1025,6 +1050,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "alert_routing": alert_routing,
         "slo_inventory": slo_inventory,
         "synthetic_inventory": synthetic_inventory,
+        "irm_integrations": irm_integrations,
         "signal_inventory": signal_inventory,
         "capability_adoption": capability_adoption,
         "loki_config": loki_config,
@@ -1072,6 +1098,11 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "alert_routing": source_report(
             expected, alert_routing, available=lambda r: bool(r.get("available")),
             errors=alert_routing_errors,
+        ),
+        "irm_integrations": source_report(
+            expected if irm_integrations_reads_enabled() else 0,
+            irm_integrations, available=lambda r: bool(r.get("available")),
+            errors=irm_integrations_errors,
         ),
         "slo_inventory": source_report(
             expected if slo_reads_enabled() else 0,

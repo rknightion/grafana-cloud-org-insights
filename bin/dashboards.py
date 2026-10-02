@@ -1202,6 +1202,17 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
 
 
 def d_usage(ds: str):
+    # An optional, never-published object must not prevent the Usage build.
+    # A readable last-good view remains eligible, regardless of its timestamp.
+    irm_panel = None
+    try:
+        irm_panel = build.table_panel(
+            "Configured IRM integrations", "irm_integrations", ds,
+            description="Point-in-time configured integrations, including zero-activity entries. "
+                        "Not usage, activity or alert volume. Default-off reader selection; "
+                        "unreadable or unmeasured stacks are absent, never zero.")
+    except FileNotFoundError:
+        pass
     el = {
         "n_stick": build.stat_panel(
             "Stickiness (daily/active)", "gcinsight_usage_stickiness_ratio",
@@ -1444,9 +1455,14 @@ def d_usage(ds: str):
                         "those logs, or stopped shipping them - both are wins, and the per-stack chart "
                         "above says which."),
     }
+    if irm_panel is not None:
+        el["irm_integrations"] = irm_panel
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
         build.tab("Adoption", ["t_signals", "plugins"]),
+        *([build.rows_tab("Configured IRM integrations", [
+            build.row("Configured IRM integrations", ["irm_integrations"], max_columns=1),
+        ])] if irm_panel is not None else []),
         build.tab("Engagement", ["b_recency", "dormant", "recency", "usage"]),
         build.tab("Protocol adoption", ["n_otlp", "n_otlp_floor", "t_otlp"]),
         build.tab("Unread telemetry", ["n_logs_unread", "n_logs_unread_bytes",

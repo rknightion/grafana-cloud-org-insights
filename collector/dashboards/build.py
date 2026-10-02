@@ -166,8 +166,6 @@ def read_view(name: str) -> dict[str, Any]:
     """Fetch a local or published view so column specs are derived, never guessed."""
     if VIEWS_DIR:
         path = pathlib.Path(VIEWS_DIR) / f"{name}.json"
-        if not path.exists():
-            raise FileNotFoundError(f"{path}: not in GCINSIGHT_VIEWS_DIR")
         return json.loads(path.read_text())
     if not BUCKET:
         raise ViewSourceNotConfigured(
@@ -179,7 +177,13 @@ def read_view(name: str) -> dict[str, Any]:
         capture_output=True, text=True,
     )
     if proc.returncode != 0:
-        raise FileNotFoundError(f"views/{name}.json: {proc.stderr.strip()}")
+        error = proc.stderr.strip()
+        # Only an object-not-found response is optional absence. Access failures,
+        # missing buckets and transport errors must still abort assembly explicitly.
+        if ("An error occurred (404) when calling the HeadObject operation:" in error
+                or "An error occurred (NoSuchKey) when calling the GetObject operation:" in error):
+            raise FileNotFoundError(f"views/{name}.json: {error}")
+        raise RuntimeError(f"views/{name}.json: {error}")
     return json.loads(proc.stdout)
 
 
@@ -917,7 +921,7 @@ DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     # Both ages belong on the page: showing only the 6-hourly data-plane age makes the daily named
     # recommendation queue look materially fresher than it is.
     "cost": ("adaptive_logs", "dataplane"),
-    "usage": ("stack_detail",),
+    "usage": ("irm_integrations", "stack_detail"),
     "maturity": ("dataplane", "stack_detail"),
     "risk": ("access_policies", "alert_routing", "dataplane", "fleet", "label_risk", "loki_config",
              "org_members", "public_dashboards", "service_accounts", "stack_detail"),
@@ -1037,6 +1041,7 @@ def banner_elements(dashboard: str = "estate") -> dict[str, Any]:
 
 
 INPUT_LABELS = {
+    "irm_integrations": "Configured IRM integrations",
     "label_risk": "Bounded label privacy sample",
     "dataplane": "Data plane",
     "stack_detail": "Per-stack detail",
@@ -1058,6 +1063,8 @@ INPUT_LABELS = {
 }
 
 INPUT_DESCRIPTIONS = {
+    "irm_integrations": "Age of the default-off configured IRM integration count. "
+                        "Not usage, activity or alert volume; unreadable stacks remain absent.",
     "label_risk": "Age of the daily bounded four-signal label privacy sample. This measures when "
                   "the input was gathered, not exhaustive backend coverage. Partial and unavailable "
                   "signal populations and sampling limits are shown in the S3 risk coverage table.",

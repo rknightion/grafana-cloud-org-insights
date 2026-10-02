@@ -597,15 +597,15 @@ variable "provision_opt_out" {
 }
 
 variable "provisioner_product_reads" {
-  description = "Optional, default-off read-only product families for the per-stack reader. SLO and Synthetic Monitoring grants apply only to deployments that explicitly select them."
+  description = "Optional, default-off read-only product families for the per-stack reader. SLO, Synthetic Monitoring and configured IRM integration grants apply only to deployments that explicitly select them."
   type        = list(string)
   default     = []
 
   validation {
     condition = length(distinct(var.provisioner_product_reads)) == length(var.provisioner_product_reads) && alltrue([
-      for family in var.provisioner_product_reads : contains(["slo", "synthetic-monitoring", "synthetic-monitoring-query"], family)
+      for family in var.provisioner_product_reads : contains(["slo", "synthetic-monitoring", "synthetic-monitoring-query", "irm-integrations"], family)
     ]) && (!contains(var.provisioner_product_reads, "synthetic-monitoring-query") || contains(var.provisioner_product_reads, "synthetic-monitoring"))
-    error_message = "provisioner_product_reads accepts unique slo, synthetic-monitoring and synthetic-monitoring-query tokens; synthetic-monitoring-query requires synthetic-monitoring."
+    error_message = "provisioner_product_reads accepts unique slo, synthetic-monitoring, synthetic-monitoring-query and irm-integrations tokens; synthetic-monitoring-query requires synthetic-monitoring."
   }
 }
 
