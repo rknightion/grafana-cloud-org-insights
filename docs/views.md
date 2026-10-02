@@ -48,7 +48,7 @@ Positive segment marginals do not establish additivity; no combined segment savi
 | `usage_datasource_inventory` | Configured datasource type/count estate, including adjacent vendor systems; separate from types queried. |
 | `usage_plugin_adoption` | Provisioned plugin prevalence, not app visits. |
 | `usage_user_recency` | Measured user last-seen recency and role. |
-| `usage_dormant_stacks` | Stacks matching the measured dormancy condition; unavailable users are not assumed dormant. |
+| `usage_dormant_stacks` | Inventory stacks with `currentActiveUsers > 0` and `dailyUserCnt == 0` after missing/null counts are coerced to zero. A missing/null daily count can therefore produce a dormancy finding, not confirmed inactivity; missing active counts exclude stacks. T2 user-reader availability does not gate this predicate. |
 | `maturity`, `maturity_summary` | Score, tier, partial/unscored reasons and measured-population summary. |
 | `maturity_dimensions`, `maturity_rubric` | Weighted contributions and human-readable scoring rules; nonapplicable/unknown components are not zeros. |
 | `maturity_owners` | Admin owner candidates and emails; only case-insensitive `@grafana.com` identities are excluded, not vendors/partners. |
