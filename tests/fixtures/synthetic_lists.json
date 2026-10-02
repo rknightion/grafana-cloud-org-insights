@@ -1,0 +1,10 @@
+{
+  "datasources": [{"type": "synthetic-monitoring-datasource", "uid": "synthetic-sm"}],
+  "checks": [
+    {"enabled": true, "settings": {"http": {}}},
+    {"enabled": true, "settings": {"http": {}}},
+    {"enabled": false, "settings": {"http": {}}},
+    {"enabled": true, "settings": {"ping": {}}}
+  ],
+  "probes": [{"public": true}, {"public": true}, {"public": false}]
+}

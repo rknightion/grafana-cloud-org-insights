@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "generated_at": "2026-10-02T14:59:44.699875+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_traces": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "slo_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "synthetic_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_risk": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      "Stack": "obs-hub",
+      "Checks": 4,
+      "Enabled checks": 3,
+      "http checks": 3,
+      "ping checks": 1,
+      "dns checks": 0,
+      "tcp checks": 0,
+      "traceroute checks": 0,
+      "scripted checks": 0,
+      "multihttp checks": 0,
+      "grpc checks": 0,
+      "browser checks": 0,
+      "unknown checks": 0,
+      "Public probes": 2,
+      "Private probes": 1
+    }
+  ]
+}

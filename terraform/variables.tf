@@ -603,9 +603,9 @@ variable "provisioner_product_reads" {
 
   validation {
     condition = length(distinct(var.provisioner_product_reads)) == length(var.provisioner_product_reads) && alltrue([
-      for family in var.provisioner_product_reads : contains(["slo", "synthetic-monitoring"], family)
-    ])
-    error_message = "provisioner_product_reads may contain each of slo and synthetic-monitoring at most once."
+      for family in var.provisioner_product_reads : contains(["slo", "synthetic-monitoring", "synthetic-monitoring-query"], family)
+    ]) && (!contains(var.provisioner_product_reads, "synthetic-monitoring-query") || contains(var.provisioner_product_reads, "synthetic-monitoring"))
+    error_message = "provisioner_product_reads accepts unique slo, synthetic-monitoring and synthetic-monitoring-query tokens; synthetic-monitoring-query requires synthetic-monitoring."
   }
 }
 

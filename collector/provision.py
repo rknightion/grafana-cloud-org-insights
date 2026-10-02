@@ -43,6 +43,7 @@ Each was probed live on 2026-08-20 (PLAN 17D-review), and each one drives a spec
 from __future__ import annotations
 
 import datetime as dt
+import re
 from dataclasses import dataclass, field
 from collections.abc import Mapping as _MappingABC
 from typing import Any, Iterable, Mapping, Sequence
@@ -186,6 +187,8 @@ PRODUCT_READ_FAMILIES: dict[str, tuple[tuple[str, str], ...]] = {
         ("grafana-slo-app.slo:read", ""),
         ("plugins.app:access", "plugins:id:grafana-slo-app"),
     ),
+    # Dynamic exact-uid grants are built below, never a static wildcard family.
+    "synthetic-monitoring-query": (),
     "synthetic-monitoring": (
         ("grafana-synthetic-monitoring-app:read", ""),
         ("grafana-synthetic-monitoring-app.checks:read", ""),
@@ -206,7 +209,7 @@ def parse_product_reads(raw: str | None) -> frozenset[str]:
         raise ValueError(
             f"{PRODUCT_READS_ENV} contains unknown product read token(s): {', '.join(sorted(unknown))}"
         )
-    return frozenset(tokens)
+    return _selected_product_reads(tokens)
 
 
 def _selected_product_reads(product_reads: Iterable[str]) -> frozenset[str]:
@@ -216,7 +219,49 @@ def _selected_product_reads(product_reads: Iterable[str]) -> frozenset[str]:
         raise ValueError(
             f"{PRODUCT_READS_ENV} contains unknown product read token(s): {', '.join(sorted(unknown))}"
         )
+    if "synthetic-monitoring-query" in selected and "synthetic-monitoring" not in selected:
+        raise ValueError(f"{PRODUCT_READS_ENV}: synthetic-monitoring-query requires synthetic-monitoring")
     return selected
+
+
+SM_PLUGIN_TYPE = "synthetic-monitoring-datasource"
+SM_PROBES_PAIR = ("grafana-synthetic-monitoring-app.probes:read", "")
+
+
+def synthetic_datasource_uid(body: Any) -> tuple[str | None, str]:
+    """Select by plugin type only, refusing ambiguity and unsafe scope syntax."""
+    if not isinstance(body, list) or not all(isinstance(ds, Mapping) for ds in body):
+        return None, "unreadable"
+    matches = [ds for ds in body if ds.get("type") == SM_PLUGIN_TYPE]
+    if len(matches) != 1:
+        return None, "ambiguous" if matches else "no_datasource"
+    uid = matches[0].get("uid")
+    if not isinstance(uid, str) or re.fullmatch(r"[A-Za-z0-9_-]{1,40}", uid) is None:
+        return None, "invalid_uid"
+    # A plugin cannot repurpose an existing approved telemetry query into an SM grant.
+    if uid in {USAGE_INSIGHTS_DS_UID, USAGE_DS_UID}:
+        return None, "invalid_uid"
+    return uid, "available"
+
+
+def synthetic_pairs(uid: str | None) -> frozenset[tuple[str, str]]:
+    if uid is None:
+        return frozenset()
+    valid, _ = synthetic_datasource_uid([{"type": SM_PLUGIN_TYPE, "uid": uid}])
+    if valid is None:
+        return frozenset()
+    return frozenset({("datasources:query", f"datasources:uid:{valid}"), SM_PROBES_PAIR})
+
+
+def needs_synthetic_discovery(current, *, write_stack: bool, product_reads: Iterable[str] = ()) -> bool:
+    selected = _selected_product_reads(product_reads)
+    if "synthetic-monitoring-query" in selected:
+        return True
+    baseline = {("datasources:query", f"datasources:uid:{USAGE_INSIGHTS_DS_UID}")}
+    if write_stack:
+        baseline.add(WRITE_STACK_PAIR)
+    return any(action == "datasources:query" and (action, scope) not in baseline
+               for action, scope in held_pairs(current))
 
 
 def product_read_pairs(product_reads: Iterable[str]) -> frozenset[tuple[str, str]]:
@@ -230,7 +275,7 @@ def product_read_pairs(product_reads: Iterable[str]) -> frozenset[tuple[str, str
 
 
 def desired_permissions(
-    *, write_stack: bool, product_reads: Iterable[str] = (),
+    *, write_stack: bool, product_reads: Iterable[str] = (), synthetic_uid: str | None = None,
 ) -> tuple[dict[str, str], ...]:
     """Build the run's desired role while keeping the manifest's fixed baseline static."""
     selected = _selected_product_reads(product_reads)
@@ -243,11 +288,15 @@ def desired_permissions(
         if family in selected
         for action, scope in pairs
     )
+    if "synthetic-monitoring-query" in selected:
+        permissions.extend({"action": action, **({"scope": scope} if scope else {})}
+                           for action, scope in sorted(synthetic_pairs(synthetic_uid)))
     return tuple(permissions)
 
 
 def removable_pairs(
-    *, write_stack: bool, product_reads: Iterable[str] = (),
+    *, write_stack: bool, product_reads: Iterable[str] = (), synthetic_uid: str | None = None,
+    current: Any = (),
 ) -> frozenset[tuple[str, str]]:
     """Pairs previously granted by this provisioner but not selected for the current run."""
     selected = _selected_product_reads(product_reads)
@@ -256,6 +305,11 @@ def removable_pairs(
     removable = RETIRED_PAIRS | (all_product_pairs - configured)
     if not write_stack:
         removable |= frozenset({WRITE_STACK_PAIR})
+    if "synthetic-monitoring-query" not in selected:
+        sm = synthetic_pairs(synthetic_uid)
+        query = sm - {SM_PROBES_PAIR}
+        if query and query <= held_pairs(current):
+            removable |= sm & held_pairs(current)
     return removable
 
 

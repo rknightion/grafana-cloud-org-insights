@@ -715,7 +715,7 @@ class EndOfRunReverifyTest(unittest.TestCase):
              mock.patch.object(cli, "ssm_load_all", return_value=stored), \
              mock.patch.object(cli, "list_sas", return_value=(200, [])), \
              mock.patch.object(cli, "sweep_leftover_admin", return_value=0), \
-             mock.patch.object(cli, "probe", return_value=SimpleNamespace(sa_exists=True, secret_exists=True, token_status=200, basic_role=None)), \
+             mock.patch.object(cli, "probe", return_value=pr.Presence(sa_exists=True, secret_exists=True, token_status=200, basic_role=None)), \
              mock.patch.object(cli.pr, "needs_repair", return_value=True), \
              mock.patch.object(cli.pr, "plan_action", return_value="patch_role"), \
              mock.patch.object(cli, "repair", side_effect=lambda _g, _l, slug, *a, **k: cli.pr.Outcome(
@@ -762,6 +762,142 @@ class EndOfRunReverifyTest(unittest.TestCase):
         code, out, _ = self._main({s: (False, self.PROPAGATING) for s in slugs}, slugs=slugs)
         self.assertEqual(code, 1)
         self.assertIn("and 3 more", out)
+
+
+def test_synthetic_deselection_discovers_once_across_real_main_repair_and_verify():
+    """Repeated phases must reuse this run's exact SM witness, never repeat absent-token lookup."""
+    selected = {"slo", "synthetic-monitoring"}
+    permissions = list(pr.desired_permissions(write_stack=True, product_reads=selected))
+    permissions += [{"action": a, **({"scope": s} if s else {})}
+                    for a, s in pr.synthetic_pairs("synthetic-sm")]
+    paths, writes = [], []
+    reader = {"id": 20001, "name": pr.READER_SA_NAME, "role": "None"}
+    class Gcom:
+        def __init__(self, *args, **kwargs):
+            self.reads = self.writes = 0
+            self.dry_run = False
+        def get(self, path):
+            self.reads += 1
+            if "serviceaccounts" in path:
+                return 200, {"serviceAccounts": [reader]}
+            return 200, {"items": [{"slug": "synthetic", "url": "https://inventory.example.test",
+                                    "status": "active"}]}
+        def post(self, path, body):
+            self.writes += 1
+            writes.append(path)
+            if path.endswith("/tokens"):
+                assert "/20001/" not in path, "working reader credential must not be minted"
+                return 200, {"key": "admin"}
+            return 201, {"id": 20002}
+        def delete(self, path):
+            self.writes += 1
+            writes.append(path)
+            assert path.endswith("/20002")
+            return 200, {}
+    class Stack:
+        NOT_INSPECTED = 0
+        def __init__(self, *args, **kwargs):
+            pass
+        def get(self, path):
+            paths.append(path)
+            if path == "/api/datasources":
+                return 200, [{"type": pr.SM_PLUGIN_TYPE, "uid": "synthetic-sm"}]
+            if path == "/api/access-control/user/permissions":
+                have = {}
+                for permission in permissions:
+                    have.setdefault(permission["action"], []).append(permission.get("scope", ""))
+                return 200, have
+            if path.endswith("?includeHidden=true"):
+                return 200, [{"name": pr.ROLE_NAME, "uid": "synthetic-role", "version": 1}]
+            return 200, {"permissions": permissions}
+        def put(self, path, body):
+            permissions[:] = body["permissions"]
+            return 200, {}
+        def post(self, path, body):
+            assert path.endswith("/roles")
+            return 200, {}
+    with mock.patch.dict(cli.os.environ, {"GCINSIGHT_PROVISION_TOKEN": "fake", "GCINSIGHT_ORG_ID": "900001",
+                                          "GCINSIGHT_WRITE_STACK": "synthetic", pr.PRODUCT_READS_ENV: "slo,synthetic-monitoring"}), \
+         mock.patch.object(cli, "Gcom", Gcom), mock.patch.object(cli, "Stack", Stack), \
+         mock.patch.object(cli, "ssm_load_all", return_value={"synthetic": {"token": "reader"}}), \
+         mock.patch.object(cli, "ssm_put") as store:
+        assert cli.main(["--no-prune"]) == 0
+    store.assert_not_called()
+    assert paths.count("/api/datasources") == 1, paths
+    assert pr.permission_pairs(permissions) == pr.permission_pairs(pr.desired_permissions(
+        write_stack=True, product_reads=selected))
+
+
+def test_synthetic_bootstrap_without_reader_is_not_inspected():
+    """Bootstrap must not send unauthenticated SM discovery before Admin repair."""
+    st = cli.Stack("https://inventory.example.test", "dry-run", dry_run=True)
+    with mock.patch.object(cli.urllib.request, "urlopen") as transport:
+        permissions, removable, state = cli.reader_policy(st, {}, product_reads={
+            "synthetic-monitoring", "synthetic-monitoring-query"})
+    transport.assert_not_called()
+    assert state == "not_inspected"
+    assert not (pr.synthetic_pairs("synthetic-sm") & pr.permission_pairs(permissions))
+
+
+def test_legacy_synthetic_customer_safety():
+    """Original-source golden catches permission drift and unnecessary discovery on either stack role."""
+    golden = json.loads((Path(__file__).parent / "fixtures/synthetic_legacy_permissions.json").read_text())
+    for case in golden["cases"]:
+        held = {}
+        for p in case["desired"]:
+            held.setdefault(p["action"], []).append(p.get("scope", ""))
+        st = mock.Mock()
+        st.get.return_value = (200, [{"type": pr.SM_PLUGIN_TYPE, "uid": "synthetic-sm"}])
+        permissions, removable, state = cli.reader_policy(
+            st, held, write_stack=case["write_stack"], product_reads=case["tokens"])
+        assert list(permissions) == case["desired"]
+        assert sorted(removable) == [tuple(pair) for pair in case["removable"]]
+        wanted = pr.permission_pairs(permissions)
+        assert sorted(pr.dangerous_extra_pairs(held, wanted, removable)) == case["dangerous"]
+        st.get.assert_not_called()
+        assert state == "not_selected"
+        sas = [{"name": pr.READER_SA_NAME, "role": "None"}]
+        with mock.patch.object(cli, "Stack") as stack:
+            stack.return_value.get.return_value = (200, held)
+            presence = cli.probe("synthetic", "https://inventory.example.test", sas,
+                                 {"synthetic": {"token": "fake"}}, desired=wanted, removable=removable)
+            stack.return_value.get.assert_called_once_with("/api/access-control/user/permissions")
+        assert not pr.needs_repair(presence, wanted, removable=removable)
+
+
+def test_synthetic_policy_exact_discovery_deselection_and_wrong_stack_usage():
+    """No arbitrary query becomes approved, and only held unique SM pairs can be retired."""
+    query = ("datasources:query", "datasources:uid:synthetic-sm")
+    unrelated = ("datasources:query", "datasources:uid:customer-database")
+    selected = {"synthetic-monitoring", "synthetic-monitoring-query"}
+    for body, state in (([], "no_datasource"),
+                        ([{"type": pr.SM_PLUGIN_TYPE, "uid": "synthetic-sm"}] * 2, "ambiguous"),
+                        ([{"type": pr.SM_PLUGIN_TYPE, "uid": "bad:*"}], "invalid_uid"),
+                        ([{"type": pr.SM_PLUGIN_TYPE, "uid": "synthetic-sm"}], "available")):
+        for tokens in ((), selected):
+            st = mock.Mock()
+            st.get.return_value = (200, body)
+            have = {"datasources:query": [query[1], unrelated[1]], pr.SM_PROBES_PAIR[0]: [""]}
+            permissions, removable, observed = cli.reader_policy(st, have, product_reads=tokens)
+            st.get.assert_called_once_with("/api/datasources")
+            assert observed == state
+            wanted = pr.permission_pairs(permissions)
+            assert unrelated in pr.dangerous_extra_pairs(have, wanted, removable)
+            assert (query in wanted) == (bool(tokens) and state == "available")
+            assert (query in removable) == (not tokens and state == "available")
+            assert (pr.SM_PROBES_PAIR in removable) == (not tokens and state == "available")
+            if state != "available":
+                assert query in pr.dangerous_extra_pairs(have, wanted, removable)
+                assert not (pr.synthetic_pairs("synthetic-sm") & removable)
+    st = mock.Mock()
+    st.get.return_value = (200, [{"type": pr.SM_PLUGIN_TYPE, "uid": "synthetic-sm"}])
+    wrong = {"datasources:query": [pr.WRITE_STACK_PAIR[1]]}
+    permissions, removable, _ = cli.reader_policy(st, wrong, write_stack=False)
+    st.get.assert_called_once_with("/api/datasources")
+    assert pr.WRITE_STACK_PAIR not in pr.permission_pairs(permissions)
+    assert pr.WRITE_STACK_PAIR in removable  # legacy telemetry removal rule unchanged
+    assert query not in removable
+    assert pr.SM_PROBES_PAIR not in removable
 
 
 if __name__ == "__main__":

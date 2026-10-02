@@ -39,7 +39,8 @@ def cli(*args, env=None):
                           text=True, capture_output=True, env=env, timeout=30)
 
 
-@pytest.mark.parametrize("policy", ["", "slo", "slo,synthetic-monitoring"])
+@pytest.mark.parametrize("policy", ["", "slo", "slo,synthetic-monitoring",
+                                     "slo,synthetic-monitoring,synthetic-monitoring-query"])
 def test_legacy_cli_regenerate_upgrade_and_real_scan_eligibility(policy):
     with tempfile.TemporaryDirectory() as name:
         temp = pathlib.Path(name)
@@ -106,6 +107,14 @@ def test_legacy_cli_regenerate_upgrade_and_real_scan_eligibility(policy):
             assert not errors
             assert bool(data) == bool(policy)
             assert credentials.called == bool(policy)
+            # The same real module-rendered policy must gate the new source, not the old SM token.
+            from tests.test_synthetic import fixture_client
+            client, calls = fixture_client()
+            data, errors = scan.gather_synthetic_inventory(client, SimpleNamespace(concurrency=1), [STACK])
+            assert not errors
+            selected = "synthetic-monitoring-query" in policy.split(",")
+            assert bool(data) == selected
+            assert len(calls) == (3 if selected else 0)
 
 
 def test_cli_rejects_mismatch_without_rewriting_manifest():

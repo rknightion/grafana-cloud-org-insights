@@ -44,7 +44,7 @@ Secret values are populated outside Terraform; the module manages the container 
 | `GCINSIGHT_OPT_OUT` | empty; comma-separated stack slugs the owner asks not to provision |
 | `GCINSIGHT_COVERAGE_SCORE_WEIGHTS` | equal weights; partial JSON overrides for `metrics`, `logs`, `traces`, `profiles`, `dashboard`, `alert`, `slo`; finite non-negative numbers with positive total |
 | `GCINSIGHT_DASHBOARD_DETAIL_ENABLED` | false; `true`/`1` or `false`/`0`; opt-in dashboard JSON inspection for service attribution, with no retained query text |
-| `GCINSIGHT_READER_PRODUCT_READS` | empty; comma-separated `slo` and/or `synthetic-monitoring`; scan and provisioner must agree; selected reader grants do not prove route availability |
+| `GCINSIGHT_READER_PRODUCT_READS` | empty; comma-separated `slo`, `synthetic-monitoring` and/or `synthetic-monitoring-query`; query token requires `synthetic-monitoring` and explicitly opts in to exact discovered SM datasource query plus probes read and count-only T2 collection; scan and provisioner must agree; legacy SM token alone makes no SM calls; missing or unreadable coverage is absent |
 
 Maturity ownership attribution excludes only identities containing `@grafana.com` (case-insensitive)
 in an Admin's login or email. Vendor and partner logins otherwise remain owner candidates; there is no

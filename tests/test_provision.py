@@ -43,6 +43,25 @@ class ProductReadScopeTest(unittest.TestCase):
             frozenset({"slo", "synthetic-monitoring"}),
         )
 
+    def test_synthetic_query_requires_existing_token_and_exact_valid_uid(self):
+        with self.assertRaisesRegex(ValueError, "requires synthetic-monitoring"):
+            pr.parse_product_reads("synthetic-monitoring-query")
+        selected = pr.parse_product_reads("synthetic-monitoring,synthetic-monitoring-query")
+        base = pr.permission_pairs(pr.desired_permissions(
+            write_stack=False, product_reads={"synthetic-monitoring"}))
+        for uid in (None, "*", "bad:scope", "a" * 41, "grafanacloud-usage", "grafanacloud-usage-insights"):
+            self.assertEqual(pr.permission_pairs(pr.desired_permissions(
+                write_stack=False, product_reads=selected, synthetic_uid=uid)), base)
+        wanted = pr.permission_pairs(pr.desired_permissions(
+            write_stack=False, product_reads=selected, synthetic_uid="synthetic-sm"))
+        self.assertEqual(wanted - base, pr.synthetic_pairs("synthetic-sm"))
+        self.assertEqual(pr.product_read_pairs({"synthetic-monitoring"}), self.SYNTHETIC_MONITORING_PAIRS)
+        current = {"datasources:query": ["datasources:*", "datasources:uid:other", "datasources:uid:synthetic-sm"],
+                   "grafana-synthetic-monitoring-app:write": [""]}
+        self.assertEqual(pr.dangerous_extra_pairs(current, wanted), frozenset({
+            ("datasources:query", "datasources:*"), ("datasources:query", "datasources:uid:other"),
+            ("grafana-synthetic-monitoring-app:write", "")}))
+
     def test_unknown_product_read_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "GCINSIGHT_READER_PRODUCT_READS.*k6"):
             pr.parse_product_reads("slo,k6")

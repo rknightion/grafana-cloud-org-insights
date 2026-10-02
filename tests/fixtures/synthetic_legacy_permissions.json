@@ -1,0 +1,1314 @@
+{
+  "source_sha": "8e7423045ee0efa23619ea8e8b5a4af3d1a6f338",
+  "cases": [
+    {
+      "write_stack": false,
+      "tokens": [],
+      "desired": [
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-assistant-app"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-dbcfg-app"
+        },
+        {
+          "action": "grafana-assistant-app.usage:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.all:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.system:read"
+        },
+        {
+          "action": "grafana-assistant-app.mcps.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.skills.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.automations.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.rules.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.watcher-agents:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivelogs-app"
+        },
+        {
+          "action": "grafana-adaptivelogs-app.patterns:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptive-metrics-app"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.exemptions:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivetraces-app"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.policies:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.recommendations:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.config:read"
+        },
+        {
+          "action": "serviceaccounts:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "serviceaccounts.permissions:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "datasources:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "datasources.caching:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "folders:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "dashboards:read",
+          "scope": "dashboards:*"
+        },
+        {
+          "action": "snapshots:read"
+        },
+        {
+          "action": "teams:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.permissions:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.roles:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "users.roles:read",
+          "scope": "users:*"
+        },
+        {
+          "action": "roles:read",
+          "scope": "roles:*"
+        },
+        {
+          "action": "alert.rules:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "alert.notifications.receivers:read",
+          "scope": "receivers:*"
+        },
+        {
+          "action": "datasources:query",
+          "scope": "datasources:uid:grafanacloud-usage-insights"
+        }
+      ],
+      "removable": [
+        [
+          "datasources:query",
+          "datasources:uid:grafanacloud-usage"
+        ],
+        [
+          "grafana-slo-app.orgpreferences:read",
+          ""
+        ],
+        [
+          "grafana-slo-app.slo:read",
+          ""
+        ],
+        [
+          "grafana-synthetic-monitoring-app.checks:read",
+          ""
+        ],
+        [
+          "grafana-synthetic-monitoring-app:read",
+          ""
+        ],
+        [
+          "plugins.app:access",
+          "plugins:id:grafana-slo-app"
+        ],
+        [
+          "plugins.app:access",
+          "plugins:id:grafana-synthetic-monitoring-app"
+        ]
+      ],
+      "dangerous": []
+    },
+    {
+      "write_stack": false,
+      "tokens": [
+        "synthetic-monitoring"
+      ],
+      "desired": [
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-assistant-app"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-dbcfg-app"
+        },
+        {
+          "action": "grafana-assistant-app.usage:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.all:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.system:read"
+        },
+        {
+          "action": "grafana-assistant-app.mcps.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.skills.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.automations.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.rules.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.watcher-agents:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivelogs-app"
+        },
+        {
+          "action": "grafana-adaptivelogs-app.patterns:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptive-metrics-app"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.exemptions:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivetraces-app"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.policies:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.recommendations:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.config:read"
+        },
+        {
+          "action": "serviceaccounts:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "serviceaccounts.permissions:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "datasources:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "datasources.caching:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "folders:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "dashboards:read",
+          "scope": "dashboards:*"
+        },
+        {
+          "action": "snapshots:read"
+        },
+        {
+          "action": "teams:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.permissions:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.roles:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "users.roles:read",
+          "scope": "users:*"
+        },
+        {
+          "action": "roles:read",
+          "scope": "roles:*"
+        },
+        {
+          "action": "alert.rules:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "alert.notifications.receivers:read",
+          "scope": "receivers:*"
+        },
+        {
+          "action": "datasources:query",
+          "scope": "datasources:uid:grafanacloud-usage-insights"
+        },
+        {
+          "action": "grafana-synthetic-monitoring-app:read"
+        },
+        {
+          "action": "grafana-synthetic-monitoring-app.checks:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-synthetic-monitoring-app"
+        }
+      ],
+      "removable": [
+        [
+          "datasources:query",
+          "datasources:uid:grafanacloud-usage"
+        ],
+        [
+          "grafana-slo-app.orgpreferences:read",
+          ""
+        ],
+        [
+          "grafana-slo-app.slo:read",
+          ""
+        ],
+        [
+          "plugins.app:access",
+          "plugins:id:grafana-slo-app"
+        ]
+      ],
+      "dangerous": []
+    },
+    {
+      "write_stack": false,
+      "tokens": [
+        "slo"
+      ],
+      "desired": [
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-assistant-app"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-dbcfg-app"
+        },
+        {
+          "action": "grafana-assistant-app.usage:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.all:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.system:read"
+        },
+        {
+          "action": "grafana-assistant-app.mcps.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.skills.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.automations.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.rules.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.watcher-agents:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivelogs-app"
+        },
+        {
+          "action": "grafana-adaptivelogs-app.patterns:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptive-metrics-app"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.exemptions:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivetraces-app"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.policies:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.recommendations:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.config:read"
+        },
+        {
+          "action": "serviceaccounts:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "serviceaccounts.permissions:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "datasources:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "datasources.caching:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "folders:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "dashboards:read",
+          "scope": "dashboards:*"
+        },
+        {
+          "action": "snapshots:read"
+        },
+        {
+          "action": "teams:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.permissions:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.roles:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "users.roles:read",
+          "scope": "users:*"
+        },
+        {
+          "action": "roles:read",
+          "scope": "roles:*"
+        },
+        {
+          "action": "alert.rules:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "alert.notifications.receivers:read",
+          "scope": "receivers:*"
+        },
+        {
+          "action": "datasources:query",
+          "scope": "datasources:uid:grafanacloud-usage-insights"
+        },
+        {
+          "action": "grafana-slo-app.orgpreferences:read"
+        },
+        {
+          "action": "grafana-slo-app.slo:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-slo-app"
+        }
+      ],
+      "removable": [
+        [
+          "datasources:query",
+          "datasources:uid:grafanacloud-usage"
+        ],
+        [
+          "grafana-synthetic-monitoring-app.checks:read",
+          ""
+        ],
+        [
+          "grafana-synthetic-monitoring-app:read",
+          ""
+        ],
+        [
+          "plugins.app:access",
+          "plugins:id:grafana-synthetic-monitoring-app"
+        ]
+      ],
+      "dangerous": []
+    },
+    {
+      "write_stack": false,
+      "tokens": [
+        "slo",
+        "synthetic-monitoring"
+      ],
+      "desired": [
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-assistant-app"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-dbcfg-app"
+        },
+        {
+          "action": "grafana-assistant-app.usage:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.all:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.system:read"
+        },
+        {
+          "action": "grafana-assistant-app.mcps.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.skills.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.automations.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.rules.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.watcher-agents:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivelogs-app"
+        },
+        {
+          "action": "grafana-adaptivelogs-app.patterns:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptive-metrics-app"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.exemptions:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivetraces-app"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.policies:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.recommendations:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.config:read"
+        },
+        {
+          "action": "serviceaccounts:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "serviceaccounts.permissions:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "datasources:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "datasources.caching:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "folders:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "dashboards:read",
+          "scope": "dashboards:*"
+        },
+        {
+          "action": "snapshots:read"
+        },
+        {
+          "action": "teams:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.permissions:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.roles:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "users.roles:read",
+          "scope": "users:*"
+        },
+        {
+          "action": "roles:read",
+          "scope": "roles:*"
+        },
+        {
+          "action": "alert.rules:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "alert.notifications.receivers:read",
+          "scope": "receivers:*"
+        },
+        {
+          "action": "datasources:query",
+          "scope": "datasources:uid:grafanacloud-usage-insights"
+        },
+        {
+          "action": "grafana-slo-app.orgpreferences:read"
+        },
+        {
+          "action": "grafana-slo-app.slo:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-slo-app"
+        },
+        {
+          "action": "grafana-synthetic-monitoring-app:read"
+        },
+        {
+          "action": "grafana-synthetic-monitoring-app.checks:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-synthetic-monitoring-app"
+        }
+      ],
+      "removable": [
+        [
+          "datasources:query",
+          "datasources:uid:grafanacloud-usage"
+        ]
+      ],
+      "dangerous": []
+    },
+    {
+      "write_stack": true,
+      "tokens": [],
+      "desired": [
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-assistant-app"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-dbcfg-app"
+        },
+        {
+          "action": "grafana-assistant-app.usage:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.all:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.system:read"
+        },
+        {
+          "action": "grafana-assistant-app.mcps.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.skills.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.automations.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.rules.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.watcher-agents:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivelogs-app"
+        },
+        {
+          "action": "grafana-adaptivelogs-app.patterns:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptive-metrics-app"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.exemptions:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivetraces-app"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.policies:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.recommendations:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.config:read"
+        },
+        {
+          "action": "serviceaccounts:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "serviceaccounts.permissions:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "datasources:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "datasources.caching:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "folders:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "dashboards:read",
+          "scope": "dashboards:*"
+        },
+        {
+          "action": "snapshots:read"
+        },
+        {
+          "action": "teams:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.permissions:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.roles:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "users.roles:read",
+          "scope": "users:*"
+        },
+        {
+          "action": "roles:read",
+          "scope": "roles:*"
+        },
+        {
+          "action": "alert.rules:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "alert.notifications.receivers:read",
+          "scope": "receivers:*"
+        },
+        {
+          "action": "datasources:query",
+          "scope": "datasources:uid:grafanacloud-usage-insights"
+        },
+        {
+          "action": "datasources:query",
+          "scope": "datasources:uid:grafanacloud-usage"
+        }
+      ],
+      "removable": [
+        [
+          "grafana-slo-app.orgpreferences:read",
+          ""
+        ],
+        [
+          "grafana-slo-app.slo:read",
+          ""
+        ],
+        [
+          "grafana-synthetic-monitoring-app.checks:read",
+          ""
+        ],
+        [
+          "grafana-synthetic-monitoring-app:read",
+          ""
+        ],
+        [
+          "plugins.app:access",
+          "plugins:id:grafana-slo-app"
+        ],
+        [
+          "plugins.app:access",
+          "plugins:id:grafana-synthetic-monitoring-app"
+        ]
+      ],
+      "dangerous": []
+    },
+    {
+      "write_stack": true,
+      "tokens": [
+        "synthetic-monitoring"
+      ],
+      "desired": [
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-assistant-app"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-dbcfg-app"
+        },
+        {
+          "action": "grafana-assistant-app.usage:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.all:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.system:read"
+        },
+        {
+          "action": "grafana-assistant-app.mcps.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.skills.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.automations.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.rules.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.watcher-agents:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivelogs-app"
+        },
+        {
+          "action": "grafana-adaptivelogs-app.patterns:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptive-metrics-app"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.exemptions:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivetraces-app"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.policies:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.recommendations:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.config:read"
+        },
+        {
+          "action": "serviceaccounts:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "serviceaccounts.permissions:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "datasources:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "datasources.caching:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "folders:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "dashboards:read",
+          "scope": "dashboards:*"
+        },
+        {
+          "action": "snapshots:read"
+        },
+        {
+          "action": "teams:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.permissions:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.roles:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "users.roles:read",
+          "scope": "users:*"
+        },
+        {
+          "action": "roles:read",
+          "scope": "roles:*"
+        },
+        {
+          "action": "alert.rules:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "alert.notifications.receivers:read",
+          "scope": "receivers:*"
+        },
+        {
+          "action": "datasources:query",
+          "scope": "datasources:uid:grafanacloud-usage-insights"
+        },
+        {
+          "action": "datasources:query",
+          "scope": "datasources:uid:grafanacloud-usage"
+        },
+        {
+          "action": "grafana-synthetic-monitoring-app:read"
+        },
+        {
+          "action": "grafana-synthetic-monitoring-app.checks:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-synthetic-monitoring-app"
+        }
+      ],
+      "removable": [
+        [
+          "grafana-slo-app.orgpreferences:read",
+          ""
+        ],
+        [
+          "grafana-slo-app.slo:read",
+          ""
+        ],
+        [
+          "plugins.app:access",
+          "plugins:id:grafana-slo-app"
+        ]
+      ],
+      "dangerous": []
+    },
+    {
+      "write_stack": true,
+      "tokens": [
+        "slo"
+      ],
+      "desired": [
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-assistant-app"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-dbcfg-app"
+        },
+        {
+          "action": "grafana-assistant-app.usage:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.all:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.system:read"
+        },
+        {
+          "action": "grafana-assistant-app.mcps.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.skills.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.automations.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.rules.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.watcher-agents:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivelogs-app"
+        },
+        {
+          "action": "grafana-adaptivelogs-app.patterns:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptive-metrics-app"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.exemptions:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivetraces-app"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.policies:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.recommendations:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.config:read"
+        },
+        {
+          "action": "serviceaccounts:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "serviceaccounts.permissions:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "datasources:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "datasources.caching:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "folders:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "dashboards:read",
+          "scope": "dashboards:*"
+        },
+        {
+          "action": "snapshots:read"
+        },
+        {
+          "action": "teams:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.permissions:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.roles:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "users.roles:read",
+          "scope": "users:*"
+        },
+        {
+          "action": "roles:read",
+          "scope": "roles:*"
+        },
+        {
+          "action": "alert.rules:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "alert.notifications.receivers:read",
+          "scope": "receivers:*"
+        },
+        {
+          "action": "datasources:query",
+          "scope": "datasources:uid:grafanacloud-usage-insights"
+        },
+        {
+          "action": "datasources:query",
+          "scope": "datasources:uid:grafanacloud-usage"
+        },
+        {
+          "action": "grafana-slo-app.orgpreferences:read"
+        },
+        {
+          "action": "grafana-slo-app.slo:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-slo-app"
+        }
+      ],
+      "removable": [
+        [
+          "grafana-synthetic-monitoring-app.checks:read",
+          ""
+        ],
+        [
+          "grafana-synthetic-monitoring-app:read",
+          ""
+        ],
+        [
+          "plugins.app:access",
+          "plugins:id:grafana-synthetic-monitoring-app"
+        ]
+      ],
+      "dangerous": []
+    },
+    {
+      "write_stack": true,
+      "tokens": [
+        "slo",
+        "synthetic-monitoring"
+      ],
+      "desired": [
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-assistant-app"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-dbcfg-app"
+        },
+        {
+          "action": "grafana-assistant-app.usage:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.all:read"
+        },
+        {
+          "action": "grafana-assistant-app.investigations.system:read"
+        },
+        {
+          "action": "grafana-assistant-app.mcps.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.skills.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.automations.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.rules.tenant:read"
+        },
+        {
+          "action": "grafana-assistant-app.watcher-agents:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivelogs-app"
+        },
+        {
+          "action": "grafana-adaptivelogs-app.patterns:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptive-metrics-app"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptive-metrics-app.exemptions:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-adaptivetraces-app"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.plugin:access"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.policies:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.recommendations:read"
+        },
+        {
+          "action": "grafana-adaptivetraces-app.config:read"
+        },
+        {
+          "action": "serviceaccounts:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "serviceaccounts.permissions:read",
+          "scope": "serviceaccounts:*"
+        },
+        {
+          "action": "datasources:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "datasources.caching:read",
+          "scope": "datasources:*"
+        },
+        {
+          "action": "folders:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "dashboards:read",
+          "scope": "dashboards:*"
+        },
+        {
+          "action": "snapshots:read"
+        },
+        {
+          "action": "teams:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.permissions:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "teams.roles:read",
+          "scope": "teams:*"
+        },
+        {
+          "action": "users.roles:read",
+          "scope": "users:*"
+        },
+        {
+          "action": "roles:read",
+          "scope": "roles:*"
+        },
+        {
+          "action": "alert.rules:read",
+          "scope": "folders:*"
+        },
+        {
+          "action": "alert.notifications.receivers:read",
+          "scope": "receivers:*"
+        },
+        {
+          "action": "datasources:query",
+          "scope": "datasources:uid:grafanacloud-usage-insights"
+        },
+        {
+          "action": "datasources:query",
+          "scope": "datasources:uid:grafanacloud-usage"
+        },
+        {
+          "action": "grafana-slo-app.orgpreferences:read"
+        },
+        {
+          "action": "grafana-slo-app.slo:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-slo-app"
+        },
+        {
+          "action": "grafana-synthetic-monitoring-app:read"
+        },
+        {
+          "action": "grafana-synthetic-monitoring-app.checks:read"
+        },
+        {
+          "action": "plugins.app:access",
+          "scope": "plugins:id:grafana-synthetic-monitoring-app"
+        }
+      ],
+      "removable": [],
+      "dangerous": []
+    }
+  ]
+}

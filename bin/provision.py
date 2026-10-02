@@ -371,11 +371,40 @@ def probe(slug: str, stack_url: str, sas: list[dict],
     )
 
 
+def discover_synthetic(st: Stack, current, *, write_stack: bool = False,
+                       product_reads: Iterable[str] = ()) -> tuple[str | None, str]:
+    """One per-stack, per-run lookup, reused through repair and verification."""
+    uid, state = None, "not_selected"
+    if pr.needs_synthetic_discovery(current, write_stack=write_stack, product_reads=product_reads):
+        try:
+            status, body = st.get("/api/datasources")
+            uid, state = (pr.synthetic_datasource_uid(body) if status == 200 else
+                          (None, "not_inspected" if status == Stack.NOT_INSPECTED else "unreadable"))
+        except Exception:  # raw exception content may contain datasource configuration
+            state = "transport_error"
+    return uid, state
+
+
+def reader_policy(st: Stack, current, *, write_stack: bool = False,
+                  product_reads: Iterable[str] = (),
+                  synthetic_discovery: tuple[str | None, str] | None = None):
+    """Build exact permission sets; the run's discovery is transient, never configured."""
+    product_reads = frozenset(product_reads)
+    uid, state = (synthetic_discovery if synthetic_discovery is not None else
+                  discover_synthetic(st, current, write_stack=write_stack, product_reads=product_reads))
+    permissions = pr.desired_permissions(write_stack=write_stack, product_reads=product_reads,
+                                         synthetic_uid=uid)
+    removable = pr.removable_pairs(write_stack=write_stack, product_reads=product_reads,
+                                   synthetic_uid=uid, current=current)
+    return permissions, removable, state
+
+
 def ensure_role(
     st: Stack,
     *,
     write_stack: bool = False,
     product_reads: Iterable[str] = (),
+    synthetic_discovery: tuple[str | None, str] | None = None,
 ) -> tuple[bool, str, str]:
     """Create or reconcile `custom:gcinsight.reader`. Returns (ok, uid, note).
 
@@ -384,11 +413,6 @@ def ensure_role(
     does not look like drift and rewrite 273 roles every run.
     """
     product_reads = frozenset(product_reads)
-    desired_permissions = pr.desired_permissions(
-        write_stack=write_stack, product_reads=product_reads,
-    )
-    desired_pairs = pr.permission_pairs(desired_permissions)
-    removable_pairs = pr.removable_pairs(write_stack=write_stack, product_reads=product_reads)
     status, roles = st.get("/api/access-control/roles?includeHidden=true")
     if status == Stack.NOT_INSPECTED:
         # Dry run: the gcom write plan above is real, the stack-side plan cannot be known without
@@ -399,6 +423,9 @@ def ensure_role(
     existing = next((r for r in roles if r.get("name") == pr.ROLE_NAME), None)
 
     if existing is None:
+        desired_permissions, _, sm_state = reader_policy(
+            st, {}, write_stack=write_stack, product_reads=product_reads,
+            synthetic_discovery=synthetic_discovery)
         status, created = st.post("/api/access-control/roles", {
             "version": 1, "name": pr.ROLE_NAME, "displayName": pr.ROLE_DISPLAY,
             "group": pr.ROLE_GROUP, "global": False,
@@ -407,7 +434,7 @@ def ensure_role(
         })
         if status not in (200, 201) or not isinstance(created, dict):
             return False, "", f"role create HTTP {status}: {str(created)[:120]}"
-        return True, created["uid"], "created"
+        return True, created["uid"], f"created; synthetic discovery: {sm_state}"
 
     uid = existing["uid"]
     status, full = st.get(f"/api/access-control/roles/{uid}")
@@ -417,14 +444,20 @@ def ensure_role(
     have: dict[str, list[str]] = {}
     for permission in permissions:
         have.setdefault(permission["action"], []).append(permission.get("scope") or "")
+    desired_permissions, removable_pairs, sm_state = reader_policy(
+        st, have, write_stack=write_stack, product_reads=product_reads,
+        synthetic_discovery=synthetic_discovery)
+    desired_pairs = pr.permission_pairs(desired_permissions)
     dangerous = sorted(pr.dangerous_extra_pairs(have, desired_pairs, removable_pairs))
     if dangerous:
         shown = ", ".join(f"{action}@{scope or '*'}" for action, scope in dangerous)
         return False, uid, (
             "REFUSED: the reader role carries unexpected blast-radius permissions: " + shown
+            + f"; synthetic discovery: {sm_state}"
         )
     if not pr.role_drift(have, desired_pairs, removable=removable_pairs):
-        return True, uid, "unchanged"
+        return True, uid, ("unchanged" if sm_state == "not_selected"
+                           else f"unchanged; synthetic discovery: {sm_state}")
 
     # Replacing the role body is the only update API. Preserve every permission we did not declare,
     # except the explicitly retired pairs, including its scope: collapsing extras to `{action}` silently
@@ -494,7 +527,7 @@ def _still_propagating(outcome: pr.Outcome) -> bool:
 
 def reverify_pending(g: Gcom, outcomes: list[pr.Outcome],
                      pending: dict[str, tuple[str, bool, float]], stored: dict[str, dict[str, Any]], *,
-                     product_reads: Iterable[str] = (), clock=None,
+                     product_reads: Iterable[str] = (), synthetic_discoveries=None, clock=None,
                      sleep=None) -> list[pr.Outcome]:
     """Give each still-propagating repair one final read-only probe with its stored credential.
 
@@ -515,7 +548,8 @@ def reverify_pending(g: Gcom, outcomes: list[pr.Outcome],
         if wait > 0:
             sleep(wait)
         verified, detail = _verify_reader_once(g, outcome.slug, stack_url, token,
-                                               write_stack=write_stack, product_reads=product_reads)
+                                               write_stack=write_stack, product_reads=product_reads,
+                                               synthetic_discovery=(synthetic_discoveries or {}).get(outcome.slug))
         result.append(pr.Outcome(outcome.slug, outcome.state, pr.OK, "role repaired; verified at end of run")
                       if verified else
                       pr.Outcome(outcome.slug, outcome.state, outcome.action,
@@ -526,10 +560,12 @@ def reverify_pending(g: Gcom, outcomes: list[pr.Outcome],
 def verify_reader(g: Gcom, slug: str, stack_url: str, token: str, *,
                   write_stack: bool = False,
                   product_reads: Iterable[str] = (),
+                  synthetic_discovery: tuple[str | None, str] | None = None,
                   sleep=time.sleep) -> tuple[bool, str]:
     """Re-probe the durable reader after repair, allowing bounded propagation time."""
     verified, detail = _verify_reader_once(g, slug, stack_url, token, write_stack=write_stack,
-                                           product_reads=product_reads)
+                                           product_reads=product_reads,
+                                           synthetic_discovery=synthetic_discovery)
     for wait in VERIFY_BACKOFF_SECONDS:
         # Only a readable reader that is still missing pairs can be propagation. A failed listing or an
         # absent account will not heal by waiting, and each wait holds the transient Admin account open.
@@ -537,25 +573,26 @@ def verify_reader(g: Gcom, slug: str, stack_url: str, token: str, *,
             break
         sleep(wait)
         verified, detail = _verify_reader_once(g, slug, stack_url, token, write_stack=write_stack,
-                                               product_reads=product_reads)
+                                               product_reads=product_reads,
+                                               synthetic_discovery=synthetic_discovery)
     return verified, detail
 
 
 def _verify_reader_once(g: Gcom, slug: str, stack_url: str, token: str, *,
                         write_stack: bool = False,
-                        product_reads: Iterable[str] = ()) -> tuple[bool, str]:
+                        product_reads: Iterable[str] = (),
+                        synthetic_discovery: tuple[str | None, str] | None = None) -> tuple[bool, str]:
     """One read-only probe; accepted writes are not proof they took effect."""
     product_reads = frozenset(product_reads)
     status, sas = list_sas(g, slug)
     if status != 200:
         return False, f"service-account verification HTTP {status}"
-    desired = pr.permission_pairs(pr.desired_permissions(
+    verified = probe(slug, stack_url, sas, {slug: {"token": token}})
+    permissions, removable, sm_state = reader_policy(
+        Stack(stack_url, token, dry_run=False), verified.role_actions,
         write_stack=write_stack, product_reads=product_reads,
-    ))
-    removable = pr.removable_pairs(write_stack=write_stack, product_reads=product_reads)
-    verified = probe(
-        slug, stack_url, sas, {slug: {"token": token}}, desired=desired, removable=removable,
-    )
+        synthetic_discovery=synthetic_discovery)
+    desired = pr.permission_pairs(permissions)
     if pr.needs_repair(verified, desired, removable=removable):
         return False, (
             f"post-repair probe still needs {pr.plan_action(verified, desired, removable=removable)} "
@@ -568,7 +605,8 @@ def _verify_reader_once(g: Gcom, slug: str, stack_url: str, token: str, *,
 def repair(g: Gcom, ledger: Ledger, slug: str, stack_url: str, sas: list[dict],
            dry_run: bool, *, presence: pr.Presence,
            existing_token: str | None, write_stack: bool = False,
-           product_reads: Iterable[str] = ()) -> pr.Outcome:
+           product_reads: Iterable[str] = (),
+           synthetic_discovery: tuple[str | None, str] | None = None) -> pr.Outcome:
     """Phase 2: the only place that writes. Creates a transient Admin identity, repairs, cleans up.
 
     The Admin service account is deleted in the `finally`, LAST  -  it is the only identity that can undo
@@ -599,6 +637,7 @@ def repair(g: Gcom, ledger: Ledger, slug: str, stack_url: str, sas: list[dict],
 
         ok, role_uid, note = ensure_role(
             st, write_stack=write_stack, product_reads=product_reads,
+            synthetic_discovery=synthetic_discovery,
         )
         if not ok:
             # A brand-new stack may not have the Assistant plugin yet, so its actions are unknown to
@@ -686,7 +725,7 @@ def repair(g: Gcom, ledger: Ledger, slug: str, stack_url: str, sas: list[dict],
                               f"role {note}; post-repair probe not available in dry-run")
         verified, detail = verify_reader(
             g, slug, stack_url, reader_token, write_stack=write_stack,
-            product_reads=product_reads,
+            product_reads=product_reads, synthetic_discovery=synthetic_discovery,
         )
         if not verified:
             return pr.Outcome(slug, pr.PROVISIONABLE, "verification_failed", detail)
@@ -778,6 +817,7 @@ def main(argv: list[str] | None = None) -> int:
 
     outcomes: list[pr.Outcome] = []
     pending: dict[str, tuple[str, bool, float]] = {}
+    synthetic_discoveries: dict[str, tuple[str | None, str] | None] = {}
     for s in stacks:
         slug = str(s.get("slug"))
         state = pr.classify(s, opted_out)
@@ -804,13 +844,18 @@ def main(argv: list[str] | None = None) -> int:
             _, sas = list_sas(g, slug)
 
         is_write_stack = slug == write_stack_slug
-        desired = pr.permission_pairs(pr.desired_permissions(
-            write_stack=is_write_stack, product_reads=product_reads,
-        ))
-        removable = pr.removable_pairs(write_stack=is_write_stack, product_reads=product_reads)
-        presence = probe(
-            slug, stack_url, sas, stored, desired=desired, removable=removable,
-        )
+        presence = probe(slug, stack_url, sas, stored)
+        record = stored.get(slug) or {}
+        st = Stack(stack_url, record.get("token") or "dry-run", dry_run=not bool(record.get("token")))
+        discovery = discover_synthetic(st, presence.role_actions,
+                                       write_stack=is_write_stack, product_reads=product_reads)
+        synthetic_discoveries[slug] = None if discovery[1] == "not_inspected" else discovery
+        permissions, removable, sm_state = reader_policy(
+            st, presence.role_actions, write_stack=is_write_stack, product_reads=product_reads,
+            synthetic_discovery=discovery)
+        desired = pr.permission_pairs(permissions)
+        if sm_state not in {"not_selected", "available"}:
+            print(f"  {slug}: synthetic discovery: {sm_state}")
         if not pr.needs_repair(presence, desired, removable=removable):
             outcomes.append(pr.Outcome(slug, pr.PROVISIONABLE, pr.OK, "already provisioned"))
             continue
@@ -828,7 +873,7 @@ def main(argv: list[str] | None = None) -> int:
         outcomes.append(repair(
             g, ledger, slug, stack_url, sas, args.dry_run,
             presence=presence, existing_token=record.get("token"), write_stack=is_write_stack,
-            product_reads=product_reads,
+            product_reads=product_reads, synthetic_discovery=synthetic_discoveries[slug],
         ))
         if _still_propagating(outcomes[-1]):
             pending[slug] = (stack_url, is_write_stack, time.monotonic())
@@ -843,7 +888,7 @@ def main(argv: list[str] | None = None) -> int:
                   file=sys.stderr)
         else:
             outcomes = reverify_pending(g, outcomes, pending, final_store,
-                                        product_reads=product_reads)
+                                        product_reads=product_reads, synthetic_discoveries=synthetic_discoveries)
 
     if not args.no_prune and not args.stack and not args.limit:
         gone = pr.prune_targets(sorted(stored), [str(s.get("slug")) for s in

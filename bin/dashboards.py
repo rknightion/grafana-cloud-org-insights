@@ -34,7 +34,7 @@ from collector import ratecard as ratecard_model
 from collector.dashboards import build
 from collector.dashboards.retention_panels import retention_panels
 from collector.pillars import adaptive_traces as adaptive_traces_pillar
-from collector.pillars import slo as slo_pillar
+from collector.pillars import slo as slo_pillar, synthetic as synthetic_pillar
 from collector.pillars import (
     ai as ai_pillar,
     coverage as coverage_pillar,
@@ -3655,6 +3655,20 @@ def d_coverage(ds: str):
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.ADOPTION_TARGET_VIEW],
             description="Stacks showing no use inside the stated capability population, ranked by "
                         "active series so the largest existing telemetry footprints lead the queue."),
+        "n_synthetic_age": build.stat_panel(
+            "Synthetic inventory input age",
+            'time() - max_over_time(timestamp(gcinsight_input_age_seconds'
+            '{tier="t1",input="synthetic_inventory"})'
+            f'[{build.FRESHNESS_LOOKBACK}:]) + last_over_time(gcinsight_input_age_seconds'
+            '{tier="t1",input="synthetic_inventory"}'
+            f'[{build.FRESHNESS_LOOKBACK}])',
+            unit="s", decimals=0, description=build.INPUT_DESCRIPTIONS["synthetic_inventory"]),
+        "tbl_synthetic_inventory": build.table_panel(
+            "Synthetic Monitoring check types and probe classes",
+            synthetic_pillar.VIEW, ds, schema=synthetic_pillar.SCHEMA,
+            description="Opt-in daily point-in-time counts, not execution volumes. Only measured stacks "
+                        "appear; missing, ambiguous and unreadable inputs are absent, never zero. "
+                        "No targets, scripts, headers, labels, names or product IDs are retained."),
         "tbl_slo_inventory": build.table_panel(
             "SLO definitions, configured alerting and source",
             slo_pillar.VIEW, ds, schema=slo_pillar.SCHEMA,
@@ -3898,6 +3912,11 @@ def d_coverage(ds: str):
             build.row("Identity evidence", ["n_legacy", "b_identity"], max_columns=2),
             build.row("Where the assets sit", ["b_stack_services", "b_stack_technologies",
                                                 "b_stack_clusters"], max_columns=3),
+        ]),
+        build.rows_tab("Synthetic inventory", [
+            build.row("Source freshness", ["n_synthetic_age"], max_columns=1),
+            build.row("Check types and public/private probes", ["tbl_synthetic_inventory"],
+                      max_columns=1, row_height="tall"),
         ]),
         build.rows_tab("SLO inventory", [
             build.row("Definitions and configured alerting", ["tbl_slo_inventory"],

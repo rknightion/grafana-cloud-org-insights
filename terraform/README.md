@@ -117,7 +117,7 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 | `scan_runtime_config_digest`, `provisioner_runtime_config_digest`, `require_explicit_consumer_config` | empty, empty, `false`; consumer projections may require both validated digests |
 | `create_provisioner`, `provisioner_secret_key` | `false`, `GCINSIGHT_PROVISION_TOKEN`; independent opt-in write-capable task |
 | `provisioner_schedule_expression`, `provisioner_enabled` | daily module default, `true`; see RUNBOOK timetable and both schedule gates above |
-| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring` read families |
+| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query` read families |
 | `provisioner_cpu`, `provisioner_memory` | `256`, `512` MiB; separate provisioner sizing |
 
 | Outputs | Use / availability |
@@ -220,8 +220,11 @@ does require a stack-realm `logs:write` token represented by the adopted access-
 
 ## Reader product policy
 
-`provisioner_product_reads` remains default-off (`[]`) and selects only the existing `slo` and
-`synthetic-monitoring` reader families. The module mirrors this one policy into both provisioner and
+`provisioner_product_reads` remains default-off (`[]`) and accepts `slo`, `synthetic-monitoring`
+and `synthetic-monitoring-query`. The new query token requires `synthetic-monitoring` and adds
+query access only to the stack's single uniquely discovered, valid Synthetic datasource UID plus
+unscoped probes read. Ambiguous or invalid discovery grants neither pair. Without the query token,
+collection makes no Synthetic HTTP calls and legacy role grants stay unchanged. The module mirrors this one policy into both provisioner and
 scan tasks as `GCINSIGHT_READER_PRODUCT_READS`; no separate scanner grant or family list exists.
 The scan runtime digest includes this value, so update consumer manifests and module/image pins
 together before rollout. Selecting `slo` enables count-only SLO definition collection on T2; selecting
@@ -229,7 +232,12 @@ together before rollout. Selecting `slo` enables count-only SLO definition colle
 digests, then carries its provisioner policy into the added scan field. Explicit `regenerate` also
 carries the policy when the scan field is absent; `check` requires the current projection and never
 rewrites it. An explicit scan/provisioner mismatch is rejected rather than silently changed. This
-wiring does not add reader permission pairs or change credentials.
+wiring alone does not select a new token or change credentials. The query token must be explicitly
+approved per deployment; T2 retains only bounded check-type, enabled and public/private probe counts.
+Missing or unreadable coverage is absent, not zero. Deselection permits one bounded datasource lookup
+only for a held query outside approved telemetry (usage-insights everywhere, usage only on the write
+stack); only the unique valid SM query and held probes read are removable. No wildcard or write grant
+is permitted and a working credential is kept.
 
 ## Consuming it
 

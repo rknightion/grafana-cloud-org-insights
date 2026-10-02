@@ -1105,6 +1105,8 @@ INPUT_DESCRIPTIONS = {
     "capability_adoption": "Age of the bounded org-usage sweep behind capability opportunity counts. "
                            "Rate-shaped signals and their populations share one 24-hour window; the "
                            "named target view is withheld if this input or signal inventory is stale.",
+    "synthetic_inventory": "Age of the daily opt-in count-only Synthetic Monitoring inventory. "
+                           "Missing, ambiguous or unreadable stacks are omitted, not zero.",
     "slo_inventory": "Age of the count-only SLO definition and configured burn-alerting inventory. "
                      "Gathered daily; unknown source stays unknown and unreadable stacks are omitted.",
     "loki_config": "Age of the per-stack effective Loki retention and self-serve change-request "

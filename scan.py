@@ -47,6 +47,7 @@ from collector.sources import adaptive_traces as adaptive_traces_src
 from collector.sources import alert_routing as alert_routing_src
 from collector.sources import public_dashboards as public_dashboards_src
 from collector.sources import slo as slo_src
+from collector.sources import synthetic as synthetic_src
 from collector.sources import stack_catalog
 from collector.sources import assistant as assistant_src
 from collector.sources import fleet as fleet_src
@@ -552,6 +553,40 @@ def gather_slo_inventory(
     return data, errors
 
 
+def synthetic_reads_enabled() -> bool:
+    return "synthetic-monitoring-query" in parse_product_reads(os.environ.get(PRODUCT_READS_ENV))
+
+
+def synthetic_source_report(expected: int, data: dict[str, Any], errors: list[str]) -> dict[str, Any]:
+    """Known absent optional datasource is not a failed read; unknown discovery still is.
+
+    Records remain unavailable and are never turned into zero count rows. Only this source's
+    eligible population changes; every other source keeps its existing publication floor.
+    """
+    absent = min(expected, sum(record.get("reason") == "no_datasource" for record in data.values()))
+    return {**source_report(expected - absent, data, available=lambda r: bool(r.get("available")),
+                            errors=errors), "not_applicable": absent}
+
+
+def gather_synthetic_inventory(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[str]]:
+    """Default-off count-only lists. Legacy product policy performs no HTTP or store read."""
+    if not synthetic_reads_enabled():
+        return {}, []
+    errors: list[str] = []
+    try:
+        creds = credentials.load_all()
+    except credentials.StoreUnavailable:
+        return {}, ["synthetic_inventory: credential_store_unavailable"]
+    data = synthetic_src.probe_all(
+        client, stacks, creds, concurrency=cfg.concurrency,
+        on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"))
+    measured = sum(bool(record.get("available")) for record in data.values())
+    console_log("warn" if errors else "info", f"Synthetic inventory: {measured}/{len(data)} stacks read")
+    return data, errors
+
+
 def gather_signal_inventory(
     client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], list[str]]:
@@ -960,6 +995,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     errors += alert_routing_errors
     slo_inventory, slo_inventory_errors = gather_slo_inventory(client, cfg, selected)
     errors += slo_inventory_errors
+    synthetic_inventory, synthetic_inventory_errors = gather_synthetic_inventory(client, cfg, selected)
+    errors += synthetic_inventory_errors
     signal_inventory, signal_inventory_errors = gather_signal_inventory(client, cfg, selected)
     errors += signal_inventory_errors
     capability_adoption, capability_adoption_errors = gather_capability_adoption(
@@ -987,6 +1024,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "public_dashboards": pubdash,
         "alert_routing": alert_routing,
         "slo_inventory": slo_inventory,
+        "synthetic_inventory": synthetic_inventory,
         "signal_inventory": signal_inventory,
         "capability_adoption": capability_adoption,
         "loki_config": loki_config,
@@ -1040,6 +1078,11 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
             slo_inventory, available=lambda r: bool(r.get("available")),
             errors=slo_inventory_errors,
         ),
+        "synthetic_inventory": {
+            **synthetic_source_report(expected if synthetic_reads_enabled() else 0,
+                                      synthetic_inventory, synthetic_inventory_errors),
+            **({"reason": "not_selected"} if not synthetic_reads_enabled() else {}),
+        },
         "signal_inventory": source_report(
             expected, signal_inventory, available=lambda r: bool(r.get("available")),
             errors=signal_inventory_errors,

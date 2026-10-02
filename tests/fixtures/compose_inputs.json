@@ -1,5 +1,25 @@
 {
  "_note": "synthetic compose fixture; accepted source changes translated through testdata identifiers",
+ "synthetic_inventory": {
+  "obs-hub": {
+   "available": true,
+   "check_count": 4,
+   "enabled_count": 3,
+   "check_type_counts": {
+    "http": 3,
+    "ping": 1,
+    "dns": 0,
+    "tcp": 0,
+    "traceroute": 0,
+    "scripted": 0,
+    "multihttp": 0,
+    "grpc": 0,
+    "browser": 0,
+    "unknown": 0
+   },
+   "probe_counts": {"public": 2, "private": 1}
+  }
+ },
  "stacks": [
   {
    "id": 5000001,

@@ -37,7 +37,7 @@ from collector.pillars import (
 # Aliased: the kwarg is `insights`, matching the hydrated input key so `**inputs` works.
 from collector.pillars import insights as insights_pillar
 from collector.pillars import insights_inventory
-from collector.pillars import slo as slo_pillar
+from collector.pillars import slo as slo_pillar, synthetic as synthetic_pillar
 
 Metrics = list[tuple[str, dict[str, str], float]]
 Views = dict[str, list[dict[str, Any]]]
@@ -93,6 +93,7 @@ def build_all(
     signal_inventory: dict[str, Any] | None = None,
     capability_adoption: dict[str, Any] | None = None,
     slo_inventory: dict[str, Any] | None = None,
+    synthetic_inventory: dict[str, Any] | None = None,
     loki_config: dict[str, Any] | None = None,
     label_risk: dict[str, Any] | None = None,
     expected_retention_policy: tuple[dict[str, str], ...] = (),
@@ -138,6 +139,7 @@ def build_all(
         producing_signals.build(stacks, capability_adoption),
         adaptive_traces_pillar.build(stacks, adaptive_traces),
         slo_pillar.build(stacks, slo_inventory),
+        synthetic_pillar.build(stacks, synthetic_inventory),
         label_risk_pillar.build(stacks, label_risk),
     ):
         metrics.extend(pillar_metrics)
