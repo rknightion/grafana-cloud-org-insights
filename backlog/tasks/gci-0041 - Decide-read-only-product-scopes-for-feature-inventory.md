@@ -1,11 +1,11 @@
 ---
 id: GCI-0041
 title: Decide read-only product scopes for feature inventory
-status: In Progress
+status: Done
 assignee:
   - '@loop9-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-10-02 09:13'
+updated_date: '2026-10-02 09:36'
 labels:
   - feature-usage
   - scope-decision
@@ -32,9 +32,9 @@ GCI-0032 found product object APIs beyond the existing basic-role-None stack rea
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -84,4 +84,12 @@ DEFERRED (low value): Knowledge Graph status, Application Observability instance
 Customer grants: each needs its own rollout decision; none granted now. Full evidence table: private loop9 preparation record.
 
 AC3 amended by the same owner decision: basic role None and refused secret/write actions stay unchanged; the datasource query pin gains exactly one approved exception, datasources:query on each stack's discovered Synthetic Monitoring datasource uid, to be recorded in AGENTS.md before any code relies on it.
+
+Loop9 root AGENTS/LOOP owner decision landed eccc4b37d11bbaff7f7d3169314aca7cc1c8974c with preparation board commit e5ac14f. Final just check1685 passed/2skipped (skips not pass),8016subtests, tf validation/identifier/history/text gates clean; exact hosted CI36990463778 success reread. Narrow future S-SM opt-in query/probes exception and named IRMcounter/ML residual risks recorded, no live scope widening. Eleven family tasks GCI-0074 through0084 ToDo cite immutable packet e46afeb70fca8cd53ee0843c898c810a80cc05bc4238db02d8df2c6310eac6ad; no family admitted. Synthetic implementation remains parked on deselection discovery contract.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Owner per-family decision recorded in enforced repository rules and packet tasks; exact root CI36990463778 at eccc4b37 proves documentation and board gates. Scope approval is not an implemented capability or customer grant.
+<!-- SECTION:FINAL_SUMMARY:END -->
