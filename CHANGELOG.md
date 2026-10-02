@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.5.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.4.4...v0.5.0) (2026-10-02)
+
+
+### Features
+
+* **synthetic:** publish opt-in check and probe counts ([a7a1199](https://github.com/rknightion/grafana-cloud-org-insights/commit/a7a1199942c39b5a8e6785179873c99b97907cf4))
+
+
+### Bug Fixes
+
+* **adaptive:** qualify totals by measured rule coverage ([f908c07](https://github.com/rknightion/grafana-cloud-org-insights/commit/f908c07baa45a622c3e1014ed57a7b0ec09ddb2d))
+* **synthetic:** fence privilege-bearing datasource discovery ([af5b2a1](https://github.com/rknightion/grafana-cloud-org-insights/commit/af5b2a1be7a8065a3baacc10b76cd040e6b5e87b))
+
+
+### Documentation
+
+* **agents:** bound Synthetic deselection discovery ([82743e3](https://github.com/rknightion/grafana-cloud-org-insights/commit/82743e32aae0e75c135863ea8da8a76f639e7649))
+* **agents:** preserve legacy telemetry discovery baseline ([776a5e8](https://github.com/rknightion/grafana-cloud-org-insights/commit/776a5e8cf1451361e053be03751ed422c8a358cd))
+* **loop:** record patch rollout proof and acceptance gaps ([f23495c](https://github.com/rknightion/grafana-cloud-org-insights/commit/f23495c805e70e231b0c00f5530acb1545f4c3cb))
+* publish canonical agent documents ([ac025a4](https://github.com/rknightion/grafana-cloud-org-insights/commit/ac025a4b37daf9294469a3b5d9c6fa08c44d8555))
+
+
+### Miscellaneous
+
+* **backlog:** add dashboard coverage inventory and docs refresh tasks ([28b0f06](https://github.com/rknightion/grafana-cloud-org-insights/commit/28b0f0634980c0a6e9d0515639393a3270ee6e0a))
+
 ## [0.4.4](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.4.3...v0.4.4) (2026-10-02)
 
 
