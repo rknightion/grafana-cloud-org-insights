@@ -938,6 +938,7 @@ def test_legacy_synthetic_customer_safety():
             ("plugins.app:access", "plugins:id:grafana-ml-app"),
             ("grafana-csp-app:read", ""),
             ("plugins.app:access", "plugins:id:grafana-csp-app"),
+            ("reports:read", "reports:*"),
             ("grafana-pdc-app.private-networks:read", ""),
             ("plugins.app:access", "plugins:id:grafana-pdc-app"),
         }

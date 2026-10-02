@@ -1211,6 +1211,16 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
 
 
 def d_usage(ds: str):
+    reports_panel = None
+    try:
+        reports_panel = build.table_panel(
+            "Configured reports", "reports_inventory", ds,
+            description="Point-in-time configured report objects, including disabled objects. "
+                        "Not execution, delivery success or scheduling activity. Default-off; "
+                        "unreadable stacks are absent, never zero. No report details stored; "
+                        "the staff route witness does not prove universal visibility.")
+    except FileNotFoundError:
+        pass
     pdc_panel = None
     try:
         pdc_panel = build.table_panel(
@@ -1501,6 +1511,8 @@ def d_usage(ds: str):
                         "those logs, or stopped shipping them - both are wins, and the per-stack chart "
                         "above says which."),
     }
+    if reports_panel is not None:
+        el["reports_inventory"] = reports_panel
     if pdc_panel is not None:
         el["pdc_networks"] = pdc_panel
     if cloud_panel is not None:
@@ -1514,6 +1526,9 @@ def d_usage(ds: str):
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
         build.tab("Adoption", ["t_signals", "plugins"]),
+        *([build.rows_tab("Configured reports", [
+            build.row("Configured reports", ["reports_inventory"], max_columns=1),
+        ])] if reports_panel is not None else []),
         *([build.rows_tab("Configured PDC private networks", [
             build.row("Configured PDC private networks", ["pdc_networks"], max_columns=1),
         ])] if pdc_panel is not None else []),

@@ -117,7 +117,7 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 | `scan_runtime_config_digest`, `provisioner_runtime_config_digest`, `require_explicit_consumer_config` | empty, empty, `false`; consumer projections may require both validated digests |
 | `create_provisioner`, `provisioner_secret_key` | `false`, `GCINSIGHT_PROVISION_TOKEN`; independent opt-in write-capable task |
 | `provisioner_schedule_expression`, `provisioner_enabled` | daily module default, `true`; see RUNBOOK timetable and both schedule gates above |
-| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query`/`irm-integrations`/`faro-apps`/`ml-jobs`/`cloud-accounts`/`pdc-networks` read families |
+| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query`/`irm-integrations`/`faro-apps`/`ml-jobs`/`cloud-accounts`/`pdc-networks`/`reports` read families |
 | `provisioner_cpu`, `provisioner_memory` | `256`, `512` MiB; separate provisioner sizing |
 
 | Outputs | Use / availability |
@@ -221,7 +221,16 @@ does require a stack-realm `logs:write` token represented by the adopted access-
 ## Reader product policy
 
 `provisioner_product_reads` remains default-off (`[]`) and accepts `slo`, `synthetic-monitoring`,
-`synthetic-monitoring-query`, `irm-integrations`, `faro-apps`, `ml-jobs`, `cloud-accounts` and `pdc-networks`.
+`synthetic-monitoring-query`, `irm-integrations`, `faro-apps`, `ml-jobs`, `cloud-accounts`, `pdc-networks` and `reports`.
+`reports` adds exactly `reports:read` at `reports:*`, no plugin, send, settings,
+query or write grant. T2 calls only guarded GET `/api/reports` without query or
+redirects on the fresh inventory's validated HTTPS origin and requires HTTP 200.
+Only a complete bare array of objects with valid transient IDs is supported;
+wrappers, pagination, malformed or partial responses are unavailable. Configured
+objects include disabled reports. All report details are discarded using the
+unchanged structural credential guard. Genuine complete empty lists measure zero;
+unreadable stacks are absent. This is not execution, delivery or scheduling activity,
+universal visibility, strict minimality, credential write isolation or a customer grant.
 `pdc-networks` adds exactly `grafana-pdc-app.private-networks:read` (empty scope) and
 `plugins.app:access` at `plugins:id:grafana-pdc-app`. T2 counts only policies matching
 the current stack realm and `set:pdc-signing`, after every fresh-inventory region plus

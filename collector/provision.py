@@ -182,6 +182,7 @@ WRITE_STACK_PAIR = (WRITE_STACK_PERMISSION["action"], WRITE_STACK_PERMISSION["sc
 
 
 PRODUCT_READ_FAMILIES: dict[str, tuple[tuple[str, str], ...]] = {
+    "reports": (("reports:read", "reports:*"),),
     "pdc-networks": (
         ("grafana-pdc-app.private-networks:read", ""),
         ("plugins.app:access", "plugins:id:grafana-pdc-app"),
