@@ -71,10 +71,24 @@ def _num(stack: dict[str, Any], field: str) -> float:
     return float(stack.get(field) or 0)
 
 
+def adaptive_eligible(am: dict[str, Any]) -> bool:
+    """Legacy/missing discovery is unknown, never confident whole-stack evidence."""
+    return bool(am.get("available") and am.get("segment_coverage_state") == "unsegmented")
+
+
+def segment_qualification(stacks: list[dict[str, Any]], dataplane: dict[str, Any]) -> str:
+    """Bounded counts over the live scope, not payload membership or raw discovery detail."""
+    states = [((dataplane.get(str(s["slug"])) or {}).get("adaptive_metrics") or {})
+              .get("segment_coverage_state") for s in stacks if s.get("status") != "paused"]
+    return (f"{states.count('unsegmented')} unsegmented; {states.count('segmented')} segmented; "
+            f"{sum(state not in ('unsegmented', 'segmented') for state in states)} unknown. "
+            "Whole-stack rules, savings and adoption withheld for segmented or unknown discovery.")
+
+
 def _adaptive(dataplane: dict[str, Any], slug: str) -> dict[str, Any] | None:
     entry = (dataplane or {}).get(slug) or {}
     am = entry.get("adaptive_metrics") or {}
-    return am if am.get("available") else None
+    return am if adaptive_eligible(am) else None
 
 
 def rules_coverage(stacks: list[dict[str, Any]],
@@ -299,6 +313,7 @@ def build(
                 ],
                 key=lambda r: -(r["Active series"] or 0),
             )
+    if any(_cardinality(dataplane, str(s["slug"])) for s in stacks):
         views["cost_cardinality_outliers"] = sorted(
             [
                 {
@@ -359,5 +374,8 @@ def build(
             " Metric": "Savings in currency",
             "Value": "not available - needs per-recommendation series reduction and the contracted rate card "
                      "(SPEC §11.3). Volume is the honest unit until then.",
+        }, {
+            " Metric": "Adaptive segment coverage",
+            "Value": segment_qualification(in_scope, dataplane),
     }]
     return metrics, views

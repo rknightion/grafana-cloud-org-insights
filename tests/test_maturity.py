@@ -133,7 +133,7 @@ class FairnessTest(unittest.TestCase):
         self.assertLess(light[0], shared[0], "stack084 carries 7x the label values of any other stack")
 
     def test_a_stack_with_no_adaptive_headroom_is_not_marked_down(self):
-        dp = {"adaptive_metrics": {"available": True, "rules_applied": 0,
+        dp = {"adaptive_metrics": {"available": True, "segment_coverage_state": "unsegmented", "rules_applied": 0,
                                   "recommendations_pending": 0}}
         self.assertIsNone(maturity._adaptive_adoption({}, dp))
 

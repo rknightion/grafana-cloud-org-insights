@@ -80,6 +80,10 @@
       "Value": 4.4
     },
     {
+      " Metric": "Adaptive segment coverage",
+      "Value": "40 unsegmented; 0 segmented; 0 unknown. Whole-stack rules, savings and adoption withheld for segmented or unknown discovery."
+    },
+    {
       " Metric": "Stacks with pending recommendations and zero rules applied",
       "Value": 18
     },

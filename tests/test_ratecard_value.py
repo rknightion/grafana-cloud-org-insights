@@ -19,7 +19,7 @@ def _inputs():
         "currentActiveUsers": 10,
     }
     dataplane = {"example": {"adaptive_metrics": {
-        "available": True,
+        "available": True, "segment_coverage_state": "unsegmented",
         "adopted": False,
         "rules_applied": 0,
         "recommendations_pending": 1,

@@ -3597,6 +3597,7 @@
  "dataplane": {
   "stack110": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -3644,6 +3645,7 @@
   },
   "stack177": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 58,
@@ -3901,6 +3903,7 @@
   },
   "stack049": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 99,
@@ -4174,6 +4177,7 @@
   },
   "stack145": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -4221,6 +4225,7 @@
   },
   "stack019": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 50,
@@ -4457,6 +4462,7 @@
   },
   "stack020": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 47,
@@ -4722,6 +4728,7 @@
   },
   "stack158": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 708,
@@ -5022,6 +5029,7 @@
   },
   "stack111": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 2,
@@ -5156,6 +5164,7 @@
   },
   "obs-hub-dev": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": true,
     "available": true,
     "recommendations_pending": 243,
@@ -5424,6 +5433,7 @@
   },
   "stack036": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 610,
@@ -5677,6 +5687,7 @@
   },
   "obs-hub": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": true,
     "available": true,
     "recommendations_pending": 521,
@@ -5948,6 +5959,7 @@
   },
   "stack125": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -5995,6 +6007,7 @@
   },
   "stack071": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -6042,6 +6055,7 @@
   },
   "stack112": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -6089,6 +6103,7 @@
   },
   "stack051": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -6136,6 +6151,7 @@
   },
   "stack146": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -6183,6 +6199,7 @@
   },
   "stack147": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -6230,6 +6247,7 @@
   },
   "stack001": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -6277,6 +6295,7 @@
   },
   "stack001c": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -6324,6 +6343,7 @@
   },
   "stack038": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 66,
@@ -6576,6 +6596,7 @@
   },
   "stack001a": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -6623,6 +6644,7 @@
   },
   "stack035": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 145,
@@ -6872,6 +6894,7 @@
   },
   "stack054": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -6919,6 +6942,7 @@
   },
   "stack053": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 105,
@@ -7182,6 +7206,7 @@
   },
   "stack148": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -7229,6 +7254,7 @@
   },
   "stack126": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -7278,6 +7304,7 @@
   },
   "stack070": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -7325,6 +7352,7 @@
   },
   "stack002": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -7372,6 +7400,7 @@
   },
   "stack097": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -7451,6 +7480,7 @@
   },
   "stack072": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 758,
@@ -7726,6 +7756,7 @@
   },
   "stack037": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": true,
     "available": true,
     "recommendations_pending": 154,
@@ -7975,6 +8006,7 @@
   },
   "stack193": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 12,
@@ -8223,6 +8255,7 @@
   },
   "stack001b": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 2144,
@@ -8461,6 +8494,7 @@
   },
   "stack050": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 3,
@@ -8604,6 +8638,7 @@
   },
   "stack149": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,
@@ -8651,6 +8686,7 @@
   },
   "stack052": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 301,
@@ -8909,6 +8945,7 @@
   },
   "stack113": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 1,
@@ -9035,6 +9072,7 @@
   },
   "stack055": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 25,
@@ -9278,6 +9316,7 @@
   },
   "stack170": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 174,
@@ -9533,6 +9572,7 @@
   },
   "stack201": {
    "adaptive_metrics": {
+    "segment_coverage_state": "unsegmented",
     "adopted": false,
     "available": true,
     "recommendations_pending": 0,

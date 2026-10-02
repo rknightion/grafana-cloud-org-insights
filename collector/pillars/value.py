@@ -24,7 +24,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from collector.coverage import Coverage
-from collector.pillars.cost import qualified_label, rules_coverage
+from collector.pillars.cost import adaptive_eligible, qualified_label, rules_coverage, segment_qualification
 from collector.pillars.maturity import RUBRIC_VERSION, score_stack
 from collector.pillars.usage import SIGNAL_FIELDS
 
@@ -167,7 +167,9 @@ def build(
             elif key == "adaptive_adoption":
                 applied = am.get("rules_applied")
                 total = (applied or 0) + (am.get("recommendations_pending") or 0)
-                value = 100 * applied / total if am.get("available") and applied is not None and total else None
+                value = (100 * applied / total
+                         if s.get("status") != "paused" and adaptive_eligible(am)
+                         and applied is not None and total else None)
             else:
                 value = None
             if value is not None:
@@ -205,12 +207,12 @@ def build(
         (dataplane.get(str(s["slug"])) or {}).get("adaptive_metrics") or {}
         for s in adaptive_stacks_in_scope
     ]
-    available_adaptive = [am for am in adaptive if am.get("available")]
+    available_adaptive = [am for am in adaptive if adaptive_eligible(am)]
     rules_cov = rules_coverage(adaptive_stacks_in_scope, dataplane)
     rules_complete = rules_cov["complete"]
     unadopted_stacks = [
         s for s in adaptive_stacks_in_scope
-        if (am := (dataplane.get(str(s["slug"])) or {}).get("adaptive_metrics") or {}).get("available")
+        if adaptive_eligible(am := (dataplane.get(str(s["slug"])) or {}).get("adaptive_metrics") or {})
         and am.get("rules_applied") is not None
         and am.get("adopted") is False and (am.get("recommendations_pending") or 0)
     ]
@@ -223,7 +225,7 @@ def build(
     remediable_unused = sum(am.get("remediable_series_unused") or 0 for am in savings_measured)
     savings_series_population = sum(
         s.get("hmInstancePromCurrentActiveSeries") or 0 for s in adaptive_stacks_in_scope
-        if (am := (dataplane.get(str(s["slug"])) or {}).get("adaptive_metrics") or {}).get("available")
+        if adaptive_eligible(am := (dataplane.get(str(s["slug"])) or {}).get("adaptive_metrics") or {})
         and am.get("rules_applied") is not None and am.get("series_counts_complete") is True
     )
     recommendation_records = sum(am.get("recommendation_records_total") or 0
@@ -320,6 +322,9 @@ def build(
             else SAVINGS_NO_METRICS_RATE_NOTE
         )
         rows = [{
+            " Metric": "Adaptive segment coverage",
+            "Value": segment_qualification(adaptive_stacks_in_scope, dataplane),
+        }, {
             " Metric": rules_label("Stacks with pending recommendations and zero rules applied"),
             "Value": len(unadopted_stacks) if rules_cov["measured"] else None,
         }, {
@@ -327,13 +332,14 @@ def build(
             "Value": f"{len(complete_stacks)} of {len(adaptive_stacks_in_scope)} in scope",
         }, {
             " Metric": records_label("Savings-bearing add/update records with marginal series counts"),
-            "Value": f"{recommendation_records_with_counts} of {recommendation_savings_records}",
+            "Value": (f"{recommendation_records_with_counts} of {recommendation_savings_records}"
+                      if available_adaptive else None),
         }, {
             " Metric": records_label("Savings-bearing add/update records missing marginal series counts"),
-            "Value": recommendation_records_missing_counts,
+            "Value": recommendation_records_missing_counts if available_adaptive else None,
         }, {
             " Metric": records_label("All recommendation records (including keep/remove)"),
-            "Value": recommendation_records,
+            "Value": recommendation_records if available_adaptive else None,
         }]
         if savings_measured:
             rows[:0] = [{

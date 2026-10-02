@@ -185,7 +185,8 @@ def _datasource_breadth(s, _dp):
 
 def _adaptive_adoption(_s, dp):
     am = (dp or {}).get("adaptive_metrics") or {}
-    if not am.get("available") or am.get("rules_applied") is None:
+    if (not am.get("available") or am.get("segment_coverage_state") != "unsegmented"
+            or am.get("rules_applied") is None):
         return None
     applied, pending = am["rules_applied"], am["recommendations_pending"]
     if not applied and not pending:

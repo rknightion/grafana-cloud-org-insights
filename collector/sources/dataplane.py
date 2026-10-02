@@ -21,6 +21,7 @@ from __future__ import annotations
 import base64
 import decimal
 import json
+import re
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -314,7 +315,7 @@ def _auto_apply_config(
     return {"auto_apply_state": state, "auto_apply": auto_apply}
 
 
-def adaptive_metrics(client: ReadOnlyClient, stack: dict[str, Any], cap: str) -> dict[str, Any]:
+def _default_adaptive_metrics(client: ReadOnlyClient, stack: dict[str, Any], cap: str) -> dict[str, Any]:
     """Applied aggregation rules vs waiting recommendations = the unrealised saving."""
     unknown_rules = {"rules_available": False, "rules_applied": None, "adopted": None}
     base = stack.get("hmInstancePromUrl")
@@ -367,6 +368,58 @@ def adaptive_metrics(client: ReadOnlyClient, stack: dict[str, Any], cap: str) ->
         **auto_apply,
         **summary,
     }
+
+
+def adaptive_metrics(client: ReadOnlyClient, stack: dict[str, Any], cap: str) -> dict[str, Any]:
+    """Discovery fences default-only counts; no segmented output-additivity claim is made."""
+    base = stack.get("hmInstancePromUrl")
+    discovery = {"segment_coverage_state": "unknown", "segments_discovered": None,
+                 "segment_coverage_reason": "unreadable"}
+    if base:
+        try:
+            response = client.get(f"{base}/aggregations/rules/segments",
+                                  basic=auth_for(stack, "metrics", cap))
+            if response.ok:
+                segments = response.json()
+                # Enumeration is deliberately bounded. IDs are transient validation inputs only.
+                valid = isinstance(segments, list) and len(segments) <= 1000
+                ids: set[str] = set()
+                if valid:
+                    for segment in segments:
+                        if not isinstance(segment, dict):
+                            valid = False
+                            break
+                        sid = segment.get("id")
+                        if (not isinstance(sid, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", sid)
+                                or sid in ids or not isinstance(segment.get("fallback_to_default"), bool)):
+                            valid = False
+                            break
+                        ids.add(sid)
+                if valid:
+                    discovery = {
+                        "segment_coverage_state": "segmented" if segments else "unsegmented",
+                        "segments_discovered": len(segments),
+                        "segment_coverage_reason": "segments_present" if segments else "empty",
+                    }
+                else:
+                    discovery["segment_coverage_reason"] = "malformed"
+        except Exception:  # noqa: BLE001 - optional discovery cannot expose response detail
+            pass
+    out = _default_adaptive_metrics(client, stack, cap)
+    out.update(discovery)
+    if discovery["segment_coverage_state"] != "unsegmented":
+        # available continues to describe HTTP/payload availability, not whole-stack eligibility.
+        # series_counts_complete still describes the independently validated DEFAULT row counts.
+        out.update({"rules_available": False, "rules_applied": None, "adopted": None})
+        for key in ("recommendations_pending", "recommendation_records_total",
+                    "recommendation_records_savings_bearing", "recommendation_records_with_series_counts",
+                    "recommendation_records_missing_series_counts", "series_under_recommendation",
+                    "series_after_recommendation", "remediable_series", "remediable_series_unused"):
+            if key in out:
+                out[key] = None
+        out["sample_recommendations"] = []
+        out["actions"] = {}
+    return out
 
 
 def fleet(stack: dict[str, Any], cap: str) -> dict[str, Any]:

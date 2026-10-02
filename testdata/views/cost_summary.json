@@ -90,6 +90,10 @@
     {
       " Metric": "Savings in currency",
       "Value": "not available - needs per-recommendation series reduction and the contracted rate card (SPEC \u00a711.3). Volume is the honest unit until then."
+    },
+    {
+      " Metric": "Adaptive segment coverage",
+      "Value": "40 unsegmented; 0 segmented; 0 unknown. Whole-stack rules, savings and adoption withheld for segmented or unknown discovery."
     }
   ]
 }

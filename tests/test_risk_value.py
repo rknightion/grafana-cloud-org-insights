@@ -86,7 +86,7 @@ def _service_accounts():
 
 def _complete_savings_dataplane(stack, *, remediable=90, unused=70):
     return {str(stack["slug"]): {"adaptive_metrics": {
-        "available": True,
+        "available": True, "segment_coverage_state": "unsegmented",
         "rules_applied": 0,
         "adopted": False,
         "recommendations_available": True,
@@ -455,7 +455,7 @@ class ValueTest(unittest.TestCase):
         """One non-verbose record makes the estate reduction unknown, not a smaller confident total."""
         stack = self.stacks[0]
         incomplete = {str(stack["slug"]): {"adaptive_metrics": {
-            "available": True,
+            "available": True, "segment_coverage_state": "unsegmented",
             "rules_applied": 0,
             "adopted": False,
             "recommendations_available": True,

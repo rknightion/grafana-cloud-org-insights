@@ -39,7 +39,7 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
         for stack in stacks:
             coverage.record_ok(stack["slug"])
         payload = {slug: {"adaptive_metrics": {
-            "available": True, "rules_available": True, "rules_applied": 2,
+            "available": True, "segment_coverage_state": "unsegmented", "rules_available": True, "rules_applied": 2,
             "adopted": True, "recommendations_pending": 1,
         }} for slug in ("first", "second")}
         metrics, views, view_coverage = compose.build_all(stacks, coverage, dataplane=payload)
@@ -115,7 +115,7 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
         for stack in stacks:
             coverage.record_ok(stack["slug"])
         payload = {slug: {"adaptive_metrics": {
-            "available": True, "rules_applied": applied, "adopted": bool(applied),
+            "available": True, "segment_coverage_state": "unsegmented", "rules_applied": applied, "adopted": bool(applied),
             "recommendations_pending": 2,
         }} for slug, applied in (("empty", 0), ("adopted", 2))}
         _, views, view_coverage = compose.build_all(stacks, coverage, dataplane=payload)
@@ -160,7 +160,7 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
         stacks = [{"slug": slug, "status": "active", "hmInstancePromUrl": "https://prom.example"}
                   for slug in ("unknown", "first", "second")]
         payload = {slug: {"adaptive_metrics": {
-            "available": True, "rules_applied": 2, "adopted": True,
+            "available": True, "segment_coverage_state": "unsegmented", "rules_applied": 2, "adopted": True,
             "recommendations_pending": 1, "series_counts_complete": True,
             "remediable_series": 10,
         }} for slug in ("first", "second")}
@@ -209,7 +209,7 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
             coverage.record_ok(stack["slug"])
         payload = {
             slug: {"adaptive_metrics": {
-                "available": True, "rules_available": applied is not None,
+                "available": True, "segment_coverage_state": "unsegmented", "rules_available": applied is not None,
                 "rules_applied": applied, "adopted": bool(applied) if applied is not None else None,
                 "recommendations_pending": 2,
             }}
@@ -286,7 +286,7 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
         # Known adopted plus unknown must not manufacture a zero finding gauge either.
         payload["empty"] = payload["adopted"]
         payload["unknown"] = {"adaptive_metrics": {
-            "available": True, "rules_available": False, "rules_applied": None,
+            "available": True, "segment_coverage_state": "unsegmented", "rules_available": False, "rules_applied": None,
             "adopted": None, "recommendations_pending": 2,
         }}
         _, views, view_coverage = build_all(stacks, coverage, dataplane=payload)
@@ -444,7 +444,7 @@ class AutoApplyViewTest(unittest.TestCase):
             stacks,
             coverage,
             {"example": {"adaptive_metrics": {
-                "available": True,
+                "available": True, "segment_coverage_state": "unsegmented",
                 "adopted": False,
                 "rules_applied": 0,
                 "recommendations_pending": 1,

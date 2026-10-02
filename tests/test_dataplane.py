@@ -11,6 +11,11 @@ import urllib.response
 from email.message import Message
 from unittest import mock
 
+import pytest
+
+from collector.coverage import Coverage
+from collector.emit import s3
+from collector.pillars import compose, maturity
 from collector.sources import dataplane
 
 
@@ -213,6 +218,8 @@ class AdaptiveRulesAvailabilityTest(unittest.TestCase):
                 self.rules = rules
 
             def get(self, url, basic=None):
+                if url.endswith('/aggregations/rules/segments'):
+                    return Response(True, [])
                 if url.endswith('/aggregations/rules'):
                     return self.rules
                 if 'verbose=true' in url:
@@ -446,6 +453,186 @@ class ConnectRpcTest(unittest.TestCase):
                 "https://profiles.example/write.v1.WriterService/Push", "123", "cap",
                 payload={"series": []},
             )
+
+
+# Segment discovery fences whole-stack claims across the real publication boundary.
+class Response:
+    def __init__(self, body, ok=True):
+        self.body, self.ok, self.status = body, ok, 200 if ok else 503
+
+    def json(self):
+        return self.body
+
+
+class Client:
+    def __init__(self, segments, ok=True, empty=False):
+        self.segments, self.ok, self.empty, self.calls = segments, ok, empty, []
+
+    def get(self, url, basic=None):
+        self.calls.append((url, basic))
+        if url.endswith('/segments'):
+            return Response(self.segments, self.ok)
+        if url.endswith('/rules'):
+            return Response([])
+        if '?verbose=true' in url:
+            return Response([] if self.empty else [{
+                'metric': 'synthetic_metric', 'recommended_action': 'add',
+                'current_series_count': 100, 'recommended_series_count': 10,
+            }])
+        return Response({})
+
+
+STACK = {'slug': 'one', 'hmInstancePromUrl': 'https://inventory.example',
+         'hmInstancePromId': '123', 'hmInstancePromCurrentActiveSeries': 1000}
+SEGMENT = {'id': 'synthetic-segment-a', 'fallback_to_default': True,
+           'name': 'PRIVATE-NAME', 'selector': 'PRIVATE-SELECTOR'}
+
+
+def publish(am, stacks=None, payload=None, ratecard=None):
+    stacks = stacks or [STACK]
+    coverage = Coverage(tier='t3', total=len(stacks))
+    for stack in stacks:
+        if stack.get('status') == 'paused':
+            coverage.record_skipped(stack['slug'], 'paused')
+        else:
+            coverage.record_ok(stack['slug'])
+    payload = payload or {'one': {'adaptive_metrics': am}}
+    metrics, views, cov = compose.build_all(stacks, coverage, dataplane=payload, ratecard=ratecard)
+    published = {}
+
+    def capture(path, key, bucket, dry_run):
+        published[key] = json.loads(path.read_text())
+        return key
+
+    with mock.patch.object(s3, '_put', side_effect=capture):
+        s3.write_views(views, {'tier': 't3'}, bucket='offline', view_coverage=cov)
+    return metrics, views, published
+
+
+def test_segmented_default_saving_is_not_a_whole_stack_total():
+    client = Client([SEGMENT])
+    am = dataplane.adaptive_metrics(client, STACK, 'cap')
+    from collector import ratecard
+    card = ratecard.loads('dimension,rate,per,unit,included,currency,period,billing_basis,notes\n'
+                          'metrics_series,3,1000,series,0,USD,month,base_rate_only,\n')
+    metrics, views, published = publish(am, ratecard=card)
+    assert not any(name.startswith('gcinsight_value_savings_') for name, _, _ in metrics)
+    assert 'gcinsight_value_savings_identified_series' not in {n for n, _, _ in metrics}
+    assert am['segment_coverage_state'] == 'segmented'
+    assert am['series_counts_complete'] is True  # default-count validity is independent
+    assert am['rules_applied'] is None
+    assert am['remediable_series'] is None
+    assert maturity._adaptive_adoption(STACK, {'adaptive_metrics': am}) is None
+    assert published['views/value_savings.json']['meta']['rules_coverage'] == {
+        'measured': 0, 'in_scope': 1, 'complete': False}
+    encoded = json.dumps(published)
+    assert 'segmented' in encoded
+    assert 'PRIVATE-' not in encoded
+    assert SEGMENT['id'] not in encoded
+    assert client.calls.count(('https://inventory.example/aggregations/rules/segments',
+                               ('123', 'cap'))) == 1
+
+
+@pytest.mark.parametrize('segments,ok,state', [
+    ([], True, 'unsegmented'), ([SEGMENT], True, 'segmented'),
+    ({}, True, 'unknown'), ([None], True, 'unknown'),
+    ([SEGMENT, SEGMENT], True, 'unknown'),
+    ([dict(SEGMENT, id='bad/id')], True, 'unknown'),
+    ([dict(SEGMENT, fallback_to_default=1)], True, 'unknown'),
+    ([{'id': SEGMENT['id']}], True, 'unknown'),
+    ([], False, 'unknown'),
+])
+def test_discovery_states(segments, ok, state):
+    am = dataplane.adaptive_metrics(Client(segments, ok), STACK, 'cap')
+    assert am['segment_coverage_state'] == state
+    metrics, _, _ = publish(am)
+    names = {n for n, _, _ in metrics}
+    assert ('gcinsight_value_savings_identified_series' in names) == (state == 'unsegmented')
+    assert am['segments_discovered'] == (len(segments) if state != 'unknown' else None)
+
+
+def test_empty_discovery_and_empty_recommendations_prove_zero():
+    am = dataplane.adaptive_metrics(Client([], empty=True), STACK, 'cap')
+    metrics, _, _ = publish(am)
+    assert ('gcinsight_value_savings_identified_series', {}, 0.0) in metrics
+
+
+def test_legacy_complete_counts_remain_unknown():
+    am = dataplane.adaptive_metrics(Client([]), STACK, 'cap')
+    del am['segment_coverage_state']
+    metrics, _, published = publish(am)
+    assert 'gcinsight_value_savings_identified_series' not in {n for n, _, _ in metrics}
+    assert published['views/value_savings.json']['meta']['rules_coverage']['measured'] == 0
+    assert maturity._adaptive_adoption(STACK, {'adaptive_metrics': am}) is None
+
+
+def test_mixed_live_source_population_is_qualified_in_dashboard(tmp_path):
+    import shutil
+    from bin import dashboards
+    from collector.dashboards import build
+    from collector import ratecard
+
+    normal = dataplane.adaptive_metrics(Client([]), STACK, 'cap')
+    segmented = dataplane.adaptive_metrics(Client([SEGMENT]), STACK, 'cap')
+    unknown = dataplane.adaptive_metrics(Client({}, False), STACK, 'cap')
+    stacks = [dict(STACK, slug=slug) for slug in ('one', 'segmented', 'unknown')]
+    stacks.append(dict(STACK, slug='paused', status='paused'))
+    payload = {slug: {'adaptive_metrics': am} for slug, am in (
+        ('one', normal), ('segmented', segmented), ('unknown', unknown),
+        ('departed', normal), ('paused', normal))}
+    card = ratecard.loads('dimension,rate,per,unit,included,currency,period,billing_basis,notes\n'
+                          'metrics_series,3,1000,series,0,USD,month,base_rate_only,\n')
+    metrics, views, published = publish(normal, stacks, payload, card)
+    assert not any(name.startswith('gcinsight_value_savings_') for name, _, _ in metrics)
+    envelope = published['views/value_savings.json']
+    assert envelope['meta']['rules_coverage'] == {
+        'measured': 1, 'in_scope': 3, 'complete': False}
+    rows = {r[' Metric']: r['Value'] for r in envelope['rows']}
+    assert rows['Remediable series, applying every recommendation (measured on 1 of 3 stacks)'] == 90
+    priced = [v for k, v in rows.items() if 'USD/month' in k]
+    assert priced[0] == 0.27
+    assert '1 unsegmented; 1 segmented; 1 unknown' in rows['Adaptive segment coverage']
+    benchmark = next(r for r in views['value_benchmarks'] if r[' Dimension'] == 'adaptive_adoption')
+    assert benchmark['Stacks with data'] == 1
+    fixtures = __import__('pathlib').Path(__file__).resolve().parents[1] / 'testdata/views'
+    for existing in fixtures.glob('*.json'):
+        shutil.copyfile(existing, tmp_path / existing.name)
+    for key, doc in published.items():
+        (tmp_path / key.rsplit('/', 1)[-1]).write_text(json.dumps(doc))
+    with mock.patch.object(build, 'VIEWS_DIR', str(tmp_path)), mock.patch.object(build, 'BUCKET', 'offline'):
+        _, dashboard = dashboards.assemble('value', 'infinity-offline')
+    queries = [q['spec']['query']['spec'] for element in dashboard['spec']['elements'].values()
+               for q in element['spec'].get('data', {}).get('spec', {}).get('queries', [])]
+    savings = next(q for q in queries if q.get('url', '').endswith('/value_savings.json'))
+    assert savings['root_selector'] == 'rows'
+    assert ' Metric' in [c['selector'] for c in savings['columns']]
+
+
+def test_t1_legacy_hydration_cannot_carry_complete_default_totals():
+    import datetime as dt
+    import scan
+    from collector.emit import hydrate
+    from tests.test_scan import FakeClient, cfg_for
+
+    am = dataplane.adaptive_metrics(Client([]), STACK, 'cap')
+    del am['segment_coverage_state']
+    names = ['gcinsight_cost_adaptive_rules_applied_total', 'gcinsight_cost_stacks_without_adaptive',
+             'gcinsight_value_savings_identified_series', 'gcinsight_value_savings_unused_series',
+             'gcinsight_value_savings_identified_currency', 'gcinsight_value_savings_unused_currency']
+    state = {'generated_at': dt.datetime.now(dt.timezone.utc).isoformat(), 'tier': 't3',
+             'metrics': [[name, {}, 100] for name in names]}
+    with (mock.patch.object(scan.gcom, 'fetch_inventory', return_value=[dict(STACK, status='active')]),
+          mock.patch.object(scan.gcom, 'fetch_access_policies', return_value=[]),
+          mock.patch.object(scan.gcom, 'fetch_org_members', return_value={'state': 'ok', 'members': []}),
+          mock.patch.object(scan, 'gather_fleet', return_value=({}, [])),
+          mock.patch.object(scan.hydrate, 'hydrate', return_value=(
+              {'dataplane': {'one': {'adaptive_metrics': am}}}, hydrate.Provenance())),
+          mock.patch.object(scan, 'assistant_gaps', return_value={}),
+          mock.patch.object(scan, 'load_ratecard', return_value=None),
+          mock.patch.object(scan.carry, 'load_state', return_value=state)):
+        result = scan.run_t1(FakeClient(), cfg_for('t1'))
+    assert set(names).isdisjoint(n for n, _, _ in result['_emit']['metrics'])
+    assert result['_emit']['view_coverage']['cost_summary']['measured'] == 0
 
 
 if __name__ == "__main__":
