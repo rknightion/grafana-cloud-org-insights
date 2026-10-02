@@ -33171,5 +33171,367 @@
    "available": true,
    "integration_count": 0
   }
+ },
+ "faro_apps": {
+  "stack158": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack145": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack177": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack125": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack001": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack001b": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack001c": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack001a": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack019": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack049": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack110": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack020": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "obs-hub": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "obs-hub-dev": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack035": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack036": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack111": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack070": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack037": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack071": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack050": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack112": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack051": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack146": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack147": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack038": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack052": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack053": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack054": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack148": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack126": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack002": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack113": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack097": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack072": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack055": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack193": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack170": {
+   "available": true,
+   "app_count": 1,
+   "app_types": {
+    "web": 1,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack201": {
+   "available": true,
+   "app_count": 2,
+   "app_types": {
+    "web": 2,
+    "mobile": 0,
+    "unknown": 0
+   }
+  },
+  "stack149": {
+   "available": true,
+   "app_count": 0,
+   "app_types": {
+    "web": 0,
+    "mobile": 0,
+    "unknown": 0
+   }
+  }
  }
 }

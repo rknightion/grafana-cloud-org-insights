@@ -1204,6 +1204,15 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
 def d_usage(ds: str):
     # An optional, never-published object must not prevent the Usage build.
     # A readable last-good view remains eligible, regardless of its timestamp.
+    faro_panel = None
+    try:
+        faro_panel = build.table_panel(
+            "Configured Faro apps", "faro_apps", ds,
+            description="Point-in-time configured apps by web/mobile/unknown type. Not sessions or usage. "
+                        "Default-off selection; unreadable or unmeasured stacks are absent, never zero. "
+                        "Reader visibility is conditional on the stack's product permissions.")
+    except FileNotFoundError:
+        pass
     irm_panel = None
     try:
         irm_panel = build.table_panel(
@@ -1455,11 +1464,16 @@ def d_usage(ds: str):
                         "those logs, or stopped shipping them - both are wins, and the per-stack chart "
                         "above says which."),
     }
+    if faro_panel is not None:
+        el["faro_apps"] = faro_panel
     if irm_panel is not None:
         el["irm_integrations"] = irm_panel
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
         build.tab("Adoption", ["t_signals", "plugins"]),
+        *([build.rows_tab("Configured Faro apps", [
+            build.row("Configured Faro apps", ["faro_apps"], max_columns=1),
+        ])] if faro_panel is not None else []),
         *([build.rows_tab("Configured IRM integrations", [
             build.row("Configured IRM integrations", ["irm_integrations"], max_columns=1),
         ])] if irm_panel is not None else []),

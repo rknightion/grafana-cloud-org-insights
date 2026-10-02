@@ -1,0 +1,378 @@
+{
+  "meta": {
+    "generated_at": "2026-10-02T18:07:38.004540+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_traces": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "slo_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "synthetic_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_integrations": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "faro_apps": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_risk": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      "Stack": "stack158",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack145",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack177",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack125",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack001",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack001b",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack001c",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack001a",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack019",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack049",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack110",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack020",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "obs-hub",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "obs-hub-dev",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack035",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack036",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack111",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack070",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack037",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack071",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack050",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack112",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack051",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack146",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack147",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack038",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack052",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack053",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack054",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack148",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack126",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack002",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack113",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack097",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack072",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack055",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack193",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack170",
+      "Configured Faro apps": 1,
+      "Web apps": 1,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack201",
+      "Configured Faro apps": 2,
+      "Web apps": 2,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    },
+    {
+      "Stack": "stack149",
+      "Configured Faro apps": 0,
+      "Web apps": 0,
+      "Mobile apps": 0,
+      "Unknown type apps": 0
+    }
+  ]
+}

@@ -603,9 +603,9 @@ variable "provisioner_product_reads" {
 
   validation {
     condition = length(distinct(var.provisioner_product_reads)) == length(var.provisioner_product_reads) && alltrue([
-      for family in var.provisioner_product_reads : contains(["slo", "synthetic-monitoring", "synthetic-monitoring-query", "irm-integrations"], family)
+      for family in var.provisioner_product_reads : contains(["slo", "synthetic-monitoring", "synthetic-monitoring-query", "irm-integrations", "faro-apps"], family)
     ]) && (!contains(var.provisioner_product_reads, "synthetic-monitoring-query") || contains(var.provisioner_product_reads, "synthetic-monitoring"))
-    error_message = "provisioner_product_reads accepts unique slo, synthetic-monitoring, synthetic-monitoring-query and irm-integrations tokens; synthetic-monitoring-query requires synthetic-monitoring."
+    error_message = "provisioner_product_reads accepts unique slo, synthetic-monitoring, synthetic-monitoring-query, irm-integrations and faro-apps tokens; synthetic-monitoring-query requires synthetic-monitoring."
   }
 }
 

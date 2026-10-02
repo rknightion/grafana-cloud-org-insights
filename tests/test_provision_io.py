@@ -932,6 +932,8 @@ def test_legacy_synthetic_customer_safety():
         expected_removable = {tuple(pair) for pair in case["removable"]} | {
             ("grafana-irm-app.integrations:read", ""),
             ("plugins.app:access", "plugins:id:grafana-irm-app"),
+            ("grafana-kowalski-app.apps:read", ""),
+            ("plugins.app:access", "plugins:id:grafana-kowalski-app"),
         }
         assert set(removable) == expected_removable
         wanted = pr.permission_pairs(permissions)

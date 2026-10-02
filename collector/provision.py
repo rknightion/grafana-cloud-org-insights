@@ -182,6 +182,10 @@ WRITE_STACK_PAIR = (WRITE_STACK_PERMISSION["action"], WRITE_STACK_PERMISSION["sc
 
 
 PRODUCT_READ_FAMILIES: dict[str, tuple[tuple[str, str], ...]] = {
+    "faro-apps": (
+        ("grafana-kowalski-app.apps:read", ""),
+        ("plugins.app:access", "plugins:id:grafana-kowalski-app"),
+    ),
     "irm-integrations": (
         ("grafana-irm-app.integrations:read", ""),
         ("plugins.app:access", "plugins:id:grafana-irm-app"),

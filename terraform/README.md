@@ -117,7 +117,7 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 | `scan_runtime_config_digest`, `provisioner_runtime_config_digest`, `require_explicit_consumer_config` | empty, empty, `false`; consumer projections may require both validated digests |
 | `create_provisioner`, `provisioner_secret_key` | `false`, `GCINSIGHT_PROVISION_TOKEN`; independent opt-in write-capable task |
 | `provisioner_schedule_expression`, `provisioner_enabled` | daily module default, `true`; see RUNBOOK timetable and both schedule gates above |
-| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query`/`irm-integrations` read families |
+| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query`/`irm-integrations`/`faro-apps` read families |
 | `provisioner_cpu`, `provisioner_memory` | `256`, `512` MiB; separate provisioner sizing |
 
 | Outputs | Use / availability |
@@ -221,10 +221,16 @@ does require a stack-realm `logs:write` token represented by the adopted access-
 ## Reader product policy
 
 `provisioner_product_reads` remains default-off (`[]`) and accepts `slo`, `synthetic-monitoring`,
-`synthetic-monitoring-query` and `irm-integrations`. The query token requires `synthetic-monitoring`
+`synthetic-monitoring-query`, `irm-integrations` and `faro-apps`. The query token requires `synthetic-monitoring`
 and adds query access only to the stack's single uniquely discovered, valid Synthetic datasource
 UID plus unscoped probes read. Ambiguous or invalid discovery grants neither pair. Without the
 query token, collection makes no Synthetic HTTP calls and legacy role grants stay unchanged.
+`faro-apps` adds only `grafana-kowalski-app.apps:read` (empty scope) and
+`plugins.app:access` scoped to `plugins:id:grafana-kowalski-app`. It enables default-off T2
+point-in-time app counts by web/mobile/unknown type, not sessions or usage. App identifiers,
+names, ingest keys/endpoints and settings are discarded at parse. Unreadable stacks are absent;
+visibility is conditional on product permissions, not a universal estate completeness claim.
+
 `irm-integrations` adds only `grafana-irm-app.integrations:read` (empty scope) and
 `plugins.app:access` (`plugins:id:grafana-irm-app`) for T2 configured integration counts, not activity.
 That credential also reaches secret-bearing configuration; the collector is restricted to GET

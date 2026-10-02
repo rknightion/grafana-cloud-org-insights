@@ -71,14 +71,39 @@ def add_synthetic_irm() -> int:
     return 0
 
 
+def add_synthetic_faro() -> int:
+    """Append only count/type projection, preserving every upstream field and byte format."""
+    original = COMMITTED_FIXTURE.read_text()
+    payload = json.loads(original)
+    projection = {
+        str(stack["slug"]): {"available": True, "app_count": index % 3,
+                             "app_types": {"web": index % 3, "mobile": 0, "unknown": 0}}
+        for index, stack in enumerate(s for s in payload["stacks"] if s.get("status") != "paused")
+    }
+    if "faro_apps" in payload:
+        if payload["faro_apps"] != projection:
+            raise ValueError("existing Faro fixture differs from the synthetic projection")
+        return 0
+    end = original.rfind("}")
+    field = json.dumps({"faro_apps": projection}, indent=1)[2:-2]
+    COMMITTED_FIXTURE.write_text(original[:end].rstrip() + ",\n" + field + "\n" + original[end:])
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--stacks", type=int, default=40)
+    ap.add_argument("--synthetic-faro", action="store_true",
+                    help="add only synthetic minimized Faro counts, offline")
     ap.add_argument("--synthetic-irm", action="store_true",
                     help="add only synthetic minimized IRM counts to the committed fixture, offline")
     ap.add_argument("--output",
                     help="export path outside the committed synthetic fixture")
     args = ap.parse_args(argv)
+    if args.synthetic_faro:
+        if args.output or args.synthetic_irm:
+            ap.error("--synthetic-faro cannot be combined with --output or --synthetic-irm")
+        return add_synthetic_faro()
     if args.synthetic_irm:
         if args.output:
             ap.error("--synthetic-irm cannot be combined with --output")
