@@ -49,8 +49,10 @@ live dev proof it depended on failed (`goal-2026-09-23-wave2.md` §"R6 release";
   scope, with the owner-approved S-SM opt-in exception: `synthetic-monitoring-query` requires
   `synthetic-monitoring` and adds only the single live-discovered SM datasource uid query pair plus
   the empty-scope probes read action. Never a wildcard or a grant through the existing SM token;
-  ambiguity or an invalid uid adds no pair. S-SM(e'): with the query token absent, a held non-baseline
-  datasource query pair permits one bounded discovery of the datasource list. Deselection removes
+  ambiguity or an invalid uid adds no pair. S-SM(e'): with the query token absent, a held datasource
+  query pair outside an approved telemetry query permits one bounded discovery of the datasource
+  list. The telemetry baseline is usage-insights everywhere and grafanacloud-usage only on the write
+  stack, preserving its existing desired/removable/dangerous rules. Deselection removes
   only a held pair matching the uniquely discovered, regex-valid SM uid and the empty-scope probes
   read action. Ambiguous or invalid discovery removes nothing and reports it; every other query
   pair stays dangerous. A v0.4.3-correct role makes zero discovery calls. With the token absent,

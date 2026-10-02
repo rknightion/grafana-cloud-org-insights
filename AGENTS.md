@@ -74,8 +74,11 @@ off anything but the live inventory.
   a grant through the existing `synthetic-monitoring` token, whose three pairs stay unchanged.
   An ambiguous datasource set or a uid outside `^[A-Za-z0-9_-]{1,40}$` adds no query pair. Every
   other datasource query pair and every SM write action remain refused. S-SM(e'): without the new
-  token, a held non-baseline `datasources:query` pair permits one bounded discovery of the datasource
-  list. Only a held pair whose uid equals the uniquely discovered, regex-valid SM uid (plus the
+  token, a held `datasources:query` pair outside an approved telemetry query permits one bounded
+  discovery of the datasource list. The approved telemetry query baseline is usage-insights on every
+  stack plus `datasources:uid:grafanacloud-usage` only on the write stack, preserving the existing
+  desired/removable/dangerous rules for that pair. Only a held pair whose uid equals the uniquely
+  discovered, regex-valid SM uid (plus the
   empty-scope probes read action) is removable. Ambiguous or invalid discovery removes nothing and
   reports it; every other query pair stays dangerous. A v0.4.3-correct role makes zero discovery
   calls. With the token absent, scans make zero SM calls.
