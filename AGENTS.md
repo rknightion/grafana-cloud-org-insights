@@ -73,8 +73,12 @@ off anything but the live inventory.
   `grafana-synthetic-monitoring-app.probes:read` with empty scope. Never a wildcard, name match or
   a grant through the existing `synthetic-monitoring` token, whose three pairs stay unchanged.
   An ambiguous datasource set or a uid outside `^[A-Za-z0-9_-]{1,40}$` adds no query pair. Every
-  other datasource query pair and every SM write action remain refused. Without the new token,
-  discovery runs only to remove an already-held exact SM query pair; scans make zero SM calls.
+  other datasource query pair and every SM write action remain refused. S-SM(e'): without the new
+  token, a held non-baseline `datasources:query` pair permits one bounded discovery of the datasource
+  list. Only a held pair whose uid equals the uniquely discovered, regex-valid SM uid (plus the
+  empty-scope probes read action) is removable. Ambiguous or invalid discovery removes nothing and
+  reports it; every other query pair stays dangerous. A v0.4.3-correct role makes zero discovery
+  calls. With the token absent, scans make zero SM calls.
 - The owner's GCI-0041 scope decision accepts two residual risks only for its named routes:
   IRM `grafana-irm-app.integrations:read` also reaches secret-bearing integration configuration,
   but the collector may call only `alert_receive_channels/counters` and publish counts; ML
