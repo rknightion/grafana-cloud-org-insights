@@ -55,8 +55,8 @@ def test_captured_proxy_to_compose_drops_content_and_emits_no_business_metrics()
     assert all(token == "synthetic" for _, token in client.calls)
     cov = Coverage(tier="t2", total=1)
     cov.record_ok("obs-hub")
-    baseline, _ = compose.build_all([STACK], cov)
-    metrics, views = compose.build_all([STACK], cov, adaptive_traces=inventory)
+    baseline, _, _ = compose.build_all([STACK], cov)
+    metrics, views, _ = compose.build_all([STACK], cov, adaptive_traces=inventory)
     assert metrics == baseline
     row = views[adaptive_traces.VIEW][0]
     assert row["policy_count"] == 4 and row["config_available"] is True

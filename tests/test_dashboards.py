@@ -2036,7 +2036,7 @@ class RecentDashboardPresentationContractsTest(unittest.TestCase):
         for i in range(data["scanned"]):
             coverage.record_ok(f"s{i}")
         inputs = {key: data[key] for key in sorted(hydrate.INPUT_OWNER)}
-        _metrics, views = compose.build_all(data["stacks"], coverage, **inputs)
+        _metrics, views, _ = compose.build_all(data["stacks"], coverage, **inputs)
         expected = {
             "risk_fleet_attributes": risk.VIEW_SCHEMAS["risk_fleet_attributes"],
             "risk_fleet_pipelines": risk.VIEW_SCHEMAS["risk_fleet_pipelines"],
@@ -2237,7 +2237,7 @@ class EveryPublishedViewIsRenderedSomewhereTest(unittest.TestCase):
         for i in range(self.data["scanned"]):
             cov.record_ok(f"s{i}")
         kw = {k: self.data[k] for k in sorted(hydrate.INPUT_OWNER)}
-        _metrics, views = compose.build_all(stacks, cov, **kw)
+        _metrics, views, _ = compose.build_all(stacks, cov, **kw)
         return set(views)
 
     def test_every_view_the_pillars_produce_has_a_panel(self):

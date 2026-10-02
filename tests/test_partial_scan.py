@@ -77,8 +77,8 @@ class TheEstateDoesNotShrinkTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.stacks = _inventory()
-        cls.ok, _ = compose.build_all(cls.stacks, _healthy(cls.stacks))
-        cls.bad, _ = compose.build_all(cls.stacks, _degraded(cls.stacks))
+        cls.ok, _, _ = compose.build_all(cls.stacks, _healthy(cls.stacks))
+        cls.bad, _, _ = compose.build_all(cls.stacks, _degraded(cls.stacks))
         cls.ok_by, cls.bad_by = _by_name(cls.ok), _by_name(cls.bad)
 
     def test_the_estate_size_is_unchanged(self):

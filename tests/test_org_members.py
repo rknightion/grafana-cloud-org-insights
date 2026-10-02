@@ -82,7 +82,7 @@ class OrgMembershipGovernanceTest(unittest.TestCase):
 
     def test_composition_accepts_the_org_level_input(self):
         self.assertIn("org_members", inspect.signature(compose.build_all).parameters)
-        metrics, views = compose.build_all(
+        metrics, views, _ = compose.build_all(
             [], coverage(), org_members={"state": "ok", "members": []}, now=NOW,
         )
         self.assertIn("gcinsight_risk_org_members_admins", {name for name, _, _ in metrics})

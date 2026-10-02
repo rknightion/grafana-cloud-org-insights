@@ -844,7 +844,7 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         bucket=s3emit.BUCKET,
     )
     rate_card = load_ratecard(bucket=s3emit.BUCKET)
-    metrics, views = compose.build_all(
+    metrics, views, view_coverage = compose.build_all(
         stacks, coverage,
         gap_first_seen=assistant_gaps(cfg, stacks, inputs.get("assistant"), gathered=False),
         ratecard=rate_card,
@@ -870,6 +870,18 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         # re-stamped as current for up to MAX_CARRY_AGE.
         carried, report = carry.carry_forward(
             metrics, state, live_stacks={str(s['slug']) for s in stacks})
+        # These additive Adaptive estate metrics are deliberately absent from live composition
+        # unless all required reads are complete. Carry must not undo that coverage decision by
+        # re-stamping an older complete estate over today's partial live inventory.
+        adaptive_totals = {
+            "gcinsight_cost_adaptive_rules_applied_total", "gcinsight_cost_stacks_without_adaptive",
+            "gcinsight_value_savings_identified_series", "gcinsight_value_savings_unused_series",
+            "gcinsight_value_savings_identified_currency", "gcinsight_value_savings_unused_currency",
+        }
+        live_names = {name for name, _, _ in metrics}
+        carried = [series for series in carried
+                   if series[0] not in adaptive_totals or series[0] in live_names]
+        report["carried"] = len(carried)
         if report["too_old"]:
             console_log(
                 "warn",
@@ -904,7 +916,7 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         },
     )
     scan["meta"]["inputs"] = scan_inputs
-    scan["_emit"] = {"metrics": metrics, "views": views}
+    scan["_emit"] = {"metrics": metrics, "views": views, "view_coverage": view_coverage}
     return scan
 
 
@@ -1067,7 +1079,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         bucket=s3emit.BUCKET,
     )
     rate_card = load_ratecard(bucket=s3emit.BUCKET)
-    metrics, views = compose.build_all(
+    metrics, views, view_coverage = compose.build_all(
         selected, coverage,
         gap_first_seen=assistant_gaps(
             cfg, selected, inputs.get("assistant"),
@@ -1105,7 +1117,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         },
     )
     scan["meta"]["inputs"] = scan_inputs
-    scan["_emit"] = {"metrics": metrics, "views": views}
+    scan["_emit"] = {"metrics": metrics, "views": views, "view_coverage": view_coverage}
     return scan
 
 
@@ -1126,7 +1138,7 @@ def run_t3(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     # The richest tier: Pillars B, D and F only become real here, and Pillar E gains Fleet Management.
     inputs, prov = hydrate.hydrate(cfg.tier, {"dataplane": data}, bucket=s3emit.BUCKET)
     rate_card = load_ratecard(bucket=s3emit.BUCKET)
-    metrics, views = compose.build_all(
+    metrics, views, view_coverage = compose.build_all(
         stacks, coverage,
         gap_first_seen=assistant_gaps(cfg, stacks, inputs.get("assistant"), gathered=False),
         ratecard=rate_card,
@@ -1147,7 +1159,7 @@ def run_t3(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
                "series_emitted": len(metrics)},
     )
     scan["meta"]["inputs"] = scan_inputs
-    scan["_emit"] = {"metrics": metrics, "views": views}
+    scan["_emit"] = {"metrics": metrics, "views": views, "view_coverage": view_coverage}
     return scan
 
 
@@ -1196,7 +1208,7 @@ def run_t4(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
 
     scan = envelope(cfg, coverage, {"diff": payload})
     if views:
-        scan["_emit"] = {"metrics": [], "views": views}
+        scan["_emit"] = {"metrics": [], "views": views, "view_coverage": {}}
     return scan
 
 
@@ -1283,7 +1295,8 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
     # it emitted no completion timestamp at all. Its staleness rule then sat on NoData for ever, which is
     # indistinguishable from the tier being dead. A switch that cannot tell "ran, nothing to do" from
     # "never ran" is not a switch.
-    emit = scan.pop("_emit", None) or {"metrics": [], "views": {}}
+    emit = scan.pop("_emit", None) or {"metrics": [], "views": {}, "view_coverage": {}}
+    emit.setdefault("view_coverage", {})
 
     # A partial run composes every estate rollup over a SUBSET. Refuse before every publication seam:
     # carry state, views, Mimir, Loki and the latest scan envelope must all remain at their last-good
@@ -1321,7 +1334,7 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
     # cardinality-checked nor written, and the only symptom is a metric that is quietly always absent.
     # The COUNTS go to Mimir as a bounded gauge so the trend outlives log retention; the DETAIL goes
     # to Loki, because the fields that make a finding actionable are the ones banned from a label.
-    derived, finding_totals = findings_mod.derive(emit["views"])
+    derived, finding_totals = findings_mod.derive(emit["views"], emit["view_coverage"])
     if finding_totals:
         emit["metrics"] = list(emit["metrics"]) + findings_mod.metrics(finding_totals)
     console_log("info", findings_mod.summarise(derived, finding_totals))
@@ -1343,7 +1356,8 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
     scan["meta"]["series_emitted"] = n
     console_log("info", f"label guard: {n} series pass")
 
-    for uri in s3emit.write_views(emit["views"], scan["meta"], dry_run=cfg.dry_run):
+    for uri in s3emit.write_views(emit["views"], scan["meta"], dry_run=cfg.dry_run,
+                                  view_coverage=emit["view_coverage"]):
         console_log("info", f"  {uri}")
 
     # Native remote_write to the target stack. Never the OTLP gateway (SPEC §5.3).

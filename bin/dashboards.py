@@ -833,11 +833,12 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
                         "more efficient per person; rising means series growth is outpacing adoption. "
                         "Uses the billed figure, not active users, because this is a money ratio."),
         "n_pending": build.stat_panel(
-            "Adaptive recs pending",
+            "Adaptive recs pending (measured stacks)",
             'sum(gcinsight_adaptive_recommendations{status="pending",stack=~"$stack"})',
             description="Adaptive Metrics aggregation RULES that Grafana Cloud has recommended and nobody "
                         "has applied. A count of recommendations, not of series - for the volume they "
-                        "would actually remove see the live Savings available tab."),
+                        "would actually remove see the live Savings available tab. This is a measured "
+                        "subtotal, not an estate total; the Cost breakdown shows the live coverage."),
         "n_unadopted": build.stat_panel(
             "Stacks with 0 rules applied", "gcinsight_cost_stacks_without_adaptive",
             description="Stacks that HAVE pending Adaptive Metrics recommendations and have applied none "
@@ -849,7 +850,8 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
             description="Aggregation rules already in force across the estate - the numerator to the "
                         "pending count beside it. Without it a rising pending figure is unreadable: it "
                         "can mean nobody is acting, or that Grafana Cloud is recommending faster than "
-                        "the organisation can apply."),
+                        "the organisation can apply. This metric requires complete rules coverage; "
+                        "partial measured totals are qualified in the Cost breakdown, not emitted here."),
         "t_billed_top": build.timeseries_panel(
             "Top 10 stacks by billed users",
             [('topk(10, gcinsight_stack_billed_users{stack=~"$stack"})', "{{stack}}")],
@@ -903,10 +905,12 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
             description="Leads with the denominator. 'Savings in currency' states why it is unavailable "
                         "rather than rendering blank."),
         "headroom": build.table_panel(
-            "Adaptive headroom - sorted by remediable volume", "cost_adaptive_headroom", ds,
+            "Adaptive headroom - measured stacks, ranked by volume", "cost_adaptive_headroom", ds,
             schema=cost_pillar.VIEW_SCHEMAS["cost_adaptive_headroom"],
-            description="Pending recommendations, zero rules applied. Sorted by what you can remove, "
-                        "not by spend."),
+            description="Pending recommendations, zero rules applied, on measured stacks. With partial "
+                        "coverage this is not the estate total: the Cost breakdown qualifies each total "
+                        "as measured on N of M live in-scope stacks. An empty partial table is not proof "
+                        "of zero estate headroom. Sorted by volume, not by spend."),
         "cardinality": build.table_panel(
             "Cardinality outliers", "cost_cardinality_outliers", ds,
             schema=cost_pillar.VIEW_SCHEMAS["cost_cardinality_outliers"],
@@ -4676,7 +4680,7 @@ FINDING_DETAIL: dict[str, tuple[tuple[object, ...], ...]] = {
                 estate_pillar.VIEW_SCHEMAS["estate_leftovers_billing"]),
                ("_fd_drift", "Off the standard build - which stacks", "estate_drift",
                 estate_pillar.VIEW_SCHEMAS["estate_drift"])),
-    "cost": (("_fd_headroom", "Adaptive headroom - which stacks", "cost_adaptive_headroom",
+    "cost": (("_fd_headroom", "Adaptive headroom - which measured stacks", "cost_adaptive_headroom",
               cost_pillar.VIEW_SCHEMAS["cost_adaptive_headroom"]),
              ("_fd_cardinality", "Cardinality outliers - which stacks", "cost_cardinality_outliers",
               cost_pillar.VIEW_SCHEMAS["cost_cardinality_outliers"])),

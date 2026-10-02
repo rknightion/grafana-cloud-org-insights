@@ -180,7 +180,7 @@ class LabelRiskContracts(unittest.TestCase):
         cov.record_ok("obs-hub")
         cov.record_ok("missing-stack")
         stacks = [STACK, {"slug": "missing-stack"}]
-        metrics, views = compose.build_all(stacks, cov, label_risk=payload, now=NOW)
+        metrics, views, _ = compose.build_all(stacks, cov, label_risk=payload, now=NOW)
         rows = views["risk_label_hygiene"]
         self.assertTrue(rows)
         self.assertEqual({r[" Stack"] for r in rows}, {"obs-hub"})

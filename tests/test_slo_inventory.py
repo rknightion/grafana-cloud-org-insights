@@ -39,7 +39,7 @@ def test_captured_list_minimized_at_source_and_view():
     assert result["source_counts"] == {"metrics": 2, "knowledge_graph": 1, "unknown": 0}
     assert result["status_counts"] == {"created": 2, "updated": 1, "unknown": 0}
     cov = Coverage(tier="t2", total=1)
-    metrics, views = compose.build_all([STACK], cov, slo_inventory={"obs-hub": result})
+    metrics, views, _ = compose.build_all([STACK], cov, slo_inventory={"obs-hub": result})
     assert not any("slo" in name for name, _, _ in metrics)
     row = views["coverage_slo_inventory"][0]
     assert row["SLO definitions"] == 3
@@ -72,10 +72,10 @@ def test_empty_measured_vs_unreadable_and_inventory_left_join():
                          ({"slos": []}, 404)):
         assert slo.fetch_slo_inventory(client_for(body, status), STACK, "synthetic-token") is None
     records = {"obs-hub": empty, "departed": {**empty, "count": 99}}
-    _, views = compose.build_all([STACK], Coverage(tier="t2", total=1), slo_inventory=records)
+    _, views, _ = compose.build_all([STACK], Coverage(tier="t2", total=1), slo_inventory=records)
     assert len(views["coverage_slo_inventory"]) == 1
     assert views["coverage_slo_inventory"][0]["SLO definitions"] == 0
-    _, absent = compose.build_all([STACK], Coverage(tier="t2", total=1), slo_inventory={})
+    _, absent, _ = compose.build_all([STACK], Coverage(tier="t2", total=1), slo_inventory={})
     assert "coverage_slo_inventory" not in absent
     assert slo.probe_all(client_for({"slos": []}), [STACK], {}) == {
         "obs-hub": {"available": False, "reason": "no_credential"}}

@@ -483,7 +483,7 @@ class ValueTest(unittest.TestCase):
             rows["Savings-bearing add/update records missing marginal series counts"], 1)
 
     def test_an_unreachable_adaptive_stack_suppresses_the_estate_savings_total(self):
-        """A complete subset is still a partial estate total and must not oscillate into view."""
+        """A complete subset may publish a qualified subtotal, never an estate metric or total."""
         measured, unavailable = self.stacks[:2]
         dataplane = _complete_savings_dataplane(measured)
         dataplane[str(unavailable["slug"])] = {"adaptive_metrics": {"available": False, "http": 503}}
@@ -494,6 +494,13 @@ class ValueTest(unittest.TestCase):
         self.assertNotIn("gcinsight_value_savings_identified_series", names)
         rows = {row[" Metric"]: row["Value"] for row in views["value_savings"]}
         self.assertEqual(rows["Stacks with complete recommendation series counts"], "1 of 2 in scope")
+        self.assertNotIn("Remediable series, applying every recommendation", rows)
+        self.assertEqual(rows["Remediable series, applying every recommendation "
+                              "(measured on 1 of 2 stacks)"], 90)
+        self.assertEqual(rows["Remediable series observed unused in the API window "
+                              "(measured on 1 of 2 stacks)"], 70)
+        self.assertEqual(rows["Stacks with pending recommendations and zero rules applied "
+                              "(measured on 1 of 2 stacks)"], 1)
 
     def test_a_paused_complete_payload_cannot_mask_a_live_gap(self):
         active, paused = self.stacks[:2]

@@ -90,7 +90,8 @@ def view_payload(rows: list[dict[str, Any]] | dict[str, Any],
 
 
 def write_views(views: dict[str, list[dict[str, Any]] | dict[str, Any]], meta: dict[str, Any],
-                *, bucket: str = BUCKET, dry_run: bool = False) -> list[str]:
+                *, bucket: str = BUCKET, dry_run: bool = False,
+                view_coverage: dict[str, dict[str, Any]] | None = None) -> list[str]:
     """Write pre-shaped dashboard tables.
 
     Every view carries `generated_at` and the coverage block, so a dashboard can show freshness and
@@ -100,7 +101,10 @@ def write_views(views: dict[str, list[dict[str, Any]] | dict[str, Any]], meta: d
     stamp = view_stamp(meta)
     with tempfile.TemporaryDirectory() as tmp:
         for name, rows in views.items():
-            payload = view_payload(rows, stamp)
+            view_meta = stamp
+            if view_coverage is not None and name in view_coverage:
+                view_meta = dict(stamp, rules_coverage=view_coverage[name])
+            payload = view_payload(rows, view_meta)
             path = Path(tmp) / f"{name}.json"
             path.write_text(json.dumps(payload, default=str))
             written.append(_put(path, f"views/{name}.json", bucket, dry_run))

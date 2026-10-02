@@ -237,7 +237,7 @@ class AdaptiveRulesAvailabilityTest(unittest.TestCase):
                 self.assertIs(am.get('rules_available'), known)
                 self.assertTrue(am['recommendations_available'])
                 payload = {'synthetic': {'adaptive_metrics': am}}
-                metrics, views = build_all([stack], coverage, dataplane=payload)
+                metrics, views, _ = build_all([stack], coverage, dataplane=payload)
                 by = {(name, tuple(sorted(labels.items()))): value
                       for name, labels, value in metrics}
                 row = views['cost'][0]

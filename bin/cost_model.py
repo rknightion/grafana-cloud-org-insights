@@ -102,8 +102,8 @@ def main() -> int:
     detail = {str(s["slug"]): dict(sample, slug=str(s["slug"])) for s in stacks}
 
     # --- Mimir: active series is the billed unit. Peak = T1 plus everything it carries forward. ---
-    t3_metrics, _ = compose.build_all(stacks, _coverage(stacks, "t3"), dataplane=dataplane)
-    t1_metrics, _ = compose.build_all(stacks, _coverage(stacks, "t1"))
+    t3_metrics, _, _ = compose.build_all(stacks, _coverage(stacks, "t3"), dataplane=dataplane)
+    t1_metrics, _, _ = compose.build_all(stacks, _coverage(stacks, "t1"))
     state = {"generated_at": NOW.isoformat(), "tier": "t3",
              "metrics": [[n, dict(l), v] for n, l, v in t3_metrics]}
     extra, report = carry.carry_forward(t1_metrics, state, now=NOW + dt.timedelta(hours=1))

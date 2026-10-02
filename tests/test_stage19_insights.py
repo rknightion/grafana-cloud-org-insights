@@ -233,9 +233,9 @@ class QueryMixViewTest(unittest.TestCase):
             },
         }
 
-        metrics, views = compose.build_all(stacks, cov, insights=insight_input)
+        metrics, views, _ = compose.build_all(stacks, cov, insights=insight_input)
         direct_metrics, _direct_views = insights.build(stacks, cov, insight_input)
-        _baseline_metrics, baseline_views = compose.build_all(stacks, cov)
+        _baseline_metrics, baseline_views, _ = compose.build_all(stacks, cov)
         legacy_record = dict(insight_input["alpha"])
         for field in (
             "query_mix_complete", "query_mix_datasource_types", "query_mix_panel_plugins",
@@ -253,7 +253,7 @@ class QueryMixViewTest(unittest.TestCase):
                             for _name, labels, _value in metrics))
 
         old_input = {"alpha": {"available": True, "requests": 42}}
-        _old_metrics, old_views = compose.build_all(stacks, cov, insights=old_input)
+        _old_metrics, old_views, _ = compose.build_all(stacks, cov, insights=old_input)
         self.assertNotIn("insights_query_mix", old_views)
 
 
@@ -561,8 +561,8 @@ class CompositionAndHydrationContractTest(unittest.TestCase):
         cost_input = {
             "alpha": {"available": True, "window": "24h", "datasources": [], "costs": []},
         }
-        baseline, _baseline_views = compose.build_all(stacks, cov)
-        metrics, views = compose.build_all(
+        baseline, _baseline_views, _ = compose.build_all(stacks, cov)
+        metrics, views, _ = compose.build_all(
             stacks, cov, dashboard_inventory=dashboard_input,
             datasource_query_cost=cost_input,
         )
@@ -585,7 +585,7 @@ class CompositionAndHydrationContractTest(unittest.TestCase):
             },
         }
 
-        metrics, views = compose.build_all(stacks, cov, insights=insight_input)
+        metrics, views, _ = compose.build_all(stacks, cov, insights=insight_input)
 
         self.assertIn("insights_surface_usage", views)
         self.assertIn("insights_surface_usage_estate", views)

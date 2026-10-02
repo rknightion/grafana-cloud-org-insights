@@ -77,6 +77,24 @@ def _adaptive(dataplane: dict[str, Any], slug: str) -> dict[str, Any] | None:
     return am if am.get("available") else None
 
 
+def rules_coverage(stacks: list[dict[str, Any]],
+                   dataplane: dict[str, Any] | None) -> dict[str, Any]:
+    """Coverage of rules reads, left-joined to the live non-paused inventory, never to view rows."""
+    in_scope = [s for s in stacks if s.get("status") != "paused"]
+    measured = sum(1 for s in in_scope
+                   if (am := _adaptive(dataplane or {}, str(s["slug"]))) is not None
+                   and am.get("rules_applied") is not None)
+    return {"measured": measured, "in_scope": len(in_scope),
+            "complete": bool(in_scope) and measured == len(in_scope)}
+
+
+def qualified_label(label: str, measured: int, in_scope: int) -> str:
+    """Keep complete totals unqualified; name the measured subset directly otherwise."""
+    if measured == 0 or (in_scope > 0 and measured == in_scope):
+        return label
+    return f"{label} (measured on {measured} of {in_scope} stacks)"
+
+
 def _auto_apply(am: dict[str, Any]) -> tuple[str, str | None]:
     """Return the explicit auto-apply state and a deterministic copy of its full object."""
     state = am.get("auto_apply_state")
@@ -169,7 +187,8 @@ def build(
     rules_measured = [(am, s) for am, s in measured if am.get("rules_applied") is not None]
     # An unqualified additive estate total needs every live, non-paused inventory stack.
     # Payload membership alone cannot prove coverage: missing live stacks are unknown too.
-    rules_complete = bool(in_scope) and len(rules_measured) == len(in_scope)
+    rules_complete = rules_coverage(stacks, dataplane)["complete"]
+    rules_label = lambda label: qualified_label(label, len(rules_measured), len(in_scope))
     unadopted = [(am, s) for am, s in rules_measured
                  if am["adopted"] is False and am["recommendations_pending"]]
 
@@ -262,9 +281,9 @@ def build(
             ],
             key=lambda row: (-(row["Removable series"] or 0), row[" Stack"], row["Metric"] or ""),
         )
-        # Findings derives an unqualified estate count from this view. Partial coverage
-        # must not become a zero/subtotal there; fully measured empty remains legitimate.
-        if rules_complete:
+        # Partial rows are honest when accompanied by independent publication coverage. Findings
+        # consumes that channel separately and still withholds the unqualified estate gauge.
+        if rules_measured:
             views["cost_adaptive_headroom"] = sorted(
                 [
                     {
@@ -312,25 +331,26 @@ def build(
             # The denominator, first row, because every figure below it is measured over this many
             # stacks and not over 271. A partial T3 must not read as a small estate (SPEC §5.2).
             " Metric": "Stacks measured for Adaptive",
-            "Value": f"{len(rules_measured)} of {coverage.scannable} scannable ({coverage.total} total)",
+            "Value": f"{len(rules_measured)} of {len(in_scope)} scannable ({len(stacks)} total)",
         }, {
-            " Metric": "Adaptive recommendations pending (measured stacks)",
-            "Value": sum(am["recommendations_pending"] for am, _ in measured),
+            " Metric": qualified_label("Adaptive recommendations pending (measured stacks)",
+                                       len(measured), len(in_scope)),
+            "Value": sum(am["recommendations_pending"] for am, _ in measured) if measured else None,
         }, {
-            " Metric": "Adaptive rules applied",
-            "Value": sum(am["rules_applied"] for am, _ in rules_measured) if rules_complete else None,
+            " Metric": rules_label("Adaptive rules applied"),
+            "Value": sum(am["rules_applied"] for am, _ in rules_measured) if rules_measured else None,
         }, {
-            " Metric": "Stacks with recommendations and zero rules applied",
-            "Value": len(unadopted) if rules_complete else None,
+            " Metric": rules_label("Stacks with recommendations and zero rules applied"),
+            "Value": len(unadopted) if rules_measured else None,
         }, {
-            " Metric": "Active series on those stacks",
+            " Metric": rules_label("Active series on those stacks"),
             "Value": int(sum(_num(s, "hmInstancePromCurrentActiveSeries") for _, s in unadopted))
-                     if rules_complete else None,
+                     if rules_measured else None,
         }, {
-            " Metric": "Their share of org series %",
+            " Metric": rules_label("Their share of org series %"),
             "Value": round(
                 100 * sum(_num(s, "hmInstancePromCurrentActiveSeries") for _, s in unadopted) / total_series, 1
-            ) if total_series and rules_complete else None,
+            ) if total_series and rules_measured else None,
         }, {
             " Metric": "Series per billed user (estate)",
             "Value": round(total_series / total_billed, 1) if total_billed else None,

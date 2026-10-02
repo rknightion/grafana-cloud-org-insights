@@ -140,7 +140,7 @@ def emitted(scan: dict) -> dict[tuple[str, tuple], float]:
         slug = str(s["slug"])
         if slug not in meta.get("skipped_stacks", {}) and slug not in meta.get("failed_stacks", {}):
             coverage.record_ok(slug)
-    metrics, _ = compose.build_all(stacks, coverage)
+    metrics, _, _ = compose.build_all(stacks, coverage)
     return {(n, tuple(sorted(l.items()))): v for n, l, v in metrics}
 
 

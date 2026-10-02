@@ -93,10 +93,10 @@ class GapsAreAbsentNotZeroTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.stacks, cls.dataplane, cls.detail = _load()
-        cls.t1, _ = compose.build_all(cls.stacks, _coverage(cls.stacks))
-        cls.t3, _ = compose.build_all(cls.stacks, _coverage(cls.stacks, "t3"),
+        cls.t1, _, _ = compose.build_all(cls.stacks, _coverage(cls.stacks))
+        cls.t3, _, _ = compose.build_all(cls.stacks, _coverage(cls.stacks, "t3"),
                                       dataplane=cls.dataplane)
-        cls.t2, _ = compose.build_all(cls.stacks, _coverage(cls.stacks, "t2"),
+        cls.t2, _, _ = compose.build_all(cls.stacks, _coverage(cls.stacks, "t2"),
                                       stack_detail=cls.detail,
                                       service_accounts={
                                           "obs-hub": {"state": "ok", "accounts": [], "total": 0}
@@ -132,7 +132,7 @@ class GapsAreAbsentNotZeroTest(unittest.TestCase):
 
     def test_stack_detail_cannot_mask_a_failed_service_account_sweep(self):
         """The old merged input made service-account failure look fresh whenever users/plugins worked."""
-        metrics, views = compose.build_all(
+        metrics, views, _ = compose.build_all(
             self.stacks, _coverage(self.stacks, "t2"), stack_detail=self.detail,
         )
         self.assertNotIn("gcinsight_risk_service_accounts_total", {n for n, _, _ in metrics})
@@ -177,10 +177,10 @@ class ViewsAreNeverBlankedByAThinTierTest(unittest.TestCase):
         cls.stacks, cls.dataplane, cls.detail = _load()
         cls.policies = [{"name": "p", "region": "us", "realms": [{"type": "org"}],
                          "scopes": ["stacks:read"], "createdAt": "2026-01-01"}]
-        cls.rich, cls.rich_views = compose.build_all(
+        cls.rich, cls.rich_views, _ = compose.build_all(
             cls.stacks, _coverage(cls.stacks, "t3"), dataplane=cls.dataplane,
             stack_detail=cls.detail, access_policies=cls.policies)
-        cls.thin, cls.thin_views = compose.build_all(cls.stacks, _coverage(cls.stacks))
+        cls.thin, cls.thin_views, _ = compose.build_all(cls.stacks, _coverage(cls.stacks))
 
     def test_a_thin_tier_emits_no_empty_view_that_a_rich_tier_populates(self):
         offenders = []
@@ -193,7 +193,7 @@ class ViewsAreNeverBlankedByAThinTierTest(unittest.TestCase):
 
     def test_the_access_policy_view_is_absent_without_policies_not_empty(self):
         """The exact regression: T3 has no access policies and must not publish an empty table."""
-        _, t3_views = compose.build_all(self.stacks, _coverage(self.stacks, "t3"),
+        _, t3_views, _ = compose.build_all(self.stacks, _coverage(self.stacks, "t3"),
                                         dataplane=self.dataplane)
         self.assertNotIn("risk_access_policies", t3_views)
         self.assertIn("risk_access_policies", self.rich_views)
@@ -224,14 +224,14 @@ class ViewsAreNeverBlankedByAThinTierTest(unittest.TestCase):
 class ComposeContractTest(unittest.TestCase):
     def test_two_pillars_may_not_produce_a_view_of_the_same_name(self):
         stacks, dataplane, detail = _load()
-        metrics, views = compose.build_all(stacks, _coverage(stacks), dataplane=dataplane,
+        metrics, views, _ = compose.build_all(stacks, _coverage(stacks), dataplane=dataplane,
                                            stack_detail=detail)
         self.assertGreater(len(views), 20)
         self.assertEqual(len(views), len(set(views)))
 
     def test_compose_gates_labels_and_duplicates(self):
         stacks, dataplane, detail = _load()
-        metrics, _ = compose.build_all(stacks, _coverage(stacks), dataplane=dataplane,
+        metrics, _, _ = compose.build_all(stacks, _coverage(stacks), dataplane=dataplane,
                                         stack_detail=detail)
         self.assertEqual(guard.check_all(metrics), len(metrics))
         self.assertEqual(guard.check_no_duplicates(metrics), len(metrics))
@@ -239,9 +239,9 @@ class ComposeContractTest(unittest.TestCase):
     def test_the_richest_possible_batch_plus_carry_forward_stays_inside_the_ceiling(self):
         """The worst case for the budget: a T1 run republishing everything T3 knows."""
         stacks, dataplane, detail = _load()
-        t3, _ = compose.build_all(stacks, _coverage(stacks, "t3"), dataplane=dataplane,
+        t3, _, _ = compose.build_all(stacks, _coverage(stacks, "t3"), dataplane=dataplane,
                                    stack_detail=detail)
-        t1, _ = compose.build_all(stacks, _coverage(stacks))
+        t1, _, _ = compose.build_all(stacks, _coverage(stacks))
         state = {"generated_at": "2026-08-17T20:00:00+00:00", "tier": "t3",
                  "metrics": [[n, dict(l), v] for n, l, v in t3]}
         import datetime as dt
@@ -253,7 +253,7 @@ class ComposeContractTest(unittest.TestCase):
 
     def test_every_metric_in_the_richest_batch_is_declared(self):
         stacks, dataplane, detail = _load()
-        metrics, _ = compose.build_all(stacks, _coverage(stacks, "t3"), dataplane=dataplane,
+        metrics, _, _ = compose.build_all(stacks, _coverage(stacks, "t3"), dataplane=dataplane,
                                         stack_detail=detail)
         declared = {(s.name, tuple(sorted(s.labels))) for s in CATALOGUE if s.store == "mimir"}
         undeclared = {(n, tuple(sorted(l))) for n, l, _ in metrics} - declared
@@ -273,7 +273,7 @@ class DisplayNumbersTest(unittest.TestCase):
         coverage = Coverage(tier="t3", total=len(stacks))
         for st in stacks:
             coverage.record_ok(str(st["slug"]))
-        _, views = compose.build_all(stacks, coverage, dataplane=dataplane, stack_detail=detail)
+        _, views, _ = compose.build_all(stacks, coverage, dataplane=dataplane, stack_detail=detail)
         offenders = [
             (name, key, value)
             for name, rows in views.items()

@@ -1160,7 +1160,7 @@ class EnvelopePersistenceTest(unittest.TestCase):
                 scan.hydrate, "hydrate",
                 side_effect=lambda _tier, own, **_kwargs: (dict(own), hydrate.Provenance()),
             ),
-            mock.patch.object(scan.compose, "build_all", return_value=([], {})),
+            mock.patch.object(scan.compose, "build_all", return_value=([], {}, {})),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
             mock.patch.object(scan, "load_ratecard", return_value=None),
         ):

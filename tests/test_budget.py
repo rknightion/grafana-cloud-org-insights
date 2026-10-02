@@ -174,7 +174,7 @@ class EveryPillarsEmissionIsDeclaredTest(unittest.TestCase):
         coverage = Coverage(tier="t2", total=len(stacks))
         for i in range(data["scanned"]):
             coverage.record_ok(f"s{i}")
-        cls.metrics, cls.views = compose.build_all(
+        cls.metrics, cls.views, _ = compose.build_all(
             stacks, coverage,
             dataplane=data.get("dataplane"), stack_detail=data.get("stack_detail"),
             access_policies=data.get("access_policies"), assistant=data.get("assistant"),

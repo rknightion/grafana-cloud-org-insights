@@ -51,6 +51,11 @@
         "source": "local",
         "age_seconds": 0.0
       }
+    },
+    "rules_coverage": {
+      "measured": 40,
+      "in_scope": 40,
+      "complete": true
     }
   },
   "rows": [

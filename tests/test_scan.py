@@ -258,7 +258,7 @@ class T3CarryPublicationOrderTest(unittest.TestCase):
             mock.patch.object(scan, "load_ratecard", return_value=None),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
             mock.patch.object(scan.compose, "build_all", return_value=(
-                [("gcinsight_cost_active_series", {"stack": "alpha"}, 1.0)], {},
+                [("gcinsight_cost_active_series", {"stack": "alpha"}, 1.0)], {}, {},
             )),
             mock.patch.object(scan.carry, "save_state") as save_state,
         ):
@@ -269,6 +269,9 @@ class T3CarryPublicationOrderTest(unittest.TestCase):
 
     def test_common_health_gate_saves_an_accepted_t3_batch_before_publication(self):
         metrics = [("gcinsight_cost_active_series", {"stack": "alpha"}, 1.0)]
+        view_coverage = {"cost_adaptive_headroom": {
+            "measured": 2, "in_scope": 3, "complete": False,
+        }}
         result = {
             "meta": {
                 "tier": "t3", "generated_at": "2026-08-21T00:00:00+00:00",
@@ -276,7 +279,8 @@ class T3CarryPublicationOrderTest(unittest.TestCase):
                 "stacks_total": 1, "source_failures": [], "inputs": {},
             },
             "data": {},
-            "_emit": {"metrics": metrics, "views": {}},
+            "_emit": {"metrics": metrics, "views": {"cost_adaptive_headroom": []},
+                      "view_coverage": view_coverage},
         }
         args = SimpleNamespace(out=None)
         cfg = cfg_for("t3")
@@ -286,7 +290,7 @@ class T3CarryPublicationOrderTest(unittest.TestCase):
             mock.patch.object(scan, "run_t3", return_value=result),
             mock.patch.object(scan.carry, "save_state", return_value="s3://bucket/state/t3.json")
             as save_state,
-            mock.patch.object(scan.s3emit, "write_views", return_value=[]),
+            mock.patch.object(scan.s3emit, "write_views", return_value=[]) as write_views,
             mock.patch.object(scan.s3emit, "write_scan", return_value=[]),
             mock.patch.object(scan.mimir, "RemoteWriter") as remote_writer,
             mock.patch.object(scan.loki, "LokiWriter") as loki_writer,
@@ -297,6 +301,9 @@ class T3CarryPublicationOrderTest(unittest.TestCase):
 
         self.assertEqual(rc, 0)
         save_state.assert_called_once_with(metrics, "t3", bucket=scan.s3emit.BUCKET)
+        self.assertEqual(write_views.call_args.kwargs["view_coverage"], view_coverage)
+        self.assertNotIn(("gcinsight_findings", {"kind": "adaptive_headroom"}, 0.0),
+                         remote_writer.return_value.push.call_args.args[0])
 
     def test_retention_change_rows_are_forwarded_to_loki_after_view_withholding(self):
         row = {
@@ -568,7 +575,7 @@ class T2SourceHealthTest(unittest.TestCase):
             mock.patch.object(scan, "gather_loki_config", return_value=unavailable),
             mock.patch.object(scan.label_risk_src, "probe_all", return_value={}),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=hydrate_own),
-            mock.patch.object(scan.compose, "build_all", return_value=([], {})),
+            mock.patch.object(scan.compose, "build_all", return_value=([], {}, {})),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
             mock.patch.object(scan, "load_ratecard", return_value=None),
         ):
@@ -681,8 +688,8 @@ class T2SourceHealthTest(unittest.TestCase):
             # estate total and summary view are produced from the one successful stack.
             if "insights" in kwargs:
                 return ([('gcinsight_dashboards_estate_views', {"version": "2"}, 99.0)],
-                        {"insights_summary": [{"Value": 99}]})
-            return [], {}
+                        {"insights_summary": [{"Value": 99}]}, {})
+            return [], {}, {}
 
         with (
             mock.patch.object(scan.gcom, "fetch_inventory", return_value=stacks),
@@ -713,7 +720,7 @@ class T2SourceHealthTest(unittest.TestCase):
 
         self.assertNotIn("insights", seen, "partial source must not reach estate composition")
         self.assertNotIn("insights", result["data"], "partial source must not become latest owner input")
-        self.assertEqual(result["_emit"], {"metrics": [], "views": {}})
+        self.assertEqual(result["_emit"], {"metrics": [], "views": {}, "view_coverage": {}})
         self.assertEqual(result["meta"]["sources"]["insights"]["available"], 1)
         self.assertFalse(result["meta"]["sources"]["insights"]["healthy"])
         self.assertEqual(result["meta"]["inputs"]["insights"]["state"], "partial")
@@ -755,7 +762,7 @@ class T1FleetSourceHealthTest(unittest.TestCase):
                               return_value={"state": "ok", "members": []}),
             mock.patch.object(scan, "gather_fleet", return_value=(fleet_data, [])),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=local_hydrate),
-            mock.patch.object(scan.compose, "build_all", return_value=([], {})),
+            mock.patch.object(scan.compose, "build_all", return_value=([], {}, {})),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
             mock.patch.object(scan, "load_ratecard", return_value=None),
             mock.patch.object(scan.carry, "load_state", side_effect=scan.carry.StateUnavailable("none")),
@@ -791,7 +798,7 @@ class T1FleetSourceHealthTest(unittest.TestCase):
             mock.patch.object(scan.hydrate, "hydrate", side_effect=lambda _t, own, **_kw: (
                 own, hydrate.Provenance()
             )),
-            mock.patch.object(scan.compose, "build_all", return_value=([], {})),
+            mock.patch.object(scan.compose, "build_all", return_value=([], {}, {})),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
             mock.patch.object(scan, "load_ratecard", return_value=None),
             mock.patch.object(scan.carry, "load_state", side_effect=scan.carry.StateUnavailable("none")),
@@ -816,7 +823,7 @@ class T1OrgMembershipSourceHealthTest(unittest.TestCase):
 
         def compose(_stacks, _coverage, **kwargs):
             seen["compose"] = kwargs
-            return [], {}
+            return [], {}, {}
 
         with (
             mock.patch.object(scan.gcom, "fetch_inventory", return_value=stacks),
@@ -852,7 +859,7 @@ class T1OrgMembershipSourceHealthTest(unittest.TestCase):
             mock.patch.object(scan.gcom, "fetch_org_members", side_effect=RuntimeError("HTTP 500")),
             mock.patch.object(scan, "gather_fleet", return_value=({}, [])),
             mock.patch.object(scan.hydrate, "hydrate", side_effect=local_hydrate),
-            mock.patch.object(scan.compose, "build_all", return_value=([], {})),
+            mock.patch.object(scan.compose, "build_all", return_value=([], {}, {})),
             mock.patch.object(scan, "assistant_gaps", return_value={}),
             mock.patch.object(scan, "load_ratecard", return_value=None),
             mock.patch.object(scan.carry, "load_state", side_effect=scan.carry.StateUnavailable("none")),
@@ -958,7 +965,7 @@ class RateCardLoadingTest(unittest.TestCase):
 
         def compose(*args, **kwargs):
             seen.update(kwargs)
-            return [], {}
+            return [], {}, {}
 
         available = ({"alpha": {"available": True}}, [])
         loki_available = ({

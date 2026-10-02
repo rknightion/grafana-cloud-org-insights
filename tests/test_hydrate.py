@@ -336,7 +336,7 @@ class ViewInputsAreDerivedNotAssumed(unittest.TestCase):
         # Every subset must see one instant. Several views contain age/recency values, so allowing
         # each composition to call the wall clock can invent a dependency when the loop crosses a
         # bucket boundary.
-        _, views = compose.build_all(stacks, cov, now=NOW, **kw)
+        _, views, _ = compose.build_all(stacks, cov, now=NOW, **kw)
         return {n: json.dumps(r, default=str, sort_keys=True) for n, r in views.items()}
 
     def test_derivation_does_not_depend_on_the_wall_clock(self):

@@ -99,7 +99,7 @@ def build_all(
     fleet_default_scrape_interval_seconds: float = 60.0,
     score_weights: dict[str, float] | None = None,
     now: dt.datetime | None = None,
-) -> tuple[Metrics, Views]:
+) -> tuple[Metrics, Views, dict[str, dict[str, Any]]]:
     """Compose every pillar, then gate labels and duplicates before anything can be emitted."""
     metrics: Metrics = []
     views: Views = {}
@@ -149,4 +149,12 @@ def build_all(
     # Both gates are errors, not warnings (SPEC §10.3).
     guard.check_all(metrics)
     guard.check_no_duplicates(metrics)
-    return metrics, _display(views)
+    # Independent of rows: a measured, empty subset is not proof of a complete zero estate.
+    rules_cov = cost.rules_coverage(stacks, dataplane)
+    view_coverage = {name: dict(rules_cov) for name in (
+        "cost_summary", "cost_adaptive_headroom", "cost_adaptive_metric_recommendations",
+    ) if name in views}
+    if "value_savings" in views:
+        value_scope = [s for s in stacks if s.get("hmInstancePromUrl")]
+        view_coverage["value_savings"] = cost.rules_coverage(value_scope, dataplane)
+    return metrics, _display(views), view_coverage

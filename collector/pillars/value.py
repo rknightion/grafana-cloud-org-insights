@@ -24,6 +24,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from collector.coverage import Coverage
+from collector.pillars.cost import qualified_label, rules_coverage
 from collector.pillars.maturity import RUBRIC_VERSION, score_stack
 from collector.pillars.usage import SIGNAL_FIELDS
 
@@ -205,17 +206,26 @@ def build(
         for s in adaptive_stacks_in_scope
     ]
     available_adaptive = [am for am in adaptive if am.get("available")]
-    rules_complete = bool(adaptive_stacks_in_scope) and all(
-        am.get("available") and am.get("rules_applied") is not None for am in adaptive
-    )
+    rules_cov = rules_coverage(adaptive_stacks_in_scope, dataplane)
+    rules_complete = rules_cov["complete"]
     unadopted_stacks = [
         s for s in adaptive_stacks_in_scope
         if (am := (dataplane.get(str(s["slug"])) or {}).get("adaptive_metrics") or {}).get("available")
         and am.get("rules_applied") is not None
         and am.get("adopted") is False and (am.get("recommendations_pending") or 0)
     ]
-    remediable_series = sum(am.get("remediable_series") or 0 for am in available_adaptive)
-    remediable_unused = sum(am.get("remediable_series_unused") or 0 for am in available_adaptive)
+    # Only whole, verbose per-stack savings whose rules are known enter a qualified subtotal.
+    # A partially counted stack cannot be priced as if its missing recommendations were zero.
+    savings_measured = [am for am in available_adaptive
+                        if am.get("rules_applied") is not None
+                        and am.get("series_counts_complete") is True]
+    remediable_series = sum(am.get("remediable_series") or 0 for am in savings_measured)
+    remediable_unused = sum(am.get("remediable_series_unused") or 0 for am in savings_measured)
+    savings_series_population = sum(
+        s.get("hmInstancePromCurrentActiveSeries") or 0 for s in adaptive_stacks_in_scope
+        if (am := (dataplane.get(str(s["slug"])) or {}).get("adaptive_metrics") or {}).get("available")
+        and am.get("rules_applied") is not None and am.get("series_counts_complete") is True
+    )
     recommendation_records = sum(am.get("recommendation_records_total") or 0
                                  for am in available_adaptive)
     recommendation_savings_records = sum(
@@ -234,9 +244,7 @@ def build(
     # non-verbose record or one failed recommendations request makes the volume unknown; it must not
     # oscillate between a partial number and the full number as endpoints recover.
     savings_complete = (
-        bool(adaptive_stacks_in_scope)
-        and len(adaptive) == len(adaptive_stacks_in_scope)
-        and all(am.get("available") and am.get("series_counts_complete") is True for am in adaptive)
+        rules_complete and len(savings_measured) == len(adaptive_stacks_in_scope)
     )
     if dataplane and savings_complete:
         metrics.append(("gcinsight_value_savings_identified_series", {},
@@ -292,10 +300,15 @@ def build(
     # Emit only with the data plane: a T1 run would otherwise overwrite the savings table with rows
     # reading "needs a T3 scan", which is worse than the real thing being a week old.
     if dataplane:
-        priced_total = (ratecard.savings("metrics_series", total_series, remediable_series)
-                        if ratecard is not None and savings_complete else None)
-        priced_unused = (ratecard.savings("metrics_series", total_series, remediable_unused)
-                         if ratecard is not None and savings_complete else None)
+        priced_total = (ratecard.savings("metrics_series", savings_series_population, remediable_series)
+                        if ratecard is not None and savings_measured else None)
+        priced_unused = (ratecard.savings("metrics_series", savings_series_population, remediable_unused)
+                         if ratecard is not None and savings_measured else None)
+        rules_label = lambda label: qualified_label(label, rules_cov["measured"], rules_cov["in_scope"])
+        savings_label = lambda label: qualified_label(label, len(savings_measured),
+                                                     len(adaptive_stacks_in_scope))
+        records_label = lambda label: qualified_label(label, len(available_adaptive),
+                                                     len(adaptive_stacks_in_scope))
         pricing_scope = (ratecard.pricing_scope("metrics_series")
                          if ratecard is not None else None)
         metrics_rate = (ratecard.rates.get("metrics_series")
@@ -307,43 +320,43 @@ def build(
             else SAVINGS_NO_METRICS_RATE_NOTE
         )
         rows = [{
-            " Metric": "Stacks with pending recommendations and zero rules applied",
-            "Value": len(unadopted_stacks) if rules_complete else None,
+            " Metric": rules_label("Stacks with pending recommendations and zero rules applied"),
+            "Value": len(unadopted_stacks) if rules_cov["measured"] else None,
         }, {
             " Metric": "Stacks with complete recommendation series counts",
             "Value": f"{len(complete_stacks)} of {len(adaptive_stacks_in_scope)} in scope",
         }, {
-            " Metric": "Savings-bearing add/update records with marginal series counts",
+            " Metric": records_label("Savings-bearing add/update records with marginal series counts"),
             "Value": f"{recommendation_records_with_counts} of {recommendation_savings_records}",
         }, {
-            " Metric": "Savings-bearing add/update records missing marginal series counts",
+            " Metric": records_label("Savings-bearing add/update records missing marginal series counts"),
             "Value": recommendation_records_missing_counts,
         }, {
-            " Metric": "All recommendation records (including keep/remove)",
+            " Metric": records_label("All recommendation records (including keep/remove)"),
             "Value": recommendation_records,
         }]
-        if savings_complete:
+        if savings_measured:
             rows[:0] = [{
-                " Metric": f"Savings from Adaptive Metrics, applying every recommendation "
-                           f"({pricing_scope})"
-                           if priced_total is not None else "Savings basis (series volume)",
+                " Metric": savings_label(f"Savings from Adaptive Metrics, applying every recommendation "
+                                         f"({pricing_scope})"
+                                         if priced_total is not None else "Savings basis (series volume)"),
                 "Value": round(priced_total, 2) if priced_total is not None
                          else currency_gap_note,
             }, {
-                " Metric": f"Of that base-rate saving, observed unused in the API window "
-                           f"({pricing_scope})"
-                           if priced_unused is not None
-                           else "Review-free subset basis (series volume)",
+                " Metric": savings_label(f"Of that base-rate saving, observed unused in the API window "
+                                         f"({pricing_scope})"
+                                         if priced_unused is not None
+                                         else "Review-free subset basis (series volume)"),
                 "Value": round(priced_unused, 2) if priced_unused is not None
                          else "same gap as the row above",
             }, {
-                " Metric": "Remediable series, applying every recommendation",
+                " Metric": savings_label("Remediable series, applying every recommendation"),
                 "Value": remediable_series,
             }, {
-                " Metric": "Remediable series observed unused in the API window",
+                " Metric": savings_label("Remediable series observed unused in the API window"),
                 "Value": remediable_unused,
             }, {
-                " Metric": "Share of org active series that is remediable %",
+                " Metric": savings_label("Share of org active series that is remediable %"),
                 "Value": round(100 * remediable_series / total_series, 1) if total_series else None,
             }]
         views["value_savings"] = rows

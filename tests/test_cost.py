@@ -27,6 +27,173 @@ def _load():
 
 
 class UnknownAdaptiveRulesTest(unittest.TestCase):
+    def test_empty_partial_coverage_survives_compose_to_s3(self):
+        """An empty measured subset must not erase unknown live stacks or imply a zero gauge."""
+        from unittest import mock
+        from collector.emit import s3
+        from collector.pillars import compose, findings
+
+        stacks = [{"slug": slug, "hmInstancePromUrl": "https://prom.example"}
+                  for slug in ("unknown", "first", "second")]
+        coverage = Coverage(tier="t3", total=3)
+        for stack in stacks:
+            coverage.record_ok(stack["slug"])
+        payload = {slug: {"adaptive_metrics": {
+            "available": True, "rules_available": True, "rules_applied": 2,
+            "adopted": True, "recommendations_pending": 1,
+        }} for slug in ("first", "second")}
+        metrics, views, view_coverage = compose.build_all(stacks, coverage, dataplane=payload)
+        published = {}
+
+        def capture(path, key, bucket, dry_run):
+            published[key] = json.loads(path.read_text())
+            return key
+
+        with mock.patch.object(s3, "_put", side_effect=capture):
+            s3.write_views(views, {"tier": "t3"}, bucket="offline", view_coverage=view_coverage)
+        self.assertIn("views/cost_adaptive_headroom.json", published,
+                      "empty partial 2/3 measured headroom envelope must be published")
+        envelope = published["views/cost_adaptive_headroom.json"]
+        self.assertEqual(envelope["rows"], [])
+        self.assertEqual(envelope["meta"]["rules_coverage"],
+                         {"measured": 2, "in_scope": 3, "complete": False})
+        _, totals = findings.derive(views, view_coverage)
+        self.assertNotIn("adaptive_headroom", totals)
+        self.assertNotIn("gcinsight_cost_adaptive_rules_applied_total",
+                         {name for name, _, _ in metrics})
+        self.assertEqual(published["views/estate.json"],
+                         s3.view_payload(views["estate"], s3.view_stamp({"tier": "t3"})))
+        # Paused and departed payload members cannot inflate the live denominator or numerator.
+        paused = {"slug": "paused", "status": "paused"}
+        payload["paused"] = payload["first"]
+        payload["departed"] = payload["first"]
+        _, _, scoped = compose.build_all(stacks + [paused], coverage, dataplane=payload)
+        self.assertEqual(scoped["cost_adaptive_headroom"], envelope["meta"]["rules_coverage"])
+        # A complete, genuinely empty finding population emits an honest estate zero.
+        payload["unknown"] = payload["first"]
+        metrics, views, view_coverage = compose.build_all(stacks, coverage, dataplane=payload)
+        with mock.patch.object(s3, "_put", side_effect=capture):
+            s3.write_views(views, {"tier": "t3"}, bucket="offline", view_coverage=view_coverage)
+        self.assertEqual(published["views/cost_adaptive_headroom.json"]["meta"]["rules_coverage"],
+                         {"measured": 3, "in_scope": 3, "complete": True})
+        self.assertEqual(published["views/cost_adaptive_headroom.json"]["rows"], [])
+        _, totals = findings.derive(views, view_coverage)
+        self.assertIn(("gcinsight_findings", {"kind": "adaptive_headroom"}, 0.0),
+                      findings.metrics(totals))
+        self.assertNotIn("adaptive_headroom", findings.derive(views)[1],
+                         "missing coverage cannot prove complete, even for empty rows")
+        summary = {r[" Metric"]: r["Value"] for r in views["cost_summary"]}
+        self.assertEqual(summary["Adaptive rules applied"], 6)
+        # No live measured rules means no total, not a zero population.
+        metrics, views, view_coverage = compose.build_all(
+            stacks, coverage, dataplane={"departed": payload["first"]})
+        self.assertNotIn("cost_adaptive_headroom", views)
+        self.assertEqual(view_coverage["cost_summary"],
+                         {"measured": 0, "in_scope": 3, "complete": False})
+        for row in views["cost_summary"]:
+            if row[" Metric"].startswith(("Adaptive rules applied", "Active series on those stacks",
+                                          "Stacks with recommendations and zero rules applied")):
+                self.assertIsNone(row["Value"])
+        self.assertNotIn("gcinsight_cost_adaptive_rules_applied_total",
+                         {name for name, _, _ in metrics})
+
+    def test_partial_publication_reaches_assembled_cost_dashboard(self):
+        """The shipped table consumer must display a qualified subtotal, not an estate headline."""
+        import pathlib
+        import shutil
+        import tempfile
+        from unittest import mock
+        from bin import dashboards
+        from collector.dashboards import build
+        from collector.emit import s3
+        from collector.pillars import compose, findings
+
+        stacks = [{"slug": slug, "hmInstancePromUrl": "https://prom.example",
+                   "hmInstancePromCurrentActiveSeries": 10000}
+                  for slug in ("unknown", "empty", "adopted")]
+        coverage = Coverage(tier="t3", total=3)
+        for stack in stacks:
+            coverage.record_ok(stack["slug"])
+        payload = {slug: {"adaptive_metrics": {
+            "available": True, "rules_applied": applied, "adopted": bool(applied),
+            "recommendations_pending": 2,
+        }} for slug, applied in (("empty", 0), ("adopted", 2))}
+        _, views, view_coverage = compose.build_all(stacks, coverage, dataplane=payload)
+        with tempfile.TemporaryDirectory() as tmp:
+            local = pathlib.Path(tmp)
+            for existing in (TESTDATA / "views").glob("*.json"):
+                shutil.copyfile(existing, local / existing.name)
+
+            def capture(path, key, bucket, dry_run):
+                shutil.copyfile(path, local / pathlib.Path(key).name)
+                return key
+
+            with mock.patch.object(s3, "_put", side_effect=capture):
+                s3.write_views(views, {"tier": "t3"}, bucket="offline", view_coverage=view_coverage)
+            with (mock.patch.object(build, "VIEWS_DIR", tmp),
+                  mock.patch.object(build, "BUCKET", "offline")):
+                _, document = dashboards.assemble("cost", "infinity-offline")
+            elements = document["spec"]["elements"]
+            headroom = elements["headroom"]["spec"]
+            self.assertIn("measured", headroom["title"].lower())
+            self.assertIn("not the estate total", headroom["description"].lower())
+            query = elements["summary"]["spec"]["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+            self.assertEqual(query["root_selector"], "rows")
+            self.assertIn(" Metric", [c["selector"] for c in query["columns"]])
+            published = json.loads((local / query["url"].rsplit("/", 1)[-1]).read_text())
+            displayed = {r[" Metric"]: r["Value"] for r in published["rows"]}
+            self.assertEqual(displayed["Adaptive rules applied (measured on 2 of 3 stacks)"], 2)
+            self.assertNotIn("Adaptive rules applied", displayed)
+            self.assertEqual(published["meta"]["rules_coverage"],
+                             {"measured": 2, "in_scope": 3, "complete": False})
+            _, totals = findings.derive(views, view_coverage)
+            self.assertNotIn("adaptive_headroom", totals)
+
+    def test_t1_carry_cannot_resurrect_incomplete_adaptive_estate_totals(self):
+        """An older complete total must not be re-stamped as current over a newly partial estate."""
+        import datetime as dt
+        from unittest import mock
+        import scan
+        from tests.test_scan import FakeClient, cfg_for
+        from collector.emit import hydrate
+
+        stacks = [{"slug": slug, "status": "active", "hmInstancePromUrl": "https://prom.example"}
+                  for slug in ("unknown", "first", "second")]
+        payload = {slug: {"adaptive_metrics": {
+            "available": True, "rules_applied": 2, "adopted": True,
+            "recommendations_pending": 1, "series_counts_complete": True,
+            "remediable_series": 10,
+        }} for slug in ("first", "second")}
+        old_totals = [
+            "gcinsight_cost_adaptive_rules_applied_total", "gcinsight_cost_stacks_without_adaptive",
+            "gcinsight_value_savings_identified_series", "gcinsight_value_savings_unused_series",
+            "gcinsight_value_savings_identified_currency", "gcinsight_value_savings_unused_currency",
+        ]
+        state = {"generated_at": dt.datetime.now(dt.timezone.utc).isoformat(), "tier": "t3",
+                 "metrics": [[name, {}, 100.0] for name in old_totals] + [
+                     ["gcinsight_maturity_score", {"stack": "first", "version": "1"}, 49.0],
+                 ]}
+        with (
+            mock.patch.object(scan.gcom, "fetch_inventory", return_value=stacks),
+            mock.patch.object(scan.gcom, "fetch_access_policies", return_value=[]),
+            mock.patch.object(scan.gcom, "fetch_org_members",
+                              return_value={"state": "ok", "members": []}),
+            mock.patch.object(scan, "gather_fleet", return_value=({}, [])),
+            mock.patch.object(scan.hydrate, "hydrate", return_value=(
+                {"dataplane": payload}, hydrate.Provenance())),
+            mock.patch.object(scan, "assistant_gaps", return_value={}),
+            mock.patch.object(scan, "load_ratecard", return_value=None),
+            mock.patch.object(scan.carry, "load_state", return_value=state),
+        ):
+            result = scan.run_t1(FakeClient(), cfg_for("t1"))
+        metrics = result["_emit"]["metrics"]
+        names = {name for name, _, _ in metrics}
+        self.assertTrue(set(old_totals).isdisjoint(names),
+                        "partial coverage must withhold carried Adaptive estate totals too")
+        self.assertIn(("gcinsight_maturity_score", {"stack": "first", "version": "1"}, 49.0), metrics)
+        self.assertEqual(result["_emit"]["view_coverage"]["cost_summary"],
+                         {"measured": 2, "in_scope": 3, "complete": False})
+
     def test_mixed_estate_excludes_unknown_rules_from_sums_and_adoption(self):
         from collector.pillars.compose import build_all
         from collector.pillars import findings
@@ -48,26 +215,30 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
             }}
             for slug, applied in (("unknown", None), ("empty", 0), ("adopted", 2))
         }
-        metrics, views = build_all(stacks, coverage, dataplane=payload)
+        metrics, views, view_coverage = build_all(stacks, coverage, dataplane=payload)
         by = {(name, tuple(sorted(labels.items()))): value for name, labels, value in metrics}
         for name in ("gcinsight_cost_adaptive_rules_applied_total", "gcinsight_cost_stacks_without_adaptive"):
             with self.subTest(estate_metric=name):
                 self.assertNotIn((name, ()), by)
         self.assertNotIn(("gcinsight_adaptive_recommendations",
                           (("stack", "unknown"), ("status", "applied"))), by)
-        # The scan derives an unqualified estate finding gauge from each admitted view.
-        # Partial headroom would turn an unknown live member into a partial/zero total.
-        self.assertNotIn("cost_adaptive_headroom", views)
-        _, totals = findings.derive(views)
+        # The partial view is published, but cannot become an unqualified estate finding gauge.
+        self.assertEqual([r[" Stack"] for r in views["cost_adaptive_headroom"]], ["empty"])
+        self.assertEqual(view_coverage["cost_adaptive_headroom"],
+                         {"measured": 2, "in_scope": 3, "complete": False})
+        _, totals = findings.derive(views, view_coverage)
         self.assertNotIn("adaptive_headroom", totals)
         self.assertNotIn(("gcinsight_findings", {"kind": "adaptive_headroom"}, 1.0),
                          findings.metrics(totals))
         summary = {r[" Metric"]: r["Value"] for r in views["cost_summary"]}
         self.assertEqual(summary["Stacks measured for Adaptive"], "2 of 3 scannable (3 total)")
-        for key in ("Adaptive rules applied", "Stacks with recommendations and zero rules applied",
-                    "Active series on those stacks", "Their share of org series %"):
+        for key, expected in (("Adaptive rules applied", 2),
+                              ("Stacks with recommendations and zero rules applied", 1),
+                              ("Active series on those stacks", 10000),
+                              ("Their share of org series %", 33.3)):
             with self.subTest(summary=key):
-                self.assertIsNone(summary[key])
+                self.assertNotIn(key, summary, "no unqualified partial estate total")
+                self.assertEqual(summary[f"{key} (measured on 2 of 3 stacks)"], expected)
         self.assertEqual(summary["Adaptive recommendations pending (measured stacks)"], 6)
         benchmark = next(r for r in views["value_benchmarks"]
                          if r[" Dimension"] == "adaptive_adoption")
@@ -79,7 +250,9 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
         self.assertFalse(dimension["Applicable"])
         savings = {r[" Metric"]: r["Value"] for r in views["value_savings"]}
         with self.subTest(consumer="value"):
-            self.assertIsNone(savings["Stacks with pending recommendations and zero rules applied"])
+            self.assertNotIn("Stacks with pending recommendations and zero rules applied", savings)
+            self.assertEqual(savings["Stacks with pending recommendations and zero rules applied "
+                                     "(measured on 2 of 3 stacks)"], 1)
 
         from collector.emit.diff import summarise
         with self.subTest(consumer="diff"):
@@ -88,16 +261,17 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
         # Missing live members cannot be replaced by an equally sized payload containing departed stacks.
         payload.pop("unknown")
         payload["departed"] = payload["adopted"]
-        metrics, views = build_all(stacks, coverage, dataplane=payload)
+        metrics, views, view_coverage = build_all(stacks, coverage, dataplane=payload)
         self.assertNotIn("gcinsight_cost_adaptive_rules_applied_total", {n for n, _, _ in metrics})
         self.assertNotIn("gcinsight_cost_stacks_without_adaptive", {n for n, _, _ in metrics})
-        self.assertIsNone(next(r["Value"] for r in views["value_savings"]
-                               if r[" Metric"] == "Stacks with pending recommendations and zero rules applied"))
+        self.assertEqual(next(r["Value"] for r in views["value_savings"]
+                              if r[" Metric"] == "Stacks with pending recommendations and zero rules applied "
+                              "(measured on 2 of 3 stacks)"), 1)
         self.assertNotIn("adaptive_applied",
                          summarise({"data": {"stacks": stacks, "dataplane": payload}}))
         # A recovered, measured-empty live member restores honest estate totals, including zeros.
         payload["unknown"] = payload["empty"]
-        metrics, views = build_all(stacks, coverage, dataplane=payload)
+        metrics, views, view_coverage = build_all(stacks, coverage, dataplane=payload)
         by = {(n, tuple(sorted(labels.items()))): v for n, labels, v in metrics}
         self.assertEqual(by[("gcinsight_cost_adaptive_rules_applied_total", ())], 2)
         self.assertEqual(by[("gcinsight_cost_stacks_without_adaptive", ())], 2)
@@ -105,7 +279,7 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
                          ["adaptive_applied"], 2)
         self.assertEqual([r[" Stack"] for r in views["cost_adaptive_headroom"]],
                          ["unknown", "empty"])
-        _, totals = findings.derive(views)
+        _, totals = findings.derive(views, view_coverage)
         self.assertEqual(totals["adaptive_headroom"], 2)
         self.assertIn(("gcinsight_findings", {"kind": "adaptive_headroom"}, 2.0),
                       findings.metrics(totals))
@@ -115,15 +289,15 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
             "available": True, "rules_available": False, "rules_applied": None,
             "adopted": None, "recommendations_pending": 2,
         }}
-        _, views = build_all(stacks, coverage, dataplane=payload)
-        self.assertNotIn("cost_adaptive_headroom", views)
-        _, totals = findings.derive(views)
+        _, views, view_coverage = build_all(stacks, coverage, dataplane=payload)
+        self.assertEqual(views["cost_adaptive_headroom"], [])
+        _, totals = findings.derive(views, view_coverage)
         self.assertNotIn("adaptive_headroom", totals)
         # Once every live member is measured and adopted, empty really means zero.
         payload["unknown"] = payload["adopted"]
-        _, views = build_all(stacks, coverage, dataplane=payload)
+        _, views, view_coverage = build_all(stacks, coverage, dataplane=payload)
         self.assertEqual(views["cost_adaptive_headroom"], [])
-        _, totals = findings.derive(views)
+        _, totals = findings.derive(views, view_coverage)
         self.assertEqual(totals["adaptive_headroom"], 0)
         self.assertIn(("gcinsight_findings", {"kind": "adaptive_headroom"}, 0.0),
                       findings.metrics(totals))

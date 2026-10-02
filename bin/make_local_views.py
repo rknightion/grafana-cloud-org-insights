@@ -70,7 +70,7 @@ def main(argv: list[str] | None = None) -> int:
 
     cov = _coverage(stacks, args.tier)
     optional_inputs = {name: src.get(name) for name in hydrate.INPUT_OWNER}
-    metrics, views = compose.build_all(stacks, cov, **optional_inputs)
+    metrics, views, view_coverage = compose.build_all(stacks, cov, **optional_inputs)
 
     stamp = s3emit.view_stamp({
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -99,7 +99,10 @@ def main(argv: list[str] | None = None) -> int:
     args.out.mkdir(parents=True, exist_ok=True)
     for name, rows in sorted(views.items()):
         (args.out / f"{name}.json").write_text(
-            json.dumps(s3emit.view_payload(rows, stamp), indent=2, default=str) + "\n"
+            json.dumps(s3emit.view_payload(
+                rows, dict(stamp, rules_coverage=view_coverage[name])
+                if name in view_coverage else stamp,
+            ), indent=2, default=str) + "\n"
         )
 
     print(f"{len(views)} views -> {args.out}   ({len(metrics)} metrics composed, "

@@ -225,7 +225,9 @@ def _stack_of(row: Mapping[str, Any]) -> str | None:
     return None
 
 
-def derive(views: Mapping[str, Any]) -> tuple[list[dict[str, Any]], dict[str, int]]:
+def derive(views: Mapping[str, Any],
+           view_coverage: Mapping[str, Mapping[str, Any]] | None = None
+           ) -> tuple[list[dict[str, Any]], dict[str, int]]:
     """Return `(findings, totals)`.
 
     `totals` is keyed by kind and holds the TRUE row count even where the lines were capped. Only kinds
@@ -243,6 +245,11 @@ def derive(views: Mapping[str, Any]) -> tuple[list[dict[str, Any]], dict[str, in
         if spec.view not in views:
             # The tier that ran cannot compute this. Say nothing at all about it.
             continue
+        if spec.kind == "adaptive_headroom":
+            rules_cov = (view_coverage or {}).get(spec.view) or {}
+            if rules_cov.get("complete") is not True:
+                # No channel (including older callers) is not evidence of complete coverage.
+                continue
         rows = views[spec.view]
         if not isinstance(rows, list):
             continue

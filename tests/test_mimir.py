@@ -252,7 +252,7 @@ class RealBatchTest(unittest.TestCase):
                 coverage.record_skipped(str(s["slug"]), "paused")
             else:
                 coverage.record_ok(str(s["slug"]))
-        metrics, _ = compose.build_all(stacks, coverage, dataplane=dataplane)
+        metrics, _, _ = compose.build_all(stacks, coverage, dataplane=dataplane)
 
         wire = mimir.snappy_compress(mimir.encode_write_request(metrics, 1_755_460_000_000))
         decoded = decode_write_request(mimir.snappy_decompress(wire))
