@@ -1,9 +1,11 @@
 ---
 id: GCI-0083
 title: Count playlists after permission and visibility verification
-status: To Do
-assignee: []
+status: Parked
+assignee:
+  - '@loop10-root'
 created_date: '2026-10-02 09:25'
+updated_date: '2026-10-02 17:07'
 labels:
   - feature-usage
   - scope-decision
@@ -34,3 +36,15 @@ Historical empty200 does not prove complete positive visibility or no required a
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+R-wit freshdeclaredplaylists:read emptyscope basicNone exactGET /api/playlists versusAdminpositivecount/population orpreciseemptyblocker, no playlistcreation/dashboardsgrant; IDteardown.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Loop10 exactplaylists:read emptyscope None/AdminGET200count0; no positiveexistingplaylist control, empty equalitycannotprove positivevisibility/completeness. SA67/roleeg016wk99qcqoe/token77deletedtoken-role-SA200/404/postlistsabsence. No creationgrant orimplementationadmitted, implementation0/reviewrepair0/infra0. Resume needsexistingpositivecontrol allowedrobk+matchingreader/Adminfullvisibility.
+<!-- SECTION:NOTES:END -->

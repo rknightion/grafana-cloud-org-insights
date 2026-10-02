@@ -360,8 +360,9 @@ deployment and its write stack as the serial resource described under Resource m
   parked. The later inline capture exercised the same accepted observer without a replacement run.
 - One dev Adaptive segment was retained for a later loop. Creation, about two hours later and final
   reads found no selected rules or recommendations; the actual deployed read CAP could list segments.
-  Empty recommendations do not prove segmented savings. Deletion is owed by the recorded private
-  ID only, never by name; no deletion or new segment is implied by this record.
+  Empty recommendations do not prove segmented savings. Loop10 freshly observed the recorded old
+  ID absent; that historical deletion item is no longer outstanding. Loop10 performed no segment
+  creation or deletion. Never substitute name matching for a recorded object ID.
 - A bounded positive audit-log sample exposed decryption/service caller identities, not an established
   browser-app identity or exact join to usage-insights data requests. Timestamp proximity alone is
   not attribution. The deployed stack reader's main-logs proxy query returned 403. Upstream opt-in,
@@ -375,3 +376,57 @@ deployment and its write stack as the serial resource described under Resource m
 - A changed immutable module ref needs `tofu init` before the pre-push validation hook. The first
   dev push failed on stale module installation, then passed after init; unrelated dirty lockfiles
   remained byte-identical. This is not authority to update provider pins or discard sibling work.
+
+## Verified loop10 outcomes and limits
+
+- Stable v0.5.0 is signed and accepted at source `db4b26004036fa08a286b64081f736a107212336`;
+  GHCR index `sha256:cda4908e7acd2b6800c265e3cdd6c5b2de9198387e46b35efb0a09a723a9350d`.
+  Later IRM, segment, Faro, ML, AWS account, PDC, report and dashboard changes are current-main
+  work, not content retroactively shipped in that stable release. Automated RC tags are not
+  authority to manually publish a second stable release.
+- D-WAIVE was a one-time owner acceptance of the retained loop9 dev evidence for the v0.4.4
+  customer prerequisite. It did not make the 199-second descriptor capture timely and does not
+  waive a later dev rollout or capture gate. The v0.4.4 image apply and full definition/schedule/IAM
+  readback passed; manual T3/T2 completed and advanced their scans. The single manual T1 outcome
+  and final no-change/source closeout remain unknown after AWS authentication expired. No
+  replacement task, login, credential repair or rollback was inferred from that uncertainty.
+- Dev v0.5.0 execution stopped before init/build/apply/provisioner/tasks because AWS authentication
+  could not read the backend passphrase. Dev remains at its previously proven v0.4.4 triplet. The
+  root archived its unapplied target preparation and restored only its own local changes, byte
+  identical to the saved pre-run files; unrelated infrastructure work was preserved.
+- S-SM(e') preserves usage-insights query access everywhere and usage query access only on the
+  write stack. New Synthetic query/probes access requires the separate opt-in token and one valid
+  live-discovered datasource UID. All legacy-correct role cases perform zero discovery; an
+  arbitrary extra query stays refused. No new customer grant or token re-mint follows.
+- S-COV uses explicit `(metrics, views, view_coverage)` propagation through scan, findings and S3.
+  Partial rule coverage produces qualified subtotals, never an estate metric/gauge, and suppresses
+  carry-forward of the incomplete tier's estate claim. Pricing and recommendation-count coverage
+  are separate from rules-read coverage; a dashboard denominator must name which it proves.
+- Three owner-created staff segments were readable. Positive per-segment marginal reductions
+  do not establish additive savings or fallback semantics. Current main discovers state and
+  conservatively withholds whole-stack confidence for segmented/unknown/legacy inputs, retaining
+  qualified known-unsegmented subtotals. No segment object was changed by this loop.
+- Serial staff witnesses matched exact-None and Admin positive populations for IRM counters,
+  Faro, ML, AWS accounts, PDC attribution and reports. Library/playlist controls were empty and
+  remain parked, not visibility passes. All temporary service accounts, roles and tokens were
+  removed by recorded IDs and checked absent. Counts do not establish universal visibility or
+  subtract-one privilege minimality; no customer product-read grant was added.
+- PDC must sweep fresh inventory regions plus policy control realms, validate every page and
+  client-filter exact stack realm plus PDC signing scope; the server returned foreign policies
+  despite a realm query. Continuations are validated and reconstructed onto the fixed proxy,
+  never fetched as supplied credential-bearing URLs. Its read action also reaches a tokens GET,
+  which the collector never calls. AWS backend write isolation remains unknown; only its exact
+  accounts GET is admitted and other providers remain unknown, not zero.
+- Independent review reproduced complete-looking HTTP 206 bodies accepted by earlier count
+  sources. Faro/ML were repaired to exact HTTP 200 with red-first T2/S3 withholding proofs.
+  IRM's three review-repair rounds were exhausted, so its acceptance and follow-up are parked;
+  do not bypass that budget with a renamed task or a shared Response.ok change.
+- Dashboard coverage is derived from actual fixture publications and assembled dashboards with
+  exact field/metric dispositions. Empty row schemas and live-only provenance variants are not
+  silently claimed covered. Optional JSONata metadata selection needs a missing-field guard:
+  `$exists(meta.rules_coverage) ? [meta.rules_coverage] : []` gives no rows rather than a fabricated
+  zero. Real upstream jsonframer API proof is not an installed-plugin/browser proof.
+- A temporary virtualenv symlink violates the lane environment rule even when its tests run.
+  The Faro/ML repair's original linked-environment gate was superseded by a real local `just setup`
+  directory and full gate at the unchanged exact landed SHA. Keep the deviation and correction in
+  evidence; do not erase history or repeat unchanged remote CI/review to disguise it.

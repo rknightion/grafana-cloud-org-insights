@@ -1,9 +1,11 @@
 ---
 id: GCI-0082
 title: Count library panels with verified folder coverage
-status: To Do
-assignee: []
+status: Parked
+assignee:
+  - '@loop10-root'
 created_date: '2026-10-02 09:25'
+updated_date: '2026-10-02 17:05'
 labels:
   - feature-usage
   - scope-decision
@@ -34,3 +36,15 @@ Exact library.panels:read folder scopes and None-reader full folder visibility a
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+R-wit robk exactlibrary.panels:read@folders:* fromfreshfixedrolemetadata basicNone, GETkind1page/perPage frozen route, None/Adminpositivecountvisibility andtotalCountpagingreconciliation orpreciseblocker; no panelmodelsemanticread/grantchange, recordedIDteardown.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Loop10 R-wit exactlibrary.panels:read@folders:* None/AdminGETboth200 butcount/totalCount0. Preciseblocker: no positive existing librarypanel population on allowedrobk; emptyequalitycannotprove completefoldervisibility, no panelcreation grant. SA66/roleeg016sv8u8yrka/token76 allremoved200/404/postlistsabsence. Noimplementationadmitted, implementationattempts0/reviewrepair0/infra0. Resume requires ownerexistingpositivecontrol onallowedstack withfoldervisibility andpagecount witness.
+<!-- SECTION:NOTES:END -->

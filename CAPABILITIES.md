@@ -4,6 +4,11 @@ This file records which identity reaches each source. Endpoint availability stil
 region and product rollout, so a deployment must record actual HTTP status and coverage rather than
 turning an unavailable source into zero.
 
+Version boundary: stable v0.5.0 includes Synthetic counts and coverage-qualified Adaptive totals.
+The additional product counters and conservative segment handling below describe current main;
+they are not a claim that stable v0.5.0 or any deployment contains those later changes. Live v0.5.0
+dev acceptance remains unproven. No new customer product-read grant follows this document.
+
 ## Org-realm reader
 
 `collector.config.READER_SCOPES` is authoritative:
@@ -100,11 +105,13 @@ So reading exemptions means adding `grafana-adaptive-metrics-app.exemptions:read
 uses for Adaptive Logs - not widening the org credential. The rules, recommendations, segments and
 config data all remain reachable on the Mimir host with the org token and need no plugin role.
 
-**Segments are an uncollected surface.** `/aggregations/rules/segments`,
-`/aggregations/rules?segment=<id>` and `/aggregations/recommendations?segment=<id>` were verified
-200 with a live segment present, but `dataplane.adaptive_metrics` does not enumerate or select
-segments. A segment scopes a rule set to a selector; the collector's unsegmented aggregate must not
-be claimed as a verified segment-aware estate saving.
+**Current main discovers segmentation but does not add segment savings.** The existing reader
+reaches `/aggregations/rules/segments`. Discovery distinguishes unsegmented, segmented and unknown,
+including legacy inputs without a state. Whole-stack cost/value/maturity confidence requires a
+known unsegmented stack; segmented or unknown stacks cannot qualify a default-only figure as an
+estate saving. Qualified unsegmented subtotals remain available. Positive per-segment recommendation
+counts are not proof of disjointness, fallback additivity or an achievable combined saving. The
+collector creates or deletes no segments and adds no scope for this handling.
 
 ### Scope-isolated trace and profile content reads
 
@@ -180,8 +187,9 @@ The role can read:
 `datasources:uid:grafanacloud-usage` for the bounded capability-adoption input. No reader can query
 arbitrary production datasources.
 
-An optional, default-off `GCINSIGHT_READER_PRODUCT_READS` setting accepts `slo` and
-`synthetic-monitoring`. When selected, `slo` adds unscoped
+The default-off `GCINSIGHT_READER_PRODUCT_READS` setting accepts `slo`, `synthetic-monitoring`,
+`synthetic-monitoring-query`, `irm-integrations`, `faro-apps`, `ml-jobs`, `cloud-accounts`,
+`pdc-networks` and `reports` on current main. Later counters are not included in stable v0.5.0. When selected, `slo` adds unscoped
 `grafana-slo-app.orgpreferences:read` and `grafana-slo-app.slo:read`, plus `plugins.app:access` scoped
 to `plugins:id:grafana-slo-app`. `synthetic-monitoring` adds unscoped
 `grafana-synthetic-monitoring-app:read` and `grafana-synthetic-monitoring-app.checks:read`, plus
@@ -189,7 +197,12 @@ to `plugins:id:grafana-slo-app`. `synthetic-monitoring` adds unscoped
 against live role metadata on 2026-09-23. Unsetting the option removes those product pairs during
 reconciliation without replacing a working reader token. A deployment must explicitly approve and
 select a family; generic defaults grant neither. T2 gathers count-only SLO definitions when `slo` is
-selected, but the Synthetic Monitoring app grant does not establish a reachable check-list route.
+selected. The original Synthetic app grant alone does not establish datasource-query access.
+The separate `synthetic-monitoring-query` token requires `synthetic-monitoring`, adds query access
+only to the single valid live-discovered Synthetic datasource UID and adds probes-read with empty
+scope. Ambiguous or invalid discovery adds no query grant. No wildcard or other datasource query is
+allowed. Without the new token, scans make no Synthetic calls; reconciliation discovers only when
+needed to remove an already-held exact Synthetic query pair, never for legacy-correct readers.
 
 The declaration explicitly refuses decrypted alert secrets, secure values, user session tokens,
 Grafana auth settings, support bundles, provisioning writes and Adaptive Traces mutation actions.
@@ -238,6 +251,46 @@ sufficiency of the full role, not proof of isolated minimum permissions. Config 
 prove enablement, and recommendation counts do not measure achieved saving. Both readers discard
 raw objects and use the [guarded transport/schema fences](docs/source-resource-fences.md).
 
+### Optional count-only product inputs
+
+All are default-off T2 inputs, inventory-led joins and point-in-time views, not product time-series
+metrics. Each new input adds only the existing bounded input-freshness series. Unknown or unreadable
+stacks are absent, never a manufactured zero; withheld views leave last-good S3 objects intact.
+Readable older optional views remain eligible for dashboards. Only genuine missing objects omit an
+optional table; permission, transport and parse errors remain explicit.
+
+| Token | Exact added read pairs | Collector GET and retained output |
+|---|---|---|
+| `irm-integrations` | `grafana-irm-app.integrations:read` (empty), `plugins.app:access@plugins:id:grafana-irm-app` | `/api/plugins/grafana-irm-app/resources/alert_receive_channels/counters/`; integration count only |
+| `faro-apps` | `grafana-kowalski-app.apps:read` (empty), `plugins.app:access@plugins:id:grafana-kowalski-app` | `/api/plugin-proxy/grafana-kowalski-app/api-proxy/api/v1/app`; count and closed web/mobile/unknown counts |
+| `ml-jobs` | `grafana-ml-app.forecasting:read` (empty), `plugins.app:access@plugins:id:grafana-ml-app` | `/api/plugins/grafana-ml-app/resources/manage/api/v1/jobs`; configured forecast-job count |
+| `cloud-accounts` | `grafana-csp-app:read` (empty), `plugins.app:access@plugins:id:grafana-csp-app` | `/api/plugin-proxy/grafana-csp-app/he-api/api/v2/stacks/<inventory id>/aws/accounts`; stack, fixed provider `aws`, count |
+| `pdc-networks` | `grafana-pdc-app.private-networks:read` (empty), `plugins.app:access@plugins:id:grafana-pdc-app` | `/api/plugin-proxy/grafana-pdc-app/grafanacom-api/v1/accesspolicies`; complete-region/page count matching current stack realm and `set:pdc-signing` |
+| `reports` | `reports:read@reports:*` only | `/api/reports`; configured-object count including disabled reports, not execution or delivery activity |
+
+Transport uses fresh validated inventory origins, guarded GET without redirects, and bounded bodies
+and structural traversal. Faro, ML, AWS accounts, PDC and reports require HTTP 200; valid empty
+collections measure zero, partial or unsupported envelopes remain unavailable. IRM currently still
+admits HTTP 206 through `response.ok`: its count-integrity acceptance is parked until an authorised
+repair. Do not treat its earlier successful 200 witness as proof that this defect is fixed.
+
+The owner accepts two named receipt risks only: IRM's same permission also reaches secret-bearing
+integration configuration, but the collector calls only counters; ML job items contain top-level
+`grafanaApiKey`, dropped before the unchanged structural credential guard. Nested keys and other
+known credential fields remain rejected. No integration-list, job-expression, outliers or sift route
+is admitted. All identities, names, URLs, keys and arbitrary settings are discarded from outputs.
+Faro ingest keys/endpoints are public ingest values, but still not retained. AWS backend write
+isolation remains unknown despite GET-only collection; other providers are unknown, not zero, and
+there is no all-provider total. PDC's same read action also reaches tokens GET, which the collector
+never calls; no connection POST is permitted. Positive staff reader/Admin controls establish the
+recorded populations, not universal visibility, strict minimality or a customer deployment grant.
+Raw receipt is transient, not memory erasure; caller deadlines do not terminate surviving reads.
+
+Synthetic uses guarded GET `/api/datasources/proxy/uid/<discovered uid>/sm/check/list` and
+`.../sm/probe/list` with the separately selected query token. Only counts by bounded check type,
+enabled state and public/private probe class leave the source. Targets, scripts, headers, labels
+and identities are discarded. These are inventory counts, not probe usage or execution results.
+
 ### Loki retention
 
 Effective tenant limits come from `/config/tenant/v1/limits` on the Loki dataplane under the existing
@@ -281,8 +334,8 @@ automatically labelled broken.
  `grafana-synthetic-monitoring-app.checks:read` and plugin access on that app. The IRM integrations
  reader would grant `grafana-irm-app.integrations:read` and its plugin access. The k6 reader would
  grant `k6-app.settings:read` and plugin access on `k6-app`; that role name alone does not prove a
- k6 runs API is reachable. SLO and Synthetic pairs are optional and default off; k6 and IRM remain
- undeclared. Product object and run routes were not queried with an expanded identity at that time.
+ k6 runs API is reachable. This is historical metadata evidence. Current optional count contracts
+ are above; k6 still has no admitted collector route.
 - In the same sample, `/api/plugins`, `/api/datasources`, `/api/v1/provisioning/alert-rules`,
  `/api/search/` and the existing Adaptive Logs plugin-proxy recommendation route returned HTTP 200.
  The plugin, datasource, rule and search lists were populated; a 200 alone is not an unfiltered
@@ -295,8 +348,9 @@ automatically labelled broken.
  returned 403 before the optional product grant on 2026-09-23. The reader's datasource query scope
  intentionally excludes this datasource, so the optional app read pairs alone do not establish a
  reachable check-list route. The backend's separate REST API requires a Synthetic Monitoring token.
- Do not add a datasource query grant or mint that token without a separate explicit deployment
- decision. See the
+ The separately owner-approved `synthetic-monitoring-query` exception above addresses only the
+ single live-discovered datasource UID. The earlier denial is historical; fresh deployed-reader
+ two-stack count proof remains unverified. No separate Synthetic API token is minted. See the
  [plugin source](https://github.com/grafana/synthetic-monitoring-app/blob/97fefc26fac1abd508f753ec41807a448e957ae5/src/datasource/DataSource.ts)
  and [Grafana API documentation](https://grafana.com/docs/grafana-cloud/observe-and-act/testing/synthetic-monitoring/api-reference/).
 - Adaptive Profiles endpoints have not produced a verified read contract.

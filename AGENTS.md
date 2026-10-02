@@ -89,6 +89,18 @@ off anything but the live inventory.
   parse, never logged or persisted. This is not approval for IRM integration lists, alert-group
   lists or schedules, nor a blanket product-route or POST exception. Other approved families
   require their exact-pair and route witnesses before implementation; no customer grant follows.
+- Current main's optional `faro-apps`, `ml-jobs`, `cloud-accounts`, `pdc-networks` and `reports`
+  readers are default-off count-only GET sources. They require exact HTTP 200; an otherwise valid
+  HTTP 206 body is unavailable, not a complete inventory. Do not globally redefine `Response.ok`
+  to enforce this source contract. `irm-integrations` still admits 206 and its acceptance is parked;
+  the recorded follow-up needs explicit repair allowance, not an automatic budget reset.
+- PDC counts only policies with the exact current stack realm and `set:pdc-signing`, after complete
+  reads across `gcom.policy_regions(live_inventory)` and validated pages. Never trust server realm
+  filtering, follow a supplied continuation URL with a credential, or call tokens/connection routes.
+  Reports counts configured objects, including disabled reports, not executions or delivery.
+- Adaptive segmentation discovery is unsegmented, segmented or unknown. A default-only value cannot
+  establish whole-stack savings or maturity for segmented/unknown/legacy inputs. Positive segment
+  marginal counts do not establish disjointness or fallback additivity; no combined saving is emitted.
 - A repair must not re-mint a working credential. Token names are organisation-wide unique, so an
   unnecessary mint can leave an untracked credential while SSM points at the replacement.
 - Adaptive savings require verbose recommendation counts. Sum positive marginal reductions for `add`
