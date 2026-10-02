@@ -468,6 +468,36 @@ def table_panel(title: str, view_name: str, ds_uid: str, *, description: str = "
     return panel
 
 
+def rules_coverage_panel(title: str, view_name: str, ds_uid: str) -> dict[str, Any]:
+    """Render the publication's denominator, including when the recommendation rows are empty.
+
+    Do not derive coverage from rows or substitute the latest scan's metric: these counts qualify
+    this specific last-good view. A pre-upgrade object lacking metadata stays blank, never zero.
+    """
+    query = data_query(INFINITY_TYPE, ds_uid, {
+        "type": "json", "source": "url", "format": "table", "parser": "backend",
+        "root_selector": "$exists(meta.rules_coverage) ? [meta.rules_coverage] : []",
+        "columns": [
+            {"selector": "measured", "text": "Measured stacks", "type": "number"},
+            {"selector": "in_scope", "text": "In-scope stacks", "type": "number"},
+            {"selector": "complete", "text": "Complete", "type": "boolean"},
+        ],
+        "url": f"{bucket_url()}/views/{view_name}.json",
+        "url_options": {"method": "GET"},
+    }, "A")
+    return _panel(title,
+                  "Rules-read coverage of this published view, not the latest scan. It does not "
+                  "prove recommendation-count or pricing completeness; rows can have a narrower "
+                  "measured population. Incomplete means only part of the in-scope estate is measured. "
+                  "This denominator remains visible even when the detail table has no rows. "
+                  "No rows means coverage metadata is absent, not a measured zero. "
+                  "HTTP or access errors remain explicit.",
+                  [query], viz("table", {
+                      "options": {"showHeader": True, "footer": {"show": False, "fields": []}},
+                      "fieldConfig": {"defaults": {}, "overrides": []},
+                  }))
+
+
 def treemap_panel(title: str, view_name: str, ds_uid: str, *,
                   text_field: str, size_field: str, color_by_field: str,
                   label_fields: Sequence[str] = (), description: str = "",

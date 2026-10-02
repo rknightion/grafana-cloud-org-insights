@@ -2198,6 +2198,132 @@ class CoverageOutcomeValueTest(unittest.TestCase):
         self.assertNotIn("protected", prose)
 
 
+def dashboard_coverage_inventory():
+    """Read the offline publication envelopes and the assembled consumer, not builder names.
+
+    Run make_local_views in a temporary directory so conditional panels see exactly the fixture's
+    publication set, including the diff emitter. No golden files or network are read or changed.
+    """
+    import json
+    import pathlib
+    from bin import dashboards, make_local_views
+    from collector.emit import budget, hydrate
+
+    with tempfile.TemporaryDirectory() as directory:
+        make_local_views.main(["--out", directory])
+        payloads = {p.stem: json.loads(p.read_text()) for p in pathlib.Path(directory).glob("*.json")}
+        with (mock.patch.object(build, "VIEWS_DIR", directory),
+              mock.patch.object(build, "BUCKET", "synthetic-coverage")):
+            assembled = {name: dashboards.assemble(name, "infinity-uid")[1]
+                         for name in dashboards.BUILDERS}
+
+    rendered = {}
+    metric_panels = {}
+    for dashboard, doc in assembled.items():
+        for key, element in doc["spec"]["elements"].items():
+            panel = element["spec"]
+            reference = f"{dashboard}/{key}: {panel['title']}"
+            data = panel.get("data", {}).get("spec", {})
+            hidden = set()
+            for transform in data.get("transformations", []):
+                if transform["spec"]["id"] == "organize":
+                    hidden.update(k for k, v in transform["spec"]["options"]
+                                  .get("excludeByName", {}).items() if v)
+            for query in data.get("queries", []):
+                inner = query["spec"]["query"]
+                spec = inner["spec"]
+                expr = spec.get("expr", "")
+                for metric in budget.CATALOGUE:
+                    if EveryEmittedMetricIsRenderedOrAlertedTest._contains_metric(expr, metric.name):
+                        metric_panels.setdefault(metric.name, []).append(reference)
+                if inner["group"] != build.INFINITY_TYPE:
+                    continue
+                match = re.search(r"/views/([^/]+)\.json", spec.get("url", ""))
+                if not match:
+                    continue
+                view = match.group(1)
+                root = spec.get("root_selector", "")
+                # This exact optional-object expression selects the same observed field lineage;
+                # arbitrary expressions are not credited as displaying a guessed metadata path.
+                optional_root = re.fullmatch(r"\$exists\(([^()]+)\) \? \[\1\] : \[\]", root)
+                if optional_root:
+                    root = optional_root.group(1)
+                viz = panel["vizConfig"]
+                options = viz["spec"].get("options", {})
+                for column in spec.get("columns", []):
+                    display = column.get("text", column["selector"])
+                    if display in hidden:
+                        continue
+                    if viz["group"] == "marcusolsson-treemap-panel" and display not in (
+                        options.get("textField"), options.get("sizeField"),
+                        options.get("colorByField"), *options.get("labelFields", []),
+                    ):
+                        continue
+                    rendered.setdefault((view, f"{root}.{column['selector']}"), []).append(reference)
+
+    fields = []
+    for view, payload in sorted(payloads.items()):
+        # Rows are tabular: a nested object selected as one column is rendered as that object.
+        selectors = {key for row in payload["rows"] for key in row}
+        paths = {f"rows.{key}" for key in selectors}
+        def leaves(value, prefix):
+            if isinstance(value, dict) and value:
+                for key, child in value.items():
+                    yield from leaves(child, f"{prefix}.{key}")
+            else:
+                yield prefix
+        paths.update(leaves(payload["meta"], "meta"))
+        for field in sorted(paths):
+            panels = sorted(set(rendered.get((view, field), [])))
+            reason = ""
+            # Exact envelope semantics, not a blanket metadata exemption. Snapshot provenance is
+            # deliberately not credited to scan/input-age metrics: those describe another publication.
+            envelope_omissions = {
+                "meta.generated_at": "Snapshot publication timestamp retained for audit; dashboard banners show scan/input freshness, not this object's timestamp.",
+                "meta.tier": "Publisher tier is operational provenance, not the ownership tier of each hydrated input.",
+                "meta.stacks_total": "Snapshot inventory denominator retained for audit; the estate panel renders the current inventory metric.",
+                "meta.stacks_scannable": "Snapshot scannable denominator retained for audit; dashboard scan coverage uses the current scan metric.",
+                "meta.stacks_scanned": "Snapshot scanned count retained for audit; dashboard scan coverage uses the current scan metric.",
+                "meta.coverage_ratio": "Snapshot scan coverage retained for audit, distinct from rules coverage and the dashboard's current scan coverage.",
+            }
+            if not panels:
+                reason = envelope_omissions.get(field, "")
+                parts = field.split(".")
+                if len(parts) == 4 and parts[:2] == ["meta", "inputs"] and parts[2] in hydrate.INPUT_OWNER:
+                    if parts[3] == "source":
+                        reason = f"{parts[2]} provenance origin is diagnostic audit detail, not a product finding; retained in the object."
+                    elif parts[3] == "age_seconds":
+                        reason = f"{parts[2]} age at this object's publication is audit detail, not current age. Dashboard input-age panels evolve with time and are not credited as rendering this snapshot field."
+            fields.append({"view": view, "field": field, "panels": panels,
+                           "classification": "rendered" if panels else "deliberate" if reason else "gap",
+                           "reason": reason})
+
+    alerts = (pathlib.Path(__file__).resolve().parent.parent / "bin" / "alerts.py").read_text()
+    metrics = []
+    for metric in budget.CATALOGUE:
+        panels = sorted(set(metric_panels.get(metric.name, [])))
+        alerted = EveryEmittedMetricIsRenderedOrAlertedTest._contains_metric(alerts, metric.name)
+        reason = ""
+        classification = "rendered" if panels else "alert-only" if alerted else "gap"
+        if metric.name in EveryEmittedMetricIsRenderedOrAlertedTest.NEVER_EMITTED:
+            classification = "deliberate"
+            reason = "Never emitted: superseded by Pillar J's public-dashboard counter."
+        elif getattr(metric, "store", None) == "view":
+            classification = "deliberate"
+            reason = "Catalogue view-budget entry, not a Mimir metric; fields inventoried separately."
+        metrics.append({"metric": metric.name, "panels": panels, "alerted": alerted,
+                        "classification": classification, "reason": reason})
+    return {"fields": fields, "metrics": metrics,
+            "unobserved_views": sorted(set(hydrate.VIEW_INPUTS) - set(payloads)),
+            "empty_views": sorted(view for view, payload in payloads.items() if not payload["rows"]),
+            "limitations": [
+                "Empty fixture views have no observed row fields; their declared fallback columns are not proof of published field coverage.",
+                "The local fixture publishes input source/age_seconds only; live hydration's available/tier/stale/state/reason variants are unobserved.",
+                "Nested row objects are inventoried as the selected JSON-valued column; metadata is inventoried recursively.",
+                "Metric references are actual assembled PromQL queries; alert-only classification searches the alert definitions, not prose on dashboards.",
+            ]}
+
+
 class EveryPublishedViewIsRenderedSomewhereTest(unittest.TestCase):
     """A view published to S3 with no panel bound to it runs for nobody, and nothing fails.
 
@@ -2210,14 +2336,7 @@ class EveryPublishedViewIsRenderedSomewhereTest(unittest.TestCase):
     would need updating by the same change that forgets the panel.
     """
 
-    EXEMPT = {
-        # These three Stage 19 tables are fully wired conditionally, but their first scheduled owners
-        # have not yet published S3 objects. Keep only this exact first-publication gate; remove each
-        # entry as soon as its object exists and before publishing the corresponding dashboard.
-        "insights_dashboard_opening_31d",
-        "insights_datasource_query_cost",
-        "risk_org_members",
-    }
+    EXEMPT = set()
 
     @classmethod
     def setUpClass(cls):
@@ -2239,6 +2358,11 @@ class EveryPublishedViewIsRenderedSomewhereTest(unittest.TestCase):
         kw = {k: self.data[k] for k in sorted(hydrate.INPUT_OWNER)}
         _metrics, views, _ = compose.build_all(stacks, cov, **kw)
         return set(views)
+
+    def test_every_published_field_is_rendered_or_deliberate(self):
+        inventory = dashboard_coverage_inventory()
+        gaps = [item for item in inventory["fields"] if item["classification"] == "gap"]
+        self.assertEqual(gaps, [], f"Published fields rendered nowhere: {gaps}")
 
     def test_every_view_the_pillars_produce_has_a_panel(self):
         import bin.dashboards as dash

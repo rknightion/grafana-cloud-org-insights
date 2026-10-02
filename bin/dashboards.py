@@ -1091,6 +1091,12 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
                         "Raw and aggregated are shown together so the reduction where aggregation is "
                         "enabled can be read from the live data rather than a frozen example."),
     }
+    for view in ("cost_summary", "cost_adaptive_headroom"):
+        el[f"coverage_{view}"] = build.rules_coverage_panel(
+            f"Adaptive rules coverage: {view}", view, ds)
+    if recommendation_view_live:
+        el["coverage_cost_adaptive_metric_recommendations"] = build.rules_coverage_panel(
+            "Adaptive recommendation queue coverage", "cost_adaptive_metric_recommendations", ds)
     dpm_rows: list[dict[str, Any]] = []
     if dpm is not None:
         scope = (
@@ -1157,13 +1163,16 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
                         "subset, not permission to apply without the workload owner.",
         )
     savings_rows = [
+        build.row("Published Adaptive rules coverage",
+                  ["coverage_cost_summary", "coverage_cost_adaptive_headroom"], max_columns=2),
         build.row("Headline", ["n_savings", "n_savings_pct", "n_savings_stacks", "n_aggregating"],
                   max_columns=3, row_height="short"),
         build.row("Where to act", ["b_savings", "b_savings_endpoint"], max_columns=2),
     ]
     if recommendation_view_live:
         savings_rows.append(build.row(
-            "Which metrics", ["adaptive_metric_recommendations"],
+            "Which metrics", ["coverage_cost_adaptive_metric_recommendations",
+                              "adaptive_metric_recommendations"],
             max_columns=1, row_height="tall",
         ))
     savings_rows.append(build.row("Progress", ["t_savings"], max_columns=1))
@@ -2792,6 +2801,8 @@ def d_value(ds: str):
                         "other, and 'your own p90 team already does this' is a stronger argument than any "
                         "industry average because nobody can dispute the comparison."),
     }
+    el["coverage_value_savings"] = build.rules_coverage_panel(
+        "Adaptive rules coverage: savings view", "value_savings", ds)
     tabs = [
         build.tab("Overview", ["n_unit", "n_billed", "n_remediable", "t_unit", "summary"]),
         build.rows_tab("Savings", [
@@ -2799,6 +2810,7 @@ def d_value(ds: str):
                                               "n_savings_money", "n_savings_money_unused"],
                       max_columns=4, row_height="short"),
             build.row("Progress", ["t_remediable"], max_columns=1),
+            build.row("Published Adaptive rules coverage", ["coverage_value_savings"], max_columns=1),
             build.row("Per stack", ["savings"], max_columns=1),
         ]),
         build.tab("Adoption", ["b_adoption", "adoption"]),
