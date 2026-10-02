@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@loop7-root'
 created_date: '2026-10-01 11:45'
-updated_date: '2026-10-02 09:34'
+updated_date: '2026-10-02 12:07'
 labels:
   - adaptive-metrics
   - accuracy
@@ -52,4 +52,6 @@ Loop7 AC1 evidence: authoritative Grafana Adaptive Metrics API and segmentation 
 Loop7 committed AC1 accepted; conditional L-seg not admitted and AC2/AC3 explicitly parked. Resume boundary: verified positive segmented recommendation/fallback semantics and authorised discoverability for deployed reader, followed by a frozen owned source-to-consumer packet. This loop does not change collector scopes or fabricate a segment.
 
 Loop9 one owner-granted robk segment created and retained: ID01M3XYKP465FR8C1Q2P189FFS2, fallback_to_default true, auto-apply disabled. Fresh inventory and modest live namespace population1107 selected. At creation segments list200 count1, grouped rules200 count2, selected rules/recommendations200 count0. Actual deployed read CAP segments-list200, correcting prior unverified reader-discoverability premise. Positive segmented recommendations not yet observed; +2h and final witnesses pending. AC2/AC3 not checked; no code reserve admission. DELETE by recorded ID owed next loop, never name matching.
+
+Loop9 creation/+2h/final GET witnesses retained one segment01M3XYKP465FR8C1Q2P189FFS2, fallbackdefault true/autoapplyfalse. All live GET200, selectedrules0/recs0 throughout; deployed actualread CAP list200. No positive segmented recommendation, so reserve notadmitted and AC2/AC3 remain parked. Delete byrecordedID owed nextloop. Root+2h witness4m35late after recordedroottoolgap, not claimed exactclock compliance.
 <!-- SECTION:NOTES:END -->

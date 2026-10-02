@@ -330,3 +330,42 @@ deployment and its write stack as the serial resource described under Resource m
 - A helper's historical non-target image override must not be reused when that deployment becomes
   the rollout target: it can hide the newly committed image pin. Use the reviewed committed default
   and require the saved plan's image to equal the registry digest actually read back.
+
+## Verified loop9 outcomes and limits
+
+- S-SM is an owner-approved future opt-in boundary, not an implemented capability. The live SM
+  datasource plugin type is `synthetic-monitoring-datasource`; guessing a prefixed type produced a
+  false zero until metadata was inspected. Two staff Admin proxy check/probe reads succeeded, but
+  these do not prove the proposed reader or collector. Implementation remains blocked on the frozen
+  absent-token deselection discovery predicate; do not silently relax its zero-call requirement.
+- Coverage-qualified Adaptive totals remain unimplemented. An empty finding view cannot carry
+  per-row coverage metadata. Freeze an explicit compose/publication/findings coverage seam before
+  extending ownership; do not add a synthetic metadata row or present a partial total as the estate.
+  The loop8 complete-coverage withholding contract remains the runtime behavior.
+- The accepted machine-local ECS observer bounds each read independently (default five seconds)
+  and bounds post-kill cleanup even if a descendant retains stdout. A task observation must have
+  exactly three nonempty fields, a recognized state and `None` or an exit code from 0 to 255;
+  only state and exit code are rendered. Arbitrary stopped reasons must not enter DONE or TIMEOUT.
+  Initial RunTask stays outside the read fence, and adoption preserves the ARN and original deadline.
+  Escaped descendants can survive; response memory is not bounded. These are not termination claims.
+- Capture the stopped descriptor immediately in the root-owned observer adapter, before parent
+  notification latency can consume the two-minute window. In loop9 the first dev descriptor was
+  retained but captured 199 seconds late; the timing gate was not waived and customer rollout was
+  parked. The later inline capture exercised the same accepted observer without a replacement run.
+- One dev Adaptive segment was retained for a later loop. Creation, about two hours later and final
+  reads found no selected rules or recommendations; the actual deployed read CAP could list segments.
+  Empty recommendations do not prove segmented savings. Deletion is owed by the recorded private
+  ID only, never by name; no deletion or new segment is implied by this record.
+- A bounded positive audit-log sample exposed decryption/service caller identities, not an established
+  browser-app identity or exact join to usage-insights data requests. Timestamp proximity alone is
+  not attribution. The deployed stack reader's main-logs proxy query returned 403. Upstream opt-in,
+  coverage, privacy and any new datasource query grant need separate decisions before a collector.
+- Stable v0.4.4 was verified by tag, Release, immutable GHCR index and cosign against the publish
+  run's pinned reusable identity, issuer, repository and exact source SHA. Its separate unsigned dev
+  consumer ran T3, T2 and T1 successfully, preserved full task/schedule inputs and effective scheduler
+  policy, and ended with a no-change plan. Dev stayed on the proven image, but acceptance was parked
+  on the descriptor timing miss. The customer deployment remained unchanged on v0.4.3; no customer
+  image push, apply, manual tier, provisioner, publication or bucket write occurred.
+- A changed immutable module ref needs `tofu init` before the pre-push validation hook. The first
+  dev push failed on stale module installation, then passed after init; unrelated dirty lockfiles
+  remained byte-identical. This is not authority to update provider pins or discard sibling work.

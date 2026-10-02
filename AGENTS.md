@@ -68,7 +68,8 @@ off anything but the live inventory.
   pairs. `datasources:read` may use `datasources:*`; `datasources:query` stays pinned to
   `datasources:uid:grafanacloud-usage-insights`, with one owner-approved S-SM exception: the opt-in
   `synthetic-monitoring-query` token, requiring `synthetic-monitoring`, adds query access only to
-  that stack's single live-discovered Synthetic Monitoring datasource uid and adds
+  that stack's single live-discovered Synthetic Monitoring datasource uid (plugin type
+  `synthetic-monitoring-datasource`) and adds
   `grafana-synthetic-monitoring-app.probes:read` with empty scope. Never a wildcard, name match or
   a grant through the existing `synthetic-monitoring` token, whose three pairs stay unchanged.
   An ambiguous datasource set or a uid outside `^[A-Za-z0-9_-]{1,40}$` adds no query pair. Every
