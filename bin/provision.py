@@ -59,7 +59,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from collector import identity                             # noqa: E402
 from collector import provision as pr                      # noqa: E402
-from collector.httpclient import RateLimiter                # noqa: E402
+from collector.httpclient import RateLimiter, ReadOnlyClient  # noqa: E402
+from collector.sources.stack_catalog import validated_base_url  # noqa: E402
 
 GCOM = "https://grafana.com/api"
 SSM_REGION = os.environ.get("GCINSIGHT_SSM_REGION", "eu-west-1")
@@ -177,6 +178,7 @@ class Stack:
         # historical stack names make `https://<slug>.grafana.net` a plausible route to the wrong host.
         if not isinstance(base_url, str) or not base_url.startswith("https://"):
             raise ValueError(f"stack inventory returned an unusable URL: {base_url!r}")
+        self._inventory_url = base_url
         self.base = base_url.rstrip("/")
         self._t = token
         self.dry_run = dry_run
@@ -212,6 +214,20 @@ class Stack:
                 return e.code, raw[:200].decode(errors="replace")
         except Exception as exc:                                  # noqa: BLE001
             return 0, f"{type(exc).__name__}: {exc}"
+
+    def get_synthetic_datasources(self) -> tuple[int, Any]:
+        """Privilege-bearing discovery: validated inventory origin, one bounded nonredirecting GET.
+
+        Keep legacy provisioning writes separate. No foreign response may choose a query grant.
+        """
+        base, error = validated_base_url({"url": self._inventory_url})
+        if error:
+            return 400, None
+        if self.dry_run and self._t == "dry-run":
+            return self.NOT_INSPECTED, None
+        response = ReadOnlyClient(timeout=45).get(
+            base + "/api/datasources", bearer=self._t, guarded=True)
+        return response.status, response.json() if response.status == 200 else None
 
     get = lambda self, path: self._call("GET", path)                       # noqa: E731
     post = lambda self, path, body: self._call("POST", path, body)         # noqa: E731
@@ -377,7 +393,7 @@ def discover_synthetic(st: Stack, current, *, write_stack: bool = False,
     uid, state = None, "not_selected"
     if pr.needs_synthetic_discovery(current, write_stack=write_stack, product_reads=product_reads):
         try:
-            status, body = st.get("/api/datasources")
+            status, body = st.get_synthetic_datasources()
             uid, state = (pr.synthetic_datasource_uid(body) if status == 200 else
                           (None, "not_inspected" if status == Stack.NOT_INSPECTED else "unreadable"))
         except Exception:  # raw exception content may contain datasource configuration

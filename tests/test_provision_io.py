@@ -11,6 +11,9 @@ import importlib.util
 import io
 import json
 import unittest
+import urllib.request
+from email.message import Message
+from urllib.response import addinfourl
 from types import SimpleNamespace
 from unittest import mock
 from pathlib import Path
@@ -798,10 +801,11 @@ def test_synthetic_deselection_discovers_once_across_real_main_repair_and_verify
         NOT_INSPECTED = 0
         def __init__(self, *args, **kwargs):
             pass
+        def get_synthetic_datasources(self):
+            paths.append("/api/datasources")
+            return 200, [{"type": pr.SM_PLUGIN_TYPE, "uid": "synthetic-sm"}]
         def get(self, path):
             paths.append(path)
-            if path == "/api/datasources":
-                return 200, [{"type": pr.SM_PLUGIN_TYPE, "uid": "synthetic-sm"}]
             if path == "/api/access-control/user/permissions":
                 have = {}
                 for permission in permissions:
@@ -826,6 +830,78 @@ def test_synthetic_deselection_discovers_once_across_real_main_repair_and_verify
     assert paths.count("/api/datasources") == 1, paths
     assert pr.permission_pairs(permissions) == pr.permission_pairs(pr.desired_permissions(
         write_stack=True, product_reads=selected))
+
+
+def test_synthetic_discovery_redirect_cannot_forward_token_or_choose_query_grant():
+    """Real urllib redirect processing must stop before the foreign HTTPS network edge."""
+    from collector import httpclient
+
+    seen, puts = [], []
+    foreign = "https://foreign.example.test/api/datasources"
+
+    def edge(_handler, req):
+        seen.append((req.full_url, req.get_header("Authorization")))
+        headers = Message()
+        code = 200
+        if req.full_url == foreign:
+            body = [{"type": pr.SM_PLUGIN_TYPE, "uid": "customer-database"}]
+        elif req.full_url.endswith("/api/datasources"):
+            headers["Location"] = foreign
+            code, body = 302, {}
+        elif req.get_method() == "PUT":
+            puts.append(json.loads(req.data))
+            body = {}
+        elif req.full_url.endswith("?includeHidden=true"):
+            body = [{"name": pr.ROLE_NAME, "uid": "role-1", "version": 1}]
+        else:
+            body = {"permissions": list(pr.DESIRED_PERMISSIONS)}
+        response = addinfourl(io.BytesIO(json.dumps(body).encode()), headers, req.full_url, code)
+        response.msg = "test response"
+        return response
+
+    opener = urllib.request.build_opener()
+    with mock.patch.object(urllib.request.HTTPSHandler, "https_open", edge), \
+         mock.patch.object(httpclient._GuardedHTTPSHandler, "https_open", edge), \
+         mock.patch.object(cli.urllib.request, "urlopen", opener.open):
+        ok, _, _ = cli.ensure_role(
+            cli.Stack("https://inventory.example.test", "fake-admin", dry_run=False),
+            product_reads={"synthetic-monitoring", "synthetic-monitoring-query"})
+    assert ok
+    # Independently pin grant safety, no second request, and no bearer forwarding.
+    assert all(("datasources:query", "datasources:uid:customer-database") not in
+               pr.permission_pairs(body["permissions"]) for body in puts), puts
+    assert [url for url, _ in seen].count("https://inventory.example.test/api/datasources") == 1
+    assert not any(url == foreign for url, _ in seen), seen
+    assert not any(url == foreign and auth for url, auth in seen), seen
+
+
+def test_synthetic_discovery_validates_inventory_origin_before_sending_credentials():
+    from collector import httpclient
+
+    seen = []
+    def edge(_handler, req):
+        seen.append((req.full_url, req.get_method(), req.get_header("Authorization")))
+        response = addinfourl(io.BytesIO(json.dumps([
+            {"type": pr.SM_PLUGIN_TYPE, "uid": "synthetic-sm"}
+        ]).encode()), Message(), req.full_url, 200)
+        response.msg = "test response"
+        return response
+
+    tokens = {"synthetic-monitoring", "synthetic-monitoring-query"}
+    with mock.patch.object(httpclient._GuardedHTTPSHandler, "https_open", edge):
+        for url in ("https://user@inventory.example.test", "https://inventory.example.test/path",
+                    "https://inventory.example.test?query=yes", "https://inventory.example.test#fragment",
+                    "https://inventory.example.test:bad", "https://inventory.example.test///"):
+            permissions, _, state = cli.reader_policy(cli.Stack(url, "fake-reader", False), {},
+                                                       product_reads=tokens)
+            assert state == "unreadable"
+            assert not (pr.synthetic_pairs("synthetic-sm") & pr.permission_pairs(permissions))
+        assert seen == []
+        permissions, _, state = cli.reader_policy(
+            cli.Stack("https://inventory.example.test/", "fake-reader", False), {}, product_reads=tokens)
+    assert state == "available"
+    assert pr.synthetic_pairs("synthetic-sm") <= pr.permission_pairs(permissions)
+    assert seen == [("https://inventory.example.test/api/datasources", "GET", "Bearer fake-reader")]
 
 
 def test_synthetic_bootstrap_without_reader_is_not_inspected():
@@ -855,6 +931,7 @@ def test_legacy_synthetic_customer_safety():
         wanted = pr.permission_pairs(permissions)
         assert sorted(pr.dangerous_extra_pairs(held, wanted, removable)) == case["dangerous"]
         st.get.assert_not_called()
+        st.get_synthetic_datasources.assert_not_called()
         assert state == "not_selected"
         sas = [{"name": pr.READER_SA_NAME, "role": "None"}]
         with mock.patch.object(cli, "Stack") as stack:
@@ -876,10 +953,10 @@ def test_synthetic_policy_exact_discovery_deselection_and_wrong_stack_usage():
                         ([{"type": pr.SM_PLUGIN_TYPE, "uid": "synthetic-sm"}], "available")):
         for tokens in ((), selected):
             st = mock.Mock()
-            st.get.return_value = (200, body)
+            st.get_synthetic_datasources.return_value = (200, body)
             have = {"datasources:query": [query[1], unrelated[1]], pr.SM_PROBES_PAIR[0]: [""]}
             permissions, removable, observed = cli.reader_policy(st, have, product_reads=tokens)
-            st.get.assert_called_once_with("/api/datasources")
+            st.get_synthetic_datasources.assert_called_once_with()
             assert observed == state
             wanted = pr.permission_pairs(permissions)
             assert unrelated in pr.dangerous_extra_pairs(have, wanted, removable)
@@ -890,10 +967,10 @@ def test_synthetic_policy_exact_discovery_deselection_and_wrong_stack_usage():
                 assert query in pr.dangerous_extra_pairs(have, wanted, removable)
                 assert not (pr.synthetic_pairs("synthetic-sm") & removable)
     st = mock.Mock()
-    st.get.return_value = (200, [{"type": pr.SM_PLUGIN_TYPE, "uid": "synthetic-sm"}])
+    st.get_synthetic_datasources.return_value = (200, [{"type": pr.SM_PLUGIN_TYPE, "uid": "synthetic-sm"}])
     wrong = {"datasources:query": [pr.WRITE_STACK_PAIR[1]]}
     permissions, removable, _ = cli.reader_policy(st, wrong, write_stack=False)
-    st.get.assert_called_once_with("/api/datasources")
+    st.get_synthetic_datasources.assert_called_once_with()
     assert pr.WRITE_STACK_PAIR not in pr.permission_pairs(permissions)
     assert pr.WRITE_STACK_PAIR in removable  # legacy telemetry removal rule unchanged
     assert query not in removable
