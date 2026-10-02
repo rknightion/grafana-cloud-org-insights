@@ -14,7 +14,7 @@ Do not enable schedules until:
 6. the dashboards and new paused, unrouted alert rules have been published with a short-lived build token.
 
 These are prerequisites, not authority to perform live changes. Each live scan, provisioning run,
-publish or schedule change needs separate authorization. See the [runbook timetable](../RUNBOOK.md#scheduled-jobs)
+publish or schedule change needs separate authorization. See the [runbook timetable](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/RUNBOOK.md#scheduled-jobs)
 for all five jobs: module defaults are T1 hourly at :05, T2 daily, T3 six-hourly, T4 daily and a daily
 opt-in provisioner. Deployment cron and timezone overrides must be checked in the manifest and live
 Scheduler state; the module timezone default is UTC.

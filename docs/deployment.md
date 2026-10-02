@@ -43,7 +43,7 @@ local-build provenance, AWS plan assumptions and rollback evidence. The steps be
 live-change approval.
 
 Doing these out of order starts tasks before their image and credentials are ready. Failure frequency
-follows the configured schedules. See the [runbook timetable](../RUNBOOK.md#scheduled-jobs): module
+follows the configured schedules. See the [runbook timetable](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/RUNBOOK.md#scheduled-jobs): module
 defaults are T1 hourly at :05, T2 daily, T3 six-hourly, T4 daily and a daily opt-in provisioner, all in
 UTC by default. Deployment cron and timezone overrides must be checked separately.
 

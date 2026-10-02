@@ -56,7 +56,7 @@ Coverage is a ratio against **scannable** stacks. Paused stacks answer the contr
 
 ## Tasks fail to start immediately after the first apply
 
-Almost always ordering. See [Deployment](deployment.md) for the steps in order. The two that bite hardest: an x86 image on an ARM64 task definition fails at runtime with `exec format error` rather than at plan time, and schedules enabled before the secret is populated start failing tasks at the configured cadence. The module does not schedule four tasks every hour; see the [default timetable](../RUNBOOK.md#scheduled-jobs).
+Almost always ordering. See [Deployment](deployment.md) for the steps in order. The two that bite hardest: an x86 image on an ARM64 task definition fails at runtime with `exec format error` rather than at plan time, and schedules enabled before the secret is populated start failing tasks at the configured cadence. The module does not schedule four tasks every hour; see the [default timetable](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/RUNBOOK.md#scheduled-jobs).
 
 ## T2 exits 1 at coverage 0.0 on a brand-new deployment
 
@@ -83,5 +83,5 @@ An existing view has zero rows and the panel has no usable fallback schema. Legi
 finding tables, including idle leftovers and dead Fleet registrations, have declared schemas and are
 supported. Identify the failing view and panel; if empty is legitimate, report the missing schema.
 A missing S3 object instead fails during the view read: check the owning scan and input freshness.
-See [Empty or missing views](../RUNBOOK.md#empty-or-missing-views); do not fabricate rows or assume every
+See [Empty or missing views](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/RUNBOOK.md#empty-or-missing-views); do not fabricate rows or assume every
 small estate must skip affected dashboards.

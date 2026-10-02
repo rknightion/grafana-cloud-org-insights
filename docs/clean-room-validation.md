@@ -70,7 +70,7 @@ process, not credential discovery.
 ## First consumer manifest and candidate
 
 A first deployment has no manifest for `upgrade` to update. Create `deployment/consumer.json` using
-[`consumer/manifest.schema.json`](../consumer/manifest.schema.json). Include every required `aws` and
+[`consumer/manifest.schema.json`](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/consumer/manifest.schema.json). Include every required `aws` and
 `policy` field and all four `runtime` projections. The projection key contract is
 `PROJECTION_ENVS` in `collector/identity.py`; runtime meanings are described in
 [Configuration](configuration.md). These are non-secret values, not credentials. Keep reader product
@@ -92,7 +92,7 @@ Regeneration calculates digests; it does not prove the deployment root, module w
 gate. Create deployment-owned Terraform wiring with a module ref pinned to that same full commit,
 and wire non-default runtime values from the manifest. The standalone example is an infrastructure
 starting point, not a complete consumer-manifest adapter: copying it alone does not prove this seam.
-Follow [Consumer upgrade, deployment, and rollback](../consumer/MIGRATION-RUNBOOK.md) for the full
+Follow [Consumer upgrade, deployment, and rollback](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/consumer/MIGRATION-RUNBOOK.md) for the full
 `check` command, including historical retired-core paths when any exist. Do not copy product core
 into the deployment repository.
 

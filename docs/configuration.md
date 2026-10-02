@@ -92,7 +92,7 @@ views and a synthetic bucket name for generated URLs; that placeholder JSON must
 these values in its manifest; use the consumer tools rather than editing a task's environment by
 hand. `GCINSIGHT_RUNTIME_CONFIG_DIGEST` verifies the resolved projection;
 `GCINSIGHT_REQUIRE_EXPLICIT_CONFIG=1` requires it and all non-optional projection values.
-See [Consumer upgrades and rollback](../consumer/MIGRATION-RUNBOOK.md).
+See [Consumer upgrades and rollback](https://github.com/rknightion/grafana-cloud-org-insights/blob/main/consumer/MIGRATION-RUNBOOK.md).
 
 | Variables | Meaning |
 |---|---|
