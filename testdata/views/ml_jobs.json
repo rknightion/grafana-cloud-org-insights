@@ -1,0 +1,262 @@
+{
+  "meta": {
+    "generated_at": "2026-10-02T19:10:08.090781+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_traces": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "slo_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "synthetic_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_integrations": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "faro_apps": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "ml_jobs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_risk": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      "Stack": "stack158",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "stack145",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack177",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "stack125",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "stack001",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack001b",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "stack001c",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "stack001a",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack019",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "stack049",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "stack110",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack020",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "obs-hub",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "obs-hub-dev",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack035",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "stack036",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "stack111",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack070",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "stack037",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "stack071",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack050",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "stack112",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "stack051",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack146",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "stack147",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "stack038",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack052",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "stack053",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "stack054",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack148",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "stack126",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "stack002",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack113",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "stack097",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "stack072",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack055",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "stack193",
+      "Configured forecast jobs": 0
+    },
+    {
+      "Stack": "stack170",
+      "Configured forecast jobs": 1
+    },
+    {
+      "Stack": "stack201",
+      "Configured forecast jobs": 2
+    },
+    {
+      "Stack": "stack149",
+      "Configured forecast jobs": 0
+    }
+  ]
+}

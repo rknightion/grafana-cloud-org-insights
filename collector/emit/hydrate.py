@@ -130,6 +130,7 @@ INPUT_OWNER: dict[str, str] = {
     "synthetic_inventory": "t2",
     "irm_integrations": "t2",
     "faro_apps": "t2",
+    "ml_jobs": "t2",
     # Bounded classified label matches. Clear values stay in this private input and S3-only risk views.
     "label_risk": "t2",
 }
@@ -145,6 +146,7 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     # Derived from the offline minimized IRM projection in compose_inputs.json.
     "irm_integrations": frozenset({"irm_integrations"}),
     "faro_apps": frozenset({"faro_apps"}),
+    "ml_jobs": frozenset({"ml_jobs"}),
     # Derived from the anonymized captured SLO projection in compose_inputs.json.
     "coverage_slo_inventory": frozenset({"slo_inventory"}),
     # Mechanically derived from full fixture versus absent and all singleton inputs.

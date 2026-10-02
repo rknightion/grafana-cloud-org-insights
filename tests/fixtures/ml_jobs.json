@@ -1,0 +1,1 @@
+{"status":"success","data":[{"id":"synthetic-job","grafanaApiKey":"synthetic-key","queryParams":{"expr":"synthetic-expression"},"name":"synthetic-name","datasourceUid":"synthetic-datasource","config":{"algorithm":"synthetic-algorithm"},"labels":{"synthetic-label":"synthetic-value"},"user":"synthetic-user"}]}

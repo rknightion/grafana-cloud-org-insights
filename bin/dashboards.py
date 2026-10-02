@@ -1202,6 +1202,15 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
 
 
 def d_usage(ds: str):
+    ml_panel = None
+    try:
+        ml_panel = build.table_panel(
+            "Configured forecast jobs", "ml_jobs", ds,
+            description="Point-in-time configured forecast jobs only. Not query usage or job health. "
+                        "Default-off selection; unreadable or unmeasured stacks are absent, never zero. "
+                        "The named read route receives job keys transiently; no job details are stored.")
+    except FileNotFoundError:
+        pass
     # An optional, never-published object must not prevent the Usage build.
     # A readable last-good view remains eligible, regardless of its timestamp.
     faro_panel = None
@@ -1464,6 +1473,8 @@ def d_usage(ds: str):
                         "those logs, or stopped shipping them - both are wins, and the per-stack chart "
                         "above says which."),
     }
+    if ml_panel is not None:
+        el["ml_jobs"] = ml_panel
     if faro_panel is not None:
         el["faro_apps"] = faro_panel
     if irm_panel is not None:
@@ -1471,6 +1482,9 @@ def d_usage(ds: str):
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
         build.tab("Adoption", ["t_signals", "plugins"]),
+        *([build.rows_tab("Configured forecast jobs", [
+            build.row("Configured forecast jobs", ["ml_jobs"], max_columns=1),
+        ])] if ml_panel is not None else []),
         *([build.rows_tab("Configured Faro apps", [
             build.row("Configured Faro apps", ["faro_apps"], max_columns=1),
         ])] if faro_panel is not None else []),

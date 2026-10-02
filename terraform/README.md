@@ -117,7 +117,7 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 | `scan_runtime_config_digest`, `provisioner_runtime_config_digest`, `require_explicit_consumer_config` | empty, empty, `false`; consumer projections may require both validated digests |
 | `create_provisioner`, `provisioner_secret_key` | `false`, `GCINSIGHT_PROVISION_TOKEN`; independent opt-in write-capable task |
 | `provisioner_schedule_expression`, `provisioner_enabled` | daily module default, `true`; see RUNBOOK timetable and both schedule gates above |
-| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query`/`irm-integrations`/`faro-apps` read families |
+| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query`/`irm-integrations`/`faro-apps`/`ml-jobs` read families |
 | `provisioner_cpu`, `provisioner_memory` | `256`, `512` MiB; separate provisioner sizing |
 
 | Outputs | Use / availability |
@@ -221,10 +221,18 @@ does require a stack-realm `logs:write` token represented by the adopted access-
 ## Reader product policy
 
 `provisioner_product_reads` remains default-off (`[]`) and accepts `slo`, `synthetic-monitoring`,
-`synthetic-monitoring-query`, `irm-integrations` and `faro-apps`. The query token requires `synthetic-monitoring`
+`synthetic-monitoring-query`, `irm-integrations`, `faro-apps` and `ml-jobs`. The query token requires `synthetic-monitoring`
 and adds query access only to the stack's single uniquely discovered, valid Synthetic datasource
 UID plus unscoped probes read. Ambiguous or invalid discovery grants neither pair. Without the
 query token, collection makes no Synthetic HTTP calls and legacy role grants stay unchanged.
+`ml-jobs` adds only `grafana-ml-app.forecasting:read` (empty scope) and
+`plugins.app:access` scoped to `plugins:id:grafana-ml-app` for T2 configured forecast job
+counts only. The owner accepts transient receipt of job-top-level `grafanaApiKey` on GET
+`/api/plugins/grafana-ml-app/resources/manage/api/v1/jobs` without query. That field is
+removed before structural credential validation; nested keys and other known credential fields
+remain rejected. All job details are discarded. Unreadable or partial coverage is absent.
+This is not a customer grant, a query permission, or a credential memory-secrecy claim.
+
 `faro-apps` adds only `grafana-kowalski-app.apps:read` (empty scope) and
 `plugins.app:access` scoped to `plugins:id:grafana-kowalski-app`. It enables default-off T2
 point-in-time app counts by web/mobile/unknown type, not sessions or usage. App identifiers,
