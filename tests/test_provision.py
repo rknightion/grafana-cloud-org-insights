@@ -49,6 +49,10 @@ class ProductReadScopeTest(unittest.TestCase):
         ("grafana-csp-app:read", ""),
         ("plugins.app:access", "plugins:id:grafana-csp-app"),
     })
+    PDC_PAIRS = frozenset({
+        ("grafana-pdc-app.private-networks:read", ""),
+        ("plugins.app:access", "plugins:id:grafana-pdc-app"),
+    })
     ALL_PRODUCT_PAIRS = SLO_PAIRS | SYNTHETIC_MONITORING_PAIRS
 
     def test_product_reads_are_default_off_and_parse_the_fixed_enum(self):
@@ -98,11 +102,11 @@ class ProductReadScopeTest(unittest.TestCase):
         self.assertEqual(configured_both - base, self.ALL_PRODUCT_PAIRS)
         self.assertEqual(
             pr.removable_pairs(write_stack=False, product_reads={"slo"}),
-            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.SYNTHETIC_MONITORING_PAIRS | self.IRM_PAIRS | self.FARO_PAIRS | self.ML_PAIRS | self.CSP_PAIRS,
+            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.SYNTHETIC_MONITORING_PAIRS | self.IRM_PAIRS | self.FARO_PAIRS | self.ML_PAIRS | self.CSP_PAIRS | self.PDC_PAIRS,
         )
         self.assertEqual(
             pr.removable_pairs(write_stack=False, product_reads={"slo", "synthetic-monitoring"}),
-            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.IRM_PAIRS | self.FARO_PAIRS | self.ML_PAIRS | self.CSP_PAIRS,
+            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.IRM_PAIRS | self.FARO_PAIRS | self.ML_PAIRS | self.CSP_PAIRS | self.PDC_PAIRS,
         )
 
     def test_runtime_desired_and_removable_sets_do_not_conflict(self):

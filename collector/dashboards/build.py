@@ -951,7 +951,7 @@ DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     # Both ages belong on the page: showing only the 6-hourly data-plane age makes the daily named
     # recommendation queue look materially fresher than it is.
     "cost": ("adaptive_logs", "dataplane"),
-    "usage": ("irm_integrations", "faro_apps", "ml_jobs", "cloud_accounts", "stack_detail"),
+    "usage": ("irm_integrations", "faro_apps", "ml_jobs", "cloud_accounts", "pdc_networks", "stack_detail"),
     "maturity": ("dataplane", "stack_detail"),
     "risk": ("access_policies", "alert_routing", "dataplane", "fleet", "label_risk", "loki_config",
              "org_members", "public_dashboards", "service_accounts", "stack_detail"),
@@ -1073,6 +1073,7 @@ def banner_elements(dashboard: str = "estate") -> dict[str, Any]:
 INPUT_LABELS = {
     "ml_jobs": "Configured forecast jobs",
     "cloud_accounts": "Configured AWS accounts",
+    "pdc_networks": "Configured PDC private networks",
     "irm_integrations": "Configured IRM integrations",
     "faro_apps": "Configured Faro apps",
     "label_risk": "Bounded label privacy sample",
@@ -1096,6 +1097,8 @@ INPUT_LABELS = {
 }
 
 INPUT_DESCRIPTIONS = {
+    "pdc_networks": "Age of the default-off configured stack-attributed PDC policy count. "
+                    "Not connections or traffic; incomplete region/page coverage stays absent.",
     "cloud_accounts": "Age of the default-off configured AWS account count. Other providers are unknown, "
                       "not zero; not an all-provider total. Backend write isolation is unproven.",
     "ml_jobs": "Age of the default-off configured forecast job count. Not query usage or job health; "

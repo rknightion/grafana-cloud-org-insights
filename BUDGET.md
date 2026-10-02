@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **9,694** |
-| Phase 1 only | 9,693 |
+| **Declared (all phases)** | **9,702** |
+| Phase 1 only | 9,701 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -28,8 +28,8 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | I | 895 |
 | J | 4,400 |
 | K | 969 |
-| scan | 290 |
-| **Total** | **9,694** |
+| scan | 298 |
+| **Total** | **9,702** |
 
 ## Metrics
 
@@ -57,8 +57,8 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_stack_billed_users` | B | `stack`(271) | 271 | 1 | billingActiveUsers, NEVER currentActiveUsers. Named `stack_` not `cost_` so it cannot collide with the estate rollup of the same quantity |
 | `gcinsight_stack_collectors_active` | E | `stack`(271) | 271 | 1 | the per-stack half; use it to find registration concentration and churn |
 | `gcinsight_stack_fleet_fast_scrape_pipelines` | E | `stack`(271) | 271 | 1 | enabled, reaching Fleet pipelines scraping faster than the default interval. Per stack because the alert names the stack and remediation is a trend; ABSENT where Fleet was not read or the payload predates the interval parser |
-| `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(24) | 96 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
-| `gcinsight_input_available` | scan | `tier`(4), `input`(24) | 96 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
+| `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(25) | 100 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
+| `gcinsight_input_available` | scan | `tier`(4), `input`(25) | 100 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
 | `gcinsight_ai_estate_messages` | I | `category`(8), `surface`(8) | 64 | 1 | estate-wide category x surface, NO `stack` label  -  the per-stack cross product belongs in the existing `ai_category_surface` view |
 | `gcinsight_coverage_technology_stacks` | K | `kind`(63) | 63 | 1 | one bounded registry enum per technology; value is measured stacks present |
 | `gcinsight_coverage_unscored` | K | `component`(8), `reason`(7) | 56 | 1 | bounded component/reason counts; product absence and unavailable evidence are excluded from the score rather than published as failed coverage |

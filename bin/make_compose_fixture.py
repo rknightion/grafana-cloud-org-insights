@@ -126,9 +126,29 @@ def add_synthetic_cloud() -> int:
     return 0
 
 
+def add_synthetic_pdc() -> int:
+    """Append only minimized attributed policy counts; preserve upstream bytes."""
+    original = COMMITTED_FIXTURE.read_text()
+    payload = json.loads(original)
+    projection = {
+        str(stack["slug"]): {"available": True, "network_count": index % 3}
+        for index, stack in enumerate(s for s in payload["stacks"] if s.get("status") != "paused")
+    }
+    if "pdc_networks" in payload:
+        if payload["pdc_networks"] != projection:
+            raise ValueError("existing PDC fixture differs from the synthetic projection")
+        return 0
+    end = original.rfind("}")
+    field = json.dumps({"pdc_networks": projection}, indent=1)[2:-2]
+    COMMITTED_FIXTURE.write_text(original[:end].rstrip() + ",\n" + field + "\n" + original[end:])
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--stacks", type=int, default=40)
+    ap.add_argument("--synthetic-pdc", action="store_true",
+                    help="add only synthetic minimized PDC policy counts, offline")
     ap.add_argument("--synthetic-cloud", action="store_true",
                     help="add only synthetic minimized AWS account counts, offline")
     ap.add_argument("--synthetic-ml", action="store_true",
@@ -140,6 +160,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--output",
                     help="export path outside the committed synthetic fixture")
     args = ap.parse_args(argv)
+    if args.synthetic_pdc:
+        if args.output or args.synthetic_cloud or args.synthetic_ml or args.synthetic_faro or args.synthetic_irm:
+            ap.error("--synthetic-pdc cannot be combined with other export modes")
+        return add_synthetic_pdc()
     if args.synthetic_cloud:
         if args.output or args.synthetic_ml or args.synthetic_faro or args.synthetic_irm:
             ap.error("--synthetic-cloud cannot be combined with other export modes")

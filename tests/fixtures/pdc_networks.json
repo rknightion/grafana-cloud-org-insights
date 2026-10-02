@@ -1,0 +1,9 @@
+{
+  "items": [
+    {"id": "synthetic-policy-a", "realms": [{"type": "stack", "identifier": "123"}], "scopes": ["set:pdc-signing"]},
+    {"id": "synthetic-policy-b", "realms": [{"type": "stack", "identifier": "456"}], "scopes": ["set:pdc-signing"]},
+    {"id": "synthetic-policy-c", "realms": [{"type": "org", "identifier": "900001"}], "scopes": ["set:pdc-signing"]},
+    {"id": "synthetic-policy-d", "realms": [{"type": "stack", "identifier": "123"}], "scopes": ["metrics:read"]}
+  ],
+  "metadata": {"pagination": {"nextPage": null}}
+}

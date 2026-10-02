@@ -1211,6 +1211,15 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
 
 
 def d_usage(ds: str):
+    pdc_panel = None
+    try:
+        pdc_panel = build.table_panel(
+            "Configured PDC private networks", "pdc_networks", ds,
+            description="Point-in-time policies matching this stack realm and set:pdc-signing only. "
+                        "Not tokens, connections or traffic. Default-off; incomplete region/page reads "
+                        "are absent, never zero. Reader visibility is conditional; no policy details stored.")
+    except FileNotFoundError:
+        pass
     cloud_panel = None
     try:
         cloud_panel = build.table_panel(
@@ -1492,6 +1501,8 @@ def d_usage(ds: str):
                         "those logs, or stopped shipping them - both are wins, and the per-stack chart "
                         "above says which."),
     }
+    if pdc_panel is not None:
+        el["pdc_networks"] = pdc_panel
     if cloud_panel is not None:
         el["cloud_accounts"] = cloud_panel
     if ml_panel is not None:
@@ -1503,6 +1514,9 @@ def d_usage(ds: str):
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
         build.tab("Adoption", ["t_signals", "plugins"]),
+        *([build.rows_tab("Configured PDC private networks", [
+            build.row("Configured PDC private networks", ["pdc_networks"], max_columns=1),
+        ])] if pdc_panel is not None else []),
         *([build.rows_tab("Configured AWS accounts", [
             build.row("Configured AWS accounts", ["cloud_accounts"], max_columns=1),
         ])] if cloud_panel is not None else []),

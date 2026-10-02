@@ -117,7 +117,7 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 | `scan_runtime_config_digest`, `provisioner_runtime_config_digest`, `require_explicit_consumer_config` | empty, empty, `false`; consumer projections may require both validated digests |
 | `create_provisioner`, `provisioner_secret_key` | `false`, `GCINSIGHT_PROVISION_TOKEN`; independent opt-in write-capable task |
 | `provisioner_schedule_expression`, `provisioner_enabled` | daily module default, `true`; see RUNBOOK timetable and both schedule gates above |
-| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query`/`irm-integrations`/`faro-apps`/`ml-jobs`/`cloud-accounts` read families |
+| `provision_opt_out`, `provisioner_product_reads` | `[]`, `[]`; approved stack opt-outs and optional `slo`/`synthetic-monitoring`/`synthetic-monitoring-query`/`irm-integrations`/`faro-apps`/`ml-jobs`/`cloud-accounts`/`pdc-networks` read families |
 | `provisioner_cpu`, `provisioner_memory` | `256`, `512` MiB; separate provisioner sizing |
 
 | Outputs | Use / availability |
@@ -221,7 +221,15 @@ does require a stack-realm `logs:write` token represented by the adopted access-
 ## Reader product policy
 
 `provisioner_product_reads` remains default-off (`[]`) and accepts `slo`, `synthetic-monitoring`,
-`synthetic-monitoring-query`, `irm-integrations`, `faro-apps`, `ml-jobs` and `cloud-accounts`. The query token requires `synthetic-monitoring`
+`synthetic-monitoring-query`, `irm-integrations`, `faro-apps`, `ml-jobs`, `cloud-accounts` and `pdc-networks`.
+`pdc-networks` adds exactly `grafana-pdc-app.private-networks:read` (empty scope) and
+`plugins.app:access` at `plugins:id:grafana-pdc-app`. T2 counts only policies matching
+the current stack realm and `set:pdc-signing`, after every fresh-inventory region plus
+control realm and page succeeds. Only the fixed accesspolicies GET is called; no tokens,
+connections, traffic or policy writes. All policy details are dropped. Complete empty
+reads measure zero; unknown, malformed or partial coverage is absent. The permission
+also reaches a tokens GET, which is not used. Staff visibility is conditional, not a
+universal completeness or customer rollout claim. The query token requires `synthetic-monitoring`
 and adds query access only to the stack's single uniquely discovered, valid Synthetic datasource
 UID plus unscoped probes read. Ambiguous or invalid discovery grants neither pair. Without the
 query token, collection makes no Synthetic HTTP calls and legacy role grants stay unchanged.
