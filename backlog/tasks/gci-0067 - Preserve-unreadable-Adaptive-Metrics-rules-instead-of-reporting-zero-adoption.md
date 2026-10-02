@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@loop8-root'
 created_date: '2026-10-01 14:18'
-updated_date: '2026-10-01 22:10'
+updated_date: '2026-10-02 00:34'
 labels: []
 dependencies: []
 references:
@@ -57,6 +57,8 @@ R-int-r1 rejected a889d749: downstream findings derive partial headroom view int
 Root L-am-a3 repaired R-int majors: headroom now requires full live-scope readable rules before publishing its findings source view; compose-to-real-findings test proves absent partial gauge and recovered true-empty zero. Selected-stack applied/pending chart now explicitly measured subtotals, not estate adoption/remediation; query remains selector-aware. Failing-first a3/findings-red.log then narrow and full gate green (1685 passed, 2 skipped, 8016 subtests); offline real dashboard CLI artifact readback passed after supplying synthetic bucket config. CodeRabbit complete zero findings, all three changed code/test files reviewed. Evidence codex/loop8-evidence/L-am/a3. a3 root rescue consumed, no infra retry; a4 specialist remains; R-int round2 still required.
 
 Root L-am-a3 landed fbecf541417508aac30b61e2266787dee3759d67; exact CI36933153109 success, all four jobs, one watch and one readback. Changed-headroom expectation is the intended S-AMR-R2 repair, not weakening. Round2 integration reviewer resumed before release. This completion means code criteria/gate/review/CI accepted; release/live-runtime proof remains separately pending.
+
+Loop8 live proof: signed stable v0.4.3 source8e7423045ee0efa23619ea8e8b5a4af3d1a6f338, separate unsigned consumers. Dev T3 actual new rules_available observed5 measured/0unknown with fresh cost/maturity views; failed-rule branch remains offline proof, not a forced live fault. Authorized customer T2/T1 fleet/profiles310/310 not worse; cost/maturity readback has no new false nonadoption from identifiable unknown inputs. Customer consumes retained legacy natural T3 observations because an extra customer T3 was not granted; no new customer source-flag sample claimed. Changed cost dashboards published/read back on both targets. Both final plans No changes, schedules ENABLED/unchanged; evidence R-dev/acceptance.json and R-cust/acceptance.json. Customer T2 exceeded fit estimate, so T1 held next safe window, never suspended or collided.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

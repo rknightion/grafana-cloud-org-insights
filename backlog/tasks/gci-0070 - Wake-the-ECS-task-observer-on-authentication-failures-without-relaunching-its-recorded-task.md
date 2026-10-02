@@ -7,7 +7,7 @@ status: Done
 assignee:
   - '@loop8-root'
 created_date: '2026-10-01 17:27'
-updated_date: '2026-10-01 21:17'
+updated_date: '2026-10-02 00:34'
 labels: []
 dependencies: []
 references:
@@ -47,6 +47,8 @@ Loop8 bounded implementation per frozen packet; worker owns offline reproduction
 
 <!-- SECTION:NOTES:BEGIN -->
 Loop8 L-obs-a1: old observer auth-failure reproduction timed out as expected; shellcheck and fake-AWS public CLI tests pass. Root read both candidate scripts, accepted conservative stderr redaction and zero-run-task adoption proof, copied and sha256-verified ignored files. runtier.sh 939dce98505a32a1ae5ce063165b0454e4017e92ab63d340bad833633a1ecf45; test_runtier.sh 2b11e98af2ae75fb2418fc69aaf64ff22f2d56c5fce21e1d3ed30db768afef8b. No tracked code or hosted CI; entry exempts just check and CodeRabbit for the ignored observer, with root review instead. Root repository gate passed separately (1676 passed, 2 skipped); skipped tests are not passing evidence. Live behavior remains unproven until rollout use; individual AWS-call hangs retain CLI timeout behavior.
+
+Accepted observer used for five validated one-ARN task runs across dev/customer, each with RunTask full-response validation then adopted observation; STOPPED/containerexit0 and descriptors within2minutes, S3 advancement recorded. No relaunch/timeout/live auth failure occurred. Individual hung-call residual captured separately as GCI-0071 (bound individual AWS observation waits), To Do and not admitted.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
