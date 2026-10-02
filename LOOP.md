@@ -245,8 +245,8 @@ deployment and its write stack as the serial resource described under Resource m
   returns their HTTP status without a second request. The former urllib redirect behavior could
   forward Basic credentials across origins; this was reproduced offline with synthetic credentials,
   not demonstrated as a live disclosure. The general client remains GET-only and label-risk keeps
-  its separate two-route native read-POST exception. Published AGENTS wording must be corrected at
-  its canonical publisher, not by hand here.
+  its separate two-route native read-POST exception. AGENTS.md is maintained in this repository;
+  a boundary change still needs Rob's explicit decision.
 - Maturity ownership has no configurable staff-login list. The case-insensitive `@grafana.com`
   identity exclusion remains the sole exclusion; vendor and partner Admins are otherwise owner
   candidates. The retired environment variable is not a consumer policy.
@@ -272,3 +272,52 @@ deployment and its write stack as the serial resource described under Resource m
 - A very short blocked-DNS probe may exhaust its budget while starting the fixed worker pool before
   entering DNS under host contention. Keep both the resolver-entry and wall-time assertions; record
   the failing phase and preserve an independent discriminator instead of relaxing the deadline.
+
+## Verified loop8 contracts and operational corrections
+
+- Adaptive Metrics rules availability is independent of recommendations. A failed or malformed rules
+  read has `rules_available = false`, `rules_applied = null` and `adopted = null`; a successful empty
+  rules list is measured zero and non-adoption. Unknown rules do not enter adoption scores or
+  non-adopted lists. Per-stack applied metrics are absent for unknown rules; unqualified additive
+  estate totals require every live in-scope stack's readable rule input. Measured per-stack detail
+  and benchmarks remain useful, but a selected-stack subtotal must say it is measured and that
+  changing coverage is not remediation.
+- `cost_adaptive_headroom` also requires complete rule coverage: the findings publisher derives an
+  unqualified estate count from the admitted view. Partial coverage must not become a zero or partial
+  finding gauge. Withhold the view and retain its last good copy; a fully measured empty population
+  still publishes an honest empty view and zero gauge. The public-boundary proof crosses composition
+  into the real findings collaborator, not only the cost-specific metric builder.
+- T1 and T2 can exercise new consumers against hydrated older T3 observations without exercising a
+  changed Adaptive Metrics source. A separately authorized, bounded dev T3 run proves that source;
+  it does not widen a customer rollout's explicitly named tier fence.
+- The accepted machine-local ECS observer exits 3 after three consecutive failed or malformed AWS
+  observations and prints the recorded ARN and original deadline with credential-safe diagnostics.
+  One transient failure followed by success continues. Adoption preserves the ARN and deadline and
+  issues no RunTask. Validate the full initial RunTask response before watching; capture the stopped
+  descriptor within two minutes of watcher exit. Individual hung AWS CLI calls are not fenced by
+  polling checks. The effective watcher cap is 3600 seconds; a timeout or exit 3 requires readback
+  and adoption of the same task, never a replacement launch. A second timeout after a landed apply
+  remains Pending until STOPPED, then completion or rollback, rather than parking half a rollout.
+- CloudWatch first-to-last log duration omits task startup and shutdown and does not bound a new
+  image's runtime. A healthy tier can exceed the window estimate without losing source coverage.
+  Recheck live active tasks and the next schedule window before every manual tier; hold the next safe
+  window rather than force a collision or suspend a customer schedule.
+- `.venv/` in gitignore does not hide a `.venv` symlink. A strictly clean gate needs an actual clean
+  worktree check, not merely unchanged tracked source. Use a genuine ignored local venv from
+  `just setup`; archive a session-created setup link before removing it. A later green gate repairs
+  the proof gap, not the timing of an earlier pre-merge requirement.
+- Audit grants use exact ref membership, not wildcard matching. Expand only the current goal's
+  authorized patterns against an immutable after-snapshot and record the expansion before the one
+  closeout audit. Dependency-bot and release-please branch rewrite exceptions do not authorize a
+  root force push. Ungranted pull refs remain FOREIGN, not violations.
+- Stable v0.4.3 was read back and its immutable GHCR index verified with cosign against the publish
+  run's pinned reusable identity, GitHub issuer, repository and exact source SHA. Consumer images
+  have distinct unsigned content/provenance; neither inherits the public image's signature. Dev
+  runtime and changed cost-dashboard readback passed without schedule suspension or alert writes.
+  The authorized customer image-only rollout passed its pre/post privacy witnesses, named T2/T1
+  runtime and changed cost-dashboard readback, preserved effective scheduler policy and all schedule
+  expressions/states, and ended with a no-change plan. No customer provisioner, alert activation,
+  bucket configuration write or extra tier was needed.
+- A helper's historical non-target image override must not be reused when that deployment becomes
+  the rollout target: it can hide the newly committed image pin. Use the reviewed committed default
+  and require the saved plan's image to equal the registry digest actually read back.
