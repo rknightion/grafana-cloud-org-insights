@@ -66,7 +66,21 @@ off anything but the live inventory.
   a new rule still lands paused and unrouted; confirm live state after any publish.
 - The per-stack reader stays basic-role-None and query-scoped. Compare role drift as action/scope
   pairs. `datasources:read` may use `datasources:*`; `datasources:query` stays pinned to
-  `datasources:uid:grafanacloud-usage-insights`.
+  `datasources:uid:grafanacloud-usage-insights`, with one owner-approved S-SM exception: the opt-in
+  `synthetic-monitoring-query` token, requiring `synthetic-monitoring`, adds query access only to
+  that stack's single live-discovered Synthetic Monitoring datasource uid and adds
+  `grafana-synthetic-monitoring-app.probes:read` with empty scope. Never a wildcard, name match or
+  a grant through the existing `synthetic-monitoring` token, whose three pairs stay unchanged.
+  An ambiguous datasource set or a uid outside `^[A-Za-z0-9_-]{1,40}$` adds no query pair. Every
+  other datasource query pair and every SM write action remain refused. Without the new token,
+  discovery runs only to remove an already-held exact SM query pair; scans make zero SM calls.
+- The owner's GCI-0041 scope decision accepts two residual risks only for its named routes:
+  IRM `grafana-irm-app.integrations:read` also reaches secret-bearing integration configuration,
+  but the collector may call only `alert_receive_channels/counters` and publish counts; ML
+  `grafana-ml-app.forecasting:read` job items contain `grafanaApiKey`, which must be dropped at
+  parse, never logged or persisted. This is not approval for IRM integration lists, alert-group
+  lists or schedules, nor a blanket product-route or POST exception. Other approved families
+  require their exact-pair and route witnesses before implementation; no customer grant follows.
 - A repair must not re-mint a working credential. Token names are organisation-wide unique, so an
   unnecessary mint can leave an untracked credential while SSM points at the replacement.
 - Adaptive savings require verbose recommendation counts. Sum positive marginal reductions for `add`

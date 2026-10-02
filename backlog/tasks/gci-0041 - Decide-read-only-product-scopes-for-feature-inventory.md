@@ -1,11 +1,11 @@
 ---
 id: GCI-0041
 title: Decide read-only product scopes for feature inventory
-status: Parked
+status: In Progress
 assignee:
-  - '@loop3-root'
+  - '@loop9-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-10-02 08:17'
+updated_date: '2026-10-02 09:13'
 labels:
   - feature-usage
   - scope-decision
@@ -41,6 +41,8 @@ GCI-0032 found product object APIs beyond the existing basic-role-None stack rea
 
 <!-- SECTION:PLAN:BEGIN -->
 loop3 D1a: discover live staff product routes, exact minimal pairs, minimization and per-family verdicts. Root freezes evidence-backed table before I-scopes implementation and independent security review; customer grants bounded by goal D7.
+
+Loop9: record owner table and narrow S-SM exception in AGENTS and LOOP, gate and hosted CI, then file unbuilt family packets as To Do.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

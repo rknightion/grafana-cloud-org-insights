@@ -1,9 +1,11 @@
 ---
 id: GCI-0071
 title: Bound individual AWS observation waits in the ECS task observer
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop9-root'
 created_date: '2026-10-02 00:18'
+updated_date: '2026-10-02 09:13'
 labels: []
 dependencies: []
 references:
@@ -33,3 +35,9 @@ Loop8 accepted the exit-3 observer for failed authentication/read responses and 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+L-obs2 isolated offline observer candidate; root adoption and integrated review. No live AWS proof in lane.
+<!-- SECTION:PLAN:END -->

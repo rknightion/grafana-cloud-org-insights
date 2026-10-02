@@ -1,9 +1,11 @@
 ---
 id: GCI-0073
 title: 'Spike: Grafana audit logs as a per-app query discriminator'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop9-root'
 created_date: '2026-10-02 08:17'
+updated_date: '2026-10-02 09:25'
 labels:
   - feature-usage
   - research
@@ -34,3 +36,9 @@ GCI-0040 and GCI-0032.01 cannot attribute queries to individual Scenes apps from
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Root bounded read-only Loki count sweep on owner-named contexts/datasources; retain negatives or private positive sample; mapper analysis only if positive. No new scope or live writes.
+<!-- SECTION:PLAN:END -->

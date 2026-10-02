@@ -45,8 +45,13 @@ live dev proof it depended on failed (`goal-2026-09-23-wave2.md` §"R6 release";
   deploys, publishes dashboards/alerts and runs live proof, and a separate customer estate reached
   strictly read-only (`GET` only, or existing read-only RPC routes). No write of any kind lands on a
   customer resource (`goal-2026-09-23-wave1.md`, items 5-8 of the external-write-authority list).
-- The per-stack reader token stays pinned to basic role `None` and a single fixed datasource scope;
-  role drift is compared as action/scope pairs, never as overall shape, and a post-change readback
+- The per-stack reader token stays pinned to basic role `None` and the fixed usage datasource query
+  scope, with the owner-approved S-SM opt-in exception: `synthetic-monitoring-query` requires
+  `synthetic-monitoring` and adds only the single live-discovered SM datasource uid query pair plus
+  the empty-scope probes read action. Never a wildcard or a grant through the existing SM token;
+  ambiguity or an invalid uid adds no pair. Deselection may remove only that exact SM pair and probes
+  action; other query pairs remain dangerous. With the token absent, scans make zero SM calls.
+  Role drift is compared as action/scope pairs, never as overall shape, and a post-change readback
   must show only the approved pairs added, with nothing else changed (AGENTS.md "Hard rules";
   `goal-2026-09-23-wave2.md` step 5 of the provisioner procedure).
 - Minting or rotating a service account or reader token is a live write on the estate: take a fresh
@@ -134,7 +139,11 @@ deployment and its write stack as the serial resource described under Resource m
   before/after-discriminator limits explicit; datasource type is not an app identity.
 - A safe IRM counter response does not make its credential narrow: captured integration read
   permissions also cover configuration, and client-side URL masking is not server-side redaction.
-  Defer a new grant until its broader credential reach is proven safe.
+  The owner superseded the historical defer decision on 2026-10-02 for the exact integration-counter
+  route only, accepting that residual credential breadth. The same decision accepts ML jobs'
+  `grafanaApiKey` field only as transient input dropped at parse, never logged or persisted.
+  AGENTS.md records both named-route exceptions. Neither permits IRM lists/schedules, blanket
+  product routes, customer grants or implementation before exact-pair and route witnesses.
 - Run consumer publication with a supported Python executable. A login shell can resolve the system
   Python rather than the verified Homebrew Python. Commit deployment pins before starting a consumer
   build; the build correctly refuses uncommitted wiring.
