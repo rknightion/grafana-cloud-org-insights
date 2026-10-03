@@ -1,9 +1,11 @@
 ---
 id: GCI-0087
 title: Reject partial HTTP responses in the IRM integration counter source
-status: Parked
-assignee: []
+status: In Progress
+assignee:
+  - '@loop11-root'
 created_date: '2026-10-02 20:30'
+updated_date: '2026-10-03 11:39'
 labels:
   - source-integrity
 dependencies: []
@@ -33,3 +35,9 @@ Independent loop10 review proved a real guarded-client path accepts HTTP206 with
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Loop11 D-IRM11: lane a1 reproduces guarded HTTP206 red-first; source-local exact200; real T2/S3 withholding controls; final-rebase gate, CodeRabbit, exact-SHA CI, independent focused review. Two implementation and two review-repair rounds granted.
+<!-- SECTION:PLAN:END -->

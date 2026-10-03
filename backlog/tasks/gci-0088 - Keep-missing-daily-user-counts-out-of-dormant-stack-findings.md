@@ -1,9 +1,11 @@
 ---
 id: GCI-0088
 title: Keep missing daily user counts out of dormant-stack findings
-status: Parked
-assignee: []
+status: In Progress
+assignee:
+  - '@loop11-root'
 created_date: '2026-10-02 22:02'
+updated_date: '2026-10-03 11:39'
 labels:
   - data-quality
 dependencies: []
@@ -33,3 +35,9 @@ Independent loop10 documentation review reproduced usage.build with currentActiv
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Loop11 frozen scope: missing/null dailyUserCnt excluded from measured dormancy and absent stickiness; preserve known zero/positive and distinct missing active counts. Lane a1 red-first real usage boundary, final-rebase gate, CodeRabbit, exact-SHA CI, focused review. No fixture/table regeneration.
+<!-- SECTION:PLAN:END -->
