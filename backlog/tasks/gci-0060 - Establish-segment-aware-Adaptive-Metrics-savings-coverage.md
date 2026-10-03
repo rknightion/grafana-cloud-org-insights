@@ -1,11 +1,11 @@
 ---
 id: GCI-0060
 title: Establish segment-aware Adaptive Metrics savings coverage
-status: In Progress
+status: Done
 assignee:
   - '@loop11-root'
 created_date: '2026-10-01 11:45'
-updated_date: '2026-10-03 12:42'
+updated_date: '2026-10-03 13:16'
 labels:
   - adaptive-metrics
   - accuracy
@@ -27,8 +27,8 @@ The loop6 reference audit at fb5803a found collector/sources/dataplane.py:293 re
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 Current supported segmented and unsegmented API contracts and completeness limits are established with authoritative evidence
-- [ ] #2 Savings do not silently present a partial unsegmented result as complete where segmented coverage is required
-- [ ] #3 Any implemented route preserves read-only access, bounded labels and live inventory joins and is proved across its public boundary
+- [x] #2 Savings do not silently present a partial unsegmented result as complete where segmented coverage is required
+- [x] #3 Any implemented route preserves read-only access, bounded labels and live inventory joins and is proved across its public boundary
 <!-- AC:END -->
 
 ## Definition of Done
@@ -70,4 +70,6 @@ GCI0060-r2 stopped at test-proof seam before sourcefix: realGETclient/Response20
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Loop10 honestdiscovery-aware defaultonlysuppression landed9caaebee40127f58001a6b49ac9c60032b567904 CI37044380347success: explicitunsegmented/segmented/unknown/legacyguard, cost/value/maturity/carry publicproof, sourceGETno scopes/additiveclaims,13fileCRcomplete0findings. Finalrootfixtureidentitysanitation+rebaseoverIRM justcheckpassed. a1implementation/reviewrepairr1/infra1; no global7022or livecollectorsegmentedproof, notincludedstable0.5.0.
+
+Loop11 integratedmajorclosed by479361233784192cc896ea75203d4035ffe59381 CI37124043071allfourjobs success. Segmentdiscoveryexact200 source-local; real206empty/nonempty/201/204 unknown and unqualifiedAdaptiveS3/metric/findings/maturity/carry claims withheld, valid200controls retained. r3fullgate1951pass2skips8635subtests/CRcomplete2files0findings, freshR-int-r2independentlyparentfalse90/candidateclosurePASS; rootnewcleanfreeze gatepassed. Wholecost_summaryassertion was newlyauthoredwrongproof, correctedonlytonewqualifiednull/coveragecheck; no committedbaseline weakening. Historicalimpla1/infra1 andr1 preserved; r2stoppedconservativelycharged/r3FINALconsumed,0repairroundsremain. Signedv0.6.0source2b4d304f5903f8528ff67da4c6d3913d2d88b851 includesfix; no live206 or segmentedcollectorsampleclaim yet.
 <!-- SECTION:FINAL_SUMMARY:END -->
