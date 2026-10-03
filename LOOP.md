@@ -390,6 +390,16 @@ deployment and its write stack as the serial resource described under Resource m
 - Rob narrowed loop11 to safe partial close on 2026-10-03: stabilize dev or roll it back, restore
   suspended schedules, leave the customer deployment unchanged, then audit and report. The
   originally authorized customer v0.6.0 rollout is deferred, not completed or a standing grant.
+- Dev v0.6.0 acceptance failed: T2 refused all publication because AWS-account coverage was 2/5
+  and PDC coverage 0/5, with invalid-response schema results. The saved v0.4.4 module/manifest/image
+  and old reader selection were restored. All 61 recorded added pairs were removed without minting
+  tokens; all five reader identities and SSM versions stayed unchanged. Full definition/schedule/
+  effective-policy readbacks and the final no-change plan passed; all schedules are enabled.
+- A binary/config rollback is insufficient across hydration schema changes: v0.4.4 T1 crashed on
+  a null Adaptive recommendation count from the newer T3 scan. The retained pre-upgrade T3 scan
+  version was restored after fresh full-estate equality checks, preserving version history. The next
+  natural T1 completed exit zero and published a healthy five-stack scan. Its descriptor was read
+  retrospectively, not within an inline capture gate. No replacement manual T1 was launched.
 - Stable v0.6.0 is signed and accepted at source `2b4d304f5903f8528ff67da4c6d3913d2d88b851`;
   GHCR index `sha256:a2390f30865171cf3191c34163af1273881cf68f7c980084012882d1c8780ca5`.
   Playlists and IRM alert-group counts were independently accepted after release and are not in
