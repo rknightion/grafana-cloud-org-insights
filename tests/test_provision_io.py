@@ -927,10 +927,11 @@ def test_legacy_synthetic_customer_safety():
         permissions, removable, state = cli.reader_policy(
             st, held, write_stack=case["write_stack"], product_reads=case["tokens"])
         assert list(permissions) == case["desired"]
-        # The legacy golden stays immutable; this separately approved, unselected family adds
-        # only its two retirement candidates, not grants or a Synthetic discovery exception.
+        # The legacy golden stays immutable; separately approved, unselected families add only
+        # their literal retirement candidates, not grants or a Synthetic discovery exception.
         expected_removable = {tuple(pair) for pair in case["removable"]} | {
             ("grafana-irm-app.integrations:read", ""),
+            ("grafana-irm-app.alert-groups:read", ""),
             ("plugins.app:access", "plugins:id:grafana-irm-app"),
             ("grafana-kowalski-app.apps:read", ""),
             ("plugins.app:access", "plugins:id:grafana-kowalski-app"),
@@ -939,6 +940,7 @@ def test_legacy_synthetic_customer_safety():
             ("grafana-csp-app:read", ""),
             ("plugins.app:access", "plugins:id:grafana-csp-app"),
             ("reports:read", "reports:*"),
+            ("playlists:read", ""),
             ("grafana-pdc-app.private-networks:read", ""),
             ("plugins.app:access", "plugins:id:grafana-pdc-app"),
         }

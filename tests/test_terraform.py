@@ -59,6 +59,13 @@ def _list_items(block: str, attribute: str) -> set[str]:
     }
 
 
+class ProvisionerProductReadsValidationTest(unittest.TestCase):
+    def test_irm_alert_groups_is_an_explicit_optional_product_read_token(self):
+        block = _block(VARIABLES, 'variable "provisioner_product_reads"')
+        self.assertIn('default     = []', block)
+        self.assertIn('"irm-alert-groups"', block)
+
+
 class StackTokenPathPolicyTest(unittest.TestCase):
     EXPECTED_RESOURCES = {
         "local.stack_token_arn_prefix",

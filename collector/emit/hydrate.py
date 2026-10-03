@@ -129,11 +129,13 @@ INPUT_OWNER: dict[str, str] = {
     # Opt-in minimized point-in-time Synthetic Monitoring check and probe counts.
     "synthetic_inventory": "t2",
     "irm_integrations": "t2",
+    "irm_alert_groups": "t2",
     "faro_apps": "t2",
     "ml_jobs": "t2",
     "cloud_accounts": "t2",
     "pdc_networks": "t2",
     "reports_inventory": "t2",
+    "playlists_inventory": "t2",
     # Bounded classified label matches. Clear values stay in this private input and S3-only risk views.
     "label_risk": "t2",
 }
@@ -148,12 +150,15 @@ INPUT_OWNER: dict[str, str] = {
 VIEW_INPUTS: dict[str, frozenset[str]] = {
     # Derived from the offline minimized IRM projection in compose_inputs.json.
     "irm_integrations": frozenset({"irm_integrations"}),
+    # Mechanically derived by ViewInputsAreDerivedNotAssumed from compose_inputs.json.
+    "irm_alert_groups": frozenset({"irm_alert_groups"}),
     "faro_apps": frozenset({"faro_apps"}),
     "ml_jobs": frozenset({"ml_jobs"}),
     "cloud_accounts": frozenset({"cloud_accounts"}),
     "pdc_networks": frozenset({"pdc_networks"}),
     # Derived from full fixture versus absent and every singleton input.
     "reports_inventory": frozenset({"reports_inventory"}),
+    "playlists_inventory": frozenset({"playlists_inventory"}),
     # Derived from the anonymized captured SLO projection in compose_inputs.json.
     "coverage_slo_inventory": frozenset({"slo_inventory"}),
     # Mechanically derived from full fixture versus absent and all singleton inputs.

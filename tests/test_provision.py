@@ -37,6 +37,10 @@ class ProductReadScopeTest(unittest.TestCase):
         ("grafana-irm-app.integrations:read", ""),
         ("plugins.app:access", "plugins:id:grafana-irm-app"),
     })
+    IRM_ALERT_GROUPS_PAIRS = frozenset({
+        ("grafana-irm-app.alert-groups:read", ""),
+        ("plugins.app:access", "plugins:id:grafana-irm-app"),
+    })
     FARO_PAIRS = frozenset({
         ("grafana-kowalski-app.apps:read", ""),
         ("plugins.app:access", "plugins:id:grafana-kowalski-app"),
@@ -50,6 +54,7 @@ class ProductReadScopeTest(unittest.TestCase):
         ("plugins.app:access", "plugins:id:grafana-csp-app"),
     })
     REPORTS_PAIRS = frozenset({("reports:read", "reports:*")})
+    PLAYLISTS_PAIRS = frozenset({("playlists:read", "")})
     PDC_PAIRS = frozenset({
         ("grafana-pdc-app.private-networks:read", ""),
         ("plugins.app:access", "plugins:id:grafana-pdc-app"),
@@ -83,6 +88,19 @@ class ProductReadScopeTest(unittest.TestCase):
             ("datasources:query", "datasources:*"), ("datasources:query", "datasources:uid:other"),
             ("grafana-synthetic-monitoring-app:write", "")}))
 
+    def test_irm_alert_groups_token_adds_only_its_exact_pairs_and_is_default_off(self):
+        self.assertEqual(pr.parse_product_reads(None), frozenset())
+        self.assertEqual(
+            pr.product_read_pairs({"irm-alert-groups"}), self.IRM_ALERT_GROUPS_PAIRS,
+        )
+        selected = pr.permission_pairs(pr.desired_permissions(
+            write_stack=False, product_reads={"irm-alert-groups"},
+        ))
+        baseline = pr.permission_pairs(pr.desired_permissions(write_stack=False))
+        self.assertEqual(selected - baseline, self.IRM_ALERT_GROUPS_PAIRS)
+        self.assertNotIn(("grafana-irm-app.integrations:read", ""), selected)
+        self.assertNotIn(("grafana-irm-app.schedules:read", ""), selected)
+
     def test_unknown_product_read_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "GCINSIGHT_READER_PRODUCT_READS.*k6"):
             pr.parse_product_reads("slo,k6")
@@ -103,11 +121,11 @@ class ProductReadScopeTest(unittest.TestCase):
         self.assertEqual(configured_both - base, self.ALL_PRODUCT_PAIRS)
         self.assertEqual(
             pr.removable_pairs(write_stack=False, product_reads={"slo"}),
-            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.SYNTHETIC_MONITORING_PAIRS | self.IRM_PAIRS | self.FARO_PAIRS | self.ML_PAIRS | self.CSP_PAIRS | self.PDC_PAIRS | self.REPORTS_PAIRS,
+            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.SYNTHETIC_MONITORING_PAIRS | self.IRM_PAIRS | self.FARO_PAIRS | self.ML_PAIRS | self.CSP_PAIRS | self.PDC_PAIRS | self.REPORTS_PAIRS | self.PLAYLISTS_PAIRS | self.IRM_ALERT_GROUPS_PAIRS,
         )
         self.assertEqual(
             pr.removable_pairs(write_stack=False, product_reads={"slo", "synthetic-monitoring"}),
-            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.IRM_PAIRS | self.FARO_PAIRS | self.ML_PAIRS | self.CSP_PAIRS | self.PDC_PAIRS | self.REPORTS_PAIRS,
+            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.IRM_PAIRS | self.FARO_PAIRS | self.ML_PAIRS | self.CSP_PAIRS | self.PDC_PAIRS | self.REPORTS_PAIRS | self.PLAYLISTS_PAIRS | self.IRM_ALERT_GROUPS_PAIRS,
         )
 
     def test_runtime_desired_and_removable_sets_do_not_conflict(self):

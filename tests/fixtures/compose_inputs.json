@@ -33010,6 +33010,14 @@
   ]
  }
 },
+ "irm_alert_groups": {
+  "obs-hub": {
+   "available": true,
+   "alert_group_count": 14,
+   "relation": "exact",
+   "population": "api_default_window"
+  }
+ },
  "irm_integrations": {
   "stack158": {
    "available": true,
@@ -34018,6 +34026,12 @@
   "stack149": {
    "available": true,
    "network_count": 0
+  }
+ },
+ "playlists_inventory": {
+  "obs-hub": {
+   "available": true,
+   "playlist_count": 2
   }
  },
  "reports_inventory": {

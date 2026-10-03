@@ -1211,6 +1211,14 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
 
 
 def d_usage(ds: str):
+    playlists_panel = None
+    try:
+        playlists_panel = build.table_panel(
+            "Configured playlists", "playlists_inventory", ds,
+            description="Point-in-time configured playlist count only. Playlist names, UIDs, and items are "
+                        "discarded. Default-off; unreadable or incomplete responses are absent, never zero.")
+    except FileNotFoundError:
+        pass
     reports_panel = None
     try:
         reports_panel = build.table_panel(
@@ -1267,6 +1275,16 @@ def d_usage(ds: str):
             description="Point-in-time configured integrations, including zero-activity entries. "
                         "Not usage, activity or alert volume. Default-off reader selection; "
                         "unreadable or unmeasured stacks are absent, never zero.")
+    except FileNotFoundError:
+        pass
+    irm_alert_groups_panel = None
+    try:
+        irm_alert_groups_panel = build.table_panel(
+            "IRM alert groups in API default window", "irm_alert_groups", ds,
+            description="Observed IRM alert-group count in the stats API's default window, not a lifetime "
+                        "inventory. Relation is exact or a lower bound when the API uses a trailing plus. "
+                        "Population is api_default_window. Default-off; unreadable or malformed responses "
+                        "are absent, never zero.")
     except FileNotFoundError:
         pass
     el = {
@@ -1511,6 +1529,8 @@ def d_usage(ds: str):
                         "those logs, or stopped shipping them - both are wins, and the per-stack chart "
                         "above says which."),
     }
+    if playlists_panel is not None:
+        el["playlists_inventory"] = playlists_panel
     if reports_panel is not None:
         el["reports_inventory"] = reports_panel
     if pdc_panel is not None:
@@ -1523,9 +1543,14 @@ def d_usage(ds: str):
         el["faro_apps"] = faro_panel
     if irm_panel is not None:
         el["irm_integrations"] = irm_panel
+    if irm_alert_groups_panel is not None:
+        el["irm_alert_groups"] = irm_alert_groups_panel
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
         build.tab("Adoption", ["t_signals", "plugins"]),
+        *([build.rows_tab("Configured playlists", [
+            build.row("Configured playlists", ["playlists_inventory"], max_columns=1),
+        ])] if playlists_panel is not None else []),
         *([build.rows_tab("Configured reports", [
             build.row("Configured reports", ["reports_inventory"], max_columns=1),
         ])] if reports_panel is not None else []),
@@ -1544,6 +1569,9 @@ def d_usage(ds: str):
         *([build.rows_tab("Configured IRM integrations", [
             build.row("Configured IRM integrations", ["irm_integrations"], max_columns=1),
         ])] if irm_panel is not None else []),
+        *([build.rows_tab("IRM alert groups", [
+            build.row("IRM alert groups in API default window", ["irm_alert_groups"], max_columns=1),
+        ])] if irm_alert_groups_panel is not None else []),
         build.tab("Engagement", ["b_recency", "dormant", "recency", "usage"]),
         build.tab("Protocol adoption", ["n_otlp", "n_otlp_floor", "t_otlp"]),
         build.tab("Unread telemetry", ["n_logs_unread", "n_logs_unread_bytes",

@@ -49,11 +49,13 @@ from collector.sources import public_dashboards as public_dashboards_src
 from collector.sources import slo as slo_src
 from collector.sources import synthetic as synthetic_src
 from collector.sources import irm_integrations as irm_integrations_src
+from collector.sources import irm_alert_groups as irm_alert_groups_src
 from collector.sources import faro_apps as faro_apps_src
 from collector.sources import ml_jobs as ml_jobs_src
 from collector.sources import cloud_accounts as cloud_accounts_src
 from collector.sources import pdc_networks as pdc_networks_src
 from collector.sources import reports as reports_src
+from collector.sources import playlists as playlists_src
 from collector.sources import stack_catalog
 from collector.sources import assistant as assistant_src
 from collector.sources import fleet as fleet_src
@@ -615,6 +617,28 @@ def gather_reports_inventory(
     return data, errors
 
 
+def playlists_reads_enabled() -> bool:
+    return "playlists" in parse_product_reads(os.environ.get(PRODUCT_READS_ENV))
+
+
+def gather_playlists_inventory(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[str]]:
+    """Default-off configured playlist count only; no item or playlist content is retained."""
+    if not playlists_reads_enabled():
+        return {}, []
+    errors: list[str] = []
+    try:
+        creds = credentials.load_all()
+    except credentials.StoreUnavailable:
+        return {}, ["playlists_inventory: credential_store_unavailable"]
+    data = playlists_src.probe_all(
+        client, stacks, creds, concurrency=cfg.concurrency,
+        on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
+    )
+    return data, errors
+
+
 def pdc_networks_reads_enabled() -> bool:
     return "pdc-networks" in parse_product_reads(os.environ.get(PRODUCT_READS_ENV))
 
@@ -720,6 +744,28 @@ def gather_irm_integrations(
     except credentials.StoreUnavailable:
         return {}, ["irm_integrations: credential_store_unavailable"]
     data = irm_integrations_src.probe_all(
+        client, stacks, creds, concurrency=cfg.concurrency,
+        on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
+    )
+    return data, errors
+
+
+def irm_alert_groups_reads_enabled() -> bool:
+    return "irm-alert-groups" in parse_product_reads(os.environ.get(PRODUCT_READS_ENV))
+
+
+def gather_irm_alert_groups(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[str]]:
+    """Default-off API-default-window IRM alert-group count only."""
+    if not irm_alert_groups_reads_enabled():
+        return {}, []
+    errors: list[str] = []
+    try:
+        creds = credentials.load_all()
+    except credentials.StoreUnavailable:
+        return {}, ["irm_alert_groups: credential_store_unavailable"]
+    data = irm_alert_groups_src.probe_all(
         client, stacks, creds, concurrency=cfg.concurrency,
         on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
     )
@@ -1138,12 +1184,16 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     errors += synthetic_inventory_errors
     irm_integrations, irm_integrations_errors = gather_irm_integrations(client, cfg, selected)
     errors += irm_integrations_errors
+    irm_alert_groups, irm_alert_groups_errors = gather_irm_alert_groups(client, cfg, selected)
+    errors += irm_alert_groups_errors
     ml_jobs, ml_jobs_errors = gather_ml_jobs(client, cfg, selected)
     errors += ml_jobs_errors
     pdc_networks, pdc_networks_errors = gather_pdc_networks(client, cfg, selected, inventory=stacks)
     errors += pdc_networks_errors
     reports_inventory, reports_inventory_errors = gather_reports_inventory(client, cfg, selected)
     errors += reports_inventory_errors
+    playlists_inventory, playlists_inventory_errors = gather_playlists_inventory(client, cfg, selected)
+    errors += playlists_inventory_errors
     cloud_accounts, cloud_accounts_errors = gather_cloud_accounts(client, cfg, selected)
     errors += cloud_accounts_errors
     faro_apps, faro_apps_errors = gather_faro_apps(client, cfg, selected)
@@ -1177,10 +1227,12 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "slo_inventory": slo_inventory,
         "synthetic_inventory": synthetic_inventory,
         "irm_integrations": irm_integrations,
+        "irm_alert_groups": irm_alert_groups,
         "faro_apps": faro_apps,
         "ml_jobs": ml_jobs,
         "pdc_networks": pdc_networks,
         "reports_inventory": reports_inventory,
+        "playlists_inventory": playlists_inventory,
         "cloud_accounts": cloud_accounts,
         "signal_inventory": signal_inventory,
         "capability_adoption": capability_adoption,
@@ -1235,6 +1287,11 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
             reports_inventory, available=lambda r: bool(r.get("available")),
             errors=reports_inventory_errors,
         ),
+        "playlists_inventory": source_report(
+            expected if playlists_reads_enabled() else 0,
+            playlists_inventory, available=lambda r: bool(r.get("available")),
+            errors=playlists_inventory_errors,
+        ),
         "pdc_networks": source_report(
             expected if pdc_networks_reads_enabled() else 0,
             pdc_networks, available=lambda r: bool(r.get("available")),
@@ -1259,6 +1316,11 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
             expected if irm_integrations_reads_enabled() else 0,
             irm_integrations, available=lambda r: bool(r.get("available")),
             errors=irm_integrations_errors,
+        ),
+        "irm_alert_groups": source_report(
+            expected if irm_alert_groups_reads_enabled() else 0,
+            irm_alert_groups, available=lambda r: bool(r.get("available")),
+            errors=irm_alert_groups_errors,
         ),
         "slo_inventory": source_report(
             expected if slo_reads_enabled() else 0,

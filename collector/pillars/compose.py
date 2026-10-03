@@ -39,11 +39,13 @@ from collector.pillars import insights as insights_pillar
 from collector.pillars import insights_inventory
 from collector.pillars import slo as slo_pillar, synthetic as synthetic_pillar
 from collector.pillars import irm_integrations as irm_integrations_pillar
+from collector.pillars import irm_alert_groups as irm_alert_groups_pillar
 from collector.pillars import faro_apps as faro_apps_pillar
 from collector.pillars import ml_jobs as ml_jobs_pillar
 from collector.pillars import cloud_accounts as cloud_accounts_pillar
 from collector.pillars import pdc_networks as pdc_networks_pillar
 from collector.pillars import reports as reports_pillar
+from collector.pillars import playlists as playlists_pillar
 
 Metrics = list[tuple[str, dict[str, str], float]]
 Views = dict[str, list[dict[str, Any]]]
@@ -101,11 +103,13 @@ def build_all(
     slo_inventory: dict[str, Any] | None = None,
     synthetic_inventory: dict[str, Any] | None = None,
     irm_integrations: dict[str, Any] | None = None,
+    irm_alert_groups: dict[str, Any] | None = None,
     faro_apps: dict[str, Any] | None = None,
     ml_jobs: dict[str, Any] | None = None,
     cloud_accounts: dict[str, Any] | None = None,
     pdc_networks: dict[str, Any] | None = None,
     reports_inventory: dict[str, Any] | None = None,
+    playlists_inventory: dict[str, Any] | None = None,
     loki_config: dict[str, Any] | None = None,
     label_risk: dict[str, Any] | None = None,
     expected_retention_policy: tuple[dict[str, str], ...] = (),
@@ -153,11 +157,13 @@ def build_all(
         slo_pillar.build(stacks, slo_inventory),
         synthetic_pillar.build(stacks, synthetic_inventory),
         irm_integrations_pillar.build(stacks, irm_integrations),
+        irm_alert_groups_pillar.build(stacks, irm_alert_groups),
         faro_apps_pillar.build(stacks, faro_apps),
         ml_jobs_pillar.build(stacks, ml_jobs),
         cloud_accounts_pillar.build(stacks, cloud_accounts),
         pdc_networks_pillar.build(stacks, pdc_networks),
         reports_pillar.build(stacks, reports_inventory),
+        playlists_pillar.build(stacks, playlists_inventory),
         label_risk_pillar.build(stacks, label_risk),
     ):
         metrics.extend(pillar_metrics)

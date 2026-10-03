@@ -183,6 +183,7 @@ WRITE_STACK_PAIR = (WRITE_STACK_PERMISSION["action"], WRITE_STACK_PERMISSION["sc
 
 PRODUCT_READ_FAMILIES: dict[str, tuple[tuple[str, str], ...]] = {
     "reports": (("reports:read", "reports:*"),),
+    "playlists": (("playlists:read", ""),),
     "pdc-networks": (
         ("grafana-pdc-app.private-networks:read", ""),
         ("plugins.app:access", "plugins:id:grafana-pdc-app"),
@@ -201,6 +202,10 @@ PRODUCT_READ_FAMILIES: dict[str, tuple[tuple[str, str], ...]] = {
     ),
     "irm-integrations": (
         ("grafana-irm-app.integrations:read", ""),
+        ("plugins.app:access", "plugins:id:grafana-irm-app"),
+    ),
+    "irm-alert-groups": (
+        ("grafana-irm-app.alert-groups:read", ""),
         ("plugins.app:access", "plugins:id:grafana-irm-app"),
     ),
     "slo": (
