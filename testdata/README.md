@@ -60,6 +60,7 @@ reserved signal namespace without inventing a stack relationship.
 | `ui-instance-ids.json`, `ui-series-pairs.json` | id-collision and series-pair invariants |
 | `views/` | the composed view set, so table panels build with no S3 |
 | `views/insights_query_mix.json` | local dashboard build fixture with illustrative synthetic datasource and panel-plugin values, not a measurement |
+| `views/playlists_inventory.json` | synthetic configured playlist counts for the Usage dashboard build and `tests/test_playlists_inventory.py` scan-to-dashboard boundary check; counts are illustrative, not playback or activity measurements |
 
 Regenerate the composed views with `python3 bin/make_local_views.py`. The raw scan fixtures are not
 regenerable from anything in this repo: they are a captured snapshot, and replacing one means capturing

@@ -1211,6 +1211,14 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
 
 
 def d_usage(ds: str):
+    playlists_panel = None
+    try:
+        playlists_panel = build.table_panel(
+            "Configured playlists", "playlists_inventory", ds,
+            description="Point-in-time configured playlist count only. Playlist names, UIDs, and items are "
+                        "discarded. Default-off; unreadable or incomplete responses are absent, never zero.")
+    except FileNotFoundError:
+        pass
     reports_panel = None
     try:
         reports_panel = build.table_panel(
@@ -1511,6 +1519,8 @@ def d_usage(ds: str):
                         "those logs, or stopped shipping them - both are wins, and the per-stack chart "
                         "above says which."),
     }
+    if playlists_panel is not None:
+        el["playlists_inventory"] = playlists_panel
     if reports_panel is not None:
         el["reports_inventory"] = reports_panel
     if pdc_panel is not None:
@@ -1526,6 +1536,9 @@ def d_usage(ds: str):
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
         build.tab("Adoption", ["t_signals", "plugins"]),
+        *([build.rows_tab("Configured playlists", [
+            build.row("Configured playlists", ["playlists_inventory"], max_columns=1),
+        ])] if playlists_panel is not None else []),
         *([build.rows_tab("Configured reports", [
             build.row("Configured reports", ["reports_inventory"], max_columns=1),
         ])] if reports_panel is not None else []),

@@ -34020,6 +34020,12 @@
    "network_count": 0
   }
  },
+ "playlists_inventory": {
+  "obs-hub": {
+   "available": true,
+   "playlist_count": 2
+  }
+ },
  "reports_inventory": {
   "stack158": {
    "available": true,

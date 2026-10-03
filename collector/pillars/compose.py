@@ -44,6 +44,7 @@ from collector.pillars import ml_jobs as ml_jobs_pillar
 from collector.pillars import cloud_accounts as cloud_accounts_pillar
 from collector.pillars import pdc_networks as pdc_networks_pillar
 from collector.pillars import reports as reports_pillar
+from collector.pillars import playlists as playlists_pillar
 
 Metrics = list[tuple[str, dict[str, str], float]]
 Views = dict[str, list[dict[str, Any]]]
@@ -106,6 +107,7 @@ def build_all(
     cloud_accounts: dict[str, Any] | None = None,
     pdc_networks: dict[str, Any] | None = None,
     reports_inventory: dict[str, Any] | None = None,
+    playlists_inventory: dict[str, Any] | None = None,
     loki_config: dict[str, Any] | None = None,
     label_risk: dict[str, Any] | None = None,
     expected_retention_policy: tuple[dict[str, str], ...] = (),
@@ -158,6 +160,7 @@ def build_all(
         cloud_accounts_pillar.build(stacks, cloud_accounts),
         pdc_networks_pillar.build(stacks, pdc_networks),
         reports_pillar.build(stacks, reports_inventory),
+        playlists_pillar.build(stacks, playlists_inventory),
         label_risk_pillar.build(stacks, label_risk),
     ):
         metrics.extend(pillar_metrics)
