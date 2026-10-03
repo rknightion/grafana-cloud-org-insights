@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.6.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.5.0...v0.6.0) (2026-10-03)
+
+
+### Features
+
+* **cloud:** add default-off configured AWS account counts ([de2f6f7](https://github.com/rknightion/grafana-cloud-org-insights/commit/de2f6f78e749506637aa126df82bb6a6e022a96d))
+* **dashboards:** account for published fields and show rules coverage ([845321c](https://github.com/rknightion/grafana-cloud-org-insights/commit/845321c64c9af410baa70b96e6cac231e76eda38))
+* **faro:** add default-off count-only app inventory ([3fae7cc](https://github.com/rknightion/grafana-cloud-org-insights/commit/3fae7cc23be867334c648cd2d1345563b3915d6e))
+* **irm:** publish configured integration counts ([30f555b](https://github.com/rknightion/grafana-cloud-org-insights/commit/30f555b125c7e7b5c9a07f695aa9a17a40118659))
+* **ml:** add default-off count-only forecast job inventory ([493fbc7](https://github.com/rknightion/grafana-cloud-org-insights/commit/493fbc7487474efce900b796a9dc7a66a822a3cd))
+* **pdc:** count stack-attributed private-network policies ([3500a53](https://github.com/rknightion/grafana-cloud-org-insights/commit/3500a5318516288df0759d9f74c42f108b96ef5f))
+* **reports:** count configured reports through guarded inventory reads ([fd68c5c](https://github.com/rknightion/grafana-cloud-org-insights/commit/fd68c5c1f9e4472b86269ae0984dec10dde8312e))
+
+
+### Bug Fixes
+
+* **adaptive:** qualify default-only coverage with segment discovery ([9caaebe](https://github.com/rknightion/grafana-cloud-org-insights/commit/9caaebee40127f58001a6b49ac9c60032b567904))
+* **adaptive:** reject partial segment discovery ([4793612](https://github.com/rknightion/grafana-cloud-org-insights/commit/479361233784192cc896ea75203d4035ffe59381))
+* **counts:** reject partial Faro and ML HTTP responses ([921279f](https://github.com/rknightion/grafana-cloud-org-insights/commit/921279fa6942e18bf00d91270aa63260c40c15b1))
+* **irm:** reject partial integration counters ([5e132be](https://github.com/rknightion/grafana-cloud-org-insights/commit/5e132bed12cfa71cadd4eeaad78300d454e89f6a))
+* **usage:** exclude unavailable daily activity from dormancy ([00a1cd9](https://github.com/rknightion/grafana-cloud-org-insights/commit/00a1cd927bcdabb7465644100b53479fff8bd62c))
+
+
+### Documentation
+
+* **backlog:** accept IRM fix and record family witnesses ([eda99d1](https://github.com/rknightion/grafana-cloud-org-insights/commit/eda99d15d4fd73a0ff697925b1663b2c9e1e69bf))
+* **backlog:** admit loop11 count-integrity repairs ([42c28d9](https://github.com/rknightion/grafana-cloud-org-insights/commit/42c28d9ab9dcb43a835f6a92bf2bf9d1d966eaff))
+* clarify inventory dormancy predicate and unknown daily counts ([0a2964e](https://github.com/rknightion/grafana-cloud-org-insights/commit/0a2964ec54109308616f076b69186eed2891df4b))
+* publish canonical agent documents ([ec18c63](https://github.com/rknightion/grafana-cloud-org-insights/commit/ec18c638dc6301a079fab0c1c0e309e8b93ab80f))
+* publish canonical agent documents ([22b0f8d](https://github.com/rknightion/grafana-cloud-org-insights/commit/22b0f8d2db2686c9f938f6c895d4f8bdfc0f6a40))
+* publish canonical agent documents ([087fbec](https://github.com/rknightion/grafana-cloud-org-insights/commit/087fbec4e65adfa2008a5c7bc8d60a0f000e8d89))
+* record loop10 capability boundaries and delivery limits ([c4381db](https://github.com/rknightion/grafana-cloud-org-insights/commit/c4381db229c851afa6eec1887894865cccc09120))
+* record loop11 count fixes and bounded rollout authority ([4da9580](https://github.com/rknightion/grafana-cloud-org-insights/commit/4da9580ae2e3e9041feda4136f7eddc70eaffe51))
+* refresh current product and operator reference ([9d97b98](https://github.com/rknightion/grafana-cloud-org-insights/commit/9d97b9820539e8d6a082725597fd799620bafbe4))
+
+
+### Miscellaneous
+
+* **backlog:** record documentation acceptance and dormant-count follow-up ([55d29f4](https://github.com/rknightion/grafana-cloud-org-insights/commit/55d29f4dcbfa5f27ac381866be70a04ec0624e44))
+
 ## [0.5.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.4.4...v0.5.0) (2026-10-02)
 
 
