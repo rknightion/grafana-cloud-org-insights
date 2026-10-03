@@ -33010,6 +33010,14 @@
   ]
  }
 },
+ "irm_alert_groups": {
+  "obs-hub": {
+   "available": true,
+   "alert_group_count": 14,
+   "relation": "exact",
+   "population": "api_default_window"
+  }
+ },
  "irm_integrations": {
   "stack158": {
    "available": true,

@@ -1277,6 +1277,16 @@ def d_usage(ds: str):
                         "unreadable or unmeasured stacks are absent, never zero.")
     except FileNotFoundError:
         pass
+    irm_alert_groups_panel = None
+    try:
+        irm_alert_groups_panel = build.table_panel(
+            "IRM alert groups in API default window", "irm_alert_groups", ds,
+            description="Observed IRM alert-group count in the stats API's default window, not a lifetime "
+                        "inventory. Relation is exact or a lower bound when the API uses a trailing plus. "
+                        "Population is api_default_window. Default-off; unreadable or malformed responses "
+                        "are absent, never zero.")
+    except FileNotFoundError:
+        pass
     el = {
         "n_stick": build.stat_panel(
             "Stickiness (daily/active)", "gcinsight_usage_stickiness_ratio",
@@ -1533,6 +1543,8 @@ def d_usage(ds: str):
         el["faro_apps"] = faro_panel
     if irm_panel is not None:
         el["irm_integrations"] = irm_panel
+    if irm_alert_groups_panel is not None:
+        el["irm_alert_groups"] = irm_alert_groups_panel
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
         build.tab("Adoption", ["t_signals", "plugins"]),
@@ -1557,6 +1569,9 @@ def d_usage(ds: str):
         *([build.rows_tab("Configured IRM integrations", [
             build.row("Configured IRM integrations", ["irm_integrations"], max_columns=1),
         ])] if irm_panel is not None else []),
+        *([build.rows_tab("IRM alert groups", [
+            build.row("IRM alert groups in API default window", ["irm_alert_groups"], max_columns=1),
+        ])] if irm_alert_groups_panel is not None else []),
         build.tab("Engagement", ["b_recency", "dormant", "recency", "usage"]),
         build.tab("Protocol adoption", ["n_otlp", "n_otlp_floor", "t_otlp"]),
         build.tab("Unread telemetry", ["n_logs_unread", "n_logs_unread_bytes",

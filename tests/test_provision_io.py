@@ -931,6 +931,7 @@ def test_legacy_synthetic_customer_safety():
         # their literal retirement candidates, not grants or a Synthetic discovery exception.
         expected_removable = {tuple(pair) for pair in case["removable"]} | {
             ("grafana-irm-app.integrations:read", ""),
+            ("grafana-irm-app.alert-groups:read", ""),
             ("plugins.app:access", "plugins:id:grafana-irm-app"),
             ("grafana-kowalski-app.apps:read", ""),
             ("plugins.app:access", "plugins:id:grafana-kowalski-app"),

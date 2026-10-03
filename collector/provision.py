@@ -204,6 +204,10 @@ PRODUCT_READ_FAMILIES: dict[str, tuple[tuple[str, str], ...]] = {
         ("grafana-irm-app.integrations:read", ""),
         ("plugins.app:access", "plugins:id:grafana-irm-app"),
     ),
+    "irm-alert-groups": (
+        ("grafana-irm-app.alert-groups:read", ""),
+        ("plugins.app:access", "plugins:id:grafana-irm-app"),
+    ),
     "slo": (
         ("grafana-slo-app.orgpreferences:read", ""),
         ("grafana-slo-app.slo:read", ""),

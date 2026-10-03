@@ -49,6 +49,7 @@ from collector.sources import public_dashboards as public_dashboards_src
 from collector.sources import slo as slo_src
 from collector.sources import synthetic as synthetic_src
 from collector.sources import irm_integrations as irm_integrations_src
+from collector.sources import irm_alert_groups as irm_alert_groups_src
 from collector.sources import faro_apps as faro_apps_src
 from collector.sources import ml_jobs as ml_jobs_src
 from collector.sources import cloud_accounts as cloud_accounts_src
@@ -749,6 +750,28 @@ def gather_irm_integrations(
     return data, errors
 
 
+def irm_alert_groups_reads_enabled() -> bool:
+    return "irm-alert-groups" in parse_product_reads(os.environ.get(PRODUCT_READS_ENV))
+
+
+def gather_irm_alert_groups(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[str]]:
+    """Default-off API-default-window IRM alert-group count only."""
+    if not irm_alert_groups_reads_enabled():
+        return {}, []
+    errors: list[str] = []
+    try:
+        creds = credentials.load_all()
+    except credentials.StoreUnavailable:
+        return {}, ["irm_alert_groups: credential_store_unavailable"]
+    data = irm_alert_groups_src.probe_all(
+        client, stacks, creds, concurrency=cfg.concurrency,
+        on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
+    )
+    return data, errors
+
+
 def gather_signal_inventory(
     client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], list[str]]:
@@ -1161,6 +1184,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     errors += synthetic_inventory_errors
     irm_integrations, irm_integrations_errors = gather_irm_integrations(client, cfg, selected)
     errors += irm_integrations_errors
+    irm_alert_groups, irm_alert_groups_errors = gather_irm_alert_groups(client, cfg, selected)
+    errors += irm_alert_groups_errors
     ml_jobs, ml_jobs_errors = gather_ml_jobs(client, cfg, selected)
     errors += ml_jobs_errors
     pdc_networks, pdc_networks_errors = gather_pdc_networks(client, cfg, selected, inventory=stacks)
@@ -1202,6 +1227,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "slo_inventory": slo_inventory,
         "synthetic_inventory": synthetic_inventory,
         "irm_integrations": irm_integrations,
+        "irm_alert_groups": irm_alert_groups,
         "faro_apps": faro_apps,
         "ml_jobs": ml_jobs,
         "pdc_networks": pdc_networks,
@@ -1290,6 +1316,11 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
             expected if irm_integrations_reads_enabled() else 0,
             irm_integrations, available=lambda r: bool(r.get("available")),
             errors=irm_integrations_errors,
+        ),
+        "irm_alert_groups": source_report(
+            expected if irm_alert_groups_reads_enabled() else 0,
+            irm_alert_groups, available=lambda r: bool(r.get("available")),
+            errors=irm_alert_groups_errors,
         ),
         "slo_inventory": source_report(
             expected if slo_reads_enabled() else 0,

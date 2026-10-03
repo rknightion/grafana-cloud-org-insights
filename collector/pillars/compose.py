@@ -39,6 +39,7 @@ from collector.pillars import insights as insights_pillar
 from collector.pillars import insights_inventory
 from collector.pillars import slo as slo_pillar, synthetic as synthetic_pillar
 from collector.pillars import irm_integrations as irm_integrations_pillar
+from collector.pillars import irm_alert_groups as irm_alert_groups_pillar
 from collector.pillars import faro_apps as faro_apps_pillar
 from collector.pillars import ml_jobs as ml_jobs_pillar
 from collector.pillars import cloud_accounts as cloud_accounts_pillar
@@ -102,6 +103,7 @@ def build_all(
     slo_inventory: dict[str, Any] | None = None,
     synthetic_inventory: dict[str, Any] | None = None,
     irm_integrations: dict[str, Any] | None = None,
+    irm_alert_groups: dict[str, Any] | None = None,
     faro_apps: dict[str, Any] | None = None,
     ml_jobs: dict[str, Any] | None = None,
     cloud_accounts: dict[str, Any] | None = None,
@@ -155,6 +157,7 @@ def build_all(
         slo_pillar.build(stacks, slo_inventory),
         synthetic_pillar.build(stacks, synthetic_inventory),
         irm_integrations_pillar.build(stacks, irm_integrations),
+        irm_alert_groups_pillar.build(stacks, irm_alert_groups),
         faro_apps_pillar.build(stacks, faro_apps),
         ml_jobs_pillar.build(stacks, ml_jobs),
         cloud_accounts_pillar.build(stacks, cloud_accounts),
