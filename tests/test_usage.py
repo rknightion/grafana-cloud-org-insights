@@ -115,6 +115,46 @@ class StickinessTest(unittest.TestCase):
         self.assertEqual(got, round(daily / active, 4))
         self.assertNotEqual(got, round(daily / billed, 4))
 
+    def test_missing_daily_activity_is_not_reported_as_dormancy_or_zero_stickiness(self):
+        """Unavailable daily counts are not evidence that active users were dormant."""
+        for stack in (
+            {"slug": "missing-daily", "currentActiveUsers": 5},
+            {"slug": "null-daily", "currentActiveUsers": 5, "dailyUserCnt": None},
+        ):
+            with self.subTest(stack=stack["slug"]):
+                metrics, views = usage.build([stack], Coverage(tier="t1", total=1), now=NOW)
+                row = views["usage"][0]
+                self.assertIsNone(row["Users (daily)"])
+                self.assertIsNone(row["Stickiness"])
+                self.assertEqual(views["usage_dormant_stacks"], [])
+                self.assertNotIn("gcinsight_usage_stickiness_ratio", {name for name, _, _ in metrics})
+                self.assertIsNone(views["usage_summary"][0]["Value"])
+
+    def test_known_daily_activity_retains_measured_dormancy_and_stickiness(self):
+        stacks = [
+            {"slug": "active-today", "currentActiveUsers": 5, "dailyUserCnt": 2},
+            {"slug": "dormant", "currentActiveUsers": 5, "dailyUserCnt": 0},
+            {"slug": "no-active-users", "currentActiveUsers": None, "dailyUserCnt": 0},
+        ]
+        metrics, views = usage.build(stacks, Coverage(tier="t1", total=3), now=NOW)
+        rows = {row[" Stack"]: row for row in views["usage"]}
+        self.assertEqual(rows["active-today"]["Stickiness"], 0.4)
+        self.assertEqual(rows["dormant"]["Stickiness"], 0.0)
+        self.assertIsNone(rows["no-active-users"]["Stickiness"])
+        self.assertEqual([row[" Stack"] for row in views["usage_dormant_stacks"]], ["dormant"])
+        self.assertEqual(
+            next(value for name, _, value in metrics if name == "gcinsight_usage_stickiness_ratio"),
+            0.2,
+        )
+
+    def test_estate_stickiness_is_absent_without_an_active_user_denominator(self):
+        metrics, _ = usage.build(
+            [{"slug": "no-users", "currentActiveUsers": 0, "dailyUserCnt": 0}],
+            Coverage(tier="t1", total=1),
+            now=NOW,
+        )
+        self.assertNotIn("gcinsight_usage_stickiness_ratio", {name for name, _, _ in metrics})
+
     def test_per_stack_stickiness_is_none_when_there_are_no_users(self):
         """0.0 would render as 'nobody uses it'; the truth is there is nobody to use it."""
         nousers = [r for r in self.views["usage"] if r["Users (active)"] == 0]

@@ -115,7 +115,7 @@ def build(
     for s in stacks:
         slug = str(s["slug"])
         active = s.get("currentActiveUsers") or 0
-        daily = s.get("dailyUserCnt") or 0
+        daily = s.get("dailyUserCnt")
         datasources = {k: v for k, v in (s.get("datasourceCnts") or {}).items()
                        if v and k not in EXCLUDED_DATASOURCES}
         signals = _signals_in_use(s)
@@ -125,7 +125,7 @@ def build(
             "Users (active)": active,
             "Users (daily)": daily,
             # Of the people with access, how many showed up today.
-            "Stickiness": round(daily / active, 3) if active else None,
+            "Stickiness": round(daily / active, 3) if active and daily is not None else None,
             "Admins": s.get("currentActiveAdminUsers") or 0,
             "Editors": s.get("currentActiveEditorUsers") or 0,
             "Viewers": s.get("currentActiveViewerUsers") or 0,
@@ -140,10 +140,11 @@ def build(
 
     active_total = sum(s.get("currentActiveUsers") or 0 for s in stacks)
     daily_total = sum(s.get("dailyUserCnt") or 0 for s in stacks)
-    metrics.append((
-        "gcinsight_usage_stickiness_ratio", {},
-        round(daily_total / active_total, 4) if active_total else 0.0,
-    ))
+    if stacks and active_total and all(s.get("dailyUserCnt") is not None for s in stacks):
+        metrics.append((
+            "gcinsight_usage_stickiness_ratio", {},
+            round(daily_total / active_total, 4) if active_total else 0.0,
+        ))
 
     # Plugin adoption = stacks with at least one instance, not instance count. One stack with 12
     # Infinity datasources is not 12 stacks' worth of adoption.
@@ -228,7 +229,11 @@ def build(
         ),
         "usage_summary": [{
             " Metric": "Stickiness (daily / active users, estate)",
-            "Value": round(daily_total / active_total, 3) if active_total else None,
+            "Value": (
+                round(daily_total / active_total, 3)
+                if active_total and all(s.get("dailyUserCnt") is not None for s in stacks)
+                else None
+            ),
         }, {
             " Metric": "Active users",
             "Value": active_total,
