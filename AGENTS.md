@@ -88,12 +88,20 @@ off anything but the live inventory.
   `grafana-ml-app.forecasting:read` job items contain `grafanaApiKey`, which must be dropped at
   parse, never logged or persisted. This is not approval for IRM integration lists, alert-group
   lists or schedules, nor a blanket product-route or POST exception. Other approved families
-  require their exact-pair and route witnesses before implementation; no customer grant follows.
+  require their exact-pair and route witnesses before implementation. No standing customer grant
+  follows. Rob's loop11 D-CUST11 owner decision (2026-10-03) separately authorizes the customer
+  deployment to enable only opt-in readers shipped in v0.6.0 and proven live on dev in that loop:
+  Synthetic Monitoring query, Faro apps, ML jobs, AWS accounts, PDC networks, reports and IRM
+  integration counters. IRM qualifies only after GCI-0087's exact-200 correction is accepted and
+  shipped. The decision preserves every reader-role, route, privacy and publication hard rule;
+  unshipped or unproven families receive no customer grant.
 - Current main's optional `faro-apps`, `ml-jobs`, `cloud-accounts`, `pdc-networks` and `reports`
   readers are default-off count-only GET sources. They require exact HTTP 200; an otherwise valid
   HTTP 206 body is unavailable, not a complete inventory. Do not globally redefine `Response.ok`
-  to enforce this source contract. `irm-integrations` still admits 206 and its acceptance is parked;
-  the recorded follow-up needs explicit repair allowance, not an automatic budget reset.
+  to enforce this source contract. `irm-integrations` now also requires exact HTTP 200 at its
+  source boundary; valid 206 JSON is unavailable and cannot overwrite its last-good view. GCI-0087
+  was accepted under Rob's separately granted loop11 D-IRM11 allowance, not an automatic reset of
+  GCI-0074's exhausted review budget.
 - PDC counts only policies with the exact current stack realm and `set:pdc-signing`, after complete
   reads across `gcom.policy_regions(live_inventory)` and validated pages. Never trust server realm
   filtering, follow a supplied continuation URL with a credential, or call tokens/connection routes.

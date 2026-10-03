@@ -43,8 +43,15 @@ live dev proof it depended on failed (`goal-2026-09-23-wave2.md` §"R6 release";
 
 - Two estate tiers, never mixed: a write-capable internal deployment tier where a loop mints,
   deploys, publishes dashboards/alerts and runs live proof, and a separate customer estate reached
-  strictly read-only (`GET` only, or existing read-only RPC routes). No write of any kind lands on a
-  customer resource (`goal-2026-09-23-wave1.md`, items 5-8 of the external-write-authority list).
+  read-only by default (`GET` only, or existing read-only RPC routes). The original no-write fence
+  (`goal-2026-09-23-wave1.md`, items 5-8) is not a standing deployment grant. Rob's loop11 D-CUST11
+  owner decision (2026-10-03) separately permits the named customer deployment's v0.6.0 rollout:
+  saved classified plans/applies, immutable consumer images, one provisioner run, manual tiers and
+  dashboard/alert publication preserving pause/routing. Its reader set is the live set unioned
+  only with opt-in readers shipped in v0.6.0 and proven live on dev: Synthetic Monitoring query,
+  Faro apps, ML jobs, AWS accounts, PDC networks, reports and accepted exact-200 IRM counters.
+  Unshipped/unproven families are excluded. Every AGENTS.md hard rule still binds; no bucket
+  policy/lifecycle write, foreign access-policy mutation or working-token re-mint is implied.
 - The per-stack reader token stays pinned to basic role `None` and the fixed usage datasource query
   scope, with the owner-approved S-SM opt-in exception: `synthetic-monitoring-query` requires
   `synthetic-monitoring` and adds only the single live-discovered SM datasource uid query pair plus
@@ -149,7 +156,8 @@ deployment and its write stack as the serial resource described under Resource m
   route only, accepting that residual credential breadth. The same decision accepts ML jobs'
   `grafanaApiKey` field only as transient input dropped at parse, never logged or persisted.
   AGENTS.md records both named-route exceptions. Neither permits IRM lists/schedules, blanket
-  product routes, customer grants or implementation before exact-pair and route witnesses.
+  product routes, standing customer grants or implementation before exact-pair and route witnesses.
+  Loop11's separate D-CUST11 decision above does not expand either named-route exception.
 - Run consumer publication with a supported Python executable. A login shell can resolve the system
   Python rather than the verified Homebrew Python. Commit deployment pins before starting a consumer
   build; the build correctly refuses uncommitted wiring.
@@ -376,6 +384,26 @@ deployment and its write stack as the serial resource described under Resource m
 - A changed immutable module ref needs `tofu init` before the pre-push validation hook. The first
   dev push failed on stale module installation, then passed after init; unrelated dirty lockfiles
   remained byte-identical. This is not authority to update provider pins or discard sibling work.
+
+## Verified loop11 decisions and pre-release witnesses
+
+- Rob's D-IRM11 allowance was separate from GCI-0074's exhausted review budget. Accepted GCI-0087
+  rejects non-200 IRM counter responses locally; real guarded-client HTTP 206 and last-good
+  withholding were reproduced offline. No live upstream emitting 206 was observed.
+- Accepted GCI-0088 keeps missing/null daily counts out of measured dormancy and stickiness;
+  known zero remains measured. The excluded daily-total coercion and pre-existing partially
+  missing active-user denominator remain follow-up work, not claims of complete usage coverage.
+- The old customer v0.4.4 manual T1 completed: its recorded CloudWatch stream's healthy terminal
+  timestamp and duration matched the retained S3 scan version. The ECS descriptor aged out;
+  no replacement task was started. The fresh customer targeted plan showed no changes.
+- Loop11's non-General-folder library control exposed a permission-filtered zero under exact
+  `library.panels:read` at `folders:*`: reader count zero, Admin count two. No extra folder grant
+  followed and implementation remains parked. Playlists returned one matching positive control
+  under the exact empty-scope `playlists:read` pair; baseline None also saw it on that deployed
+  version, not a universal no-action or strict-minimality proof. Exact IRM alert-group read plus
+  plugin access returned matching projected stats count 14; the API-default window is not lifetime.
+  All temporary service accounts, custom roles, tokens and controls were removed by recorded ID
+  with absence readbacks. Implementation and rollout acceptance remain separate from witnesses.
 
 ## Verified loop10 outcomes and limits
 
