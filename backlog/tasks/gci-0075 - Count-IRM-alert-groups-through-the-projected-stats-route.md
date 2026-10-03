@@ -1,9 +1,11 @@
 ---
 id: GCI-0075
 title: Count IRM alert groups through the projected stats route
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop11-root'
 created_date: '2026-10-02 09:25'
+updated_date: '2026-10-03 12:00'
 labels:
   - feature-usage
   - scope-decision
@@ -34,3 +36,15 @@ Exact declared reader pairs returned403 historically while Admin succeeded; diag
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Loop11 R-wit11 exact declared alert-groups:read empty plusIRMplugin access, basicNone GET /api/plugins/grafana-irm-app/resources/alertgroups/stats/ freshHTTP200 count14 equalAdmin, shape count canonicaldecimalstring. Historical403 no longer reproduced on recorded actualstats route. Build becomes ready only after prior family lands (sharedfilemutex); T2 count/relation/api_default_window only, no lifetime/statussum/contentlist/extra pair. Defaultoff future token, no newseries.
+<!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Evidence codex/loop11-evidence/R-wit/GCI-0075/ledger.json positive; SA70 token80 roleag03zv2yvcow0d recorded-IDdeleted200/404/postlistsabsent. Implementationnotyetadmitted, waits L-fam-GCI-0083 sharedfiles; no grant widened.
+<!-- SECTION:NOTES:END -->

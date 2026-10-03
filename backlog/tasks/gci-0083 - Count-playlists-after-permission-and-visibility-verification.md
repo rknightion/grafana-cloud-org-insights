@@ -1,11 +1,11 @@
 ---
 id: GCI-0083
 title: Count playlists after permission and visibility verification
-status: Parked
+status: In Progress
 assignee:
-  - '@loop10-root'
+  - '@loop11-root'
 created_date: '2026-10-02 09:25'
-updated_date: '2026-10-02 17:07'
+updated_date: '2026-10-03 11:59'
 labels:
   - feature-usage
   - scope-decision
@@ -41,10 +41,14 @@ Historical empty200 does not prove complete positive visibility or no required a
 
 <!-- SECTION:PLAN:BEGIN -->
 R-wit freshdeclaredplaylists:read emptyscope basicNone exactGET /api/playlists versusAdminpositivecount/population orpreciseemptyblocker, no playlistcreation/dashboardsgrant; IDteardown.
+
+Loop11 R-wit positive exactplaylists:read empty scope None/AdminHTTP200 count1 same UID/control visible; baselineNone also positive on this deployed version. Preserve conservative declared read pair, no universal minimality claim. L-fam a1 defaultoff playlists T2 count-only with immediate content/identity drops, no series; gated candidate holds push until explicit root permit after release mutex.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Loop10 exactplaylists:read emptyscope None/AdminGET200count0; no positiveexistingplaylist control, empty equalitycannotprove positivevisibility/completeness. SA67/roleeg016wk99qcqoe/token77deletedtoken-role-SA200/404/postlistsabsence. No creationgrant orimplementationadmitted, implementation0/reviewrepair0/infra0. Resume needsexistingpositivecontrol allowedrobk+matchingreader/Adminfullvisibility.
+
+Witness SA69 token79 rolefg03zhahb65fke playlistbg03zh9jvj2tcc recorded-ID deletions200/404, postcount0/objectsabsent. Evidence codex/loop11-evidence/R-wit/GCI-0083/ledger.json. L-fam-GCI-0083 admitted a1, sharedfilesexclusive; no customer enabled reader grant inferred.
 <!-- SECTION:NOTES:END -->

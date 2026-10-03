@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@loop10-root'
 created_date: '2026-10-02 09:25'
-updated_date: '2026-10-02 17:05'
+updated_date: '2026-10-03 11:50'
 labels:
   - feature-usage
   - scope-decision
@@ -47,4 +47,6 @@ R-wit robk exactlibrary.panels:read@folders:* fromfreshfixedrolemetadata basicNo
 
 <!-- SECTION:NOTES:BEGIN -->
 Loop10 R-wit exactlibrary.panels:read@folders:* None/AdminGETboth200 butcount/totalCount0. Preciseblocker: no positive existing librarypanel population on allowedrobk; emptyequalitycannotprove completefoldervisibility, no panelcreation grant. SA66/roleeg016sv8u8yrka/token76 allremoved200/404/postlistsabsence. Noimplementationadmitted, implementationattempts0/reviewrepair0/infra0. Resume requires ownerexistingpositivecontrol onallowedstack withfoldervisibility andpagecount witness.
+
+Loop11 D-WIT11-CTL positive non-General-folder control exposed permission-filtered zero: basicNone exact library.panels:read@folders:* readerHTTP200 count0 versusAdminHTTP200 count2, including synthetic control. BaselineNone403. Exact action alone is insufficient for complete folder visibility; no companion grant added. SA68 token78 role dg03ytzhwni80a panel cg03ytyqs9728e deleted by recorded IDs; token200, role/SA/panel200 then404, postlists absent. Evidence codex/loop11-evidence/R-wit/GCI-0082/ledger.json. No implementation admitted; needs owner-approved folder visibility boundary.
 <!-- SECTION:NOTES:END -->

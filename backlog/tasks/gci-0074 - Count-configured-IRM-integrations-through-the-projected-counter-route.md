@@ -1,11 +1,11 @@
 ---
 id: GCI-0074
 title: Count configured IRM integrations through the projected counter route
-status: Parked
+status: Done
 assignee:
   - '@loop10-root'
 created_date: '2026-10-02 09:25'
-updated_date: '2026-10-02 20:30'
+updated_date: '2026-10-03 11:59'
 labels:
   - feature-usage
   - scope-decision
@@ -67,4 +67,6 @@ New independent count-integrity finding: valid HTTP206 body is accepted by respo
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Loop10 exactNone/Adminrobk counterGET25equality+IDteardown, minimized selectedfullT2->compose->S3/panel proof, optionalneverpublishedguard/retainedolderview/nohiddenerrors, exact2pairretirementgoldencompatibility. Landed30f555b125c7e7b5c9a07f695aa9a17a40118659 CI37043315992success; finalgate1734pass2existing skips8156subtests/CRcomplete21one redundantparseminorleft withevidence; independentcomponentinventory+securityPASS. a1/a2implementationconsumed, reviewrepairr1-r3consumed, infra1. No customergrant/deployedfamilycollector/livebrowser claim.
+
+Loop11 GCI-0087 (reject partial IRM responses) accepted under separately granted D-IRM11 allowance; closes the remaining HTTP206 blocker at5e132bed12cfa71cadd4eeaad78300d454e89f6a CI37120735853success and independentfocusedreviewPASS. Historical GCI-0074 attempt/review consumption preserved, not reset. No customerfamily rollout or live206 claim.
 <!-- SECTION:FINAL_SUMMARY:END -->
