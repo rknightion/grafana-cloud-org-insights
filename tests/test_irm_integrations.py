@@ -28,7 +28,8 @@ def client_for(body, status=200, calls=None):
     return ReadOnlyClient(transport=transport, max_attempts=1)
 
 
-def test_projected_count_public_boundary(tmp_path, capsys, caplog):
+@pytest.mark.parametrize("status", [200, 206])
+def test_projected_count_public_boundary(tmp_path, capsys, caplog, status):
     body = json.loads((Path(__file__).parent / "fixtures/irm_counters.json").read_text())
     from tests.test_scan import cfg_for
 
@@ -51,9 +52,24 @@ def test_projected_count_public_boundary(tmp_path, capsys, caplog):
         edges.enter_context(mock.patch.object(scan.label_risk_src, "probe_all", return_value={}))
         edges.enter_context(mock.patch.object(scan, "load_ratecard", return_value=None))
         edges.enter_context(mock.patch.object(hydrate.subprocess, "run", return_value=SimpleNamespace(returncode=1)))
-        result = scan.run_t2(client_for(body), cfg_for())
-    data = result["data"]["irm_integrations"]
+        result = scan.run_t2(client_for(body, status), cfg_for())
+    data = result["data"].get("irm_integrations", {})
     errors = result["meta"]["error_samples"]
+    if status == 206:
+        assert data == {}
+        assert errors
+        assert result["meta"]["sources"]["irm_integrations"]["healthy"] is False
+        assert result["meta"]["sources"]["irm_integrations"]["unavailable"] == 1
+        assert "irm_integrations" not in result["_emit"]["views"]
+        writes = {}
+        def put(path, key, bucket, dry_run):
+            writes[key] = path.read_text()
+            return key
+        with mock.patch.object(s3, "_put", side_effect=put):
+            filtered, _ = hydrate.filter_views(result["_emit"]["views"], result["meta"]["inputs"])
+            s3.write_views(filtered, result["meta"], view_coverage=result["_emit"]["view_coverage"])
+        assert "views/irm_integrations.json" not in writes
+        return
     assert data == {"obs-hub": {"available": True, "integration_count": 1}}
     assert errors == []
     metrics, views = result["_emit"]["metrics"], result["_emit"]["views"]
@@ -117,12 +133,15 @@ def test_valid_empty_and_zero_activity_count(body, status):
     ({SENTINEL: {"alerts_count": 0}}, 200),
     ({SENTINEL: {"alerts_count": 0, "alert_groups_count": 0, "config": SENTINEL}}, 200),
     ({"error": SENTINEL}, 403), ({"error": SENTINEL}, 500),
+    ({SENTINEL: {"alerts_count": 0, "alert_groups_count": 0}}, 206),
 ])
 def test_failed_or_partial_is_absent_and_private(body, status, capsys, caplog):
     from collector.sources import irm_integrations as source
     errors = []
     result = source.probe_all(client_for(body, status), [STACK], {"obs-hub": {"token": "synthetic-token"}}, on_error=lambda slug, msg: errors.append(msg))
     assert result["obs-hub"]["available"] is False
+    if status == 206:
+        assert result["obs-hub"]["reason"] == "unreadable"
     views = compose.build_all([STACK], Coverage(tier="t2", total=1), irm_integrations=result)[1]
     assert "irm_integrations" not in views
     assert SENTINEL not in json.dumps([result, errors]) + capsys.readouterr().out + caplog.text

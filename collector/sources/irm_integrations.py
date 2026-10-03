@@ -23,7 +23,7 @@ def fetch_irm_integrations(client: ReadOnlyClient, stack: Mapping[str, Any], rea
         return {"available": False, "reason": "no_credential"}
     try:
         response = client.get(base + PATH, bearer=reader, guarded=True)
-        if not response.ok:
+        if response.status != 200:
             return {"available": False, "reason": "unreadable"}
         body = response.json()
         if not isinstance(body, dict) or len(body) > MAX_INTEGRATIONS:
