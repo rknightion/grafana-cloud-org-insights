@@ -379,7 +379,8 @@ def adaptive_metrics(client: ReadOnlyClient, stack: dict[str, Any], cap: str) ->
         try:
             response = client.get(f"{base}/aggregations/rules/segments",
                                   basic=auth_for(stack, "metrics", cap))
-            if response.ok:
+            # Partial enumeration cannot establish the absence of segments.
+            if response.status == 200:
                 segments = response.json()
                 # Enumeration is deliberately bounded. IDs are transient validation inputs only.
                 valid = isinstance(segments, list) and len(segments) <= 1000

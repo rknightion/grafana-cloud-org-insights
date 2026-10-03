@@ -456,30 +456,37 @@ class ConnectRpcTest(unittest.TestCase):
 
 
 # Segment discovery fences whole-stack claims across the real publication boundary.
-class Response:
-    def __init__(self, body, ok=True):
-        self.body, self.ok, self.status = body, ok, 200 if ok else 503
-
-    def json(self):
-        return self.body
+from collector.httpclient import ReadOnlyClient, Response
 
 
-class Client:
-    def __init__(self, segments, ok=True, empty=False):
-        self.segments, self.ok, self.empty, self.calls = segments, ok, empty, []
+class Client(ReadOnlyClient):
+    """Fake only the transport; preserve real status/JSON and GET-only semantics."""
+
+    def __init__(self, segments, ok=True, empty=False, status=None):
+        self.segments, self.empty, self.calls = segments, empty, []
+        self.segment_status = status if status is not None else (200 if ok else 503)
+        super().__init__(transport=self.transport, max_attempts=1)
 
     def get(self, url, basic=None):
         self.calls.append((url, basic))
+        return super().get(url, basic=basic)
+
+    def transport(self, request, timeout):
+        assert request.method == 'GET'
+        url = request.full_url
+        status = 200
         if url.endswith('/segments'):
-            return Response(self.segments, self.ok)
-        if url.endswith('/rules'):
-            return Response([])
-        if '?verbose=true' in url:
-            return Response([] if self.empty else [{
+            body, status = self.segments, self.segment_status
+        elif url.endswith('/rules'):
+            body = []
+        elif '?verbose=true' in url:
+            body = [] if self.empty else [{
                 'metric': 'synthetic_metric', 'recommended_action': 'add',
                 'current_series_count': 100, 'recommended_series_count': 10,
-            }])
-        return Response({})
+            }]
+        else:
+            body = {}
+        return Response(status, json.dumps(body).encode(), url)
 
 
 STACK = {'slug': 'one', 'hmInstancePromUrl': 'https://inventory.example',
@@ -488,7 +495,7 @@ SEGMENT = {'id': 'synthetic-segment-a', 'fallback_to_default': True,
            'name': 'PRIVATE-NAME', 'selector': 'PRIVATE-SELECTOR'}
 
 
-def publish(am, stacks=None, payload=None, ratecard=None):
+def publish(am, stacks=None, payload=None, ratecard=None, seeded=None):
     stacks = stacks or [STACK]
     coverage = Coverage(tier='t3', total=len(stacks))
     for stack in stacks:
@@ -498,7 +505,7 @@ def publish(am, stacks=None, payload=None, ratecard=None):
             coverage.record_ok(stack['slug'])
     payload = payload or {'one': {'adaptive_metrics': am}}
     metrics, views, cov = compose.build_all(stacks, coverage, dataplane=payload, ratecard=ratecard)
-    published = {}
+    published = dict(seeded or {})
 
     def capture(path, key, bucket, dry_run):
         published[key] = json.loads(path.read_text())
@@ -533,22 +540,40 @@ def test_segmented_default_saving_is_not_a_whole_stack_total():
                                ('123', 'cap'))) == 1
 
 
-@pytest.mark.parametrize('segments,ok,state', [
-    ([], True, 'unsegmented'), ([SEGMENT], True, 'segmented'),
-    ({}, True, 'unknown'), ([None], True, 'unknown'),
-    ([SEGMENT, SEGMENT], True, 'unknown'),
-    ([dict(SEGMENT, id='bad/id')], True, 'unknown'),
-    ([dict(SEGMENT, fallback_to_default=1)], True, 'unknown'),
-    ([{'id': SEGMENT['id']}], True, 'unknown'),
-    ([], False, 'unknown'),
+@pytest.mark.parametrize('segments,status,state', [
+    ([], 200, 'unsegmented'), ([SEGMENT], 200, 'segmented'),
+    ({}, 200, 'unknown'), ([None], 200, 'unknown'),
+    ([SEGMENT, SEGMENT], 200, 'unknown'),
+    ([dict(SEGMENT, id='bad/id')], 200, 'unknown'),
+    ([dict(SEGMENT, fallback_to_default=1)], 200, 'unknown'),
+    ([{'id': SEGMENT['id']}], 200, 'unknown'),
+    ([], 503, 'unknown'),
+    ([], 206, 'unknown'), ([SEGMENT], 206, 'unknown'),
+    ([], 201, 'unknown'), ([], 204, 'unknown'),
 ])
-def test_discovery_states(segments, ok, state):
-    am = dataplane.adaptive_metrics(Client(segments, ok), STACK, 'cap')
+def test_discovery_states(segments, status, state):
+    am = dataplane.adaptive_metrics(Client(segments, status=status), STACK, 'cap')
     assert am['segment_coverage_state'] == state
-    metrics, _, _ = publish(am)
+    last_good = {'meta': {'generated_at': 'older'}, 'rows': [{'sentinel': 'last-good'}]}
+    metrics, _, published = publish(am, seeded={'views/cost_summary.json': last_good})
     names = {n for n, _, _ in metrics}
     assert ('gcinsight_value_savings_identified_series' in names) == (state == 'unsegmented')
     assert am['segments_discovered'] == (len(segments) if state != 'unknown' else None)
+    assert published['views/value_savings.json']['meta']['rules_coverage'] == {
+        'measured': int(state == 'unsegmented'), 'in_scope': 1,
+        'complete': state == 'unsegmented'}
+    if state == 'unsegmented':
+        assert ('gcinsight_value_savings_identified_series', {}, 90.0) in metrics
+        assert published['views/cost_summary.json'] != last_good
+    else:
+        assert not any(name.startswith('gcinsight_value_savings_') for name in names)
+        cost_rows = published['views/cost_summary.json']['rows']
+        assert cost_rows[0]['Value'] == '0 of 1 scannable (1 total)'
+        # Independent inventory dimensions still update; unavailable Adaptive claims stay null.
+        assert all(row['Value'] is None for row in cost_rows[1:6])
+        assert {'gcinsight_cost_adaptive_rules_applied_total',
+                'gcinsight_cost_stacks_without_adaptive'}.isdisjoint(names)
+        assert maturity._adaptive_adoption(STACK, {'adaptive_metrics': am}) is None
 
 
 def test_empty_discovery_and_empty_recommendations_prove_zero():
@@ -608,14 +633,18 @@ def test_mixed_live_source_population_is_qualified_in_dashboard(tmp_path):
     assert ' Metric' in [c['selector'] for c in savings['columns']]
 
 
-def test_t1_legacy_hydration_cannot_carry_complete_default_totals():
+@pytest.mark.parametrize('discovery', ['legacy', 'partial-empty', 'partial-segmented'])
+def test_t1_legacy_hydration_cannot_carry_complete_default_totals(discovery):
     import datetime as dt
     import scan
     from collector.emit import hydrate
     from tests.test_scan import FakeClient, cfg_for
 
-    am = dataplane.adaptive_metrics(Client([]), STACK, 'cap')
-    del am['segment_coverage_state']
+    segments = [SEGMENT] if discovery == 'partial-segmented' else []
+    am = dataplane.adaptive_metrics(
+        Client(segments, status=200 if discovery == 'legacy' else 206), STACK, 'cap')
+    if discovery == 'legacy':
+        del am['segment_coverage_state']
     names = ['gcinsight_cost_adaptive_rules_applied_total', 'gcinsight_cost_stacks_without_adaptive',
              'gcinsight_value_savings_identified_series', 'gcinsight_value_savings_unused_series',
              'gcinsight_value_savings_identified_currency', 'gcinsight_value_savings_unused_currency']
