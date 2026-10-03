@@ -1,11 +1,11 @@
 ---
 id: GCI-0060
 title: Establish segment-aware Adaptive Metrics savings coverage
-status: Done
+status: In Progress
 assignee:
-  - '@loop10-root'
+  - '@loop11-root'
 created_date: '2026-10-01 11:45'
-updated_date: '2026-10-02 19:01'
+updated_date: '2026-10-03 12:33'
 labels:
   - adaptive-metrics
   - accuracy
@@ -27,8 +27,8 @@ The loop6 reference audit at fb5803a found collector/sources/dataplane.py:293 re
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 Current supported segmented and unsegmented API contracts and completeness limits are established with authoritative evidence
-- [x] #2 Savings do not silently present a partial unsegmented result as complete where segmented coverage is required
-- [x] #3 Any implemented route preserves read-only access, bounded labels and live inventory joins and is proved across its public boundary
+- [ ] #2 Savings do not silently present a partial unsegmented result as complete where segmented coverage is required
+- [ ] #3 Any implemented route preserves read-only access, bounded labels and live inventory joins and is proved across its public boundary
 <!-- AC:END -->
 
 ## Definition of Done
@@ -60,6 +60,8 @@ Loop9 creation/+2h/final GET witnesses retained one segment01M3XYKP465FR8C1Q2P18
 Root M-seg-contract currentpublicquotes confirm defaultonly/asynchronous/fallback semantics and no outputsummationproof. Chosen narrow reversible suppression incl legacy/adoption guard; no7022global saving claim. Knownsegmented distinguished from HTTPunknown. L-seg-a1 reserved (prior loops notadmitted), no implementationattemptreset. Oldloop9segmentabsence confirmed; no deletion owed/no segmentwrites.
 
 Root finaldiff caught newlyauthoredtest using recordedoldstaffsegmentID instead ofsynthetic fixture ID. No commit/push/publication occurred. Reserve bounded reviewrepairr1 root: replace literal with synthetic-segment-a preserving regex/behavior, rerun affectedpublic tests and finalgate; do not weaken identityminimization assertion. Existing a1candidate rebasedclean stabledb4b260 andgatepass,13filesCRcomplete0findings/infra1; target remainsnextstable notv0.5.0live.
+
+Loop11 R-int must-fix at4da9580: actual Response206 [] establishes unsegmented, realrules200/recommendations200positive source->compose publishesunqualified90saving. Booleanok-only sourcefake missedstatusboundary; introduced9caa segmentdiscoverydefect, notinheritedusagefollowup. Releaseblocked. Existing historicala1/r1/infra1 budgetretained; bounded GCI0060-r2 repair admitted as releasecriterionblocker, source-local exactHTTP200 discovery only, no scopes/routes/sharedResponse/fixture/pillar changes. Redfirst206empty/nonemptyunknown andwhole-stackwithholding plus200empty/segmentedcontrols; finalrebasegate/CR/exactCI and affectedintegratedrereviewrequired. Remainingreviewrepairr3only afterr2, no budgetreset.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
