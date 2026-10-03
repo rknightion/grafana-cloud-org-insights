@@ -1,11 +1,11 @@
 ---
 id: GCI-0075
 title: Count IRM alert groups through the projected stats route
-status: In Progress
+status: Done
 assignee:
   - '@loop11-root'
 created_date: '2026-10-02 09:25'
-updated_date: '2026-10-03 12:00'
+updated_date: '2026-10-03 14:43'
 labels:
   - feature-usage
   - scope-decision
@@ -25,16 +25,16 @@ Exact declared reader pairs returned403 historically while Admin succeeded; diag
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Fresh authorised dev evidence establishes exact action/scope pairs, permitted route/method and complete count visibility, or records the precise blocker without widening authority
-- [ ] #2 Any implemented source emits counts and bounded enums only; sensitive sentinels are absent from payloads, logs, errors and persisted envelopes; unavailable coverage remains absent
-- [ ] #3 Any implementation follows fresh inventory, exact selected read boundaries and offline public-boundary proofs with final just check and hosted CI; conditional blockers in the packet are resolved before build
+- [x] #1 Fresh authorised dev evidence establishes exact action/scope pairs, permitted route/method and complete count visibility, or records the precise blocker without widening authority
+- [x] #2 Any implemented source emits counts and bounded enums only; sensitive sentinels are absent from payloads, logs, errors and persisted envelopes; unavailable coverage remains absent
+- [x] #3 Any implementation follows fresh inventory, exact selected read boundaries and offline public-boundary proofs with final just check and hosted CI; conditional blockers in the packet are resolved before build
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -48,3 +48,9 @@ Loop11 R-wit11 exact declared alert-groups:read empty plusIRMplugin access, basi
 <!-- SECTION:NOTES:BEGIN -->
 Evidence codex/loop11-evidence/R-wit/GCI-0075/ledger.json positive; SA70 token80 roleag03zv2yvcow0d recorded-IDdeleted200/404/postlistsabsent. Implementationnotyetadmitted, waits L-fam-GCI-0083 sharedfiles; no grant widened.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Loop11 accepted9c04eeaddccec8b2895f6786bd2650df0c8d566d CI37129055777allfourjobs success, justcheck1980pass2skips8763subtests/TFidentifierclean, CR18/18complete0directevent, independentAstraPASS133tests/no skips+1536combination check+6adversarial cases. Defaultoffirm-alert-groups exact2pairs/GETstats no params, solecountcanonicalASCIIstring max18digits; pluslowerboundnotexact/APIdefaultwindownotlifetime; count/relation/populationonly, malformed/206unknown/lastgood. RootNone/Adminstats200count14/IDteardown freshpositivewitness. a1impl, infra1malformedrootprompttruncatedbeforeimplementation thencompletebriefnativecontinuation; reviewrepair0. InitialImportErrorred provesmissingfeaturestructuralonly, noteach206branchred; dependencyderivationred meaningful. INPUT28+8plannedprovenanceseries/zero newproductmetrics. Notinsignedv0.6orcustomer/devreaderset.
+<!-- SECTION:FINAL_SUMMARY:END -->
