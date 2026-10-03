@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.7.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.6.0...v0.7.0) (2026-10-03)
+
+
+### Features
+
+* count IRM alert groups from stats ([9c04eea](https://github.com/rknightion/grafana-cloud-org-insights/commit/9c04eeaddccec8b2895f6786bd2650df0c8d566d))
+* **playlists:** add default-off configured playlist counts ([af309ea](https://github.com/rknightion/grafana-cloud-org-insights/commit/af309ea2f1565c0b7499fe382a3c833a84be9f2e))
+
+
+### Documentation
+
+* **backlog:** accept configured playlist reader ([9beca23](https://github.com/rknightion/grafana-cloud-org-insights/commit/9beca232ed6845bb4fc987519a7421282a2a632b))
+* **backlog:** accept exact-status segment coverage repair ([b364aab](https://github.com/rknightion/grafana-cloud-org-insights/commit/b364aabbf506b49dcfb5e1539cd2fcbea8fe44fd))
+* **backlog:** accept projected IRM alert-group counts ([b70f16b](https://github.com/rknightion/grafana-cloud-org-insights/commit/b70f16b5e1e4d0a14e8811a2f7b9923aa4388423))
+* **backlog:** record final segment discovery repair allowance ([c72e975](https://github.com/rknightion/grafana-cloud-org-insights/commit/c72e9755e248ac78e070abd5c476abf1b53800ad))
+* **backlog:** reopen segment coverage on partial enumeration ([08698a2](https://github.com/rknightion/grafana-cloud-org-insights/commit/08698a25f9651850f0dbf765937356d7c16e39ac))
+* **loop:** adopt the lean LOOP.md and point at the loop contract ([3080b23](https://github.com/rknightion/grafana-cloud-org-insights/commit/3080b239428d489f48c3dba06da10256dc6d9312))
+* publish canonical agent documents ([5c21348](https://github.com/rknightion/grafana-cloud-org-insights/commit/5c21348213750401feadbff0a4280b68f9ee4f45))
+* publish canonical agent documents ([e36e8f1](https://github.com/rknightion/grafana-cloud-org-insights/commit/e36e8f1f69d395b9e212ef91ff259120fc362ec0))
+* publish canonical agent documents ([f73adf0](https://github.com/rknightion/grafana-cloud-org-insights/commit/f73adf0b4f9b949b600d16589eece41d872f1294))
+* record accepted count families and safe partial close ([8c0a3c4](https://github.com/rknightion/grafana-cloud-org-insights/commit/8c0a3c4ca11eba3b3c237e6abca980fc70317ea1))
+* record verified dev rollback and remaining rollout blockers ([47457ad](https://github.com/rknightion/grafana-cloud-org-insights/commit/47457ad9da0e0841f6c20ef32f30b0db069b1f6a))
+
 ## [0.6.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.5.0...v0.6.0) (2026-10-03)
 
 
