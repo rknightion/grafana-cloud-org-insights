@@ -102,6 +102,12 @@ off anything but the live inventory.
   source boundary; valid 206 JSON is unavailable and cannot overwrite its last-good view. GCI-0087
   was accepted under Rob's separately granted loop11 D-IRM11 allowance, not an automatic reset of
   GCI-0074's exhausted review budget.
+- Current main's `playlists` and `irm-alert-groups` readers are default-off, count-only GET
+  sources requiring exact HTTP 200. They are not shipped in v0.6.0. Playlist counts configured
+  objects, not execution or activity. IRM stats expose a bounded canonical count with `exact` or
+  `at_least` semantics and `api_default_window`, never lifetime or status-filtered claims. Each
+  input adds eight planned series to existing provenance age/availability metrics across four
+  tiers; neither adds a product metric. Library panels remain parked on filtered reader visibility.
 - PDC counts only policies with the exact current stack realm and `set:pdc-signing`, after complete
   reads across `gcom.policy_regions(live_inventory)` and validated pages. Never trust server realm
   filtering, follow a supplied continuation URL with a credential, or call tokens/connection routes.

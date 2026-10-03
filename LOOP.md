@@ -387,6 +387,15 @@ deployment and its write stack as the serial resource described under Resource m
 
 ## Verified loop11 decisions and pre-release witnesses
 
+- Rob narrowed loop11 to safe partial close on 2026-10-03: stabilize dev or roll it back, restore
+  suspended schedules, leave the customer deployment unchanged, then audit and report. The
+  originally authorized customer v0.6.0 rollout is deferred, not completed or a standing grant.
+- Stable v0.6.0 is signed and accepted at source `2b4d304f5903f8528ff67da4c6d3913d2d88b851`;
+  GHCR index `sha256:a2390f30865171cf3191c34163af1273881cf68f7c980084012882d1c8780ca5`.
+  Playlists and IRM alert-group counts were independently accepted after release and are not in
+  that signed source or its deployment reader sets. Their combined footprint is sixteen planned
+  existing provenance series, not zero total new series. They add no product metrics.
+
 - Rob's D-IRM11 allowance was separate from GCI-0074's exhausted review budget. Accepted GCI-0087
   rejects non-200 IRM counter responses locally; real guarded-client HTTP 206 and last-good
   withholding were reproduced offline. No live upstream emitting 206 was observed.
