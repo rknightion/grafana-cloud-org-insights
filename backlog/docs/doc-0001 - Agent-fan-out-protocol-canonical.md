@@ -3,10 +3,10 @@ id: doc-0001
 title: Agent fan-out protocol (canonical)
 type: other
 created_date: '2026-08-24 11:58'
-updated_date: '2026-10-02 22:33'
+updated_date: '2026-10-03 18:57'
 ---
 > **Generated file - do not edit this copy.** Rendered from `sources/fan-out-protocol.md` in
-> `m7kni/agent-docs` at commit `de55441`. This copy is authoritative for `grafana-cloud-org-insights`, so an agent
+> `m7kni/agent-docs` at commit `d623772`. This copy is authoritative for `grafana-cloud-org-insights`, so an agent
 > with only this checkout has the whole document.
 >
 > **To change this document, edit the source in `agent-docs`, commit and push it, then run
@@ -2042,6 +2042,11 @@ Every receiver-enabled goal carries a filled `Start ping:` run-contract line:
 The root runs it once, straight after creating its state record and before its first dispatch, as
 its own bare bash call (no pipe, redirection, heredoc, `;`, `&&` or wrapper). Note a failure in state
 and never retry or debug it. A repository without the receiver line gets no `Start ping:` line.
+An accepted start writes a `.started` receipt beside the goal file holding
+`<owner>/<repo>#<loop>#<goal sha256>`. The agent-history catalogue takes the loop's canonical
+identity from that receipt, cross-checked against the `origin` remote of the checkout the root runs
+in, and records no identity when they conflict. Fill `--repo` with that remote's exact
+`<owner>/<repo>`.
 The command posts `/v1/live/start` with schema version `"1"`, the goal file's byte SHA256, repo,
 loop and the current UTC launch timestamp. Repo and loop match the report Data values. It uses the
 same ingest credentials, ten-second timeout and no-redirect opener as report delivery, never sends
@@ -2202,7 +2207,15 @@ whatever the campaign's `goal-` and `launch-` files are named - a campaign slug 
 loop are both fine. The message carries the questions and pending counts, and in Personal context a
 sanitised Outcome line; in Work context it carries no path, hostname or headline. A successful read
 writes a `<report>.notified` receipt keyed by the report's content hash, so a repeat call sends nothing
-and a rewritten report pings again; a degraded send writes no receipt. Credentials live in
+and a rewritten report pings again; a degraded send writes no receipt. The receipt is also the
+loop's completion evidence: the agent-history catalogue reads a loop as finished (`end_evidence`
+`completion_receipt`) only when a `.notified` receipt exists for the exact report path named at
+launch, dated after the launch, and no lane starts after it. It reads no ping command text. A ping
+run before the report is in place, a failed send, a moved or renamed report, a deleted receipt or a
+lane started after the ping leaves the loop reading as running, so never delete or move a receipt.
+The receipt is written after the run-end `codex-reconcile`, so it stays on the Mac that ran the loop
+until the next reconcile (normally the following loop's preparation) copies it across. Keep the
+run-end order: reconcile, then the one ping. Credentials live in
 `<private-credential-tree>/pushover.env`. A child lane, reviewer or gate runner never runs
 it; only the root does, at closeout.
 
@@ -3078,6 +3091,11 @@ established.
 
 Where this appendix is silent, the body applies unchanged.
 
+**Pinned runtime:** pi 1.0.0 and pi-subagents 0.75.0, from loop-pi's `package.json` at
+`eb79ed33879c0e2d47ca5ecc15377aa69ab7ee5a`. Keep the pair together: pi 1.0.0 removed
+the `node` export from `pi-agent-core`; pi-subagents 0.75.0 makes that module optional for background launches,
+whereas 0.74.0 cannot start them on pi 1.0.0.
+
 ### What differs from Appendix A in kind
 
 pi (`earendil-works/pi`, pinned) has no native subagents, sandbox or approval prompts. Its built-in MCP, codemode and tool-search extensions are switched off in a `loop-pi` home. The
@@ -3104,7 +3122,8 @@ runs `gpt-6.1-sol` at `medium`. The configured Work launcher is the same harness
 its own `~/.loop-pi-<context>` home and codex-lb key, transcripts in its context-specific stream.
 Everything else in this appendix
 applies to both; `~/.loop-pi-<context>` below means the configured pi home for that launcher. As in Appendices A and B, goals carry no root model declaration and
-no self-route check.
+no self-route check. Roots run with `tuiMode: "regular"`, set in the loop-pi home
+settings file, rather than pi 1.0.0's default fullscreen TUI.
 
 **Models: `gpt-6.1-sol`, `gpt-6-luna` and `gpt-6-astra` only.** Every `loop-pi` session runs one
 of them through codex-lb. Never `gpt-6-sol`, any gpt-5.x model or any other model, even though
@@ -3142,7 +3161,7 @@ Appendix A's rules otherwise apply unchanged:
 - the 90-minute Luna diagnosis, for Luna lanes and for burn-mode `lane-worker` and `mapper-deep` lanes;
 - gate classification fallback;
 - no automatic Astra/high or higher;
-- frozen implementation moves to a Luna/high `lane-worker` (6.1 Sol/medium in burn mode, below).
+- frozen implementation moves to a Luna/high `lane-worker` (6.1 Sol/medium in burn and burn-fast modes, below).
 
 There is no poller role.
 
@@ -3163,18 +3182,20 @@ pi has no per-agent service tier. The tier is set per model per home (`samplingP
 `models.json`), so every agent in a home that runs a given model gets the same tier. That is why
 `burn-fast` below is a separate home.
 
-### Burn mode (temporary, expires 2026-10-13)
+### Burn and fast modes
 
-Burn mode is an operator-chosen, per-goal mode for Personal `loop-pi` loops only. It does not exist
-for the Work launcher, Codex (Appendix A) or Claude Code (Appendix B). Each variant is its own pi home
-and launcher with the same agent names as the standard home, so lane briefs stay portable:
+Burn and fast modes are operator-chosen, per-goal modes for Personal `loop-pi` loops only. They do not
+exist for the Work launcher, Codex (Appendix A) or Claude Code (Appendix B). Each variant is its own pi
+home and launcher with the same agent names as the standard home, so lane briefs stay portable. They do
+not expire:
 
-| Mode | Home | Launcher |
-|---|---|---|
-| `burn` | `~/.loop-pi-personal-burn` | `loop-pi-burn` |
-| `burn-fast` | `~/.loop-pi-personal-burn-fast` | `loop-pi-burn-fast` |
+| Mode | Home | Launcher | Agent routes | Service tier |
+|---|---|---|---|---|
+| `burn` | `~/.loop-pi-personal-burn` | `loop-pi-burn` | burn rows below | Standard |
+| `burn-fast` | `~/.loop-pi-personal-burn-fast` | `loop-pi-burn-fast` | burn rows below | priority, every model |
+| `fast` | `~/.loop-pi-personal-fast` | `loop-pi-fast` | standard table above | priority, every model |
 
-Both variants use the standard route table above except for these rows:
+`burn` and `burn-fast` use the standard route table above except for these rows:
 
 | Role | Agent | Model / thinking | Run deadline | Delegates |
 |---|---|---|---|---|
@@ -3184,19 +3205,18 @@ Both variants use the standard route table above except for these rows:
 In burn mode `lane-worker-retry` runs the same route as attempt 1. Attempt 2 is still a separate
 attempt and counts toward the ladder as usual.
 
-`burn-fast` also sends every `gpt-6.1-sol` request, root and lanes, at `service_tier: "priority"`
-(OpenAI Fast mode: up to about 2.5x generation speed, consuming subscription limits at 2.5x). Luna
-and Astra requests stay on the Standard tier. Ultrafast is not offered: no codex-lb account is
-entitled to it, and 6.1 Sol Ultrafast is not released.
+`burn-fast` and `fast` send every request, root and lanes, Sol, Luna and Astra alike, at
+`service_tier: "priority"` (OpenAI Fast mode: up to about 2.5x generation speed, consuming
+subscription limits at 2.5x). Ultrafast is not offered: no codex-lb account is entitled to it, and
+6.1 Sol Ultrafast is not released.
 
-- The goal records the mode as a frozen decision: `Burn mode: off | burn | burn-fast`. The launch
-  file names the matching launcher. A root never switches mode or harness itself.
+- The goal records the mode as a frozen decision: `Burn mode: off | burn | burn-fast | fast`. The
+  launch file names the matching launcher. A root never switches mode or harness itself.
 - **Route evidence:** codex-lb `request_logs.requested_service_tier = 'priority'` proves a fast
   request. `actual_service_tier` reads `default` even when fast was served; never use it as
-  evidence.
-- After 2026-10-13 a goal must not select burn mode. An active goal keeps its commissioned mode
-  until closeout.
-- Transcripts from both burn homes land in the `pi-personal` namespace.
+  evidence. Whether codex-lb serves priority for Luna and Astra is unverified until a request log
+  shows it.
+- Transcripts from every variant home land in the `pi-personal` namespace.
 
 ### Context scope
 
@@ -3326,7 +3346,10 @@ requires a clean checkout.
 
 ### Target-repository preflight
 
-Repository agent files (`.pi/agents`, `.agents/*.md`) outrank the home's whatever the project trust. Since pi-subagents 0.74.0 children follow the root's project trust, which is `never` here, so a repository's `.pi/` settings, system prompt and extensions are no longer loaded; the preflight still refuses them. `loop-pi` started
+Repository agent files (`.pi/agents`, `.agents/*.md`) outrank the home's regardless of project
+trust: agent discovery is not trust-gated. In the pinned pi-subagents 0.75.0, children follow the
+root's project trust, which is `never` here, so a repository's `.pi/` settings, system prompt,
+skills and extensions are not loaded; the preflight still refuses them. `loop-pi` started
 inside a git repository preflights that repository and refuses to start if it fails (exit 78);
 `loop-pi --plain` starts an ordinary session with no run setup. Before spawning into any other
 repository the root runs `loop-pi-preflight <repo>` itself; it inherits `PI_CODING_AGENT_DIR` from
@@ -3363,9 +3386,22 @@ heredocs or here-strings fed to a shell. A command the parser cannot read, and t
 an inline interpreter, get a text scan that blocks only when one of these commands literally
 appears in the text. A command assembled at runtime inside interpreter code is not caught.
 
-**A lane's push right is not enforced.** A child extension cannot learn which agent file it runs
-under, so every lane may make a plain, non-force `git push`. The `-push` agent variants record the
-grant; they do not gate it.
+**Push rights are fenced for directly bound async single-agent children.** After validating the
+launch, the root replaces the entire `extensionBindings` input with
+`{"loop-pi.guard/1":{"agent":<selected agent>}}`. pi-subagents 0.75.0 passes it to the detached
+child as `PI_SUBAGENT_EXTENSION_BINDINGS`; the lane guard captures it once at extension load.
+Only `lane-worker-push`, `lane-worker-retry-push` and `complex-worker-push` grant plain,
+non-force `git push`. Missing, malformed or unknown identities deny pushes. This applies to
+`bash` and `watch_process`; force pushes remain blocked for everyone. The binding replacement
+and allowlist are in loop-pi's `extensions/loop-guard/push-grant.ts:3-23` at the pinned SHA;
+`lane.ts:16-28,50-53` captures and applies the grant.
+
+**Foreground nested children inherit the detached parent's push grant**, even if their own
+agent is not a `-push` variant: pi-subagents creates them in the parent's process without
+per-child `processEnv`. Lane `subagent` calls carrying any `extensionBindings` are refused
+(`lane.ts:56-62`), preventing explicit binding forgery, not this inheritance. A brief must not
+treat the guard as enforcing a separate no-push right on a granted lane's foreground descendants.
+This remains an honest-mistake fence, not an OS security boundary.
 
 The root is not fenced on landing pushes. These fences catch plainly typed mistakes only. At
 closeout the root compares remote refs, tags and releases before and after the run and lists every
@@ -3385,7 +3421,13 @@ directory, so concurrent loops never share a snapshot:
   and commits.
 
 If the guard cannot register itself for children, the root's `subagent` calls are blocked for the
-rest of the session. Treat that as a harness fault: park the run.
+rest of the session. Treat that as a harness fault: park the run. In pi-subagents 0.75.0 a required
+child extension that fails to load or throws during `session_start` aborts the child launch,
+rather than starting an unguarded lane. `registerRequiredChildExtensions` also accepts
+`requireForAllRunners: true`, which refuses runners unable to load the required extensions,
+including external CLI, external-job and remote runners. The pinned loop-pi root registration
+(`extensions/loop-guard/root.ts:42`) sets that flag; its agent set also disables external CLI
+runners.
 
 ### Closeout sweep
 
@@ -3419,8 +3461,9 @@ The report lists all of these. Nothing started by the run outlives it.
 ### Structural differences a goal author must not miss
 
 1. There is no wait tool, and a `WAITING:` line without a timer is re-prompted.
-2. Delegation rights live in the agent file, not the brief. Push rights are recorded by choosing
-   the `-push` variant but are not enforced; the closeout audit is the check.
+2. Delegation rights live in the agent file, not the brief. Push rights for directly bound async
+   children are fenced by the `-push` identity allowlist; foreground descendants inherit their
+   detached parent's grant. The closeout audit remains the evidence of remote changes.
 3. Every child dies at its `timeoutMs`. Size the lane or split it; never rely on a lane outliving
    its deadline.
 4. There is no tree-wide concurrency cap.
