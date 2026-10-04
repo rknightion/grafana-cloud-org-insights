@@ -169,8 +169,7 @@ Never pass `--yes` or `JUST_YES=1` to get past that gate.
 `testdata/` is a synthetic estate and `tests/fixtures/` a synthetic scan. Read `testdata/README.md`
 before treating any number in either as a measurement.
 
-Four kinds of test here earn their keep beyond the usual proportionality bar, because each catches a
-class of bug that looks like working code:
+Four kinds of test here are required because each catches a class of bug that looks like working code:
 
 - Contract tests that read a real artifact back. A test written from the implementation cannot catch
   the implementation being wrong about an external contract.
