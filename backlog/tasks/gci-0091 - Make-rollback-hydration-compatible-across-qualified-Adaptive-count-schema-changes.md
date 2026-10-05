@@ -3,11 +3,11 @@ id: GCI-0091
 title: >-
   Make rollback hydration compatible across qualified Adaptive count schema
   changes
-status: In Progress
+status: Done
 assignee:
   - '@loop12-root'
 created_date: '2026-10-03 20:03'
-updated_date: '2026-10-05 14:21'
+updated_date: '2026-10-05 15:10'
 labels: []
 dependencies: []
 priority: high
@@ -23,15 +23,15 @@ Dev v0.6.0 T3 published recommendations_pending=null for unknown Adaptive covera
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A red public-boundary reproduction covers an older consumer hydrating the newer qualified/unknown Adaptive payload; do not manufacture zero savings or loosen committed coverage expectations.
-- [ ] #2 Define and verify the supported upgrade and rollback hydration contract, including retained-version recovery and fresh estate checks, before another deployment.
+- [x] #1 A red public-boundary reproduction covers an older consumer hydrating the newer qualified/unknown Adaptive payload; do not manufacture zero savings or loosen committed coverage expectations.
+- [x] #2 Define and verify the supported upgrade and rollback hydration contract, including retained-version recovery and fresh estate checks, before another deployment.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -39,3 +39,15 @@ Dev v0.6.0 T3 published recommendations_pending=null for unknown Adaptive covera
 <!-- SECTION:PLAN:BEGIN -->
 Implement D-HYD12 integer input schema versions, red public-boundary compatibility reproduction, unknown future schema withholding and retained scan recovery documentation; review and gate before landing.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Loop12: 2 implementation attempts, 1 review-repair round. Integer hydrated-input versions and future/malformed-version withholding proven through real hydrate/compose/scan artifact boundaries; nullable Adaptive pending never crash or manufacture zero headroom. Initial CodeRabbit major corrected, final delta complete zero findings; independent review PASS. Landed b8bd98e and 6934546 covered by exact main bbb9668dd89b5733d6817b6cfb1fdaaf1d05cb57 real clean gate, composed gate and CI37329484807 success. Two skipped tests disclosed separately. Historical v0.4.4 crash reproduced at a93e92c3ceaff1489f7be028fa537303dacc3659; retained scan restoration remains mandatory below v0.7.0.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Version-aware hydration treats unsupported input schemas unavailable and withholds dependent views; legacy version0 remains conservative. Unknown pending counts omit samples and qualify known-only summaries. RUNBOOK documents fresh-estate-checked retained-version recovery for older binaries. Verified 2011 passed,2 skipped,8925 subtests on integrated bbb9668; evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop12-evidence/L-hyd/ and /Users/rob/repos/grafana-cloud-org-insights/codex/loop12-evidence/repair-batch/.
+<!-- SECTION:FINAL_SUMMARY:END -->
