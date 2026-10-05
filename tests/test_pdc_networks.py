@@ -85,6 +85,52 @@ def test_selected_full_t2_public_boundary(body, status, measured, capsys, caplog
     assert "pdc_networks.json" in json.dumps(assembled)
 
 
+@pytest.mark.parametrize("fixture", sorted((Path(__file__).parent / "fixtures").glob("pdc_networks.witness-*.json")), ids=lambda p: p.name)
+def test_witnessed_pagination_guarded_get(fixture):
+    """Synthetic values retain each distinct minimized root response shape."""
+    from collector.sources import pdc_networks as source
+    body = json.loads(fixture.read_text())
+    calls = []
+    assert source.fetch_pdc_networks(client_for(body, calls=calls), STACK, "synthetic", ["new-region"]) == {
+        "available": True, "network_count": len(body["items"])}
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize("pagination", [
+    {"nextPage": None, "pageCursor": None},
+    {"nextPage": None, "pageSize": 100},
+    {"nextPage": None, "pageCursor": "unwitnessed", "pageSize": 100},
+    *[{"nextPage": None, "pageCursor": None, "pageSize": size}
+      for size in (None, True, 0, -1, 1.5, "100", 100_001)],
+    {"nextPage": None, "pageCursor": None, "pageSize": 100, "partial": False},
+])
+def test_witnessed_pagination_stays_fail_closed(pagination):
+    from collector.sources import pdc_networks as source
+    body = deepcopy(BODY)
+    body["metadata"]["pagination"] = pagination
+    calls = []
+    assert source.fetch_pdc_networks(client_for(body, calls=calls), STACK, "synthetic", ["us"])["available"] is False
+    assert len(calls) == 1
+
+
+def test_witnessed_page_size_does_not_prove_completeness():
+    from collector.sources import pdc_networks as source
+    body = json.loads((Path(__file__).parent / "fixtures/pdc_networks.witness-1.json").read_text())
+    body["metadata"]["pagination"]["nextPage"] = "v1/accesspolicies?pageCursor=next"
+    calls = []
+    # Even an empty page must follow nextPage, and a repeated cursor fails closed.
+    assert source.fetch_pdc_networks(client_for(body, calls=calls), STACK, "synthetic", ["us"])["available"] is False
+    assert len(calls) == 2
+
+
+def test_witnessed_items_cannot_exceed_page_size():
+    from collector.sources import pdc_networks as source
+    body = deepcopy(BODY)
+    body["items"] *= 2
+    body["metadata"]["pagination"].update(pageCursor=None, pageSize=1)
+    assert source.fetch_pdc_networks(client_for(body), STACK, "synthetic", ["us"])["available"] is False
+
+
 def test_default_off_exact_grants_and_retirement():
     from collector import provision as pr
     with mock.patch.dict("os.environ", {"GCINSIGHT_READER_PRODUCT_READS": ""}), mock.patch.object(scan.credentials, "load_all") as store:

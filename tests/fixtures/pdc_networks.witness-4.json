@@ -1,0 +1,30 @@
+{
+  "items": [
+    {
+      "createdAt": "synthetic",
+      "displayName": "synthetic",
+      "id": "synthetic-policy-0",
+      "name": "synthetic",
+      "orgId": "synthetic",
+      "realms": [
+        {
+          "identifier": "123",
+          "labelPolicies": [],
+          "type": "stack"
+        }
+      ],
+      "scopes": [
+        "set:pdc-signing"
+      ],
+      "source": "synthetic",
+      "status": "synthetic"
+    }
+  ],
+  "metadata": {
+    "pagination": {
+      "nextPage": null,
+      "pageCursor": null,
+      "pageSize": 100
+    }
+  }
+}

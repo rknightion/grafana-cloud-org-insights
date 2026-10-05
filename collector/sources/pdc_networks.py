@@ -83,8 +83,19 @@ def fetch_pdc_networks(client: ReadOnlyClient, stack: Mapping[str, Any], reader:
                         or not isinstance(body["metadata"], dict)
                         or set(body["metadata"]) != {"pagination"}
                         or not isinstance(body["metadata"]["pagination"], dict)
-                        or set(body["metadata"]["pagination"]) != {"nextPage"}):
+                        or set(body["metadata"]["pagination"]) not in (
+                            {"nextPage"}, {"nextPage", "pageCursor", "pageSize"})):
                     return unavailable("invalid_response")
+                pagination = body["metadata"]["pagination"]
+                # Only the witnessed null cursor and positive integer size are
+                # supported. Neither replaces nextPage as the completeness witness.
+                if "pageCursor" in pagination:
+                    size = pagination["pageSize"]
+                    if (pagination["pageCursor"] is not None
+                            or isinstance(size, bool) or not isinstance(size, int)
+                            or size <= 0 or size > MAX_POLICIES
+                            or len(body["items"]) > size):
+                        return unavailable("invalid_response")
                 objects += len(body["items"])
                 if objects > MAX_POLICIES:
                     return unavailable("limit_exceeded")

@@ -79,6 +79,18 @@ def test_selected_full_t2_public_boundary(body, status, measured, capsys, caplog
     assert "cloud_accounts.json" in json.dumps(assembled)
 
 
+def test_witnessed_null_data_remains_unknown():
+    """A null live shape proves no empty-account contract: never publish zero."""
+    from collector.sources import cloud_accounts as source
+    from collector.pillars import cloud_accounts as pillar
+    body = json.loads((Path(__file__).parent / "fixtures/cloud_accounts.witness-1.json").read_text())
+    calls = []
+    record = source.fetch_cloud_accounts(client_for(body, calls=calls), STACK, "synthetic")
+    assert record == {"available": False, "reason": "invalid_response"}
+    assert pillar.build([STACK], {"obs-hub": record}) == ([], {})
+    assert calls == [STACK["url"] + PATH]
+
+
 def test_default_off_and_exact_grants():
     from collector.provision import desired_permissions, product_read_pairs
     with mock.patch.dict("os.environ", {"GCINSIGHT_READER_PRODUCT_READS": ""}), mock.patch.object(scan.credentials, "load_all") as store:
