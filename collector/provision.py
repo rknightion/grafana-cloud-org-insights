@@ -184,6 +184,11 @@ WRITE_STACK_PAIR = (WRITE_STACK_PERMISSION["action"], WRITE_STACK_PERMISSION["sc
 PRODUCT_READ_FAMILIES: dict[str, tuple[tuple[str, str], ...]] = {
     "reports": (("reports:read", "reports:*"),),
     "playlists": (("playlists:read", ""),),
+    # None-role witness matches Admin, including a non-General folder control.
+    "library-panels": (
+        ("library.panels:read", "folders:*"),
+        ("folders:read", "folders:*"),
+    ),
     "pdc-networks": (
         ("grafana-pdc-app.private-networks:read", ""),
         ("plugins.app:access", "plugins:id:grafana-pdc-app"),
@@ -328,7 +333,9 @@ def removable_pairs(
     selected = _selected_product_reads(product_reads)
     configured = product_read_pairs(selected)
     all_product_pairs = product_read_pairs(PRODUCT_READ_FAMILIES)
-    removable = RETIRED_PAIRS | (all_product_pairs - configured)
+    # A default-off family can share a standing baseline pair (library panels need
+    # folders:read). Opting out must never retire a permission the baseline still owns.
+    removable = RETIRED_PAIRS | (all_product_pairs - configured - DESIRED_PAIRS)
     if not write_stack:
         removable |= frozenset({WRITE_STACK_PAIR})
     if "synthetic-monitoring-query" not in selected:

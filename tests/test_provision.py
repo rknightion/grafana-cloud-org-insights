@@ -101,6 +101,27 @@ class ProductReadScopeTest(unittest.TestCase):
         self.assertNotIn(("grafana-irm-app.integrations:read", ""), selected)
         self.assertNotIn(("grafana-irm-app.schedules:read", ""), selected)
 
+    def test_library_panels_exact_folder_coverage_pairs_are_opt_in(self):
+        pairs = frozenset({("library.panels:read", "folders:*"),
+                           ("folders:read", "folders:*")})
+        self.assertEqual(pr.product_read_pairs({"library-panels"}), pairs)
+        self.assertEqual(pr.parse_product_reads("library-panels"), frozenset({"library-panels"}))
+        baseline = pr.permission_pairs(pr.desired_permissions(write_stack=False))
+        self.assertNotIn(("library.panels:read", "folders:*"), baseline)
+        selected = pr.permission_pairs(pr.desired_permissions(
+            write_stack=False, product_reads={"library-panels"}))
+        self.assertEqual(selected, baseline | pairs)
+        self.assertTrue(selected.isdisjoint(pr.removable_pairs(
+            write_stack=False, product_reads={"library-panels"})))
+        # Folder reads belong to the standing baseline: opting out must not remove them.
+        removable = pr.removable_pairs(write_stack=False)
+        self.assertIn(("library.panels:read", "folders:*"), removable)
+        self.assertTrue(baseline.isdisjoint(removable))
+        held = {action: [scope] for action, scope in pairs}
+        self.assertIn(("library.panels:read", "folders:*"),
+                      pr.missing_pairs({"library.panels:read": ["folders:uid:sharedwithme"]}, pairs))
+        self.assertFalse(pr.missing_pairs(held, pairs))
+
     def test_unknown_product_read_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "GCINSIGHT_READER_PRODUCT_READS.*k6"):
             pr.parse_product_reads("slo,k6")
@@ -121,11 +142,11 @@ class ProductReadScopeTest(unittest.TestCase):
         self.assertEqual(configured_both - base, self.ALL_PRODUCT_PAIRS)
         self.assertEqual(
             pr.removable_pairs(write_stack=False, product_reads={"slo"}),
-            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.SYNTHETIC_MONITORING_PAIRS | self.IRM_PAIRS | self.FARO_PAIRS | self.ML_PAIRS | self.CSP_PAIRS | self.PDC_PAIRS | self.REPORTS_PAIRS | self.PLAYLISTS_PAIRS | self.IRM_ALERT_GROUPS_PAIRS,
+            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.SYNTHETIC_MONITORING_PAIRS | self.IRM_PAIRS | self.FARO_PAIRS | self.ML_PAIRS | self.CSP_PAIRS | self.PDC_PAIRS | self.REPORTS_PAIRS | self.PLAYLISTS_PAIRS | self.IRM_ALERT_GROUPS_PAIRS | {("library.panels:read", "folders:*")},
         )
         self.assertEqual(
             pr.removable_pairs(write_stack=False, product_reads={"slo", "synthetic-monitoring"}),
-            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.IRM_PAIRS | self.FARO_PAIRS | self.ML_PAIRS | self.CSP_PAIRS | self.PDC_PAIRS | self.REPORTS_PAIRS | self.PLAYLISTS_PAIRS | self.IRM_ALERT_GROUPS_PAIRS,
+            pr.RETIRED_PAIRS | {pr.WRITE_STACK_PAIR} | self.IRM_PAIRS | self.FARO_PAIRS | self.ML_PAIRS | self.CSP_PAIRS | self.PDC_PAIRS | self.REPORTS_PAIRS | self.PLAYLISTS_PAIRS | self.IRM_ALERT_GROUPS_PAIRS | {("library.panels:read", "folders:*")},
         )
 
     def test_runtime_desired_and_removable_sets_do_not_conflict(self):
