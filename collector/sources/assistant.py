@@ -60,6 +60,24 @@ from collector.httpclient import ReadOnlyClient
 # adoption figure meaningful. Also what every live measurement in CAPABILITIES.md was taken over.
 WINDOW_DAYS = 30
 
+# Org usage is a different read boundary from this per-stack plugin sweep. The existing
+# capability_adoption source uses the write-stack reader's exact grafanacloud-usage query grant;
+# probe_all has neither a write-stack selector nor an org-usage payload. Do not infer these facts
+# from hero-stats or choose an arbitrary stack credential to query the billing datasource.
+ORG_USERS_NOT_GATHERED = (
+    "UNAVAILABLE: grafanacloud_org_assistant_users is not gathered by the Assistant plugin sweep. "
+    "Org-deduplicated billing-period users are not the plugin rolling 30d per-stack sum. "
+    "An empty usage query is unavailable, not zero or proof that the metric does not exist."
+)
+AGENT_ADOPTION_NOT_GATHERED = (
+    "UNAVAILABLE: 0 of {population} live stacks measured for Agent Observability. "
+    "The write-stack grafanacloud-usage GET query input is not gathered here. "
+    "Read max_over_time(grafanacloud_agent_observability_instance_generation_items_per_second"
+    "[30d]) > 0 and deduplicate by stack_id against live inventory. "
+    "Positive samples within 30d indicate observed generation, not sustained or current activity. "
+    "Missing stack samples are unavailable, not zero; no adoption percentage can be computed."
+)
+
 # Detail rows come back paginated with a default `limit` of 20. Counts use `pagination.total`, so paging
 # is only about the detail table; 200 is far above the estate's observed maximum of 3 tenant objects.
 DETAIL_LIMIT = 200

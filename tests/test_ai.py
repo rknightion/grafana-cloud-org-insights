@@ -277,6 +277,47 @@ class ViewShapeTest(unittest.TestCase):
         self.assertLessEqual(set(self.views), declared)
 
 
+class OrgUsageBoundaryTest(unittest.TestCase):
+    """Exercise the published view boundary, not a stand-alone parsing proxy."""
+
+    def setUp(self):
+        # The same people can occur on both stacks: their sum is not org deduplication.
+        self.metrics, self.views = ai.build(
+            [stack("a"), stack("b"), stack("new")], coverage(total=3, scanned=3),
+            {"a": record("a", users=2), "b": record("b", users=2),
+             "departed": record("departed", users=99)}, now=NOW,
+        )
+        self.summary = {row[" Metric"]: row["Value"] for row in self.views["ai_summary"]}
+
+    def test_org_deduplicated_users_are_unavailable_not_the_per_stack_sum(self):
+        self.assertEqual(self.summary["Assistant active users (sum of per-stack figures)"], 4)
+        value = self.summary["Assistant org users (deduplicated; billing-period source)"]
+        self.assertIn("UNAVAILABLE", value)
+        self.assertIn("grafanacloud_org_assistant_users", value)
+        self.assertIn("not gathered", value)
+        self.assertIn("not zero", value)
+        self.assertIn("not the plugin rolling 30d", value)
+
+    def test_agent_adoption_states_live_population_window_and_exact_missing_read(self):
+        value = self.summary["Agent Observability adoption (positive sample within 30d)"]
+        self.assertIn("UNAVAILABLE", value)
+        self.assertIn("0 of 3 live stacks measured", value)
+        self.assertIn("stack_id", value)
+        self.assertIn("max_over_time", value)
+        self.assertIn("[30d]) > 0", value)
+        self.assertIn("not sustained or current activity", value)
+        self.assertIn("not zero", value)
+        self.assertIn("grafanacloud-usage", value)
+
+    def test_no_new_metrics_or_labels_for_unavailable_org_usage(self):
+        names = {name for name, _, _ in self.metrics}
+        self.assertFalse(any("agent_observability" in name for name in names))
+        self.assertEqual(next(value for name, labels, value in self.metrics
+                              if name == "gcinsight_ai_estate_users" and not labels), 4)
+        guard.check_all(self.metrics)
+        guard.check_no_duplicates(self.metrics)
+
+
 class GapStateTest(unittest.TestCase):
     def test_a_persisting_gap_keeps_its_original_stamp(self):
         old = "2026-08-15T00:00:00+00:00"

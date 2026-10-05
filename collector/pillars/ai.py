@@ -51,8 +51,9 @@ from collector.coverage import Coverage
 from collector import provision as prov
 from collector.emit import gapstate
 from collector.sources.assistant import (
-    INVESTIGATION_INVENTORY_NOT_MEASURABLE, NO_CREDENTIAL,
-    USER_SCOPED_NOT_MEASURABLE, WATCHERS_NOT_MEASURABLE, WINDOW_DAYS, split_category,
+    AGENT_ADOPTION_NOT_GATHERED, INVESTIGATION_INVENTORY_NOT_MEASURABLE, NO_CREDENTIAL,
+    ORG_USERS_NOT_GATHERED, USER_SCOPED_NOT_MEASURABLE, WATCHERS_NOT_MEASURABLE,
+    WINDOW_DAYS, split_category,
 )
 
 # --- Finding thresholds. Each sits at a measured point in the estate's own distribution ------------
@@ -376,7 +377,7 @@ def build(
         measured=measured, with_usage=with_usage, with_config=with_config,
         est_messages=est_messages, est_categorised=est_categorised, est_users=est_users,
         est_tokens=est_tokens, est_tenant=est_tenant, est_investigations=est_investigations,
-        combos=len(combos), missing=len(missing), coverage=coverage,
+        combos=len(combos), missing=len(missing), coverage=coverage, population=len(stacks),
     )
     return metrics, views
 
@@ -400,6 +401,12 @@ def _summary(**f: Any) -> list[dict[str, Any]]:
                   if est_messages else None},
         {" Metric": f"Assistant tokens ({WINDOW_DAYS}d)", "Value": f["est_tokens"]},
         {" Metric": "Assistant active users (sum of per-stack figures)", "Value": f["est_users"]},
+        # Neither fact can be reconstructed from the per-stack plugin aggregates. Keep the source
+        # boundary visible until the root-owned gather/compose wiring supplies verified usage reads.
+        {" Metric": "Assistant org users (deduplicated; billing-period source)",
+         "Value": ORG_USERS_NOT_GATHERED},
+        {" Metric": "Agent Observability adoption (positive sample within 30d)",
+         "Value": AGENT_ADOPTION_NOT_GATHERED.format(population=f["population"])},
         {" Metric": "Tenant skills / rules / automations / MCP integrations",
          "Value": " / ".join(str(f["est_tenant"][k]) for k in TENANT_KINDS)},
         {" Metric": "Investigations created (Assistant / user)",
