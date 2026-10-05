@@ -130,11 +130,73 @@ class StickinessTest(unittest.TestCase):
                 self.assertNotIn("gcinsight_usage_stickiness_ratio", {name for name, _, _ in metrics})
                 self.assertIsNone(views["usage_summary"][0]["Value"])
 
+    def test_incomplete_daily_counts_withhold_the_unqualified_total_and_estate_ratio(self):
+        for unknown in ({}, {"dailyUserCnt": None}):
+            with self.subTest(unknown=unknown):
+                stacks = [
+                    {"slug": "measured", "currentActiveUsers": 5, "dailyUserCnt": 2},
+                    {"slug": "unknown", "currentActiveUsers": 5, **unknown},
+                ]
+                metrics, views = usage.build(stacks, Coverage(tier="t1", total=2), now=NOW)
+                summary = {row[" Metric"]: row["Value"] for row in views["usage_summary"]}
+                self.assertIsNone(summary["Daily users"])
+                self.assertEqual(summary["Active users"], 10)
+                self.assertIsNone(summary["Stickiness (daily / active users, estate)"])
+                self.assertNotIn("gcinsight_usage_stickiness_ratio", {n for n, _, _ in metrics})
+                self.assertEqual(views["usage_dormant_stacks"], [])
+                rows = {row[" Stack"]: row for row in views["usage"]}
+                self.assertEqual(rows["measured"]["Stickiness"], 0.4)
+                self.assertIsNone(rows["unknown"]["Stickiness"])
+
+    def test_incomplete_active_counts_withhold_the_unqualified_total_and_estate_ratio(self):
+        for unknown in ({}, {"currentActiveUsers": None}):
+            with self.subTest(unknown=unknown):
+                stacks = [
+                    {"slug": "measured", "currentActiveUsers": 5, "dailyUserCnt": 2},
+                    {"slug": "unknown", "dailyUserCnt": 1, **unknown},
+                ]
+                metrics, views = usage.build(stacks, Coverage(tier="t1", total=2), now=NOW)
+                summary = {row[" Metric"]: row["Value"] for row in views["usage_summary"]}
+                self.assertIsNone(summary["Active users"])
+                self.assertEqual(summary["Daily users"], 3)
+                self.assertIsNone(summary["Stickiness (daily / active users, estate)"])
+                self.assertNotIn("gcinsight_usage_stickiness_ratio", {n for n, _, _ in metrics})
+                rows = {row[" Stack"]: row for row in views["usage"]}
+                self.assertEqual(rows["measured"]["Stickiness"], 0.4)
+                self.assertIsNone(rows["unknown"]["Stickiness"])
+                self.assertEqual(views["usage_dormant_stacks"], [])
+
+    def test_fully_measured_counts_preserve_zero_and_positive_totals(self):
+        for daily in (0, 2):
+            with self.subTest(daily=daily):
+                stacks = [
+                    {"slug": "measured", "currentActiveUsers": 5, "dailyUserCnt": daily},
+                    {"slug": "zero", "currentActiveUsers": 0, "dailyUserCnt": 0},
+                ]
+                metrics, views = usage.build(stacks, Coverage(tier="t1", total=2), now=NOW)
+                summary = {row[" Metric"]: row["Value"] for row in views["usage_summary"]}
+                self.assertEqual(summary["Active users"], 5)
+                self.assertEqual(summary["Daily users"], daily)
+                self.assertEqual(summary["Stickiness (daily / active users, estate)"], daily / 5)
+                self.assertEqual(
+                    [value for name, _, value in metrics
+                     if name == "gcinsight_usage_stickiness_ratio"], [daily / 5],
+                )
+        metrics, views = usage.build(
+            [{"slug": "zero", "currentActiveUsers": 0, "dailyUserCnt": 0}],
+            Coverage(tier="t1", total=1), now=NOW,
+        )
+        summary = {row[" Metric"]: row["Value"] for row in views["usage_summary"]}
+        self.assertEqual(summary["Active users"], 0)
+        self.assertEqual(summary["Daily users"], 0)
+        self.assertIsNone(summary["Stickiness (daily / active users, estate)"])
+        self.assertNotIn("gcinsight_usage_stickiness_ratio", {n for n, _, _ in metrics})
+
     def test_known_daily_activity_retains_measured_dormancy_and_stickiness(self):
         stacks = [
             {"slug": "active-today", "currentActiveUsers": 5, "dailyUserCnt": 2},
             {"slug": "dormant", "currentActiveUsers": 5, "dailyUserCnt": 0},
-            {"slug": "no-active-users", "currentActiveUsers": None, "dailyUserCnt": 0},
+            {"slug": "no-active-users", "currentActiveUsers": 0, "dailyUserCnt": 0},
         ]
         metrics, views = usage.build(stacks, Coverage(tier="t1", total=3), now=NOW)
         rows = {row[" Stack"]: row for row in views["usage"]}

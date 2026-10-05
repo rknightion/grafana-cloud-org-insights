@@ -138,12 +138,20 @@ def build(
             "Age (days)": round(a, 1) if (a := _age_days(s.get("createdAt"), now)) is not None else None,
         })
 
-    active_total = sum(s.get("currentActiveUsers") or 0 for s in stacks)
-    daily_total = sum(s.get("dailyUserCnt") or 0 for s in stacks)
-    if stacks and active_total and all(s.get("dailyUserCnt") is not None for s in stacks):
+    # An estate total requires a measured count on every live stack. Zero is measured;
+    # missing/null is not, and must not silently contribute zero to a total or denominator.
+    active_total = (
+        sum(s["currentActiveUsers"] for s in stacks)
+        if stacks and all(s.get("currentActiveUsers") is not None for s in stacks) else None
+    )
+    daily_total = (
+        sum(s["dailyUserCnt"] for s in stacks)
+        if stacks and all(s.get("dailyUserCnt") is not None for s in stacks) else None
+    )
+    if active_total and daily_total is not None:
         metrics.append((
             "gcinsight_usage_stickiness_ratio", {},
-            round(daily_total / active_total, 4) if active_total else 0.0,
+            round(daily_total / active_total, 4),
         ))
 
     # Plugin adoption = stacks with at least one instance, not instance count. One stack with 12
@@ -231,7 +239,7 @@ def build(
             " Metric": "Stickiness (daily / active users, estate)",
             "Value": (
                 round(daily_total / active_total, 3)
-                if active_total and all(s.get("dailyUserCnt") is not None for s in stacks)
+                if active_total and daily_total is not None
                 else None
             ),
         }, {
