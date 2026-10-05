@@ -4,6 +4,7 @@ title: Define and fence future-dated hydrated scan inputs
 status: Parked
 assignee: []
 created_date: '2026-10-05 21:51'
+updated_date: '2026-10-05 21:55'
 labels:
   - hydration
   - follow-on
@@ -31,3 +32,9 @@ Independent loop12 library security review corrected a worker overclaim: collect
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Park reason is old accepted freshness-policy seam and unresolved clock-skew tolerance, not an exhausted three-cycle budget: contract ceiling is four for all tasks. Root does not reopen or reset accepted GCI-0091 (schema/null hydration repair). Future-age source proof remains unclaimed.
+<!-- SECTION:NOTES:END -->
