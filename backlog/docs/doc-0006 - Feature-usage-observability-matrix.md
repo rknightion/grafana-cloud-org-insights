@@ -3,7 +3,7 @@ id: doc-0006
 title: Feature usage observability matrix
 type: specification
 created_date: '2026-09-23 18:33'
-updated_date: '2026-09-30 16:11'
+updated_date: '2026-10-05 19:02'
 ---
 # Feature usage observability matrix - wave 1 evidence, 2026-09-23
 
@@ -704,3 +704,15 @@ Consumer diagnostic window: 24h, five-minute evaluation steps for every row. Pro
 A genuine Logs Drilldown 2.6.0 Chrome UI control, authenticated as an existing Admin service account, made 40 backend query POSTs and emitted 43 actual data-request events with generic source `app`. Exact-stack guarded usage-insights readback confirmed all 43, with no app-specific plugin or URL field and empty dashboard UIDs. Known app identity comes from the controlled frontend page, never datasource type. This proves frontend analytics transport, not human adoption or a working per-app discriminator. Generic app/scenes aggregation remains; no new per-app series. Backend-only source tags and the first browser run that blocked analytics are not a frontend before/after discriminator trial. Per-app use inside generic app/scenes remains unestablished by the tested schemas, not universally impossible. Shipped limits and pinned source are in docs/traps.md.
 
 IRM integration counters work under exact plugin-access plus integrations:read pairs on a disposable basic-role-None identity and matched the Admin visible population (25). Alert-group stats remained denied. Safe counter projection is not safe permission breadth: captured archived backend grants list/retrieve/counters the same read action and serializes ingress URLs, while installed UI masking is cosmetic. Hosted backend redaction or usable ingress credentials under the read grant are unproven. No narrower permission is proven. All new IRM grants and collector implementation remain deferred; no known secret-bearing list or Incident read POST is approved. Disposable objects were removed by recorded IDs with GET404 verification.
+
+## Loop12 Agent reporting contract and exact-volume gap (2026-10-05 UTC)
+
+GCI-0092.02 (org Assistant users and verified Agent Observability reporting) uses the existing write-stack `grafanacloud-usage` GET boundary: `/api/datasources/proxy/uid/grafanacloud-usage/api/v1/query`, with the existing exact datasource query pair. No wider datasource, product write or customer grant follows.
+
+`grafanacloud_agent_observability_instance_generation_items_per_second` supports positive reported generation-rate observations over an explicit 30-day window, deduplicated by `stack_id` and left-joined to fresh live inventory. The collector's maximum aggregate rate is not a cumulative generation count, licence/entitlement, sustained activity or present-time use. Missing members and empty/unavailable observations remain unknown, never zero. Empty inventory withholds the per-stack view rather than replacing the last good table with an empty estate.
+
+**Exact cumulative generation volume is unobservable from this verified rate family alone.** The blocking contract at this route is the lack of a verified cumulative counter with reset/window semantics or an exact product aggregate GET read. Maximum rates must not be integrated using an assumed sample cadence. Keep cumulative volume absent until one of those read contracts is independently verified and approved.
+
+The bounded staff-org witness queried this source on robk. Two positive reporting rows matched fresh Grafana Cloud inventory IDs in memory; this is not a claim of two distinct stacks. A robk-specific positive selector returned no series, which is not proof of zero activity. No sample or label values were retained. Evidence: `/Users/rob/repos/grafana-cloud-org-insights/codex/loop12-evidence/R-agent-identity/result.json` and `/Users/rob/repos/grafana-cloud-org-insights/codex/loop12-evidence/R-agent-control/result.json`.
+
+Assistant org users use the deduplicated org billing-period gauge, separately labelled beside the sum of per-stack plugin rolling-30-day users. These populations and periods are not comparable: never subtract or divide the figures. An empty org gauge remains unavailable, not zero or evidence of metric nonexistence. The combined summary keeps its mechanically derived two-input dependency and last-good withholding; the Agent view publishes independently of Assistant when its own inputs are satisfied.
