@@ -379,10 +379,13 @@ class FootprintConsumerTest(unittest.TestCase):
         from collector.emit.s3 import view_payload
         _, views = ai.build([], coverage(total=0, scanned=0),
                             capability_adoption={"footprint": {}}, now=NOW)
-        self.assertEqual(views["ai_agent_observability"], [])
+        # Empty inventory is unknown, so the collector must leave the last-good table alone.
+        self.assertNotIn("ai_agent_observability", views)
+        # Separately prove the published-envelope parser's empty-table fallback, without claiming
+        # an empty inventory authorizes publication of an empty estate.
         with tempfile.TemporaryDirectory() as directory:
             path = pathlib.Path(directory) / "ai_agent_observability.json"
-            path.write_text(json.dumps(view_payload(views["ai_agent_observability"], {})))
+            path.write_text(json.dumps(view_payload([], {})))
             with mock.patch.object(build, "VIEWS_DIR", directory):
                 panel = build.table_panel("Agent reporting", "ai_agent_observability", "infinity",
                     schema=ai.VIEW_SCHEMAS["ai_agent_observability"])

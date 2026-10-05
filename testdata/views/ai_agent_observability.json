@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-05T17:30:48.167706+00:00",
+    "generated_at": "2026-10-05T18:20:55.472471+00:00",
     "tier": "t3",
     "stacks_total": 44,
     "stacks_scannable": 40,
@@ -125,7 +125,7 @@
       "Positive rate reported (30d)": true,
       "Maximum generation items/s (30d)": 0.5,
       "Window": "30d",
-      "Last seen": "2026-08-25T00:00:00+00:00",
+      "Window end": "2026-08-25T00:00:00+00:00",
       "Detail": "Measured maximum rate within 30d, not cumulative volume, entitlement or sustained/current use."
     },
     {
@@ -135,7 +135,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -145,7 +145,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -155,7 +155,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -165,7 +165,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -175,7 +175,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -185,7 +185,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -195,7 +195,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -205,7 +205,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -215,7 +215,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -225,7 +225,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -235,7 +235,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -245,7 +245,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -255,7 +255,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -265,7 +265,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -275,7 +275,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -285,7 +285,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -295,7 +295,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -305,7 +305,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -315,7 +315,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -325,7 +325,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -335,7 +335,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -345,7 +345,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -355,7 +355,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -365,7 +365,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -375,7 +375,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -385,7 +385,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -395,7 +395,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -405,7 +405,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -415,7 +415,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -425,7 +425,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -435,7 +435,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -445,7 +445,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -455,7 +455,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -465,7 +465,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -475,7 +475,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -485,7 +485,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -495,7 +495,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -505,7 +505,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -515,7 +515,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -525,7 +525,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -535,7 +535,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -545,7 +545,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     },
     {
@@ -555,7 +555,7 @@
       "Positive rate reported (30d)": null,
       "Maximum generation items/s (30d)": null,
       "Window": "30d",
-      "Last seen": null,
+      "Window end": null,
       "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
     }
   ]

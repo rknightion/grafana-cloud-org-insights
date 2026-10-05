@@ -129,7 +129,7 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
     "ai_agent_observability": ((" Stack", "string"), ("Region", "string"),
         ("Measured", "boolean"), ("Positive rate reported (30d)", "boolean"),
         ("Maximum generation items/s (30d)", "number"), ("Window", "string"),
-        ("Last seen", "string"), ("Detail", "string")),
+        ("Window end", "string"), ("Detail", "string")),
     "ai_category_surface": ((" Stack", "string"), ("Category", "string"), ("Surface", "string"),
                             ("Messages", "number"), ("Human driven", "boolean")),
     "ai_tenant_config": _OBJECT_ROW_SCHEMA,
@@ -230,7 +230,8 @@ def build(
     metrics: list[tuple[str, dict[str, str], float]] = []
     views: dict[str, list[dict[str, Any]]] = {}
     footprint = (capability_adoption or {}).get("footprint") or {}
-    if capability_adoption:
+    if capability_adoption and stacks:
+        # Empty inventory is unknown, not an estate of zero: preserve the last-good per-stack view.
         views["ai_agent_observability"] = _agent_rows(stacks, footprint)
     if not assistant:
         # Nothing at all, not zeros. A tier without this input must not flatten the views a tier that
@@ -403,7 +404,7 @@ def _agent_rows(stacks: Sequence[Mapping[str, Any]], footprint: Mapping[str, Any
             "Measured": measured,
             "Positive rate reported (30d)": value > 0 if measured else None,
             "Maximum generation items/s (30d)": value,
-            "Window": "30d", "Last seen": entry.get("window_end") if measured else None,
+            "Window": "30d", "Window end": entry.get("window_end") if measured else None,
             "Detail": ("Measured maximum rate within 30d, not cumulative volume, entitlement "
                        "or sustained/current use." if measured else
                        "UNKNOWN: no measured rate for this live stack; absent is not zero. "
