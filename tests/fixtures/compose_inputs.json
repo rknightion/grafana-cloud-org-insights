@@ -32654,7 +32654,7 @@
   "footprint": {
    "adaptive_traces": {
     "available": true,
-    "values": {"5000001": 1},
+    "values": {"5000001": 1, "5000002": 0},
     "basis": "maximum_bytes_per_second",
     "window": "24h",
     "window_start": "2026-08-24T00:00:00+00:00",
@@ -32662,7 +32662,7 @@
    },
    "app_observability": {
     "available": true,
-    "values": {"5000001": 2},
+    "values": {"5000001": 2, "5000002": 0},
     "basis": "maximum_service_entity_count",
     "window": "24h",
     "window_start": "2026-08-24T00:00:00+00:00",

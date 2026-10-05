@@ -13,6 +13,7 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 from collector import observability_score, technology_registry
+from collector.pillars.cost import adaptive_eligible
 
 Metrics = list[tuple[str, dict[str, str], float]]
 Views = dict[str, list[dict[str, Any]]]
@@ -458,6 +459,94 @@ def _adoption_surface(
     return metrics, {ADOPTION_VIEW: rows, ADOPTION_TARGET_VIEW: targets}
 
 
+def _footprint_rows(
+    stacks: Sequence[Mapping[str, Any]],
+    capability_adoption: Mapping[str, Any],
+    dataplane: Mapping[str, Any],
+    adaptive_logs: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    """View-only evidence: configured rules/patterns and backend observations, not UI activity.
+
+    Only returned counts enter the measured population. Absent series, nullable rules and
+    segmented/unknown discovery never become zero-use opportunities. These rows deliberately do
+    not extend ADOPTION_CAPABILITIES, which is also a metric-label vocabulary.
+    """
+    live = [stack for stack in stacks if stack.get("slug") and stack.get("status") != "paused"]
+    footprint = capability_adoption.get("footprint") or {}
+    rows: list[dict[str, Any]] = []
+
+    def row(title, basis, counts, window, seen, evidence, next_step):
+        measured = len(counts)
+        positive = sum(value > 0 for value in counts)
+        unknown = len(live) - measured
+        rows.append({
+            "Capability": title,
+            "Population basis": basis,
+            "Population stacks": measured if measured else None,
+            "Stacks using capability": positive if measured else None,
+            "Opportunity stacks": measured - positive if measured else None,
+            "Finding": (f"{positive} of {measured} measured stacks: {evidence}; "
+                        f"{unknown} of {len(live)} non-paused live stacks unknown. "
+                        "Missing evidence is not a zero-use opportunity."),
+            "Fundable next step": next_step,
+            "Window": window,
+            "Last seen": seen,
+        })
+
+    rules = []
+    patterns = []
+    for stack in live:
+        slug = str(stack["slug"])
+        am = (dataplane.get(slug) or {}).get("adaptive_metrics") or {}
+        if adaptive_eligible(am) and am.get("rules_applied") is not None:
+            rules.append(am["rules_applied"])
+        logs = adaptive_logs.get(slug) or {}
+        if logs.get("available") and logs.get("applied") is not None:
+            patterns.append(logs["applied"])
+    row(
+        "Adaptive Metrics", "Successfully measured non-paused stacks with unsegmented rules; "
+        "segmented, unknown discovery and unknown rules excluded", rules,
+        "point-in-time configuration snapshot", "",
+        "positive rules configuration, not activity or achieved savings",
+        "Review recommendations on a measured zero-rule stack; resolve unknown segment coverage first",
+    )
+    row(
+        "Adaptive Logs", "Successfully measured non-paused stacks with applied-pattern counts", patterns,
+        "point-in-time configuration snapshot", "",
+        "positive configured drop-pattern counts, not achieved savings or activity",
+        "Review pending recommendations on a measured stack with no configured drop patterns",
+    )
+    for key, title, basis, evidence, next_step in (
+        ("adaptive_traces", "Adaptive Traces",
+         "Successfully measured non-paused stacks reporting received-byte observations",
+         "positive maximum received-byte rate, not configured policy counts or achieved savings",
+         "Review trace-ingesting stacks with a measured zero Adaptive Traces received-byte rate"),
+        ("app_observability", "Application Observability",
+         "Successfully measured non-paused stacks reporting service-entity observations",
+         "positive maximum observed service-entity count, not activity or human adoption",
+         "Review application instrumentation on a stack with a measured zero service-entity count"),
+    ):
+        entry = footprint.get(key) or {}
+        values = (entry.get("values") or {}) if entry.get("available") else {}
+        counts = [values[str(stack["id"])] for stack in live
+                  if str(stack.get("id") or "") in values]
+        row(title, basis, counts, str(entry.get("window") or "unknown"),
+            str(entry.get("window_end") or ""), evidence, next_step)
+    rows.append({
+        "Capability": "Database Observability",
+        "Population basis": "Per-stack population unknown: no verified per-stack adoption/unit contract",
+        "Population stacks": None,
+        "Stacks using capability": None,
+        "Opportunity stacks": None,
+        "Finding": "Unknown: no verified per-stack adoption/unit contract. Reporting markers exist, "
+                   "but do not establish DB totals, activity, human use or entitlement; org overage is not per-stack use.",
+        "Fundable next step": "Establish a verified per-stack observation contract before targeting adoption",
+        "Window": "unknown: no verified observation window",
+        "Last seen": "",
+    })
+    return rows
+
+
 def _population(service: str, signals: Sequence[str]) -> str:
     """Classify from live identity evidence without a configured name or length threshold.
 
@@ -815,6 +904,10 @@ def build(
         stacks, signal_inventory, capability_adoption or {}, score_product_use,
     )
     metrics.extend(adoption_metrics)
+    if capability_adoption is not None:
+        adoption_views.setdefault(ADOPTION_VIEW, []).extend(_footprint_rows(
+            stacks, capability_adoption, dataplane or {}, adaptive_logs or {},
+        ))
     views = {
         SERVICE_VIEW: service_rows,
         TECHNOLOGY_VIEW: sorted(technology_rows, key=lambda row: (row["Technology"], row[" Stack"])),

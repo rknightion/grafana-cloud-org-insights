@@ -3775,8 +3775,13 @@ def d_coverage(ds: str):
             coverage_pillar.ADOPTION_VIEW, ds,
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.ADOPTION_VIEW],
             description="One row per capability with its population basis, measured use, opportunity "
-                        "count and a specific next step. Provisioned and population-eligible do not "
-                        "mean entitled, paid for or wasted."),
+                        "count and a specific next step. Adaptive Metrics and Logs count configured "
+                        "rules/drop patterns at a point in time, not activity or achieved savings. "
+                        "Adaptive Traces and Application Observability show 24h backend observations "
+                        "only on measured non-paused stacks; absent observations stay unknown, not zero. "
+                        "Application service entities are not human adoption. Database Observability "
+                        "has no verified per-stack adoption/unit contract or window and remains unknown. Provisioned "
+                        "and population-eligible do not mean entitled, paid for or wasted."),
         "tbl_adoption_targets": build.table_panel(
             "Named capability enablement call list",
             coverage_pillar.ADOPTION_TARGET_VIEW, ds,

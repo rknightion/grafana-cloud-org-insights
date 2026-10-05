@@ -391,6 +391,11 @@ def build(
             "Value": "not available - needs per-recommendation series reduction and the contracted rate card "
                      "(SPEC §11.3). Volume is the honest unit until then.",
         }, {
+            " Metric": "Adaptive rules total qualification",
+            "Value": "Estate total withheld unless every non-paused live stack has measured "
+                     "unsegmented rules. A qualified measured subset is shown alongside when available; "
+                     "unknown rules or segment coverage are not zero rules.",
+        }, {
             " Metric": "Adaptive segment coverage",
             "Value": segment_qualification(in_scope, dataplane),
     }]

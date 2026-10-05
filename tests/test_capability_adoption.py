@@ -329,7 +329,7 @@ class FootprintBoundaryTest(unittest.TestCase):
 
 
 class ComposeSeamTest(unittest.TestCase):
-    def test_forwarding_and_no_consumer_behavior_change(self):
+    def test_forwarding_changes_only_authorized_adoption_observations(self):
         fixture = json.loads((pathlib.Path(__file__).parent / "fixtures" /
                               "compose_inputs.json").read_text())
         from collector.emit.hydrate import INPUT_OWNER
@@ -338,14 +338,36 @@ class ComposeSeamTest(unittest.TestCase):
         cov = Coverage(tier="t3", total=len(stacks))
         with mock.patch.object(coverage, "build", wraps=coverage.build) as coverage_build, \
                 mock.patch.object(ai, "build", wraps=ai.build) as ai_build:
-            result = compose.build_all(stacks, cov, **inputs)
+            result = compose.build_all(stacks, cov, now=NOW, **inputs)
         self.assertIs(coverage_build.call_args.kwargs["dataplane"], inputs["dataplane"])
         self.assertIs(coverage_build.call_args.kwargs["adaptive_logs"], inputs["adaptive_logs"])
         self.assertIs(ai_build.call_args.kwargs["capability_adoption"], inputs["capability_adoption"])
         legacy_inputs = dict(inputs)
         legacy_inputs["capability_adoption"] = {
             key: value for key, value in inputs["capability_adoption"].items() if key != "footprint"}
-        self.assertEqual(result, compose.build_all(stacks, cov, **legacy_inputs))
+        legacy = compose.build_all(stacks, cov, now=NOW, **legacy_inputs)
+        # The source seam now has an authorized consumer: only the adoption view may change.
+        # Preserve the complete metric series, unaffected views and publication metadata contract.
+        self.assertEqual(result[0], legacy[0])
+        self.assertEqual(result[2], legacy[2])
+        self.assertEqual(set(result[1]), set(legacy[1]))
+        for view in result[1]:
+            if view != coverage.ADOPTION_VIEW:
+                with self.subTest(view=view):
+                    self.assertEqual(result[1][view], legacy[1][view])
+        observed_rows = {row["Capability"]: row for row in result[1][coverage.ADOPTION_VIEW]}
+        legacy_rows = {row["Capability"]: row for row in legacy[1][coverage.ADOPTION_VIEW]}
+        self.assertEqual(set(observed_rows), set(legacy_rows))
+        changed = {title for title in observed_rows if observed_rows[title] != legacy_rows[title]}
+        self.assertEqual(changed, {"Adaptive Traces", "Application Observability"})
+        for title in changed:
+            with self.subTest(capability=title):
+                self.assertEqual(observed_rows[title]["Population stacks"], 2)
+                self.assertEqual(observed_rows[title]["Stacks using capability"], 1)
+                self.assertEqual(observed_rows[title]["Opportunity stacks"], 1)
+                self.assertEqual(observed_rows[title]["Window"], "24h")
+                for column in ("Population stacks", "Stacks using capability", "Opportunity stacks"):
+                    self.assertIsNone(legacy_rows[title][column])
         self.assertEqual(coverage.build(stacks, inputs["signal_inventory"]), coverage.build(
             stacks, inputs["signal_inventory"], dataplane=inputs["dataplane"],
             adaptive_logs=inputs["adaptive_logs"]))

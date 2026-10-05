@@ -27,6 +27,23 @@ def _load():
 
 
 class UnknownAdaptiveRulesTest(unittest.TestCase):
+    def test_public_summary_explains_withheld_estate_rules_and_keeps_measured_subtotal(self):
+        from collector.pillars import compose
+        stacks = [{"slug": slug} for slug in ("measured", "unknown")]
+        payload = {"measured": {"adaptive_metrics": {
+            "available": True, "segment_coverage_state": "unsegmented", "rules_applied": 7,
+            "recommendations_pending": 0, "adopted": True,
+        }}, "unknown": {"adaptive_metrics": {
+            "available": True, "segment_coverage_state": "segmented", "rules_applied": 100,
+        }}}
+        metrics, views, _ = compose.build_all(stacks, Coverage(tier="t3", total=2), dataplane=payload)
+        summary = {row[" Metric"]: row["Value"] for row in views["cost_summary"]}
+        self.assertEqual(summary["Adaptive rules applied (measured on 1 of 2 stacks)"], 7)
+        self.assertNotIn("Adaptive rules applied", summary)
+        self.assertIn("withheld", summary["Adaptive rules total qualification"])
+        self.assertIn("measured subset", summary["Adaptive rules total qualification"])
+        self.assertNotIn("gcinsight_cost_adaptive_rules_applied_total", {name for name, _, _ in metrics})
+
     def test_empty_partial_coverage_survives_compose_to_s3(self):
         """An empty measured subset must not erase unknown live stacks or imply a zero gauge."""
         from unittest import mock

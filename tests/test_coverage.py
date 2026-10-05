@@ -610,6 +610,108 @@ class CoverageBuildTest(unittest.TestCase):
                 self.assertEqual(tuple(views[name][0]), tuple(column for column, _kind in schema))
 
 
+class FootprintComposeTest(unittest.TestCase):
+    def compose(self, *, footprint=None, dataplane=None, logs=None):
+        from collector.pillars import compose
+        stacks = [
+            {"slug": slug, "id": index + 1, "status": "paused" if slug == "paused" else "active"}
+            for index, slug in enumerate(("positive", "zero", "unknown", "paused"))
+        ]
+        cov = Coverage(tier="t2", total=len(stacks))
+        usage = {"available": True, "values": {}, "footprint": footprint or {}}
+        return compose.build_all(stacks, cov, signal_inventory={}, capability_adoption=usage,
+                                 dataplane=dataplane, adaptive_logs=logs)
+
+    def test_public_compose_qualified_footprints_are_view_only(self):
+        footprint = {key: {
+            "available": True, "values": {"1": 5, "2": 0, "4": 10, "999": 10},
+            "window": "24h", "window_end": "2026-08-25T00:00:00+00:00",
+        } for key in ("adaptive_traces", "app_observability")}
+        dataplane = {slug: {"adaptive_metrics": {
+            "available": True, "segment_coverage_state": state, "rules_applied": count,
+            "recommendations_pending": 0, "adopted": None,
+        }} for slug, state, count in (
+            ("positive", "unsegmented", 5), ("zero", "unsegmented", 0),
+            ("unknown", "segmented", 10), ("paused", "unsegmented", 10),
+            ("departed", "unsegmented", 10))}
+        logs = {slug: {"slug": slug, "available": True, "applied": count}
+                for slug, count in (("positive", 5), ("zero", 0), ("paused", 10), ("departed", 10))}
+        metrics, views, _ = self.compose(footprint=footprint, dataplane=dataplane, logs=logs)
+        rows = {row["Capability"]: row for row in views[coverage.ADOPTION_VIEW]}
+        for title in ("Adaptive Metrics", "Adaptive Logs", "Adaptive Traces", "Application Observability"):
+            with self.subTest(title=title):
+                row = rows[title]
+                self.assertEqual((row["Population stacks"], row["Stacks using capability"],
+                                  row["Opportunity stacks"]), (2, 1, 1))
+                self.assertIn("measured", row["Population basis"].lower())
+                self.assertIn("1 of 3", row["Finding"])
+                self.assertTrue(row["Window"])
+        self.assertIn("configuration", rows["Adaptive Metrics"]["Finding"])
+        self.assertIn("not activity", rows["Application Observability"]["Finding"])
+        db = rows["Database Observability"]
+        for column in ("Population stacks", "Stacks using capability", "Opportunity stacks"):
+            self.assertIsNone(db[column])
+        self.assertIn("no verified per-stack adoption/unit contract", db["Finding"])
+        self.assertIn("Reporting markers exist", db["Finding"])
+        baseline_metrics, _, _ = self.compose()
+        self.assertEqual({(name, tuple(sorted(labels.items()))) for name, labels, _ in metrics
+                          if name.startswith("gcinsight_coverage_")},
+                         {(name, tuple(sorted(labels.items()))) for name, labels, _ in baseline_metrics
+                          if name.startswith("gcinsight_coverage_")})
+
+    def test_missing_nullable_and_segmented_inputs_are_unknown_not_zero(self):
+        dataplane = {"positive": {"adaptive_metrics": {
+            "available": True, "segment_coverage_state": "unsegmented", "rules_applied": None,
+            "recommendations_pending": None, "adopted": None,
+        }}, "zero": {"adaptive_metrics": {
+            "available": True, "segment_coverage_state": "segmented", "rules_applied": 3,
+        }}}
+        _, views, _ = self.compose(dataplane=dataplane)
+        rows = {row["Capability"]: row for row in views[coverage.ADOPTION_VIEW]}
+        for title in ("Adaptive Metrics", "Adaptive Logs", "Adaptive Traces",
+                      "Application Observability", "Database Observability"):
+            for column in ("Population stacks", "Stacks using capability", "Opportunity stacks"):
+                self.assertIsNone(rows[title][column], (title, column))
+        self.assertIn("segmented", rows["Adaptive Metrics"]["Population basis"])
+
+    def test_fixture_public_compose_derives_adoption_dependencies(self):
+        from tests.test_hydrate import ViewInputsAreDerivedNotAssumed
+        case = ViewInputsAreDerivedNotAssumed()
+        case.setUpClass()
+        names = frozenset(hydrate.INPUT_OWNER)
+        view = coverage.ADOPTION_VIEW
+        full = case._build(names)[view]
+        # Remove each input from the public full composition, not a pillar-level proxy. Require
+        # every declared input to be indispensable even with every alternative input present.
+        derived = frozenset(name for name in names if case._build(names - {name}).get(view) != full)
+        self.assertEqual(hydrate.VIEW_INPUTS[view], derived)
+        self.assertEqual(case._build(derived)[view], full)
+
+    def test_assembled_adoption_dashboard_reads_public_rows(self):
+        import json
+        import pathlib
+        import shutil
+        import tempfile
+        from bin import dashboards
+        from collector.dashboards import build
+        from collector.emit import s3
+        _, views, _ = self.compose()
+        with tempfile.TemporaryDirectory() as tmp:
+            local = pathlib.Path(tmp)
+            for existing in (pathlib.Path(__file__).resolve().parent.parent / "testdata" / "views").glob("*.json"):
+                shutil.copyfile(existing, local / existing.name)
+            (local / (coverage.ADOPTION_VIEW + ".json")).write_text(
+                json.dumps(s3.view_payload(views[coverage.ADOPTION_VIEW], {})))
+            with mock.patch.object(build, "VIEWS_DIR", tmp), mock.patch.object(build, "BUCKET", "offline"):
+                _, document = dashboards.assemble("coverage", "infinity-offline")
+            panel = document["spec"]["elements"]["tbl_adoption"]["spec"]
+            self.assertIn("configured", panel["description"])
+            query = panel["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+            self.assertEqual(query["root_selector"], "rows")
+            payload = json.loads((local / query["url"].rsplit("/", 1)[-1]).read_text())
+            self.assertIn("Database Observability", {row["Capability"] for row in payload["rows"]})
+
+
 class ObservabilityScoreConfigTest(unittest.TestCase):
     def test_defaults_weight_all_seven_visible_components_equally(self):
         self.assertEqual(observability_score.parse_weights(""), {

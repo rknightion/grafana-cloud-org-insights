@@ -538,7 +538,7 @@ class ViewInputsAreDerivedNotAssumed(unittest.TestCase):
         actual = {v: n for v, n in hydrate.VIEW_INPUTS.items() if v in full}
         declared = {view: actual.get(view, frozenset()) for view in full}
 
-        max_compositions = 512
+        max_compositions = 8192
         largest_declaration = max(map(len, declared.values()), default=0)
         smaller_candidates = set(
             subsets_up_to(

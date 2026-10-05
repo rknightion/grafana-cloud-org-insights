@@ -196,7 +196,9 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     "coverage_cluster_register": frozenset({"signal_inventory"}),
     "coverage_legacy_service_register": frozenset({"signal_inventory"}),
     "coverage_summary": frozenset({"signal_inventory"}),
-    "coverage_capability_adoption": frozenset({"signal_inventory", "capability_adoption"}),
+    "coverage_capability_adoption": frozenset({
+        "signal_inventory", "capability_adoption", "dataplane", "adaptive_logs",
+    }),
     "coverage_capability_opportunities": frozenset({"signal_inventory", "capability_adoption"}),
     "coverage_producing_signals": frozenset({"capability_adoption"}),
     "cost": frozenset({"dataplane"}),
