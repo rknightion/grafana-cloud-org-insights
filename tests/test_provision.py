@@ -108,8 +108,10 @@ class ProductReadScopeTest(unittest.TestCase):
         self.assertEqual(pr.parse_product_reads("library-panels"), frozenset({"library-panels"}))
         baseline = pr.permission_pairs(pr.desired_permissions(write_stack=False))
         self.assertNotIn(("library.panels:read", "folders:*"), baseline)
-        selected = pr.permission_pairs(pr.desired_permissions(
-            write_stack=False, product_reads={"library-panels"}))
+        manifest = pr.desired_permissions(write_stack=False, product_reads={"library-panels"})
+        manifest_pairs = [(p["action"], p.get("scope", "")) for p in manifest]
+        self.assertEqual(len(manifest_pairs), len(set(manifest_pairs)))
+        selected = pr.permission_pairs(manifest)
         self.assertEqual(selected, baseline | pairs)
         self.assertTrue(selected.isdisjoint(pr.removable_pairs(
             write_stack=False, product_reads={"library-panels"})))

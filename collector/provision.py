@@ -322,7 +322,8 @@ def desired_permissions(
     if "synthetic-monitoring-query" in selected:
         permissions.extend({"action": action, **({"scope": scope} if scope else {})}
                            for action, scope in sorted(synthetic_pairs(synthetic_uid)))
-    return tuple(permissions)
+    # Product families may repeat a standing baseline grant. Serialize each pair once.
+    return tuple({(p["action"], p.get("scope", "")): p for p in permissions}.values())
 
 
 def removable_pairs(
