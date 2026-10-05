@@ -4,7 +4,7 @@ title: Define and fence future-dated hydrated scan inputs
 status: Parked
 assignee: []
 created_date: '2026-10-05 21:51'
-updated_date: '2026-10-05 21:55'
+updated_date: '2026-10-05 22:18'
 labels:
   - hydration
   - follow-on
@@ -37,4 +37,6 @@ Independent loop12 library security review corrected a worker overclaim: collect
 
 <!-- SECTION:NOTES:BEGIN -->
 Park reason is old accepted freshness-policy seam and unresolved clock-skew tolerance, not an exhausted three-cycle budget: contract ceiling is four for all tasks. Root does not reopen or reset accepted GCI-0091 (schema/null hydration repair). Future-age source proof remains unclaimed.
+
+Loop12:0 implementation attempts,0 review-repair rounds; parked owner grading of the older accepted future-age/freshness semantics and clock-skew tolerance. Pre-existing negative-age admission observed by source review, no future-input reproduction or repair claimed. Four-attempt contract corrected; this park is not exhaustion of GCI-0091 (schema/null hydration repair) three cycles.
 <!-- SECTION:NOTES:END -->
