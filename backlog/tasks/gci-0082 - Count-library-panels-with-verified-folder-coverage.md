@@ -1,11 +1,11 @@
 ---
 id: GCI-0082
 title: Count library panels with verified folder coverage
-status: Parked
+status: In Progress
 assignee:
-  - '@loop10-root'
+  - '@loop12-root'
 created_date: '2026-10-02 09:25'
-updated_date: '2026-10-03 11:50'
+updated_date: '2026-10-05 15:15'
 labels:
   - feature-usage
   - scope-decision
@@ -41,6 +41,8 @@ Exact library.panels:read folder scopes and None-reader full folder visibility a
 
 <!-- SECTION:PLAN:BEGIN -->
 R-wit robk exactlibrary.panels:read@folders:* fromfreshfixedrolemetadata basicNone, GETkind1page/perPage frozen route, None/Adminpositivecountvisibility andtotalCountpagingreconciliation orpreciseblocker; no panelmodelsemanticread/grantchange, recordedIDteardown.
+
+Positive D-WIT12 witness permits default-off exact-pair count reader; source foundation reviewed, finish no-duplicate role manifest and root scan/publication wiring with no customer grant.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
