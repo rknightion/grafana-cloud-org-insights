@@ -3,9 +3,11 @@ id: GCI-0091
 title: >-
   Make rollback hydration compatible across qualified Adaptive count schema
   changes
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop12-root'
 created_date: '2026-10-03 20:03'
+updated_date: '2026-10-05 14:21'
 labels: []
 dependencies: []
 priority: high
@@ -31,3 +33,9 @@ Dev v0.6.0 T3 published recommendations_pending=null for unknown Adaptive covera
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Implement D-HYD12 integer input schema versions, red public-boundary compatibility reproduction, unknown future schema withholding and retained scan recovery documentation; review and gate before landing.
+<!-- SECTION:PLAN:END -->

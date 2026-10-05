@@ -3,9 +3,11 @@ id: GCI-0089
 title: >-
   Withhold unqualified usage totals when daily or active-user coverage is
   incomplete
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop12-root'
 created_date: '2026-10-03 12:13'
+updated_date: '2026-10-05 14:21'
 labels:
   - data-quality
 dependencies: []
@@ -35,3 +37,9 @@ Loop11 focused review of the missing-daily dormancy fix proved two pre-existing 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Red-first usage.build incomplete daily and active denominator reproductions; withhold unqualified summaries while preserving complete zero/positive and per-stack semantics; review and gate before landing.
+<!-- SECTION:PLAN:END -->
