@@ -489,6 +489,8 @@ def build(
     dashboard_inventory: Mapping[str, Mapping[str, Any]] | None = None,
     alert_routing: Mapping[str, Mapping[str, Any]] | None = None,
     capability_adoption: Mapping[str, Any] | None = None,
+    dataplane: Mapping[str, Any] | None = None,
+    adaptive_logs: Mapping[str, Any] | None = None,
     score_weights: Mapping[str, float] | None = None,
 ) -> tuple[Metrics, Views]:
     if signal_inventory is None:

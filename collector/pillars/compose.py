@@ -138,7 +138,8 @@ def build_all(
             expected_policy=expected_retention_policy,
         ),
         value.build(stacks, coverage, dataplane, ratecard=ratecard),
-        ai.build(stacks, coverage, assistant, gap_first_seen=gap_first_seen, now=now),
+        ai.build(stacks, coverage, assistant, capability_adoption=capability_adoption,
+                 gap_first_seen=gap_first_seen, now=now),
         insights_pillar.build(stacks, coverage, insights),
         insights_inventory.build(
             stacks,
@@ -150,6 +151,8 @@ def build_all(
             dashboard_inventory=dashboard_inventory,
             alert_routing=alert_routing,
             capability_adoption=capability_adoption,
+            dataplane=dataplane,
+            adaptive_logs=adaptive_logs,
             score_weights=score_weights,
         ),
         producing_signals.build(stacks, capability_adoption),

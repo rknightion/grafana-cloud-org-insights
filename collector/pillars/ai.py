@@ -216,6 +216,7 @@ def build(
     assistant: Mapping[str, Any] | None = None,
     *,
     opted_out: Sequence[str] = (),
+    capability_adoption: Mapping[str, Any] | None = None,
     gap_first_seen: Mapping[str, str] | None = None,
     now: dt.datetime | None = None,
 ) -> tuple[list[tuple[str, dict[str, str], float]], dict[str, list[dict[str, Any]]]]:

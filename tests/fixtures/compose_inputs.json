@@ -32651,6 +32651,48 @@
   "available": true,
   "window_start": "2026-08-24T00:00:00+00:00",
   "window_end": "2026-08-25T00:00:00+00:00",
+  "footprint": {
+   "adaptive_traces": {
+    "available": true,
+    "values": {"5000001": 1},
+    "basis": "maximum_bytes_per_second",
+    "window": "24h",
+    "window_start": "2026-08-24T00:00:00+00:00",
+    "window_end": "2026-08-25T00:00:00+00:00"
+   },
+   "app_observability": {
+    "available": true,
+    "values": {"5000001": 2},
+    "basis": "maximum_service_entity_count",
+    "window": "24h",
+    "window_start": "2026-08-24T00:00:00+00:00",
+    "window_end": "2026-08-25T00:00:00+00:00"
+   },
+   "agent_observability": {
+    "available": true,
+    "values": {"5000001": 0.5},
+    "basis": "maximum_generation_items_per_second",
+    "window": "30d",
+    "window_start": "2026-07-26T00:00:00+00:00",
+    "window_end": "2026-08-25T00:00:00+00:00"
+   },
+   "assistant_org_users": {
+    "available": true,
+    "value": 3,
+    "basis": "current_billing_period_org_gauge",
+    "window": "service_default_lookback_unknown",
+    "window_start": null,
+    "window_end": "2026-08-25T00:00:00+00:00"
+   },
+   "db_observability": {
+    "available": false,
+    "reason": "no_verified_stack_source",
+    "basis": "per_stack_unknown",
+    "window": null,
+    "window_start": null,
+    "window_end": null
+   }
+  },
   "values": {
    "metrics": {
     "5000001": 128779
