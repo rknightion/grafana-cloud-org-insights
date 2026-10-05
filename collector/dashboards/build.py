@@ -951,7 +951,7 @@ DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     # Both ages belong on the page: showing only the 6-hourly data-plane age makes the daily named
     # recommendation queue look materially fresher than it is.
     "cost": ("adaptive_logs", "dataplane"),
-    "usage": ("irm_integrations", "irm_alert_groups", "faro_apps", "ml_jobs", "cloud_accounts", "pdc_networks", "reports_inventory", "playlists_inventory", "stack_detail"),
+    "usage": ("irm_integrations", "irm_alert_groups", "faro_apps", "ml_jobs", "cloud_accounts", "pdc_networks", "reports_inventory", "playlists_inventory", "library_panels_inventory", "stack_detail"),
     "maturity": ("dataplane", "stack_detail"),
     "risk": ("access_policies", "alert_routing", "dataplane", "fleet", "label_risk", "loki_config",
              "org_members", "public_dashboards", "service_accounts", "stack_detail"),
@@ -1076,6 +1076,7 @@ INPUT_LABELS = {
     "pdc_networks": "Configured PDC private networks",
     "reports_inventory": "Configured reports",
     "playlists_inventory": "Configured playlists",
+    "library_panels_inventory": "Configured library panels",
     "irm_integrations": "Configured IRM integrations",
     "irm_alert_groups": "IRM alert groups",
     "faro_apps": "Configured Faro apps",
@@ -1100,6 +1101,9 @@ INPUT_LABELS = {
 }
 
 INPUT_DESCRIPTIONS = {
+    "library_panels_inventory": "Age of the default-off daily configured library panel count, after "
+                                "same-token folder-wide coverage and complete paging. Not usage or "
+                                "rendered instances; unreadable stacks are absent, never zero.",
     "irm_alert_groups": "Age of the default-off IRM alert-group stats count. The count represents the API default window, not lifetime inventory; capped values are lower bounds and unreadable stacks are absent.",
     "playlists_inventory": "Age of the default-off configured playlist count, gathered daily. "
                            "Not playback or activity; unreadable stacks remain absent.",

@@ -136,6 +136,7 @@ INPUT_OWNER: dict[str, str] = {
     "pdc_networks": "t2",
     "reports_inventory": "t2",
     "playlists_inventory": "t2",
+    "library_panels_inventory": "t2",
     # Bounded classified label matches. Clear values stay in this private input and S3-only risk views.
     "label_risk": "t2",
 }
@@ -165,6 +166,8 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     # Derived from full fixture versus absent and every singleton input.
     "reports_inventory": frozenset({"reports_inventory"}),
     "playlists_inventory": frozenset({"playlists_inventory"}),
+    # Mechanically derived from full fixture, empty input and every singleton input.
+    "library_panels_inventory": frozenset({"library_panels_inventory"}),
     # Derived from the anonymized captured SLO projection in compose_inputs.json.
     "coverage_slo_inventory": frozenset({"slo_inventory"}),
     # Mechanically derived from full fixture versus absent and all singleton inputs.

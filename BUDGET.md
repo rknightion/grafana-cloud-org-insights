@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **9,726** |
-| Phase 1 only | 9,725 |
+| **Declared (all phases)** | **9,734** |
+| Phase 1 only | 9,733 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -28,8 +28,8 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | I | 895 |
 | J | 4,400 |
 | K | 969 |
-| scan | 322 |
-| **Total** | **9,726** |
+| scan | 330 |
+| **Total** | **9,734** |
 
 ## Metrics
 
@@ -57,8 +57,8 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_stack_billed_users` | B | `stack`(271) | 271 | 1 | billingActiveUsers, NEVER currentActiveUsers. Named `stack_` not `cost_` so it cannot collide with the estate rollup of the same quantity |
 | `gcinsight_stack_collectors_active` | E | `stack`(271) | 271 | 1 | the per-stack half; use it to find registration concentration and churn |
 | `gcinsight_stack_fleet_fast_scrape_pipelines` | E | `stack`(271) | 271 | 1 | enabled, reaching Fleet pipelines scraping faster than the default interval. Per stack because the alert names the stack and remediation is a trend; ABSENT where Fleet was not read or the payload predates the interval parser |
-| `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(28) | 112 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
-| `gcinsight_input_available` | scan | `tier`(4), `input`(28) | 112 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
+| `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(29) | 116 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
+| `gcinsight_input_available` | scan | `tier`(4), `input`(29) | 116 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
 | `gcinsight_ai_estate_messages` | I | `category`(8), `surface`(8) | 64 | 1 | estate-wide category x surface, NO `stack` label  -  the per-stack cross product belongs in the existing `ai_category_surface` view |
 | `gcinsight_coverage_technology_stacks` | K | `kind`(63) | 63 | 1 | one bounded registry enum per technology; value is measured stacks present |
 | `gcinsight_coverage_unscored` | K | `component`(8), `reason`(7) | 56 | 1 | bounded component/reason counts; product absence and unavailable evidence are excluded from the score rather than published as failed coverage |
@@ -228,6 +228,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `insights_surface_usage` | J | 1 | 1 | per-stack query requests, share and distinct users by closed surface enum |
 | `insights_surface_usage_estate` | J | 1 | 1 | estate query requests, stacks queried and sum of per-stack distinct users by surface |
 | `insights_top_dashboards` | J | 1 | 1 |  |
+| `library_panels_inventory` | C | 1 | 1 | default-off configured library panel counts after same-token wildcard folder coverage; zero product series, one input adds eight planned existing provenance series across four tiers; not usage, rendered instances or panel details |
 | `maturity_dimensions` | D | 2,439 | 1 | a table shows every dimension's contribution; only the composite needs trending |
 | `public_dashboard_inventory` | E | 271 | 3 | complete configured public-dashboard inventory for comparison with local policy |
 | `risk_admin_share_per_stack` | E | 271 | 1 |  |

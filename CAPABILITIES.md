@@ -253,6 +253,16 @@ raw objects and use the [guarded transport/schema fences](docs/source-resource-f
 
 ### Optional count-only product inputs
 
+Library panels require exact HTTP 200 on both the same-token effective permissions witness and
+collection pages. Both wildcard pairs must be effective before collection starts; filtered visibility
+is unavailable, never a smaller inventory. Bounded stable paging validates page numbers, totals and
+unique element IDs; a duplicate, truncated or changing collection discards the entire count. An empty
+complete collection measures zero, but empty live inventory is unknown and withholds the view. Models,
+targets, creators, names, UIDs and IDs are transient source data, absent from the minimized scan input,
+view, diagnostics and error text. Counts do not measure usage or rendered panel instances. The staff
+Admin/None positive control including a non-General folder proves the witnessed pair/route, not
+universal visibility. Research and default-off shipping confer no customer enablement grant.
+
 All are default-off T2 inputs, inventory-led joins and point-in-time views, not product time-series
 metrics. Each new input adds only the existing bounded input-freshness series. Unknown or unreadable
 stacks are absent, never a manufactured zero; withheld views leave last-good S3 objects intact.
@@ -263,6 +273,7 @@ optional table; permission, transport and parse errors remain explicit.
 |---|---|---|
 | `irm-integrations` | `grafana-irm-app.integrations:read` (empty), `plugins.app:access@plugins:id:grafana-irm-app` | `/api/plugins/grafana-irm-app/resources/alert_receive_channels/counters/`; integration count only |
 | `faro-apps` | `grafana-kowalski-app.apps:read` (empty), `plugins.app:access@plugins:id:grafana-kowalski-app` | `/api/plugin-proxy/grafana-kowalski-app/api-proxy/api/v1/app`; count and closed web/mobile/unknown counts |
+| `library-panels` | `library.panels:read@folders:*`; existing baseline `folders:read@folders:*` also required | Same-token `/api/access-control/user/permissions` coverage GET, then `/api/library-elements?kind=1&perPage=100&page=<n>`; configured library panel count only |
 | `ml-jobs` | `grafana-ml-app.forecasting:read` (empty), `plugins.app:access@plugins:id:grafana-ml-app` | `/api/plugins/grafana-ml-app/resources/manage/api/v1/jobs`; configured forecast-job count |
 | `cloud-accounts` | `grafana-csp-app:read` (empty), `plugins.app:access@plugins:id:grafana-csp-app` | `/api/plugin-proxy/grafana-csp-app/he-api/api/v2/stacks/<inventory id>/aws/accounts`; stack, fixed provider `aws`, count |
 | `pdc-networks` | `grafana-pdc-app.private-networks:read` (empty), `plugins.app:access@plugins:id:grafana-pdc-app` | `/api/plugin-proxy/grafana-pdc-app/grafanacom-api/v1/accesspolicies`; complete-region/page count matching current stack realm and `set:pdc-signing` |

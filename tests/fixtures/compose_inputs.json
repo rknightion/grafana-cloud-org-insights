@@ -1,5 +1,9 @@
 {
  "_note": "synthetic compose fixture; accepted source changes translated through testdata identifiers",
+ "library_panels_inventory": {
+  "obs-hub": {"available": true, "library_panel_count": 2},
+  "stack158": {"available": true, "library_panel_count": 0}
+ },
  "synthetic_inventory": {
   "obs-hub": {
    "available": true,

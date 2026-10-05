@@ -40,7 +40,7 @@ def cli(*args, env=None):
 
 
 @pytest.mark.parametrize("policy", ["", "slo", "slo,synthetic-monitoring",
-                                     "slo,synthetic-monitoring,synthetic-monitoring-query"])
+                                     "slo,synthetic-monitoring,synthetic-monitoring-query", "library-panels"])
 def test_legacy_cli_regenerate_upgrade_and_real_scan_eligibility(policy):
     with tempfile.TemporaryDirectory() as name:
         temp = pathlib.Path(name)
@@ -100,13 +100,14 @@ def test_legacy_cli_regenerate_upgrade_and_real_scan_eligibility(policy):
         with pytest.raises(identity.InvalidIdentity, match="digest mismatch"):
             identity.verify_runtime_projection("scan", environ=tampered)
         with mock.patch.dict(os.environ, emitted), mock.patch.object(
-            scan.credentials, "load_all", return_value={"obs-hub": {"token": "synthetic-token"}}
+            scan.credentials, "load_all", return_value={"obs-hub": {"token": "synthetic-token"},
+                                                      "current": {"token": "synthetic"}}
         ) as credentials:
             data, errors = scan.gather_slo_inventory(client_for({"slos": []}),
                                                     SimpleNamespace(concurrency=1), [STACK])
             assert not errors
-            assert bool(data) == bool(policy)
-            assert credentials.called == bool(policy)
+            assert bool(data) == ("slo" in policy.split(","))
+            assert credentials.called == ("slo" in policy.split(","))
             # The same real module-rendered policy must gate the new source, not the old SM token.
             from tests.test_synthetic import fixture_client
             client, calls = fixture_client()
@@ -115,6 +116,18 @@ def test_legacy_cli_regenerate_upgrade_and_real_scan_eligibility(policy):
             selected = "synthetic-monitoring-query" in policy.split(",")
             assert bool(data) == selected
             assert len(calls) == (3 if selected else 0)
+            from tests.test_library_panels import STACK as LIBRARY_STACK, client_for as library_client, page
+            library_calls = []
+            data, errors = scan.gather_library_panels_inventory(
+                library_client([(page([1, 2]), 200)], library_calls),
+                SimpleNamespace(concurrency=1), [LIBRARY_STACK])
+            # This closed token must pass through the actual module/manifest policy to the scan.
+            selected_library = "library-panels" in policy.split(",")
+            assert not errors
+            assert len(library_calls) == (2 if selected_library else 0)
+            assert bool(data) == selected_library
+            if selected_library:
+                assert data == {"current": {"available": True, "library_panel_count": 2}}
 
 
 def test_cli_rejects_mismatch_without_rewriting_manifest():

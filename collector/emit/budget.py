@@ -84,7 +84,7 @@ PILLAR_J_EPOCHS = 2  # contaminated unversioned history plus the clean v2 epoch 
 FINDING_KIND = 18
 # Cardinality follows `len(hydrate.INPUT_OWNER)`; the test below the catalogue re-derives it so adding an
 # input cannot silently leave this declaration stale.
-INPUT = 28
+INPUT = 29
 # Assistant's chat taxonomy (pillars/ai.py). Declared at 8 x 8 = 64 to leave room for product additions
 # without an unplanned series jump. Estate-wide ONLY; the per-stack cross product is a view.
 CATEGORY = 8
@@ -483,6 +483,10 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                     "in memory, contents never retained"),
 
     # --- Declared as views, deliberately. Zero series. This half of the table is the decision record. ---
+    MetricSpec("library_panels_inventory", "C", store="view",
+               note="default-off configured library panel counts after same-token wildcard folder coverage; "
+                    "zero product series, one input adds eight planned existing provenance series across four tiers; "
+                    "not usage, rendered instances or panel details"),
     MetricSpec("estate", "A", {"stack": STACK}, store="view",
                note="wide per-stack inventory: region, cluster, status, dashboards, alert rules, users by "
                     "role, admin share, age, idle, drift, delete protection, leftover, created/updated by"),

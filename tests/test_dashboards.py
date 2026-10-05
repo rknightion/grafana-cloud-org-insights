@@ -17,6 +17,33 @@ from unittest import mock
 from collector.dashboards import build
 
 
+class LibraryPanelPublicationTest(unittest.TestCase):
+    def test_optional_usage_table_schema_freshness_and_errors(self):
+        from bin import dashboards
+        from collector.pillars import library_panels
+        original = build.read_view
+        _, assembled = dashboards.assemble("usage", "infinity-uid")
+        panel = assembled["spec"]["elements"]["library_panels_inventory"]["spec"]
+        query = panel["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+        self.assertEqual(query["root_selector"], "rows")
+        self.assertEqual(query["parser"], "backend")
+        self.assertEqual([(c["selector"], c["type"]) for c in query["columns"]], list(library_panels.SCHEMA))
+        self.assertIn("_age_library_panels_inventory", assembled["spec"]["elements"])
+        self.assertIn("not usage", panel["description"])
+        for error in (FileNotFoundError("absent"), PermissionError("denied"), ValueError("malformed")):
+            def read(name):
+                if name == "library_panels_inventory":
+                    raise error
+                return original(name)
+            with mock.patch.object(build, "read_view", side_effect=read):
+                if isinstance(error, FileNotFoundError):
+                    _, without = dashboards.assemble("usage", "infinity-uid")
+                    self.assertNotIn("library_panels_inventory", without["spec"]["elements"])
+                else:
+                    with self.assertRaises(type(error)):
+                        dashboards.assemble("usage", "infinity-uid")
+
+
 class DashboardCliRateCardTest(unittest.TestCase):
     def test_local_out_with_explicit_datasource_is_fully_offline(self):
         from bin import dashboards

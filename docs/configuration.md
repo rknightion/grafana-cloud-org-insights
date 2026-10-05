@@ -73,6 +73,7 @@ across four tiers, not a product-count time series or a stack multiplier.
 | `ml-jobs` | Configured forecast jobs. Forecasting read plus ML plugin access; only job-top-level `grafanaApiKey` is discarded before the unchanged credential guard. Nested/other credential fields still reject the input. |
 | `cloud-accounts` | Configured AWS accounts only. CSP read plus plugin access; numeric fresh stack ID and data-only array required. Other providers are unknown, not zero; no all-provider total. Backend write isolation of the credential remains unknown. |
 | `pdc-networks` | Policies matching exactly the current stack realm and `set:pdc-signing`, after complete reads of live inventory regions unioned with control realms and every validated page. Private-networks read plus PDC plugin access; server realm filtering is not trusted. Continuations are reconstructed on the fixed proxy, never fetched as supplied credential-bearing URLs. No tokens GET, connections POST or policy write is called. |
+| `library-panels` | Configured library panel counts only, not usage or rendered instances. Requires `library.panels:read@folders:*` plus existing baseline `folders:read@folders:*`, verified using the same token's effective permissions GET before exact-200 paged library collection. No model, target, creator or element ID is retained; unavailable wildcard coverage or incomplete pages are absent, never zero. No customer grant follows selection or default-off shipping. |
 | `reports` | Configured report objects, including disabled reports. Only `reports:read` at `reports:*`; no executions, delivery or scheduling activity. |
 | `irm-integrations` | Implementation exists for counters only, but acceptance is parked: its current transport still accepts HTTP 206. Do not enable it as an accepted delivered counter. Its permission also reaches secret-bearing integration configuration; lists, schedules and alert groups are not admitted. |
 
@@ -83,6 +84,14 @@ guaranteed erased from memory. ML transient-key receipt and IRM credential bread
 risk decisions, not permission to call other routes. Staff reader/Admin controls do not establish
 universal visibility or strict minimum permissions. See the [exact route/pair map](../CAPABILITIES.md#optional-count-only-product-inputs)
 and [resource fences](source-resource-fences.md) for transport and schema limits.
+
+With `library-panels` absent, T2 makes no extra credential-store load, permissions GET or library
+collection call. The count-only `library_panels_inventory` input is T2-owned and schema-versioned;
+other tiers can hydrate it with its original provenance and age, but T2 never hydrates its own failed
+input. Missing inputs withhold the Usage table and preserve its last-good S3 object. Empty live
+inventory is unknown, not an estate of zero. The zero-series view adds only eight planned series to
+the existing input availability/age metrics across four tiers, with no new metric name or product
+series. The illustrative local artifact is synthetic, not an estate measurement.
 
 With the Synthetic query token absent, scans make zero Synthetic calls. Reconciliation also makes
 zero discovery calls for a legacy-correct role. A held query outside the approved telemetry baseline

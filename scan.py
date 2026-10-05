@@ -57,6 +57,7 @@ from collector.sources import cloud_accounts as cloud_accounts_src
 from collector.sources import pdc_networks as pdc_networks_src
 from collector.sources import reports as reports_src
 from collector.sources import playlists as playlists_src
+from collector.sources import library_panels as library_panels_src
 from collector.sources import stack_catalog
 from collector.sources import assistant as assistant_src
 from collector.sources import fleet as fleet_src
@@ -612,6 +613,28 @@ def gather_reports_inventory(
     except credentials.StoreUnavailable:
         return {}, ["reports_inventory: credential_store_unavailable"]
     data = reports_src.probe_all(
+        client, stacks, creds, concurrency=cfg.concurrency,
+        on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
+    )
+    return data, errors
+
+
+def library_panels_reads_enabled() -> bool:
+    return "library-panels" in parse_product_reads(os.environ.get(PRODUCT_READS_ENV))
+
+
+def gather_library_panels_inventory(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[str]]:
+    """Default-off counts after same-token folder-wide coverage; private models stay transient."""
+    if not library_panels_reads_enabled():
+        return {}, []
+    errors: list[str] = []
+    try:
+        creds = credentials.load_all()
+    except credentials.StoreUnavailable:
+        return {}, ["library_panels_inventory: credential_store_unavailable"]
+    data = library_panels_src.probe_all(
         client, stacks, creds, concurrency=cfg.concurrency,
         on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
     )
@@ -1206,6 +1229,10 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     errors += reports_inventory_errors
     playlists_inventory, playlists_inventory_errors = gather_playlists_inventory(client, cfg, selected)
     errors += playlists_inventory_errors
+    library_panels_inventory, library_panels_inventory_errors = gather_library_panels_inventory(
+        client, cfg, selected,
+    )
+    errors += library_panels_inventory_errors
     cloud_accounts, cloud_accounts_errors = gather_cloud_accounts(client, cfg, selected)
     errors += cloud_accounts_errors
     faro_apps, faro_apps_errors = gather_faro_apps(client, cfg, selected)
@@ -1245,6 +1272,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "pdc_networks": pdc_networks,
         "reports_inventory": reports_inventory,
         "playlists_inventory": playlists_inventory,
+        "library_panels_inventory": library_panels_inventory,
         "cloud_accounts": cloud_accounts,
         "signal_inventory": signal_inventory,
         "capability_adoption": capability_adoption,
@@ -1299,6 +1327,14 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
             reports_inventory, available=lambda r: bool(r.get("available")),
             errors=reports_inventory_errors,
         ),
+        "library_panels_inventory": {
+            **source_report(
+                expected if library_panels_reads_enabled() else 0,
+                library_panels_inventory, available=lambda r: r.get("available") is True,
+                errors=library_panels_inventory_errors,
+            ),
+            **({"reason": "not_selected"} if not library_panels_reads_enabled() else {}),
+        },
         "playlists_inventory": source_report(
             expected if playlists_reads_enabled() else 0,
             playlists_inventory, available=lambda r: bool(r.get("available")),

@@ -122,7 +122,15 @@ strict erasure since observation. See [Security](security.md) before enabling ra
 | `cloud_accounts` | Optional AWS configured-account counts only; other providers remain unknown. |
 | `pdc_networks` | Optional stack-attributed PDC signing-policy counts after complete region/page reads, not connection activity. |
 | `reports_inventory` | Optional configured reports including disabled objects, not delivery/execution. |
+| `library_panels_inventory` | Optional configured library panel counts after same-token wildcard folder coverage and complete exact-200 paging; not usage or rendered instances. Only Stack and Configured library panels columns. Unreadable stacks are absent, complete empty collections alone measure zero. |
 | `irm_integrations` | Counter implementation exists, but acceptance is parked on HTTP 206 handling; not an accepted delivered inventory. |
+
+The library input is T2-owned with schema version and per-input provenance/age. Empty live inventory
+withholds it; a failed T2 read cannot reuse T2's previous input. Other tiers hydrate only supported,
+fresh owner inputs and retain original provenance. Missing coverage preserves last-good publication,
+never substitutes zero. Its Usage panel is optional and its synthetic local fixture is illustrative.
+Models, targets, creators and element identifiers do not leave the source; no product metrics or
+customer enablement grant are introduced.
 
 Optional tables/tabs are omitted only when their objects are genuinely missing. Retained older views
 remain readable and visibly age; permission, transport and parse errors remain explicit. Product

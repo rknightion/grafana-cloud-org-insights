@@ -34,6 +34,7 @@ from collector import ratecard as ratecard_model
 from collector.dashboards import build
 from collector.dashboards.retention_panels import retention_panels
 from collector.pillars import adaptive_traces as adaptive_traces_pillar
+from collector.pillars import library_panels as library_panels_pillar
 from collector.pillars import slo as slo_pillar, synthetic as synthetic_pillar
 from collector.pillars import (
     ai as ai_pillar,
@@ -1211,6 +1212,17 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
 
 
 def d_usage(ds: str):
+    library_panels_panel = None
+    try:
+        library_panels_panel = build.table_panel(
+            "Configured library panels", "library_panels_inventory", ds,
+            schema=library_panels_pillar.SCHEMA,
+            description="Point-in-time configured library panel count, not usage or rendered instances. "
+                        "Requires same-token effective library.panels:read and folders:read at folders:*. "
+                        "Default-off; incomplete paging or unavailable coverage is absent, never zero. "
+                        "Panel models, targets, creators and IDs are discarded; no customer rollout grant.")
+    except FileNotFoundError:
+        pass
     playlists_panel = None
     try:
         playlists_panel = build.table_panel(
@@ -1543,6 +1555,8 @@ def d_usage(ds: str):
                         "those logs, or stopped shipping them - both are wins, and the per-stack chart "
                         "above says which."),
     }
+    if library_panels_panel is not None:
+        el["library_panels_inventory"] = library_panels_panel
     if playlists_panel is not None:
         el["playlists_inventory"] = playlists_panel
     if reports_panel is not None:
@@ -1562,6 +1576,9 @@ def d_usage(ds: str):
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
         build.tab("Adoption", ["t_signals", "plugins", "enterprise_catalogue"]),
+        *([build.rows_tab("Configured library panels", [
+            build.row("Configured library panels", ["library_panels_inventory"], max_columns=1),
+        ])] if library_panels_panel is not None else []),
         *([build.rows_tab("Configured playlists", [
             build.row("Configured playlists", ["playlists_inventory"], max_columns=1),
         ])] if playlists_panel is not None else []),
