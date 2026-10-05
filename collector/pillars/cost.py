@@ -163,7 +163,7 @@ def build(
             # one with 3M series and 400.
             "Series per billed user": round(series / billed, 1) if billed else None,
             "Adaptive rules applied": am["rules_applied"] if am else None,
-            "Adaptive recs pending": am["recommendations_pending"] if am else None,
+            "Adaptive recs pending": am.get("recommendations_pending") if am else None,
             "Adaptive adopted": am["adopted"] if am else None,
             "Label values": card["label_values_count_total"] if card else None,
             "Label names": card["label_names_count"] if card else None,

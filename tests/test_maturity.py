@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
+import copy
+import datetime as dt
 import json
 import pathlib
 import unittest
 
 from collector.coverage import Coverage
-from collector.emit import guard
+from collector.emit import guard, hydrate
 from collector.emit.budget import CATALOGUE
-from collector.pillars import maturity
+from collector.pillars import compose, maturity
 from collector.pillars.maturity import RUBRIC, RUBRIC_VERSION, is_staff, score_stack, tier_for
 from collector.sources.gcom import user_record
 
@@ -228,6 +230,36 @@ class EligibilityTest(unittest.TestCase):
 
 
 class ExplainabilityTest(unittest.TestCase):
+    def test_unknown_pending_counts_compose_without_manufacturing_an_adoption_score(self):
+        fixture = json.loads((pathlib.Path(__file__).parent / "fixtures" /
+                              "compose_inputs.json").read_text())
+        inputs = {key: copy.deepcopy(value) for key, value in fixture.items()
+                  if key in hydrate.INPUT_OWNER}
+        stack = next(s for s in fixture["stacks"]
+                     if inputs["dataplane"].get(s["slug"], {}).get("adaptive_metrics"))
+        am = inputs["dataplane"][stack["slug"]]["adaptive_metrics"]
+        am.update(available=True, segment_coverage_state="unsegmented", rules_applied=5)
+        coverage = Coverage(tier="t1", total=len(fixture["stacks"]))
+        for missing in (False, True):
+            with self.subTest(missing=missing):
+                if missing:
+                    am.pop("recommendations_pending", None)
+                else:
+                    am["recommendations_pending"] = None
+                compose.build_all(fixture["stacks"], coverage,
+                                  now=dt.datetime(2026, 8, 19, 20, tzinfo=dt.timezone.utc), **inputs)
+                entry = maturity.score_stack(stack, inputs["dataplane"][stack["slug"]])
+                dimension = next(d for d in entry["dimensions"]
+                                 if d["dimension"] == "adaptive_adoption")
+                self.assertFalse(dimension["applicable"])
+                self.assertIsNone(dimension["score"])
+                self.assertIsNone(dimension["contribution"])
+        am["recommendations_pending"] = 0
+        entry = maturity.score_stack(stack, inputs["dataplane"][stack["slug"]])
+        dimension = next(d for d in entry["dimensions"] if d["dimension"] == "adaptive_adoption")
+        self.assertTrue(dimension["applicable"])
+        self.assertEqual(dimension["score"], 100.0)
+
     def test_a_known_stack_scores_a_reproducible_value_from_its_own_contributions(self):
         """The 'explainable per stack' obligation: the composite must be re-derivable by hand."""
         stacks, dataplane, _ = _load()
