@@ -304,6 +304,31 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
 
 
 class UnknownAdaptivePendingTest(unittest.TestCase):
+    def test_known_rules_with_unknown_pending_do_not_publish_zero_headroom(self):
+        from collector.pillars import compose, findings
+
+        stacks = [{"slug": "example", "hmInstancePromUrl": "https://prom.example"}]
+        coverage = Coverage(tier="t3", total=1)
+        coverage.record_ok("example")
+        payload = {"example": {"adaptive_metrics": {
+            "available": True, "segment_coverage_state": "unsegmented",
+            "rules_applied": 0, "adopted": False, "recommendations_pending": None,
+            "series_counts_complete": False,
+        }}}
+        metrics, views, view_coverage = compose.build_all(stacks, coverage, dataplane=payload)
+        self.assertNotIn("gcinsight_cost_stacks_without_adaptive", {name for name, _, _ in metrics})
+        self.assertIn(("gcinsight_cost_adaptive_rules_applied_total", {}, 0.0), metrics,
+                      "readable rules remain independently measured")
+        self.assertNotIn("cost_adaptive_headroom", views)
+        self.assertNotIn("adaptive_headroom", findings.derive(views, view_coverage)[1])
+        self.assertEqual(view_coverage["cost_summary"],
+                         {"measured": 1, "in_scope": 1, "complete": True})
+        summary = {row[" Metric"]: row["Value"] for row in views["cost_summary"]}
+        self.assertIsNone(summary["Stacks with recommendations and zero rules applied"])
+        self.assertIsNone(summary["Active series on those stacks"])
+        self.assertIsNone(summary["Their share of org series %"])
+        self.assertFalse(any(name.startswith("gcinsight_value_savings_") for name, _, _ in metrics))
+
     def test_pending_unknown_zero_and_partial_totals_remain_distinct(self):
         stacks = [{"slug": slug} for slug in ("unknown", "empty", "known")]
         coverage = Coverage(tier="t3", total=3)

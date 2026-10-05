@@ -208,7 +208,14 @@ def build(
     # Payload membership alone cannot prove coverage: missing live stacks are unknown too.
     rules_complete = rules_coverage(stacks, dataplane)["complete"]
     rules_label = lambda label: qualified_label(label, len(rules_measured), len(in_scope))
-    unadopted = [(am, s) for am, s in rules_measured
+    headroom_measured = [(am, s) for am, s in rules_measured
+                         if am.get("recommendations_pending") is not None]
+    headroom_label = lambda label: qualified_label(label, len(headroom_measured), len(in_scope))
+    # Rules coverage remains an independent contract. A missing pending count cannot turn a known
+    # rules population into a confident zero finding, even when every rules read succeeded.
+    pending_complete = bool(in_scope) and len(pending_measured) == len(in_scope)
+    headroom_readable = len(headroom_measured) == len(rules_measured)
+    unadopted = [(am, s) for am, s in headroom_measured
                  if am["adopted"] is False and am["recommendations_pending"]]
 
     # Emit ONLY if the data plane was actually measured. Without it these are both structurally 0, and a
@@ -218,7 +225,8 @@ def build(
     if rules_complete:
         metrics.append(("gcinsight_cost_adaptive_rules_applied_total", {},
                         float(sum(am["rules_applied"] for am, _ in rules_measured))))
-        metrics.append(("gcinsight_cost_stacks_without_adaptive", {}, float(len(unadopted))))
+        if pending_complete:
+            metrics.append(("gcinsight_cost_stacks_without_adaptive", {}, float(len(unadopted))))
 
     # --- Adaptive LOGS. A separate input from a separate tier, so it gets its own guard: the same
     # "a gap is an absent series, never a zero" rule that stops an hourly T1 erasing T3's findings.
@@ -302,7 +310,9 @@ def build(
         )
         # Partial rows are honest when accompanied by independent publication coverage. Findings
         # consumes that channel separately and still withholds the unqualified estate gauge.
-        if rules_measured:
+        # Partial rules coverage may still publish an explicitly qualified measured subset, but
+        # unknown pending counts within that subset withhold the view (and its finding gauge).
+        if rules_measured and headroom_readable:
             views["cost_adaptive_headroom"] = sorted(
                 [
                     {
@@ -361,17 +371,17 @@ def build(
             " Metric": rules_label("Adaptive rules applied"),
             "Value": sum(am["rules_applied"] for am, _ in rules_measured) if rules_measured else None,
         }, {
-            " Metric": rules_label("Stacks with recommendations and zero rules applied"),
-            "Value": len(unadopted) if rules_measured else None,
+            " Metric": headroom_label("Stacks with recommendations and zero rules applied"),
+            "Value": len(unadopted) if headroom_measured else None,
         }, {
-            " Metric": rules_label("Active series on those stacks"),
+            " Metric": headroom_label("Active series on those stacks"),
             "Value": int(sum(_num(s, "hmInstancePromCurrentActiveSeries") for _, s in unadopted))
-                     if rules_measured else None,
+                     if headroom_measured else None,
         }, {
-            " Metric": rules_label("Their share of org series %"),
+            " Metric": headroom_label("Their share of org series %"),
             "Value": round(
                 100 * sum(_num(s, "hmInstancePromCurrentActiveSeries") for _, s in unadopted) / total_series, 1
-            ) if total_series and rules_measured else None,
+            ) if total_series and headroom_measured else None,
         }, {
             " Metric": "Series per billed user (estate)",
             "Value": round(total_series / total_billed, 1) if total_billed else None,
