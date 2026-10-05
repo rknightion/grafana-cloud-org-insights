@@ -140,6 +140,12 @@ INPUT_OWNER: dict[str, str] = {
     "label_risk": "t2",
 }
 
+# Per-input writer version and highest version this consumer understands. Version 1 introduces the
+# explicit envelope contract; version 0 is the unversioned legacy shape (including qualified nullable
+# Adaptive counts). Payload layouts stay unchanged. Bump the affected input for a breaking change,
+# never infer a version from fields or promote a hydrated input to the running binary's version.
+INPUT_SCHEMA_VERSION: dict[str, int] = {name: 1 for name in INPUT_OWNER}
+
 # What each view actually needs, beyond inventory.
 #
 # DERIVED AND MECHANICALLY CHECKED. For every view, the declared inputs must reproduce the full-input
@@ -311,7 +317,10 @@ def hydrate(
     one successful stack out of an estate is partial; neither is permission to compose an estate total.
 
     Anything simply absent or falsy is fetched from the owning tier's latest scan. Returns the merged
-    inputs (suitable for `compose.build_all(**inputs)`) and the provenance record.
+    inputs (suitable for `compose.build_all(**inputs)`) and the provenance record. Accepted inputs carry
+    integer `schema_version` in provenance, serialized by the runners as `meta.inputs[name]`.
+    Missing version metadata means legacy version 0. Explicit malformed or newer versions are
+    unavailable before composition, so `filter_views` preserves their dependent last-good views.
     """
     now = now or dt.datetime.now(dt.timezone.utc)
     inputs: dict[str, Any] = {}
@@ -356,6 +365,23 @@ def hydrate(
         meta = scan.get("meta") or {}
         source_health = (meta.get("sources") or {}).get(name)
         age = _age(meta.get("generated_at"), now)
+        versions = meta.get("inputs", {})
+        version_entry = versions.get(name, {}) if isinstance(versions, Mapping) else None
+        version = (version_entry.get("schema_version", 0)
+                   if isinstance(version_entry, Mapping) else None)
+        # bool is an int subclass in Python, but is not an integer schema version on the wire.
+        valid_version = type(version) is int and version >= 0
+        if not valid_version or version > INPUT_SCHEMA_VERSION[name]:
+            prov[name] = {
+                "available": False, "source": "hydrated", "tier": owner,
+                "age_seconds": None if age is None else age.total_seconds(), "stale": False,
+                "schema_version": version if valid_version else None,
+                "state": "incompatible_schema",
+                "reason": (f"input schema version {version} newer than supported "
+                           f"{INPUT_SCHEMA_VERSION[name]}" if valid_version
+                           else "invalid input schema version: expected a non-negative integer"),
+            }
+            continue
         if isinstance(source_health, Mapping) and source_health.get("healthy") is False:
             def _count(value: Any) -> int:
                 try:
@@ -396,8 +422,12 @@ def hydrate(
         prov[name] = {
             "available": True, "source": "hydrated", "tier": owner,
             "age_seconds": age.total_seconds(), "stale": False,
+            "schema_version": version,
         }
 
+    for name, entry in prov.items():
+        entry.setdefault("schema_version", INPUT_SCHEMA_VERSION[name]
+                         if entry["source"] == "own" else 0)
     return inputs, prov
 
 

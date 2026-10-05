@@ -141,6 +141,175 @@ class HydrationSourcesTest(unittest.TestCase):
         self.assertIn("0 of 0", prov["insights"]["reason"])
 
 
+class AdaptiveSchemaCompatibilityTest(unittest.TestCase):
+    """Exercise the public hydration/composition boundary, not just dict merging."""
+
+    def test_nullable_qualified_adaptive_input_survives_hydration_and_composition(self):
+        stacks = [{"slug": "example", "hmInstancePromUrl": "https://prom.example"}]
+        coverage = Coverage(tier="t1", total=1)
+        coverage.record_ok("example")
+        # The newer qualified shape can have HTTP availability but no whole-stack counts.
+        # Include known-unsegmented discovery to exercise the old float(None) consumer path too.
+        for state in ("unsegmented", "segmented", "unknown"):
+            with self.subTest(segment_coverage_state=state):
+                payload = {"example": {"adaptive_metrics": {
+                    "available": True, "segment_coverage_state": state,
+                    "rules_available": False, "rules_applied": None, "adopted": None,
+                    "recommendations_pending": None, "recommendations_available": False,
+                    "series_counts_complete": False, "remediable_series": None,
+                    "remediable_series_unused": None,
+                }}}
+                inputs, prov = hydrate.hydrate(
+                    "t1", {}, now=NOW, loader=_loader(t3=_scan("t3", "dataplane", payload)))
+                metrics, views, view_coverage = compose.build_all(stacks, coverage, **inputs)
+                keep, _ = hydrate.filter_views(views, prov)
+                self.assertIsNone(keep["cost"][0]["Adaptive recs pending"])
+                self.assertIsNone(keep["cost"][0]["Adaptive rules applied"])
+                self.assertFalse(view_coverage["cost_summary"]["complete"])
+                names = {name for name, _, _ in metrics}
+                self.assertNotIn("gcinsight_adaptive_recommendations", names)
+                self.assertFalse(any(name.startswith("gcinsight_value_savings_") for name in names))
+                self.assertNotIn("cost_adaptive_headroom", keep)
+                for row in keep["value_savings"]:
+                    self.assertFalse(row[" Metric"].startswith("Remediable series"))
+
+
+class InputSchemaVersionTest(unittest.TestCase):
+    def test_every_own_input_has_an_integer_writer_version(self):
+        self.assertEqual(set(hydrate.INPUT_SCHEMA_VERSION), set(hydrate.INPUT_OWNER))
+        for name, owner in hydrate.INPUT_OWNER.items():
+            with self.subTest(input=name):
+                inputs, prov = hydrate.hydrate(owner, {name: {"example": 1}},
+                                              now=NOW, loader=_loader())
+                self.assertIn(name, inputs)
+                self.assertIs(type(prov[name]["schema_version"]), int)
+                self.assertEqual(prov[name]["schema_version"], hydrate.INPUT_SCHEMA_VERSION[name])
+
+    def test_supported_versions_and_unversioned_legacy_keep_their_origin_version(self):
+        for name, owner in hydrate.INPUT_OWNER.items():
+            for version in (None, 0, hydrate.INPUT_SCHEMA_VERSION[name]):
+                with self.subTest(input=name, version=version):
+                    source = _scan(owner, name, {"example": 1})
+                    if version is not None:
+                        source["meta"]["inputs"] = {name: {"schema_version": version}}
+                    inputs, prov = hydrate.hydrate("t4", {}, now=NOW,
+                                                  loader=_loader(**{owner: source}))
+                    self.assertEqual(inputs[name], {"example": 1})
+                    self.assertEqual(prov[name]["schema_version"], version or 0)
+                    self.assertTrue(prov.satisfied(name))
+
+    def test_newer_versions_withhold_each_inputs_dependent_views_before_composition(self):
+        for name, owner in hydrate.INPUT_OWNER.items():
+            with self.subTest(input=name):
+                version = hydrate.INPUT_SCHEMA_VERSION[name] + 1
+                # Deliberately opaque to this consumer. Must never reach a pillar.
+                source = _scan(owner, name, "future incompatible payload")
+                source["meta"]["inputs"] = {name: {"schema_version": version}}
+                inputs, prov = hydrate.hydrate("t4", {}, now=NOW,
+                                              loader=_loader(**{owner: source}))
+                self.assertNotIn(name, inputs)
+                self.assertFalse(prov.satisfied(name))
+                self.assertEqual(prov[name]["schema_version"], version)
+                self.assertEqual(prov[name]["state"], "incompatible_schema")
+                dependent = {view: [1] for view, needed in hydrate.VIEW_INPUTS.items()
+                             if name in needed}
+                keep, withheld = hydrate.filter_views({"estate": [1], **dependent}, prov)
+                self.assertEqual(keep, {"estate": [1]})
+                self.assertEqual(set(withheld), set(dependent))
+                self.assertTrue(all("newer than supported" in why for why in withheld.values()))
+                names = {(metric, labels["input"])
+                         for metric, labels, _ in hydrate.report_metrics(prov, "t4")}
+                self.assertNotIn(("gcinsight_input_age_seconds", name), names)
+
+    def test_malformed_explicit_versions_are_not_legacy(self):
+        for version in (None, True, False, "1", 1.0, -1, {}, []):
+            with self.subTest(version=version):
+                source = _scan("t3", "dataplane", "opaque")
+                source["meta"]["inputs"] = {"dataplane": {"schema_version": version}}
+                inputs, prov = hydrate.hydrate("t1", {}, now=NOW, loader=_loader(t3=source))
+                self.assertNotIn("dataplane", inputs)
+                self.assertEqual(prov["dataplane"]["state"], "incompatible_schema")
+                self.assertIn("non-negative integer", prov["dataplane"]["reason"])
+
+    def test_malformed_version_metadata_is_not_legacy(self):
+        for metadata in (None, [], "invalid", {"dataplane": None}, {"dataplane": 1}):
+            with self.subTest(metadata=metadata):
+                source = _scan("t3", "dataplane", "opaque")
+                source["meta"]["inputs"] = metadata
+                inputs, prov = hydrate.hydrate("t1", {}, now=NOW, loader=_loader(t3=source))
+                self.assertNotIn("dataplane", inputs)
+                self.assertFalse(prov.satisfied("dataplane"))
+
+    def test_older_version_aware_consumer_withholds_new_writer_but_accepts_retained_legacy(self):
+        stacks = [{"slug": "example", "hmInstancePromUrl": "https://prom.example"}]
+        coverage = Coverage(tier="t1", total=1)
+        coverage.record_ok("example")
+        future = _scan("t3", "dataplane", "new schema unknown to old consumer")
+        future["meta"]["inputs"] = {"dataplane": {"schema_version": 1}}
+        with mock.patch.dict(hydrate.INPUT_SCHEMA_VERSION, dataplane=0):
+            inputs, prov = hydrate.hydrate("t1", {}, now=NOW, loader=_loader(t3=future))
+            metrics, views, _ = compose.build_all(stacks, coverage, **inputs)
+            keep, withheld = hydrate.filter_views(views, prov)
+            self.assertNotIn("cost_summary", keep)
+            self.assertIn("cost_summary", withheld)
+            self.assertIn("estate", keep)
+            self.assertFalse(any(name.startswith("gcinsight_value_savings_")
+                                 for name, _, _ in metrics))
+            retained = _scan("t3", "dataplane", {"example": {"adaptive_metrics": {
+                "available": True, "rules_applied": 0, "adopted": False,
+                "recommendations_pending": 3, "remediable_series": 10,
+            }}})
+            inputs, prov = hydrate.hydrate("t1", {}, now=NOW, loader=_loader(t3=retained))
+            metrics, views, _ = compose.build_all(stacks, coverage, **inputs)
+            keep, _ = hydrate.filter_views(views, prov)
+            self.assertTrue(prov.satisfied("dataplane"))
+            self.assertEqual(prov["dataplane"]["schema_version"], 0)
+            self.assertIsNone(keep["cost"][0]["Adaptive recs pending"],
+                              "legacy without segmentation discovery cannot become whole-stack evidence")
+            self.assertFalse(any(name.startswith("gcinsight_value_savings_")
+                                 for name, _, _ in metrics))
+
+    def test_actual_t3_scan_writer_serializes_versions_and_t1_reads_them_back(self):
+        import scan
+        from collector.emit import s3
+        from tests.test_scan import FakeClient, cfg_for
+
+        stacks = [{"slug": "example", "hmInstancePromUrl": "https://prom.example"}]
+        payload = {"example": {"adaptive_metrics": {
+            "available": True, "segment_coverage_state": "unknown",
+            "rules_applied": None, "adopted": None, "recommendations_pending": None,
+            "series_counts_complete": False,
+        }}}
+        published = {}
+
+        def capture(path, key, bucket, dry_run):
+            published[key] = json.loads(path.read_text())
+            return key
+
+        with (mock.patch.object(scan.gcom, "fetch_inventory", return_value=stacks),
+              mock.patch.object(scan.dataplane, "probe_all", return_value=payload),
+              mock.patch.object(scan, "load_ratecard", return_value=None),
+              mock.patch.object(scan, "assistant_gaps", return_value={}),
+              mock.patch.object(s3, "_put", side_effect=capture)):
+            # Patch the default-bound loader explicitly without replacing hydration itself.
+            real_hydrate = hydrate.hydrate
+            with mock.patch.object(hydrate, "hydrate", side_effect=lambda *a, **kw:
+                                   real_hydrate(*a, loader=_loader(), **kw)):
+                client = FakeClient()
+                client.attempts.by_status = {}
+                produced = scan.run_t3(client, cfg_for("t3"))
+            s3.write_scan(produced, bucket="offline")
+        source = published["scans/t3/latest.json"]
+        self.assertEqual(source["meta"]["inputs"]["dataplane"]["schema_version"],
+                         hydrate.INPUT_SCHEMA_VERSION["dataplane"])
+        inputs, prov = hydrate.hydrate("t1", {},
+                                      now=dt.datetime.fromisoformat(source["meta"]["generated_at"]),
+                                      loader=_loader(t3=source))
+        self.assertEqual(inputs["dataplane"], payload)
+        self.assertEqual(prov["dataplane"]["schema_version"],
+                         source["meta"]["inputs"]["dataplane"]["schema_version"])
+
+
 class StalenessTest(unittest.TestCase):
     def test_an_input_past_the_cap_is_refused(self):
         _, prov = hydrate.hydrate(

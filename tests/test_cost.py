@@ -303,6 +303,36 @@ class UnknownAdaptiveRulesTest(unittest.TestCase):
                       findings.metrics(totals))
 
 
+class UnknownAdaptivePendingTest(unittest.TestCase):
+    def test_pending_unknown_zero_and_partial_totals_remain_distinct(self):
+        stacks = [{"slug": slug} for slug in ("unknown", "empty", "known")]
+        coverage = Coverage(tier="t3", total=3)
+        for stack in stacks:
+            coverage.record_ok(stack["slug"])
+        payload = {slug: {"adaptive_metrics": {
+            "available": True, "segment_coverage_state": "unsegmented",
+            "rules_applied": None, "adopted": None, "recommendations_pending": pending,
+        }} for slug, pending in (("unknown", None), ("empty", 0), ("known", 4))}
+        metrics, views = cost.build(stacks, coverage, payload)
+        pending = {labels["stack"]: value for name, labels, value in metrics
+                   if name == "gcinsight_adaptive_recommendations" and labels["status"] == "pending"}
+        self.assertEqual(pending, {"empty": 0.0, "known": 4.0})
+        rows = {row[" Stack"]: row for row in views["cost"]}
+        self.assertIsNone(rows["unknown"]["Adaptive recs pending"])
+        self.assertEqual(rows["empty"]["Adaptive recs pending"], 0)
+        summary = {row[" Metric"]: row["Value"] for row in views["cost_summary"]}
+        label = "Adaptive recommendations pending (measured stacks)"
+        self.assertNotIn(label, summary)
+        self.assertEqual(summary[f"{label} (measured on 2 of 3 stacks)"], 4)
+        self.assertNotIn("cost_adaptive_headroom", views)
+        for entry in payload.values():
+            entry["adaptive_metrics"]["recommendations_pending"] = None
+        metrics, views = cost.build(stacks, coverage, payload)
+        summary = {row[" Metric"]: row["Value"] for row in views["cost_summary"]}
+        self.assertIsNone(summary[label])
+        self.assertNotIn("gcinsight_adaptive_recommendations", {name for name, _, _ in metrics})
+
+
 class CostMathsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:

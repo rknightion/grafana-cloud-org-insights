@@ -172,8 +172,11 @@ def build(
         metrics.append(("gcinsight_stack_active_series", {"stack": slug}, series))
         metrics.append(("gcinsight_stack_billed_users", {"stack": slug}, billed))
         if am:
-            metrics.append(("gcinsight_adaptive_recommendations", {"stack": slug, "status": "pending"},
-                            float(am["recommendations_pending"])))
+            # Qualified newer scans can keep HTTP availability while counts remain unknown.
+            # Unknown is an absent sample, not float(None) and not a fabricated zero.
+            if am.get("recommendations_pending") is not None:
+                metrics.append(("gcinsight_adaptive_recommendations", {"stack": slug, "status": "pending"},
+                                float(am["recommendations_pending"])))
             if am.get("rules_applied") is not None:
                 metrics.append(("gcinsight_adaptive_recommendations", {"stack": slug, "status": "applied"},
                                 float(am["rules_applied"])))
@@ -199,6 +202,8 @@ def build(
     adaptive = [(_adaptive(dataplane, str(s["slug"])), s) for s in in_scope]
     measured = [(am, s) for am, s in adaptive if am]
     rules_measured = [(am, s) for am, s in measured if am.get("rules_applied") is not None]
+    pending_measured = [(am, s) for am, s in measured
+                        if am.get("recommendations_pending") is not None]
     # An unqualified additive estate total needs every live, non-paused inventory stack.
     # Payload membership alone cannot prove coverage: missing live stacks are unknown too.
     rules_complete = rules_coverage(stacks, dataplane)["complete"]
@@ -349,8 +354,9 @@ def build(
             "Value": f"{len(rules_measured)} of {len(in_scope)} scannable ({len(stacks)} total)",
         }, {
             " Metric": qualified_label("Adaptive recommendations pending (measured stacks)",
-                                       len(measured), len(in_scope)),
-            "Value": sum(am["recommendations_pending"] for am, _ in measured) if measured else None,
+                                       len(pending_measured), len(in_scope)),
+            "Value": (sum(am["recommendations_pending"] for am, _ in pending_measured)
+                      if pending_measured else None),
         }, {
             " Metric": rules_label("Adaptive rules applied"),
             "Value": sum(am["rules_applied"] for am, _ in rules_measured) if rules_measured else None,

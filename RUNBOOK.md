@@ -449,6 +449,59 @@ manifest, generic module ref, and registry digest move together, and the image r
 revisions plus the overlay digest. Capture current task definitions and schedule targets before applying
 that rollback. Source rollback never deletes or overwrites S3 state automatically.
 
+### Hydration schema compatibility and retained-scan recovery
+
+Starting with v0.7.0, each accepted optional scan input records a non-negative integer
+`meta.inputs.<input>.schema_version`. Inventory is always freshly discovered, never hydrated.
+Version 1 is the explicit versioned envelope contract for every current optional input, including
+qualified Adaptive Metrics counts that may be `null`. A consumer accepts versions from 0 through
+its supported per-input version. A newer version or an explicitly malformed version is unavailable
+**before composition**: dependent views are withheld, their last-good S3 copies survive, and unknown
+counts or savings do not become zeros. Version numbers are per input, not per image or whole scan;
+a breaking payload change must increment the affected input's version.
+
+Missing version metadata is legacy version 0, not proof that the payload has numeric counts.
+Current consumers accept those legacy layouts conservatively: absent/unknown Adaptive counts stay
+unknown, and missing segmentation discovery cannot establish whole-stack savings or adoption.
+Hydration preserves the producer's version; it does not relabel legacy input as version 1. Existing
+source-health and maximum-input-age checks still apply. A version is compatibility metadata, not
+proof of availability, complete estate coverage, or freshness.
+
+An upgrade to v0.7.0 can therefore read retained legacy scans, and a version-aware rollback can
+withhold input newer than it understands. **Rollback below v0.7.0 requires retained compatible scan
+restore as well as the recorded image/configuration rollback.** Older binaries have no version fence;
+some try `float(null)` on newer Adaptive payloads. Merely repinning their digest cannot repair S3
+state. Do not strip version fields, substitute zeros, or rewrite a scan timestamp to bypass checks.
+
+Before an authorized rollback:
+
+1. Record the current immutable image/configuration and exact S3 object keys/version IDs for
+   `scans/<tier>/latest.json`. Retain the pre-upgrade owner scans (especially T3) and their timestamps,
+   schema/provenance and coverage records. A timestamped scan or retained S3 version is recovery
+   material only while it remains present under the bucket's retention policy.
+2. Obtain fresh, successful full estate discovery from the intended organisation. Require exact
+   equality of the retained scan's inventory and the live inventory by stack ID and slug, including
+   paused status; neither a subset nor matching counts is equality. Compare against `data.stacks`,
+   never infer the estate from dataplane payload membership. Missing inventory, additions, removals,
+   renamed stacks or status changes block retained restore; obtain a compatible full owner scan
+   under separately authorized operating procedures instead.
+3. Check that each retained input is compatible with the target binary, passed its independent
+   coverage checks, and remains within the normal hydration age cap at recovery time. For an older
+   Adaptive consumer that requires numeric counts, inspect every live in-scope stack's required
+   `recommendations_pending` and `rules_applied` fields as actual numbers, not `null` or coerced zero.
+   Inspect savings/segmentation qualifications too: numeric counts alone do not authorize a
+   whole-stack or currency claim. Stop if no compatible, fresh retained scan exists.
+4. Under explicit live-change authority, coordinate schedules and in-flight publishers so a newer
+   owner cannot overwrite the restoration during rollback. Restore only the selected exact retained
+   owner scan(s) to their `scans/<tier>/latest.json` keys, preserving all timestamps and payloads.
+   Record the source and restored version IDs and read back to verify exact content. Do not overwrite
+   views, delete history, change credentials, or grant product readers as part of recovery.
+5. Verify the next complete consumer run from both sides: its task exits successfully and its scan
+   advances with the full freshly discovered estate. Inspect input provenance and withheld views,
+   unknown counts/savings and the resulting cost views, not exit 0 alone. If the retained scan ages
+   out, leave dependent views visibly stale until a compatible owning-tier scan succeeds. A manual
+   scan or schedule change still requires its own authority; this procedure grants neither.
+
 Do not publish an image from a dirty tree. The build script refuses a dirty push unless the override is
 explicit and reports the uncommitted paths.
 
