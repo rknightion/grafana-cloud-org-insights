@@ -154,6 +154,25 @@ class FootprintBoundaryTest(unittest.TestCase):
             write_stack="hub", now=NOW,
         )
 
+    def test_real_source_to_compose_preserves_positive_mapping_and_unknown_controls(self):
+        # The HTTP transport boundary supplies a per-stack rate and an empty org vector.
+        # Legacy failure cannot suppress independently available footprint evidence.
+        payload = self.probe({source.QUERIES["metrics"]: (503, {}),
+                             FOOTPRINT_EXPRESSIONS["assistant_org_users"]: prometheus([])})
+        self.assertFalse(payload["available"])
+        _, views, _ = compose.build_all(self.stacks, Coverage(tier="t2", total=2),
+                                        capability_adoption=payload, now=NOW)
+        rows = {r[" Stack"]: r for r in views["ai_agent_observability"]}
+        self.assertEqual(set(rows), {"hub", "other"})
+        self.assertEqual(rows["other"]["Maximum generation items/s (30d)"], 3)
+        self.assertTrue(rows["other"]["Positive rate reported (30d)"])
+        self.assertFalse(rows["hub"]["Positive rate reported (30d)"])
+        empty = self.probe({FOOTPRINT_EXPRESSIONS["agent_observability"]: prometheus([])})
+        _, unknown, _ = compose.build_all(self.stacks, Coverage(tier="t2", total=2),
+                                          capability_adoption=empty, now=NOW)
+        self.assertTrue(all(r["Positive rate reported (30d)"] is None
+                            for r in unknown["ai_agent_observability"]))
+
     def test_frozen_payload_queries_windows_live_ids_and_minimization(self):
         body = prometheus([(101, 0), (202, 3), (999, 8)])
         for row in body["data"]["result"]:
@@ -346,13 +365,13 @@ class ComposeSeamTest(unittest.TestCase):
         legacy_inputs["capability_adoption"] = {
             key: value for key, value in inputs["capability_adoption"].items() if key != "footprint"}
         legacy = compose.build_all(stacks, cov, now=NOW, **legacy_inputs)
-        # The source seam now has an authorized consumer: only the adoption view may change.
+        # Authorized consumers now include the org Assistant summary and independent Agent view.
         # Preserve the complete metric series, unaffected views and publication metadata contract.
         self.assertEqual(result[0], legacy[0])
         self.assertEqual(result[2], legacy[2])
         self.assertEqual(set(result[1]), set(legacy[1]))
         for view in result[1]:
-            if view != coverage.ADOPTION_VIEW:
+            if view not in {coverage.ADOPTION_VIEW, "ai_summary", "ai_agent_observability"}:
                 with self.subTest(view=view):
                     self.assertEqual(result[1][view], legacy[1][view])
         observed_rows = {row["Capability"]: row for row in result[1][coverage.ADOPTION_VIEW]}
@@ -371,8 +390,16 @@ class ComposeSeamTest(unittest.TestCase):
         self.assertEqual(coverage.build(stacks, inputs["signal_inventory"]), coverage.build(
             stacks, inputs["signal_inventory"], dataplane=inputs["dataplane"],
             adaptive_logs=inputs["adaptive_logs"]))
-        self.assertEqual(ai.build(stacks, cov, inputs["assistant"]), ai.build(
-            stacks, cov, inputs["assistant"], capability_adoption=inputs["capability_adoption"]))
+        baseline_metrics, baseline_views = ai.build(stacks, cov, inputs["assistant"])
+        observed_metrics, observed_views = ai.build(
+            stacks, cov, inputs["assistant"], capability_adoption=inputs["capability_adoption"])
+        # The new consumer intentionally adds Agent reporting and changes the org usage summary,
+        # while leaving every existing metric and unrelated Assistant view untouched.
+        self.assertEqual(baseline_metrics, observed_metrics)
+        for name, rows in baseline_views.items():
+            if name != "ai_summary":
+                self.assertEqual(rows, observed_views[name], name)
+        self.assertIn("ai_agent_observability", observed_views)
 
 
 class OpportunityArithmeticTest(unittest.TestCase):

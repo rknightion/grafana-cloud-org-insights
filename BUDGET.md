@@ -194,6 +194,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 
 | View | Pillar | Series if emitted | Phase | Why a view |
 |---|---|---|---|---|
+| `ai_agent_observability` | I | 1 | 1 | live-stack 30d maximum generation rate reporting, independently available from Assistant plugin inputs; absent stays unknown, not cumulative volume or entitlement |
 | `ai_assistant` | I | 271 | 1 | the wide per-stack table: users, days active, messages, categorised/uncategorised, tokens split chat vs investigation, tenant object counts, and why a stack was not measured |
 | `ai_category_surface` | I | 5,691 | 1 | per-stack human-vs-machine detail; the bounded view avoids a stack-by-taxonomy metric cross product |
 | `ai_config_disabled` | I | 1 | 1 | rules/automations/integrations that exist but are switched off. `enabled` is absent on skills, so only an explicit false counts  -  unknown is not disabled |

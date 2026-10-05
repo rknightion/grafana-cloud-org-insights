@@ -569,6 +569,9 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                note="rules/automations/integrations that exist but are switched off. `enabled` is absent "
                     "on skills, so only an explicit false counts  -  unknown is not disabled"),
     MetricSpec("ai_summary", "I", store="view"),
+    MetricSpec("ai_agent_observability", "I", store="view",
+               note="live-stack 30d maximum generation rate reporting, independently available from "
+                    "Assistant plugin inputs; absent stays unknown, not cumulative volume or entitlement"),
 
     MetricSpec("usage_query_cost_attribution", "C", {"stack": STACK}, store="view", phase=2),
     MetricSpec("public_dashboard_inventory", "E", {"stack": STACK}, store="view", phase=3,

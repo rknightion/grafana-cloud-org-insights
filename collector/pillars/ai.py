@@ -126,6 +126,10 @@ _OBJECT_ROW_SCHEMA: tuple[tuple[str, str], ...] = (
     ("createdBy", "string"), ("created", "string"), ("modified", "string"),
 )
 VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
+    "ai_agent_observability": ((" Stack", "string"), ("Region", "string"),
+        ("Measured", "boolean"), ("Positive rate reported (30d)", "boolean"),
+        ("Maximum generation items/s (30d)", "number"), ("Window", "string"),
+        ("Last seen", "string"), ("Detail", "string")),
     "ai_category_surface": ((" Stack", "string"), ("Category", "string"), ("Surface", "string"),
                             ("Messages", "number"), ("Human driven", "boolean")),
     "ai_tenant_config": _OBJECT_ROW_SCHEMA,
@@ -221,10 +225,13 @@ def build(
     gap_first_seen: Mapping[str, str] | None = None,
     now: dt.datetime | None = None,
 ) -> tuple[list[tuple[str, dict[str, str], float]], dict[str, list[dict[str, Any]]]]:
-    """`assistant` is the optional T2 payload. Without it this pillar emits and publishes nothing."""
+    """Assistant plugin and org usage have independent availability; emit no new usage metrics."""
     now = now or dt.datetime.now(dt.timezone.utc)
     metrics: list[tuple[str, dict[str, str], float]] = []
     views: dict[str, list[dict[str, Any]]] = {}
+    footprint = (capability_adoption or {}).get("footprint") or {}
+    if capability_adoption:
+        views["ai_agent_observability"] = _agent_rows(stacks, footprint)
     if not assistant:
         # Nothing at all, not zeros. A tier without this input must not flatten the views a tier that
         # has it published - the whole reason emit/hydrate.py exists.
@@ -378,8 +385,48 @@ def build(
         est_messages=est_messages, est_categorised=est_categorised, est_users=est_users,
         est_tokens=est_tokens, est_tenant=est_tenant, est_investigations=est_investigations,
         combos=len(combos), missing=len(missing), coverage=coverage, population=len(stacks),
+        footprint=footprint, agent_rows=views.get("ai_agent_observability", []),
     )
     return metrics, views
+
+
+def _agent_rows(stacks: Sequence[Mapping[str, Any]], footprint: Mapping[str, Any]
+                ) -> list[dict[str, Any]]:
+    entry = footprint.get("agent_observability") or {}
+    values = (entry.get("values") or {}) if entry.get("available") else {}
+    rows = []
+    for stack in stacks:
+        value = values.get(str(stack.get("id")))
+        measured = value is not None
+        rows.append({
+            " Stack": str(stack.get("slug")), "Region": stack.get("regionSlug"),
+            "Measured": measured,
+            "Positive rate reported (30d)": value > 0 if measured else None,
+            "Maximum generation items/s (30d)": value,
+            "Window": "30d", "Last seen": entry.get("window_end") if measured else None,
+            "Detail": ("Measured maximum rate within 30d, not cumulative volume, entitlement "
+                       "or sustained/current use." if measured else
+                       "UNKNOWN: no measured rate for this live stack; absent is not zero. "
+                       + str(entry.get("reason") or "no stack_id sample")),
+        })
+    return rows
+
+
+def _agent_summary(rows: Sequence[Mapping[str, Any]], population: int,
+                   entry: Mapping[str, Any]) -> str:
+    measured = sum(bool(row["Measured"]) for row in rows)
+    if not measured:
+        if not entry:
+            return AGENT_ADOPTION_NOT_GATHERED.format(population=population)
+        return (f"UNAVAILABLE: 0 of {population} live stacks measured for 30d rate reporting; "
+                f"{population} unknown, not zero. Source: grafanacloud-usage; "
+                f"{entry.get('reason') or 'no live stack_id samples'}. "
+                "No cumulative volume, entitlement or sustained/current activity claim.")
+    positive = sum(row["Positive rate reported (30d)"] is True for row in rows)
+    return (f"{positive} live stacks with positive rate reporting in 30d; "
+            f"{measured} of {population} live stacks measured, {population - measured} unknown. "
+            "Deduplicated by stack_id; a maximum rate is not cumulative volume, entitlement "
+            "or sustained/current use. No estate adoption percentage for unknown stacks.")
 
 
 def _summary(**f: Any) -> list[dict[str, Any]]:
@@ -401,12 +448,25 @@ def _summary(**f: Any) -> list[dict[str, Any]]:
                   if est_messages else None},
         {" Metric": f"Assistant tokens ({WINDOW_DAYS}d)", "Value": f["est_tokens"]},
         {" Metric": "Assistant active users (sum of per-stack figures)", "Value": f["est_users"]},
-        # Neither fact can be reconstructed from the per-stack plugin aggregates. Keep the source
-        # boundary visible until the root-owned gather/compose wiring supplies verified usage reads.
+        # Org deduplication comes only from the independent billing gauge, never plugin sums.
         {" Metric": "Assistant org users (deduplicated; billing-period source)",
-         "Value": ORG_USERS_NOT_GATHERED},
+         "Value": (f["footprint"].get("assistant_org_users", {}).get("value")
+                   if f["footprint"].get("assistant_org_users", {}).get("available")
+                   else ("UNAVAILABLE: grafanacloud_org_assistant_users; "
+                         + str(f["footprint"]["assistant_org_users"].get("reason") or "no scalar")
+                         + "; empty is not zero or proof of metric nonexistence."
+                         if f["footprint"].get("assistant_org_users") else ORG_USERS_NOT_GATHERED))},
+        {" Metric": "Assistant user periods", "Value":
+         "Per-stack users and their sum: plugin rolling 30d, not org-deduplicated. "
+         "Org users: current billing-period gauge; service default instant lookback duration unknown. "
+         "Different populations and periods are not comparable; never subtract or divide these figures."},
         {" Metric": "Agent Observability adoption (positive sample within 30d)",
-         "Value": AGENT_ADOPTION_NOT_GATHERED.format(population=f["population"])},
+         "Value": _agent_summary(f["agent_rows"], f["population"],
+                                 f["footprint"].get("agent_observability") or {})},
+        {" Metric": "Agent Observability exact generation volume", "Value":
+         "UNOBSERVABLE: a 30d maximum rate is not cumulative volume. doc0006 gap: "
+         "requires a verified cumulative generation counter or exact product aggregate read route; "
+         "do not integrate rates using an assumed cadence. No entitlement or sustained/current use claim."},
         {" Metric": "Tenant skills / rules / automations / MCP integrations",
          "Value": " / ".join(str(f["est_tenant"][k]) for k in TENANT_KINDS)},
         {" Metric": "Investigations created (Assistant / user)",

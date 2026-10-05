@@ -1,0 +1,562 @@
+{
+  "meta": {
+    "generated_at": "2026-10-05T17:30:48.167706+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_traces": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "slo_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "synthetic_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_integrations": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_alert_groups": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "faro_apps": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "ml_jobs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "cloud_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "pdc_networks": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "reports_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "playlists_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_risk": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack158",
+      "Region": "prod-eu-west-2",
+      "Measured": true,
+      "Positive rate reported (30d)": true,
+      "Maximum generation items/s (30d)": 0.5,
+      "Window": "30d",
+      "Last seen": "2026-08-25T00:00:00+00:00",
+      "Detail": "Measured maximum rate within 30d, not cumulative volume, entitlement or sustained/current use."
+    },
+    {
+      " Stack": "stack145",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack177",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack125",
+      "Region": "prod-us-east-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack001",
+      "Region": "prod-us-west-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack001b",
+      "Region": "prod-us-west-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack001c",
+      "Region": "prod-us-west-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack001a",
+      "Region": "prod-us-west-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack019",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack049",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack110",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack020",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "obs-hub",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack035",
+      "Region": "prod-us-east-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack036",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack111",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack070",
+      "Region": "prod-us-west-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack037",
+      "Region": "prod-us-west-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack071",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack050",
+      "Region": "prod-us-west-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack112",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack051",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack146",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack147",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack038",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack052",
+      "Region": "prod-us-west-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack053",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack054",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack148",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack126",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack002",
+      "Region": "eu",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack113",
+      "Region": "prod-us-west-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack097",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack072",
+      "Region": "eu",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack055",
+      "Region": "prod-us-west-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack193",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack170",
+      "Region": "prod-us-west-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack201",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "stack149",
+      "Region": "prod-eu-central-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "testsrobot002",
+      "Region": "prod-us-west-0",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "teststack004",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "teststack017",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    },
+    {
+      " Stack": "teststack018",
+      "Region": "prod-eu-west-2",
+      "Measured": false,
+      "Positive rate reported (30d)": null,
+      "Maximum generation items/s (30d)": null,
+      "Window": "30d",
+      "Last seen": null,
+      "Detail": "UNKNOWN: no measured rate for this live stack; absent is not zero. no stack_id sample"
+    }
+  ]
+}

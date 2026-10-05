@@ -4701,6 +4701,12 @@ def d_ai(ds: str):
                         "stack: paused, so its Grafana is not running and even listing service accounts "
                         "is refused, or on the opt-out list the organisation asked for. Only actionable rows can "
                         "raise the alert. An empty table means every stack in the estate is covered."),
+        "tbl_ai_agent": build.table_panel(
+            "Agent Observability - positive rate reporting within 30d", "ai_agent_observability", ds,
+            schema=ai_pillar.VIEW_SCHEMAS["ai_agent_observability"],
+            description="Live-inventory stacks, with measured availability independent of Assistant. "
+                        "Maximum generation items/s is a rate, not cumulative volume or entitlement. "
+                        "Positive reporting within 30d is not sustained/current use. Missing is unknown."),
         "tbl_ai_summary": build.table_panel(
             "What is collected, what is not, and why", "ai_summary", ds,
             description="The headline figures with their denominators, followed by the four things this "
@@ -4780,6 +4786,8 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
                       ["n_ai_provisioned", "n_ai_missing", "n_ai_gap_age"],
                       max_columns=3, row_height="short"),
             build.row("Stacks awaiting a credential", ["tbl_ai_coverage"], max_columns=1,
+                      row_height="standard"),
+            build.row("Agent rate reporting", ["tbl_ai_agent"], max_columns=1,
                       row_height="standard"),
             build.row("What is collected and what is not", ["tbl_ai_summary"], max_columns=1,
                       row_height="tall"),

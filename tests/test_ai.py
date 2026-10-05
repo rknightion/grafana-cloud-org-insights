@@ -318,6 +318,99 @@ class OrgUsageBoundaryTest(unittest.TestCase):
         guard.check_no_duplicates(self.metrics)
 
 
+class FootprintConsumerTest(unittest.TestCase):
+    def test_real_compose_maps_live_ids_independently_of_legacy_and_assistant(self):
+        from collector.pillars import compose
+        stacks = [{**stack("a"), "id": 101}, {**stack("b"), "id": 202}]
+        payload = {"available": False, "footprint": {
+            "agent_observability": {"available": True, "window": "30d",
+                "values": {"101": 2.5, "999": 900}, "window_end": NOW.isoformat()},
+            "assistant_org_users": {"available": True, "value": 3,
+                "window": "service_default_lookback_unknown"}}}
+        metrics, views, _ = compose.build_all(stacks, coverage(total=2, scanned=2),
+                                              capability_adoption=payload, now=NOW)
+        rows = {r[" Stack"]: r for r in views["ai_agent_observability"]}
+        self.assertEqual(set(rows), {"a", "b"})
+        self.assertEqual(rows["a"]["Maximum generation items/s (30d)"], 2.5)
+        self.assertTrue(rows["a"]["Positive rate reported (30d)"])
+        self.assertIsNone(rows["b"]["Positive rate reported (30d)"])
+        self.assertIsNone(rows["b"]["Maximum generation items/s (30d)"])
+        self.assertFalse(any(n.startswith("gcinsight_ai_") for n, _, _ in metrics))
+        self.assertNotIn("ai_assistant", views)
+
+    def test_org_gauge_is_not_sum_or_period_comparison(self):
+        payload = {"footprint": {"assistant_org_users": {
+            "available": True, "value": 3, "window": "service_default_lookback_unknown"}}}
+        _, views = ai.build([{**stack("a"), "id": 101}], coverage(),
+                            {"a": record("a", users=8)}, capability_adoption=payload, now=NOW)
+        summary = {r[" Metric"]: r["Value"] for r in views["ai_summary"]}
+        self.assertEqual(summary["Assistant org users (deduplicated; billing-period source)"], 3)
+        self.assertEqual(summary["Assistant active users (sum of per-stack figures)"], 8)
+        self.assertIn("rolling 30d", summary["Assistant user periods"])
+        self.assertIn("not comparable", summary["Assistant user periods"])
+
+    def test_unavailable_and_empty_are_unknown_not_zero(self):
+        for entry in ({}, {"available": False, "values": {"101": 9}},
+                      {"available": True, "values": {}}):
+            _, views = ai.build([{**stack("a"), "id": 101}], coverage(),
+                                capability_adoption={"footprint": {
+                                    "agent_observability": entry}}, now=NOW)
+            row = views["ai_agent_observability"][0]
+            self.assertIsNone(row["Positive rate reported (30d)"])
+            self.assertIsNone(row["Maximum generation items/s (30d)"])
+
+    def test_agent_publication_survives_missing_assistant_provenance(self):
+        from collector.emit import hydrate
+        _, views = ai.build([{**stack("a"), "id": 101}], coverage(),
+            capability_adoption={"footprint": {"agent_observability": {
+                "available": True, "values": {"101": 2}}}}, now=NOW)
+        prov = hydrate.Provenance({"capability_adoption": {"available": True},
+                                   "assistant": {"available": False}})
+        keep, _ = hydrate.filter_views(views, prov)
+        self.assertIn("ai_agent_observability", keep)
+        self.assertNotIn("ai_assistant", keep)
+
+    def test_legitimate_empty_agent_envelope_builds_real_infinity_panel(self):
+        import json
+        import pathlib
+        import tempfile
+        from unittest import mock
+        from collector.dashboards import build
+        from collector.emit.s3 import view_payload
+        _, views = ai.build([], coverage(total=0, scanned=0),
+                            capability_adoption={"footprint": {}}, now=NOW)
+        self.assertEqual(views["ai_agent_observability"], [])
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "ai_agent_observability.json"
+            path.write_text(json.dumps(view_payload(views["ai_agent_observability"], {})))
+            with mock.patch.object(build, "VIEWS_DIR", directory):
+                panel = build.table_panel("Agent reporting", "ai_agent_observability", "infinity",
+                    schema=ai.VIEW_SCHEMAS["ai_agent_observability"])
+        rendered = json.dumps(panel)
+        self.assertIn("Maximum generation items/s (30d)", rendered)
+        self.assertIn("backend", rendered)
+        self.assertIn("ai_agent_observability.json", rendered)
+
+    def test_exact_volume_gap_is_explicit_and_empty_org_not_zero(self):
+        _, views = ai.build([stack("a")], coverage(), {"a": record("a", users=7)},
+            capability_adoption={"footprint": {"assistant_org_users": {
+                "available": False, "reason": "empty_response"}}}, now=NOW)
+        summary = {r[" Metric"]: r["Value"] for r in views["ai_summary"]}
+        self.assertIn("empty_response", summary[
+            "Assistant org users (deduplicated; billing-period source)"])
+        gap = summary["Agent Observability exact generation volume"]
+        self.assertIn("doc0006 gap", gap)
+        self.assertIn("verified cumulative generation counter", gap)
+        self.assertIn("do not integrate rates", gap)
+
+    def test_zero_sample_is_measured_no_positive_not_absence(self):
+        _, views = ai.build([{**stack("a"), "id": 101}], coverage(),
+            capability_adoption={"footprint": {"agent_observability": {
+                "available": True, "values": {"101": 0}}}}, now=NOW)
+        self.assertFalse(views["ai_agent_observability"][0]["Positive rate reported (30d)"])
+        self.assertEqual(views["ai_agent_observability"][0]["Maximum generation items/s (30d)"], 0)
+
+
 class GapStateTest(unittest.TestCase):
     def test_a_persisting_gap_keeps_its_original_stamp(self):
         old = "2026-08-15T00:00:00+00:00"

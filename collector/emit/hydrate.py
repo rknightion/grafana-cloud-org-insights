@@ -247,7 +247,9 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     "ai_credential_coverage": frozenset({"assistant"}),
     "ai_enablement_gap": frozenset({"assistant"}),
     "ai_mcp_auth_failed": frozenset({"assistant"}),
-    "ai_summary": frozenset({"assistant"}),
+    # Mechanically derived against full compose fixture; Agent reporting is independent.
+    "ai_summary": frozenset({"assistant", "capability_adoption"}),
+    "ai_agent_observability": frozenset({"capability_adoption"}),
     "ai_tenant_config": frozenset({"assistant"}),
     "ai_token_outliers": frozenset({"assistant"}),
     "value_benchmarks": frozenset({"dataplane"}),
