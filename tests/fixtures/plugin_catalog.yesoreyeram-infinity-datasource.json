@@ -1,0 +1,15 @@
+{
+  "sourceURL": "https://grafana.com/api/plugins/yesoreyeram-infinity-datasource",
+  "observedAt": "2026-10-05T17:29:22.956201+00:00",
+  "httpStatus": 200,
+  "rawBodySha256": "174f097d67436b4bed79e1a3cdb2a6d84df43572befd48904fa1e475f0c2789e",
+  "body": {
+    "slug": "yesoreyeram-infinity-datasource",
+    "typeCode": "datasource",
+    "status": "active",
+    "version": "4.1.0",
+    "signatureType": "grafana"
+  },
+  "projectionSha256": "1f7aa3cc6753e0d1f5902a8151f9a90bd662892447ff7bcd8bb8de32bbaa1019",
+  "contractRevision": "6e5fb9d9729c94b2a0f51b66ee92949684af9824"
+}

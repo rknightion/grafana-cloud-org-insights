@@ -1,0 +1,15 @@
+{
+  "sourceURL": "https://grafana.com/api/plugins/grafana-aurora-datasource",
+  "observedAt": "2026-10-05T17:29:22.782366+00:00",
+  "httpStatus": 200,
+  "rawBodySha256": "14e6fc848548c8b633373805a8117a0f2c84f9686821895f59614a7a16248d98",
+  "body": {
+    "slug": "grafana-aurora-datasource",
+    "typeCode": "datasource",
+    "status": "enterprise",
+    "version": "0.6.5",
+    "signatureType": "grafana"
+  },
+  "projectionSha256": "027e1e81f50f8933155192be6f82be2d011f99d50a122dee7341c27da39b3c4b",
+  "contractRevision": "6e5fb9d9729c94b2a0f51b66ee92949684af9824"
+}
