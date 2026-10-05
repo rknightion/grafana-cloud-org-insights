@@ -42,6 +42,7 @@ from collector.resolver import InstanceResolver
 from collector.pillars import ai as ai_pillar, compose, findings as findings_mod
 from collector import credentials
 from collector.provision import PRODUCT_READS_ENV, parse_product_reads
+from collector.sources import plugin_catalog
 from collector.sources import adaptive_logs as adaptive_logs_src
 from collector.sources import adaptive_traces as adaptive_traces_src
 from collector.sources import alert_routing as alert_routing_src
@@ -1158,6 +1159,17 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     detail = gcom.fetch_all_stack_detail(
         client, cfg, selected, coverage, on_error=lambda slug, msg: errors.append(f"{slug}: {msg}")
     )
+    # One anonymous catalogue gather from fresh inventory, not detail/payload keys. Attach only to
+    # successful live records; catalogue failure must never manufacture a healthy detail record.
+    catalogue = plugin_catalog.fetch_catalogue(client, stacks)
+    for stack in selected:
+        slug = str(stack["slug"])
+        if slug in detail:
+            counts = stack.get("datasourceCnts")
+            detail[slug]["plugin_catalogue"] = {
+                name: catalogue[name] for name in counts
+                if name in catalogue
+            } if isinstance(counts, dict) else {}
     service_accounts, service_account_errors = gather_service_accounts(client, cfg, selected)
     errors += service_account_errors
     assistant, assistant_errors = gather_assistant(client, cfg, selected)

@@ -239,6 +239,11 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     "risk_plugin_drift": frozenset({"stack_detail"}),
     "risk_service_accounts": frozenset({"service_accounts"}),
     "risk_summary": frozenset({"access_policies", "dataplane", "service_accounts"}),
+    # Derived against full fixture, empty and every singleton input: only stack_detail reproduces
+    # the minimized current public catalogue joins byte for byte (no new hydration input).
+    "usage_enterprise_catalogue": frozenset({"stack_detail"}),
+    "usage_plugin_adoption": frozenset({"stack_detail"}),
+    "usage_datasource_inventory": frozenset({"stack_detail"}),
     "usage_summary": frozenset({"stack_detail"}),
     "usage_user_recency": frozenset({"stack_detail"}),
     "ai_assistant": frozenset({"assistant"}),

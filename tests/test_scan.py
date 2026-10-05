@@ -43,6 +43,43 @@ class FakeClient:
     attempts = Attempts()
 
 
+class EnterpriseProcessEdgeTest(unittest.TestCase):
+    def test_anonymous_catalogue_once_from_fresh_inventory_attaches_only_live_successes(self):
+        from collector.httpclient import ReadOnlyClient, Response
+        stacks = [
+            {"slug": "ok", "datasourceCnts": {"grafana-aurora-datasource": 2}},
+            {"slug": "failed", "datasourceCnts": {"yesoreyeram-infinity-datasource": 1}},
+            {"slug": "paused", "datasourceCnts": {"grafana-aurora-datasource": 1}},
+        ]
+        detail = {"ok": {"users": []}, "departed": {"users": []}}
+        requests = []
+        fixtures = pathlib.Path(__file__).parent / "fixtures"
+
+        def transport(request, timeout):
+            requests.append(request)
+            name = request.full_url.rsplit("/", 1)[-1]
+            path = fixtures / ("plugin_catalog." + name + ".json")
+            return Response(200, json.dumps(json.loads(path.read_text())["body"]).encode(),
+                            request.full_url)
+
+        client = ReadOnlyClient(transport=transport, max_attempts=1)
+        with (
+            mock.patch.object(scan.gcom, "fetch_inventory", return_value=stacks),
+            mock.patch.object(scan.label_risk_src, "probe_all", return_value={}),
+            mock.patch.object(scan.gcom, "fetch_all_stack_detail", return_value=detail),
+            mock.patch.object(scan, "gather_service_accounts", side_effect=RuntimeError("stop seam")),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "stop seam"):
+                scan.run_t2(client, cfg_for())
+        self.assertEqual(len(requests), 2)
+        self.assertTrue(all(not r.has_header("Authorization") for r in requests))
+        self.assertEqual(set(detail), {"ok", "departed"})
+        self.assertNotIn("plugin_catalogue", detail["departed"])
+        self.assertEqual(set(detail["ok"]["plugin_catalogue"]), {"grafana-aurora-datasource"})
+        self.assertIs(detail["ok"]["plugin_catalogue"]["grafana-aurora-datasource"]["enterprise"], True)
+        self.assertNotIn("author", json.dumps(detail))
+
+
 class ConsoleLoggingTest(unittest.TestCase):
     def test_console_log_is_one_json_line_with_explicit_level_and_message(self):
         stderr = io.StringIO()

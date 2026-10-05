@@ -1364,12 +1364,26 @@ def d_usage(ds: str):
                         "stickiness number breaks down into who is actually using their stack. A stack "
                         "with users but zero daily actives is provisioned and unused; a blank cell is not "
                         "measured, never zero."),
+        "enterprise_catalogue": build.table_panel(
+            "Current public Enterprise catalogue - configured inventory",
+            "usage_enterprise_catalogue", ds,
+            schema=usage_pillar.VIEW_SCHEMAS["usage_enterprise_catalogue"],
+            description="Current public catalogue status only, not installed version, licence, "
+                        "entitlement, publisher identity or activity. Includes active (false) and "
+                        "unknown (blank) classifications; not an Enterprise-only empty/none claim. "
+                        "Stacks and configured instances are measured inventory subtotals, not estate "
+                        "totals unless inventory coverage is complete. Catalogue stacks measured is "
+                        "the classified subset of configured stacks for that plugin."),
         "plugins": build.table_panel(
             "Plugin adoption", "usage_plugin_adoption", ds,
+            schema=usage_pillar.VIEW_SCHEMAS["usage_plugin_adoption"],
             description="Which datasource types are provisioned and on how many STACKS (not how many "
                         "instances). Worth scanning for competitor datasources, which indicate another "
                         "monitoring platform may still be live somewhere. "
-                        "Excludes the auto-provisioned knowledge-graph datasource."),
+                        "Excludes the auto-provisioned knowledge-graph datasource. Counts are measured "
+                        "inventory subtotals; estate share is blank with incomplete inventory. "
+                        "Enterprise is current public catalogue status, blank if unknown; neither "
+                        "installed licence nor activity. Catalogue coverage is per configured plugin."),
         "dormant": build.table_panel(
             "Provisioned, populated, nobody logs in", "usage_dormant_stacks", ds,
             columns=['Stack', 'Region', 'Users (active)', 'Users (daily)', 'Stickiness', 'Dashboards', 'Alert rules', 'Age (days)'],
@@ -1547,7 +1561,7 @@ def d_usage(ds: str):
         el["irm_alert_groups"] = irm_alert_groups_panel
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
-        build.tab("Adoption", ["t_signals", "plugins"]),
+        build.tab("Adoption", ["t_signals", "plugins", "enterprise_catalogue"]),
         *([build.rows_tab("Configured playlists", [
             build.row("Configured playlists", ["playlists_inventory"], max_columns=1),
         ])] if playlists_panel is not None else []),

@@ -447,6 +447,9 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                note="the denominator: why a stack has no figures"),
     MetricSpec("insights_summary", "J", store="view"),
 
+    MetricSpec("usage_enterprise_catalogue", "C", store="view",
+               note="configured datasource rollup qualified by measured inventory/catalogue coverage; "
+                    "current public Enterprise status, never installed licence or activity"),
     MetricSpec("usage_datasource_inventory", "C", {"stack": STACK}, store="view",
                note="live-inventory stack, vendor datasource type and instance count; type names stay "
                     "out of metric labels"),

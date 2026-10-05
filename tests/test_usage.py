@@ -98,6 +98,79 @@ class PluginAdoptionTest(unittest.TestCase):
         self.assertEqual(declared["gcinsight_usage_datasource_types_distinct"].series, 1)
 
 
+class EnterpriseCatalogueTest(unittest.TestCase):
+    def test_real_two_plugin_contract_reaches_composed_views_without_raw_metadata(self):
+        from collector.httpclient import ReadOnlyClient, Response
+        from collector.sources import plugin_catalog
+        from collector.pillars import compose
+        names = ("grafana-aurora-datasource", "yesoreyeram-infinity-datasource")
+        stacks = [{"slug": "live", "datasourceCnts": dict.fromkeys(names, 2)}]
+        requests = []
+
+        def transport(request, timeout):
+            requests.append(request)
+            name = request.full_url.rsplit("/", 1)[-1]
+            path = pathlib.Path(__file__).parent / "fixtures" / ("plugin_catalog." + name + ".json")
+            body = json.loads(path.read_text())["body"]
+            body["author"] = {"email": "discard@example.invalid"}
+            body["details"] = "discard raw public details"
+            return Response(200, json.dumps(body).encode(), request.full_url)
+
+        catalogue = plugin_catalog.fetch_catalogue(ReadOnlyClient(transport=transport), stacks)
+        _, views, _ = compose.build_all(
+            stacks, Coverage(tier="t2", total=1),
+            stack_detail={"live": {"plugin_catalogue": catalogue}},
+        )
+        by = {r[" Plugin"]: r for r in views["usage_enterprise_catalogue"]}
+        self.assertIs(by[names[0]]["Enterprise (current catalogue)"], True)
+        self.assertIs(by[names[1]]["Enterprise (current catalogue)"], False)
+        self.assertEqual(len(requests), 2)
+        self.assertNotIn("discard", json.dumps(catalogue))
+        self.assertNotIn("discard", json.dumps(views))
+        for name in names:
+            self.assertEqual(by[name]["Catalogue stacks measured"], 1)
+            self.assertEqual(by[name]["Configured instances (measured)"], 2)
+
+    def test_current_catalogue_is_nullable_and_only_joins_live_stack_detail(self):
+        stacks = [
+            {"slug": "live", "datasourceCnts": {"aurora": 2, "infinity": 1}},
+            {"slug": "unknown"},
+        ]
+        detail = {"live": {"plugin_catalogue": {
+            "aurora": {"available": True, "enterprise": True, "status": "enterprise",
+                       "basis": "current_public_catalogue"},
+            "infinity": {"available": True, "enterprise": False, "status": "active",
+                         "basis": "current_public_catalogue"},
+        }}, "departed": {"plugin_catalogue": {"ghost": {"enterprise": True}}}}
+        _, views = usage.build(stacks, Coverage(tier="t2", total=2), detail, NOW)
+        by = {r[" Plugin"]: r for r in views["usage_enterprise_catalogue"]}
+        self.assertEqual(set(by), {"aurora", "infinity"})
+        self.assertIs(by["aurora"]["Enterprise (current catalogue)"], True)
+        self.assertIs(by["infinity"]["Enterprise (current catalogue)"], False)
+        self.assertEqual(by["aurora"]["Inventory stacks measured"], 1)
+        self.assertEqual(by["aurora"]["Estate stacks"], 2)
+        self.assertEqual(by["aurora"]["Configured instances (measured)"], 2)
+        self.assertEqual(by["aurora"]["Catalogue stacks measured"], 1)
+        _, unknown = usage.build(stacks, Coverage(tier="t2", total=2), now=NOW)
+        for row in unknown["usage_enterprise_catalogue"]:
+            self.assertIsNone(row["Enterprise (current catalogue)"])
+            self.assertEqual(row["Catalogue stacks measured"], 0)
+        self.assertIsNone(unknown["usage_plugin_adoption"][0]["Share of estate %"])
+
+    def test_missing_metadata_never_becomes_false_or_empty_enterprise_result(self):
+        stacks = [{"slug": "a", "datasourceCnts": {"aurora": 2}},
+                  {"slug": "b", "datasourceCnts": {"aurora": 1}}]
+        for record in ({}, {"available": False}, {"available": True, "enterprise": False}):
+            _, views = usage.build(stacks, Coverage(tier="t2", total=2),
+                                   {"a": {"plugin_catalogue": {"aurora": record}}}, NOW)
+            row = views["usage_enterprise_catalogue"][0]
+            self.assertIsNone(row["Enterprise (current catalogue)"])
+            self.assertEqual(row["Configured instances (measured)"], 3)
+            self.assertEqual(row["Catalogue stacks measured"], 0)
+        _, views = usage.build([{"slug": "a"}], Coverage(tier="t2", total=1), now=NOW)
+        self.assertIsNone(views["usage_enterprise_catalogue"][0]["Configured instances (measured)"])
+
+
 class StickinessTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:

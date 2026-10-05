@@ -9722,7 +9722,15 @@
    ],
    "plugins": [],
    "service_accounts_denied": true,
-   "service_accounts": []
+   "service_accounts": [],
+   "plugin_catalogue": {
+    "yesoreyeram-infinity-datasource": {
+     "available": true,
+     "enterprise": false,
+     "status": "active",
+     "basis": "current_public_catalogue"
+    }
+   }
   },
   "stack049": {
    "slug": "stack049",
@@ -10690,7 +10698,15 @@
     }
    ],
    "service_accounts_denied": true,
-   "service_accounts": []
+   "service_accounts": [],
+   "plugin_catalogue": {
+    "yesoreyeram-infinity-datasource": {
+     "available": true,
+     "enterprise": false,
+     "status": "active",
+     "basis": "current_public_catalogue"
+    }
+   }
   },
   "stack001b": {
    "slug": "stack001b",
@@ -11394,7 +11410,15 @@
     }
    ],
    "service_accounts_denied": true,
-   "service_accounts": []
+   "service_accounts": [],
+   "plugin_catalogue": {
+    "yesoreyeram-infinity-datasource": {
+     "available": true,
+     "enterprise": false,
+     "status": "active",
+     "basis": "current_public_catalogue"
+    }
+   }
   },
   "stack071": {
    "slug": "stack071",
@@ -11931,7 +11955,15 @@
     }
    ],
    "service_accounts_denied": true,
-   "service_accounts": []
+   "service_accounts": [],
+   "plugin_catalogue": {
+    "yesoreyeram-infinity-datasource": {
+     "available": true,
+     "enterprise": false,
+     "status": "active",
+     "basis": "current_public_catalogue"
+    }
+   }
   },
   "stack177": {
    "slug": "stack177",
@@ -12531,7 +12563,15 @@
     }
    ],
    "service_accounts_denied": true,
-   "service_accounts": []
+   "service_accounts": [],
+   "plugin_catalogue": {
+    "yesoreyeram-infinity-datasource": {
+     "available": true,
+     "enterprise": false,
+     "status": "active",
+     "basis": "current_public_catalogue"
+    }
+   }
   },
   "stack053": {
    "slug": "stack053",
@@ -13437,7 +13477,15 @@
     }
    ],
    "service_accounts_denied": true,
-   "service_accounts": []
+   "service_accounts": [],
+   "plugin_catalogue": {
+    "yesoreyeram-infinity-datasource": {
+     "available": true,
+     "enterprise": false,
+     "status": "active",
+     "basis": "current_public_catalogue"
+    }
+   }
   },
   "stack113": {
    "slug": "stack113",
@@ -14113,7 +14161,15 @@
     }
    ],
    "service_accounts_denied": true,
-   "service_accounts": []
+   "service_accounts": [],
+   "plugin_catalogue": {
+    "yesoreyeram-infinity-datasource": {
+     "available": true,
+     "enterprise": false,
+     "status": "active",
+     "basis": "current_public_catalogue"
+    }
+   }
   },
   "stack055": {
    "slug": "stack055",

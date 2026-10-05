@@ -66,12 +66,45 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
     "usage_plugin_adoption": (
         (" Plugin", "string"), ("Stacks", "number"),
         ("Share of estate %", "number"), ("Total instances", "number"),
+        ("Enterprise (current catalogue)", "boolean"),
+        ("Catalogue stacks measured", "number"),
+        ("Inventory stacks measured", "number"), ("Estate stacks", "number"),
     ),
     "usage_datasource_inventory": (
         (" Stack", "string"), ("Datasource type", "string"),
         ("Provisioned instances", "number"),
+        ("Enterprise (current catalogue)", "boolean"),
+        ("Catalogue basis", "string"),
+    ),
+    "usage_enterprise_catalogue": (
+        (" Plugin", "string"), ("Enterprise (current catalogue)", "boolean"),
+        ("Stacks (measured)", "number"), ("Configured instances (measured)", "number"),
+        ("Catalogue stacks measured", "number"),
+        ("Inventory stacks measured", "number"), ("Estate stacks", "number"),
+        ("Catalogue basis", "string"),
     ),
 }
+
+
+def _catalogue_record(detail: dict[str, Any], slug: str, plugin: str) -> bool | None:
+    """Validate hydrated minimized metadata too; missing or malformed is unknown."""
+    record = (detail.get(slug) or {}).get("plugin_catalogue", {}).get(plugin, {})
+    if (record.get("available") is True
+            and record.get("basis") == "current_public_catalogue"
+            and record.get("status") in ("enterprise", "active")
+            and record.get("enterprise") is (record["status"] == "enterprise")):
+        return record["enterprise"]
+    return None
+
+
+def _inventory_counts(stack: dict[str, Any]) -> dict[str, int] | None:
+    counts = stack.get("datasourceCnts")
+    if not isinstance(counts, dict) or any(
+        not isinstance(k, str) or not isinstance(v, int) or isinstance(v, bool) or v < 0
+        for k, v in counts.items()
+    ):
+        return None
+    return counts
 
 
 def _age_days(iso: str | None, now: dt.datetime) -> float | None:
@@ -158,8 +191,10 @@ def build(
     # Infinity datasources is not 12 stacks' worth of adoption.
     adoption: dict[str, int] = {}
     instances: dict[str, int] = {}
+    inventory_measured = sum(_inventory_counts(s) is not None for s in stacks)
+    inventory_complete = bool(stacks) and inventory_measured == len(stacks)
     for s in stacks:
-        for name, count in (s.get("datasourceCnts") or {}).items():
+        for name, count in (_inventory_counts(s) or {}).items():
             if not count or name in EXCLUDED_DATASOURCES:
                 continue
             adoption[name] = adoption.get(name, 0) + 1
@@ -167,11 +202,44 @@ def build(
     # Vendor datasource types are discovered strings, not a fixed enum. They stay in the views below;
     # Mimir gets only scalar estate counts. The Synthetic Monitoring scalar preserves the established
     # provisioned-versus-active comparison without republishing its plugin id as a label value.
-    metrics.append(("gcinsight_usage_datasource_types_distinct", {}, float(len(adoption))))
-    metrics.append((
-        "gcinsight_usage_synthetic_monitoring_datasource_stacks", {},
-        float(adoption.get("synthetic-monitoring-datasource", 0)),
-    ))
+    if inventory_complete:
+        metrics.append(("gcinsight_usage_datasource_types_distinct", {}, float(len(adoption))))
+        metrics.append((
+            "gcinsight_usage_synthetic_monitoring_datasource_stacks", {},
+            float(adoption.get("synthetic-monitoring-datasource", 0)),
+        ))
+
+    catalogue_rows = []
+    catalogue_by = {}
+    for name in adoption:
+        classifications = [
+            _catalogue_record(stack_detail, str(s["slug"]), name)
+            for s in stacks if (_inventory_counts(s) or {}).get(name, 0) > 0
+        ]
+        measured = [value for value in classifications if value is not None]
+        # Partial or inconsistent catalogue joins cannot classify the whole plugin rollup.
+        enterprise = (measured[0] if len(measured) == len(classifications)
+                      and len(set(measured)) == 1 else None)
+        row = {
+            " Plugin": name,
+            "Enterprise (current catalogue)": enterprise,
+            "Stacks (measured)": adoption[name],
+            "Configured instances (measured)": instances[name],
+            "Catalogue stacks measured": len(measured),
+            "Inventory stacks measured": inventory_measured,
+            "Estate stacks": len(stacks),
+            "Catalogue basis": "current_public_catalogue" if measured else "unknown",
+        }
+        catalogue_rows.append(row)
+        catalogue_by[name] = row
+    if not catalogue_rows and not inventory_complete:
+        # A coverage-only row distinguishes unknown inventory from measured absence.
+        catalogue_rows.append({
+            " Plugin": None, "Enterprise (current catalogue)": None,
+            "Stacks (measured)": None, "Configured instances (measured)": None,
+            "Catalogue stacks measured": 0, "Inventory stacks measured": inventory_measured,
+            "Estate stacks": len(stacks), "Catalogue basis": "unknown",
+        })
 
     for signal in SIGNAL_FIELDS:
         metrics.append((
@@ -205,13 +273,18 @@ def build(
 
     views: dict[str, list[dict[str, Any]]] = {
         "usage": sorted(rows, key=lambda r: -(r["Users (active)"] or 0)),
+        "usage_enterprise_catalogue": sorted(catalogue_rows, key=lambda r: r[" Plugin"] or ""),
         "usage_plugin_adoption": sorted(
             [
                 {
                     " Plugin": name,
                     "Stacks": count,
-                    "Share of estate %": round(100 * count / len(stacks), 1) if stacks else None,
+                    "Share of estate %": round(100 * count / len(stacks), 1) if inventory_complete else None,
                     "Total instances": instances[name],
+                    "Enterprise (current catalogue)": catalogue_by[name]["Enterprise (current catalogue)"],
+                    "Catalogue stacks measured": catalogue_by[name]["Catalogue stacks measured"],
+                    "Inventory stacks measured": inventory_measured,
+                    "Estate stacks": len(stacks),
                 }
                 for name, count in adoption.items()
             ],
@@ -223,9 +296,14 @@ def build(
                     " Stack": str(stack.get("slug") or ""),
                     "Datasource type": name,
                     "Provisioned instances": int(count),
+                    "Enterprise (current catalogue)": _catalogue_record(
+                        stack_detail, str(stack["slug"]), name),
+                    "Catalogue basis": (
+                        "current_public_catalogue" if _catalogue_record(
+                            stack_detail, str(stack["slug"]), name) is not None else "unknown"),
                 }
                 for stack in stacks
-                for name, count in (stack.get("datasourceCnts") or {}).items()
+                for name, count in (_inventory_counts(stack) or {}).items()
                 if count and name not in EXCLUDED_DATASOURCES
             ],
             key=lambda row: (row["Datasource type"], row[" Stack"]),
@@ -250,7 +328,7 @@ def build(
             "Value": daily_total,
         }, {
             " Metric": "Datasource types in use (excl. auto-provisioned)",
-            "Value": len(adoption),
+            "Value": len(adoption) if inventory_complete else None,
         }, {
             " Metric": "Stacks with users but zero daily activity",
             "Value": len([r for r in rows if r["Users (daily)"] == 0 and r["Users (active)"] > 0]),

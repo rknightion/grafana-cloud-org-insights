@@ -119,164 +119,164 @@
   },
   "rows": [
     {
-      " Plugin": "synthetic-monitoring-datasource",
-      "Stacks": 12,
-      "Share of estate %": 27.3,
-      "Total instances": 12,
+      " Plugin": "cloudwatch",
       "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 2,
+      "Configured instances (measured)": 4,
       "Catalogue stacks measured": 0,
       "Inventory stacks measured": 44,
-      "Estate stacks": 44
-    },
-    {
-      " Plugin": "yesoreyeram-infinity-datasource",
-      "Stacks": 7,
-      "Share of estate %": 15.9,
-      "Total instances": 27,
-      "Enterprise (current catalogue)": false,
-      "Catalogue stacks measured": 7,
-      "Inventory stacks measured": 44,
-      "Estate stacks": 44
-    },
-    {
-      " Plugin": "prometheus",
-      "Stacks": 6,
-      "Share of estate %": 13.6,
-      "Total instances": 18,
-      "Enterprise (current catalogue)": null,
-      "Catalogue stacks measured": 0,
-      "Inventory stacks measured": 44,
-      "Estate stacks": 44
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
     },
     {
       " Plugin": "elasticsearch",
-      "Stacks": 5,
-      "Share of estate %": 11.4,
-      "Total instances": 21,
       "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 5,
+      "Configured instances (measured)": 21,
       "Catalogue stacks measured": 0,
       "Inventory stacks measured": 44,
-      "Estate stacks": 44
-    },
-    {
-      " Plugin": "grafana-postgresql-datasource",
-      "Stacks": 4,
-      "Share of estate %": 9.1,
-      "Total instances": 7,
-      "Enterprise (current catalogue)": null,
-      "Catalogue stacks measured": 0,
-      "Inventory stacks measured": 44,
-      "Estate stacks": 44
-    },
-    {
-      " Plugin": "influxdb",
-      "Stacks": 2,
-      "Share of estate %": 4.5,
-      "Total instances": 3,
-      "Enterprise (current catalogue)": null,
-      "Catalogue stacks measured": 0,
-      "Inventory stacks measured": 44,
-      "Estate stacks": 44
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
     },
     {
       " Plugin": "grafana-atlassianstatuspage-datasource",
-      "Stacks": 2,
-      "Share of estate %": 4.5,
-      "Total instances": 2,
       "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 2,
+      "Configured instances (measured)": 2,
       "Catalogue stacks measured": 0,
       "Inventory stacks measured": 44,
-      "Estate stacks": 44
-    },
-    {
-      " Plugin": "grafana-gitlab-datasource",
-      "Stacks": 2,
-      "Share of estate %": 4.5,
-      "Total instances": 2,
-      "Enterprise (current catalogue)": null,
-      "Catalogue stacks measured": 0,
-      "Inventory stacks measured": 44,
-      "Estate stacks": 44
-    },
-    {
-      " Plugin": "grafana-logicmonitor-datasource",
-      "Stacks": 2,
-      "Share of estate %": 4.5,
-      "Total instances": 2,
-      "Enterprise (current catalogue)": null,
-      "Catalogue stacks measured": 0,
-      "Inventory stacks measured": 44,
-      "Estate stacks": 44
-    },
-    {
-      " Plugin": "cloudwatch",
-      "Stacks": 2,
-      "Share of estate %": 4.5,
-      "Total instances": 4,
-      "Enterprise (current catalogue)": null,
-      "Catalogue stacks measured": 0,
-      "Inventory stacks measured": 44,
-      "Estate stacks": 44
-    },
-    {
-      " Plugin": "mysql",
-      "Stacks": 1,
-      "Share of estate %": 2.3,
-      "Total instances": 3,
-      "Enterprise (current catalogue)": null,
-      "Catalogue stacks measured": 0,
-      "Inventory stacks measured": 44,
-      "Estate stacks": 44
-    },
-    {
-      " Plugin": "grafana-googlesheets-datasource",
-      "Stacks": 1,
-      "Share of estate %": 2.3,
-      "Total instances": 2,
-      "Enterprise (current catalogue)": null,
-      "Catalogue stacks measured": 0,
-      "Inventory stacks measured": 44,
-      "Estate stacks": 44
-    },
-    {
-      " Plugin": "tempo",
-      "Stacks": 1,
-      "Share of estate %": 2.3,
-      "Total instances": 1,
-      "Enterprise (current catalogue)": null,
-      "Catalogue stacks measured": 0,
-      "Inventory stacks measured": 44,
-      "Estate stacks": 44
-    },
-    {
-      " Plugin": "grafana-mongodb-datasource",
-      "Stacks": 1,
-      "Share of estate %": 2.3,
-      "Total instances": 2,
-      "Enterprise (current catalogue)": null,
-      "Catalogue stacks measured": 0,
-      "Inventory stacks measured": 44,
-      "Estate stacks": 44
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
     },
     {
       " Plugin": "grafana-datadog-datasource",
-      "Stacks": 1,
-      "Share of estate %": 2.3,
-      "Total instances": 1,
       "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 1,
+      "Configured instances (measured)": 1,
       "Catalogue stacks measured": 0,
       "Inventory stacks measured": 44,
-      "Estate stacks": 44
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
+    },
+    {
+      " Plugin": "grafana-gitlab-datasource",
+      "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 2,
+      "Configured instances (measured)": 2,
+      "Catalogue stacks measured": 0,
+      "Inventory stacks measured": 44,
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
+    },
+    {
+      " Plugin": "grafana-googlesheets-datasource",
+      "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 1,
+      "Configured instances (measured)": 2,
+      "Catalogue stacks measured": 0,
+      "Inventory stacks measured": 44,
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
+    },
+    {
+      " Plugin": "grafana-logicmonitor-datasource",
+      "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 2,
+      "Configured instances (measured)": 2,
+      "Catalogue stacks measured": 0,
+      "Inventory stacks measured": 44,
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
+    },
+    {
+      " Plugin": "grafana-mongodb-datasource",
+      "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 1,
+      "Configured instances (measured)": 2,
+      "Catalogue stacks measured": 0,
+      "Inventory stacks measured": 44,
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
+    },
+    {
+      " Plugin": "grafana-postgresql-datasource",
+      "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 4,
+      "Configured instances (measured)": 7,
+      "Catalogue stacks measured": 0,
+      "Inventory stacks measured": 44,
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
     },
     {
       " Plugin": "grafana-x-ray-datasource",
-      "Stacks": 1,
-      "Share of estate %": 2.3,
-      "Total instances": 1,
       "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 1,
+      "Configured instances (measured)": 1,
       "Catalogue stacks measured": 0,
       "Inventory stacks measured": 44,
-      "Estate stacks": 44
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
+    },
+    {
+      " Plugin": "influxdb",
+      "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 2,
+      "Configured instances (measured)": 3,
+      "Catalogue stacks measured": 0,
+      "Inventory stacks measured": 44,
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
+    },
+    {
+      " Plugin": "mysql",
+      "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 1,
+      "Configured instances (measured)": 3,
+      "Catalogue stacks measured": 0,
+      "Inventory stacks measured": 44,
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
+    },
+    {
+      " Plugin": "prometheus",
+      "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 6,
+      "Configured instances (measured)": 18,
+      "Catalogue stacks measured": 0,
+      "Inventory stacks measured": 44,
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
+    },
+    {
+      " Plugin": "synthetic-monitoring-datasource",
+      "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 12,
+      "Configured instances (measured)": 12,
+      "Catalogue stacks measured": 0,
+      "Inventory stacks measured": 44,
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
+    },
+    {
+      " Plugin": "tempo",
+      "Enterprise (current catalogue)": null,
+      "Stacks (measured)": 1,
+      "Configured instances (measured)": 1,
+      "Catalogue stacks measured": 0,
+      "Inventory stacks measured": 44,
+      "Estate stacks": 44,
+      "Catalogue basis": "unknown"
+    },
+    {
+      " Plugin": "yesoreyeram-infinity-datasource",
+      "Enterprise (current catalogue)": false,
+      "Stacks (measured)": 7,
+      "Configured instances (measured)": 27,
+      "Catalogue stacks measured": 7,
+      "Inventory stacks measured": 44,
+      "Estate stacks": 44,
+      "Catalogue basis": "current_public_catalogue"
     }
   ]
 }

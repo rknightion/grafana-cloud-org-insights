@@ -245,6 +245,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `risk_retention_stream` | E | 1 | 1 | effective per-stream periods and selectors from Loki tenant limits |
 | `risk_sa_and_token_inventory` | E | 271 | 1 | named service-account and token inventory stays out of metric labels |
 | `usage_datasource_inventory` | C | 271 | 1 | live-inventory stack, vendor datasource type and instance count; type names stay out of metric labels |
+| `usage_enterprise_catalogue` | C | 1 | 1 | configured datasource rollup qualified by measured inventory/catalogue coverage; current public Enterprise status, never installed licence or activity |
 | `usage_query_cost_attribution` | C | 271 | 2 |  |
 
 ## Rules this table enforces
