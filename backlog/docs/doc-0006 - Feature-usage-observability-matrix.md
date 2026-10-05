@@ -3,7 +3,7 @@ id: doc-0006
 title: Feature usage observability matrix
 type: specification
 created_date: '2026-09-23 18:33'
-updated_date: '2026-10-05 21:14'
+updated_date: '2026-10-05 21:50'
 ---
 # Feature usage observability matrix - wave 1 evidence, 2026-09-23
 
@@ -740,3 +740,10 @@ Enterprise datasource classification follows explicit current public catalogue s
 Library panels are configured-object counts, not panel execution or views. The positive staff-only research witness established basic-None coverage using exact `library.panels:read@folders:*` plus baseline `folders:read@folders:*`, with a non-General-folder control and recorded-ID teardown. The default-off source checks those effective pairs through the same reader before counting exact-200, reconciled pages. Publication integration is a separate guarded acceptance; research, code or this matrix supplies no customer grant.
 
 The preceding Agent section records the remaining exact cumulative-generation-volume gap. Assistant org billing-period figures remain separately labelled from rolling-30-day per-stack sums; the staff org query was empty at instant and explicit 30 days, meaning unavailable rather than zero or metric nonexistence. Its actual service-default lookback duration was not observed. No arithmetic comparison between those different populations/periods is supported.
+
+
+### Host counts and host-hour gap
+
+Application service-entity observations are not a host count or host hours. Kubernetes/Infra producing telemetry, Fleet registrations and installed plugins likewise do not establish billable or active host hours. The historical `grafanacloud_app_observability_*` and `grafanacloud_infra_observability_*` names remain discovery evidence; an exact host-count/host-hour family with verified units, accumulation/window semantics and per-stack population was not established by the accepted sibling work. This part of the footprint request remains unobservable at the required fidelity, not zero. The current read boundary is the existing write-stack `grafanacloud-usage` query/metadata GET with `datasources:query@datasources:uid:grafanacloud-usage`; further semantic qualification and an authorised control are required before converting any reporting observation into host hours. Application/Kubernetes plugin resource paths and their exact reader pairs remain unverified and are not granted as an alternative.
+
+The named robk Agent positive-generation control was not observed. Other positive 30-day generation-family rows matched fresh authorised staff inventory IDs, establishing observed reporting but not that named control or activity on robk. No zero-activity or complete-absence assertion follows; the exact-volume and named-control limitations remain open.

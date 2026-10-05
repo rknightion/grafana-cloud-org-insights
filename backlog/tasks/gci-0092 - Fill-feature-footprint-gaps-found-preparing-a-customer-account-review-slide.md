@@ -4,6 +4,7 @@ title: Fill feature-footprint gaps found preparing a customer account-review sli
 status: To Do
 assignee: []
 created_date: '2026-10-05 09:18'
+updated_date: '2026-10-05 21:50'
 labels:
   - feature-usage
   - follow-on
@@ -47,3 +48,9 @@ Customer-facing figures that prompted this live in the consumer engagement, not 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Loop12 children .01-.05 accepted with qualified zero-product-series views and explicit unavailable gaps in the matrix. Parent remains partial: named robk Agent positive-generation control not observed, exact cumulative generation volume and host-hour contracts unresolved; DB reporting markers do not establish units/adoption, Assistant org source empty and default lookback unknown. Do not mark parent AC2 complete or infer zero activity. Library source/publication accepted default-off with no customer grant. Follow-up scope/attempt authorization belongs to a later owner-graded packet.
+<!-- SECTION:NOTES:END -->

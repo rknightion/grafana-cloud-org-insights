@@ -107,7 +107,13 @@ off anything but the live inventory.
   objects, not execution or activity. IRM stats expose a bounded canonical count with `exact` or
   `at_least` semantics and `api_default_window`, never lifetime or status-filtered claims. Each
   input adds eight planned series to existing provenance age/availability metrics across four
-  tiers; neither adds a product metric. Library panels remain parked on filtered reader visibility.
+  tiers; neither adds a product metric. The default-off `library-panels` T2 reader now publishes configured-object counts only. It
+  first requires same-token effective `library.panels:read@folders:*` and baseline
+  `folders:read@folders:*`, then exact-200 reconciled collection pages. A staff basic-None/Admin
+  positive control including a non-General folder supports those witnessed pairs, not universal
+  visibility. Unavailable or incomplete coverage stays absent and preserves the last-good view;
+  models, targets, creators and IDs remain transient. Its one input adds eight planned existing
+  provenance-series combinations, no product metric. Shipping confers no customer enablement grant.
 - PDC counts only policies with the exact current stack realm and `set:pdc-signing`, after complete
   reads across `gcom.policy_regions(live_inventory)` and validated pages. Never trust server realm
   filtering, follow a supplied continuation URL with a credential, or call tokens/connection routes.
