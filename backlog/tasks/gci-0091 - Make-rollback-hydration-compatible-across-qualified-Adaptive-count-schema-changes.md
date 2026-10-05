@@ -3,11 +3,11 @@ id: GCI-0091
 title: >-
   Make rollback hydration compatible across qualified Adaptive count schema
   changes
-status: In Progress
+status: Done
 assignee:
   - '@loop12-root'
 created_date: '2026-10-03 20:03'
-updated_date: '2026-10-05 16:35'
+updated_date: '2026-10-05 17:07'
 labels: []
 dependencies: []
 priority: high
@@ -24,12 +24,12 @@ Dev v0.6.0 T3 published recommendations_pending=null for unknown Adaptive covera
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 A red public-boundary reproduction covers an older consumer hydrating the newer qualified/unknown Adaptive payload; do not manufacture zero savings or loosen committed coverage expectations.
-- [ ] #2 Define and verify the supported upgrade and rollback hydration contract, including retained-version recovery and fresh estate checks, before another deployment.
+- [x] #2 Define and verify the supported upgrade and rollback hydration contract, including retained-version recovery and fresh estate checks, before another deployment.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
+- [x] #1 just test
 - [x] #2 just tf-validate
 - [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
@@ -46,6 +46,8 @@ Implement D-HYD12 integer input schema versions, red public-boundary compatibili
 Loop12: 2 implementation attempts, 1 review-repair round. Integer hydrated-input versions and future/malformed-version withholding proven through real hydrate/compose/scan artifact boundaries; nullable Adaptive pending never crash or manufacture zero headroom. Initial CodeRabbit major corrected, final delta complete zero findings; independent review PASS. Landed b8bd98e and 6934546 covered by exact main bbb9668dd89b5733d6817b6cfb1fdaaf1d05cb57 real clean gate, composed gate and CI37329484807 success. Two skipped tests disclosed separately. Historical v0.4.4 crash reproduced at a93e92c3ceaff1489f7be028fa537303dacc3659; retained scan restoration remains mandatory below v0.7.0.
 
 Loop12 correction: previous Done claim covered cost/unknown-rules cases but not valid known applied rules with recommendations_pending=null under unsegmented inputs. Root real compose.build_all reproduction confirms maturity._adaptive_adoption TypeError at applied+pending. Reopen supported-consumer contract for root rescue attempt3; original historical/newer-schema proofs remain valid, no ceiling reset. First scratch reproduction had an incomplete fake and KeyError, discarded as proof; corrected existing synthetic payload reproduces exact maturity failure. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop12-evidence/L-hyd/maturity-supported-null-red-confirmed.log.
+
+Loop12 final correction:3 implementation attempts (2worker,1rootrescue),1 review-repair round. Supported knownrules/null-or-missing pending now realcompose-safe and maturity-unscored, measuredpending0 retains100%; cost detail missingkey displaysNone rather thancrashing. Independent exactparent red and114candidate tests no skips, CRcomplete0 all3files. Landed bddc51b83bf8e05087a57fda94103e931803c124, cleanprelanding/composed justcheck2085passed2skipped9020subtests, exactCI37345177039 success. Earlier Done overclaim corrected and superseded, no deployment occurred. Pre-v0.7.0 retained-scan restore remains required.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
