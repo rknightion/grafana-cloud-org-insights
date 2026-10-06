@@ -1,10 +1,11 @@
 ---
 id: GCI-0095
 title: Publish a per-stack cost showback on the Commercial dashboard
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop13-root'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-06 10:23'
+updated_date: '2026-10-06 11:55'
 labels:
   - dashboards
   - cost
@@ -35,3 +36,9 @@ Owner decision D-SHOW13 (Rob, 2026-10-06, 'Full showback'): lift SPEC.md's exclu
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+D-SHOW13 after accepted spelling/text prerequisite: implement zero-series vendor per-stack showback, strict unattributed and reconciliation semantics, rendered local artifact proof and resource-bounded public query fixtures where cheap; final gate/CodeRabbit and independent review before root landing.
+<!-- SECTION:PLAN:END -->
