@@ -93,6 +93,104 @@ class DashboardNameAndGenericTextTest(unittest.TestCase):
                             r"75\.9%|11\.8%|6\.65%|11\.73%|4,458|2,439|3\.9x")
 
 
+class CostContextPublicationTest(unittest.TestCase):
+    """Requirements-derived contracts over the actual assembled publication."""
+
+    def artifact(self, card=None):
+        from bin import dashboards
+        return dashboards.assemble("cost", "infinity-uid", rate_card=card)[1]["spec"]
+
+    @staticmethod
+    def expressions(panel):
+        return [q["spec"]["query"]["spec"]["expr"]
+                for q in panel["spec"]["data"]["spec"]["queries"]]
+
+    def test_raw_vendor_quantities_keep_dimensions_and_unknown_semantics(self):
+        spec = self.artifact()
+        for key, metric in {
+            "context_attr_metrics_active": "grafanacloud_instance_attributed_active_series",
+            "context_attr_metrics_billable": "grafanacloud_instance_attributed_billable_usage",
+            "context_attr_logs_usage": "grafanacloud_logs_instance_attributed_usage",
+            "context_attr_traces_bytes": "grafanacloud_traces_instance_attributed_bytes_received_per_second",
+            "context_vendor_stack": "grafanacloud_instance_billable_usage",
+            "context_vendor_org": "grafanacloud_org_metrics_billable_series",
+        }.items():
+            panel = spec["elements"][key]
+            self.assertEqual(self.expressions(panel), [metric])
+            self.assertIn(metric, panel["spec"]["description"])
+            self.assertIn("unit and window unverified", panel["spec"]["description"])
+            self.assertEqual(panel["spec"]["vizConfig"]["spec"]["fieldConfig"]
+                             ["defaults"]["unit"], "short")
+        context = {k: v for k, v in spec["elements"].items() if k.startswith("context_")}
+        self.assertTrue(context)
+        for key, panel in context.items():
+            for q in panel["spec"]["data"]["spec"]["queries"]:
+                self.assertEqual(q["spec"]["query"]["datasource"]["name"], build.USAGE_UID)
+            self.assertNotIn("gcinsight_", " ".join(self.expressions(panel)))
+            self.assertNotIn("$stack", " ".join(self.expressions(panel)))
+        titles = [tab["spec"]["title"] for tab in spec["layout"]["spec"]["tabs"]]
+        for title in ("Vendor attribution", "Included allowance context", "DPM reconciliation",
+                      "Seat context"):
+            self.assertIn(title, titles)
+
+    def test_allowance_zero_is_unfiltered_and_not_a_quota_ratio(self):
+        spec = self.artifact()
+        for key, metric in {
+            "context_allow_metrics_included": "grafanacloud_org_metrics_included_series",
+            "context_allow_logs_included": "grafanacloud_org_logs_included_usage",
+            "context_allow_grafana_included": "grafanacloud_org_grafana_included_users",
+        }.items():
+            panel = spec["elements"][key]
+            self.assertEqual(self.expressions(panel), [metric])
+            self.assertIn("Zero included is valid", panel["spec"]["description"])
+            self.assertIn("not quota headroom", panel["spec"]["description"])
+
+    def test_dpm_model_is_separate_and_absence_does_not_fall_back_to_vendor(self):
+        from collector import ratecard
+        def card_for(basis):
+            return ratecard.loads(
+                "dimension,rate,per,unit,included,currency,period,billing_basis,included_dpm\n"
+                f"metrics_series,7,1000,series,0,GBP,month,{basis},"
+                + ("4" if basis == "dpm_aware" else "") + "\n")
+        for card in (None, card_for("base_rate_only")):
+            spec = self.artifact(card)
+            absent = spec["elements"]["context_model_unavailable"]["spec"]
+            self.assertIn("unavailable", absent["title"].lower())
+            self.assertNotIn("context_model_usage", spec["elements"])
+            self.assertIn("context_vendor_org", spec["elements"])
+        card = card_for("dpm_aware")
+        spec = self.artifact(card)
+        panel = spec["elements"]["context_model_usage"]
+        expr = self.expressions(panel)[0]
+        self.assertIn(" / 4", expr)
+        self.assertIn("clamp_min", expr)
+        self.assertIn("sum by(stack_id)", expr)
+        self.assertNotIn("billable_usage", expr)
+        self.assertNotIn("org_metrics", expr)
+        row = next(row for tab in spec["layout"]["spec"]["tabs"]
+                   if tab["spec"]["title"] == "DPM reconciliation"
+                   for row in tab["spec"]["layout"]["spec"]["rows"]
+                   if row["spec"]["title"] == "Model and vendor: separate populations and windows")
+        self.assertEqual(_placed_names(row), ["context_model_usage", "context_vendor_stack",
+                                              "context_vendor_org"])
+
+    def test_seats_never_invent_a_matched_cohort_or_plugin_active_count(self):
+        spec = self.artifact()
+        for key, metric in {
+            "context_seat_grafana_billable": "grafanacloud_grafana_instance_billable_users",
+            "context_seat_grafana_active": "grafanacloud_grafana_instance_active_user_count",
+            "context_seat_irm_billable": "grafanacloud_irm_billable_users",
+            "context_seat_irm_active": "grafanacloud_irm_active_user_count",
+            "context_seat_plugin_users": "grafanacloud_org_grafana_plugin_users",
+        }.items():
+            panel = spec["elements"][key]
+            self.assertEqual(self.expressions(panel), [metric])
+            self.assertIn("not a matched-cohort", panel["spec"]["description"])
+        absent = spec["elements"]["context_plugin_active_unavailable"]["spec"]
+        self.assertIn("No exact plugin active-user", absent["description"])
+        self.assertEqual(absent["data"]["spec"]["queries"], [])
+
+
 class LibraryPanelPublicationTest(unittest.TestCase):
     def test_optional_usage_table_schema_freshness_and_errors(self):
         from bin import dashboards

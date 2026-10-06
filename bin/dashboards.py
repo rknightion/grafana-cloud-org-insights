@@ -727,6 +727,7 @@ def _dpm_pricing(card: ratecard_model.RateCard | None) -> dict[str, str] | None:
         "active": active,
         "dpm_floor": dpm_floor,
         "after_active": after_active,
+        "before_usage": before_usage,
         "before": before_cost,
         "after": after_cost,
         "saving": saving,
@@ -755,6 +756,169 @@ def _dpm_regime_savings(dpm: dict[str, str]) -> str:
         )
         labelled.append(f'label_replace({selected}, "regime", "{regime}", "", "")')
     return "(" + " or ".join(labelled) + ")"
+
+
+def _cost_context(dpm: dict[str, str] | None):
+    """Raw vendor context, not showback money or an additive billing reconciliation.
+
+    Names are from the usage census or the customer-observed matrix appendix. Discovery of a name
+    does not qualify its unit, population or window. Keep unknown contracts visible, preserve vendor
+    dimensions without interpreting them, and never feed these observations into the rate-card model.
+    """
+    el: dict[str, Any] = {}
+    caveat = (
+        "Raw vendor quantity; unit and window unverified in the corrected feature matrix. "
+        "Last non-null observation in the dashboard range, which is not a billing window. "
+        "Dimensions remain separate vendor series, not additive or a complete estate total. "
+        "No money conversion; billable/overage names do not establish dollars. "
+        "Absent data is unavailable, never zero. Reads grafanacloud-usage directly; "
+        "attribution values are not copied into collector labels or stores."
+    )
+
+    def raw(key, title, metric, extra=""):
+        el[key] = build.barchart_panel(
+            title, metric, ds_uid=build.USAGE_UID, sort=None,
+            description=f"`{metric}`. {caveat} {extra}".strip())
+        return key
+
+    def unavailable(key, title, reason):
+        el[key] = build.text_panel(title, reason)
+        el[key]["spec"]["description"] = reason
+        return key
+
+    attribution = []
+    for signal, entries in (
+        ("Metrics", (
+            ("metrics_active", "active series", "grafanacloud_instance_attributed_active_series"),
+            ("metrics_samples", "samples rate", "grafanacloud_instance_attributed_samples_per_second"),
+            ("metrics_billable", "billable usage", "grafanacloud_instance_attributed_billable_usage"),
+            ("metrics_overage", "overage quantity", "grafanacloud_instance_attributed_overage"))),
+        ("Logs", (
+            ("logs_bytes", "received bytes rate", "grafanacloud_logs_instance_attributed_bytes_received_per_second"),
+            ("logs_usage", "usage", "grafanacloud_logs_instance_attributed_usage"),
+            ("logs_overage", "overage quantity", "grafanacloud_logs_instance_attributed_overage"),
+            ("logs_retention", "retention usage", "grafanacloud_logs_instance_attributed_retention_usage"),
+            ("logs_retention_overage", "retention overage quantity", "grafanacloud_logs_instance_attributed_retention_overage"))),
+        ("Traces", (
+            ("traces_bytes", "received bytes rate", "grafanacloud_traces_instance_attributed_bytes_received_per_second"),)),
+    ):
+        keys = [raw(f"context_attr_{key}", f"{signal} attributed {title} (raw)", metric)
+                for key, title, metric in entries]
+        attribution.append(build.row(f"{signal}: separate vendor quantities", keys, max_columns=2))
+
+    allowances = []
+    # Pair spellings are observed names, not evidence of matching measurement windows or cohorts.
+    for key, title, usage, included in (
+        ("metrics", "Metrics series", "metrics_billable_series", "metrics_included_series"),
+        ("logs", "Logs usage", "logs_usage", "logs_included_usage"),
+        ("logs_process", "Logs process usage", "logs_process_usage", "logs_process_included_usage"),
+        ("logs_retention", "Logs retention usage", "logs_retention_usage", "logs_retention_included_usage"),
+        ("traces", "Traces usage", "traces_usage", "traces_included_usage"),
+        ("traces_process", "Traces process usage", "traces_process_usage", "traces_process_included_usage"),
+        ("traces_retention", "Traces retention usage", "traces_retention_usage", "traces_retention_included_usage"),
+        ("profiles", "Profiles usage", "profiles_usage", "profiles_included_usage"),
+        ("profiles_process", "Profiles process usage", "profiles_process_usage", "profiles_process_included_usage"),
+        ("profiles_retention", "Profiles retention usage", "profiles_retention_usage", "profiles_retention_included_usage"),
+        ("grafana", "Grafana users", "grafana_billable_users", "grafana_included_users"),
+        ("irm", "IRM users", "irm_users", "irm_included_users"),
+        ("plugins", "Plugin users", "grafana_plugin_users", "grafana_plugin_included_users"),
+        ("app", "Application host hours", "app_o11y_billable_host_hours", "app_o11y_included_host_hours"),
+        ("db", "Database host hours", "db_o11y_billable_host_hours", "db_o11y_included_host_hours"),
+        ("infra_hosts", "Infrastructure host hours", "infra_o11y_billable_host_hours", "infra_o11y_included_host_hours"),
+        ("infra_containers", "Infrastructure container hours", "infra_o11y_billable_container_hours", "infra_o11y_included_container_hours"),
+        ("frontend", "Frontend sessions", "fe_o11y_billable_sessions", "fe_o11y_included_sessions"),
+        ("sm", "Synthetic check executions", "sm_billable_check_executions", "sm_included_check_executions"),
+        ("sm_browser", "Synthetic browser executions", "sm_browser_billable_check_executions", "sm_browser_included_check_executions"),
+        ("k6", "k6 VUh usage", "k6_virtual_user_hours_usage", "k6_virtual_user_hours_included_usage"),
+        ("k6_ip", "k6 IP usage", "k6_ip_usage", "k6_ip_included_usage"),
+        ("assistant", "Assistant users", "assistant_users", "assistant_included_users"),
+        ("ai", "Additional AI tokens", "ai_tokens_additional_tokens", "ai_tokens_included_additional_tokens"),
+    ):
+        note = ("Zero included is valid; not quota headroom, a remaining allowance, or excess spend. "
+                "Usage and included are side by side only: no subtraction or utilisation ratio "
+                "without a verified common unit, window and population.")
+        keys = [raw(f"context_allow_{key}_{role}", f"{title}: vendor {role} (raw)",
+                    f"grafanacloud_org_{suffix}", note)
+                for role, suffix in (("usage", usage), ("included", included))]
+        allowances.append(build.row(f"{title}: usage vs included (unqualified)", keys, max_columns=2))
+    # No matching org query-usage series is established by the roster. Show the parameters, not a
+    # fabricated query budget or a ratio of ingest to query usage.
+    allowances.append(build.row("Logs query parameters, not a computed quota", [
+        raw("context_allow_logs_query", "Vendor included query usage (raw)",
+            "grafanacloud_org_logs_query_included_usage", "Zero included is valid; not quota headroom."),
+        raw("context_allow_logs_query_ratio", "Vendor included query-to-ingest parameter (raw)",
+            "grafanacloud_org_logs_included_query_to_ingest_ratio",
+            "Zero included is valid; not quota headroom. No new quota interpretation is established."),
+    ], max_columns=2))
+
+    model_note = (
+        "Existing rate-card model only: per-stack max(rolling 30-day p95 active series, rolling "
+        "30-day p95 samples/s * 60 / card included DPM). Series-equivalents, not currency. "
+        "This rolling model is not the vendor calendar-month invoice or a complete-total claim; "
+        "input cadence/averaging is unverified. Only stacks with both inputs participate. "
+        "Vendor figures have their own unverified units, windows and populations: no substitution, "
+        "combination, difference or ratio between model and vendor. No vendor divisor feeds the model."
+    )
+    if dpm is not None:
+        model_key = raw("context_model_usage", "Modelled series-equivalents (rate card, 30d p95)",
+                        dpm["before_usage"], model_note)
+        # This expression has a qualified model unit, not the raw-vendor unknown-unit contract.
+        el[model_key]["spec"]["description"] = (
+            f"{model_note} Card included DPM: {dpm['included_dpm']}. "
+            "Model stays per stack and is not priced here.")
+        card_key = raw("context_model_divisor", "Model divisor: rate-card included DPM",
+                       f"vector({dpm['included_dpm']})", model_note)
+        el[card_key]["spec"]["description"] = (
+            f"Rate-card included DPM per series: {dpm['included_dpm']}. {model_note}")
+    else:
+        model_key = unavailable("context_model_unavailable", "Rate-card DPM model unavailable",
+                                "No DPM-aware metrics rate card supplied: model unavailable, not zero. "
+                                "Vendor figures remain independent and never substitute for it.")
+        card_key = unavailable("context_model_divisor_unavailable", "Rate-card divisor unavailable",
+                               "No qualified DPM-aware card divisor. The vendor parameter cannot "
+                               "supply or override the absent rate-card model.")
+    vendor_stack = raw("context_vendor_stack", "Vendor instance billable usage (raw)",
+                       "grafanacloud_instance_billable_usage")
+    vendor_org = raw("context_vendor_org", "Vendor org billable series (raw)",
+                     "grafanacloud_org_metrics_billable_series")
+    vendor_divisor = raw("context_vendor_divisor", "Vendor configured included DPM per series",
+                         "grafanacloud_org_metrics_included_dpm_per_series")
+    el[vendor_divisor]["spec"]["description"] = (
+        "`grafanacloud_org_metrics_included_dpm_per_series`: configured included DPM per series, "
+        "not measured consumption or cumulative monthly usage. Refresh/cadence and wire type "
+        "unverified. This vendor parameter is shown independently of the card divisor, never used "
+        "to substitute for or recalculate the rate-card model. Missing is unavailable, not zero.")
+
+    seats = []
+    seat_note = ("Separate vendor populations; not a matched-cohort utilisation ratio, unused seats "
+                 "or distinct-human adoption. Billing-side and active labels cannot be equated.")
+    for key, title, billable, active in (
+        ("grafana", "Grafana", "grafanacloud_grafana_instance_billable_users",
+         "grafanacloud_grafana_instance_active_user_count"),
+        ("irm", "IRM", "grafanacloud_irm_billable_users", "grafanacloud_irm_active_user_count"),
+    ):
+        seats.append(build.row(f"{title}: billable vs active (unmatched)", [
+            raw(f"context_seat_{key}_billable", f"{title} billable users (raw)", billable, seat_note),
+            raw(f"context_seat_{key}_active", f"{title} active users (raw)", active, seat_note),
+        ], max_columns=2))
+    seats.append(build.row("Plugins: billing-side context; active cohort unavailable", [
+        raw("context_seat_plugin_users", "Vendor org plugin users (raw; billable semantics unverified)",
+            "grafanacloud_org_grafana_plugin_users", seat_note),
+        unavailable("context_plugin_active_unavailable", "Plugin active-user comparison unavailable",
+                    "No exact plugin active-user or billable-user metric contract is established by "
+                    "the roster/corrected matrix. Org plugin users is raw billing-side context, not "
+                    "a verified billable or active cohort. No matched-cohort ratio or unused-seat claim."),
+    ], max_columns=2))
+    return el, [
+        build.rows_tab("Vendor attribution", attribution),
+        build.rows_tab("Included allowance context", allowances),
+        build.rows_tab("DPM reconciliation", [
+            build.row("Model and vendor: separate populations and windows",
+                      [model_key, vendor_stack, vendor_org], max_columns=3),
+            build.row("Independent included-DPM parameters", [card_key, vendor_divisor], max_columns=2),
+        ]),
+        build.rows_tab("Seat context", seats),
+    ]
 
 
 def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
@@ -1148,6 +1312,9 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
     ]
     if dpm_rows:
         tabs.insert(4, build.rows_tab("DPM-aware savings", dpm_rows))
+    context_elements, context_tabs = _cost_context(dpm)
+    el.update(context_elements)
+    tabs.extend(context_tabs)
     return "gcinsight-cost", "Grafana Cloud Org Insights - Cost", \
         "Pillar B: cost as diagnosis. The organisation's showback email already gives owners the number; this " \
         "says why it is that size and which lever moves it.", el, tabs
