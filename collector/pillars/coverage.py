@@ -28,10 +28,12 @@ SUMMARY_VIEW = "coverage_summary"
 ADOPTION_VIEW = "coverage_capability_adoption"
 ADOPTION_TARGET_VIEW = "coverage_capability_opportunities"
 
+# Reporting populations, not all provisioned stacks or inferred product entitlements.
+ADOPTION_OBSERVATIONS = ("synthetic_monitoring", "kubernetes", "knowledge_graph", "pdc")
 ADOPTION_CAPABILITIES = (
     "profiles", "slos", "traces", "span_metrics", "service_graphs",
     "native_histograms", "exemplars", "irm_oncall", "k6", "frontend_observability",
-)
+) + ADOPTION_OBSERVATIONS
 ADOPTION_USAGE_KEYS = ("metrics",) + ADOPTION_CAPABILITIES
 
 ADOPTION_DISPLAY = {
@@ -49,7 +51,7 @@ ADOPTION_DISPLAY = {
                           "Migrate a high-series histogram workload to native histograms"),
     "exemplars": ("Exemplars", "Stacks ingesting metrics in the same 24-hour window",
                   "Add exemplar propagation from metrics to traces"),
-    "irm_oncall": ("IRM / OnCall", "Stacks reporting the provisioned OnCall counter",
+    "irm_oncall": ("IRM / OnCall", "Stacks reporting the OnCall alert-group gauge",
                    "Onboard a service and its owning team to IRM / OnCall"),
     "k6": ("k6", "Stacks carrying a provisioned k6 organisation id",
            "Fund a first performance-test workload"),
@@ -57,12 +59,33 @@ ADOPTION_DISPLAY = {
         "Frontend Observability", "Stacks reporting the provisioned frontend usage series",
         "Instrument a customer-facing frontend for real-user monitoring",
     ),
+    "synthetic_monitoring": (
+        "Synthetic Monitoring", "Non-paused live stacks with measured billable-check execution "
+        "observations; absent series unknown, units unverified; not check inventory or human adoption",
+        "Review synthetic check production on a stack with measured zero execution observations",
+    ),
+    "kubernetes": (
+        "Kubernetes", "Non-paused live stacks with measured pod-info series observations; "
+        "absent series unknown, units unverified; not cluster/pod inventory or human adoption",
+        "Review Kubernetes telemetry on a stack with measured zero pod-info series observations",
+    ),
+    "knowledge_graph": (
+        "Knowledge Graph", "Non-paused live stacks with measured active-entity observations; "
+        "absent series unknown, units unverified; not datasource provisioning or human adoption",
+        "Review entity telemetry on a stack with measured zero active-entity observations",
+    ),
+    "pdc": (
+        "Private Datasource Connect", "Non-paused live stacks with measured connected-agent "
+        "observations; absent series unknown, units unverified; not network inventory or query activity",
+        "Review PDC connectivity on a stack with measured zero connected-agent observations",
+    ),
 }
 
 ADOPTION_WINDOW = {
     **{key: "24h" for key in ADOPTION_CAPABILITIES},
-    "irm_oncall": "cumulative alert-group counter",
+    "irm_oncall": "point-in-time alert-group gauge; producer window unspecified",
     "k6": "current billing period",
+    **{key: "24h query observation; producer window unverified" for key in ADOPTION_OBSERVATIONS},
 }
 
 INFRASTRUCTURE_IDENTITY = re.compile(
@@ -418,6 +441,12 @@ def _adoption_surface(
             population["frontend_observability"].add(slug)
             if (usage["frontend_observability"].get(stack_id) or 0) > 0:
                 used["frontend_observability"].add(slug)
+        for key in ADOPTION_OBSERVATIONS:
+            value = usage[key].get(stack_id)
+            if value is not None:
+                population[key].add(slug)
+                if value > 0:
+                    used[key].add(slug)
 
     metrics: Metrics = []
     rows: list[dict[str, Any]] = []
@@ -430,14 +459,25 @@ def _adoption_surface(
         )
         # DELIBERATE EXCEPTION TO absent-not-zero: this source measured the whole population and a zero
         # gap is the positive finding. Omitting it would make "no opportunity remains" look unavailable.
-        metrics.append(("gcinsight_coverage_capability_gap", {"kind": key}, float(len(gap))))
+        unknown_population = key in ADOPTION_OBSERVATIONS and not population[key]
+        if not unknown_population:
+            metrics.append(("gcinsight_coverage_capability_gap", {"kind": key}, float(len(gap))))
+        finding = _finding(key, len(gap))
+        if key in ADOPTION_OBSERVATIONS:
+            unknown = len(stack_by_slug) - len(population[key])
+            finding = (
+                f"{len(gap)} of {len(population[key])} measured stacks report zero observations; "
+                f"{unknown} of {len(stack_by_slug)} non-paused live stacks unknown. "
+                "Backend producing/configuration observations, not human adoption or entitlement. "
+                "Missing evidence is not a zero-use opportunity."
+            )
         rows.append({
             "Capability": display,
             "Population basis": basis,
-            "Population stacks": len(population[key]),
-            "Stacks using capability": len(used[key]),
-            "Opportunity stacks": len(gap),
-            "Finding": _finding(key, len(gap)),
+            "Population stacks": None if unknown_population else len(population[key]),
+            "Stacks using capability": None if unknown_population else len(used[key]),
+            "Opportunity stacks": None if unknown_population else len(gap),
+            "Finding": finding,
             "Fundable next step": next_step,
             "Window": ADOPTION_WINDOW[key],
             "Last seen": summary_last_seen,

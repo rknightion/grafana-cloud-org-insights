@@ -621,9 +621,11 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                note="mean over non-ephemeral services with at least four applicable components"),
     MetricSpec("gcinsight_coverage_service_applicable_components_mean", "K", {"version": 2},
                note="mean score denominator over exactly the same services as completeness"),
-    MetricSpec("gcinsight_coverage_capability_gap", "K", {"kind": 10},
-               note="provisioned or population-eligible stacks with no measured use, by a fixed "
-                    "capability enum. Deliberately emits measured zero gaps on the adoption surface"),
+    MetricSpec("gcinsight_coverage_capability_gap", "K", {"kind": 14},
+               note="fixed capability enum; four additional estate-only observation gaps track "
+                    "SM, Kubernetes, Knowledge Graph and PDC outreach closure with no stack multiplier. "
+                    "Reporting populations exclude missing observations; unknown populations emit "
+                    "nothing, measured zero gaps remain findings, not human adoption"),
     MetricSpec("coverage_service_register", "K", {"stack": STACK}, store="view",
                note="top-N named services with signal depth and explicit alert/dashboard metadata"),
     MetricSpec("coverage_technology_register", "K", {"stack": STACK, "kind": TECHNOLOGY}, store="view",

@@ -20,6 +20,22 @@ from collector.dashboards import build
 class DashboardNameAndGenericTextTest(unittest.TestCase):
     """Read the publication artifact, not just the expression constants."""
 
+    def test_coverage_observation_populations_and_call_list_disclaim_human_adoption(self):
+        from bin import dashboards
+        _, artifact = dashboards.assemble("coverage", "infinity-uid")
+        elements = artifact["spec"]["elements"]
+        for key, view in (("tbl_adoption", "coverage_capability_adoption"),
+                          ("tbl_adoption_targets", "coverage_capability_opportunities")):
+            spec = elements[key]["spec"]
+            query = spec["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+            self.assertTrue(query["url"].endswith(view + ".json"))
+            self.assertEqual(query["root_selector"], "rows")
+            self.assertEqual(query["parser"], "backend")
+            for text in ("Synthetic Monitoring", "Kubernetes", "Knowledge Graph", "PDC",
+                         "non-paused live stacks", "missing series", "not human adoption"):
+                self.assertIn(text, spec["description"])
+        self.assertIn("alert-group gauge", elements["tbl_adoption"]["spec"]["description"])
+
     def test_assembled_app_host_queries_use_witnessed_generation_names(self):
         from bin import dashboards
 

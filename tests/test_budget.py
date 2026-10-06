@@ -67,6 +67,15 @@ class BudgetShapeTest(unittest.TestCase):
         from collector.emit import hydrate
         self.assertEqual(budget.INPUT, len(hydrate.INPUT_OWNER))
 
+    def test_capability_gap_adds_only_four_estate_series_and_tracks_the_enum(self):
+        from collector.pillars.coverage import ADOPTION_CAPABILITIES
+        spec = next(s for s in CATALOGUE if s.name == "gcinsight_coverage_capability_gap")
+        self.assertEqual(spec.labels, {"kind": 14})
+        self.assertEqual(spec.series - 10, 4, "owner allowance is about five estate series")
+        self.assertEqual(spec.labels["kind"], len(ADOPTION_CAPABILITIES))
+        self.assertEqual(len(ADOPTION_CAPABILITIES), len(set(ADOPTION_CAPABILITIES)))
+        self.assertEqual(spec.store, "mimir")
+
     def test_technology_cardinality_tracks_the_registry(self):
         from collector import technology_registry
         self.assertEqual(budget.TECHNOLOGY, len(technology_registry.REGISTRY.entries))
@@ -215,6 +224,11 @@ class EveryPillarsEmissionIsDeclaredTest(unittest.TestCase):
 
 
 class RenderTest(unittest.TestCase):
+    def test_committed_budget_is_generated_from_the_catalogue(self):
+        document = pathlib.Path(__file__).resolve().parent.parent / "BUDGET.md"
+        with mock.patch.dict("os.environ", {"GCINSIGHT_METRIC_PREFIX": "gcinsight"}):
+            self.assertEqual(document.read_text(), budget.render_table() + "\n")
+
     def test_table_uses_the_configured_external_metric_identity(self):
         with mock.patch.dict("os.environ", {"GCINSIGHT_METRIC_PREFIX": "customer_insight"}):
             table = budget.render_table()

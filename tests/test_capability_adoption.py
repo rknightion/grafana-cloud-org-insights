@@ -347,6 +347,143 @@ class FootprintBoundaryTest(unittest.TestCase):
         self.assertEqual(result["reason"], "http_error")
 
 
+# Frozen observation contract, independent of the implementation's registry and query helper.
+NEW_OBSERVATIONS = {
+    "synthetic_monitoring": ("Synthetic Monitoring", "billable-check execution",
+        "max_over_time(sum by(stack_id)(grafanacloud_sm_billable_check_executions_per_second)[24h:5m])"),
+    "kubernetes": ("Kubernetes", "pod-info series",
+        "max_over_time(sum by(stack_id)(grafanacloud_instance_active_kube_pod_info_series)[24h:5m])"),
+    "knowledge_graph": ("Knowledge Graph", "active-entity",
+        "max_over_time(sum by(stack_id)(grafanacloud_asserts_instance_active_entities)[24h:5m])"),
+    "pdc": ("Private Datasource Connect", "connected-agent",
+        "max_over_time(sum by(stack_id)(grafanacloud_grafana_pdc_connected_agents)[24h:5m])"),
+}
+
+
+class NewObservationBoundaryTest(unittest.TestCase):
+    stacks = [
+        {"slug": "hub", "id": 101, "status": "active", "url": "https://hub.example.test"},
+        {"slug": "zero", "id": 202, "status": "active"},
+        {"slug": "unknown", "id": 303, "status": "active"},
+        {"slug": "paused", "id": 404, "status": "paused"},
+    ]
+
+    def probe(self, overrides=None):
+        bodies = {query: prometheus([(101, 7), (202, 0), (404, 9), (999, 9)])
+                  for _title, _basis, query in NEW_OBSERVATIONS.values()}
+        bodies.update(overrides or {})
+        return FootprintBoundaryTest.probe(self, bodies)
+
+    def compose(self, payload, stacks=None):
+        stacks = self.stacks if stacks is None else stacks
+        return compose.build_all(stacks, Coverage(tier="t2", total=len(stacks)),
+                                 signal_inventory={}, capability_adoption=payload, now=NOW)
+
+    def test_guarded_source_compose_view_and_dashboard_call_list(self):
+        import shutil
+        import tempfile
+        from bin import dashboards
+        from collector.dashboards import build
+        from collector.emit import s3
+
+        payload = self.probe()
+        observed = {parse_qs(urlsplit(r.full_url).query)["query"][0] for r in self.requests}
+        for _title, _basis, query in NEW_OBSERVATIONS.values():
+            self.assertIn(query, observed)
+        for request in self.requests:
+            self.assertEqual(request.get_method(), "GET")
+            self.assertEqual(urlsplit(request.full_url).netloc, "hub.example.test")
+            self.assertEqual(urlsplit(request.full_url).path,
+                             "/api/datasources/proxy/uid/grafanacloud-usage/api/v1/query")
+        metrics, views, meta = self.compose(payload)
+        rows = {row["Capability"]: row for row in views["coverage_capability_adoption"]}
+        for key, (title, basis, _query) in NEW_OBSERVATIONS.items():
+            row = rows[title]
+            self.assertEqual((row["Population stacks"], row["Stacks using capability"],
+                              row["Opportunity stacks"]), (2, 1, 1))
+            for text in ("Non-paused live stacks", basis, "absent", "unknown"):
+                self.assertIn(text, row["Population basis"])
+            self.assertIn("not human adoption", row["Finding"])
+            self.assertIn("producer window unverified", row["Window"])
+            self.assertIn("units unverified", row["Population basis"])
+            self.assertIn(("gcinsight_coverage_capability_gap", {"kind": key}, 1.0), metrics)
+            self.assertEqual([r[" Stack"] for r in views["coverage_capability_opportunities"]
+                              if r["Capability"] == title], ["zero"])
+        with tempfile.TemporaryDirectory() as tmp:
+            local = pathlib.Path(tmp)
+            for existing in (pathlib.Path(__file__).resolve().parent.parent /
+                             "testdata" / "views").glob("*.json"):
+                shutil.copyfile(existing, local / existing.name)
+            for name in ("coverage_capability_adoption", "coverage_capability_opportunities"):
+                (local / (name + ".json")).write_text(json.dumps(s3.view_payload(views[name], meta)))
+            with mock.patch.object(build, "VIEWS_DIR", tmp), mock.patch.object(build, "BUCKET", "offline"):
+                _, artifact = dashboards.assemble("coverage", "infinity-offline")
+            for panel_key in ("tbl_adoption", "tbl_adoption_targets"):
+                spec = artifact["spec"]["elements"][panel_key]["spec"]
+                query = spec["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+                self.assertEqual(query["parser"], "backend")
+                self.assertEqual(query["root_selector"], "rows")
+                public = json.loads((local / query["url"].rsplit("/", 1)[-1]).read_text())
+                self.assertTrue({title for title, _, _ in NEW_OBSERVATIONS.values()}.issubset(
+                    {row["Capability"] for row in public["rows"]}))
+                self.assertIn("not human adoption", spec["description"])
+
+    def test_empty_departed_paused_and_nullable_observations_are_unknown_not_zero(self):
+        for outcome in (prometheus([]), prometheus([(999, 4)]), prometheus([(404, 4)])):
+            with self.subTest(outcome=outcome):
+                payload = self.probe({query: outcome for _, _, query in NEW_OBSERVATIONS.values()})
+                metrics, views, _ = self.compose(payload)
+                rows = {r["Capability"]: r for r in views["coverage_capability_adoption"]}
+                for key, (title, _, _) in NEW_OBSERVATIONS.items():
+                    for column in ("Population stacks", "Stacks using capability", "Opportunity stacks"):
+                        self.assertIsNone(rows[title][column])
+                    self.assertNotIn(key, {labels["kind"] for name, labels, _ in metrics
+                                          if name == "gcinsight_coverage_capability_gap"})
+                    self.assertNotIn(title, {r["Capability"]
+                                            for r in views["coverage_capability_opportunities"]})
+        payload = self.probe()
+        for key in NEW_OBSERVATIONS:
+            payload["values"][key] = {"101": None}
+        metrics, views, _ = self.compose(payload)
+        rows = {r["Capability"]: r for r in views["coverage_capability_adoption"]}
+        self.assertTrue(all(rows[title]["Population stacks"] is None
+                            for title, _, _ in NEW_OBSERVATIONS.values()))
+
+    def test_new_query_failures_preserve_atomic_source_unavailability(self):
+        for _key, (title, _, query) in NEW_OBSERVATIONS.items():
+            for outcome in ((206, prometheus([(101, 1)])), RuntimeError("private-upstream"),
+                            prometheus([(101, "NaN")]), prometheus([(101, None)])):
+                with self.subTest(title=title, outcome=outcome):
+                    payload = self.probe({query: outcome})
+                    self.assertFalse(payload["available"])
+                    self.assertNotIn("values", payload)
+                    metrics, views, _ = self.compose(payload)
+                    self.assertFalse(any(name == "gcinsight_coverage_capability_gap"
+                                         for name, _, _ in metrics))
+                    self.assertFalse({t for t, _, _ in NEW_OBSERVATIONS.values()} & {
+                        r["Capability"] for r in views["coverage_capability_adoption"]})
+                    self.assertNotIn("private-upstream", json.dumps(payload))
+
+    def test_fresh_consumer_inventory_drops_stale_source_and_measured_zero_gap_remains(self):
+        payload = self.probe()
+        metrics, views, _ = self.compose(payload, [self.stacks[0], self.stacks[2]])
+        rows = {r["Capability"]: r for r in views["coverage_capability_adoption"]}
+        for key, (title, _, _) in NEW_OBSERVATIONS.items():
+            self.assertEqual(rows[title]["Population stacks"], 1)
+            self.assertEqual(rows[title]["Opportunity stacks"], 0)
+            self.assertIn(("gcinsight_coverage_capability_gap", {"kind": key}, 0.0), metrics)
+            self.assertNotIn(title, {r["Capability"]
+                                    for r in views["coverage_capability_opportunities"]})
+
+    def test_oncall_is_a_gauge_without_an_invented_period_or_cohort(self):
+        _, views, _ = self.compose(self.probe())
+        row = next(r for r in views["coverage_capability_adoption"] if r["Capability"] == "IRM / OnCall")
+        self.assertIn("gauge", row["Population basis"])
+        self.assertIn("gauge", row["Window"])
+        self.assertNotIn("cumulative", json.dumps(row))
+        self.assertNotIn("counter", json.dumps(row))
+
+
 class ComposeSeamTest(unittest.TestCase):
     def test_forwarding_changes_only_authorized_adoption_observations(self):
         fixture = json.loads((pathlib.Path(__file__).parent / "fixtures" /
@@ -439,6 +576,10 @@ class OpportunityArithmeticTest(unittest.TestCase):
                 "irm_oncall": {"101": 0.0},
                 "k6": {"101": 0.0},
                 "frontend_observability": {"101": 0.0},
+                "synthetic_monitoring": {"101": 0.0},
+                "kubernetes": {"101": 0.0},
+                "knowledge_graph": {"101": 0.0},
+                "pdc": {"101": 0.0},
             },
         }
 

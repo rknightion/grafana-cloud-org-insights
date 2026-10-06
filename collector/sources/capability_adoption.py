@@ -52,11 +52,18 @@ QUERIES: Mapping[str, str] = {
     "frontend_observability": _windowed(
         "grafanacloud_frontend_observability_instance_sessions_per_second"
     ),
+    # A 24h maximum of the reporting stack's observations, not product/API inventory,
+    # consumer activity or human adoption. Census name presence does not verify vendor
+    # units or producer windows. Empty vectors remain empty, never defaulted to zero.
+    "synthetic_monitoring": _windowed("grafanacloud_sm_billable_check_executions_per_second"),
+    "kubernetes": _windowed("grafanacloud_instance_active_kube_pod_info_series"),
+    "knowledge_graph": _windowed("grafanacloud_asserts_instance_active_entities"),
+    "pdc": _windowed("grafanacloud_grafana_pdc_connected_agents"),
 }
 
 RATE_QUERIES = frozenset({
     "metrics", "traces", "span_metrics", "service_graphs", "native_histograms",
-    "exemplars", "frontend_observability",
+    "exemplars", "frontend_observability", "synthetic_monitoring",
 })
 
 

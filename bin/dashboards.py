@@ -4024,7 +4024,13 @@ def d_coverage(ds: str):
             coverage_pillar.ADOPTION_VIEW, ds,
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.ADOPTION_VIEW],
             description="One row per capability with its population basis, measured use, opportunity "
-                        "count and a specific next step. Adaptive Metrics and Logs count configured "
+                        "count and a specific next step. Synthetic Monitoring, Kubernetes, Knowledge "
+                        "Graph and PDC use only non-paused live stacks with returned observations; "
+                        "missing series are unknown. These are producing/configuration observations, "
+                        "not human adoption, entitlement or product inventories. Their 24h query "
+                        "window is not a verified producer window, and vendor units are unverified. "
+                        "OnCall is an alert-group gauge, not current-period activity. "
+                        "Adaptive Metrics and Logs count configured "
                         "rules/drop patterns at a point in time, not activity or achieved savings. "
                         "Adaptive Traces and Application Observability show 24h backend observations "
                         "only on measured non-paused stacks; absent observations stay unknown, not zero. "
@@ -4036,7 +4042,11 @@ def d_coverage(ds: str):
             coverage_pillar.ADOPTION_TARGET_VIEW, ds,
             schema=coverage_pillar.VIEW_SCHEMAS[coverage_pillar.ADOPTION_TARGET_VIEW],
             description="Stacks showing no use inside the stated capability population, ranked by "
-                        "active series so the largest existing telemetry footprints lead the queue."),
+                        "active series so the largest existing telemetry footprints lead the queue. "
+                        "Synthetic Monitoring, Kubernetes, Knowledge Graph and PDC targets require "
+                        "returned zero observations on non-paused live stacks; missing series never "
+                        "enter this call list. These observations are not human adoption or entitlement; "
+                        "vendor units and producer windows remain unverified."),
         "n_synthetic_age": build.stat_panel(
             "Synthetic inventory input age",
             'time() - max_over_time(timestamp(gcinsight_input_age_seconds'

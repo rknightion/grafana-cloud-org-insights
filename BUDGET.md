@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **9,734** |
-| Phase 1 only | 9,733 |
+| **Declared (all phases)** | **9,738** |
+| Phase 1 only | 9,737 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -27,9 +27,9 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | F | 21 |
 | I | 895 |
 | J | 4,400 |
-| K | 969 |
+| K | 973 |
 | scan | 330 |
-| **Total** | **9,734** |
+| **Total** | **9,738** |
 
 ## Metrics
 
@@ -67,8 +67,8 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_maturity_dimension_mean` | D | `dimension`(9), `version`(2) | 18 | 1 | estate mean per rubric dimension  -  answers 'which dimension is the estate weakest on', which the per-stack view cannot trend without a stack-by-dimension cross product. Mean is over the stacks that SCORED that dimension, excluding the four unscored reasons |
 | `gcinsight_dashboards_estate_surface_requests` | J | `surface`(8), `version`(2) | 16 | 1 | daily query-request trend by the closed Grafana surface enum; point-in-time per-stack detail stays in insights_surface_usage |
 | `gcinsight_dashboards_estate_surface_stacks` | J | `surface`(8), `version`(2) | 16 | 1 | daily count of measured stacks with at least one request through each observed surface |
+| `gcinsight_coverage_capability_gap` | K | `kind`(14) | 14 | 1 | fixed capability enum; four additional estate-only observation gaps track SM, Kubernetes, Knowledge Graph and PDC outreach closure with no stack multiplier. Reporting populations exclude missing observations; unknown populations emit nothing, measured zero gaps remain findings, not human adoption |
 | `gcinsight_scan_stacks_skipped` | scan | `tier`(4), `reason`(3) | 12 | 1 | paused, unresolvable, out_of_scope |
-| `gcinsight_coverage_capability_gap` | K | `kind`(10) | 10 | 1 | provisioned or population-eligible stacks with no measured use, by a fixed capability enum. Deliberately emits measured zero gaps on the adoption surface |
 | `gcinsight_value_benchmark` | F | `kind`(10) | 10 | 1 | internal benchmarking: median/p90/worst across the dimensions that have data |
 | `gcinsight_estate_stacks_by_region` | A | `region`(8) | 8 | 1 |  |
 | `gcinsight_maturity_stacks_by_tier` | D | `kind`(4), `version`(2) | 8 | 1 |  |
