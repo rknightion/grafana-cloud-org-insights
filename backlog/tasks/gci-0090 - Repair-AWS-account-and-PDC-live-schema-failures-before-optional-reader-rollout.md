@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@loop12-root'
 created_date: '2026-10-03 18:50'
-updated_date: '2026-10-05 15:10'
+updated_date: '2026-10-06 09:58'
 labels: []
 dependencies: []
 priority: high
@@ -37,4 +37,6 @@ The v0.6.0 dev T2 rollout read five live stacks but cloud_accounts was available
 
 <!-- SECTION:NOTES:BEGIN -->
 Loop12: 1 implementation attempt,0 review-repair rounds. Bounded PDC metadata repair landed bbb9668dd89b5733d6817b6cfb1fdaaf1d05cb57 with real guarded GET four-shape red-first proofs, complete CodeRabbit zero findings, independent review PASS, clean integrated/composed gates and CI37329484807 success. AWS exact200 data:null on3/5 remains unavailable, never zero. Official CSP3.39.0 UI consumer normalizes null but discards query errors; independent high review rejects that as complete-empty API proof. Needs endpoint-specific authoritative backend contract distinguishing complete empty from unreadable, visibility-filtered or partial. AC2 full repair and AC3 live dev proof not satisfied. Stable0.7.0 release/dev/customer parked on this dependency; no deployment writes. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop12-evidence/R-shape/ and /Users/rob/repos/grafana-cloud-org-insights/codex/loop12-evidence/R-null-frontend/.
+
+Owner decision D-AWS13 (Rob, 2026-10-06): exact HTTP 200 with body exactly {"data": null} from the AWS cloud-accounts route means zero accounts (complete empty), witnessed by owner ground truth that m7kni, portinapushtests and rkaidev have no AWS accounts configured, with robk and portina returning arrays under the same reader scope as positive controls. Any other null placement, extra key, non-200 or error body stays unavailable. Release, dev and customer may proceed on this repair.
 <!-- SECTION:NOTES:END -->

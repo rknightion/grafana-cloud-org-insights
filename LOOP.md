@@ -19,6 +19,8 @@ grafana-stack: none
 - A named stack is per goal. This file names none.
 
 ## Traps
+- `just check` takes 413-696 s and `just test` self-limits at 540 s. Give a gate run at least
+  900 s; a 600 s or 700 s outer watchdog fails a healthy run, and a null exit is not a pass.
 - Two estate tiers, never mixed: a write-capable internal deployment tier, and a customer estate
   reached read-only (GET or existing read-only RPC routes) unless a goal names an exact write fence.
   Reader, image and publication grants never imply bucket lifecycle or policy writes.
@@ -33,9 +35,10 @@ grafana-stack: none
   tier's real lookback window. A gap is an absent series, never a zero.
 - Promoted images are pinned by immutable digest. Consumer images are separate and unsigned; verify the
   public image with cosign against the pinned reusable identity, issuer, repository and source SHA.
-- Rollouts use `just plan-out` then `just apply-plan-auto` for the same saved plan, never an implicit
-  replan. Restore suspended schedules to their saved states, verify live, and end with a no-change
-  plan. An unknown plan value is not equality: compare the effective scheduler policy after apply.
+- Rollouts run in the deployment repo, not here: its `just plan-out` then `just apply-plan-auto`
+  (not recipes in this justfile) apply the same saved plan, never an implicit replan.
+  Restore suspended schedules to their saved states, verify live, and end with a no-change plan. An
+  unknown plan value is not equality: compare the effective scheduler policy after apply.
 - A binary or config rollback does not undo a hydration schema change; restore the matching retained
   scan version after a fresh equality check.
 - Before a manual or scheduled-task run, confirm no natural run is active or imminent. Validate the
