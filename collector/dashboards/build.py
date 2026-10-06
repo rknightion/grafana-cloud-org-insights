@@ -617,11 +617,15 @@ def cross_source_ratio_stat_panel(
 
 def timeseries_panel(title: str, exprs: Sequence[tuple[str, str]], *, description: str = "",
                      unit: str = "short", stacked: bool = False,
-                     ds_uid: str = PROM_UID) -> dict[str, Any]:
+                     ds_uid: str = PROM_UID, integrity: bool = False) -> dict[str, Any]:
     """A trend from PromQL. `exprs` is a sequence of `(expr, legend)`.
 
     This is what the whole remote_write path exists for: the S3 views are point-in-time snapshots, so
     without these panels nothing on the dashboards shows a direction of travel.
+
+    Ordinary trends intentionally connect sparse periodic observations to show direction, not
+    continuous measurement. Integrity trends use points only: a sparse frame may omit timestamps
+    rather than insert nulls, so spanNulls=False alone cannot prevent interpolation during outages.
     """
     queries = [
         prom_query(expr, ds_uid, ref_id=chr(ord("A") + i), legend=legend)
@@ -630,15 +634,17 @@ def timeseries_panel(title: str, exprs: Sequence[tuple[str, str]], *, descriptio
     return _panel(title, description, queries, viz("timeseries", {
         "options": {
             "legend": {"calcs": [], "displayMode": "list", "placement": "bottom",
-                       "showLegend": len(exprs) > 1},
+                       "showLegend": integrity or len(exprs) > 1},
             "tooltip": {"mode": "single", "sort": "none"},
         },
         "fieldConfig": {
             "defaults": {
                 "unit": unit,
                 "custom": {
-                    "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10 if not stacked else 40,
-                    "showPoints": "never", "spanNulls": True,
+                    "drawStyle": "points" if integrity else "line",
+                    "lineWidth": 0 if integrity else 2,
+                    "fillOpacity": 0 if integrity else (10 if not stacked else 40),
+                    "showPoints": "always" if integrity else "never", "spanNulls": not integrity,
                     "stacking": {"mode": "normal" if stacked else "none", "group": "A"},
                     "axisPlacement": "auto", "gradientMode": "none",
                 },
@@ -657,8 +663,9 @@ REDUCED_VALUE_FIELD = "Last *"
 def barchart_panel(title: str, expr: str, *, description: str = "", legend: str = "__auto",
                    ds_uid: str = PROM_UID, unit: str = "short", sort: str | None = "desc",
                    limit: int | None = None,
-                   thresholds: Sequence[tuple[float | None, str]] | None = None) -> dict[str, Any]:
-    """A ranked bar chart for topk-style breakdowns. Range query + `lastNotNull`, never instant.
+                   thresholds: Sequence[tuple[float | None, str]] | None = None,
+                   endpoint: bool = False) -> dict[str, Any]:
+    """A ranked bar chart for breakdowns. Range + `lastNotNull` unless explicitly endpoint-qualified.
 
     Same reason as `stat_panel`: an instant query against an hourly-written series is empty most of the
     time. The `reduceValues` transformation turns the reduced series into one bar each.
@@ -679,6 +686,11 @@ def barchart_panel(title: str, expr: str, *, description: str = "", legend: str 
 
     `unit` is not cosmetic either: a 0-1 ratio rendered with the default `short` unit reads as a bare
     decimal, so `0.87` looks like a count rather than 87%.
+
+    `endpoint=True` is reserved for expressions with explicit periodic-sample windows and endpoint
+    availability qualification. They evaluate once at the selected range end: reducing a historical
+    range with lastNotNull instead would resurrect expired health evidence. Other bars keep their
+    established range/reduction behavior.
     """
     defaults: dict[str, Any] = {"unit": unit, "custom": {"axisPlacement": "auto"}}
     if thresholds:
@@ -687,7 +699,8 @@ def barchart_panel(title: str, expr: str, *, description: str = "", legend: str 
             "steps": [{"value": value, "color": color} for value, color in thresholds],
         }
         defaults["custom"]["gradientMode"] = "none"
-    panel = _panel(title, description, [prom_query(expr, ds_uid, legend=legend)], viz("barchart", {
+    query = prom_query(expr, ds_uid, legend=legend, instant=endpoint)
+    panel = _panel(title, description, [query], viz("barchart", {
         "options": {"orientation": "horizontal", "showValue": "auto", "xTickLabelRotation": 0,
                     "legend": {"showLegend": False, "displayMode": "list", "placement": "bottom"},
                     "tooltip": {"mode": "single", "sort": "none"},

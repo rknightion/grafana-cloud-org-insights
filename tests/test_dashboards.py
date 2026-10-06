@@ -17,6 +17,53 @@ from unittest import mock
 from collector.dashboards import build
 
 
+class CollectorIntegrityTest(unittest.TestCase):
+    """Integrity must be read from endpoint evidence and actual sampled trends."""
+
+    def test_failure_bars_use_endpoint_query_and_matching_tier_evidence(self):
+        from bin import dashboards, alerts
+        panel = dashboards.assemble("estate", "infinity-uid")[1]["spec"]["elements"]["b_failed"]["spec"]
+        query = panel["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+        self.assertTrue(query["instant"], "range lastNotNull resurrects a historical healthy zero")
+        self.assertFalse(query["range"])
+        expr = query["expr"]
+        self.assertNotIn("vector(0)", expr)
+        for tier in ("t1", "t2", "t3"):
+            with self.subTest(tier=tier):
+                self.assertIn(f'gcinsight_scan_stacks_failed{{tier="{tier}"}}[24h]', expr)
+                self.assertIn(f'gcinsight_scan_completed_timestamp_seconds{{tier="{tier}"}}[24h]', expr)
+                self.assertIn(f'gcinsight_scan_coverage_ratio{{tier="{tier}"}}[24h]) == 1', expr)
+                self.assertIn(f"time() - {alerts.TIERS[tier][1]}", expr)
+        self.assertNotIn('tier="t4"', expr)
+        self.assertIn("not all tiers", panel["description"])
+        self.assertIn("publication", panel["description"])
+
+    def test_integrity_trends_have_visible_samples_and_do_not_fill_gaps(self):
+        from bin import dashboards
+        elements = dashboards.assemble("estate", "infinity-uid")[1]["spec"]["elements"]
+        for key in ("t_coverage", "t_accounting", "t_carry", "t_inputs", "t_input_avail"):
+            panel = elements[key]["spec"]
+            custom = panel["vizConfig"]["spec"]["fieldConfig"]["defaults"]["custom"]
+            with self.subTest(panel=key):
+                self.assertFalse(custom["spanNulls"])
+                self.assertEqual(custom["showPoints"], "always")
+                # A sparse response can omit timestamps instead of inserting nulls. No line
+                # may interpolate between those points, even when spanNulls=False.
+                self.assertEqual(custom["drawStyle"], "points")
+                self.assertEqual(custom["lineWidth"], 0)
+                self.assertEqual(custom["fillOpacity"], 0)
+                self.assertTrue(panel["vizConfig"]["spec"]["options"]["legend"]["showLegend"])
+                self.assertEqual(panel["data"]["spec"]["transformations"], [])
+                for q in panel["data"]["spec"]["queries"]:
+                    query = q["spec"]["query"]["spec"]
+                    self.assertTrue(query["range"])
+                    self.assertNotRegex(query["expr"], r"over_time|vector\(0\)")
+                self.assertIn("gap", panel["description"].lower())
+        # Non-integrity trends still deliberately connect sparse periodic observations.
+        self.assertTrue(elements["t_stacks"]["spec"]["vizConfig"]["spec"]["fieldConfig"]
+                        ["defaults"]["custom"]["spanNulls"])
+
+
 class DashboardNameAndGenericTextTest(unittest.TestCase):
     """Read the publication artifact, not just the expression constants."""
 

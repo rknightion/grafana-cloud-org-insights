@@ -429,6 +429,30 @@ def resolve_folder_uid(token: str) -> str:
 # Each returns (uid, title, description, elements, tabs). Views are named exactly as the pillars emit
 # them; a typo fails at build time because read_view() 404s.
 
+def _scan_failure_peaks() -> str:
+    """Published 24h failure peaks, qualified separately for each API-scanning tier.
+
+    Use the existing alert age thresholds, not a dashboard-invented cadence. Completion proves an
+    accepted publication, not perfect coverage; only its tier's complete coverage can qualify zero.
+    T4 has no stack accounting. The endpoint query cannot resurrect an old healthy range member.
+    """
+    from bin.alerts import TIERS
+
+    expressions = []
+    for tier in ("t1", "t2", "t3"):
+        selector = f'{{tier="{tier}"}}'
+        completed = f'max_over_time(gcinsight_scan_completed_timestamp_seconds{selector}[24h])'
+        failures = f'max_over_time(gcinsight_scan_stacks_failed{selector}[24h])'
+        complete = f'(last_over_time(gcinsight_scan_coverage_ratio{selector}[24h]) == 1)'
+        # `or on(tier)` fills only a tier with NO recorded reason, never one zero per absent reason.
+        expressions.append(
+            f'(({failures} or on(tier) (0 * {complete})) '
+            f'and on(tier) (({completed} >= time() - {TIERS[tier][1]}) '
+            f'and ({completed} <= time())))'
+        )
+    return " or ".join(expressions)
+
+
 def d_estate(ds: str):
     el = {
         "n_stacks": build.stat_panel(
@@ -563,12 +587,15 @@ def d_estate(ds: str):
             "Scan coverage by tier",
             [('gcinsight_scan_coverage_ratio{tier="t1"}', "t1"),
              ('gcinsight_scan_coverage_ratio{tier="t2"}', "t2"),
-             ('gcinsight_scan_coverage_ratio{tier="t3"}', "t3")], unit="percentunit",
+             ('gcinsight_scan_coverage_ratio{tier="t3"}', "t3")], unit="percentunit", integrity=True,
             description="Below 1.0 means stacks failed. A partial scan is reported as partial, never as "
-                        "a smaller estate."),
+                        "a smaller estate. Points are sampled publications; a gap is unavailable, "
+                        "not interpolated coverage."),
         "t_carry": build.timeseries_panel(
             "Carry-forward age", [('gcinsight_carry_forward_age_seconds{tier="t1"}', "t1 state age")],
-            unit="s", description="Age of the data-plane state the hourly tier is republishing. ALERT ON "
+            unit="s", integrity=True,
+            description="Sampled publication age; a gap is unavailable, not interpolated freshness. "
+                        "Age of the data-plane state the hourly tier is republishing. ALERT ON "
                                   "THIS. Past the staleness cap the hourly tier stops republishing and "
                                   "the dependent panels go empty rather than presenting old figures as "
                                   "current - the emptiness is the honest signal. The cap is set in "
@@ -583,16 +610,18 @@ def d_estate(ds: str):
         # exactly like a failing tier.
         "t_accounting": build.timeseries_panel(
             "Stacks scanned vs scannable, by tier",
-            [('max_over_time(gcinsight_scan_stacks_total{tier=~"t1|t2|t3"}[24h])', "{{tier}} total"),
-             ('max_over_time(gcinsight_scan_stacks_scannable{tier=~"t1|t2|t3"}[24h])', "{{tier}} scannable"),
-             ('max_over_time(gcinsight_scan_stacks_scanned{tier=~"t1|t2|t3"}[24h])', "{{tier}} scanned")],
+            [('gcinsight_scan_stacks_total{tier=~"t1|t2|t3"}', "{{tier}} total"),
+             ('gcinsight_scan_stacks_scannable{tier=~"t1|t2|t3"}', "{{tier}} scannable"),
+             ('gcinsight_scan_stacks_scanned{tier=~"t1|t2|t3"}', "{{tier}} scanned")],
+            integrity=True,
             description="The accounting behind the coverage ratio: total estate, the part a healthy scan "
                         "is expected to reach, and what it actually reached. `scannable` is below `total` "
                         "by the number of PAUSED stacks, which are excluded by design - counting them as "
                         "failures would cap coverage below 100% for ever and train everyone to ignore it. "
                         "T4 is excluded because it makes no API calls and scans nothing, so it has no "
                         "coverage to report; including it would render a permanent gap that looks like a "
-                        "dead tier."),
+                        "dead tier. Actual sampled publications are shown together, not independent "
+                        "24h maxima from different scans. A gap is unavailable, not interpolated accounting."),
         "b_skipped": build.barchart_panel(
             "Stacks skipped, by reason",
             'max_over_time(gcinsight_scan_stacks_skipped{tier="t1"}[24h])', legend="{{reason}}",
@@ -600,14 +629,17 @@ def d_estate(ds: str):
                         "have no running Grafana to query. These are excluded from the coverage "
                         "denominator rather than counted as failures."),
         "b_failed": build.barchart_panel(
-            "Stacks that FAILED, by reason",
-            'max_over_time(gcinsight_scan_stacks_failed{tier=~"t1|t2|t3"}[24h]) or on() vector(0)',
-            legend="{{reason}}",
-            description="Real scan failures, by cause. **An empty result here means zero failures, which "
-                        "is the one place on these dashboards where absence does NOT mean 'not "
-                        "measurable'** - the collector emits a series only for a failure reason it "
-                        "actually recorded, so nothing recorded means nothing failed. `or vector(0)` "
-                        "makes that read as 0 rather than as 'No data', which would suggest an outage."),
+            "Published failure peaks (24h), by tier and reason", _scan_failure_peaks(), endpoint=True,
+            description="Endpoint of the selected time range, not last non-null historical health. "
+                        "Failure-reason peaks in the preceding 24h of publications (including carried "
+                        "samples), not an event count or a claim every scan succeeded. Zero requires no "
+                        "published failure reason in that window, that tier's latest coverage of 1 in "
+                        "the same window, and its own completion within the existing alert age threshold: "
+                        "T1 3h, T2 36h, T3 18h (`bin/alerts.py` TIERS). The 24h matching window also "
+                        "limits T2 evidence; these are publication/freshness qualifications, not immediate "
+                        "process liveness. Missing or stale completion is unavailable, not zero. Each "
+                        "bar qualifies only its named tier, not all tiers; absent tiers are unknown. "
+                        "T4 has no stack failures and is excluded."),
         "t_duration": build.timeseries_panel(
             "Scan runtime by tier",
             [('max_over_time(gcinsight_scan_duration_seconds[24h])', "{{tier}}")],
@@ -641,8 +673,9 @@ def d_estate(ds: str):
         "t_inputs": build.timeseries_panel(
             "Age of each input, by consuming tier",
             [('gcinsight_input_age_seconds', "{{tier}} <- {{input}}")],
-            unit="s",
-            description="Since every tier now composes from the full input set - pulling what it did not "
+            unit="s", integrity=True,
+            description="Sampled publication age; a gap is unavailable, not interpolated freshness. "
+                        "Since every tier now composes from the full input set - pulling what it did not "
                         "gather from the tier that did - this is the age of the DATA each published figure "
                         "was computed from, as opposed to the age of the run that published it. The two "
                         "differ by hours and it is the input age that governs how current a number is. A "
@@ -650,8 +683,9 @@ def d_estate(ds: str):
                         "stopped; past the cap its dependent views stop being republished."),
         "t_input_avail": build.timeseries_panel(
             "Inputs available, by consuming tier",
-            [('gcinsight_input_available', "{{tier}} <- {{input}}")],
-            description="1 means the input was available and fresh enough to use; 0 means the views "
+            [('gcinsight_input_available', "{{tier}} <- {{input}}")], integrity=True,
+            description="Points are sampled publications; a gap is unavailable, not interpolated "
+                        "availability. 1 means the input was available and fresh enough to use; 0 means the views "
                         "depending on it were WITHHELD rather than published with zeros in place of the "
                         "figures it feeds. A drop to 0 here is the signal that a table elsewhere has "
                         "stopped advancing - which is deliberately what happens instead of that table "
