@@ -1,9 +1,11 @@
 ---
 id: GCI-0105
 title: Correct unsupported dashboard interpretation and absence claims
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop13-root'
 created_date: '2026-10-06 10:46'
+updated_date: '2026-10-06 14:24'
 labels:
   - dashboards
   - loop13
@@ -35,3 +37,9 @@ The operator relevance review found existing titles and descriptions that imply 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Bounded P1 semantic wording corrections after planned dashboard chain: inspect doc-0007 recommendations, preserve all formulas/query/data/selection contracts, assemble actual artifacts with honest gauge/seven-day and absence/configuration framing. Red-first meaningful artifact checks, final gate and independent review; no quantitative cohort repair.
+<!-- SECTION:PLAN:END -->
