@@ -3097,6 +3097,7 @@ def operations_health_panels() -> dict:
             description=f"Source: `{metric}`. {caveat}" + scope,
         )
         panel["spec"]["vizConfig"]["spec"]["fieldConfig"]["defaults"]["custom"]["spanNulls"] = False
+        panel["spec"]["vizConfig"]["spec"]["options"]["legend"]["showLegend"] = True
         panels[key] = panel
     panels["health_export_sample_age"] = build.timeseries_panel(
         "Cloud Logs Export status sample age (not sync freshness)",
@@ -3111,6 +3112,7 @@ def operations_health_panels() -> dict:
                     "A series older than the datasource lookback becomes absent, not an ever-growing age.",
     )
     panels["health_export_sample_age"]["spec"]["vizConfig"]["spec"]["fieldConfig"]["defaults"]["custom"]["spanNulls"] = False
+    panels["health_export_sample_age"]["spec"]["vizConfig"]["spec"]["options"]["legend"]["showLegend"] = True
     panels["health_scope"] = build.text_panel(
         "Backend health: observation ceiling",
         "**These are diagnostic source observations, not a healthy/unhealthy verdict.** "

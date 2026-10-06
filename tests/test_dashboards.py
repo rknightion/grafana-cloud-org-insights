@@ -74,6 +74,7 @@ class DashboardNameAndGenericTextTest(unittest.TestCase):
                 self.assertIn("group_left(slug)", expr)
                 self.assertIn("count by(stack_id)", expr)
                 self.assertEqual(query["spec"]["legendFormat"], "__auto")
+                self.assertTrue(spec["vizConfig"]["spec"]["options"]["legend"]["showLegend"])
                 fields = spec["vizConfig"]["spec"]["fieldConfig"]
                 self.assertEqual(fields["defaults"]["unit"], "none")
                 self.assertFalse(fields["defaults"]["custom"]["spanNulls"])
@@ -94,6 +95,7 @@ class DashboardNameAndGenericTextTest(unittest.TestCase):
         expr = panel["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]["expr"]
         self.assertIn('time() - timestamp(grafanacloud_logs_instance_cloud_logs_export_status{stack_id!=""})', expr)
         self.assertEqual(panel["vizConfig"]["spec"]["fieldConfig"]["defaults"]["unit"], "s")
+        self.assertTrue(panel["vizConfig"]["spec"]["options"]["legend"]["showLegend"])
         for text in ("Units: verified", "PromQL", "not file sync freshness", "not health"):
             self.assertIn(text, panel["description"])
         missing = artifact["spec"]["elements"]["health_loki_unverified"]["spec"]
