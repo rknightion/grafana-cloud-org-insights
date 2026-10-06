@@ -1,9 +1,11 @@
 ---
 id: GCI-0106
 title: Keep collector health trends honest across publication gaps
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop13-root'
 created_date: '2026-10-06 10:46'
+updated_date: '2026-10-06 15:01'
 labels:
   - dashboards
   - loop13
@@ -35,3 +37,9 @@ The operator relevance review found Estate failure bars with unconditional zero 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+P2 integrity-only: inspect existing completion/freshness policy and real artifact expressions; red-first stopped/stale/healthy-zero public query reproduction. No arbitrary cutoff or new metric/schema. Remove false-health fallbacks/bridging only where matching completion evidence suffices, otherwise stop and return precise contract gap. Final gate/CR and independent review before integration.
+<!-- SECTION:PLAN:END -->
