@@ -1,11 +1,11 @@
 ---
 id: GCI-0090
 title: Repair AWS-account and PDC live schema failures before optional-reader rollout
-status: Parked
+status: In Progress
 assignee:
-  - '@loop12-root'
+  - '@loop13-root'
 created_date: '2026-10-03 18:50'
-updated_date: '2026-10-06 09:58'
+updated_date: '2026-10-06 10:38'
 labels: []
 dependencies: []
 priority: high
@@ -32,6 +32,12 @@ The v0.6.0 dev T2 rollout read five live stacks but cloud_accounts was available
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Loop13: red-first exact-200 exact data:null repair in isolated candidate, CodeRabbit and independent review before land, composed gate and exact-SHA CI; dev reader proof remains AC3.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 

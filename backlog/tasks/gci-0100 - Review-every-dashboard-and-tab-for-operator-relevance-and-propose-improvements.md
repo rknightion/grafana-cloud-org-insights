@@ -1,9 +1,11 @@
 ---
 id: GCI-0100
 title: Review every dashboard and tab for operator relevance and propose improvements
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop13-root'
 created_date: '2026-10-06 10:23'
+updated_date: '2026-10-06 10:38'
 labels:
   - dashboards
   - loop13
@@ -31,3 +33,9 @@ Read-only review of all eleven dashboards and their tabs from an org operator's 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Read-only dashboard/tab proposal; root records durable doc and admits only panel-only zero-series changes with live-name witnesses.
+<!-- SECTION:PLAN:END -->

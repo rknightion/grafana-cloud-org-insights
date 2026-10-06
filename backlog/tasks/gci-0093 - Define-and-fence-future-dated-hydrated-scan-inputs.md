@@ -1,10 +1,11 @@
 ---
 id: GCI-0093
 title: Define and fence future-dated hydrated scan inputs
-status: Parked
-assignee: []
+status: In Progress
+assignee:
+  - '@loop13-root'
 created_date: '2026-10-05 21:51'
-updated_date: '2026-10-06 09:58'
+updated_date: '2026-10-06 10:38'
 labels:
   - hydration
   - follow-on
@@ -32,6 +33,12 @@ Independent loop12 library security review corrected a worker overclaim: collect
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Loop13: public-boundary red-first skew tests; one shared five-minute constant; preserve own-input/schema contracts, CodeRabbit and independent review before land, composed gate.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
