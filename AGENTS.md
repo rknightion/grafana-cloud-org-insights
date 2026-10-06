@@ -98,7 +98,11 @@ off anything but the live inventory.
 - Current main's optional `faro-apps`, `ml-jobs`, `cloud-accounts`, `pdc-networks` and `reports`
   readers are default-off count-only GET sources. They require exact HTTP 200; an otherwise valid
   HTTP 206 body is unavailable, not a complete inventory. Do not globally redefine `Response.ok`
-  to enforce this source contract. `irm-integrations` now also requires exact HTTP 200 at its
+  to enforce this source contract. The AWS `cloud-accounts` route alone treats exact HTTP 200
+  with a parsed body containing only `{"data": null}` as available with account count zero,
+  under the owner's D-AWS13 complete-empty witness. Other null placements, extra keys, error
+  bodies and non-200 responses remain unavailable; this is not generic null normalization.
+  `irm-integrations` now also requires exact HTTP 200 at its
   source boundary; valid 206 JSON is unavailable and cannot overwrite its last-good view. GCI-0087
   was accepted under Rob's separately granted loop11 D-IRM11 allowance, not an automatic reset of
   GCI-0074's exhausted review budget.
@@ -144,6 +148,10 @@ every run publishes a complete view set rather than flattening views only a slow
   for byte. A test re-derives it and fails on drift. Hand-editing the table reintroduces the exact
   defect it exists to prevent, where a pillar gains a dependency, the table does not, and a tier that
   cannot compute the view publishes it as zeros.
+- Hydration and carry share `carry.MAX_FUTURE_SKEW`: timestamps up to five minutes in the future
+  are admitted as age zero; greater skew is unavailable with `future_timestamp` provenance.
+  Unavailable future inputs withhold dependent views and preserve the last-good object; they
+  never publish a usable freshness-age gauge. Schema-version and own-input rules are unchanged.
 - `MAX_INPUT_AGE` is deliberately the same constant as `carry.MAX_CARRY_AGE`. One staleness story.
   Two constants that can drift apart would mean a view withheld while its metric is still carried, or
   the reverse.
