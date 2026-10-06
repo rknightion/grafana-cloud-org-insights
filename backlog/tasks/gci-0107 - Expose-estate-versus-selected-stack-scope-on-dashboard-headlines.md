@@ -1,10 +1,11 @@
 ---
 id: GCI-0107
 title: Expose estate versus selected-stack scope on dashboard headlines
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop13-root'
 created_date: '2026-10-06 10:46'
-updated_date: '2026-10-06 10:50'
+updated_date: '2026-10-06 15:44'
 labels:
   - dashboards
   - loop13
@@ -36,6 +37,12 @@ The operator relevance review found global collector/findings headlines next to 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+P4 visible population labels only across Cost/Maturity/Value/Risk/Dashboard usage/Coverage/shared Findings. Preserve selectors/formulas/data, inspect actual public artifacts and all/single/multi/prefix-collision context; truthful estate versus selected scope. Finalgate/CR as applicable and independent review before integration.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
