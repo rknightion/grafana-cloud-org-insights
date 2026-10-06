@@ -6,6 +6,7 @@ semantics. Exemptions below are debts, never evidence of rendering.
 from __future__ import annotations
 
 import copy
+import functools
 import importlib
 import itertools
 import json
@@ -111,30 +112,104 @@ def field_gaps(payloads, schemas, documents):
     return row_requirements(payloads, schemas) - rendered.keys()
 
 
-# Parse vector selectors, not occurrences in arbitrary JSON or prose. Unknown or
-# templated enum matchers are deliberately not credited. stack/region are live
-# identity dimensions, not closed enum vocabularies.
-SELECTOR = re.compile(r'(?<![A-Za-z0-9_:])(?P<name>gcinsight_[A-Za-z0-9_]+)'
-                      r'(?![A-Za-z0-9_:])(?:\{(?P<labels>[^{}]*)\})?')
-MATCHER = re.compile(r'([A-Za-z_][A-Za-z0-9_]*)\s*(=~|!~|!=|=)\s*("(?:\\.|[^"\\])*")')
+# A bounded lexical recognizer, not a PromQL parser/engine. Strings and comments
+# are indivisible tokens; matcher, range and grouping-label contents never earn
+# selector credit. Unknown syntax and templated enum matchers earn no credit.
+# stack/region are live identity dimensions, not closed enum vocabularies.
+PROM_TOKEN = re.compile(
+    r'''(?P<skip>\s+|\#[^\n]*)|(?P<string>"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`[^`]*`)|'''
+    r'(?P<number>(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)|'
+    r'(?P<identifier>[A-Za-z_:][A-Za-z0-9_:]*|\$[A-Za-z_][A-Za-z0-9_]*)|'
+    r'(?P<symbol>=~|!~|!=|==|<=|>=|[{}()\[\],+*/%^<>=@-])')
+LABEL_GROUPS = {"by", "without", "on", "ignoring", "group_left", "group_right"}
+BINARY_OPS = {"+", "-", "*", "/", "%", "^", "==", "!=", "<", ">", "<=", ">=",
+              "and", "or", "unless", "atan2"}
+
+
+def selector_matchers(tokens):
+    """Require whole comma-delimited matcher syntax, never regex fragments."""
+    matchers = []
+    index = 0
+    while index < len(tokens):
+        if index + 3 > len(tokens):
+            return None
+        (kind, key), (_op_kind, op), (value_kind, quoted) = tokens[index:index + 3]
+        if (kind != "identifier" or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", key)
+                or op not in ("=", "!=", "=~", "!~")
+                or value_kind != "string" or not quoted.startswith('"')):
+            return None
+        try:
+            expected = json.loads(quoted)
+            if op in ("=~", "!~"):
+                re.compile(expected)
+        except (ValueError, re.error):
+            return None
+        matchers.append((key, op, expected))
+        index += 3
+        if index < len(tokens):
+            if tokens[index][1] != ",":
+                return None
+            index += 1  # A single trailing comma is valid PromQL.
+    return tuple(matchers)
+
+
+@functools.lru_cache(maxsize=2048)
+def vector_selectors(expression):
+    tokens = []
+    position = 0
+    while position < len(expression):
+        token = PROM_TOKEN.match(expression, position)
+        if token is None:
+            return ()  # Including unterminated quotes: no partial regex credit.
+        if token.lastgroup != "skip":
+            tokens.append((token.lastgroup, token.group()))
+        position = token.end()
+    # Balance delimiters before crediting anything, and record opaque spans.
+    stack, closing, label_ends = [], {}, set()
+    for index, (_kind, value) in enumerate(tokens):
+        if value in ("(", "{", "["):
+            stack.append((index, value))
+        elif value in (")", "}", "]"):
+            if not stack or stack[-1][1] != {")": "(", "}": "{", "]": "["}[value]:
+                return ()
+            start, opener = stack.pop()
+            closing[start] = index
+            if opener == "(" and start and tokens[start - 1][1] in LABEL_GROUPS:
+                label_ends.add(index)
+    if stack:
+        return ()
+    selectors, index = [], 0
+    while index < len(tokens):
+        kind, value = tokens[index]
+        previous = tokens[index - 1][1] if index else None
+        if value in ("{", "[") or (value == "(" and previous in LABEL_GROUPS):
+            index = closing[index] + 1
+            continue
+        if kind == "identifier" and re.fullmatch(r"gcinsight_[A-Za-z0-9_]+", value):
+            end, matchers = index + 1, ()
+            if end < len(tokens) and tokens[end][1] == "{":
+                matchers = selector_matchers(tokens[end + 1:closing[end]])
+                end = closing[end] + 1
+            following = tokens[end][1] if end < len(tokens) else None
+            # Names in prose, function names and grouping labels are not operands.
+            starts_operand = (previous is None or previous in ({"(", ",", "bool", "group_left", "group_right"} | BINARY_OPS)
+                              or index - 1 in label_ends)
+            ends_operand = following is None or following in ({")", ",", "[", "offset", "@"} | BINARY_OPS)
+            if starts_operand and ends_operand and matchers is not None:
+                selectors.append((value, matchers))
+        index += 1
+    return tuple(selectors)
 
 
 def selects(expression, metric, labels):
-    for selector in SELECTOR.finditer(expression):
-        if selector["name"] != metric:
-            continue
-        raw = selector["labels"] or ""
-        matchers = list(MATCHER.finditer(raw))
-        remainder = MATCHER.sub("", raw).replace(",", "").strip()
-        if remainder:
+    for name, matchers in vector_selectors(expression):
+        if name != metric:
             continue
         accepted = True
-        for match in matchers:
-            key, op, quoted = match.groups()
-            if key not in labels:
+        for key, op, expected in matchers:
+            if key != "__name__" and key not in labels:
                 continue
-            value = labels[key]
-            expected = json.loads(quoted)
+            value = metric if key == "__name__" else labels[key]
             if "$" in expected:
                 accepted = False
                 break
@@ -351,6 +426,63 @@ DISPLAY_CONTRACT_DEBT = (
 )
 
 
+class SelectorLexicalTest(unittest.TestCase):
+    def test_only_actual_vector_selectors_credit_enum_coverage(self):
+        metric = "gcinsight_estate_users_by_role"
+        labels = {"role": "viewer"}
+        positives = (
+            metric,
+            f'{metric} {{ role = "viewer" }}',
+            f'{metric}{{role="viewer",}}',
+            f'{metric}{{__name__="{metric}",role="viewer"}}',
+            f'up * on (job) group_left (region) {metric}{{role="viewer"}}',
+            f'{metric} offset 5m',
+            f'{metric} @ end()',
+            f'sum by (role) ({metric}{{role=~"admin|viewer"}})',
+            f'up + {metric}{{role!="admin"}}',
+            f'rate({metric}{{role!~"admin|editor"}}[5m])',
+            f'{metric}{{role="viewer",stack=~"$stack"}}',
+            f'# {metric}{{role="admin"}}\n{metric}{{role="viewer"}}',
+            f'label_replace({metric}, "note", "text", "job", "x")',
+            f'{metric}{{role="viewer",note="brace }} and # are string content"}}',
+        )
+        negatives = (
+            f'label_replace(up, "note", "{metric}", "job", "x")',
+            f'label_replace(up, "note", \'{metric}\', "job", "x")',
+            f'label_replace(up, "note", `{metric}`, "job", "x")',
+            f'label_replace(up, "note", "escaped \\\" {metric}", "job", "x")',
+            f'up # {metric}{{role="viewer"}}',
+            f'# {metric}\nup',
+            f'up{{note="{metric}"}}',
+            f'sum by ({metric}) (up)',
+            f'up + on ({metric}) group_left ({metric}) up',
+            f'{metric}(up)',
+            f'up{{{metric}="viewer"}}',
+            f'up[{metric}]',
+            f'mention {metric} in prose',
+            f'{metric}{{role="admin"}}',
+            f'{metric}{{role=~"$role"}}',
+            f'{metric}{{role="viewer",broken}}',
+            f'{metric}{{role="viewer"',
+            f'{metric}{{role="viewer" role="admin"}}',
+            f'{metric}{{role="viewer",,stack="x"}}',
+            f'{metric}{{role=~"["}}',
+            f'{metric}{{__name__="up",role="viewer"}}',
+            f'{metric}{{__name__=~"$metric",role="viewer"}}',
+            f'{{__name__="{metric}",role="viewer"}}',  # Unsupported name-only selector.
+            f'{metric}{{role=\'viewer\'}}',  # Unsupported matcher string syntax.
+            f'{metric}{{role="viewer"}} "arbitrary trailing mention"',
+            f'(up + {metric}',
+            f'{metric}{{role="viewer"]',
+        )
+        for expression in positives:
+            with self.subTest(expression=expression, selected=True):
+                self.assertTrue(selects(expression, metric, labels))
+        for expression in negatives:
+            with self.subTest(expression=expression, selected=False):
+                self.assertFalse(selects(expression, metric, labels))
+
+
 class DashboardCoverageTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -399,6 +531,24 @@ class DashboardCoverageTest(unittest.TestCase):
         self.assert_enums_covered(roles, self.documents)
         with self.assertRaisesRegex(AssertionError, "viewer"):
             self.assert_enums_covered(roles, documents)
+
+    def test_seed_quoted_and_commented_metric_cannot_rescue_omitted_viewer(self):
+        documents = copy.deepcopy(self.documents)
+        metric = "gcinsight_estate_users_by_role"
+        for document in documents.values():
+            for panel in document["spec"]["elements"].values():
+                for query in panel["spec"].get("data", {}).get("spec", {}).get("queries", []):
+                    spec = query["spec"]["query"]["spec"]
+                    if "expr" in spec:
+                        spec["expr"] = spec["expr"].replace(
+                            f'{metric}{{role="viewer"}}', f'{metric}{{role="admin"}}')
+                        spec["expr"] += (f' or label_replace(up, "note", "{metric}", "job", "x")'
+                                         f' # {metric}{{role="viewer"}}')
+        requirement = {(metric, (("role", "viewer"),))}
+        self.assertEqual(metric_gaps(requirement, self.documents), set())
+        self.assertEqual(metric_gaps(requirement, documents), requirement)
+        with self.assertRaisesRegex(AssertionError, "viewer"):
+            self.assert_enums_covered(requirement, documents)
 
     def test_observed_and_declared_enum_combinations_are_rendered(self):
         self.assert_enums_covered(self.enums, self.documents)
