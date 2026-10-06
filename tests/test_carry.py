@@ -88,6 +88,27 @@ class CarryForwardTest(unittest.TestCase):
         self.assertGreaterEqual(missed_runs, 4, "too tight - ordinary downtime would blank the panels")
         self.assertLessEqual(missed_runs, 30, "too loose - stale figures would present as current")
 
+    def test_future_skew_boundary(self):
+        for seconds in (600, 300.000001, 300, 299, 1, 0):
+            with self.subTest(future_seconds=seconds):
+                extra, report = carry.carry_forward(
+                    [], _state(dt.timedelta(seconds=-seconds)), now=NOW)
+                if seconds <= 300:
+                    self.assertEqual(len(extra), 2)
+                    self.assertTrue(report["available"])
+                    self.assertEqual(report["age_seconds"], 0)
+                    by = {name: value for name, _, value in carry.report_metrics(report, "t1")}
+                    self.assertEqual(by["gcinsight_carry_forward_age_seconds"], 0)
+                else:
+                    self.assertEqual(extra, [], "future state must not be republished")
+                    self.assertFalse(report["available"])
+                    self.assertEqual(report["carried"], 0)
+                    self.assertEqual(report["state"], "future_timestamp")
+                    self.assertIn("future", report["reason"])
+                    self.assertFalse(report["too_old"], "future skew is not old data")
+                    names = {name for name, _, _ in carry.report_metrics(report, "t1")}
+                    self.assertNotIn("gcinsight_carry_forward_age_seconds", names)
+
     def test_no_state_is_not_an_error(self):
         extra, report = carry.carry_forward([], None, now=NOW)
         self.assertEqual(extra, [])

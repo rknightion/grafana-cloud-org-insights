@@ -45,6 +45,9 @@ from collector import identity
 # other way round - `tests/test_alerts.py` asserts that ordering for every tier.
 MAX_CARRY_AGE = dt.timedelta(days=3)
 
+# Shared with hydration: tolerate bounded writer clock skew as age zero, never unlimited freshness.
+MAX_FUTURE_SKEW = dt.timedelta(minutes=5)
+
 STATE_PREFIX = "state"
 
 Metric = tuple[str, Mapping[str, str], float]
@@ -141,6 +144,14 @@ def carry_forward(
         return [], report
 
     age = now - generated
+    if age < -MAX_FUTURE_SKEW:
+        report.update({
+            "available": False, "state": "future_timestamp",
+            "reason": (f"generated_at is {-age.total_seconds():g}s in the future, "
+                       f"cap is {MAX_FUTURE_SKEW.total_seconds():g}s"),
+        })
+        return [], report
+    age = max(age, dt.timedelta(0))
     report["age_seconds"] = round(age.total_seconds())
     if age > max_age:
         # Deliberately republish nothing. An empty panel beats a confidently wrong one.

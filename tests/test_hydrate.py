@@ -310,6 +310,68 @@ class InputSchemaVersionTest(unittest.TestCase):
                          source["meta"]["inputs"]["dataplane"]["schema_version"])
 
 
+class FutureTimestampTest(unittest.TestCase):
+    """Use hydrate, compose and the real view writer against an offline object store."""
+
+    def test_future_skew_boundary_and_last_good_publication(self):
+        from collector.emit import s3
+
+        data = json.loads((FIXTURES / "compose_inputs.json").read_text())
+        stacks = data["stacks"]
+        coverage = Coverage(tier="t1", total=len(stacks))
+        for stack in stacks:
+            coverage.record_ok(stack["slug"])
+
+        for seconds in (600, 300.000001, 300, 299, 1, 0):
+            with self.subTest(future_seconds=seconds):
+                stored = {}
+
+                def capture(path, key, bucket, dry_run):
+                    stored[key] = json.loads(path.read_text())
+                    return key
+
+                def publish(age):
+                    inputs, prov = hydrate.hydrate(
+                        "t1", {}, now=NOW,
+                        loader=_loader(t3=_scan("t3", "dataplane", data["dataplane"], age)))
+                    _, views, view_coverage = compose.build_all(
+                        stacks, coverage, now=NOW, **inputs)
+                    keep, withheld = hydrate.filter_views(views, prov)
+                    s3.write_views(keep, {"tier": "t1", "generated_at": NOW.isoformat(),
+                                         "inputs": prov}, bucket="offline",
+                                   view_coverage=view_coverage)
+                    return inputs, prov, keep, withheld
+
+                with mock.patch.object(s3, "_put", side_effect=capture):
+                    publish(dt.timedelta(hours=1))
+                    last_good = stored["views/cost_summary.json"]
+                    inputs, prov, keep, withheld = publish(dt.timedelta(seconds=-seconds))
+
+                entry = prov["dataplane"]
+                metrics = {(name, labels["input"]): value
+                           for name, labels, value in hydrate.report_metrics(prov, "t1")}
+                if seconds <= 300:
+                    self.assertIn("dataplane", inputs)
+                    self.assertIn("cost_summary", keep)
+                    self.assertTrue(prov.satisfied("dataplane"))
+                    self.assertEqual(entry["age_seconds"], 0)
+                    self.assertEqual(metrics[("gcinsight_input_age_seconds", "dataplane")], 0)
+                    self.assertEqual(stored["views/cost_summary.json"]["meta"]["inputs"]
+                                     ["dataplane"]["age_seconds"], 0)
+                else:
+                    self.assertNotIn("cost_summary", keep,
+                                     "future owner scan must not replace last-good view")
+                    self.assertNotIn("dataplane", inputs)
+                    self.assertFalse(prov.satisfied("dataplane"))
+                    self.assertFalse(entry["available"])
+                    self.assertEqual(entry["state"], "future_timestamp")
+                    self.assertIn("future", entry["reason"])
+                    self.assertIn(entry["reason"], withheld["cost_summary"])
+                    self.assertEqual(stored["views/cost_summary.json"], last_good)
+                    self.assertEqual(metrics[("gcinsight_input_available", "dataplane")], 0)
+                    self.assertNotIn(("gcinsight_input_age_seconds", "dataplane"), metrics)
+
+
 class StalenessTest(unittest.TestCase):
     def test_an_input_past_the_cap_is_refused(self):
         _, prov = hydrate.hydrate(

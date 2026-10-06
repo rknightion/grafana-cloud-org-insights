@@ -62,7 +62,7 @@ import subprocess
 from typing import Any, Callable, Mapping
 
 from collector.emit import s3 as s3emit
-from collector.emit.carry import MAX_CARRY_AGE
+from collector.emit.carry import MAX_CARRY_AGE, MAX_FUTURE_SKEW
 
 # One cap for every hydrated input, shared with carry-forward on purpose (see the module docstring).
 MAX_INPUT_AGE = MAX_CARRY_AGE
@@ -377,6 +377,8 @@ def hydrate(
         meta = scan.get("meta") or {}
         source_health = (meta.get("sources") or {}).get(name)
         age = _age(meta.get("generated_at"), now)
+        if age is not None and -MAX_FUTURE_SKEW <= age < dt.timedelta(0):
+            age = dt.timedelta(0)
         versions = meta.get("inputs", {})
         version_entry = versions.get(name, {}) if isinstance(versions, Mapping) else None
         version = (version_entry.get("schema_version", 0)
@@ -418,6 +420,15 @@ def hydrate(
                 "available": False, "source": "missing", "tier": owner,
                 "age_seconds": None if age is None else age.total_seconds(), "stale": True,
                 "reason": f"scans/{owner}/latest.json carries no {name!r}",
+            }
+            continue
+        if age is not None and age < -MAX_FUTURE_SKEW:
+            prov[name] = {
+                "available": False, "source": "hydrated", "tier": owner,
+                "age_seconds": age.total_seconds(), "stale": False,
+                "schema_version": version, "state": "future_timestamp",
+                "reason": (f"generated_at is {-age.total_seconds():g}s in the future, "
+                           f"cap is {MAX_FUTURE_SKEW.total_seconds():g}s"),
             }
             continue
         if age is None or age > max_age:
