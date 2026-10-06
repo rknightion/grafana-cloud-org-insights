@@ -1,11 +1,11 @@
 ---
 id: GCI-0107
 title: Expose estate versus selected-stack scope on dashboard headlines
-status: In Progress
+status: Done
 assignee:
   - '@loop13-root'
 created_date: '2026-10-06 10:46'
-updated_date: '2026-10-06 15:44'
+updated_date: '2026-10-06 17:19'
 labels:
   - dashboards
   - loop13
@@ -27,15 +27,15 @@ The operator relevance review found global collector/findings headlines next to 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Cost, Maturity, Value, Risk, Dashboard usage, Coverage and shared Findings visible headlines distinguish estate-wide versus selected-stack populations wherever those coexist, without relabelling global ratios as selected.
-- [ ] #2 Assembled artifacts and selector inspection prove all/single/multiselect/prefix-collision scope is explicit with unchanged data/query contracts; just check and independent review pass.
+- [x] #1 Cost, Maturity, Value, Risk, Dashboard usage, Coverage and shared Findings visible headlines distinguish estate-wide versus selected-stack populations wherever those coexist, without relabelling global ratios as selected.
+- [x] #2 Assembled artifacts and selector inspection prove all/single/multiselect/prefix-collision scope is explicit with unchanged data/query contracts; just check and independent review pass.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -48,4 +48,12 @@ P4 visible population labels only across Cost/Maturity/Value/Risk/Dashboard usag
 
 <!-- SECTION:NOTES:BEGIN -->
 Independent proposal review found the initial named dashboard list narrower than P4 matrix. Expanded static-label scope to include Risk, Dashboard usage and Coverage; no dynamic-inventory or query change.
+
+Loop13:2workerchange/verify cycles,1review-repair round. Original987ccb classifier independentlyFAIL3majors despite currentartifacts/CRgreen. Repaired53da4bd0c29c123d5177d515d7bffc3031225f90 conservatively closes mixedexpression, refgraph and missing/unsupportedsyntax cases; chronological12failures then187modulepasses2skips, completed0findingCRdelta. Same reviewer finaldeltaPASS6focusedpasses47subtests,11artifacts identicalfirstcandidate/nonpresentationidenticalpre-task. LandedfinalSHA; composedjustcheck2212passed2skipped13476subtests, stableclean858seconds; exactCI37500598373 required leaves success. Visibleestate/selection/mixed/unresolvedlabels, no query/data/statechange or browser/currentinventory guarantee.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Visible population scope across six dashboards and shared Findings, with conservative closed-grammar/ref-graph safety rather than substring inference.
+<!-- SECTION:FINAL_SUMMARY:END -->

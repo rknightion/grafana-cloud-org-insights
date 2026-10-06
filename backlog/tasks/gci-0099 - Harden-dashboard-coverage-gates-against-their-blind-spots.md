@@ -1,9 +1,11 @@
 ---
 id: GCI-0099
 title: Harden dashboard coverage gates against their blind spots
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop13-root'
 created_date: '2026-10-06 10:23'
+updated_date: '2026-10-06 17:19'
 labels:
   - dashboards
   - tests
@@ -33,3 +35,9 @@ Existing gates (tests/test_dashboards.py:2354-2470) prove every view, published 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Last dashboard-wave task on final assembled tree: add new coverage gate file only, cross assembled public artifacts/empty-fixture schemas/enums/tabs/hydration state; seeded meaningful field/enum/empty-view failures before realtreepass. Explicit reason-and-owning-task exemption ledger, no weakening existing tests or incidental substring/magiccount proofs. Finalgoal gate/CR and independentreview.
+<!-- SECTION:PLAN:END -->
