@@ -27,9 +27,13 @@ def fetch_cloud_accounts(client: ReadOnlyClient, stack: Mapping[str, Any], reade
         if response.status != 200:
             return {"available": False, "reason": "unreadable"}
         body = response.json()
-        # Only the witnessed data-only array is supported; no paging or partial fields.
-        if (not isinstance(body, dict) or set(body) != {"data"}
-                or not isinstance(body["data"], list) or len(body["data"]) > MAX_ACCOUNTS):
+        # D-AWS13: exact-200 data-only null is witnessed complete empty.
+        # Reject extra keys before admitting null; paging and errors stay unknown.
+        if not isinstance(body, dict) or set(body) != {"data"}:
+            return {"available": False, "reason": "invalid_response"}
+        if body["data"] is None:
+            return {"available": True, "account_count": 0}
+        if not isinstance(body["data"], list) or len(body["data"]) > MAX_ACCOUNTS:
             return {"available": False, "reason": "invalid_response"}
         guard_resource(body)
         if any(not isinstance(account, dict) or not isinstance(account.get("id"), str)

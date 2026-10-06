@@ -29,6 +29,9 @@ def client_for(body, status=200, calls=None):
 
 
 @pytest.mark.parametrize("body,status,measured", [(BODY, 200, True),
+    ({"data": None}, 200, True),
+    ({"data": None, "error": PRIVATE}, 200, False),
+    ({"data": None}, 206, False),
     ({"data": [{"id": PRIVATE, "password": PRIVATE}]}, 200, False),
     ({"error": PRIVATE}, 403, False)])
 def test_selected_full_t2_public_boundary(body, status, measured, capsys, caplog, tmp_path):
@@ -48,10 +51,11 @@ def test_selected_full_t2_public_boundary(body, status, measured, capsys, caplog
         edges.enter_context(mock.patch.object(scan, "load_ratecard", return_value=None))
         edges.enter_context(mock.patch.object(hydrate.subprocess, "run", return_value=SimpleNamespace(returncode=1)))
         result = scan.run_t2(client_for(body, status), cfg_for())
+    row = {**ROW, "Configured accounts": 0 if body == {"data": None} else 1}
     if measured:
-        assert result["data"]["cloud_accounts"] == {"obs-hub": {"available": True, "account_count": 1}}
+        assert result["data"]["cloud_accounts"] == {"obs-hub": {"available": True, "account_count": row["Configured accounts"]}}
         assert result["meta"]["sources"]["cloud_accounts"]["healthy"]
-        assert result["_emit"]["views"]["cloud_accounts"] == [ROW]
+        assert result["_emit"]["views"]["cloud_accounts"] == [row]
     else:
         assert "cloud_accounts" not in result["data"]
         assert not result["meta"]["sources"]["cloud_accounts"]["healthy"]
@@ -65,7 +69,7 @@ def test_selected_full_t2_public_boundary(body, status, measured, capsys, caplog
         s3.write_views(views, result["meta"], view_coverage=result["_emit"]["view_coverage"])
     if measured:
         envelope = json.loads(writes["views/cloud_accounts.json"])
-        assert envelope["rows"] == [ROW]
+        assert envelope["rows"] == [row]
         assert envelope["meta"]["inputs"]["cloud_accounts"]["source"] == "own"
         assert envelope["meta"]["inputs"]["cloud_accounts"]["tier"] == "t2"
     else:
@@ -79,15 +83,15 @@ def test_selected_full_t2_public_boundary(body, status, measured, capsys, caplog
     assert "cloud_accounts.json" in json.dumps(assembled)
 
 
-def test_witnessed_null_data_remains_unknown():
-    """A null live shape proves no empty-account contract: never publish zero."""
+def test_witnessed_null_data_is_complete_empty():
+    """D-AWS13 admits only the exact-200 minimized shape as complete empty."""
     from collector.sources import cloud_accounts as source
     from collector.pillars import cloud_accounts as pillar
     body = json.loads((Path(__file__).parent / "fixtures/cloud_accounts.witness-1.json").read_text())
     calls = []
     record = source.fetch_cloud_accounts(client_for(body, calls=calls), STACK, "synthetic")
-    assert record == {"available": False, "reason": "invalid_response"}
-    assert pillar.build([STACK], {"obs-hub": record}) == ([], {})
+    assert record == {"available": True, "account_count": 0}
+    assert pillar.build([STACK], {"obs-hub": record}) == ([], {"cloud_accounts": [{**ROW, "Configured accounts": 0}]})
     assert calls == [STACK["url"] + PATH]
 
 
@@ -106,7 +110,7 @@ def test_default_off_and_exact_grants():
     assert not any("write" in action or action == "datasources:query" for action, _ in pairs)
 
 
-@pytest.mark.parametrize("body,count", [(BODY, 1), ({"data": []}, 0)])
+@pytest.mark.parametrize("body,count", [(BODY, 1), ({"data": []}, 0), ({"data": None}, 0)])
 def test_empty_and_inventory_left_join(body, count):
     from collector.sources import cloud_accounts as source
     from collector.pillars import compose
@@ -125,6 +129,14 @@ def test_empty_and_inventory_left_join(body, count):
 
 
 @pytest.mark.parametrize("body,status", [
+    (None, 200), ({}, 200), ({"accounts": None}, 200),
+    ({"data": {"accounts": None}}, 200),
+    ({"data": None, "pagination": None}, 200),
+    ({"data": None, "partial": False}, 200),
+    ({"data": None, "error": PRIVATE}, 200),
+    ({"data": None, "message": PRIVATE}, 200),
+    *[({"data": None}, status) for status in (204, 206, 302, 401, 403, 429, 500)],
+    ({"error": PRIVATE}, 200),
     ({"data": [], "pagination": {}}, 200), ({"data": [], "partial": False}, 200),
     ({"data": [], "next": PRIVATE}, 200), ({"data": {}}, 200), ([], 200),
     ({"data": [{"id": ""}]}, 200), ({"data": [{"id": " "}]}, 200),
