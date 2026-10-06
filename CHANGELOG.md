@@ -1,5 +1,70 @@
 # Changelog
 
+## [0.7.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.6.0...v0.7.0) (2026-10-06)
+
+
+### Features
+
+* add qualified product footprint adoption rows ([ed5d417](https://github.com/rknightion/grafana-cloud-org-insights/commit/ed5d417714df3e104600fb2c4a0ba4e31cd96a38))
+* **ai:** consume independent org users and live-stack Agent rate reporting ([74aa1b4](https://github.com/rknightion/grafana-cloud-org-insights/commit/74aa1b494ee4400e5dab935f38ba983f4a9fbb3a))
+* count IRM alert groups from stats ([9c04eea](https://github.com/rknightion/grafana-cloud-org-insights/commit/9c04eeaddccec8b2895f6786bd2650df0c8d566d))
+* count library panels with verified folder coverage ([cbe06f5](https://github.com/rknightion/grafana-cloud-org-insights/commit/cbe06f51a7fc1adf0066ba5baccd5e261dbbfea7))
+* gather bounded feature-footprint observations for composition ([fead8c7](https://github.com/rknightion/grafana-cloud-org-insights/commit/fead8c741731399f1490a7e088a10bbba1770569))
+* **playlists:** add default-off configured playlist counts ([af309ea](https://github.com/rknightion/grafana-cloud-org-insights/commit/af309ea2f1565c0b7499fe382a3c833a84be9f2e))
+* wire default-off count-only library panel publication ([eb0a44e](https://github.com/rknightion/grafana-cloud-org-insights/commit/eb0a44e48b217759286f2010fceba92cd5c1d1fa))
+
+
+### Bug Fixes
+
+* admit witnessed complete-empty AWS accounts response ([9a76608](https://github.com/rknightion/grafana-cloud-org-insights/commit/9a76608afdf7aba22e7891b238e7ffe3af6cf1c0))
+* admit witnessed PDC pagination metadata without guessing AWS null counts ([bbb9668](https://github.com/rknightion/grafana-cloud-org-insights/commit/bbb9668dd89b5733d6817b6cfb1fdaaf1d05cb57))
+* **ai:** expose unavailable org usage boundaries without fabricated adoption ([69d0754](https://github.com/rknightion/grafana-cloud-org-insights/commit/69d0754f9a3ad3ca1e9ec2f1cb1ab7f821b99976))
+* **ai:** preserve Agent view on unknown inventory and label query window ([7058365](https://github.com/rknightion/grafana-cloud-org-insights/commit/7058365234be33205e33a55e27efc03e9ffbe06c))
+* remove unverified provisioner clock from Assistant hint ([d4a7003](https://github.com/rknightion/grafana-cloud-org-insights/commit/d4a700353c0fc83e9d4c6c5c5a9807421d0236bf))
+* serialize each reader permission pair once ([f109c5f](https://github.com/rknightion/grafana-cloud-org-insights/commit/f109c5f0dab33701e41c9fba3c318bd6351e5854))
+* withhold maturity adoption when pending counts are unknown ([bddc51b](https://github.com/rknightion/grafana-cloud-org-insights/commit/bddc51b83bf8e05087a57fda94103e931803c124))
+
+
+### Documentation
+
+* add gate-time trap to LOOP.md and record loop13 owner decisions ([ecf99b1](https://github.com/rknightion/grafana-cloud-org-insights/commit/ecf99b1678955f66eb5153fbb40aa9aa9de628d9))
+* **agents:** drop stale history, cached facts and restated global rules ([7bd871c](https://github.com/rknightion/grafana-cloud-org-insights/commit/7bd871c65961c5cb920026eeeb5d24ee190ce6bc))
+* **backlog:** accept configured playlist reader ([9beca23](https://github.com/rknightion/grafana-cloud-org-insights/commit/9beca232ed6845bb4fc987519a7421282a2a632b))
+* **backlog:** accept exact-status segment coverage repair ([b364aab](https://github.com/rknightion/grafana-cloud-org-insights/commit/b364aabbf506b49dcfb5e1539cd2fcbea8fe44fd))
+* **backlog:** accept projected IRM alert-group counts ([b70f16b](https://github.com/rknightion/grafana-cloud-org-insights/commit/b70f16b5e1e4d0a14e8811a2f7b9923aa4388423))
+* **backlog:** record final segment discovery repair allowance ([c72e975](https://github.com/rknightion/grafana-cloud-org-insights/commit/c72e9755e248ac78e070abd5c476abf1b53800ad))
+* **backlog:** record loop13 execution ownership ([0ffb217](https://github.com/rknightion/grafana-cloud-org-insights/commit/0ffb2176f7c10af370a1ae48d213db2b371f9238))
+* **backlog:** reopen segment coverage on partial enumeration ([08698a2](https://github.com/rknightion/grafana-cloud-org-insights/commit/08698a25f9651850f0dbf765937356d7c16e39ac))
+* close AI reporting and record exact volume limitation ([ae2a56b](https://github.com/rknightion/grafana-cloud-org-insights/commit/ae2a56bb3c075138c35e28dd309b6f5788d6611d))
+* close library proofs and retain scoped footprint follow-ups ([e343e85](https://github.com/rknightion/grafana-cloud-org-insights/commit/e343e857d460defbb07c4e944e5644b3e8fb59b9))
+* close neutral credential hint proof and retain freshness scope ([77cfe22](https://github.com/rknightion/grafana-cloud-org-insights/commit/77cfe22ab828d3804d19beda35644346384b0662))
+* close qualified adoption rows with exhaustive proof ([b78bd48](https://github.com/rknightion/grafana-cloud-org-insights/commit/b78bd48885872c249c02e4e613cb2ea00381bc0d))
+* close qualified Enterprise catalogue integration ([a3cf719](https://github.com/rknightion/grafana-cloud-org-insights/commit/a3cf7193ab0dd888d125f44d67e21a12fccec81a))
+* close supported nullable composition rescue ([2d6fcee](https://github.com/rknightion/grafana-cloud-org-insights/commit/2d6fcee7ab89728c8a2fd2e4678572562f9c48e5))
+* close verified incomplete-usage correction ([cb7b18d](https://github.com/rknightion/grafana-cloud-org-insights/commit/cb7b18d38390a0a5b60957d088f4b8ff2c7fbe7b))
+* close verified shared footprint source seams ([1bc2358](https://github.com/rknightion/grafana-cloud-org-insights/commit/1bc2358257e35737b1738dc08f11e9e1599ecf0f))
+* **loop:** adopt the lean LOOP.md and point at the loop contract ([3080b23](https://github.com/rknightion/grafana-cloud-org-insights/commit/3080b239428d489f48c3dba06da10256dc6d9312))
+* publish canonical agent documents ([5c21348](https://github.com/rknightion/grafana-cloud-org-insights/commit/5c21348213750401feadbff0a4280b68f9ee4f45))
+* publish canonical agent documents ([e36e8f1](https://github.com/rknightion/grafana-cloud-org-insights/commit/e36e8f1f69d395b9e212ef91ff259120fc362ec0))
+* publish canonical agent documents ([f73adf0](https://github.com/rknightion/grafana-cloud-org-insights/commit/f73adf0b4f9b949b600d16589eece41d872f1294))
+* qualify observed and unavailable feature footprints ([3f5c7e9](https://github.com/rknightion/grafana-cloud-org-insights/commit/3f5c7e921fdf6925fedf1c56451082dfffdcd227))
+* record accepted count families and safe partial close ([8c0a3c4](https://github.com/rknightion/grafana-cloud-org-insights/commit/8c0a3c4ca11eba3b3c237e6abca980fc70317ea1))
+* record hydration proof and unresolved AWS contract ([f008744](https://github.com/rknightion/grafana-cloud-org-insights/commit/f0087443eac68000b950cb32d7dfbd33c4b0ff15))
+* record loop12 repair execution ([fdab338](https://github.com/rknightion/grafana-cloud-org-insights/commit/fdab338c1d5b650a03b624094f396e1d16bf1f4a))
+* record operator relevance review and bounded follow-ups ([4b40712](https://github.com/rknightion/grafana-cloud-org-insights/commit/4b40712bc4e59cfbd54496b2965fa3d87fac87b6))
+* record shared footprint seam repair and active consumers ([bc1629c](https://github.com/rknightion/grafana-cloud-org-insights/commit/bc1629c58b02ce5459667f034fe3a75d7290286e))
+* record verified dev rollback and remaining rollout blockers ([47457ad](https://github.com/rknightion/grafana-cloud-org-insights/commit/47457ad9da0e0841f6c20ef32f30b0db069b1f6a))
+* reopen unsupported nullable maturity composition ([e06c1f8](https://github.com/rknightion/grafana-cloud-org-insights/commit/e06c1f8b3f60a0f3bab9ef7d7943a04197f10736))
+
+
+### Miscellaneous
+
+* **deps:** update python:3.14-slim docker digest to 3353bb7 ([#50](https://github.com/rknightion/grafana-cloud-org-insights/issues/50)) ([23f9014](https://github.com/rknightion/grafana-cloud-org-insights/commit/23f90147d706cbd3a200cd6733c5853b0e38c61b))
+* **deps:** update python:3.14-slim docker digest to c3e521d ([#47](https://github.com/rknightion/grafana-cloud-org-insights/issues/47)) ([77f6a8f](https://github.com/rknightion/grafana-cloud-org-insights/commit/77f6a8f7ca817f90da04721450354af1a3407bc9))
+* **deps:** update python:3.14-slim docker digest to f85c569 ([#51](https://github.com/rknightion/grafana-cloud-org-insights/issues/51)) ([e717736](https://github.com/rknightion/grafana-cloud-org-insights/commit/e717736b220428751f5ce3f274b780887db195c0))
+* **deps:** update rknightion/.github action to v1.25.4 ([#48](https://github.com/rknightion/grafana-cloud-org-insights/issues/48)) ([79cb9f4](https://github.com/rknightion/grafana-cloud-org-insights/commit/79cb9f4605112df80ec6e0938403ee6f05dc05bd))
+* **deps:** update rknightion/.github action to v1.25.5 ([#49](https://github.com/rknightion/grafana-cloud-org-insights/issues/49)) ([534da44](https://github.com/rknightion/grafana-cloud-org-insights/commit/534da44ffe4cf6e8378170547fd40151e7c4188e))
+
 ## [0.6.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.5.0...v0.6.0) (2026-10-03)
 
 
