@@ -89,6 +89,19 @@ def usage_by_slug(expr: str) -> str:
     return f"{expr} * on(stack_id) group_left(slug) {USAGE_INFO}"
 
 
+def usage_observation_by_slug(expr: str) -> str:
+    """Name raw source observations without asserting an additive per-stack population.
+
+    Keep every left-hand source dimension. Only join a nonempty stack id to exactly one info
+    series with a nonempty slug and the witnessed constant value 1. Ambiguous, missing or
+    nonunit info stays absent rather than failing the entire query or altering the observation.
+    This is deliberately stricter than the historical aggregate helper above.
+    """
+    return (f"({expr}) * on(stack_id) group_left(slug) "
+            f'(max by(stack_id, slug) ({USAGE_INFO}{{stack_id!="",slug!=""}} == 1) '
+            f'and on(stack_id) (count by(stack_id) ({USAGE_INFO}{{stack_id!=""}}) == 1))')
+
+
 def viz(panel_type: str, spec: dict[str, Any]) -> dict[str, Any]:
     """`vizConfig` envelope. `kind` is the literal `VizConfig`; the panel type goes in `group`.
 

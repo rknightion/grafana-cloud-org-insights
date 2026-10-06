@@ -3037,6 +3037,103 @@ def d_value(ds: str):
         "Pillar F: unit economics and internal benchmarking, for weekly reading.", el, tabs
 
 
+def operations_health_panels() -> dict:
+    """Roster-witnessed backend observations, not inferred health or additive stack totals.
+
+    The corrected feature matrix leaves all these exact metric units/producer windows unknown.
+    The staff name/key roster witnesses every name below except the two historically customer-only
+    Cloud Logs Export names. Neither source establishes population additivity or status mappings.
+    """
+    generator = "grafanacloud_traces_instance_metrics_generator_"
+    mimir = "grafanacloud_instance_"
+    export = "grafanacloud_logs_instance_cloud_logs_export_"
+    reload_caveat = "Numeric status mapping is unverified; no reload-success or failure inference."
+    definitions = [
+        ("health_generator_saturation", "Tempo generator saturation source", generator + "series_limit_percentage_used",
+         "Ratio versus percent scaling is unverified despite the name; no percentage formatting or threshold."),
+        ("health_generator_series_demand", "Tempo generator active-series demand source", generator + "active_series_demand_estimate",
+         "An estimate observation, not a verified series count or capacity requirement."),
+        ("health_generator_label_demand", "Tempo generator label-cardinality demand source", generator + "label_cardinality_demand_estimate",
+         "Source label dimensions remain separate; no summed cardinality or stack total."),
+        ("health_generator_sanitized_demand", "Tempo generator post-sanitization demand source", generator + "post_sanitization_demand_estimate",
+         "Not subtracted from other demand estimates; shared cohort and normalization are unverified."),
+        ("health_generator_span_drops", "Tempo generator discarded-span source", generator + "discarded_spans_per_second",
+         "Per-second normalization and reason semantics are unverified; not converted to a loss count."),
+        ("health_generator_series_drops", "Tempo generator dropped-series source", generator + "series_dropped_per_second",
+         "Per-second normalization is unverified; no integration into a dropped-series total."),
+        ("health_generator_received", "Tempo generator received-span source", generator + "received_spans_per_second",
+         "Not used as a denominator; source population and normalization are unverified."),
+        ("health_generator_sanitized", "Tempo generator sanitized-span source", generator + "spans_sanitized_per_second",
+         "Sanitization is not equated to dropped spans; normalization is unverified."),
+        ("health_mimir_missed", "Mimir ruler missed-iteration source", mimir + "rule_group_iterations_missed_total:rate5m",
+         "The rate5m suffix is name evidence only, not verified per-second normalization or a missed-iteration count."),
+        ("health_mimir_evaluations", "Mimir ruler evaluation source", mimir + "rule_evaluations_total:rate5m",
+         "Rule groups remain separate; no evaluation total or success ratio is derived."),
+        ("health_mimir_failures", "Mimir ruler evaluation-failure source", mimir + "rule_evaluation_failures_total:rate5m",
+         "Failure normalization and producer window are unverified; not an event count."),
+        ("health_mimir_reload", "Mimir ruler reload source", mimir + "rule_config_last_reload_successful", reload_caveat),
+        ("health_loki_reload", "Loki ruler reload source", "grafanacloud_logs_instance_rule_config_last_reload_successful", reload_caveat),
+        ("health_am_reload", "Alertmanager config reload source", mimir + "alertmanager_config_last_reload_successful", reload_caveat),
+        ("health_export_status", "Cloud Logs Export status source", export + "status",
+         "Historical customer-observed name and stack_id only; staff observation absent. "
+         "Numeric enum mapping is unverified; not export health or enablement."),
+        ("health_export_timestamp", "Cloud Logs Export last-synced-file timestamp source", export + "last_synced_file_timestamp",
+         "Historical customer-observed name and stack_id only; staff observation absent. "
+         "Timestamp unit, epoch and sync meaning are unverified; no sync age is calculated."),
+    ]
+    scope = (" Raw source observation, not health. Units: unverified. Producer window: unverified "
+             "per the corrected feature matrix. Consumer window: dashboard-selected range, with no "
+             "extra rolling window or rate conversion. Each source-labelled series is retained, not summed "
+             "into a stack total; additivity and cohort are unverified. Stack names join only through "
+             "unique unit-valued info series. Missing source or missing/ambiguous stack lookup stays "
+             "absence, never healthy zero. Estate-wide per-stack detail; the Stack selector does not filter "
+             "this usage datasource. Zero new collector series.")
+    panels = {}
+    for key, title, metric, caveat in definitions:
+        panel = build.timeseries_panel(
+            title + " (raw, units unverified)",
+            [(build.usage_observation_by_slug(f'{metric}{{stack_id!=""}}'), "__auto")],
+            ds_uid=build.USAGE_UID, unit="none",
+            description=f"Source: `{metric}`. {caveat}" + scope,
+        )
+        panel["spec"]["vizConfig"]["spec"]["fieldConfig"]["defaults"]["custom"]["spanNulls"] = False
+        panels[key] = panel
+    panels["health_export_sample_age"] = build.timeseries_panel(
+        "Cloud Logs Export status sample age (not sync freshness)",
+        [(build.usage_observation_by_slug(f'time() - timestamp({export}status{{stack_id!=""}})'), "__auto")],
+        ds_uid=build.USAGE_UID, unit="s",
+        description="Units: verified seconds from PromQL time() minus timestamp() of the status sample. "
+                    "This measures datasource sample age at each evaluation, not file sync freshness "
+                    "and not health. Producer cadence and status semantics remain unverified. "
+                    "Historical customer-only source; no present customer readback. No invented freshness "
+                    "threshold. Each source series stays separate and missing data stays absent, not zero. "
+                    "Unique stack-id-to-slug lookup only; the Stack selector does not filter this panel. "
+                    "A series older than the datasource lookback becomes absent, not an ever-growing age.",
+    )
+    panels["health_export_sample_age"]["spec"]["vizConfig"]["spec"]["fieldConfig"]["defaults"]["custom"]["spanNulls"] = False
+    panels["health_scope"] = build.text_panel(
+        "Backend health: observation ceiling",
+        "**These are diagnostic source observations, not a healthy/unhealthy verdict.** "
+        "Metric names and stack_id keys are witnessed, but units, producer windows and additive "
+        "populations are unverified in the corrected feature matrix. No percentages, status mappings "
+        "or health thresholds are inferred. Lines retain source labels, with a unique stack slug lookup; "
+        "multiple lines can belong to one stack. The dashboard time picker sets the consumer range. "
+        "The Stack selector does not filter this datasource. Missing observations or ambiguous lookups "
+        "are absent, not healthy zero. Cloud Logs Export names are historical customer observations "
+        "and still need current customer readback. Only status **sample age** has verified seconds; "
+        "it does not prove export sync freshness. Zero new collector series.",
+    )
+    panels["health_loki_unverified"] = build.text_panel(
+        "Loki ruler missed iterations and evaluations: unavailable",
+        "Loki-specific missed iterations, evaluations and evaluation failures are **unavailable** "
+        "under the witnessed name roster, not zero. The Mimir rule metrics are not substituted: "
+        "neither their name nor stack_id establishes a Loki population. Loki reload is shown only "
+        "as a raw source observation; no reload-failure mapping is proven. Exact Loki names and "
+        "population/unit contracts are needed before adding those claims.",
+    )
+    return panels
+
+
 def d_operations(ds: str):
     """Pillar G - are they actually operating? Reads `grafanacloud-usage` only: no collector, no series.
 
@@ -3251,6 +3348,7 @@ def d_operations(ds: str):
                         "not being closed."),
     }
     el.update(retention_panels())
+    el.update(operations_health_panels())
     tabs = [
         build.rows_tab("Logs retention", [
             build.row("Estate retention", ["_ret_denom", "_ret_global", "_ret_candidates"],
@@ -3280,13 +3378,30 @@ def d_operations(ds: str):
         build.tab("Alert flow", ["n_groups", "n_notified", "n_state_history_failures",
                                  "b_state_history_failures", "b_integration", "b_service", "t_state",
                                  "b_am_active"]),
+        build.rows_tab("Backend health", [
+            build.row("Interpretation and proof limits", ["health_scope"], max_columns=1),
+            build.row("Tempo generator saturation and demand", ["health_generator_saturation",
+                      "health_generator_series_demand", "health_generator_label_demand",
+                      "health_generator_sanitized_demand"], max_columns=2),
+            build.row("Tempo generator drops and processing", ["health_generator_span_drops",
+                      "health_generator_series_drops", "health_generator_received",
+                      "health_generator_sanitized"], max_columns=2),
+            build.row("Mimir ruler observations", ["health_mimir_missed", "health_mimir_evaluations",
+                      "health_mimir_failures", "health_mimir_reload"], max_columns=2),
+            build.row("Loki ruler proof limits and reload", ["health_loki_unverified",
+                      "health_loki_reload"], max_columns=2),
+            build.row("Alertmanager config reload", ["health_am_reload"], max_columns=1),
+            build.row("Cloud Logs Export source observations", ["health_export_status",
+                      "health_export_timestamp", "health_export_sample_age"], max_columns=2),
+        ]),
     ]
     return "gcinsight-operations", "Grafana Cloud Org Insights - Operations", \
         ("Pillar G: what the estate actually DOES - acknowledged, resolved, or never touched. The only "
          "behavioural signal in this platform. Live from the stack's own grafanacloud-usage datasource, "
          "no collector and no series. SCOPE: response timing covers only stacks that emit timing; "
          "volume and ownership cover the broader OnCall population. Ratios restrict their denominator "
-         "to the timing population and each panel says which."), el, tabs
+         "to the timing population and each panel says which. Backend health adds raw per-stack "
+         "diagnostic observations with explicit unverified units, not health or human activity claims."), el, tabs
 
 
 

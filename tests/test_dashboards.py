@@ -36,6 +36,78 @@ class DashboardNameAndGenericTextTest(unittest.TestCase):
                     "grafanacloud_instance_app_o11y_host_count_v3"):
             self.assertNotIn(old, " ".join(expressions))
 
+    # Explicit witnessed names, not derived from the implementation's panel registry.
+    HEALTH_METRICS = {
+        "health_generator_saturation": "grafanacloud_traces_instance_metrics_generator_series_limit_percentage_used",
+        "health_generator_series_demand": "grafanacloud_traces_instance_metrics_generator_active_series_demand_estimate",
+        "health_generator_label_demand": "grafanacloud_traces_instance_metrics_generator_label_cardinality_demand_estimate",
+        "health_generator_sanitized_demand": "grafanacloud_traces_instance_metrics_generator_post_sanitization_demand_estimate",
+        "health_generator_span_drops": "grafanacloud_traces_instance_metrics_generator_discarded_spans_per_second",
+        "health_generator_series_drops": "grafanacloud_traces_instance_metrics_generator_series_dropped_per_second",
+        "health_generator_received": "grafanacloud_traces_instance_metrics_generator_received_spans_per_second",
+        "health_generator_sanitized": "grafanacloud_traces_instance_metrics_generator_spans_sanitized_per_second",
+        "health_mimir_missed": "grafanacloud_instance_rule_group_iterations_missed_total:rate5m",
+        "health_mimir_evaluations": "grafanacloud_instance_rule_evaluations_total:rate5m",
+        "health_mimir_failures": "grafanacloud_instance_rule_evaluation_failures_total:rate5m",
+        "health_mimir_reload": "grafanacloud_instance_rule_config_last_reload_successful",
+        "health_loki_reload": "grafanacloud_logs_instance_rule_config_last_reload_successful",
+        "health_am_reload": "grafanacloud_instance_alertmanager_config_last_reload_successful",
+        "health_export_status": "grafanacloud_logs_instance_cloud_logs_export_status",
+        "health_export_timestamp": "grafanacloud_logs_instance_cloud_logs_export_last_synced_file_timestamp",
+    }
+
+    def test_assembled_backend_health_preserves_raw_observations_and_unknown_units(self):
+        from bin import dashboards
+
+        _, artifact = dashboards.assemble("operations", "infinity-uid")
+        panels = artifact["spec"]["elements"]
+        for key, metric in self.HEALTH_METRICS.items():
+            with self.subTest(panel=key):
+                spec = panels[key]["spec"]
+                query = spec["data"]["spec"]["queries"][0]["spec"]["query"]
+                expr = query["spec"]["expr"]
+                self.assertEqual(query["datasource"]["name"], build.USAGE_UID)
+                self.assertTrue(query["spec"]["range"])
+                self.assertFalse(query["spec"]["instant"])
+                self.assertTrue(expr.startswith(f'({metric}{{stack_id!=""}}) * on(stack_id)'))
+                self.assertNotRegex(expr, r"sum\s*(?:by|\()|\*\s*100|/\s*100|or\s+vector|rate\(|increase\(")
+                self.assertIn("group_left(slug)", expr)
+                self.assertIn("count by(stack_id)", expr)
+                self.assertEqual(query["spec"]["legendFormat"], "__auto")
+                fields = spec["vizConfig"]["spec"]["fieldConfig"]
+                self.assertEqual(fields["defaults"]["unit"], "none")
+                self.assertFalse(fields["defaults"]["custom"]["spanNulls"])
+                self.assertNotIn("thresholds", fields["defaults"])
+                self.assertNotIn("mappings", fields["defaults"])
+                self.assertEqual(fields["overrides"], [])
+                for text in (metric, "Units: unverified", "Producer window: unverified",
+                             "absence", "not health", "not summed", "Stack selector does not filter"):
+                    self.assertIn(text, spec["description"])
+        self.assertIn("Backend health", [t["spec"]["title"]
+                                       for t in artifact["spec"]["layout"]["spec"]["tabs"]])
+
+    def test_export_freshness_is_sample_age_not_inferred_sync_age(self):
+        from bin import dashboards
+
+        _, artifact = dashboards.assemble("operations", "infinity-uid")
+        panel = artifact["spec"]["elements"]["health_export_sample_age"]["spec"]
+        expr = panel["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]["expr"]
+        self.assertIn('time() - timestamp(grafanacloud_logs_instance_cloud_logs_export_status{stack_id!=""})', expr)
+        self.assertEqual(panel["vizConfig"]["spec"]["fieldConfig"]["defaults"]["unit"], "s")
+        for text in ("Units: verified", "PromQL", "not file sync freshness", "not health"):
+            self.assertIn(text, panel["description"])
+        missing = artifact["spec"]["elements"]["health_loki_unverified"]["spec"]
+        self.assertEqual(missing["data"]["spec"]["queries"], [])
+        prose = missing["vizConfig"]["spec"]["options"]["content"]
+        for text in ("missed iterations", "evaluation failures", "unavailable", "not zero"):
+            self.assertIn(text, prose)
+
+    def test_raw_usage_join_refuses_ambiguous_or_nonunit_info(self):
+        expr = build.usage_observation_by_slug('source{stack_id!=""}')
+        self.assertTrue(expr.startswith('(source{stack_id!=""}) * on(stack_id) group_left(slug)'))
+        self.assertIn('max by(stack_id, slug) (grafanacloud_grafana_instance_info{stack_id!="",slug!=""} == 1)', expr)
+        self.assertIn('(count by(stack_id) (grafanacloud_grafana_instance_info{stack_id!=""}) == 1)', expr)
+
     def test_assembled_dashboard_text_has_no_deployment_contract_claims(self):
         from bin import dashboards
 
@@ -1360,7 +1432,7 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
         self.assertIn("Capability gaps", self._tabs("value"))
         self.assertEqual(self._tabs("operations"),
                          ["Logs retention", "Engagement", "Response time", "Ownership",
-                          "Alert flow"])
+                          "Alert flow", "Backend health"])
         self.assertEqual(self._tabs("commercial"),
                          ["Commitment", "Run rate", "Consumption vs term"])
         self.assertEqual(self._tabs("ai"),
