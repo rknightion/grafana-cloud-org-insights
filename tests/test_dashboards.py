@@ -20,6 +20,44 @@ from collector.dashboards import build
 class DashboardNameAndGenericTextTest(unittest.TestCase):
     """Read the publication artifact, not just the expression constants."""
 
+    def test_assembled_interpretation_respects_producer_windows_and_unknown_absence(self):
+        from bin import dashboards
+
+        artifacts = {name: dashboards.assemble(name, "infinity-uid")[1]["spec"]
+                     for name in ("operations", "coverage", "value", "usage", "risk", "ai")}
+        for name, keys in {
+            "operations": ("n_engagement", "b_teamengage", "t_engagement"),
+            "coverage": ("n_value_engagement",),
+        }.items():
+            for key in keys:
+                with self.subTest(dashboard=name, panel=key):
+                    panel = artifacts[name]["elements"][key]["spec"]
+                    self.assertIn("diagnostic ratio", panel["title"].lower())
+                    self.assertIn("unmatched", panel["description"].lower())
+        ops = artifacts["operations"]["elements"]
+        for key in ("n_groups", "b_teamvol", "b_integration", "b_service", "t_state"):
+            panel = ops[key]["spec"]
+            with self.subTest(panel=key):
+                self.assertIn("gauge", panel["title"].lower())
+                self.assertNotRegex(panel["description"].lower(), r"lifetime|only ever rise|cumulative counter")
+        for key in ("n_mtta", "n_mttr", "n_mtta_mean", "n_tail", "n_tail_share",
+                    "b_ackdist", "t_response", "b_teamtail", "n_engaged"):
+            with self.subTest(panel=key):
+                self.assertIn("7d", ops[key]["spec"]["title"])
+                self.assertIn("seven days", ops[key]["spec"]["description"])
+        for name, key in (("usage", "b_profiles"), ("value", "b_sm_active"),
+                          ("ai", "tbl_ai_stack_messages")):
+            panel = artifacts[name]["elements"][key]["spec"]
+            with self.subTest(dashboard=name, panel=key):
+                self.assertIn("unknown", panel["description"].lower())
+                self.assertNotRegex(panel["description"].lower(),
+                                    r"measured absence|ran no billable checks|was not collected")
+        self.assertIn("configured", artifacts["usage"]["elements"]["n_types"]["spec"]["title"].lower())
+        for key in ("n_deadrules", "b_deadrules"):
+            text = artifacts["risk"]["elements"][key]["spec"]["description"].lower()
+            self.assertIn("review", text)
+            self.assertNotRegex(text, r"can never fire|remediation is deleting|rules to delete")
+
     def test_coverage_observation_populations_and_call_list_disclaim_human_adoption(self):
         from bin import dashboards
         _, artifact = dashboards.assemble("coverage", "infinity-uid")

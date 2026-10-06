@@ -1056,12 +1056,11 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
                         "live gauge over a moving estate, so use the displayed value rather than a "
                         "number copied from a tooltip."),
         "n_savings_pct": build.stat_panel(
-            "Share of the estate that is removable", SAVINGS_FRACTION, unit="percentunit", decimals=1,
+            "Reported recommendation / active-series ratio", SAVINGS_FRACTION, unit="percentunit", decimals=1,
             ds_uid=build.USAGE_UID,
             description="Estimated removable series divided by the estate's active series. Read it as "
-                        "the share aggregatable without losing a query, not as the share of the bill "
-                        "that disappears "
-                        " - the pricing conversion is not in this datasource."),
+                        "a reported recommendation ratio requiring owner query review, not a guarantee "
+                        "of query preservation or bill reduction. Pricing conversion is not in this datasource."),
         "n_savings_stacks": build.stat_panel(
             "Stacks with savings on the table", SAVINGS_STACKS, ds_uid=build.USAGE_UID,
             description="How many stacks have at least one Adaptive Metrics recommendation waiting. "
@@ -1421,7 +1420,7 @@ def d_usage(ds: str):
                         "one very large stack dominates it; the per-stack column in Per-stack engagement "
                         "is where you see who is actually sticky."),
         "n_types": build.stat_panel(
-            "Datasource types in use", "gcinsight_usage_datasource_types_distinct",
+            "Datasource types configured", "gcinsight_usage_datasource_types_distinct",
             description="Distinct datasource plugin types provisioned anywhere in the estate - a breadth "
                         "measure of what the organisation connects Grafana to. Excludes "
                         "`grafana-knowledgegraph-datasource`, which is auto-provisioned on every stack and "
@@ -1483,7 +1482,7 @@ def d_usage(ds: str):
             "Per-stack engagement", "usage", ds,
             description="Per-stack users, daily actives and stickiness - this is where the estate-wide "
                         "stickiness number breaks down into who is actually using their stack. A stack "
-                        "with users but zero daily actives is provisioned and unused; a blank cell is not "
+                        "with users but zero daily actives has no recorded daily activity, not lifetime disuse; a blank cell is not "
                         "measured, never zero."),
         "enterprise_catalogue": build.table_panel(
             "Current public Enterprise catalogue - configured inventory",
@@ -1594,8 +1593,8 @@ def d_usage(ds: str):
             "Profile ingestion by usage group (24h peak)", PROFILE_USAGE_GROUPS,
             legend="{{usage_group}}", ds_uid=build.USAGE_UID, unit="Bps", limit=15,
             description="Profile bytes received per second, grouped by the live usage_group label and "
-                        "windowed over the dashboard's operational day. An empty chart is measured "
-                        "absence in this datasource, not a configured list with no matches."),
+                        "windowed over the dashboard's operational day. An empty chart is unknown: "
+                        "missing or sparse reporting does not establish zero ingestion."),
         "b_app_hosts": build.barchart_series_panel(
             "App Observability hosts by reporting metric", APP_HOST_COUNTS,
             ds_uid=build.USAGE_UID, sort="desc",
@@ -2462,11 +2461,9 @@ def d_risk(ds: str):
                         "instantaneous form read 14."),
         "n_deadrules": build.stat_panel(
             "Stacks with rules that fetch nothing (24h)", DEADRULE_STACKS, ds_uid=build.USAGE_UID,
-            description="Rule queries returning zero series, so the rule can never fire. Usually a rule "
-                        "outliving the "
-                        "metric it watched, which is invisible in the UI: a rule matching nothing shows "
-                        "as Normal, not as broken. Remediation is deleting rules, so this is the only "
-                        "finding on these dashboards with no cost attached to fixing it."),
+            description="Rule queries observed returning zero series in the window. Review query and "
+                        "metric lifecycle with the owner: low-frequency or deliberately absent metrics "
+                        "can be valid. This does not establish future firing or safe automatic deletion."),
         "n_evalfail": build.stat_panel(
             "Stacks with rule evaluation failures (24h)", EVALFAIL_STACKS, ds_uid=build.USAGE_UID,
             description="Windowed because a momentary failure rate answers only whether an evaluation "
@@ -2478,8 +2475,9 @@ def d_risk(ds: str):
                 f"topk(15, sum by(stack_id)(max_over_time("
                 f"grafanacloud_instance_ruler_queries_zero_fetched_series_total:rate5m[{WINDOW}])))"),
             legend="{{slug}}", ds_uid=build.USAGE_UID, unit="ops",
-            description="Peak rate of no-op rule evaluations. Start at the top: these are rules to "
-                        "delete, not rules to fix."),
+            description="Peak rate of zero-series rule evaluations. Review queries and metric lifecycle "
+                        "with the owner, including deliberate absence and low-frequency inputs. "
+                        "Not an instruction to delete rules."),
         "b_notif": build.barchart_panel(
             "Worst stacks by notification failure rate (24h peak)",
             build.usage_by_slug(
@@ -2755,10 +2753,9 @@ def d_value(ds: str):
     el = {
         "n_unit": build.stat_panel(
             "Series per billed user", "gcinsight_value_unit_cost_per_billed_user", decimals=0,
-            description="The estate's unit economics: active series per BILLED user. **Trending down is "
-                        "the whole ROI argument** - more people served per unit of spend. Uses billed "
-                        "rather than active users because this is a money ratio; the two populations "
-                        "differ and their spread moves with the estate."),
+            description="Active series per billed user, not money, ROI or total efficiency. "
+                        "More billed users can lower this ratio without reducing cost. Billed and "
+                        "active users are distinct populations."),
         "n_billed": build.stat_panel(
             "Billed users", "gcinsight_cost_billed_users",
             description="`billingActiveUsers` - the only user count valid for money, and the denominator "
@@ -2848,23 +2845,17 @@ def d_value(ds: str):
         # and billingOnCallActiveUsers=0. Two fields, two products. The bar chart alone permits a false
         # conclusion, so the counter-evidence sits in the same tab rather than in a doc nobody opens.
         "n_oncall": build.stat_panel(
-            "Stacks actually running IRM/OnCall", ONCALL_STACKS, ds_uid=build.USAGE_UID,
-            description="Live from grafanacloud-usage, and the direct contradiction of `incident 0` to "
-                        "its left. This panel counts stacks with alert-group activity, not merely a "
-                        "provisioned entitlement. gcom's `incident` field is the legacy standalone "
-                        "Grafana Incident product; IRM and OnCall do not set it. Evidence: "
-                        "evidence/usage-datasource-signals.json, key `irm_in_use`."),
+            "Stacks reporting a positive OnCall group gauge", ONCALL_STACKS, ds_uid=build.USAGE_UID,
+            description="Positive OnCall alert-group gauge observations, not current human operation "
+                        "or lifetime events. Gauge horizon is unspecified. The legacy standalone "
+                        "Grafana Incident flag does not cover IRM/OnCall; neither proves entitlement."),
         "b_oncall": build.barchart_panel(
-            "OnCall alert groups by stack",
+            "OnCall alert-group gauge by stack",
             build.usage_by_slug("topk(15, sum by(stack_id)(grafanacloud_oncall_instance_alert_groups_total))"),
             legend="{{slug}}", ds_uid=build.USAGE_UID,
-            description="Who is actually on the end of a pager. The first real operating signal in this "
-                        "platform - everything else here counts what EXISTS, this counts what HAPPENED. "
-                        "Note this metric is the exception on this datasource: it already carries `slug`, "
-                        "`team`, `service_name`, `integration` and `state` natively, so the stack_id join "
-                        "is only needed because the sum discards them. Those labels are a far richer "
-                        "seam than this bar chart uses - team and MTTA/MTTR dimensions are "
-                        "available and deliberately out of scope here. See IDEAS.md."),
+            description="OnCall alert-group gauge ranked by stack, with unspecified horizon. "
+                        "Not proof of current-period activity, lifetime events or a human recipient. "
+                        "Stack names are restored by the stack-id join after aggregation."),
         "n_k6_provisioned": build.stat_panel(
             "Stacks with a k6 org id", 'gcinsight_estate_feature_stacks{kind="k6"}',
             description="gcom provisioning flag only: a stack can carry a k6 org id without running a "
@@ -2902,9 +2893,9 @@ def d_value(ds: str):
                 f"grafanacloud_sm_billable_check_executions_per_second[{WINDOW}])))"
             ),
             legend="{{slug}}", ds_uid=build.USAGE_UID, unit="ops",
-            description="Named activity ranking behind the executing-stack count. A provisioned stack "
-                        "absent here ran no billable checks in the window; a high bar identifies where the "
-                        "actual synthetic workload and cost are concentrated."),
+            description="Top-15 reported execution-rate observations in the 24h window. Absence is "
+                        "unknown: a stack may be below the rank or lack reporting; it does not prove "
+                        "no checks ran. This is automated reporting, not human adoption."),
         "t_features": build.timeseries_panel(
             "gcom provisioning flags over time",
             [("gcinsight_estate_feature_stacks", "{{kind}}")],
@@ -3149,72 +3140,64 @@ def d_operations(ds: str):
     el = {
         # --- Engagement: the headline -----------------------------------------------------------------
         "n_engagement": build.stat_panel(
-            "Alerts that anyone acknowledged", ENGAGEMENT_RATE, unit="percentunit", decimals=1,
+            "Unqualified acknowledgement diagnostic ratio", ENGAGEMENT_RATE, unit="percentunit", decimals=1,
             ds_uid=build.USAGE_UID,
-            description="THE HEADLINE. Alert groups with a recorded acknowledgement divided by all alert "
-                        "groups on the stacks that report response timing. OnCall logs a response time "
-                        "when somebody engages; groups outside the numerator were resolved, silenced or "
-                        "left without an acknowledgement. "
-                        "Say 'no acknowledgement was recorded' rather than 'nobody looked': the metric "
-                        "proves an absent acknowledgement, not intent. "
-                        "The denominator is restricted to those same timing stacks on purpose; using the "
-                        "broader OnCall population would mix coverage."),
+            description="Acknowledgement observations over the last seven days divided by an alert-group "
+                        "gauge with unspecified horizon. Stack matching leaves unmatched producer windows "
+                        "and group cohorts. This unqualified diagnostic ratio is not a verified "
+                        "acknowledgement share or evidence of unanswered alerts."),
         "n_engaged": build.stat_panel(
-            "Alert groups acknowledged", ENGAGED, ds_uid=build.USAGE_UID,
-            description="Alert groups with a response-time observation. This is the population every "
-                        "response-time number on this page is calculated over."),
+            "Acknowledgement observations (7d)", ENGAGED, ds_uid=build.USAGE_UID,
+            description="Response-time observations in the producer's last seven days, not the dashboard "
+                        "range. Missing data is unknown; this is not the resolution histogram population."),
         "n_engaged_denom": build.stat_panel(
-            "Alert groups raised (timing stacks)", ENGAGED_DENOM, ds_uid=build.USAGE_UID,
-            description="All alert groups on stacks that report timing. The broader OnCall estate is "
-                        "deliberately NOT used because the acknowledgement numerator does not exist over "
-                        "that full population."),
+            "Alert-group gauge (timing stacks)", ENGAGED_DENOM, ds_uid=build.USAGE_UID,
+            description="Alert-group gauge on timing-reporting stacks. Its horizon is unspecified; "
+                        "matching stacks does not match the seven-day histogram group cohort."),
         "b_teamengage": build.barchart_panel(
-            "Share of each team's alerts that anyone acknowledged", TEAM_ENGAGEMENT,
+            "Team acknowledgement diagnostic ratio (unqualified)", TEAM_ENGAGEMENT,
             legend="{{team}}", ds_uid=build.USAGE_UID, unit="percentunit",
-            description="Acknowledged share per team over the timing-stack population. The spread shows "
-                        "whether routing and ownership correlate with response rather than hiding them "
-                        "inside an estate average. "
-                        f"Teams under {TEAM_MIN_GROUPS} alert groups are excluded - too few to mean "
-                        "anything, the same discipline as the delete-protection threshold."),
+            description="Seven-day response observations divided by the group gauge, per team on "
+                        "timing stacks. Unmatched producer windows and cohorts prevent a verified "
+                        f"acknowledgement share. Teams under {TEAM_MIN_GROUPS} gauge groups are excluded."),
         "t_engagement": build.timeseries_panel(
-            "Engagement rate over time", [(ENGAGEMENT_RATE, "acknowledged share")],
+            "Acknowledgement diagnostic ratio over time (unqualified)", [(ENGAGEMENT_RATE, "acknowledged share")],
             unit="percentunit", ds_uid=build.USAGE_UID,
-            description="Both sides are cumulative counters, so this is a lifetime running average and "
-                        "moves slowly by construction. A step up means a burst of alerts actually being "
-                        "worked; a slow decline means alert volume growing faster than anyone answers it."),
+            description="Trend of seven-day response observations divided by an unspecified-horizon "
+                        "group gauge. Unmatched windows and cohorts make this an unqualified diagnostic "
+                        "ratio, not a lifetime average, arrival rate or verified acknowledgement share."),
 
         # --- Response time, for groups with recorded acknowledgement ----------------------------------
         "n_mtta": build.stat_panel(
-            "Median time to acknowledge", MTTA_MEDIAN, unit="s", decimals=0, ds_uid=build.USAGE_UID,
-            description="Read it as the answer to a narrow question: of the alerts somebody engaged with, "
-                        "how fast? The on-call works when an alert is pointed at a person. Combined with "
-                        "the engagement panel, that is the whole diagnosis - a routing problem, not a "
-                        "responsiveness problem."),
+            "Median recorded acknowledgement time (7d)", MTTA_MEDIAN, unit="s", decimals=0, ds_uid=build.USAGE_UID,
+            description="Median recorded response duration in the producer's last seven days. The "
+                        "dashboard range selects observations of that rolling window, not its duration. "
+                        "This does not diagnose routing or measure saved operator time."),
         "n_mttr": build.stat_panel(
-            "Median time to resolve", MTTR_MEDIAN, unit="s", decimals=0, ds_uid=build.USAGE_UID,
-            description="Median elapsed time from alert-group creation to resolution, only for groups "
+            "Median recorded resolution time (7d)", MTTR_MEDIAN, unit="s", decimals=0, ds_uid=build.USAGE_UID,
+            description="Last seven days: median elapsed time from alert-group creation to resolution, only for groups "
                         "with a recorded timing observation. Compare with acknowledgement time to split "
                         "time-to-notice from time-to-fix."),
         "n_mtta_mean": build.stat_panel(
-            "Mean time to acknowledge", MTTA_MEAN, unit="s", decimals=0, ds_uid=build.USAGE_UID,
-            description="Arithmetic mean over acknowledged groups. A large gap from the median is not a "
+            "Mean recorded acknowledgement time (7d)", MTTA_MEAN, unit="s", decimals=0, ds_uid=build.USAGE_UID,
+            description="Last seven days: arithmetic mean over recorded response observations. A large gap from the median is not a "
                         "contradiction: a long tail can drag the mean sharply upward. Quoting the "
                         "mean alone makes a working on-call look broken; quoting the median alone hides "
                         "the tail. Both are on this page for that reason."),
         "n_tail": build.stat_panel(
-            "Acknowledged only after an hour", ACK_TAIL, ds_uid=build.USAGE_UID,
-            description="A COUNT above the "
+            "Acknowledgement observations over an hour (7d)", ACK_TAIL, ds_uid=build.USAGE_UID,
+            description="Last seven days: a COUNT above the "
                         "top bucket, never a high percentile: the histogram's largest finite bucket is "
                         "3600s, so p90 and p99 both saturate at exactly 3600 and would be read as "
                         "'an hour' when the truth is 'at least an hour, and the data cannot say more'."),
         "n_tail_share": build.stat_panel(
-            "Share acknowledged only after an hour", ACK_TAIL_SHARE, unit="percentunit", decimals=1,
+            "Recorded acknowledgement tail share (7d)", ACK_TAIL_SHARE, unit="percentunit", decimals=1,
             ds_uid=build.USAGE_UID,
-            description="Share of ACKNOWLEDGED alerts whose recorded acknowledgement exceeded one hour, "
+            description="Last seven days: share of recorded response observations exceeding one hour, "
                         "not a share of all alerts. Groups without an acknowledgement have no duration to "
                         "place in this ratio."),
         "b_ackdist": build.barchart_series_panel(
-            "Acknowledgements by response-time band",
+            "Acknowledgement observations by response-time band (7d)",
             # Prometheus histogram buckets are cumulative. Subtract adjacent buckets so every alert is
             # represented exactly once and the chart can be read directly rather than asking readers to
             # perform five subtractions. The order is the scale's order, deliberately not by size.
@@ -3228,56 +3211,49 @@ def d_operations(ds: str):
              (f'sum({ACK}_bucket{{le="+Inf"}}) - sum({ACK}_bucket{{le="3600.0"}})',
               "over 1 hour")],
             ds_uid=build.USAGE_UID,
-            description="Disjoint bands derived by subtracting adjacent cumulative histogram buckets, "
+            description="Last seven days: disjoint bands derived by subtracting adjacent cumulative histogram buckets, "
                         "so every acknowledgement appears in exactly one bar. Boundaries are fixed "
                         "by Grafana Cloud at 1m/5m/10m/1h, so this is the full resolution available - "
                         "there is no finer breakdown to build, and it is also why no p90 or p99 is shown "
                         "anywhere on this dashboard: both saturate at the top bucket and would report "
                         "exactly one hour regardless of the real figure."),
         "t_response": build.timeseries_panel(
-            "Acknowledge and resolve medians over time",
+            "Recorded response medians over time (rolling 7d)",
             [(MTTA_MEDIAN, "median acknowledge (s)"), (MTTR_MEDIAN, "median resolve (s)")],
             unit="s", ds_uid=build.USAGE_UID,
-            description="Medians only. The means make a poor trend line: `_sum`/`_count` are cumulative "
-                        "counters, so one very stale alert steps the series permanently."),
+            description="Recorded medians from rolling histograms covering the last seven days at each "
+                        "sample. The dashboard range does not replace the producer window; these are "
+                        "not cumulative lifetime averages."),
 
         # --- Ownership --------------------------------------------------------------------------------
         "n_unowned_all": build.stat_panel(
-            "Unowned share - timing-stack alerts", UNOWNED_SHARE_ALL, unit="percentunit", decimals=1,
+            "No-team gauge share (timing stacks)", UNOWNED_SHARE_ALL, unit="percentunit", decimals=1,
             ds_uid=build.USAGE_UID,
-            description="Share of alert groups labelled `team=\"No team\"`, restricted to the stacks "
-                        "that report acknowledgement timing. This is the same population as the "
-                        "acknowledged-alert share beside it, so the two ratios can be compared."),
+            description="Share of gauge groups labelled `team=\"No team\"` on timing-reporting stacks. "
+                        "Gauge horizon is unspecified. Do not compare with seven-day response shares "
+                        "as if the group cohorts and windows matched."),
         "n_unowned_acked": build.stat_panel(
-            "Unowned share of ACKNOWLEDGED alerts", UNOWNED_SHARE_ACKED, unit="percentunit", decimals=1,
+            "No-team response-observation share (7d)", UNOWNED_SHARE_ACKED, unit="percentunit", decimals=1,
             ds_uid=build.USAGE_UID,
-            description="Share of acknowledged alert groups labelled `team=\"No team\"`. "
-                        "Acknowledgement timing exists on a restricted set of stacks; the panel beside "
-                        "it deliberately restricts its denominator to that same timing-stack population, "
-                        "so their difference reflects engagement rather than coverage."),
+            description="Last seven days: share of response observations labelled `team=\"No team\"`. "
+                        "Its cohort is not established as matching the group-gauge share; differences "
+                        "cannot diagnose engagement."),
         "n_unowned_svc": build.stat_panel(
-            "Timing-stack alerts with no service attribution", UNOWNED_SERVICE_SHARE,
+            "No-service gauge share (timing stacks)", UNOWNED_SERVICE_SHARE,
             unit="percentunit", decimals=1,
             ds_uid=build.USAGE_UID,
-            description="Share of OnCall alert groups on timing-reporting stacks labelled "
-                        "`service_name=\"No service\"`. The same population restriction as the team "
-                        "share prevents ownership differences being confused with measurement coverage. The "
-                        "same governance gap as the "
-                        "team field but wider, and it is what stops anyone answering 'which service "
-                        "pages us most' - the by-service chart on the Alert flow tab is mostly a picture "
-                        "of how much attribution is missing."),
+            description="Share of gauge groups labelled `service_name=\"No service\"` on timing stacks. "
+                        "Horizon is unspecified; this is label attribution, not verified business ownership "
+                        "or a matched seven-day response population."),
         "b_teamtail": build.barchart_panel(
-            "Teams by share of acknowledged alerts that took over an hour", TEAM_TAIL_SHARE,
+            "Team recorded acknowledgement tail share (7d)", TEAM_TAIL_SHARE,
             legend="{{team}}", ds_uid=build.USAGE_UID, unit="percentunit",
-            description="For each team, the share of acknowledged alerts whose recorded response took "
-                        "over an hour. Use the live spread to test whether ownership affects "
-                        "not just WHETHER an alert is answered but how fast. Teams "
-                        "under 10 acknowledged groups are excluded."),
+            description="Last seven days: per-team share of recorded response observations over an hour. "
+                        "Not evidence of causal ownership effects. Teams under 10 observations are excluded."),
         "b_teamvol": build.barchart_panel(
-            "Alert volume by team", TEAM_VOLUME, legend="{{team}}", ds_uid=build.USAGE_UID,
-            description="Lifetime alert-group volume by team across every OnCall stack reporting the "
-                        "counter. This has broader coverage than the timing-based engagement panels, so "
-                        "use it to rank workload, not as their denominator."),
+            "Alert-group gauge by team", TEAM_VOLUME, legend="{{team}}", ds_uid=build.USAGE_UID,
+            description="Alert-group gauge by team across reporting OnCall stacks. Horizon is "
+                        "unspecified; levels may fall. Not an arrival rate, workload or timing cohort."),
         "b_service_owner": build.barchart_panel(
             "Observed services and their owning teams",
             f"topk(20, sum by(service_name, team)({GROUPS}))",
@@ -3288,15 +3264,15 @@ def d_operations(ds: str):
 
         # --- Alert flow -------------------------------------------------------------------------------
         "n_groups": build.stat_panel(
-            "Alert groups, estate-wide", ALL_GROUPS, ds_uid=build.USAGE_UID,
-            description="All OnCall alert groups by state across stacks reporting the counter. A cumulative counter, so "
-                        "this is lifetime volume and not a rate."),
+            "Alert-group gauge, estate-wide", ALL_GROUPS, ds_uid=build.USAGE_UID,
+            description="OnCall alert-group gauge by state across reporting stacks. Horizon is "
+                        "unspecified and levels may fall; not current-period activity or an arrival rate."),
         "n_notified": build.stat_panel(
             "User notifications sent",
             "sum(grafanacloud_oncall_instance_user_was_notified_of_alert_groups_total)",
             ds_uid=build.USAGE_UID,
-            description="Cumulative user-notification events across OnCall. This is lifetime volume, not "
-                        "a current rate or a count of distinct people."),
+            description="Cumulative user-notification counter across OnCall. Start/reset horizon is "
+                        "unknown; not a lifetime guarantee, current rate or distinct-person count."),
         "n_state_history_failures": build.stat_panel(
             "Stacks failing to write alert state history (24h)",
             STATE_HISTORY_FAILURE_STACKS, ds_uid=build.USAGE_UID,
@@ -3320,34 +3296,26 @@ def d_operations(ds: str):
             'grafanacloud_instance_alertmanager_alerts{state="active"} '
             "* on(stack_id) group_left(slug) " + build.USAGE_INFO + "))",
             legend="{{slug}}", ds_uid=build.USAGE_UID,
-            description="**GRAFANA ALERTMANAGER alerts, which are NOT the OnCall alert groups the rest of "
-                        "this dashboard counts.** Every other panel here measures OnCall - what paged a "
-                        "human and whether anyone answered. This measures what Grafana's own Alertmanager "
-                        "is currently holding in the `active` state, which is a much larger number and "
-                        "includes everything that never routes to a person. Read the two together: a "
-                        "stack high here and absent from the OnCall panels is firing constantly with "
-                        "nobody on the other end. Summed per stack because some stacks run more than one "
-                        "Alertmanager instance and would otherwise appear twice."),
+            description="Grafana Alertmanager alerts held in active state, not OnCall alert groups. "
+                        "Absence from OnCall panels is unknown, not proof of no recipient. Multiple "
+                        "Alertmanager instances are summed per stack."),
         "b_integration": build.barchart_panel(
-            "What pages them, by integration",
+            "Alert-group gauge by integration",
             f"topk(12, sum by(integration)({GROUPS}))", legend="{{integration}}",
             ds_uid=build.USAGE_UID,
-            description="Lifetime OnCall alert-group volume by integration, largest first. Differently "
-                        "named integrations that serve the same destination expose a consolidation and "
-                        "ownership problem; this chart counts names exactly as OnCall reports them."),
+            description="OnCall alert-group gauge by reported integration, largest first. Horizon is "
+                        "unspecified; names alone do not establish duplicate destinations or human use."),
         "b_service": build.barchart_panel(
-            "What pages them, by service",
+            "Alert-group gauge by service",
             f"topk(8, sum by(service_name)({GROUPS}))", legend="{{service_name}}",
             ds_uid=build.USAGE_UID,
-            description="Lifetime OnCall alert-group volume by service. The `No service` bar is the "
-                        "finding - most alerts cannot be attributed to a service, so treat this chart as "
-                        "a measure of missing attribution first and a ranking second."),
+            description="OnCall alert-group gauge by reported service. Horizon is unspecified. "
+                        "The `No service` bar shows unattributed gauge groups, not a measured arrival rate."),
         "t_state": build.timeseries_panel(
-            "Alert groups by state",
+            "Alert-group gauge by state",
             [(f"sum by(state)({GROUPS})", "{{state}}")], ds_uid=build.USAGE_UID,
-            description="Cumulative counters, so these lines only ever rise and the SLOPE is the signal. "
-                        "A `firing` line climbing while `resolved` stays flat means alerts arriving and "
-                        "not being closed."),
+            description="Gauge levels by reported state can rise or fall. Horizon is unspecified; "
+                        "slopes do not establish arrivals or closures."),
     }
     el.update(retention_panels())
     el.update(operations_health_panels())
@@ -3398,11 +3366,11 @@ def d_operations(ds: str):
         ]),
     ]
     return "gcinsight-operations", "Grafana Cloud Org Insights - Operations", \
-        ("Pillar G: what the estate actually DOES - acknowledged, resolved, or never touched. The only "
-         "behavioural signal in this platform. Live from the stack's own grafanacloud-usage datasource, "
-         "no collector and no series. SCOPE: response timing covers only stacks that emit timing; "
-         "volume and ownership cover the broader OnCall population. Ratios restrict their denominator "
-         "to the timing population and each panel says which. Backend health adds raw per-stack "
+        ("Pillar G: reported OnCall group gauges and rolling seven-day response observations. "
+         "Live from grafanacloud-usage, no collector and no series. Group-gauge horizon is "
+         "unspecified; matching timing stacks does not match group cohorts or producer windows. "
+         "Acknowledgement diagnostic ratios are unqualified, not verified response shares. "
+         "Backend health adds raw per-stack "
          "diagnostic observations with explicit unverified units, not health or human activity claims."), el, tabs
 
 
@@ -4162,32 +4130,34 @@ def d_coverage(ds: str):
         # populations. A missing timing observation means no acknowledgement was recorded, not that no
         # human looked.
         "n_value_groups": build.stat_panel(
-            "Alert groups on timing-reporting stacks", f"sum{GROUPS_ON_TIMING_STACKS}",
+            "Alert-group gauge on timing-reporting stacks", f"sum{GROUPS_ON_TIMING_STACKS}",
             ds_uid=build.USAGE_UID,
-            description="OnCall alert groups restricted to stacks that also report acknowledgement "
-                        "timing. This is the denominator for every response ratio on this tab."),
+            description="OnCall group gauge on timing-reporting stacks, with unspecified horizon. "
+                        "It is not an established matching cohort for seven-day response observations."),
         "n_value_acknowledged": build.stat_panel(
-            "Acknowledgements recorded", ENGAGED, ds_uid=build.USAGE_UID,
-            description="Response-time observations recorded by OnCall. A missing observation means no "
-                        "acknowledgement was recorded; it does not prove nobody looked."),
+            "Acknowledgement observations (7d)", ENGAGED, ds_uid=build.USAGE_UID,
+            description="Response-time observations in OnCall's last seven days. Missing series is "
+                        "unknown, not proof of no acknowledgement or no human attention."),
         "n_value_engagement": build.stat_panel(
-            "Alert groups with a recorded acknowledgement", ENGAGEMENT_RATE,
+            "Unqualified acknowledgement diagnostic ratio", ENGAGEMENT_RATE,
             unit="percentunit", decimals=1, ds_uid=build.USAGE_UID,
-            description="Acknowledgement observations divided only by alert groups on timing-reporting "
-                        "stacks. The explicit population restriction prevents a cross-estate ratio."),
+            description="Seven-day response observations divided by an unspecified-horizon group gauge "
+                        "on timing stacks. Unmatched windows and cohorts make this an unqualified "
+                        "diagnostic ratio, not a verified acknowledgement share."),
         "n_value_mtta": build.stat_panel(
-            "Median time to acknowledge", MTTA_MEDIAN, unit="s", decimals=1,
+            "Median recorded acknowledgement time (7d)", MTTA_MEDIAN, unit="s", decimals=1,
             ds_uid=build.USAGE_UID,
-            description="p50 only. Higher quantiles saturate at the histogram's top finite bucket and "
+            description="Last seven days: p50 only. Higher quantiles saturate at the histogram's top finite bucket and "
                         "would turn 'at least an hour' into a false exact duration."),
         "n_value_mttr": build.stat_panel(
-            "Median time to resolve", MTTR_MEDIAN, unit="s", decimals=1,
+            "Median recorded resolution time (7d)", MTTR_MEDIAN, unit="s", decimals=1,
             ds_uid=build.USAGE_UID,
-            description="p50 only, for the same finite-bucket reason as acknowledgement time."),
+            description="Last seven days: p50 recorded resolution duration. The producer window is "
+                        "independent of the dashboard range; not time saved."),
         "n_value_tail": build.stat_panel(
-            "Acknowledgements recorded after the top finite bucket", ACK_TAIL,
+            "Acknowledgement observations above finite bucket (7d)", ACK_TAIL,
             ds_uid=build.USAGE_UID,
-            description=f"Count above the histogram's `{TOP_BUCKET}` second finite bucket. A count is "
+            description=f"Last seven days: count above the histogram's `{TOP_BUCKET}` second finite bucket. A count is "
                         "honest here; p90 and p99 would both saturate at the bucket boundary."),
         "n_value_unowned_team": build.stat_panel(
             "Timing-stack alert groups with no owning team", UNOWNED_SHARE_ALL,
@@ -4223,11 +4193,11 @@ def d_coverage(ds: str):
             description="Infrastructure container overage divided by the matching published billable "
                         "container-hours. This is not a recomputed rate card."),
         "n_spend_ack": build.stat_panel(
-            "Current monthly run rate per acknowledgement recorded", f"{RUN_RATE} / {ENGAGED}",
+            "Unqualified run-rate / seven-day response diagnostic ratio", f"{RUN_RATE} / {ENGAGED}",
             unit="currencyUSD", decimals=2, ds_uid=build.USAGE_UID,
-            description="Grafana-published total monthly run rate divided by response-time observations "
-                        "from the timing-reporting population. It is a flipped denominator, not a claim "
-                        "that every charge exists to handle OnCall pages."),
+            description="Derived monthly run rate divided by last-seven-day response observations. "
+                        "Unmatched periods and populations: not a unit price, operational ROI or "
+                        "proof that charges exist to handle OnCall pages."),
         "n_spend_service": build.cross_source_ratio_stat_panel(
             "Current monthly run rate per named observed service",
             (RUN_RATE, build.USAGE_UID),
@@ -4344,7 +4314,7 @@ def d_coverage(ds: str):
             build.row("Recorded response", ["n_value_groups", "n_value_acknowledged",
                                               "n_value_engagement"],
                       max_columns=3, row_height="short"),
-            build.row("Time returned to people", ["n_value_mtta", "n_value_mttr", "n_value_tail"],
+            build.row("Recorded response delays, not time saved", ["n_value_mtta", "n_value_mttr", "n_value_tail"],
                       max_columns=3, row_height="short"),
             build.row("Ownership completeness", ["n_value_unowned_team",
                                                    "n_value_unowned_service"],
@@ -4800,8 +4770,8 @@ def d_ai(ds: str):
             "Top 50 stacks by Assistant messages (30d)", ai_top_messages, legend="{{stack}}",
             label_column="Stack", value_column="Messages",
             description="Ranked from our own per-stack series, so no stack_id-to-slug join is involved "
-                        "and the Stack selector works. A stack absent from this table was not collected; "
-                        "a stack present with zero really did have no Assistant traffic."),
+                        "and the Stack selector works. Absence is unknown: top-50 membership does not "
+                        "establish collection status. Consult the full table's Measured field."),
         "tbl_ai_per_stack": build.table_panel(
             "Assistant use per stack - the full table", "ai_assistant", ds,
             columns=[" Stack".strip(), "Region", "Measured", "Users (active)", "Assistant users",
@@ -4838,17 +4808,14 @@ def d_ai(ds: str):
                         "the uncategorised stat on the previous tab before quoting a percentage."),
         "b_ai_surface": build.barchart_panel(
             "Categorised messages by surface", ai_by_surface, legend="{{surface}}",
-            description="Where the traffic came from. `web` is a person in the UI; `cli`, `a2a`, "
-                        "`automation`, `lodestone` and `slack` are machine-driven. This split exists in "
-                        "no billing metric, and it is the one that changes the enablement conversation: "
-                        "a stack driven by automation needs different help from one driven by people."),
+            description="Recorded surface categories, not proven human versus machine actors. "
+                        "A person can use CLI or Slack; web does not independently establish human identity."),
         "t_ai_machine": build.timeseries_panel(
-            "Machine-driven share of categorised messages - estate",
+            "Non-web surface share of categorised messages - estate",
             [(ai_machine_share_estate, "non-web share")], unit="percentunit",
             description="Non-`web` surfaces as a share of categorised messages, estate-wide. Denominator "
-                        "is the categorised subset, not all messages. A rising line means Assistant is "
-                        "moving from an interactive tool to a pipeline component, which changes what "
-                        "growth in token spend means."),
+                        "is the categorised subset, not all messages. Surface mix does not establish "
+                        "human versus machine identity or pipeline adoption."),
         "tbl_ai_combo": build.prometheus_table_panel(
             "Categorised messages by category and surface - estate", ai_combo_series,
             legend="{{category}} ({{surface}})", label_column="Category (surface)",
@@ -4859,15 +4826,15 @@ def d_ai(ds: str):
         "tbl_ai_combo_stack": build.table_panel(
             "Category and surface per stack", "ai_category_surface", ds,
             schema=ai_pillar.VIEW_SCHEMAS["ai_category_surface"],
-            description="One row per stack, category and surface. `Human driven` marks the `web` rows. "
+            description="One row per stack, category and surface. `Human driven` is a legacy web-category "
+                        "field, not verified human identity. "
                         "This is where a single stack's mix is read; the metric version above is "
                         "estate-wide because the per-stack cross product is a table, not a time series."),
         "tbl_ai_stack_machine": build.prometheus_table_panel(
-            "Top 50 stacks by machine-driven share", ai_top_machine, legend="{{stack}}",
+            "Top 50 stacks by recorded non-web surface share", ai_top_machine, legend="{{stack}}",
             label_column="Stack", value_column="Machine share", unit="percentunit",
-            description="Stacks whose Assistant traffic is most machine-driven. ABSENT rather than zero "
-                        "where nothing was categorised at all: a stack with no classified messages has "
-                        "no share, and calling that 0% would assert it is entirely human-driven."),
+            description="Ranked recorded non-web surface share, not actor attribution. Missing or "
+                        "uncategorised messages leave the share unknown; top-50 absence is not zero."),
 
         # --- Enablement and configuration ------------------------------------------------------------
         "b_ai_tenant_objects": build.barchart_panel(
@@ -4891,10 +4858,9 @@ def d_ai(ds: str):
                      f"Days active of {assistant_src.WINDOW_DAYS}", "Tokens",
                      "Tokens per Assistant user", "Machine share of categorised"],
             units={"Machine share of categorised": "percentunit"},
-            description="Real usage, no skills, no rules, no MCP integrations, no automations - people "
-                        "driving Assistant raw. The cheapest intervention available on this estate. "
-                        "Threshold is 100+ messages in the window, just above the active-stack upper "
-                        "quartile, so this is a work queue rather than an inventory."),
+            description="Reported messages without tenant-scoped configuration in the readable "
+                        "population. User-scoped effort is invisible, not absent. Threshold is 100+ "
+                        "messages in the plugin window; owner review is needed before intervention."),
         "tbl_ai_stack_tpu": build.prometheus_table_panel(
             "Top 50 stacks by tokens per Assistant user", ai_top_tpu, legend="{{stack}}",
             label_column="Stack", value_column="Tokens per user",
@@ -4916,7 +4882,8 @@ def d_ai(ds: str):
             schema=ai_pillar.VIEW_SCHEMAS["ai_mcp_auth_failed"],
             description="An MCP integration still shows as enabled when its credentials stop working, so "
                         "this fails silently: Assistant is told to consult a system it cannot reach. An "
-                        "empty table is a MEASURED zero - every stack's integrations were read."),
+                        "empty table means no failing rows in the measured readable population, not proof "
+                        "every stack was read. Check Collection coverage for unknown inputs."),
         "tbl_ai_disabled": build.table_panel(
             "Tenant objects that exist but are switched off", "ai_config_disabled", ds,
             schema=ai_pillar.VIEW_SCHEMAS["ai_config_disabled"],
@@ -4965,8 +4932,8 @@ def d_ai(ds: str):
         # boundaries narrowly rather than retaining a blanket disclaimer that all activity is unavailable.
         "feature_scope": build.text_panel(
             "What feature-level Assistant data can and cannot be collected",
-            """Every stack now carries a read-only reader credential, so tenant-scoped Assistant
-inventory and usage ARE collectable. Three limits are permanent and are **product boundaries, not
+            """Tenant-scoped Assistant inventory and usage are collectable on eligible stacks with
+working read-only reader credentials; collection gaps remain unknown. Three limits are permanent and are **product boundaries, not
 permission gaps** - a wider role cannot fix any of them, so a blank here is never a zero:
 
 | | collectable |

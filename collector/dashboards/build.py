@@ -1008,7 +1008,7 @@ MIXED_BANNER_MD: dict[str, str] = {
     "ai": """
 - **This dashboard MIXES two sources and they have different windows.** The Overview, Adoption by stack,
   Token consumption, People and Commercial tabs are live from `grafanacloud-usage` on the **monthly
-  billing period**. Assistant use per stack, Human vs machine, Enablement and Collection coverage come
+  billing period**. Assistant use per stack, Human vs machine (recorded surface categories, not proven actors), Enablement and Collection coverage come
   from our own per-stack collection on a **rolling 30-day plugin window**, refreshed daily. The two
   disagree by design - never quote a figure from one as a check on the other.
 - **Every Assistant inventory count is TENANT-scoped.** A user-scoped skill or rule is invisible to any
@@ -1033,7 +1033,11 @@ LIVE_BANNER_MD = """\
 - **Estate scope:** the Stack selector is carried through links but does not filter these panels because
   this datasource has no stack-slug label.
 - **Rate-shaped series use a 24h window**, never an instantaneous comparison.
-- A stack missing from a metric is **absent, not zero**.
+- **OnCall groups are a gauge with unspecified horizon.** Response and resolution histograms cover
+  the producer's **last seven days** at each sample, not the dashboard range. Stack matching does not
+  match group cohorts or windows; acknowledgement diagnostic ratios are unqualified, not verified shares.
+- A stack missing from a metric or top-N ranking is **unknown, not zero**. Configuration and reported
+  telemetry do not establish human use.
 """
 
 
