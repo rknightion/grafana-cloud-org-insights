@@ -67,6 +67,55 @@ class CollectorIntegrityTest(unittest.TestCase):
 class DashboardNameAndGenericTextTest(unittest.TestCase):
     """Read the publication artifact, not just the expression constants."""
 
+    def test_population_classifier_rejects_mixed_terms_within_one_expression(self):
+        panel = build.stat_panel("Probe", 'sum(gcinsight_stack_active_series{stack=~"$stack"}) / sum(gcinsight_stack_active_series)')
+        build.qualify_population({"probe": panel})
+        self.assertEqual(panel["spec"]["title"], "Mixed population scope | Probe")
+
+    def test_population_classifier_resolves_visible_expression_dependencies(self):
+        selected = build.prom_query('sum(gcinsight_stack_active_series{stack=~"$stack"})', ref_id="A", hidden=True)
+        global_input = build.prom_query('sum(gcinsight_stack_active_series)', ref_id="B", hidden=True)
+        cases = {
+            "missing ref with hidden selected": ([selected, build.expression_query({"type": "math", "expression": "$Z"}, "E")], "Scope unresolved"),
+            "expression only missing ref": ([build.expression_query({"type": "math", "expression": "$Z"}, "E")], "Scope unresolved"),
+            "self cycle": ([build.expression_query({"type": "math", "expression": "$Z"}, "Z")], "Scope unresolved"),
+            "missing reduce input": ([selected, build.expression_query({"type": "reduce", "expression": "Z", "reducer": "last"}, "E")], "Scope unresolved"),
+            "cycle": ([selected, build.expression_query({"type": "math", "expression": "$D"}, "C", hidden=True),
+                       build.expression_query({"type": "math", "expression": "$C"}, "D")], "Scope unresolved"),
+            "mixed ratio": ([selected, global_input, build.expression_query({"type": "math", "expression": "$A / $B"}, "E")], "Mixed population scope"),
+            "unused hidden selected": ([selected, build.expression_query({"type": "reduce", "expression": "B", "reducer": "last"}, "D"), global_input], "Estate-wide source"),
+            "unsupported math syntax": ([selected, build.expression_query({"type": "math", "expression": "$A$A"}, "D")], "Scope unresolved"),
+            "bare math reference": ([selected, build.expression_query({"type": "math", "expression": "A + $A"}, "D")], "Scope unresolved"),
+            "unsupported expression type": ([selected, build.expression_query({"type": "mystery", "expression": "$A"}, "D")], "Scope unresolved"),
+            "missing PromQL in dependency": ([build.data_query("prometheus", "prom", {}, "B", hidden=True), selected,
+                                              build.expression_query({"type": "math", "expression": "$A / $B"}, "D")], "Scope unresolved"),
+            "transitive selected": ([selected, build.expression_query({"type": "reduce", "expression": "A", "reducer": "last"}, "C", hidden=True),
+                                    build.expression_query({"type": "math", "expression": "$C * 2"}, "D")], "Selected stacks"),
+        }
+        for label, (queries, expected) in cases.items():
+            with self.subTest(case=label):
+                panel = build.text_panel("Probe", "")
+                panel["spec"]["data"]["spec"]["queries"] = queries
+                build.qualify_population({"probe": panel})
+                self.assertEqual(panel["spec"]["title"], expected + " | Probe")
+
+    def test_population_classifier_missing_or_unsupported_promql_is_unresolved(self):
+        for expr in (None, "not valid promql", 'sum(gcinsight_stack_active_series{stack =~ "$stack"})',
+                     "gcinsight_stack_active_series gcinsight_stack_billed_users", "sum(",
+                     'sum(gcinsight_stack_active_series{stack=~"$other"})',
+                     'gcinsight_stack_active_series + "bad"', 'unknown_function(gcinsight_stack_active_series)'):
+            with self.subTest(expr=expr):
+                panel = build.stat_panel("Probe", "placeholder")
+                source = panel["spec"]["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+                if expr is None:
+                    del source["expr"]
+                else:
+                    source["expr"] = expr
+                build.qualify_population({"probe": panel})
+                # Valid alternative whitespace may be recognised as selected, never as global.
+                expected = ("Selected stacks | Probe", "Scope unresolved | Probe") if expr and "stack =~" in expr else ("Scope unresolved | Probe",)
+                self.assertIn(panel["spec"]["title"], expected)
+
     def test_population_titles_follow_real_selectors_not_table_or_rank_shape(self):
         from bin import dashboards
 

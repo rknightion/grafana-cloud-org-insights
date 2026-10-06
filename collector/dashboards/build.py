@@ -29,10 +29,12 @@ v2alpha1 has a different panel/query shape.
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import os
 import pathlib
+import re
 import subprocess
 from typing import Any, Iterable, Sequence
 
@@ -1317,35 +1319,244 @@ POPULATION_HELP = (
 )
 
 
-def qualify_population(elements: dict[str, Any]) -> None:
-    """Label existing assembled query populations without changing any query or data contract.
+_UNRESOLVED = frozenset({"Scope unresolved"})
 
-    This recognises only the authoring harness's existing selection forms, not arbitrary PromQL.
-    Server-side expressions inherit their input queries' scope. Mixed inputs are labelled honestly,
-    never promoted to a selected ratio. Queryless text panels retain their original titles.
+
+class _PopulationExpression:
+    """Read population-bearing leaves in a deliberately closed authoring grammar.
+
+    Not a general PromQL validator: unsupported metrics, functions, templates or syntax withhold
+    scope. Every supported metric operand contributes its own population, including denominators
+    and join/filter operands. Scalars contribute none. Never infer scope from a substring alone.
     """
+
+    _token = re.compile(r'\s*("(?:\\.|[^"\\])*"|\[(?:\d+[smhdwy])+(?::(?:\d+[smhdwy])*)?\]|'
+                        r'\d+(?:\.\d+)?|[A-Za-z_][A-Za-z_0-9:]*|=~|!~|!=|==|>=|<=|[{}(),@+*/%^<>!=\-])')
+    _aggregate = {"sum", "count", "max", "min", "avg"}
+    _arity = {"sum": 1, "count": 1, "max": 1, "min": 1, "avg": 1,
+              "topk": 2, "bottomk": 2, "count_values": 2, "clamp_min": 2,
+              "histogram_quantile": 2, "label_replace": 5, "time": 0,
+              "scalar": 1, "timestamp": 1, "avg_over_time": 1, "last_over_time": 1,
+              "max_over_time": 1, "min_over_time": 1, "sum_over_time": 1}
+    _precedence = {"or": 1, "unless": 1, "and": 2, "==": 3, "!=": 3, ">": 3,
+                   "<": 3, ">=": 3, "<=": 3, "+": 4, "-": 4, "*": 5, "/": 5,
+                   "%": 5, "^": 6}
+
+    def __init__(self, expression: str):
+        if not isinstance(expression, str) or not expression.strip() or len(expression) > 16000:
+            raise ValueError("missing or oversized expression")
+        self.tokens = []
+        position = 0
+        while position < len(expression.rstrip()):
+            match = self._token.match(expression, position)
+            if not match:
+                raise ValueError("unsupported token")
+            self.tokens.append(match[1])
+            position = match.end()
+        if len(self.tokens) > 1000:
+            raise ValueError("oversized expression")
+        self.index = 0
+
+    def peek(self) -> str:
+        return self.tokens[self.index] if self.index < len(self.tokens) else ""
+
+    def take(self, expected: str | None = None) -> str:
+        token = self.peek()
+        if not token or (expected is not None and token != expected):
+            raise ValueError("unsupported syntax")
+        self.index += 1
+        return token
+
+    def labels(self) -> None:
+        self.take("(")
+        if self.peek() != ")":
+            while True:
+                if not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*", self.take()):
+                    raise ValueError("unsupported label")
+                if self.peek() != ",":
+                    break
+                self.take(",")
+        self.take(")")
+
+    def operand(self) -> set[str]:
+        token = self.take()
+        population: set[str] = set()
+        if token in {"+", "-"}:
+            population = self.operand()
+        elif token == "(":
+            population = self.expression()
+            self.take(")")
+        elif re.fullmatch(r"\d+(?:\.\d+)?", token):
+            pass
+        elif token in self._arity:
+            if self.peek() in {"by", "without"}:
+                if token not in self._aggregate:
+                    raise ValueError("unsupported aggregation")
+                self.take()
+                self.labels()
+            self.take("(")
+            arguments = 0
+            if self.peek() != ")":
+                while True:
+                    string_argument = ((token == "count_values" and arguments == 0)
+                                       or (token == "label_replace" and arguments in {1, 2, 3, 4}))
+                    if string_argument:
+                        if not self.take().startswith('"'):
+                            raise ValueError("unsupported string argument")
+                    else:
+                        population |= self.expression()
+                    arguments += 1
+                    if self.peek() != ",":
+                        break
+                    self.take(",")
+            self.take(")")
+            if arguments != self._arity[token]:
+                raise ValueError("unsupported arity")
+        elif re.fullmatch(r"(?:gcinsight_|grafanacloud_)[A-Za-z_0-9:]+", token):
+            selected = False
+            if self.peek() == "{":
+                self.take("{")
+                while self.peek() != "}":
+                    label = self.take()
+                    if not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*", label):
+                        raise ValueError("unsupported label")
+                    operator = self.take()
+                    value = self.take()
+                    if operator not in {"=", "!=", "=~", "!~"} or not value.startswith('"'):
+                        raise ValueError("unsupported matcher")
+                    if label == "stack":
+                        if selected or operator != "=~" or value != '"$stack"':
+                            raise ValueError("unsupported selection")
+                        selected = True
+                    elif "$" in value:
+                        raise ValueError("unsupported template")
+                    if self.peek() != ",":
+                        break
+                    self.take(",")
+                self.take("}")
+            population.add("Selected stacks" if selected else "Estate-wide source")
+        else:
+            raise ValueError("unsupported operand")
+        if self.peek().startswith("["):
+            self.take()
+        if self.peek() == "@":
+            self.take("@")
+            self.take("end")
+            self.take("(")
+            self.take(")")
+        return population
+
+    def expression(self, minimum: int = 1) -> set[str]:
+        population = self.operand()
+        while self.peek() in self._precedence and self._precedence[self.peek()] >= minimum:
+            operator = self.take()
+            if self.peek() == "bool":
+                if self._precedence[operator] != 3:
+                    raise ValueError("unsupported bool modifier")
+                self.take()
+            if self.peek() in {"on", "ignoring"}:
+                self.take()
+                self.labels()
+                if self.peek() in {"group_left", "group_right"}:
+                    self.take()
+                    if self.peek() == "(":
+                        self.labels()
+            population |= self.expression(self._precedence[operator] + 1)
+        return population
+
+    def population(self) -> set[str]:
+        result = self.expression()
+        if self.peek():
+            raise ValueError("unconsumed syntax")
+        return result
+
+
+def _expression_references(source: dict[str, Any]) -> set[str]:
+    """Read only supported reduce/math dependencies, without evaluating Grafana math."""
+    expression = source.get("expression")
+    if not isinstance(expression, str) or len(expression) > 16000:
+        raise ValueError("missing expression")
+    if source.get("type") == "reduce" and source.get("reducer") == "last":
+        if re.fullmatch(r"\$?[A-Za-z_][A-Za-z_0-9]*", expression):
+            return {expression.lstrip("$")}
+    elif source.get("type") == "math":
+        refs = set(re.findall(r"\$([A-Za-z_][A-Za-z_0-9]*)", expression))
+        tree = ast.parse(re.sub(r"\$([A-Za-z_][A-Za-z_0-9]*)", "(0)", expression), mode="eval")
+        allowed = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Add, ast.Sub, ast.Mult, ast.Div,
+                   ast.Mod, ast.Pow, ast.UAdd, ast.USub, ast.Constant)
+        for node in ast.walk(tree):
+            if not isinstance(node, allowed):
+                raise ValueError("unsupported math")
+            if isinstance(node, ast.Constant) and (type(node.value) not in {int, float}):
+                raise ValueError("unsupported math constant")
+        if refs:
+            return refs
+    raise ValueError("unsupported expression")
+
+
+def _query_populations(queries: list[dict[str, Any]]) -> set[str]:
+    """Resolve visible roots, recursively including only their actual hidden dependencies."""
+    if len(queries) > 100:
+        return set(_UNRESOLVED)
+    by_ref = {q["spec"].get("refId"): q["spec"]["query"] for q in queries}
+    if len(by_ref) != len(queries) or None in by_ref:
+        return set(_UNRESOLVED)
+    resolved: dict[str, set[str]] = {}
+    visiting: set[str] = set()
+
+    def resolve(ref: str) -> set[str]:
+        if ref not in by_ref or ref in visiting:
+            return set(_UNRESOLVED)
+        if ref in resolved:
+            return resolved[ref]
+        visiting.add(ref)
+        inner = by_ref[ref]
+        source = inner.get("spec", {})
+        try:
+            if inner.get("group") == "prometheus":
+                result = _PopulationExpression(source.get("expr")).population()
+            elif inner.get("group") == INFINITY_TYPE:
+                filter_expression = source.get("filterExpression")
+                if filter_expression == STACK_FILTER:
+                    result = {"Selected stacks"}
+                elif filter_expression is None:
+                    result = {"Estate-wide source"}
+                else:
+                    result = set(_UNRESOLVED)
+            elif inner.get("group") == "__expr__":
+                refs = _expression_references(source)
+                result = set().union(*(resolve(dependency) for dependency in refs))
+            else:
+                result = set(_UNRESOLVED)
+        except (ValueError, SyntaxError, RecursionError):
+            result = set(_UNRESOLVED)
+        visiting.remove(ref)
+        resolved[ref] = result
+        return result
+
+    roots = [q["spec"]["refId"] for q in queries if not q["spec"].get("hidden", False)]
+    return set().union(*(resolve(ref) for ref in roots)) if roots else set(_UNRESOLVED)
+
+
+def qualify_population(elements: dict[str, Any]) -> None:
+    """Qualify visible outputs only; unknown provenance outranks inferred selection or mixing."""
+    prefixes = ("Selected stacks", "Estate-wide source", "Mixed population scope", "Scope unresolved")
     for element in elements.values():
         spec = element["spec"]
-        populations = set()
-        for query in spec["data"]["spec"]["queries"]:
-            inner = query["spec"]["query"]
-            if inner["group"] == "__expr__":
-                continue
-            source = inner["spec"]
-            if inner["group"] == "prometheus":
-                selected = 'stack=~"$stack"' in source["expr"]
-            elif inner["group"] == INFINITY_TYPE:
-                selected = source.get("filterExpression") == STACK_FILTER
-            else:
-                populations.add("Scope unresolved")
-                continue
-            populations.add("Selected stacks" if selected else "Estate-wide source")
-        if not populations:
+        queries = spec["data"]["spec"]["queries"]
+        if not queries:
             continue
-        scope = next(iter(populations)) if len(populations) == 1 else "Mixed population scope"
-        # Shared Findings already have a visible scope prefix when added to these dashboards.
-        if not spec["title"].startswith(scope + " | "):
-            spec["title"] = scope + " | " + spec["title"]
+        populations = _query_populations(queries)
+        if not populations or "Scope unresolved" in populations:
+            scope = "Scope unresolved"
+        else:
+            scope = next(iter(populations)) if len(populations) == 1 else "Mixed population scope"
+        title = spec["title"]
+        for prefix in prefixes:
+            if title.startswith(prefix + " | "):
+                title = title[len(prefix) + 3:]
+                break
+        spec["title"] = scope + " | " + title
 
 
 
