@@ -3,15 +3,16 @@ id: GCI-0096
 title: >-
   Add cost attribution, included-allowance, DPM reconciliation and seat
   utilisation panels
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop13-root'
 created_date: '2026-10-06 10:23'
+updated_date: '2026-10-06 12:07'
 labels:
   - dashboards
   - cost
   - loop13
-dependencies:
-  - GCI-0095
+dependencies: []
 priority: medium
 type: enhancement
 ordinal: 112000
@@ -36,3 +37,9 @@ Loop13 assessment gaps 2, 3, 4 and 7: *_attributed_* families (attribution label
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Root static seam map shows the showback edge serializes a shared writer, not a data/code consumer. Showback stopped and parked; remove that engineering edge, preserve original AC and ceilings, process one dashboard writer. Add raw vendor families with explicit unverified unit/window and no invented conversion; keep modeled and vendor figures distinct. Gate/CR then independent review and exact integration proof.
+<!-- SECTION:PLAN:END -->

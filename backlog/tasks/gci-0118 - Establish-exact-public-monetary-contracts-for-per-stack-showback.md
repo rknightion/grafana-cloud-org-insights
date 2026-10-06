@@ -1,11 +1,11 @@
 ---
 id: GCI-0118
 title: Establish exact public monetary contracts for per-stack showback
-status: In Progress
+status: Parked
 assignee:
   - '@loop13-root'
 created_date: '2026-10-06 12:00'
-updated_date: '2026-10-06 12:00'
+updated_date: '2026-10-06 12:06'
 labels:
   - dashboards
   - loop13
@@ -39,3 +39,9 @@ The authorized per-stack showback stopped before implementation because the corr
 <!-- SECTION:PLAN:BEGIN -->
 Bounded read-only public docs/official source exact-name contract search, independent of live customers; root grades evidence for resumed showback, never infers producer units from name.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Loop13: 0 implementation attempts, 0 review-repair rounds. Partial six-invocation public research found contextual product quantities, no exact monetary/period/additivity contract. Firecrawl search access denied (no numeric HTTP code); no retry/credential repair. Initial gh org search unexpectedly returned three private metadata matches, no private source body retrieved; corrected immediately to public-only search and excluded those matches. Resume approved public source capability or supplied exact contract; no exhaustive absence claim.
+<!-- SECTION:NOTES:END -->
