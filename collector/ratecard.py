@@ -139,7 +139,7 @@ DIMENSIONS: Mapping[str, Dimension] = {
     "irm_users": Dimension(
         "user", "gcom billingOnCallActiveUsers"),
     "assistant_users": Dimension(
-        "user", "grafanacloud-usage grafanacloud_instance_assistant_active_users"),
+        "user", "grafanacloud-usage grafanacloud_assistant_active_users"),
     "ai_tokens": Dimension(
         "tokens", "grafanacloud-usage grafanacloud_ai_tokens_total_tokens", per=1_000_000.0),
 }

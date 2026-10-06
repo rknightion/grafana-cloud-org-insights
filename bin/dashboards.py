@@ -71,19 +71,12 @@ DASHBOARD_TAG = identity.env("GCINSIGHT_DASHBOARD_TAG", "gcinsight")
 #
 # 1. `count(count by(stack_id) (...))`. The inner `count by` collapses a stack's several signal instances
 # and its `reason`/`integration` label values to one entry; the outer `count` counts stacks. A bare
-# `count(<metric> > 0)` counts LABEL COMBINATIONS - measured, that reported 223 zero-query stacks
-# against a real 60.
+# `count(<metric> > 0)` counts LABEL COMBINATIONS, not stacks.
 #
 # 2. **`max_over_time(...[24h])` on anything rate-shaped, never a bare instantaneous compare.** Every
 # `*_per_second` and `*:rate5m` series here is momentary: comparing it to zero answers "is this
-# happening in the current scrape window", not "does this stack have a problem". Measured 2026-08-18,
-# within one 40-minute span, the difference:
-#
-# instant vs 24h discards 20/29 log drops 7/22 notifications 14/20 eval failures 9/41
-# write-only stacks 33 instant -> 9 over 24h, and 4 "big write-only stacks" -> ZERO
-#
-# So the instant form UNDERSTATES intermittent faults and wildly OVERSTATES absence-of-activity. It
-# also made the same panel read 60 then 33 forty minutes apart, which on its own disqualifies it.
+# happening in the current scrape window", not "does this stack have a problem".
+# The instant form understates intermittent faults and overstates absence-of-activity.
 WINDOW = "24h"
 
 # Adaptive Metrics dropping samples it was told to drop is not data loss. Excluded so the panel does not
@@ -103,7 +96,7 @@ NOTIF_STACKS = _any_in_window(
     "grafanacloud_instance_alertmanager_notifications_failed_per_second")
 # The PER-INTEGRATION variant of the same failure. The stack-level metric says a stack could not deliver;
 # this one says through which channel, which is the difference between "20 stacks have a problem" and
-# "one webhook is dead". Six integrations exist in this estate. Rate-shaped, so always windowed.
+# "one webhook is dead". Integrations are discovered; rate-shaped, so always windowed.
 NOTIF_METRIC = "grafanacloud_instance_alertmanager_notifications_failed_per_integration_per_second"
 DEADRULE_STACKS = _any_in_window(
     "grafanacloud_instance_ruler_queries_zero_fetched_series_total:rate5m")
@@ -120,23 +113,12 @@ STATE_HISTORY_FAILURES = (
 STATE_HISTORY_FAILURE_STACKS = f"count(({STATE_HISTORY_FAILURES}) > 0)"
 
 # --- Ingested and never queried --------------------------------------------------------------------
-# IDEAS.md calls this the highest-value and hardest number in the platform. Measured honestly over 24h it
-# splits cleanly, and only one half survives:
-#
-# METRICS - the finding DOES NOT EXIST. 234 stacks ingest metrics and exactly ONE went a full day
-# without a query; not one stack over 10,000 series did. The instant form claimed 60 stacks and 4 big
-# ones, and both were artifacts of asking "was anyone querying in this five-minute window". Do not
-# re-add a metrics write-only panel: it is a negative result, not a missing feature.
-#
-# LOGS - this can be a real cost conversation. The live expressions identify stacks that ingest logs
-# without any query activity in the same 24-hour window and quantify their combined ingest rate.
-#
-# The `and` is load-bearing in both directions: it requires the stack to be INGESTING, so an empty stack
-# with no queries is excluded. That is what dissolved the metrics half - the 9 metric-quiet stacks turned
-# out to have no series at all, i.e. the test leftovers `estate_leftovers_idle` already reports.
-# Average each stack over the same 24-hour population used to decide whether it had a reader. Summing
-# independent per-stack maxima creates an estate rate that never existed at any instant; live it was
-# 3.9x the time-aligned average. Peaks remain useful for fault detection elsewhere, not for a spend rate.
+# Live expressions identify stacks ingesting logs without query activity in the same 24-hour window
+# and quantify their combined ingest rate. The metrics equivalent remains out of scope.
+# The `and` requires active ingest, excluding empty stacks with no queries.
+# Average each stack over the same window used to decide whether it had a reader. Summing independent
+# per-stack maxima creates an estate rate that may never have existed at any instant. Peaks remain
+# useful for fault detection elsewhere, not for a spend rate.
 _LOG_IN = f"avg_over_time(sum by(stack_id)(grafanacloud_logs_instance_bytes_received_per_second)[{WINDOW}:5m])"
 _LOG_UNREAD = f"(max_over_time(sum by(stack_id)(grafanacloud_logs_instance_query_bytes:rate5m)[{WINDOW}:5m]) == 0)"
 LOGS_UNREAD_STACKS = f"count(({_LOG_IN} > 0) and {_LOG_UNREAD})"
@@ -144,7 +126,7 @@ LOGS_UNREAD_BYTES = f"sum({_LOG_IN} and {_LOG_UNREAD})"
 LOGS_IN_BYTES = f"sum({_LOG_IN})"
 
 # A ratio 0-1, NOT a percent - see the panel description. `min_over_time` because completeness dips and a
-# dip is the defect: momentary read 4 stacks, 24h low 14.
+# dip is the defect, even if it is absent in the current scrape.
 TRACE_INCOMPLETE_STACKS = ("count(min_over_time("
                            f"grafanacloud_traces_instance_percentage_complete_traces_flushed[{WINDOW}]) < 0.90)")
 
@@ -178,17 +160,11 @@ SM_ACTIVE_STACKS = _any_in_window("grafanacloud_sm_billable_check_executions_per
 #
 # THREE measurement traps here, all found by cross-checking two metrics that disagreed.
 #
-# 1. **The two OnCall metrics cover DIFFERENT populations, and comparing them naively is a 15x error.**
-# `alert_groups_total` spans **58 stacks / 11,692 groups**; the response-time histogram spans only
-# **8 stacks / 1,069 observations**. A first draft of this dashboard put "368 unowned alerts" next to
-# "5,738 unowned alerts" from the two sources on the same tab. Any ratio MUST restrict
+# 1. **The two OnCall metrics cover DIFFERENT populations.** Any ratio MUST restrict
 # `alert_groups_total` to the stacks that report timing - the `and on(stack_id)` in ENGAGED_DENOM.
 #
-# 2. **A missing histogram observation is a missing ACKNOWLEDGEMENT, and that is the headline finding.**
-# On the 8 timing stacks there were **8,700 alert groups but only 1,069 response-time observations**:
-# OnCall records a response time when a human engages, so ~88% of alert groups show no human
-# engagement at all. Say "no acknowledgement was recorded", never "nobody looked" - the metric cannot
-# prove intent, only that no acknowledgement was logged.
+# 2. **A missing histogram observation is a missing ACKNOWLEDGEMENT.** Say "no acknowledgement was
+# recorded", never "nobody looked" - the metric cannot prove intent, only what was logged.
 #
 # 3. **The histogram buckets top out at 3600s** (60 / 300 / 600 / 3600 / +Inf), so `histogram_quantile`
 # SATURATES: p90 and p99 both return exactly 3600, meaning "at least an hour", not "an hour". Only p50
@@ -200,7 +176,7 @@ GROUPS = "grafanacloud_oncall_instance_alert_groups_total"
 TOP_BUCKET = "3600.0"
 
 # Alert groups belonging ONLY to stacks that report response timing - the honest denominator for any
-# engagement ratio. Without the `and on(stack_id)` this divides 8 stacks' numerator by 58 stacks' total.
+# engagement ratio. Without `and on(stack_id)` the numerator and denominator cover different stacks.
 ENGAGED = f"sum({ACK}_count)"
 ENGAGED_DENOM = (f"sum({GROUPS} and on(stack_id) "
                  f"(sum by(stack_id)({ACK}_count) > 0))")
@@ -218,15 +194,8 @@ ACK_TAIL_SHARE = f"1 - ({ACK_WITHIN_HOUR} / {ACK_TOTAL})"
 # 2 alert groups scores 0% or 100% and neither means anything.
 TEAM_MIN_GROUPS = 50
 
-# **The denominator restriction is the same defect as ENGAGED_DENOM, one aggregation down, and it was
-# missed when that one was fixed.** `alert_groups_total` exists on 58 stacks; the response-time histogram
-# exists on 8. So dividing a team's ACKNOWLEDGEMENT count by its TOTAL groups mixes a numerator drawn from
-# 8 stacks with a denominator drawn from 58, and understates the team.
-#
-# Measured 2026-08-19, current form vs restricted form: `dpps-aem-admins` 75.9% both ways and
-# `app_observability` 11.8% both ways - their groups happen to live only on timing stacks - but
-# `No team` moves from **6.65% to 11.73%**, a 1.76x understatement. Two of three teams unaffected is not
-# a reason to leave it: which teams are affected changes as soon as OnCall spreads to another stack.
+# Restrict the per-team denominator to response-timing stacks too: dividing a team's acknowledgement
+# count by its total groups otherwise mixes populations and can understate the acknowledged share.
 TIMING_STACKS = f"(sum by(stack_id)({ACK}_count) > 0)"
 GROUPS_ON_TIMING_STACKS = f"({GROUPS} and on(stack_id) {TIMING_STACKS})"
 TEAM_ENGAGEMENT = (f"topk(12, (sum by(team)({ACK}_count) / sum by(team){GROUPS_ON_TIMING_STACKS}) "
@@ -238,9 +207,8 @@ TEAM_TAIL_SHARE = (
 TEAM_VOLUME = f"topk(12, sum by(team)({GROUPS}))"
 
 # Both shares are over the SAME population - the stacks that report response timing - because they sit
-# side by side and are meant to be read against each other. Before this, the first was over all 58 OnCall
-# stacks and the second over the 8 timing stacks, so the comparison the layout invites was invalid: a
-# difference between them could have been a real ownership effect or purely the change of denominator.
+# side by side and are meant to be read against each other. Otherwise a difference between them could
+# be a real ownership effect or purely the change of denominator.
 UNOWNED_SHARE_ALL = (f'sum({GROUPS}{{team="No team"}} and on(stack_id) {TIMING_STACKS}) '
                      f'/ sum{GROUPS_ON_TIMING_STACKS}')
 UNOWNED_SHARE_ACKED = f'sum({ACK}_count{{team="No team"}}) / sum({ACK}_count)'
@@ -251,18 +219,10 @@ UNOWNED_SERVICE_SHARE = (
 ALL_GROUPS = f"sum({GROUPS})"
 
 # --- Capability adoption (Tier 2) -------------------------------------------------------------------
-# **The denominator decides whether each of these is a gap or a success, and TWO different mistakes here
-# each invert the conclusion. Both were made and caught on 2026-08-19.**
-#
-# 1. Use the right signal's denominator. Span metrics are derived from traces, so the population is
-# stacks that SEND traces, not all 272 stacks.
-# 2. **Measure the denominator over the same 24h window as everything else.** Read instantaneously,
-# "stacks ingesting traces" is **39**; over 24h it is **230**. Trace ingest is bursty, so an
-# instantaneous count catches only whoever happened to be shipping in that scrape. Using 39 made span
-# metrics look like 46% adoption - "a success, not a gap" - when the honest figure is 23/230 = **10%**,
-# which is a real and significant gap.
-#
-# So: every count here is windowed, and every panel states its own denominator.
+# The denominator decides whether each of these is a gap or a success.
+# Use the right signal's denominator: span metrics are derived from traces, so the population is stacks
+# sending traces, not every stack. Measure it over the same window as the numerator: bursty trace ingest
+# makes an instantaneous count unsuitable. Every count here is windowed and states its denominator.
 def _stacks_with(metric: str) -> str:
     """Stacks where a metric was present and non-zero at ANY point in the window.
 
@@ -338,8 +298,8 @@ OBSERVED_OBJECT_COUNTS = (
 )
 APP_HOST_COUNTS = (
     ("sum(grafanacloud_instance_app_o11y_host_count)", "App O11y host count"),
-    ("sum(grafanacloud_instance_app_o11y_host_count_v2)", "App O11y host count v2"),
-    ("sum(grafanacloud_instance_app_o11y_host_count_v3)", "App O11y host count v3"),
+    ("sum(grafanacloud_instance_app_o11y_host_v2_count)", "App O11y host count v2"),
+    ("sum(grafanacloud_instance_app_o11y_host_v3_count)", "App O11y host count v3"),
 )
 APP_SERVICES_BY_STACK = build.usage_by_slug(
     "topk(15, sum by(stack_id)(grafanacloud_app_observability_service_entity_count))"
@@ -367,16 +327,11 @@ FE_SESSION_RATE = (
 # Any deployment-specific commercial analysis belongs in presentation notes, not in an always-on dashboard.
 # * Its own dashboard, so commercial data is one link that can stay closed in a room.
 #
-# **Why the unit is knowable at all.** Nothing here declares a currency or a period, so it was derived
-# from an identity the metrics themselves satisfy: `spend_commit_balance_total / total_overage` = 36.55,
-# and the independent `forecast_months_remaining` = 36.64 - agreeing to 0.3%. That only holds if
-# `total_overage` is a MONTHLY run-rate against the same commitment the balance is drawn from. Verified
-# 2026-08-19. Re-derive rather than trust this if the two ever diverge.
-#
-# **`_included_*` are all ZERO and that is not a bug.** metrics/logs/grafana included volumes read 0 while
-# billable is 11.95M series / 12,486 units / 553 users. This is a pure spend-commit contract: there is no
-# bundled allowance, so "overage" is the WHOLE charge for the period and not an excess over an allowance.
-# Presenting `total_overage` as "money spent above plan" would be wrong.
+# The datasource does not declare currency or period. The existing USD/month presentation is derived,
+# not a universal contract: confirm currency and billing period against the deployment's contract.
+# Compare balance / total_overage with forecast_months_remaining before quoting the derived run rate.
+# If included volumes are zero under a spend-commit contract with no bundled allowance, "overage" can
+# represent the whole period charge, not spend above a plan. Do not assume that contract for every org.
 COMMIT_TOTAL = "sum(grafanacloud_org_spend_commit_credit_total)"
 COMMIT_BALANCE = "sum(grafanacloud_org_spend_commit_balance_total)"
 COMMIT_CONSUMED = f"{COMMIT_TOTAL} - {COMMIT_BALANCE}"
@@ -387,23 +342,11 @@ CONTRACT_START = "max(grafanacloud_org_contract_start_date)"
 CONTRACT_END = "max(grafanacloud_org_contract_end_date)"
 TERM_ELAPSED_SHARE = f"(time() - {CONTRACT_START}) / ({CONTRACT_END} - {CONTRACT_START})"
 MONTHS_TO_END = f"({CONTRACT_END} - time()) / (60*60*24*30.44)"
-# **The COMPLETE decomposition of `grafanacloud_org_total_overage`, and completeness is the point.**
-#
-# This was six components, chosen because they were the obvious ones. Measured 2026-08-19, those six sum
-# to 58,235.43 against a total of 76,521.76 - the chart was missing **18,286.33/month, 24% of the run
-# rate**, and it was missing it silently: six bars beside a total that nothing on the page reconciled to.
-# The absent lines were not rounding. Infrastructure Observability alone (containers + hosts) is
-# 11,242.33 and Synthetic Monitoring (core + browser checks) is 5,180.75.
-#
-# All 24 components verified to sum EXACTLY to `grafanacloud_org_total_overage`:
-# 58,235.43 + 18,286.33 = 76,521.76. So the set is complete and nothing is double-counted.
-#
-# **`logs`/`traces`/`profiles` and their `_process_`/`_retention_` siblings are INDEPENDENT billing
-# dimensions, not a rollup and its parts.** Summing only the three top-level names undercounts; summing
-# all three per product is what reconciles. Do not "simplify" this by dropping the sub-splits.
-#
-# A component reading exactly 0 has a real reporting series and genuinely means "no charge on this line",
-# not "not measured" - verified per component, 1,442 samples over 24h each.
+# Enumerated components of `grafanacloud_org_total_overage`: completeness is checked by the live
+# reconciliation panel, never assumed from a historical measurement.
+# `logs`/`traces`/`profiles` and their `_process_`/`_retention_` siblings are independent billing
+# dimensions, not a rollup and its parts. Do not drop the sub-splits.
+# A reported zero is a sample; an absent reporting series is not a measured zero.
 PRODUCT_OVERAGES = (
     ("grafanacloud_org_metrics_overage", "metrics"),
     ("grafanacloud_org_grafana_overage", "Grafana users"),
@@ -594,7 +537,7 @@ def d_estate(ds: str):
                         "table beside it is governance rather than a saving."),
         # --- T4 estate diff, BOTH windows (PLAN 13.2) -------------------------------------------------
         # These views existed from deployment and nothing rendered them - T4 published a diff nobody could
-        # see. Measured and fixed 2026-08-19. Daily first: it is the one that answers "what changed since
+        # see. Daily first: it is the one that answers "what changed since
         # yesterday", which is what somebody opening this tab in the morning wants.
         #
         # Each table's FIRST ROW is a `COMPARISON WINDOW` row naming the window and the interval actually
@@ -671,9 +614,8 @@ def d_estate(ds: str):
             unit="s",
             description="How long each tier takes. The question it answers is whether a tier is "
                         "approaching its own schedule interval, because a run that overruns its interval "
-                        "overlaps the next one and both write `latest.json`. Every tier currently sits far "
-                        "below its interval - the closest is well under 1% of it - so there is real "
-                        "headroom. Watch for a trend rather than a value: steady growth here is the early "
+                        "overlaps the next one and both write `latest.json`. Compare runtime with the "
+                        "tier's configured interval to assess headroom. Steady growth here is the early "
                         "warning, and the deadline in `terraform/variables.tf` is the backstop."),
         "t_carry_series": build.timeseries_panel(
             "Series carried forward vs computed live",
@@ -1414,16 +1356,14 @@ def d_usage(ds: str):
                         "Loki only - never in a metric label."),
 
         # --- Ingested and never queried, live from `grafanacloud-usage` -------------------------------
-        # IDEAS.md calls this the highest-value and hardest number in the platform. Measured honestly over
-        # a 24h window it splits, and only the LOGS half survives - see the module-level comment on
-        # LOGS_UNREAD_STACKS. There is deliberately no metrics equivalent here: 234 stacks ingest metrics
-        # and exactly ONE went a day without a query. Do not add one back; it is a negative result.
+        # Compare logs ingest with query activity over the same window, requiring active ingest.
+        # There is deliberately no metrics equivalent here; see LOGS_UNREAD_STACKS.
         "n_logs_unread": build.stat_panel(
             "Stacks ingesting logs nobody reads (24h)", LOGS_UNREAD_STACKS, ds_uid=build.USAGE_UID,
             description="Ingesting log bytes AND zero log-query bytes across a full day. The `and` "
                         "requires active ingest, so an empty stack is "
                         "excluded - this is spend with no reader, not an idle tenant. Read it next to "
-                        "log retention: paying to keep 13 months of logs nobody queries is the same "
+                        "log retention: paying to retain logs nobody queries is the same "
                         "finding twice."),
         "n_logs_unread_bytes": build.stat_panel(
             "Log ingest with no reader (24h)", LOGS_UNREAD_BYTES, unit="Bps", decimals=2,
@@ -1683,7 +1623,7 @@ def d_maturity(ds: str):
                         "on a stack carrying 3M series is a different conversation from a low score on one "
                         "carrying 500."),
         # PLAN 9.1. Before this there was NO trend for "which dimension is the estate weakest on": the
-        # per-stack view is 271 x 9 = 2,439 rows, which as series would exceed the whole budget. Sorted
+        # per-stack view scales with the live estate and would be costly as series. Sorted
         # ascending so the weakest dimension is the first bar a reader's eye lands on.
         "b_dims": build.barchart_panel(
             "Estate mean by dimension - weakest first",
@@ -1943,7 +1883,7 @@ def d_risk(ds: str):
             description="Direction of travel for stacks where more than half of active users are Admin. "
                         "The named table provides the current population and load behind the line."),
         # This tab rendered as an empty "No data" panel, and the cause was NOT missing data - the
-        # metric carries 506 custom and 4,458 extsvc service accounts. It was a bare selector on a
+        # metric had reporting series. It was a bare selector on a
         # metric derived from the DAILY per-stack sweep, read on a dashboard whose default window is 6
         # hours: at most one sample in range, usually none. Every expression here is now windowed, and
         # since T1 hydrates the per-stack detail it recomputes these hourly anyway.
@@ -2247,7 +2187,7 @@ def d_risk(ds: str):
              (TRACE_DISCARD_STACKS, "stacks discarding trace spans"),
              (METADATA_DISCARD_STACKS, "stacks discarding metric metadata")],
             ds_uid=build.USAGE_UID,
-            description="Both lines should be zero. Neither has been. Each point is a 24h look-back, so "
+            description="All four lines should be zero. Check their live values. Each point is a 24h look-back, so "
                         "the lines are smooth by construction and a single bad hour stays visible for a "
                         "day - that is the intent, not lag."),
         "n_traceincomplete": build.stat_panel(
@@ -2256,11 +2196,10 @@ def d_risk(ds: str):
                         "Only stacks reporting this trace-quality metric are in the denominator; absence "
                         "is unmeasured, not clean. A trace "
                         "that arrives in pieces cannot be read, so this is instrumentation that is "
-                        "running and useless. `min_over_time` because a momentary read caught only 4: "
-                        "trace completeness dips, and a dip is the defect. "
+                        "running and useless. `min_over_time` because trace completeness dips, and a "
+                        "dip is the defect. "
                         "UNIT TRAP: despite the metric name this series is a RATIO 0-1, so the threshold "
-                        "is 0.90 and NOT 90. Thresholding at 90 matches every stack that reports and "
-                        "invents a 26-stack outage - that error was made and caught here on 2026-08-18."),
+                        "is 0.90 and NOT 90. Thresholding at 90 would falsely flag every reporting stack."),
         "n_trace_discard": build.stat_panel(
             "Stacks discarding trace spans (24h)", TRACE_DISCARD_STACKS,
             ds_uid=build.USAGE_UID,
@@ -2706,11 +2645,8 @@ def d_value(ds: str):
                         "COUNTS ANY REPORTED USAGE, not a volume threshold: the inventory fields behind "
                         "this are in different units per signal - series for metrics, volume for logs and "
                         "traces - so a single numeric floor is meaningless across them. This panel "
-                        "previously applied a 1,000-SERIES floor to a log field whose estate-wide maximum "
-                        "is under 20, and therefore reported 0% log and 0% trace adoption while the "
-                        "sentence above it said the opposite. The counts are calibrated against the "
-                        "`grafanacloud-usage` datasource and agree with it to the stack on metrics, traces "
-                        "and profiles."),
+                        "must not apply a series floor to log or trace volume fields. Compare the live "
+                        "counts against the `grafanacloud-usage` datasource before interpreting adoption."),
         # This was one bar chart over every benchmark at once. The bars were series counts, ratios,
         # percentages, user counts, dashboard counts and a 0-100 score sharing ONE axis - so their heights
         # were arithmetically incomparable and the tallest bar was whichever benchmark happened to be
@@ -2741,9 +2677,8 @@ def d_value(ds: str):
                         "proves a flag is unset; it does not prove a capability is unused, and it never "
                         "proves the organisation pays for it - enablement backlog at most, never wasted spend."),
         # The disproof, parked beside the claim on purpose. `incident: 0` was read as "incident response
-        # is unused across the estate" and that is WRONG - measured 2026-08-18, 20 stacks carry 11,549
-        # OnCall alert groups while gcom reports incident=0 AND billingOnCallActiveUsers=0 on every one of
-        # them. Two fields, two products. Anyone deciding from the bar chart alone reaches a false
+        # is unused across the estate" and that is WRONG: OnCall activity can coexist with incident=0
+        # and billingOnCallActiveUsers=0. Two fields, two products. The bar chart alone permits a false
         # conclusion, so the counter-evidence sits in the same tab rather than in a doc nobody opens.
         "n_oncall": build.stat_panel(
             "Stacks actually running IRM/OnCall", ONCALL_STACKS, ds_uid=build.USAGE_UID,
@@ -2845,9 +2780,8 @@ def d_value(ds: str):
             "Stacks using native histograms", NATIVE_HIST_STACKS, ds_uid=build.USAGE_UID,
             description="Stacks emitting native histograms at any point in the last 24h. Read against "
                         "the metrics-ingesting denominator below. Native histograms replace a fan of "
-                        "`_bucket` series with a single series, and this estate carries 11.4M active "
-                        "series. It is also the standing recommendation from the DPM-cost prompt review, "
-                        "so the two pieces of work corroborate each other."),
+                        "`_bucket` series with a single series. Read the live active-series population "
+                        "before assessing the opportunity."),
         "n_exemplars": build.stat_panel(
             "Stacks emitting exemplars", EXEMPLAR_STACKS, ds_uid=build.USAGE_UID,
             description="Stacks emitting exemplars at any point in the last 24h. Exemplars are what lets "
@@ -2943,8 +2877,8 @@ def d_operations(ds: str):
     counts what somebody DID - acknowledged an alert, resolved it, or never touched it. It is the only
     behavioural signal the platform has, and the only one that measures outcomes rather than inventory.
 
-    Scope is stated on the page, not just here: the response-timing metrics cover **8 stacks**, so the
-    engagement figures describe **8,700 alert groups on those 8**, not the estate's 11,692 across 58.
+    Scope is stated on the page: engagement figures cover stacks reporting response timing, not the
+    broader OnCall population.
     """
     el = {
         # --- Engagement: the headline -----------------------------------------------------------------
@@ -2983,7 +2917,7 @@ def d_operations(ds: str):
                         "moves slowly by construction. A step up means a burst of alerts actually being "
                         "worked; a slow decline means alert volume growing faster than anyone answers it."),
 
-        # --- Response time, for the 12% that were engaged ---------------------------------------------
+        # --- Response time, for groups with recorded acknowledgement ----------------------------------
         "n_mtta": build.stat_panel(
             "Median time to acknowledge", MTTA_MEDIAN, unit="s", decimals=0, ds_uid=build.USAGE_UID,
             description="Read it as the answer to a narrow question: of the alerts somebody engaged with, "
@@ -4158,9 +4092,8 @@ def d_commercial(ds: str):
     Separate dashboard on purpose: commercial figures are one link that can stay closed.
 
     **Every money panel is labelled USD/month and says the unit is DERIVED**, because the datasource
-    declares no currency. The derivation is an identity the metrics satisfy: balance / total_overage =
-    36.55 against an independent forecast_months_remaining of 36.64. If those two ever disagree, the unit
-    assumption has broken and every figure here needs re-deriving before it is quoted.
+    declares no currency. Compare balance / total_overage with forecast_months_remaining and confirm
+    the currency and billing period against the deployment's contract before quoting money.
 
     **The burn tab states no conclusion, deliberately.** Do not add a projection or an underspend note to
     a panel description - that analysis belongs in a deployment-specific review, not in the dashboard.
@@ -4170,14 +4103,11 @@ def d_commercial(ds: str):
         "n_commit": build.stat_panel(
             "Spend commitment (USD, total term)", COMMIT_TOTAL, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
-            description="`grafanacloud_org_spend_commit_credit_total` - the whole 36-month commitment, "
-                        "not a monthly figure. TWO DECIMALS ON PURPOSE: at zero decimals Grafana "
-                        "abbreviates this to $3M and abbreviates the remaining balance to $3M as well, so "
-                        "the two most consequential numbers on the page rendered identically and the "
-                        "several-hundred-thousand difference between them was invisible. "
-                        "CURRENCY IS DERIVED, NOT DECLARED - the datasource states no unit; USD is "
-                        "inferred from the balance-over-run-rate identity matching the platform's own "
-                        "forecast to 0.3%. Confirm against the contract before quoting externally."),
+            description="`grafanacloud_org_spend_commit_credit_total` - the whole-term commitment, "
+                        "not a monthly figure. Two decimals keep the total and remaining balance "
+                        "distinguishable without coarse abbreviation. CURRENCY IS DERIVED, NOT DECLARED: "
+                        "the datasource states no unit. Confirm currency against the deployment's "
+                        "contract before quoting externally."),
         "n_consumed": build.stat_panel(
             "Commitment consumed (USD)", COMMIT_CONSUMED, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
@@ -4192,14 +4122,13 @@ def d_commercial(ds: str):
         "n_balance": build.stat_panel(
             "Commitment remaining (USD)", COMMIT_BALANCE, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
-            description="Credit not yet drawn down, over the whole term. Two decimals for the same reason "
-                        "as the commitment panel: abbreviated to $3M it was indistinguishable from the "
-                        "total. Derived currency, as above."),
+            description="Credit not yet drawn down, over the whole term. Two decimals distinguish the "
+                        "balance from the total without coarse abbreviation. Derived currency, as above."),
         "n_term_elapsed": build.stat_panel(
             "Share of contract term elapsed", TERM_ELAPSED_SHARE, unit="percentunit", decimals=1,
             ds_uid=build.USAGE_UID,
-            description="Computed from `grafanacloud_org_contract_start_date` and `..._end_date`: "
-                        "2026-02-01 to 2029-01-31, a 36-month term. Also currency-independent. Read "
+            description="Computed from live `grafanacloud_org_contract_start_date` and "
+                        "`grafanacloud_org_contract_end_date` queries. Currency-independent. Read "
                         "against the consumed share beside it - the two together are the burn picture, "
                         "and the chart on the Consumption vs term tab plots both over time."),
         "n_months_metric": build.stat_panel(
@@ -4212,7 +4141,8 @@ def d_commercial(ds: str):
                         "and confusing them is the easiest mistake on this page."),
         "n_months_contract": build.stat_panel(
             "Months remaining on the contract", MONTHS_TO_END, decimals=1, ds_uid=build.USAGE_UID,
-            description="Computed live from the contract end date, 2029-01-31 - how long the TERM runs. "
+            description="Computed from the live `grafanacloud_org_contract_end_date` query - how long "
+                        "the TERM runs. "
                         "The panel beside it measures the commitment rather than the term: how long the "
                         "remaining balance lasts at the present rate of spend. The two answer different "
                         "questions and confusing them is the easiest mistake on this page."),
@@ -4224,17 +4154,16 @@ def d_commercial(ds: str):
             description="`grafanacloud_org_total_overage`, per MONTH. BOTH THE CURRENCY AND THE PERIOD "
                         "ARE DERIVED, not declared by the datasource - the period is in the title because a "
                         "bare currency figure with no period is unquotable. "
-                        "Note the metric name is misleading here - `_included_*` volumes are all ZERO on "
-                        "this contract, so there is no bundled allowance and 'overage' is the WHOLE "
-                        "charge for the period, not spend above a plan. Do not present it as excess."),
+                        "If `_included_*` volumes are ZERO under a spend-commit contract with no bundled "
+                        "allowance, 'overage' is the whole charge for the period, not spend above a plan. "
+                        "Check the live included-volume queries and contract before interpreting it as excess."),
         "b_runrate": build.barchart_panel(
             "Run rate by product",
             f"sort_desc(label_replace(sum({PRODUCT_OVERAGES[0][0]}), \"product\", \"metrics\", \"\", \"\"))",
             legend="{{product}}", ds_uid=build.USAGE_UID,
             description="placeholder - replaced below"),
         # The guard that keeps the breakdown honest. A component chart the reader cannot reconcile to the
-        # total is an invitation to trust it, and the six-component version was wrong by 24% for exactly
-        # that reason: nothing on the page would have shown the discrepancy.
+        # total is an invitation to trust it without noticing missing billing lines.
         "n_reconcile": build.stat_panel(
             "Unaccounted run rate (USD/month)", RECONCILIATION_GAP, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
@@ -4249,13 +4178,10 @@ def d_commercial(ds: str):
             "Run rate by product over time",
             [(f"sum({metric})", label) for metric, label in PRODUCT_OVERAGES],
             unit="currencyUSD", stacked=True, ds_uid=build.USAGE_UID,
-            description="Stacked over every billing line, so the top edge IS the total run rate and "
-                        "the reconciliation panel above proves it. Metrics is the largest single line by "
-                        "a wide margin, which is the whole reason the Cost dashboard's Adaptive Metrics "
-                        "tab matters: the biggest cost line is the one with millions of series of "
-                        "identified, unapplied savings sitting against it. The current split is on the bar "
-                        "chart above rather than repeated here, so it cannot go stale in two places. "
-                        "USD/month, DERIVED unit."),
+            description="Stacked over the enumerated billing lines. Compare the top edge with the total "
+                        "run rate and check the live reconciliation remainder for missing components. "
+                        "Use the current product split to decide which Cost dashboard opportunities to "
+                        "review. USD/month, DERIVED unit."),
         "t_metrics_share": build.timeseries_panel(
             "Metrics share of run rate",
             [(f"sum(grafanacloud_org_metrics_overage) / {RUN_RATE}", "metrics share")],
@@ -4272,8 +4198,9 @@ def d_commercial(ds: str):
              (TERM_ELAPSED_SHARE, "contract term elapsed")],
             unit="percentunit", ds_uid=build.USAGE_UID,
             description="Two ratios on one axis, both currency-independent. `commitment consumed` is "
-                        "1 - balance/credit; `contract term elapsed` is derived from the contract start "
-                        "and end dates. "
+                        "1 - balance/credit; `contract term elapsed` is derived from live "
+                        "`grafanacloud_org_contract_start_date` and `grafanacloud_org_contract_end_date` "
+                        "queries. "
                         "The two lines are the data. Reading a trajectory off them is a commercial "
                         "conversation and is deliberately left to the person in the room, not asserted "
                         "here."),
@@ -4290,15 +4217,14 @@ def d_commercial(ds: str):
             f'label_replace(sum({metric}), "product", "{label}", "", "")'
             for metric, label in PRODUCT_OVERAGES),
         legend="{{product}}", ds_uid=build.USAGE_UID, unit="currencyUSD",
-        description="The COMPLETE decomposition of the run rate - all "
-                    f"{len(PRODUCT_OVERAGES)} billing lines, biggest first, verified to sum exactly to "
-                    "`grafanacloud_org_total_overage` with a remainder of zero. The panel beside this one "
+        description="The enumerated decomposition of the run rate - "
+                    f"{len(PRODUCT_OVERAGES)} billing lines, biggest first. Compare their sum with "
+                    "`grafanacloud_org_total_overage` using the live remainder. The panel beside this one "
                     "shows that remainder live, so if Grafana Cloud adds a billing line the gap appears "
                     "here rather than being absorbed silently. "
                     "The chart previously omitted billing lines while still looking complete; the live "
-                    "reconciliation remainder is what prevents that recurring. Lines reading zero are "
-                    "real zeros, not gaps: each "
-                    "has a reporting series and simply carries no charge. "
+                    "reconciliation remainder is what prevents that recurring. A reported zero is a "
+                    "sample carrying no charge; an absent reporting series is not a measured zero. "
                     "USD/month, DERIVED unit. Each product is a separately-named metric rather than one "
                     "metric with a `product` label, so each is relabelled and unioned with `or` - that is "
                     "why this expression is shaped the way it is.")
@@ -4312,18 +4238,17 @@ def d_commercial(ds: str):
     return "gcinsight-commercial", "Grafana Cloud Org Insights - Commercial", \
         ("Pillar H: the spend commitment and the run rate behind it. Live from grafanacloud-usage. "
          "CURRENCY AND PERIOD ARE DERIVED, not declared by the datasource - every money panel says so, "
-         "and the ratio panels are unit-free and safer to quote. Contract 2026-02-01 to 2029-01-31."), \
+         "and the ratio panels are unit-free and safer to quote. Contract timing comes from live "
+         "grafanacloud_org_contract_start_date and grafanacloud_org_contract_end_date queries."), \
         el, tabs
 
 
 def d_ai(ds: str):
     """Pillar I - Assistant adoption, AI-token consumption and commercial exposure.
 
-    The org-wide panels here come from `grafanacloud-usage`, which needs no credential. Since 2026-08-20
-    that is no longer the ONLY source: a per-stack read-only reader exists on 269 stacks (PLAN 17D) and
-    unlocks tenant Assistant inventory and a category x surface breakdown that the billing metrics do not
-    carry at all. The two must never be presented as one measure - their windows differ (obs-hub, same
-    day: plugin 30-day 14,677,233 tokens vs billing current-period 8,610,789).
+    Org-wide panels come from `grafanacloud-usage`, which needs no credential. Per-stack read-only
+    readers supply tenant Assistant inventory and a category x surface breakdown that billing metrics
+    do not carry. The two must never be presented as one measure: plugin and billing windows differ.
 
     Two superficially similar token metrics have different windows and are kept apart throughout:
 
@@ -4409,8 +4334,8 @@ def d_ai(ds: str):
             ds_uid=build.USAGE_UID,
             description="`grafanacloud_org_assistant_overage`. USD/month is DERIVED, not declared by "
                         "the datasource, using the same commitment reconciliation as the Commercial "
-                        "dashboard. On this spend-commit contract, overage is the whole charge for the "
-                        "period - not spend above a bundled plan."),
+                        "dashboard. Under a spend-commit contract with no bundled allowance, overage can "
+                        "be the whole period charge, not spend above a plan; confirm the contract."),
         "n_token_overage": build.stat_panel(
             "AI-token run rate (USD/month)", token_cost, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
@@ -4494,15 +4419,14 @@ def d_ai(ds: str):
             legend="{{slug}}", ds_uid=build.USAGE_UID, label_column="Stack",
             value_column="USD/month", unit="currencyUSD",
             description="Per-stack Assistant charge, largest first. USD/month is DERIVED and `overage` "
-                        "is the whole charge under this spend-commit contract, not an amount above a "
-                        "bundled allowance. This is the drill-down behind the Assistant run-rate stat."),
+                        "can be the whole charge under a spend-commit contract without a bundled "
+                        "allowance. Confirm the contract; this drills down from the Assistant run-rate stat."),
         "n_included_users": build.stat_panel(
             "Contract-reported included Assistant users",
             "sum(grafanacloud_org_assistant_included_users)", ds_uid=build.USAGE_UID,
-            description="The included-user gauge reported by this contract. It currently has a real "
-                        "series, but included gauges are not a usable adoption denominator here: this "
-                        "spend-commit contract reports no bundled allowance. Zero does not mean nobody "
-                        "is licensed or using Assistant."),
+            description="The live contract-reported included-user gauge, not an adoption denominator. "
+                        "A reported zero does not mean nobody is licensed or using Assistant. Confirm "
+                        "any bundled allowance against the deployment's contract."),
         "n_additional_tokens": build.stat_panel(
             "Contract-reported additional AI tokens",
             "sum(grafanacloud_org_ai_tokens_additional_tokens)", ds_uid=build.USAGE_UID,
@@ -4513,15 +4437,15 @@ def d_ai(ds: str):
             "Contract-reported included additional AI tokens",
             "sum(grafanacloud_org_ai_tokens_included_additional_tokens)", ds_uid=build.USAGE_UID,
             description="The contract-level included-additional-token gauge. A reported zero is not "
-                        "evidence that the organisation has no AI entitlement; included gauges are unpopulated for "
-                        "this spend-commit contract. It is isolated here to prevent it becoming a false "
+                        "evidence that the organisation has no AI entitlement. Confirm the allowance "
+                        "against the contract; this field is isolated to prevent it becoming a false "
                         "denominator elsewhere."),
 
         # --- Collector-sourced: per-stack Assistant reads (PLAN 17E) ---------------------------------
         #
         # These read OUR OWN metrics on `grafanacloud-prom`, not `grafanacloud-usage`, and that is the
         # performance argument for the collector path as well as the data one: `grafanacloud-usage` has no
-        # `slug` label, so every panel above it pays for a 273-series `group_left` join on a shared,
+        # `slug` label, so panels above use a live-estate `group_left` join on a shared,
         # org-wide tenant. Our series carry `stack` directly, so a ranking is a bare `topk`.
         "n_ai_measured": build.stat_panel(
             "Stacks with Assistant data collected", ai_measured,
@@ -4538,8 +4462,8 @@ def d_ai(ds: str):
             "Stacks with any tenant Assistant configuration", ai_with_config,
             description="Stacks carrying at least one TENANT-scoped skill, rule, automation or MCP "
                         "integration. Compare it with the activity count beside it: the gap between the "
-                        "two is the enablement opportunity, and it is the largest single finding on this "
-                        "dashboard. User-scoped objects are invisible to any credential and are not "
+                        "two is an enablement opportunity to assess from the live values. User-scoped "
+                        "objects are invisible to any credential and are not "
                         "counted here - see the Feature activity tab."),
         "n_ai_messages": build.stat_panel(
             "Assistant messages (30d, collected stacks)", ai_messages,
@@ -4557,15 +4481,14 @@ def d_ai(ds: str):
             "Assistant tokens (30d, collected stacks)", ai_est_tokens,
             description="Tokens reported by each stack's own Assistant API over the plugin's rolling "
                         "30-day window, summed. **Never read this against the Overview tab's token "
-                        "gauge** - that one is the monthly billing period, and on one stack measured the "
-                        "same day they differed materially. The plugin figure is what the feature reports; "
+                        "gauge** - that one is the monthly billing period. The plugin figure is what the "
+                        "feature reports; "
                         "the billing figure is what is charged."),
         "n_ai_uncategorised": build.stat_panel(
             "Share of messages carrying no category", ai_uncategorised_share,
             unit="percentunit", decimals=1,
-            description="Assistant classifies only some traffic. Measured across the estate this is the "
-                        "MAJORITY of messages, and the per-stack median is higher still, so every "
-                        "category breakdown on the Human vs machine tab is a share of the CATEGORISED "
+            description="Assistant classifies only some traffic. This live stat shows the uncategorised "
+                        "share. Every category breakdown on the Human vs machine tab is a share of the CATEGORISED "
                         "subset and never of total messages. This stat is what makes that honest."),
         "n_ai_combos": build.stat_panel(
             "Category x surface combinations in use", ai_combos,
@@ -4744,11 +4667,8 @@ def d_ai(ds: str):
                         "platform deliberately does not or cannot collect. Read the NOT MEASURABLE rows "
                         "as product boundaries: no wider credential changes any of them."),
 
-        # REPLACED, not deleted, on 2026-08-20. This tab used to say feature-level activity was "not
-        # measurable estate-wide in Phase 1". That became FALSE the moment the per-stack reader credential
-        # went live on 269 stacks (PLAN 17D), and a stale disclaimer is worse than none: it tells a reader
-        # a number is unavailable while the platform is collecting it. What remains genuinely unavailable
-        # is narrower and sharper, so it is stated as a boundary rather than a blanket.
+        # Per-stack readers make tenant-scoped feature activity collectable. State the remaining product
+        # boundaries narrowly rather than retaining a blanket disclaimer that all activity is unavailable.
         "feature_scope": build.text_panel(
             "What feature-level Assistant data can and cannot be collected",
             """Every stack now carries a read-only reader credential, so tenant-scoped Assistant

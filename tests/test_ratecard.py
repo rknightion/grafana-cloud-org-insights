@@ -20,6 +20,14 @@ ai_tokens,2,1000000,tokens,0,USD,month,quantity,
 """
 
 
+class DimensionSourceNameTest(unittest.TestCase):
+    def test_assistant_source_uses_the_customer_observed_name(self):
+        self.assertEqual(ratecard.DIMENSIONS["assistant_users"].source,
+                         "grafanacloud-usage grafanacloud_assistant_active_users")
+        self.assertNotIn("grafanacloud_instance_assistant_active_users",
+                         ratecard.DIMENSIONS["assistant_users"].source)
+
+
 class LoadingTest(unittest.TestCase):
     def test_zero_rate_is_rejected_instead_of_pricing_everything_as_free(self):
         with self.assertRaisesRegex(ratecard.InvalidRateCard, "rate.*above zero"):

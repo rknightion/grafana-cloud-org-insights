@@ -17,6 +17,82 @@ from unittest import mock
 from collector.dashboards import build
 
 
+class DashboardNameAndGenericTextTest(unittest.TestCase):
+    """Read the publication artifact, not just the expression constants."""
+
+    def test_assembled_app_host_queries_use_witnessed_generation_names(self):
+        from bin import dashboards
+
+        _, artifact = dashboards.assemble("usage", "infinity-uid")
+        panel = artifact["spec"]["elements"]["b_app_hosts"]["spec"]
+        expressions = [q["spec"]["query"]["spec"]["expr"]
+                       for q in panel["data"]["spec"]["queries"]]
+        self.assertEqual(expressions, [
+            "sum(grafanacloud_instance_app_o11y_host_count)",
+            "sum(grafanacloud_instance_app_o11y_host_v2_count)",
+            "sum(grafanacloud_instance_app_o11y_host_v3_count)",
+        ])
+        for old in ("grafanacloud_instance_app_o11y_host_count_v2",
+                    "grafanacloud_instance_app_o11y_host_count_v3"):
+            self.assertNotIn(old, " ".join(expressions))
+
+    def test_assembled_dashboard_text_has_no_deployment_contract_claims(self):
+        from bin import dashboards
+
+        forbidden = (r"\b20\d{2}-\d{2}-\d{2}\b|\$3M|36-month|whole 36-month|"
+                     r"forecast to 0\.3%|millions of series of|11\.4M active|"
+                     r"invents a 26-stack outage|estate-wide maximum is under 20|"
+                     r"Every tier currently sits|MAJORITY of messages|"
+                     r"this (?:spend-commit )?contract reports no bundled allowance")
+        for name in dashboards.BUILDERS:
+            _, artifact = dashboards.assemble(name, "infinity-uid")
+            texts = [artifact["spec"]["description"]]
+            for panel in artifact["spec"]["elements"].values():
+                spec = panel["spec"]
+                texts.extend((spec.get("title", ""), spec.get("description", "")))
+                texts.append(spec["vizConfig"]["spec"].get("options", {}).get("content", ""))
+            with self.subTest(dashboard=name):
+                self.assertNotRegex(" ".join(texts), forbidden)
+
+    def test_contract_panels_keep_live_queries_and_generic_descriptions(self):
+        from bin import dashboards
+
+        _, artifact = dashboards.assemble("commercial", "infinity-uid")
+        for key, metrics in {
+            "n_term_elapsed": ("grafanacloud_org_contract_start_date",
+                               "grafanacloud_org_contract_end_date"),
+            "n_months_contract": ("grafanacloud_org_contract_end_date",),
+            "t_burn": ("grafanacloud_org_contract_start_date",
+                       "grafanacloud_org_contract_end_date"),
+        }.items():
+            panel = artifact["spec"]["elements"][key]["spec"]
+            expressions = " ".join(q["spec"]["query"]["spec"]["expr"]
+                                   for q in panel["data"]["spec"]["queries"])
+            for metric in metrics:
+                with self.subTest(panel=key, metric=metric):
+                    self.assertIn(metric, expressions)
+                    self.assertIn(metric, panel["description"])
+                    self.assertIn("live", panel["description"].lower())
+
+    def test_source_comments_and_docstrings_do_not_embed_deployment_measurements(self):
+        import ast
+        import io
+        import pathlib
+        import tokenize
+        from bin import dashboards
+
+        source = pathlib.Path(dashboards.__file__).read_text()
+        comments = [token.string for token in tokenize.generate_tokens(io.StringIO(source).readline)
+                    if token.type == tokenize.COMMENT]
+        docstrings = [ast.get_docstring(node) or "" for node in ast.walk(ast.parse(source))
+                      if isinstance(node, (ast.Module, ast.FunctionDef, ast.ClassDef))]
+        self.assertNotRegex(" ".join(comments + docstrings),
+                            r"\b20\d{2}-\d{2}-\d{2}\b|36\.55|36\.64|11\.95M|"
+                            r"58,235\.43|76,521\.76|18,286\.33|11,242\.33|5,180\.75|"
+                            r"14,677,233|8,610,789|11,692|8,700|1,069|11,549|"
+                            r"75\.9%|11\.8%|6\.65%|11\.73%|4,458|2,439|3\.9x")
+
+
 class LibraryPanelPublicationTest(unittest.TestCase):
     def test_optional_usage_table_schema_freshness_and_errors(self):
         from bin import dashboards
@@ -957,8 +1033,8 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
             "grafanacloud_instance_active_caas_targets_series",
             "grafanacloud_instance_active_faas_targets_series",
             "grafanacloud_instance_app_o11y_host_count",
-            "grafanacloud_instance_app_o11y_host_count_v2",
-            "grafanacloud_instance_app_o11y_host_count_v3",
+            "grafanacloud_instance_app_o11y_host_v2_count",
+            "grafanacloud_instance_app_o11y_host_v3_count",
             "grafanacloud_org_infra_o11y_billable_host_hours",
             "grafanacloud_org_infra_o11y_billable_container_hours",
             "grafanacloud_org_db_o11y_billable_host_hours",
@@ -1051,8 +1127,9 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
         self.assertIn("commitment rather than the term", b)
 
     def test_the_overage_naming_trap_is_documented(self):
-        """`_included_*` are all zero, so `total_overage` is the whole charge, not spend above a plan."""
+        """The no-allowance warning is conditional, not a claim about the viewer's contract."""
         desc = self._panels("commercial")["n_runrate"]["spec"]["description"]
+        self.assertIn("If", desc)
         self.assertIn("ZERO", desc)
         self.assertIn("not spend above a plan", desc)
 
