@@ -1,0 +1,37 @@
+---
+id: GCI-0106
+title: Keep collector health trends honest across publication gaps
+status: To Do
+assignee: []
+created_date: '2026-10-06 10:46'
+labels:
+  - dashboards
+  - loop13
+dependencies: []
+documentation:
+  - >-
+    /Users/rob/repos/grafana-cloud-org-insights/backlog/docs/doc-0007 -
+    Loop13-dashboard-operator-relevance-review-and-dispositions.md
+priority: high
+type: bug
+ordinal: 122000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+The operator relevance review found Estate failure bars with unconditional zero fallback and integrity trends that bridge missing observations. P2 uses only existing collector metrics and existing success/staleness policy. No new vendor metric, collector series, reader or schema is permitted. If existing completion policy cannot qualify zero at the correct tier/window, stop rather than invent one.
+<!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 A stopped or stale publisher is unavailable/gapped rather than healthy zero; healthy complete scans with no failures may render zero only when qualified by existing matching completion evidence.
+- [ ] #2 Freshness, availability and failure integrity trends do not interpolate across gaps; any intentionally retained bridging outside integrity trends is documented. Real assembled artifact and synthetic state proof, just check, CodeRabbit and independent review pass.
+<!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 just test
+- [ ] #2 just tf-validate
+- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+<!-- DOD:END -->

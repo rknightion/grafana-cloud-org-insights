@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop13-root'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-06 10:38'
+updated_date: '2026-10-06 10:47'
 labels:
   - dashboards
   - loop13
@@ -23,8 +23,8 @@ Read-only review of all eleven dashboards and their tabs from an org operator's 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Proposal covers every dashboard and tab with concrete panel-level changes, each tagged panel-only or needs-series/scope/SPEC
-- [ ] #2 Root records it as a Backlog doc and one task per admitted change
+- [x] #1 Proposal covers every dashboard and tab with concrete panel-level changes, each tagged panel-only or needs-series/scope/SPEC
+- [x] #2 Root records it as a Backlog doc and one task per admitted change
 <!-- AC:END -->
 
 ## Definition of Done
@@ -39,3 +39,9 @@ Read-only review of all eleven dashboards and their tabs from an org operator's 
 <!-- SECTION:PLAN:BEGIN -->
 Read-only dashboard/tab proposal; root records durable doc and admits only panel-only zero-series changes with live-name witnesses.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Loop13: 0 implementation attempts; static proposal accepted, all eleven definitions and authored tabs mapped. Root durable doc and one task per admitted group recorded. GCI-0105 (wording honesty), GCI-0106 (publication-gap integrity), GCI-0107 (estate/selection scope) admitted after dashboard chain; remaining relevance and semantic gaps are owner tasks. No browser/live proof claimed.
+<!-- SECTION:NOTES:END -->
