@@ -1241,7 +1241,7 @@ def findings_elements(pillar: str, kinds: Sequence[str],
     selector = f'gcinsight_findings{{kind=~"{"|".join(kinds)}"}}'
     out = {
         "_findings_now": barchart_panel(
-            "Open findings by kind",
+            "Estate-wide source | Open findings by kind",
             f"sum by (kind) ({selector})",
             legend="{{kind}}",
             # A finding is a DEFECT, so it must not render in the same green as every healthy metric on
@@ -1249,14 +1249,16 @@ def findings_elements(pillar: str, kinds: Sequence[str],
             # boundary is a judgement, but "any" and "lots" are the two states a reader acts on
             # differently, and green for either was actively misleading.
             thresholds=[(None, "yellow"), (10, "red")],
-            description="Count of STACKS matching each finding condition, worst first, from the latest "
+            description="Count of matching rows by finding kind, not necessarily distinct stacks. "
+                        "Estate-wide source: no stack dimension, so the Stack selector does not filter "
+                        "these counts. Worst first, from the latest "
                         "scan of whichever tier can compute it. Amber and red rather than green because "
                         "every bar here is a defect. A kind that is ABSENT rather than zero means no tier "
                         "that ran could measure it - blank is not the same as none. The tables below name "
                         "the stacks behind these counts.",
         ),
         "_findings_trend": timeseries_panel(
-            "Findings over time",
+            "Estate-wide source | Findings over time",
             [(f"sum by (kind) ({selector})", "{{kind}}")],
             description="The durable record. Log retention is shorter than metric retention, so this "
                         "trend outlives the Loki lines carrying the per-stack detail.",
@@ -1265,6 +1267,13 @@ def findings_elements(pillar: str, kinds: Sequence[str],
             "About these findings - and where the rest of the detail is",
             "Each bar is a **finding kind** - a condition worth acting on, derived from this pillar's own "
             "tables by `pillars/findings.py`.\n\n"
+            "**Estate-wide source counts have no stack dimension** and never narrow with the Stack "
+            "selector. Units are **matching rows per kind**, not universally distinct stacks: "
+            "label findings count label-name rows, service-account risk counts account rows, and "
+            "fast-scrape findings count pipeline rows. Stack-level kinds count matching stack rows. "
+            "Detail tables marked Selected stacks narrow only their own rows, not the counts above. "
+            "A source table with no stack dimension remains unfiltered."
+            + POPULATION_HELP + "\n\n"
             "The **detail** is in Loki, not here: query "
             "`{job=\"gcinsight\", event=\"finding\", pillar=\"" + pillar + "\"} | json` to get the "
             "stack, the rank, and the fields that make each one actionable - the worst cardinality label, "
@@ -1289,10 +1298,54 @@ def findings_elements(pillar: str, kinds: Sequence[str],
             description="The named rows behind the counts above - which stacks, and the figures that "
                         "decide whether each one matters. Honours the Stack selector, and every column is "
                         "filterable, so this is where a reader turns a count into a work queue.")
+    qualify_population(out)
     return out
 
 
 FINDINGS_KEYS = ("_findings_now", "_findings_trend", "_findings_help")
+
+
+POPULATION_HELP = (
+    "\n\n**Population scope:** Titles marked **Selected stacks** honour the existing Stack selector: "
+    "All uses the existing all-match selection; single and multiselect narrow only those panels. "
+    "Table filters are anchored and grouped, so a prefix such as `obs-hub` does not include "
+    "`obs-hub-dev`. **Estate-wide source** means unfiltered by Stack, including global ratios, "
+    "rankings and source tables without a stack dimension; these do not change with selection. "
+    "It is the source's measured/reported population, not a completeness guarantee. "
+    "All and historical Mimir label values are **not current inventory** guarantees. "
+    "Producer windows, missing inputs and ratio cohort limitations still apply."
+)
+
+
+def qualify_population(elements: dict[str, Any]) -> None:
+    """Label existing assembled query populations without changing any query or data contract.
+
+    This recognises only the authoring harness's existing selection forms, not arbitrary PromQL.
+    Server-side expressions inherit their input queries' scope. Mixed inputs are labelled honestly,
+    never promoted to a selected ratio. Queryless text panels retain their original titles.
+    """
+    for element in elements.values():
+        spec = element["spec"]
+        populations = set()
+        for query in spec["data"]["spec"]["queries"]:
+            inner = query["spec"]["query"]
+            if inner["group"] == "__expr__":
+                continue
+            source = inner["spec"]
+            if inner["group"] == "prometheus":
+                selected = 'stack=~"$stack"' in source["expr"]
+            elif inner["group"] == INFINITY_TYPE:
+                selected = source.get("filterExpression") == STACK_FILTER
+            else:
+                populations.add("Scope unresolved")
+                continue
+            populations.add("Selected stacks" if selected else "Estate-wide source")
+        if not populations:
+            continue
+        scope = next(iter(populations)) if len(populations) == 1 else "Mixed population scope"
+        # Shared Findings already have a visible scope prefix when added to these dashboards.
+        if not spec["title"].startswith(scope + " | "):
+            spec["title"] = scope + " | " + spec["title"]
 
 
 

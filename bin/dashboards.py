@@ -961,7 +961,7 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
     dpm = _dpm_pricing(rate_card)
     el = {
         "n_series": build.stat_panel(
-            "Active series (org)", 'sum(gcinsight_stack_active_series{stack=~"$stack"})',
+            "Active series", 'sum(gcinsight_stack_active_series{stack=~"$stack"})',
             description="The metrics cost driver: Grafana Cloud bills on ACTIVE SERIES, not on queries or "
                         "samples. Respects the `$stack` selector, so it is the estate total only when "
                         "`$stack` is All. Sourced from each stack's own reported active series - NOT the "
@@ -1001,7 +1001,7 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
                         "`currentActiveUsers`, which measures adoption and runs higher; the spread "
                         "between them moves, so read both rather than converting one into the other."),
         "t_series": build.timeseries_panel(
-            "Org active series", [('sum(gcinsight_stack_active_series{stack=~"$stack"})', "total")],
+            "Active series", [('sum(gcinsight_stack_active_series{stack=~"$stack"})', "total")],
             description="The metrics cost driver. Growth here is the bill growing."),
         "t_top": build.timeseries_panel(
             "Top 10 stacks by active series",
@@ -1789,8 +1789,8 @@ def d_maturity(ds: str):
                         "rather than filling this with noise; the Leaderboard tab names it."),
         "n_ranked": build.stat_panel(
             "Stacks ranked", 'count(gcinsight_maturity_score{stack=~"$stack",version="1"})',
-            description="How many stacks got a score at all - **the denominator for every other number on "
-                        "this dashboard, and it is not the estate total.** A stack is unscored when it is "
+            description="How many selected stacks got a score at all. This is NOT the denominator of the "
+                        "estate-wide percentile stats or dimension means. A stack is unscored when it is "
                         "paused, has too few users, or the weekly data-plane tier could not reach it; the "
                         "Not scored tab breaks it down by reason. If this drops sharply the scores above "
                         "describe a different population, not an improving estate."),
@@ -5185,6 +5185,11 @@ def assemble(
         finding_rows += [build.row(entry[1], [entry[0]], max_columns=1)
                          for entry in detail]
         tabs = list(tabs) + [build.rows_tab("Findings", finding_rows)]
+
+    if name in {"cost", "maturity", "value", "risk", "dashboards", "coverage"}:
+        build.qualify_population(elements)
+        banner_content = elements["_banner"]["spec"]["vizConfig"]["spec"]["options"]
+        banner_content["content"] += build.POPULATION_HELP
 
     # Method and freshness are always available but never steal the default landing page. Append after
     # the optional Findings tab so guidance has one stable location on every dashboard.

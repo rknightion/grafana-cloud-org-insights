@@ -67,6 +67,71 @@ class CollectorIntegrityTest(unittest.TestCase):
 class DashboardNameAndGenericTextTest(unittest.TestCase):
     """Read the publication artifact, not just the expression constants."""
 
+    def test_population_titles_follow_real_selectors_not_table_or_rank_shape(self):
+        from bin import dashboards
+
+        expected = {
+            "cost": {"n_series": "Selected stacks", "n_ratio": "Estate-wide source",
+                     "n_savings_pct": "Estate-wide source", "b_al_top": "Estate-wide source",
+                     "headroom": "Selected stacks", "summary": "Estate-wide source"},
+            "maturity": {"n_ranked": "Selected stacks", "n_median": "Estate-wide source",
+                         "n_p90": "Estate-wide source", "n_worst": "Estate-wide source",
+                         "board": "Selected stacks", "b_unscored": "Estate-wide source"},
+            "value": {"n_unit": "Estate-wide source", "n_remediable": "Estate-wide source",
+                      "savings": "Estate-wide source", "b_oncall": "Estate-wide source"},
+            "risk": {"n_admin": "Estate-wide source", "risk": "Selected stacks",
+                     "n_coll_inactive_share": "Estate-wide source", "policies": "Estate-wide source"},
+            "dashboards": {"n_views": "Estate-wide source", "tbl_usage": "Selected stacks"},
+            "coverage": {"n_services": "Selected stacks", "n_hosts": "Estate-wide source",
+                         "n_legacy": "Estate-wide source", "tbl_services": "Selected stacks",
+                         "n_at_reduction": "Estate-wide source"},
+        }
+        for name, panels in expected.items():
+            elements = dashboards.assemble(name, "infinity-uid")[1]["spec"]["elements"]
+            for key, scope in panels.items():
+                with self.subTest(dashboard=name, panel=key):
+                    self.assertTrue(elements[key]["spec"]["title"].startswith(scope + " | "))
+            banner = elements["_banner"]["spec"]["vizConfig"]["spec"]["options"]["content"]
+            for context in ("All", "single", "multiselect", "prefix", "historical", "not current inventory"):
+                self.assertIn(context, banner)
+        maturity = dashboards.assemble("maturity", "infinity-uid")[1]["spec"]["elements"]
+        self.assertNotIn("denominator for every other number", maturity["n_ranked"]["spec"]["description"])
+
+    def test_findings_scope_and_kind_units_are_visible_without_stack_dimension(self):
+        from bin import dashboards
+
+        for name in ("estate", "cost", "usage", "risk", "ai"):
+            elements = dashboards.assemble(name, "infinity-uid")[1]["spec"]["elements"]
+            for key in ("_findings_now", "_findings_trend"):
+                spec = elements[key]["spec"]
+                self.assertTrue(spec["title"].startswith("Estate-wide source | "))
+                expr = spec["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]["expr"]
+                self.assertNotIn("$stack", expr)
+            help_text = elements["_findings_help"]["spec"]["vizConfig"]["spec"]["options"]["content"]
+            for text in ("no stack dimension", "matching rows", "label", "service-account", "pipeline"):
+                self.assertIn(text, help_text)
+            self.assertNotIn("Count of STACKS", elements["_findings_now"]["spec"]["description"])
+
+    def test_scope_context_preserves_all_single_multi_and_prefix_collision_filter_contract(self):
+        from bin import dashboards
+
+        spec = dashboards.assemble("maturity", "infinity-uid")[1]["spec"]
+        variable = spec["variables"][0]["spec"]
+        self.assertTrue(variable["multi"])
+        self.assertTrue(variable["includeAll"])
+        self.assertEqual(variable["allValue"], ".*")
+        query = spec["elements"]["board"]["spec"]["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+        self.assertEqual(query["filterExpression"], 'Stack =~ "^(${stack:regex})$"')
+        # Substitute the published regex contract locally, not a browser or Infinity execution claim.
+        for selection, expected in ((".*", ["obs-hub", "obs-hub-dev", "other"]),
+                                    ("obs-hub", ["obs-hub"]),
+                                    ("(obs-hub|other)", ["obs-hub", "other"])):
+            pattern = query["filterExpression"].split('"')[1].replace("${stack:regex}", selection)
+            self.assertEqual([s for s in ("obs-hub", "obs-hub-dev", "other") if re.search(pattern, s)], expected)
+        ranked = spec["elements"]["n_ranked"]["spec"]["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+        self.assertEqual(ranked["expr"], 'count(gcinsight_maturity_score{stack=~"$stack",version="1"})')
+        self.assertIn("Selected stacks", spec["elements"]["board"]["spec"]["title"])
+
     def test_assembled_interpretation_respects_producer_windows_and_unknown_absence(self):
         from bin import dashboards
 
