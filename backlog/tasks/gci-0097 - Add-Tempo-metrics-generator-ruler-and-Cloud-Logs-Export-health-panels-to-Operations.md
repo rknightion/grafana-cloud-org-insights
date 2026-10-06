@@ -3,15 +3,16 @@ id: GCI-0097
 title: >-
   Add Tempo metrics-generator, ruler and Cloud Logs Export health panels to
   Operations
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop13-root'
 created_date: '2026-10-06 10:23'
+updated_date: '2026-10-06 12:52'
 labels:
   - dashboards
   - operations
   - loop13
-dependencies:
-  - GCI-0096
+dependencies: []
 priority: medium
 type: enhancement
 ordinal: 113000
@@ -36,3 +37,9 @@ Loop13 assessment gaps 5, 6 and 14: grafanacloud_traces_instance_metrics_generat
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Root static seam mapping: Operations health consumes no missing cost/plugin/showback code or semantic contract. Writer-order dependency removed after cost-context stopped and composed gate completed. Preserve original AC and attempt history; build roster-proven health families with verified/unverified units, no unsupported percent scaling. Local real artifacts/meaningful PromQL proof, final gate/CR and independent review before root integration.
+<!-- SECTION:PLAN:END -->
