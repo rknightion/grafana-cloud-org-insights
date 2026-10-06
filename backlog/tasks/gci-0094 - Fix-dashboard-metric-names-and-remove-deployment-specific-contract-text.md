@@ -1,9 +1,11 @@
 ---
 id: GCI-0094
 title: Fix dashboard metric names and remove deployment-specific contract text
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop13-root'
 created_date: '2026-10-06 10:23'
+updated_date: '2026-10-06 11:19'
 labels:
   - dashboards
   - loop13
@@ -32,3 +34,9 @@ Loop13 assessment found: bin/dashboards.py:340-342 and tests/test_dashboards.py:
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+After accepted v0.7.0 readback: isolated exact-name/text candidate, red-first actual assembled artifact regression, gate and CodeRabbit once, root independent review then integration and exact-SHA CI/composed gate.
+<!-- SECTION:PLAN:END -->

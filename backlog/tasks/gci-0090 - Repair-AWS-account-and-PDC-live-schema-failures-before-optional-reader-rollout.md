@@ -1,11 +1,11 @@
 ---
 id: GCI-0090
 title: Repair AWS-account and PDC live schema failures before optional-reader rollout
-status: In Progress
+status: Parked
 assignee:
   - '@loop13-root'
 created_date: '2026-10-03 18:50'
-updated_date: '2026-10-06 10:38'
+updated_date: '2026-10-06 11:18'
 labels: []
 dependencies: []
 priority: high
@@ -22,15 +22,15 @@ The v0.6.0 dev T2 rollout read five live stacks but cloud_accounts was available
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 Reproduce each schema failure through its real guarded GET source with a red check derived from minimized non-secret live response shape; preserve fail-closed publication and last-good semantics.
-- [ ] #2 Fix only witnessed contracts within approved route/pair scope, retaining fresh inventory-led joins and strict completeness; pass repository gate and independent review.
+- [x] #2 Fix only witnessed contracts within approved route/pair scope, retaining fresh inventory-led joins and strict completeness; pass repository gate and independent review.
 - [ ] #3 A separately authorized dev rerun proves both readers before any customer rollout; use saved manifests, immutable image identity and unchanged working reader credentials.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -45,4 +45,6 @@ Loop13: red-first exact-200 exact data:null repair in isolated candidate, CodeRa
 Loop12: 1 implementation attempt,0 review-repair rounds. Bounded PDC metadata repair landed bbb9668dd89b5733d6817b6cfb1fdaaf1d05cb57 with real guarded GET four-shape red-first proofs, complete CodeRabbit zero findings, independent review PASS, clean integrated/composed gates and CI37329484807 success. AWS exact200 data:null on3/5 remains unavailable, never zero. Official CSP3.39.0 UI consumer normalizes null but discards query errors; independent high review rejects that as complete-empty API proof. Needs endpoint-specific authoritative backend contract distinguishing complete empty from unreadable, visibility-filtered or partial. AC2 full repair and AC3 live dev proof not satisfied. Stable0.7.0 release/dev/customer parked on this dependency; no deployment writes. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop12-evidence/R-shape/ and /Users/rob/repos/grafana-cloud-org-insights/codex/loop12-evidence/R-null-frontend/.
 
 Owner decision D-AWS13 (Rob, 2026-10-06): exact HTTP 200 with body exactly {"data": null} from the AWS cloud-accounts route means zero accounts (complete empty), witnessed by owner ground truth that m7kni, portinapushtests and rkaidev have no AWS accounts configured, with robk and portina returning arrays under the same reader scope as positive controls. Any other null placement, extra key, non-200 or error body stays unavailable. Release, dev and customer may proceed on this repair.
+
+Loop13: total 2 implementation attempts including loop12 PDC cycle, 0 repair rounds in loop13. AWS exact-200 exact data:null repair accepted and landed9a76608afdf7aba22e7891b238e7ffe3af6cf1c0; integrated composed gate and CI37453753883 success at4b4a6b8060e08de78c5049dc2a0c2033079bc4f4; independently verified real GET/publication boundary, CodeRabbit clean. Shipped v0.7.0. AC3 remains parked: original infra checkout preflight refused retained untracked backups. Resume after approved clean preflight and separately completed dev live proof; no deployment writes.
 <!-- SECTION:NOTES:END -->

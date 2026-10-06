@@ -1,11 +1,11 @@
 ---
 id: GCI-0093
 title: Define and fence future-dated hydrated scan inputs
-status: In Progress
+status: Done
 assignee:
   - '@loop13-root'
 created_date: '2026-10-05 21:51'
-updated_date: '2026-10-06 10:38'
+updated_date: '2026-10-06 11:18'
 labels:
   - hydration
   - follow-on
@@ -23,15 +23,15 @@ Independent loop12 library security review corrected a worker overclaim: collect
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Define future-dated owner-input handling and any justified clock-skew tolerance without altering schema-version or own-input hydration rules
-- [ ] #2 Observe a failing public hydration/compose reproduction, then prove unavailable future input preserves last-good output and honest provenance without weakening exhaustive resource-bounded derivation
+- [x] #1 Define future-dated owner-input handling and any justified clock-skew tolerance without altering schema-version or own-input hydration rules
+- [x] #2 Observe a failing public hydration/compose reproduction, then prove unavailable future input preserves last-good output and honest provenance without weakening exhaustive resource-bounded derivation
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -48,4 +48,12 @@ Park reason is old accepted freshness-policy seam and unresolved clock-skew tole
 Loop12:0 implementation attempts,0 review-repair rounds; parked owner grading of the older accepted future-age/freshness semantics and clock-skew tolerance. Pre-existing negative-age admission observed by source review, no future-input reproduction or repair claimed. Four-attempt contract corrected; this park is not exhaustion of GCI-0091 (schema/null hydration repair) three cycles.
 
 Owner decision D-FUT13 (Rob, 2026-10-06): a hydrated input stamped up to 5 minutes in the future is admitted as age 0; beyond 5 minutes it is unavailable (view withheld, last-good kept, provenance honest). Red-first test at the public hydrate/compose boundary. Schema-version and own-input hydration rules unchanged.
+
+Loop13: 1 implementation attempt, 0 review-repair rounds. Five-minute shared skew fence accepted and landed 4b4a6b8060e08de78c5049dc2a0c2033079bc4f4; exact archive independent focused proof, red-first public boundary and last-good preservation, CodeRabbit zero findings. Composed just check 2183 passed, 2 skipped, 13348 subtests; CI37453753883 at exact integrated SHA success. Shipped in v0.7.0 source68152d44c96807517385de81bac99c7b617daf58. No live rollout claim.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Accepted shared future-stamp policy: through five minutes age0, beyond unavailable with reason and preserved last-good. Gate/CI exact-SHA evidence recorded.
+<!-- SECTION:FINAL_SUMMARY:END -->
