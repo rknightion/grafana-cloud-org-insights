@@ -1,14 +1,15 @@
 ---
 id: GCI-0098
 title: 'Add SM, Kubernetes, Knowledge Graph and PDC rows to capability adoption'
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop13-root'
 created_date: '2026-10-06 10:23'
+updated_date: '2026-10-06 13:33'
 labels:
   - coverage
   - loop13
-dependencies:
-  - GCI-0097
+dependencies: []
 priority: medium
 type: enhancement
 ordinal: 114000
@@ -33,3 +34,9 @@ Owner approved (Rob, 2026-10-06) about five new estate series. Add rows to ADOPT
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Root static map proves adoption source/coverage work consumes no missing Loki health helper or contract. Writer-order edge removed after health partial stopped and composed gate completed; retain original criteria and series allowance. Add four bounded capability rows/query/budget dimensions with explicit population basis and absent-not-zero unavailable behavior; correct OnCall gauge wording. Real public source/compose/artifact proof, generated budget, final gate/CR and independent review before integration.
+<!-- SECTION:PLAN:END -->
