@@ -89,6 +89,14 @@ off anything but the live inventory.
   empty-scope probes read action) is removable. Ambiguous or invalid discovery removes nothing and
   reports it; every other query pair stays dangerous. A v0.4.3-correct role makes zero discovery
   calls. With the token absent, scans make zero SM calls.
+- Synthetic reader-role proof is not source-health proof. The current guarded GET path caps each
+  datasource-discovery, check-list and probe-list response at 2 MiB. Overflow, ambiguous datasource
+  sets, missing credentials and unreadable product routes remain unavailable, not zero or known
+  absence. Only a complete discovery proving no Synthetic datasource is not applicable. A selected
+  Synthetic owner input below the publication floor refuses the entire T2 publication, even when
+  other sources and the reader's scoped permissions pass. Do not lower the floor, infer absence from
+  an overflow, re-mint a working reader or broaden its query pair to clear that gate. This fixed-route
+  response cap does not establish a general collector memory bound.
 - The owner's GCI-0041 scope decision accepts two residual risks only for its named routes:
   IRM `grafana-irm-app.integrations:read` also reaches secret-bearing integration configuration,
   but the collector may call only `alert_receive_channels/counters` and publish counts; ML
