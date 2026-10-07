@@ -151,7 +151,7 @@ off anything but the live inventory.
   explicitly excludes DPM, or `dpm_aware`, which applies the contracted included-DPM divisor per
   stack.
 
-## Labelling inventory (D-LBL1..11)
+## Labelling inventory (D-LBL1..12)
 
 The approved source is doc-0008 Part 1 (Labelling best-practice research and rulebook).
 
@@ -211,6 +211,25 @@ The approved source is doc-0008 Part 1 (Labelling best-practice research and rul
   with its object ID, and the capability document
   is updated. Write or admin scopes, other policies and the per-stack reader role are never
   covered. A new scope can 401 for about 46 minutes; wait it out, never re-mint.
+
+- **D-LBL12 Source-specific, non-blocking floor.** `scan.py` declares
+  `LABEL_INVENTORY_FLOOR = 0.80` for label inventory health alone, measured in stack-signals
+  left-joined to fresh scannable inventory. Bounded partial reads are not complete inventories;
+  deadline and missing-input signals remain unavailable. Below this floor, label inventory is
+  partial/unavailable in `meta.sources` and provenance, omitted from composition and the new
+  owner envelope. Only its dependent labelling views are withheld; other healthy T2 inputs
+  publish. Last-good labelling views and historical accepted input envelopes are not overwritten
+  with partial payloads. The new latest owner envelope records the failure, not a revived old
+  input; own-input hydration remains forbidden. All other sources and primary coverage retain
+  `FAILURE_ABORT_RATIO = 0.10` and their whole-publication refusal. Source/scan health remains
+  degraded even when non-blocking publication succeeds. Gather-time side writes must also
+  honor primary coverage refusal and non-dry-run `--limit`/`--stack` refusal before their
+  update seam; a healthy peer input never overrides those guards. The scan-owned gather wrapper logs
+  unavailable counts by fixed signal and closed reason class only, never names, values or
+  exception text. Its `error_count` means classified unavailable stack-signal observations,
+  NOT hidden internal exceptions; zero observations does not prove zero exceptions. The source
+  itself exposes no internal exception list. This changes no source route, scope, deadline,
+  response bound, schema, retention rule or default-off policy.
 
 Not amended: `MAX_PER_STACK_FANOUT`, the one-extra-label rule, gap-is-absent, the limited-run
 guard, own-input hydration and derived `VIEW_INPUTS`.

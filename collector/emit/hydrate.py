@@ -345,6 +345,9 @@ def hydrate(
     `enabled` is the current configuration's eligible input set. A historical disabled owner
     envelope is unavailable for an enabled reader until that owner gathers fresh data; it is
     neither an available empty inventory nor permission to suppress failures indefinitely.
+    D-LBL12 makes below-floor label_inventory non-blocking for unrelated T2 publication, not
+    available for hydration: its rejected owner envelope still withholds labelling on other tiers.
+    The owning tier never revives its previous accepted label input to hide the current failure.
     """
     now = now or dt.datetime.now(dt.timezone.utc)
     inputs: dict[str, Any] = {}

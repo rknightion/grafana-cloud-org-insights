@@ -263,7 +263,7 @@ class LabelInventoryProcessEdgeTest(unittest.TestCase):
                 "out": diagnostic, "requests": requests, "value": value, "suppressed": suppressed,
                 "ordinary": ordinary}
 
-    def test_incomplete_http_body_cannot_become_complete_private_input_or_pass(self):
+    def test_incomplete_http_body_withholds_private_input_but_allows_other_publication(self):
         from collector import label_rules
 
         evidence = self.exercise(mode="incomplete")
@@ -275,10 +275,13 @@ class LabelInventoryProcessEdgeTest(unittest.TestCase):
         self.assertEqual(payload["data"], "unknown")
         result = next(r for r in label_rules.evaluate(private)["results"] if r["rule"] == "M_identity")
         self.assertEqual((result["result"], result["reason"]), ("not_evaluated", "missing_input"))
-        self.assertEqual(evidence["code"], 1)
+        self.assertEqual(evidence["code"], 0)
         self.assertFalse(evidence["scans"][0]["meta"]["scan_healthy"])
+        self.assertTrue(evidence["views"], "D-LBL12 preserves other T2 publication")
+        self.assertTrue(all(not any(name.startswith("labelling_") for name in views)
+                            for views in evidence["views"]))
 
-    def test_duplicate_http_lengths_cannot_become_complete_private_input_or_pass(self):
+    def test_duplicate_http_lengths_withhold_private_input_but_allow_other_publication(self):
         from collector import label_rules
 
         for mode in ("duplicate_conflicting", "duplicate_repeated"):
@@ -292,11 +295,13 @@ class LabelInventoryProcessEdgeTest(unittest.TestCase):
                                  "ambiguous owner input must be withheld")
                 result = next(r for r in label_rules.evaluate(private)["results"] if r["rule"] == "M_identity")
                 self.assertEqual((result["result"], result["reason"]), ("not_evaluated", "missing_input"))
-                self.assertEqual(evidence["code"], 1)
+                self.assertEqual(evidence["code"], 0)
                 self.assertFalse(evidence["scans"][0]["meta"]["scan_healthy"])
                 for boundary in ("views", "metrics", "events"):
-                    self.assertEqual(evidence[boundary], [])
-                self.assertEqual(evidence["out"], "")
+                    self.assertTrue(evidence[boundary], "D-LBL12 must not refuse unrelated writes")
+                self.assertTrue(all(not any(name.startswith("labelling_") for name in views)
+                                    for views in evidence["views"]))
+                self.assertTrue(evidence["out"])
                 for boundary in ("source", "scans", "views", "metrics", "events", "stdout", "stderr", "out"):
                     self.assertNotIn(evidence["value"], json.dumps(evidence[boundary]), boundary)
                     self.assertNotIn(evidence["suppressed"], json.dumps(evidence[boundary]), boundary)
@@ -325,7 +330,7 @@ class LabelInventoryProcessEdgeTest(unittest.TestCase):
         for mode in ("valid", "malformed", "overflow", "exception"):
             with self.subTest(mode=mode):
                 evidence = self.exercise(mode=mode)
-                self.assertEqual(evidence["code"], 0 if mode in {"valid", "overflow"} else 1, evidence["stderr"])
+                self.assertEqual(evidence["code"], 0, evidence["stderr"])
                 self.assertTrue(any("/cardinality/label_names" in r.full_url for r in evidence["requests"]))
                 for boundary in ("source", "scans", "views", "metrics", "events", "stdout", "stderr", "out"):
                     serialized = json.dumps(evidence[boundary])
@@ -347,14 +352,16 @@ class LabelInventoryProcessEdgeTest(unittest.TestCase):
                         self.assertIn(evidence["ordinary"], json.dumps(private_register))
                 for boundary in ("metrics", "events", "stdout", "stderr", "out"):
                     self.assertNotIn(evidence["ordinary"], json.dumps(evidence[boundary]), boundary)
-                if evidence["code"] == 0:
-                    self.assertTrue(evidence["out"])
-                    self.assertEqual(evidence["scans"][0]["meta"]["inputs"]["label_inventory"]["schema_version"], 1)
-                else:
-                    self.assertEqual(evidence["out"], "")
-                    self.assertEqual(evidence["events"], [])
-                    self.assertEqual(evidence["metrics"], [])
-                    self.assertIn("REFUSING all S3", evidence["stderr"])
+                self.assertTrue(evidence["out"])
+                self.assertEqual(evidence["scans"][0]["meta"]["inputs"]["label_inventory"]["schema_version"], 1)
+                if mode not in {"valid", "overflow"}:
+                    self.assertNotIn("label_inventory", evidence["scans"][0]["data"])
+                    self.assertFalse(evidence["scans"][0]["meta"]["inputs"]["label_inventory"]["available"])
+                    self.assertTrue(all(not any(name.startswith("labelling_") for name in views)
+                                        for views in evidence["views"]))
+                    self.assertTrue(evidence["events"])
+                    self.assertTrue(evidence["metrics"])
+                self.assertNotIn("REFUSING all S3", evidence["stderr"])
 
     def test_enabled_source_keeps_limited_publication_refusal_at_every_write(self):
         from dataclasses import replace
@@ -389,6 +396,309 @@ class LabelInventoryProcessEdgeTest(unittest.TestCase):
         self.assertFalse(report["healthy"])
         self.assertEqual(report["signals"]["logs"]["partial"], 1)
         self.assertEqual(report["signals"]["traces"]["available"], 0)
+
+
+class LabelInventoryFloorPublicationTest(unittest.TestCase):
+    """Real CLI, source, compose and S3 serialization against an offline upstream/store."""
+
+    def exercise(self, measured, *, peer_measured=5, limit=None, stack=None,
+                 primary_unhealthy=False, dry_run=False):
+        from dataclasses import replace
+        from collector.httpclient import Response
+        from tests.test_label_inventory import SourceContracts, STACK
+
+        contract = SourceContracts()
+        contract.setUp()
+        stacks = []
+        for i in range(5):
+            record = {**STACK, "slug": f"floor-{i}"}
+            for host, tenant, _ in scan.label_inventory_src.SIGNALS.values():
+                record[host] = record[host].replace(".example.test", f".floor-{i}.example.test")
+                record[tenant] += i
+            stacks.append(record)
+        cfg = replace(cfg_for(), dry_run=dry_run, label_inventory_enabled=True, limit=limit, stack=stack)
+        fixture = json.loads((pathlib.Path(__file__).parent / "fixtures/compose_inputs.json").read_text())
+        healthy = {s["slug"]: {"available": True} for s in stacks}
+        stored = {"views/" + name + ".json": {"meta": {"generated_at": "last-good"}, "rows": ["last-good"]}
+                  for name in hydrate.VIEW_INPUTS if name.startswith("labelling_")}
+        stored["scans/t2/last-good.json"] = {"data": {"label_inventory": "last-good-private-input"}}
+        last_good = json.loads(json.dumps(stored))
+        observations, composed, metrics, events, written = [], [], [], [], []
+        real_compose = scan.compose.build_all
+        real_hydrate = hydrate.hydrate
+        real_probe = scan.label_inventory_src.probe_all
+        real_detail = scan.gcom.fetch_all_stack_detail
+        real_gap_update = scan.gapstate.update
+        real_gap_load = scan.gapstate.load
+        gap_before = {"floor-4": "2026-10-01T00:00:00+00:00"}
+        gap_store = {"first_seen": dict(gap_before)}
+        gap_updates, gap_writes = [], []
+
+        def gap_runner(command, **kwargs):
+            # The real helper/update/read/merge/write all execute, with only the AWS process
+            # replaced. A non-dry-run side update is an observable persistent write here.
+            if command[3] == f"s3://{scan.s3emit.BUCKET}/{scan.gapstate.KEY}":
+                return SimpleNamespace(returncode=0, stdout=json.dumps(gap_store))
+            payload = json.loads(pathlib.Path(command[3]).read_text())
+            gap_writes.append(payload)
+            gap_store.clear()
+            gap_store.update(payload)
+            return SimpleNamespace(returncode=0, stdout="")
+
+        def update_gaps(*args, **kwargs):
+            gap_updates.append(kwargs)
+            return real_gap_update(*args, runner=gap_runner, **kwargs)
+
+        def detail_with_primary_fault(client, cfg, selected, coverage, **kwargs):
+            result = real_detail(client, cfg, selected, coverage, **kwargs)
+            if primary_unhealthy:
+                # Inject an independent primary Coverage refusal while keeping the returned
+                # detail source healthy, so a peer source failure cannot mask this guard.
+                coverage.record_failure(selected[0]["slug"], "http_503")
+            return result
+
+        def source_response(req, timeout):
+            # Fail whole stack-signals in a deterministic signal-major order. Remaining
+            # signals are real bounded reads. No fake health-report override.
+            signal = req.full_url.split("//", 1)[1].split(".", 1)[0]
+            index = next(i for i in range(5) if f".floor-{i}." in req.full_url)
+            if list(scan.label_inventory_src.SIGNALS).index(signal) * 5 + index < 20 - measured:
+                return Response(503, b"VALUE_canary_floor_secret", req.full_url)
+            return contract.send(req, timeout)
+
+        class Body(io.BytesIO):
+            headers = {}
+
+        def opened(req, timeout):
+            response = source_response(req, timeout)
+            body = Body(response.body)
+            body.status = response.status
+            return body
+
+        def upstream(req, timeout):
+            path = __import__("urllib.parse", fromlist=["urlsplit"]).urlsplit(req.full_url).path
+            payload = {"items": stacks} if path == "/api/instances" else {"items": []}
+            return Response(200, json.dumps(payload).encode(), req.full_url)
+
+        def capture_source(*args, **kwargs):
+            payload = real_probe(*args, **kwargs)
+            observations.append(payload)
+            return payload
+
+        def capture_compose(*args, **kwargs):
+            composed.append(kwargs)
+            return real_compose(*args, **kwargs)
+
+        def put(path, key, bucket, dry_run):
+            if dry_run:
+                return "DRY-RUN " + key
+            written.append(key)
+            stored[key] = json.loads(path.read_text())
+            return key
+
+        def related(name):
+            row = next((r for r in (fixture.get(name) or {}).values()
+                        if isinstance(r, dict) and r.get("available")), None)
+            return {s["slug"]: {**(row or {"available": True}), "slug": s["slug"]} for s in stacks}
+
+        gather_names = ("assistant", "insights", "dashboard_inventory", "datasource_query_cost",
+                        "adaptive_logs", "adaptive_traces", "public_dashboards", "alert_routing",
+                        "slo_inventory", "synthetic_inventory", "irm_integrations", "irm_alert_groups",
+                        "ml_jobs", "reports_inventory", "playlists_inventory", "library_panels_inventory",
+                        "cloud_accounts", "faro_apps", "signal_inventory", "pdc_networks")
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with contextlib.ExitStack() as patches:
+            patches.enter_context(mock.patch.object(scan.config, "load", return_value=cfg))
+            patches.enter_context(mock.patch.object(scan, "_verified_ecs_runtime", return_value=True))
+            patches.enter_context(mock.patch.object(scan.scanlock, "ScanLock"))
+            patches.enter_context(mock.patch("collector.httpclient._urllib_transport", side_effect=upstream))
+            patches.enter_context(mock.patch("urllib.request.build_opener", return_value=SimpleNamespace(open=opened)))
+            patches.enter_context(mock.patch.object(scan.label_inventory_src, "probe_all", side_effect=capture_source))
+            patches.enter_context(mock.patch.object(scan.label_risk_src, "probe_all", return_value=healthy))
+            patches.enter_context(mock.patch.object(scan.plugin_catalog, "fetch_catalogue", return_value={}))
+            patches.enter_context(mock.patch.object(scan.gcom, "fetch_all_stack_detail", side_effect=detail_with_primary_fault))
+            for name in gather_names:
+                patches.enter_context(mock.patch.object(scan, "gather_" + name, return_value=(related(name), [])))
+            patches.enter_context(mock.patch.object(scan, "gather_service_accounts", return_value=(
+                {s["slug"]: {"state": scan.sa_src.OK, "accounts": []} for s in stacks}, [])))
+            patches.enter_context(mock.patch.object(scan, "gather_capability_adoption", return_value=(fixture["capability_adoption"], [])))
+            patches.enter_context(mock.patch.object(scan, "gather_loki_config", return_value=(
+                {s["slug"]: {"limits": {"available": True}, "change_requests": {"available": True}} for s in stacks}, [])))
+            patches.enter_context(mock.patch.object(scan, "gather_insights", return_value=(
+                {s["slug"]: {**related("insights")[s["slug"]], "available": i < peer_measured}
+                 for i, s in enumerate(stacks)}, [])))
+            patches.enter_context(mock.patch.object(scan, "load_ratecard", return_value=None))
+            patches.enter_context(mock.patch.object(scan.gapstate, "update", side_effect=update_gaps))
+            patches.enter_context(mock.patch.object(scan.gapstate, "load", side_effect=lambda **kw:
+                real_gap_load(runner=gap_runner, **kw)))
+            patches.enter_context(mock.patch.object(hydrate, "hydrate", side_effect=lambda *a, **kw:
+                real_hydrate(*a, loader=lambda *_: None, **kw)))
+            patches.enter_context(mock.patch.object(scan.compose, "build_all", side_effect=capture_compose))
+            patches.enter_context(mock.patch.object(scan.s3emit, "_put", side_effect=put))
+            patches.enter_context(mock.patch.object(scan.mimir.RemoteWriter, "push", side_effect=lambda m: metrics.extend(m) or len(m)))
+            patches.enter_context(mock.patch.object(scan.loki.LokiWriter, "push", side_effect=lambda e: events.extend(e) or len(e)))
+            patches.enter_context(contextlib.redirect_stdout(stdout))
+            patches.enter_context(contextlib.redirect_stderr(stderr))
+            args = ["--tier", "t2"] + (["--dry-run"] if dry_run else [])
+            if limit:
+                args += ["--limit", str(limit)]
+            if stack:
+                args += ["--stack", stack]
+            code = scan.main(args)
+        return {"code": code, "stored": stored, "last_good": last_good, "written": written,
+                "source": observations, "compose": composed, "metrics": metrics, "events": events,
+                "gap_updates": gap_updates, "gap_writes": gap_writes,
+                "gap_before": gap_before, "gap_after": gap_store["first_seen"],
+                "stdout": stdout.getvalue(), "stderr": stderr.getvalue()}
+
+    def test_17_of_20_publishes_healthy_label_input_at_real_cli_boundary(self):
+        evidence = self.exercise(17)
+        self.assertEqual(evidence["code"], 0, evidence["stderr"])
+        owner = evidence["stored"]["scans/t2/latest.json"]
+        report = owner["meta"]["sources"]["label_inventory"]
+        self.assertEqual((report["available"], report["expected"]), (17, 20))
+        self.assertTrue(report["healthy"])
+        self.assertTrue(owner["meta"]["inputs"]["label_inventory"]["available"])
+        self.assertEqual(owner["data"]["label_inventory"], evidence["source"][0])
+        self.assertIn("label_inventory", evidence["compose"][0])
+        self.assertIn("views/labelling_stack_summary.json", evidence["written"])
+        self.assertEqual(report["error_count"], 3, "classified unavailable signals, not hidden exceptions")
+        self.assertEqual(report["signals"]["metrics"]["unavailable_reasons"], {"missing_input": 3})
+        self.assertIn('"unavailable_reasons":{"missing_input":3}', evidence["stderr"])
+        self.assertNotIn("VALUE_canary_floor_secret", json.dumps(evidence))
+
+    def test_15_of_20_withholds_only_labelling_and_publishes_other_t2_inputs(self):
+        evidence = self.exercise(15)
+        self.assertEqual(evidence["code"], 0, evidence["stderr"])
+        owner = evidence["stored"]["scans/t2/latest.json"]
+        report = owner["meta"]["sources"]["label_inventory"]
+        self.assertFalse(report["healthy"])
+        self.assertEqual(report["state"], "partial")
+        self.assertEqual(report["error_count"], 5)
+        self.assertEqual(owner["meta"]["inputs"]["label_inventory"]["state"], "partial")
+        self.assertFalse(owner["meta"]["inputs"]["label_inventory"]["available"])
+        self.assertNotIn("label_inventory", owner["data"])
+        self.assertNotIn("label_inventory", evidence["compose"][0])
+        self.assertIn("insights", owner["data"])
+        self.assertIn("views/insights_summary.json", evidence["written"])
+        self.assertTrue(evidence["metrics"])
+        self.assertTrue(evidence["events"])
+        self.assertIn(("gcinsight_input_available", {"tier": "t2", "input": "label_inventory"}, 0.0), evidence["metrics"])
+        self.assertFalse(any(n == "gcinsight_input_age_seconds" and l.get("input") == "label_inventory"
+                             for n, l, _ in evidence["metrics"]))
+        for key, old in evidence["last_good"].items():
+            self.assertEqual(evidence["stored"][key], old, key)
+            self.assertNotIn(key, evidence["written"], key)
+        self.assertNotIn("REFUSING all S3", evidence["stderr"])
+        self.assertNotIn("VALUE_canary_floor_secret", json.dumps(evidence))
+
+    def test_exact_80_percent_is_accepted_and_other_source_floor_still_blocks(self):
+        evidence = self.exercise(16)
+        self.assertEqual(evidence["code"], 0, evidence["stderr"])
+        self.assertTrue(evidence["stored"]["scans/t2/latest.json"]["meta"]["sources"]["label_inventory"]["healthy"])
+        evidence = self.exercise(15, peer_measured=4)
+        self.assertEqual(evidence["code"], 1)
+        self.assertEqual(evidence["written"], [])
+        self.assertEqual(evidence["metrics"], [])
+        self.assertEqual(evidence["events"], [])
+        self.assertIn("REFUSING all S3", evidence["stderr"])
+        self.assertNotIn("insights", evidence["compose"][0])
+
+    def test_zero_of_20_is_unavailable_without_refusing_other_writes(self):
+        evidence = self.exercise(0)
+        self.assertEqual(evidence["code"], 0, evidence["stderr"])
+        owner = evidence["stored"]["scans/t2/latest.json"]
+        report = owner["meta"]["sources"]["label_inventory"]
+        self.assertEqual((report["available"], report["error_count"], report["state"]), (0, 20, "unavailable"))
+        self.assertFalse(report["healthy"])
+        self.assertFalse(owner["meta"]["sources_healthy"], "non-blocking is not source health")
+        self.assertFalse(owner["meta"]["scan_healthy"], "keep the degraded scan honest")
+        self.assertNotIn("label_inventory", owner["data"])
+        self.assertNotIn("label_inventory", evidence["compose"][0])
+        self.assertIn("views/insights_summary.json", evidence["written"])
+        self.assertEqual(owner["meta"]["inputs"]["label_inventory"]["state"], "unavailable")
+        for key, old in evidence["last_good"].items():
+            self.assertEqual(evidence["stored"][key], old)
+
+    def test_below_floor_label_cannot_allow_subset_or_primary_refused_gap_state_writes(self):
+        for options, expected_exit in (({"limit": 1}, 2), ({"stack": "floor-0"}, 2),
+                                       ({"primary_unhealthy": True}, 1)):
+            with self.subTest(options=options):
+                evidence = self.exercise(15, **options)
+                self.assertEqual(evidence["code"], expected_exit, evidence["stderr"])
+                self.assertNotIn("label_inventory", evidence["compose"][0], "labels must be below floor")
+                self.assertIn("assistant", evidence["compose"][0], "healthy Assistant is not a peer blocker")
+                self.assertEqual(evidence["gap_updates"], [],
+                                 "refused runs must stop before the real gapstate.update seam")
+                self.assertEqual(evidence["gap_writes"], [], "no persistent side write before refusal")
+                self.assertEqual(evidence["gap_after"], evidence["gap_before"])
+                self.assertEqual(evidence["written"], [])
+                self.assertEqual(evidence["metrics"], [])
+                self.assertEqual(evidence["events"], [])
+                self.assertIn("REFUSING all S3", evidence["stderr"])
+
+    def test_below_floor_label_still_allows_full_gap_update_and_subset_dry_run_computation(self):
+        evidence = self.exercise(15)
+        self.assertEqual(evidence["code"], 0, evidence["stderr"])
+        self.assertEqual(len(evidence["gap_updates"]), 1)
+        self.assertFalse(evidence["gap_updates"][0]["dry_run"])
+        self.assertEqual(len(evidence["gap_writes"]), 1, "full healthy publication retains its gap update")
+        for options in ({"limit": 1}, {"stack": "floor-0"}):
+            with self.subTest(options=options):
+                evidence = self.exercise(15, dry_run=True, **options)
+                self.assertEqual(evidence["code"], 0, evidence["stderr"])
+                self.assertEqual(len(evidence["gap_updates"]), 1)
+                self.assertTrue(evidence["gap_updates"][0]["dry_run"])
+                self.assertEqual(evidence["gap_writes"], [])
+                self.assertEqual(evidence["gap_after"], evidence["gap_before"])
+                self.assertEqual(evidence["written"], [])
+
+    def test_wrapper_counts_live_unavailable_observations_and_logs_only_closed_classes(self):
+        name, value, text = "NAME_canary_floor", "VALUE_canary_floor", "EXCEPTION_canary_floor"
+        payload = {"live": {"signals": {
+            "metrics": {"state": "complete", "reason": "none", "register": [name, value]},
+            "logs": {"state": "partial", "reason": "deadline", "detail": text},
+            "traces": {"state": "unavailable", "reason": "missing_input"},
+            "profiles": {"state": "unavailable", "reason": name + value + text},
+        }}, "departed": {"signals": {s: {"state": "unavailable", "reason": "deadline"}
+                                      for s in scan.label_inventory_src.SIGNALS}}}
+        stacks = [{"slug": "live"}, {"slug": "paused", "status": "PAUSED"}]
+        from dataclasses import replace
+        stderr = io.StringIO()
+        with (mock.patch.object(scan.label_inventory_src, "probe_all", return_value=payload),
+              contextlib.redirect_stderr(stderr)):
+            data, errors = scan.gather_label_inventory(FakeClient(), replace(cfg_for(), label_inventory_enabled=True), stacks)
+        self.assertIs(data, payload)
+        self.assertEqual(errors, ["logs: deadline", "traces: missing_input", "profiles: missing_input"])
+        report = scan.label_inventory_source_report(stacks, payload, errors)
+        self.assertEqual(report["error_count"], 3)
+        self.assertEqual(report["error_count_unit"], "classified unavailable stack-signal observations")
+        self.assertEqual((report["expected"], report["available"]), (4, 1))
+        records = [json.loads(line) for line in stderr.getvalue().splitlines()]
+        self.assertEqual({r["signal"]: r["unavailable_reasons"] for r in records},
+                         {"metrics": {}, "logs": {"deadline": 1}, "traces": {"missing_input": 1},
+                          "profiles": {"missing_input": 1}})
+        for canary in (name, value, text):
+            self.assertNotIn(canary, json.dumps(report) + stderr.getvalue() + json.dumps(errors))
+        # Even an externally supplied error sample cannot export arbitrary exception text.
+        safe_report = scan.label_inventory_source_report(stacks, payload, [text])
+        self.assertEqual(safe_report["error_count"], 1)
+        self.assertNotIn(text, json.dumps(safe_report))
+
+    def test_shared_source_floor_remains_exactly_ten_percent_failure(self):
+        from collector.coverage import FAILURE_ABORT_RATIO, Coverage
+        self.assertEqual(FAILURE_ABORT_RATIO, 0.10)
+        self.assertEqual(scan.LABEL_INVENTORY_FLOOR, 0.80)
+        for missing in (2, 3):
+            rows = {str(i): True for i in range(20 - missing)}
+            self.assertEqual(scan.source_report(20, rows, available=bool)["healthy"], missing == 2)
+            cov = Coverage(tier="t2", total=20)
+            for i in range(20):
+                if i < missing:
+                    cov.record_failure(str(i), "missing_input")
+                else:
+                    cov.record_ok(str(i))
+            self.assertEqual(cov.should_abort, missing == 3)
 
 
 class ConsoleLoggingTest(unittest.TestCase):

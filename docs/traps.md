@@ -736,6 +736,40 @@ natural daily observations. This is schema/outcome evidence, not proof of raw-va
 in every downstream sink or a universal memory bound. Exact artifact contract and
 caller-chosen score-change tolerance: /Users/rob/repos/grafana-cloud-org-insights/RUNBOOK.md.
 
+### D-LBL12: label inventory must not stop unrelated T2 publication
+
+The owner decision on 2026-10-07 follows a dev T2 refusal at 17 of 20 measured label
+stack-signals under the shared 10% failure ceiling. `scan.py` now uses its named
+`LABEL_INVENTORY_FLOOR = 0.80` only for label inventory health. Exact 16/20 passes
+(the binary floating-point complement of 0.80 must not reject that boundary); 15/20
+is partial and 0/20 unavailable. Deadline and missing-input signals are unavailable,
+not measured empty; accepted bounded partial reads still do not establish completeness.
+
+Below-floor label inventory is excluded before composition and omitted from the new
+saved owner envelope. Its source and provenance remain unhealthy, but it is not a
+whole-T2 publication blocker: healthy unrelated inputs, views and telemetry still
+publish. Last-good labelling views and historical accepted scan objects remain
+untouched. The latest owner scan advances with unavailable provenance and no label
+payload; it is not permission to read the previous owner input back into T2 or to
+make downstream tiers report the failed input as fresh. All other source floors,
+primary coverage and limited-run refusals are unchanged.
+
+Assistant credential-gap state is a gather-time S3 side write, before the common
+publication guard. Checking only blocking source failures there is insufficient:
+non-blocking label failure can admit a healthy Assistant input from a limited run
+or a run with primary coverage refusal. Apply those refusals before entering the
+real gap-state update, or a later exit 2 can claim all writes were refused after
+subset observations already changed estate-wide state. Limited dry-runs may still
+compute the gap merge with `dry_run=True`, but never persist it.
+
+The scan-owned gather wrapper observes returned classified stack-signal records,
+left-joined to live scannable inventory. It reports/logs unavailable counts by fixed
+signal and closed reason class only. Its `error_count` counts those unavailable
+observations, not internally caught exceptions: the source exposes no exception list,
+and zero unavailable observations cannot prove zero internal errors. Never echo a
+register, label/attribute name, raw value, HTTP body or exception text into this report.
+No source implementation, route, scope, bounds or default-off policy changed.
+
 ## Labelling route witnesses - 2026-10-07
 
 GCI-0119.03 (Mimir labelling witness), GCI-0119.04 (Loki series/index witness),

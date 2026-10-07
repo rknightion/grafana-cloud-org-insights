@@ -259,6 +259,77 @@ class LabelInventoryHydrationContract(unittest.TestCase):
         self.assertNotIn("request_id", json.dumps(provenance_metrics))
 
 
+class LabelInventoryNonBlockingHydrationTest(unittest.TestCase):
+    def test_rejected_owner_label_input_is_not_revived_while_peer_input_hydrates(self):
+        from collector.emit import s3
+        from tests.test_label_inventory import SourceContracts, STACK
+        import scan
+
+        contract = SourceContracts()
+        contract.setUp()
+        last_good_payload = {STACK["slug"]: contract.probe()}
+        last_good_owner = _scan("t2", "label_inventory", last_good_payload)
+        owner = _scan("t2", "insights", {"peer": {"available": True}})
+        owner["meta"]["sources"] = {
+            "label_inventory": {"expected": 20, "available": 15, "healthy": False, "state": "partial"},
+            "insights": {"expected": 5, "available": 5, "healthy": True},
+        }
+        # Serialize the actual omitted-input owner envelope, not a loose provenance proxy.
+        stored = {"scans/t2/last-good.json": last_good_owner}
+        labelling_views = {name: ["last-good"] for name in hydrate.VIEW_INPUTS
+                           if name.startswith("labelling_")}
+        for name, rows in labelling_views.items():
+            stored[f"views/{name}.json"] = {"meta": {"generated_at": "last-good"}, "rows": rows}
+        baseline = json.loads(json.dumps(stored))
+
+        def put(path, key, bucket, dry_run):
+            stored[key] = json.loads(path.read_text())
+            return key
+
+        with mock.patch.object(s3, "_put", side_effect=put):
+            s3.write_scan(owner, bucket="offline")
+            for tier in ("t1", "t3", "t4"):
+                with self.subTest(tier=tier):
+                    inputs, prov = hydrate.hydrate(tier, {}, enabled={"label_inventory"}, now=NOW,
+                        loader=_loader(t2=stored["scans/t2/latest.json"]))
+                    self.assertEqual(inputs["insights"], owner["data"]["insights"])
+                    self.assertNotIn("label_inventory", inputs)
+                    self.assertEqual(prov["label_inventory"]["state"], "partial")
+                    self.assertFalse(prov.satisfied("label_inventory"))
+                    keep, withheld = hydrate.filter_views({**labelling_views, "insights_summary": ["new-peer"]}, prov)
+                    self.assertEqual(keep, {"insights_summary": ["new-peer"]})
+                    self.assertEqual(set(withheld), set(labelling_views))
+                    s3.write_views(keep, {"tier": tier, "inputs": prov}, bucket="offline")
+            for key, old in baseline.items():
+                self.assertEqual(stored[key], old, "last-good private input/history and views survive")
+
+        # An owner with a failed label input must not read even a good previous label payload.
+        loader = mock.Mock(side_effect=_loader(t2=last_good_owner))
+        inputs, prov = hydrate.hydrate("t2", {}, now=NOW, loader=loader,
+            unavailable=scan.publication_inputs({"label_inventory": {}}, owner["meta"]["sources"])[1])
+        self.assertNotIn("label_inventory", inputs)
+        self.assertEqual(prov["label_inventory"]["state"], "partial")
+        self.assertFalse(any(call.args[0] == "t2" for call in loader.call_args_list))
+
+    def test_accepted_85_percent_report_hydrates_without_reapplying_shared_floor(self):
+        from tests.test_label_inventory import SourceContracts, STACK
+
+        contract = SourceContracts()
+        contract.setUp()
+        payload = {STACK["slug"]: contract.probe()}
+        owner = _scan("t2", "label_inventory", payload)
+        owner["meta"]["sources"] = {
+            "label_inventory": {"expected": 20, "available": 17, "healthy": True, "state": "partial"}}
+        for tier in ("t1", "t3", "t4"):
+            with self.subTest(tier=tier):
+                inputs, prov = hydrate.hydrate(tier, {}, now=NOW, loader=_loader(t2=owner))
+                self.assertEqual(inputs["label_inventory"], payload)
+                self.assertTrue(prov.satisfied("label_inventory"))
+        inputs, prov = hydrate.hydrate("t2", {}, now=NOW, loader=_loader(t2=owner))
+        self.assertNotIn("label_inventory", inputs)
+        self.assertFalse(prov.satisfied("label_inventory"))
+
+
 class InputSchemaVersionTest(unittest.TestCase):
     def test_every_own_input_has_an_integer_writer_version(self):
         self.assertEqual(set(hydrate.INPUT_SCHEMA_VERSION), set(hydrate.INPUT_OWNER))

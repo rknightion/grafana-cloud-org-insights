@@ -72,6 +72,8 @@ from collector.sources import usage_insights, dataplane, gcom
 
 TIERS = ("t1", "t2", "t3", "t4")
 RATECARD_KEY = "config/ratecard.csv"
+# D-LBL12: only label_inventory health uses this floor; shared coverage stays at 0.10 failures.
+LABEL_INVENTORY_FLOOR = 0.80
 LOG_LEVELS = frozenset({"info", "warn", "error"})
 SUMMARY_KEYS = (
     "tier", "generated_at", "org_id", "scan_healthy", "sources_healthy",
@@ -826,11 +828,19 @@ def disabled_inputs(cfg: config.Config) -> dict[str, dict[str, str]]:
             for name, selected in enabled.items() if not selected}
 
 
-def label_inventory_source_report(stacks: list[dict[str, Any]], payload: dict) -> dict:
+def blocking_source_failures(tier: str, failures: list[str]) -> list[str]:
+    """D-LBL12 withholds only labelling; every other owner failure still refuses all writes."""
+    return [name for name in failures if not (tier == "t2" and name == "label_inventory")]
+
+
+def label_inventory_source_report(
+    stacks: list[dict[str, Any]], payload: dict, errors: list[str] | None = None,
+) -> dict:
     """Coverage in stack-signal units, left-joined to fresh scannable inventory only.
 
-    Bounded partial reads are not complete inventories. No register or exception text
-    reaches the source health record.
+    Bounded partial reads are not complete inventories. Error counts describe classified
+    unavailable stack-signal observations, NOT hidden internal exceptions. No register,
+    names, values or exception text reaches the source health record.
     """
     live = [s for s in stacks if str(s.get("status", "")).lower() != "paused"]
     by_signal = {}
@@ -840,11 +850,64 @@ def label_inventory_source_report(stacks: list[dict[str, Any]], payload: dict) -
         report = source_report(len(live), rows, available=lambda r:
             r.get("state") in {"complete", "partial"} and r.get("reason") not in {"deadline", "missing_input"})
         report["partial"] = sum(r.get("state") == "partial" for r in rows.values())
+        reasons: dict[str, int] = {}
+        for row in rows.values():
+            if row.get("state") in {"complete", "partial"} and row.get("reason") not in {"deadline", "missing_input"}:
+                continue
+            # Closed classes only, even if a missing/malformed record contains arbitrary text.
+            reason = row.get("reason")
+            if reason not in ("missing_input", "route_parked", "truncated", "deadline", "overflow"):
+                reason = "missing_input"
+            reasons[reason] = reasons.get(reason, 0) + 1
+        report["unavailable_reasons"] = reasons
+        # Round the complement so exact 16/20 is not rejected by binary 1 - 0.80 rounding.
+        report["healthy"] = not live or (
+            report["unavailable"] / len(live) <= round(1 - LABEL_INVENTORY_FLOOR, 10)
+        )
         by_signal[signal] = report
     expected = len(live) * len(by_signal)
     available = sum(r["available"] for r in by_signal.values())
-    report = source_report(expected, {str(n): True for n in range(available)}, available=bool)
-    return {**report, "unit": "stack-signals", "signals": by_signal}
+    safe_classes = {f"{signal}: {reason}" for signal in label_inventory_src.SIGNALS
+                    for reason in ("missing_input", "route_parked", "truncated", "deadline", "overflow")}
+    safe_errors = [error if error in safe_classes else "missing_input" for error in (errors or [])]
+    report = source_report(expected, {str(n): True for n in range(available)}, available=bool,
+                           errors=safe_errors)
+    report["healthy"] = not expected or (
+        report["unavailable"] / expected <= round(1 - LABEL_INVENTORY_FLOOR, 10)
+    )
+    state = "available" if available == expected else ("partial" if available else "unavailable")
+    return {**report, "unit": "stack-signals", "signals": by_signal, "state": state,
+            "error_count_unit": "classified unavailable stack-signal observations"}
+
+
+def gather_label_inventory(
+    client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[str]]:
+    """Scan-owned observations; the source does not expose its internal exception count.
+
+    A zero error_count proves no unavailable signal observations, not zero exceptions.
+    Only fixed signal/reason classes leave this wrapper in logs or error lists.
+    """
+    enabled = getattr(cfg, "label_inventory_enabled", False)
+    data = label_inventory_src.probe_all(
+        client, stacks, cfg.cap, enabled=enabled, concurrency=cfg.concurrency,
+        max_seconds=getattr(cfg, "label_inventory_budget_seconds", 900.0),
+        static_names=getattr(cfg, "label_inventory_static_names", label_inventory_src.STATIC_NAMES),
+    )
+    if not enabled:
+        return data, []
+    report = label_inventory_source_report(stacks, data)
+    errors: list[str] = []
+    for signal, observed in report["signals"].items():
+        reasons = observed["unavailable_reasons"]
+        for reason, count in sorted(reasons.items()):
+            errors.extend([f"{signal}: {reason}"] * count)
+        console_log(
+            "warn" if reasons else "info", "label inventory: signal availability",
+            signal=signal, available=observed["available"], expected=observed["expected"],
+            unavailable_reasons=reasons,
+        )
+    return data, errors
 
 
 def gather_signal_inventory(
@@ -1234,12 +1297,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     # Default-off source-only stage: <=900s and <=a quarter of remaining time, after label_risk
     # and BEFORE gcom detail and every other daily gatherer. Exhaustion is partial/deadline.
     label_inventory_enabled = getattr(cfg, "label_inventory_enabled", False)
-    label_inventory = label_inventory_src.probe_all(
-        client, selected, cfg.cap, enabled=label_inventory_enabled, concurrency=cfg.concurrency,
-        max_seconds=getattr(cfg, "label_inventory_budget_seconds", 900.0),
-        static_names=getattr(cfg, "label_inventory_static_names", label_inventory_src.STATIC_NAMES),
-    )
-    errors: list[str] = []
+    label_inventory, label_inventory_errors = gather_label_inventory(client, cfg, selected)
+    errors: list[str] = list(label_inventory_errors)
     detail = gcom.fetch_all_stack_detail(
         client, cfg, selected, coverage, on_error=lambda slug, msg: errors.append(f"{slug}: {msg}")
     )
@@ -1342,7 +1401,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "label_inventory": label_inventory,
     }
     sources = {
-        "label_inventory": (label_inventory_source_report(selected, label_inventory)
+        "label_inventory": (label_inventory_source_report(selected, label_inventory, label_inventory_errors)
                             if label_inventory_enabled else
                             {**source_report(0, {}, available=bool), "reason": "not_selected"}),
         "label_risk": source_report(expected, label_risk, available=lambda r: bool(r.get("available"))),
@@ -1475,6 +1534,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     for name in disabled_inputs(cfg):
         sources[name].update(state="disabled", reason="not_selected")
     source_failures = sorted(name for name, report in sources.items() if not report["healthy"])
+    publication_failures = blocking_source_failures(cfg.tier, source_failures)
     publishable_inputs, unavailable_inputs = publication_inputs(gathered_inputs, sources)
 
     # Pillar C's user recency, Pillar E's service-account and plugin-drift halves, all of Pillar I, and
@@ -1491,10 +1551,13 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         selected, coverage,
         gap_first_seen=assistant_gaps(
             cfg, selected, inputs.get("assistant"),
-            # `gathered=True` updates the first-seen gap state in S3. If ANY source failed this run is
-            # going to stop before publication, so that side write must stop too even when Assistant
-            # itself was healthy.
-            gathered=not source_failures and "assistant" in publishable_inputs,
+            # This is an S3 side-write BEFORE run()'s final publication guards. Apply primary
+            # coverage and non-dry-run subset refusal here too, not only source-health refusal.
+            # D-LBL12 still allows a healthy full-estate Assistant update despite label failure;
+            # limited dry-runs retain their read/merge computation without writing state.
+            gathered=(not publication_failures and not coverage.should_abort
+                      and (cfg.dry_run or not (cfg.limit or cfg.stack))
+                      and "assistant" in publishable_inputs),
         ),
         ratecard=rate_card,
         score_weights=getattr(cfg, "coverage_score_weights", None),
@@ -1665,6 +1728,7 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
     finished = dt.datetime.now(dt.timezone.utc)
     coverage_ratio = scan["meta"]["coverage_ratio"]
     source_failures = scan["meta"].get("source_failures") or []
+    publication_failures = blocking_source_failures(cfg.tier, source_failures)
     failed_stacks = int(scan["meta"].get("stacks_failed") or 0)
     scannable_stacks = int(scan["meta"].get("stacks_scannable") or 0)
     primary_unhealthy = bool(
@@ -1675,9 +1739,11 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
     # never have to infer health from a missing field on T1/T3/T4.
     scan["meta"].setdefault("sources_healthy", not source_failures)
     scan["meta"].setdefault("scan_healthy", not primary_unhealthy and not source_failures)
-    if primary_unhealthy or source_failures:
-        # Stop before EVERY publication seam. Advancing the completion timestamp or latest scan after
-        # an independently gathered owner input fell below its floor would make the failed run look
+    if primary_unhealthy or publication_failures:
+        # Stop before EVERY publication seam for blocking inputs. D-LBL12 label_inventory
+        # remains unhealthy in meta/provenance, but only its input and views are withheld.
+        # Advancing the completion timestamp or latest scan after a blocking independently gathered
+        # owner input fell below its floor would make the failed run look
         # fresh, and saving the partial payload would let T1 hydrate it as the new estate truth. The
         # last-good views and owner envelope therefore remain untouched; the non-zero ECS task and its
         # CloudWatch error are the failure evidence, while the existing staleness alert watches the
@@ -1688,8 +1754,8 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
                 f"primary stack coverage {failed_stacks} failures across {scannable_stacks} "
                 f"scannable stacks ({coverage_ratio:.1%} covered)"
             )
-        if source_failures:
-            reasons.append("unhealthy owner inputs: " + ", ".join(source_failures))
+        if publication_failures:
+            reasons.append("unhealthy owner inputs: " + ", ".join(publication_failures))
         console_log(
             "error",
             "error: scan coverage is below the publication floor; "
