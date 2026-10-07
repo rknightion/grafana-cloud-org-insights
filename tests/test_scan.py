@@ -80,6 +80,281 @@ class EnterpriseProcessEdgeTest(unittest.TestCase):
         self.assertNotIn("author", json.dumps(detail))
 
 
+class LabelInventoryDiagnosticBoundaryTest(unittest.TestCase):
+    def test_real_cli_out_excludes_private_input_and_future_label_register(self):
+        name = "ordinary_NAME_canary_7d0de1a4"
+        result = {
+            "meta": {"tier": "t2", "coverage_ratio": 1.0, "stacks_total": 1,
+                     "stacks_failed": 0, "stacks_scannable": 1},
+            "data": {"label_inventory": {"alpha": {"name": name}}},
+            # A later pillar may attach the private register to the scan for diagnostic purposes.
+            "views": {"labelling_label_register": [{"Label name": name}]},
+            "_emit": {"metrics": [], "views": {}, "view_coverage": {}},
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            output = pathlib.Path(directory) / "diagnostic.json"
+            with (
+                mock.patch.object(scan.config, "load", return_value=cfg_for()),
+                mock.patch.object(scan, "run_t2", return_value=result),
+                mock.patch.object(scan.s3emit, "write_views", return_value=[]),
+                mock.patch.object(scan.s3emit, "write_scan", return_value=[]),
+                mock.patch.object(scan.mimir.RemoteWriter, "push", return_value=0),
+                mock.patch.object(scan.loki.LokiWriter, "push", return_value=0),
+                contextlib.redirect_stdout(io.StringIO()),
+                contextlib.redirect_stderr(io.StringIO()),
+            ):
+                self.assertEqual(scan.main(["--tier", "t2", "--dry-run", "--out", str(output)]), 0)
+            self.assertNotIn(name, output.read_text())
+        self.assertIn(name, json.dumps(result), "filtering must not mutate the private S3 scan")
+
+
+class LabelInventoryProcessEdgeTest(unittest.TestCase):
+    """Drive actual CLI/config/inventory/source/compose/publication seams, no live calls."""
+
+    def exercise(self, enabled=True, mode="valid", extra_args=()):
+        from collector.httpclient import Response
+        from tests.test_label_inventory import STACK
+        from collector.sources import label_inventory as source
+        import urllib.parse
+
+        value = "VALUE_canary_eb6d5cca"
+        suppressed = "NAME_canary_9c708f2a@example.test"
+        ordinary = "ordinary_NAME_canary_5571e2a"
+        requests, raw_source, scans, views, metrics, events = [], [], [], [], [], []
+        env = {name: "synthetic" for name, _ in config.REQUIRED_ENV}
+        env.update({"GCINSIGHT_READ_TOKEN": "synthetic-read", "GCINSIGHT_LABEL_INVENTORY_ENABLED": str(enabled).lower(),
+                    "GCINSIGHT_MIMIR_URL": "https://mimir.invalid", "GCINSIGHT_LOKI_URL": "https://loki.invalid"})
+        fixtures = json.loads((pathlib.Path(__file__).parent / "fixtures/label_inventory/contracts.json").read_text())
+
+        def body(req):
+            requests.append(req)
+            parts = urllib.parse.urlsplit(req.full_url)
+            if parts.hostname == "grafana.com":
+                if parts.path == "/api/instances":
+                    return json.dumps({"items": [STACK]}).encode()
+                return b'{"items":[]}'  # actual gcom detail user/plugin reads
+            signal = parts.hostname.split(".")[0]
+            names = parts.path.endswith(("/label_names", "/labels", "/tags", "/LabelNames"))
+            if mode == "exception":
+                raise RuntimeError(value + suppressed)
+            if signal == "metrics":
+                names_list = [ordinary, suppressed, "job"]
+                doc = {"label_names_count": 3, "label_values_count_total": 3,
+                       "cardinality": [{"label_name": n, "label_values_count": 1} for n in names_list],
+                       "untrusted_extra": value}
+            elif names:
+                names_list = [ordinary, suppressed, "service_name"]
+                doc = ({"scopes": [{"name": "resource", "tags": names_list}]} if signal == "traces" else
+                       {"names" if signal == "profiles" else "data": names_list,
+                        **({"status": "success"} if signal == "logs" else {})})
+            elif mode == "overflow":
+                return (value + suppressed).encode() + b"x" * (2 * 1024 * 1024)
+            elif mode == "malformed":
+                return (value + suppressed).encode()
+            else:
+                doc = fixtures[f"{signal}_values"]
+                if signal == "traces":
+                    doc = {"tagValues": doc["tagValues"] + [{"type": "string", "value": value}]}
+                else:
+                    key = "names" if signal == "profiles" else "data"
+                    doc = {**doc, key: doc[key] + [value]}
+            return json.dumps(doc).encode()
+
+        class Body(io.BytesIO):
+            status = 200
+            headers = {}
+
+        opener = mock.Mock()
+        def opened(req, timeout):
+            raw_body = body(req)
+            if mode not in {"incomplete", "duplicate_conflicting", "duplicate_repeated"}:
+                return Body(raw_body)
+            import http.client
+
+            class Socket:
+                def makefile(self, mode):
+                    return io.BytesIO(wire)
+
+            is_metrics = "/cardinality/label_names" in req.full_url
+            declared = len(raw_body) + (100 if mode == "incomplete" and is_metrics else 0)
+            duplicate = b""
+            if mode.startswith("duplicate_") and is_metrics:
+                second = len(raw_body) + (100 if mode == "duplicate_conflicting" else 0)
+                duplicate = b"Content-Length: " + str(second).encode() + b"\r\n"
+            wire = (b"HTTP/1.1 200 OK\r\nContent-Length: " + str(declared).encode()
+                    + b"\r\n" + duplicate + b"\r\n" + raw_body)
+            response = http.client.HTTPResponse(Socket())
+            response.begin()
+            return response
+
+        opener.open.side_effect = opened
+        real_probe = source.probe_all
+        real_runner = scan.run_t2
+        real_hydrate = hydrate.hydrate
+
+        def capture_source(*args, **kwargs):
+            records = real_probe(*args, **kwargs)
+            raw_source.append(json.loads(json.dumps(records)))
+            return records
+
+        def capture_runner(*args):
+            result = real_runner(*args)
+            scans.append(json.loads(json.dumps(result)))
+            return result
+
+        healthy = {STACK["slug"]: {"available": True}}
+        compose_contract = json.loads((pathlib.Path(__file__).parent / "fixtures/compose_inputs.json").read_text())
+        def related_input(name):
+            records = compose_contract.get(name) or {}
+            row = next((r for r in records.values() if isinstance(r, dict) and r.get("available")), None)
+            return {STACK["slug"]: row} if row else healthy
+        gather_names = ["gather_assistant", "gather_insights", "gather_dashboard_inventory",
+            "gather_datasource_query_cost", "gather_adaptive_logs", "gather_adaptive_traces",
+            "gather_public_dashboards", "gather_alert_routing", "gather_slo_inventory",
+            "gather_synthetic_inventory", "gather_irm_integrations", "gather_irm_alert_groups",
+            "gather_ml_jobs", "gather_reports_inventory", "gather_playlists_inventory",
+            "gather_library_panels_inventory", "gather_cloud_accounts", "gather_faro_apps", "gather_signal_inventory"]
+        with tempfile.TemporaryDirectory() as directory, contextlib.ExitStack() as patches:
+            output = pathlib.Path(directory) / "out.json"
+            stdout, stderr = io.StringIO(), io.StringIO()
+            patches.enter_context(mock.patch.dict(os.environ, env, clear=True))
+            patches.enter_context(mock.patch("collector.httpclient._urllib_transport", side_effect=lambda req, timeout: Response(200, body(req), "")))
+            # Real bounded read/byte-cap/redirect handler, fake process-edge opener only.
+            patches.enter_context(mock.patch("urllib.request.build_opener", return_value=opener))
+            patches.enter_context(mock.patch.object(scan.label_risk_src, "probe_all", return_value=healthy))
+            patches.enter_context(mock.patch.object(source, "probe_all", side_effect=capture_source))
+            patches.enter_context(mock.patch.object(scan, "run_t2", side_effect=capture_runner))
+            patches.enter_context(mock.patch.object(scan.plugin_catalog, "fetch_catalogue", return_value={}))
+            for name in gather_names:
+                patches.enter_context(mock.patch.object(scan, name, return_value=(related_input(name.removeprefix("gather_")), [])))
+            patches.enter_context(mock.patch.object(scan, "gather_pdc_networks", return_value=(related_input("pdc_networks"), [])))
+            patches.enter_context(mock.patch.object(scan, "gather_service_accounts", return_value=({STACK["slug"]: {"state": scan.sa_src.OK, "accounts": []}}, [])))
+            patches.enter_context(mock.patch.object(scan, "gather_capability_adoption", return_value=(compose_contract["capability_adoption"], [])))
+            patches.enter_context(mock.patch.object(scan, "gather_loki_config", return_value=({STACK["slug"]: {"limits": {"available": True}, "change_requests": {"available": True}}}, [])))
+            patches.enter_context(mock.patch.object(scan, "load_ratecard", return_value=None))
+            patches.enter_context(mock.patch.object(scan, "assistant_gaps", return_value={}))
+            patches.enter_context(mock.patch.object(hydrate, "hydrate", side_effect=lambda *a, **kw: real_hydrate(*a, loader=lambda *_: None, **kw)))
+            patches.enter_context(mock.patch.object(scan.s3emit, "write_views", side_effect=lambda v, *a, **kw: views.append(v) or []))
+            patches.enter_context(mock.patch.object(scan.s3emit, "write_scan", side_effect=lambda s, **kw: scans.append(json.loads(json.dumps(s))) or []))
+            patches.enter_context(mock.patch.object(scan.mimir.RemoteWriter, "push", side_effect=lambda m: metrics.extend(m) or len(m)))
+            patches.enter_context(mock.patch.object(scan.loki.LokiWriter, "push", side_effect=lambda e: events.extend(e) or len(e)))
+            patches.enter_context(contextlib.redirect_stdout(stdout))
+            patches.enter_context(contextlib.redirect_stderr(stderr))
+            code = scan.main(["--tier", "t2", "--dry-run", "--out", str(output), *extra_args])
+            diagnostic = output.read_text() if output.exists() else ""
+        return {"code": code, "source": raw_source, "scans": scans, "views": views, "metrics": metrics,
+                "events": events, "stdout": stdout.getvalue(), "stderr": stderr.getvalue(),
+                "out": diagnostic, "requests": requests, "value": value, "suppressed": suppressed,
+                "ordinary": ordinary}
+
+    def test_incomplete_http_body_cannot_become_complete_private_input_or_pass(self):
+        from collector import label_rules
+
+        evidence = self.exercise(mode="incomplete")
+        private = evidence["source"][0]
+        self.assertNotIn("label_inventory", evidence["scans"][0]["data"],
+                         "unavailable owner input must be withheld, not persisted as complete")
+        payload = private["synthetic"]["signals"]["metrics"]
+        self.assertEqual(payload["state"], "unavailable")
+        self.assertEqual(payload["data"], "unknown")
+        result = next(r for r in label_rules.evaluate(private)["results"] if r["rule"] == "M_identity")
+        self.assertEqual((result["result"], result["reason"]), ("not_evaluated", "missing_input"))
+        self.assertEqual(evidence["code"], 1)
+        self.assertFalse(evidence["scans"][0]["meta"]["scan_healthy"])
+
+    def test_duplicate_http_lengths_cannot_become_complete_private_input_or_pass(self):
+        from collector import label_rules
+
+        for mode in ("duplicate_conflicting", "duplicate_repeated"):
+            with self.subTest(mode=mode):
+                evidence = self.exercise(mode=mode)
+                private = evidence["source"][0]
+                payload = private["synthetic"]["signals"]["metrics"]
+                self.assertEqual((payload["state"], payload["data"], payload["reason"]),
+                                 ("unavailable", "unknown", "missing_input"))
+                self.assertNotIn("label_inventory", evidence["scans"][0]["data"],
+                                 "ambiguous owner input must be withheld")
+                result = next(r for r in label_rules.evaluate(private)["results"] if r["rule"] == "M_identity")
+                self.assertEqual((result["result"], result["reason"]), ("not_evaluated", "missing_input"))
+                self.assertEqual(evidence["code"], 1)
+                self.assertFalse(evidence["scans"][0]["meta"]["scan_healthy"])
+                for boundary in ("views", "metrics", "events"):
+                    self.assertEqual(evidence[boundary], [])
+                self.assertEqual(evidence["out"], "")
+                for boundary in ("source", "scans", "views", "metrics", "events", "stdout", "stderr", "out"):
+                    self.assertNotIn(evidence["value"], json.dumps(evidence[boundary]), boundary)
+                    self.assertNotIn(evidence["suppressed"], json.dumps(evidence[boundary]), boundary)
+                for boundary in ("views", "metrics", "events", "stdout", "stderr", "out"):
+                    self.assertNotIn(evidence["ordinary"], json.dumps(evidence[boundary]), boundary)
+
+    def test_cli_default_off_performs_no_label_source_calls(self):
+        evidence = self.exercise(enabled=False)
+        self.assertEqual(evidence["code"], 0, evidence["stderr"])
+        self.assertEqual(evidence["source"], [{}])
+        self.assertTrue(all("grafana.com" in r.full_url for r in evidence["requests"]))
+        self.assertNotIn("label_inventory", evidence["scans"][0]["data"])
+        self.assertEqual(evidence["scans"][0]["meta"]["sources"]["label_inventory"]["reason"], "not_selected")
+
+    def test_unique_values_and_minimized_names_absent_at_every_real_cli_public_boundary(self):
+        for mode in ("valid", "malformed", "overflow", "exception"):
+            with self.subTest(mode=mode):
+                evidence = self.exercise(mode=mode)
+                self.assertEqual(evidence["code"], 0 if mode in {"valid", "overflow"} else 1, evidence["stderr"])
+                self.assertTrue(any("/cardinality/label_names" in r.full_url for r in evidence["requests"]))
+                for boundary in ("source", "scans", "views", "metrics", "events", "stdout", "stderr", "out"):
+                    serialized = json.dumps(evidence[boundary])
+                    self.assertNotIn(evidence["value"], serialized, boundary)
+                    self.assertNotIn(evidence["suppressed"], serialized, boundary)
+                # Ordinary names ARE permitted privately, but never public logs/diagnostics/metrics.
+                if mode in {"valid", "overflow"}:
+                    self.assertIn(evidence["ordinary"], json.dumps(evidence["source"]))
+                    self.assertIn(evidence["ordinary"], json.dumps(evidence["scans"][0]["data"]["label_inventory"]))
+                for boundary in ("views", "metrics", "events", "stdout", "stderr", "out"):
+                    self.assertNotIn(evidence["ordinary"], json.dumps(evidence[boundary]), boundary)
+                if evidence["code"] == 0:
+                    self.assertTrue(evidence["out"])
+                    self.assertEqual(evidence["scans"][0]["meta"]["inputs"]["label_inventory"]["schema_version"], 1)
+                else:
+                    self.assertEqual(evidence["out"], "")
+                    self.assertEqual(evidence["events"], [])
+                    self.assertEqual(evidence["metrics"], [])
+                    self.assertIn("REFUSING all S3", evidence["stderr"])
+
+    def test_enabled_source_keeps_limited_publication_refusal_at_every_write(self):
+        from dataclasses import replace
+        evidence = self.exercise(extra_args=("--limit", "1"))
+        self.assertEqual(evidence["code"], 0, evidence["stderr"])
+        candidate = evidence["scans"][0]
+        self.assertIn("label_inventory", candidate["data"])
+        cfg = replace(cfg_for(), dry_run=False, limit=1, label_inventory_enabled=True)
+        with (
+            mock.patch.object(scan, "_verified_ecs_runtime", return_value=True),
+            mock.patch.object(scan, "run_t2", return_value=candidate),
+            mock.patch.object(scan.s3emit, "write_views") as views,
+            mock.patch.object(scan.s3emit, "write_scan") as envelope,
+            mock.patch.object(scan.mimir, "RemoteWriter") as mimir,
+            mock.patch.object(scan.loki, "LokiWriter") as loki,
+            mock.patch.object(scan.carry, "save_state") as carry,
+            contextlib.redirect_stderr(io.StringIO()) as stderr,
+        ):
+            self.assertEqual(scan.run(FakeClient(), cfg, SimpleNamespace(out=None)), 2)
+        self.assertIn("REFUSING all S3, Mimir and Loki writes", stderr.getvalue())
+        for writer in (views, envelope, mimir, loki, carry):
+            writer.assert_not_called()
+
+    def test_source_report_left_joins_signal_coverage_not_any_stack_success(self):
+        payload = {"active": {"signals": {"metrics": {"state": "complete", "reason": "none"},
+            "logs": {"state": "partial", "reason": "truncated"},
+            "traces": {"state": "partial", "reason": "deadline"},
+            "profiles": {"state": "unavailable", "reason": "missing_input"}}},
+            "departed": {"signals": {s: {"state": "complete", "reason": "none"} for s in scan.label_inventory_src.SIGNALS}}}
+        report = scan.label_inventory_source_report([{"slug": "active"}, {"slug": "paused", "status": "paused"}], payload)
+        self.assertEqual((report["expected"], report["available"], report["unit"]), (4, 2, "stack-signals"))
+        self.assertFalse(report["healthy"])
+        self.assertEqual(report["signals"]["logs"]["partial"], 1)
+        self.assertEqual(report["signals"]["traces"]["available"], 0)
+
+
 class ConsoleLoggingTest(unittest.TestCase):
     def test_console_log_is_one_json_line_with_explicit_level_and_message(self):
         stderr = io.StringIO()

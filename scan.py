@@ -63,6 +63,7 @@ from collector.sources import assistant as assistant_src
 from collector.sources import fleet as fleet_src
 from collector.sources import serviceaccounts as sa_src
 from collector.sources import label_risk as label_risk_src
+from collector.sources import label_inventory as label_inventory_src
 from collector.pillars import label_risk as label_risk_pillar
 from collector.sources import loki_config as loki_config_src
 from collector.sources import signal_inventory as signal_inventory_src
@@ -796,6 +797,27 @@ def gather_irm_alert_groups(
     return data, errors
 
 
+def label_inventory_source_report(stacks: list[dict[str, Any]], payload: dict) -> dict:
+    """Coverage in stack-signal units, left-joined to fresh scannable inventory only.
+
+    Bounded partial reads are not complete inventories. No register or exception text
+    reaches the source health record.
+    """
+    live = [s for s in stacks if str(s.get("status", "")).lower() != "paused"]
+    by_signal = {}
+    for signal in label_inventory_src.SIGNALS:
+        rows = {str(s["slug"]): (payload.get(str(s["slug"]), {}).get("signals", {}).get(signal) or {})
+                for s in live}
+        report = source_report(len(live), rows, available=lambda r:
+            r.get("state") in {"complete", "partial"} and r.get("reason") not in {"deadline", "missing_input"})
+        report["partial"] = sum(r.get("state") == "partial" for r in rows.values())
+        by_signal[signal] = report
+    expected = len(live) * len(by_signal)
+    available = sum(r["available"] for r in by_signal.values())
+    report = source_report(expected, {str(n): True for n in range(available)}, available=bool)
+    return {**report, "unit": "stack-signals", "signals": by_signal}
+
+
 def gather_signal_inventory(
     client: ReadOnlyClient, cfg: config.Config, stacks: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], list[str]]:
@@ -1096,7 +1118,7 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         expected_retention_policy=getattr(cfg, "expected_retention_policy", ()),
         fleet_default_scrape_interval_seconds=getattr(
             cfg, "fleet_default_scrape_interval_seconds", 60.0),
-        **inputs,
+        **label_inventory_src.composition_inputs(inputs),
     )
     scan_inputs = prov
 
@@ -1178,6 +1200,12 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     # The source spends at most a quarter of remaining time (and at most 15 minutes), leaving the
     # existing daily inputs their budget. Exhausted/partial reads are explicit, never a clean audit.
     label_risk = label_risk_src.probe_all(client, selected, cfg.cap, concurrency=cfg.concurrency)
+    # Default-off source-only stage: <=900s and <=a quarter of remaining time, after label_risk
+    # and BEFORE gcom detail and every other daily gatherer. Exhaustion is partial/deadline.
+    label_inventory_enabled = getattr(cfg, "label_inventory_enabled", False)
+    label_inventory = label_inventory_src.probe_all(
+        client, selected, cfg.cap, enabled=label_inventory_enabled, concurrency=cfg.concurrency,
+    )
     errors: list[str] = []
     detail = gcom.fetch_all_stack_detail(
         client, cfg, selected, coverage, on_error=lambda slug, msg: errors.append(f"{slug}: {msg}")
@@ -1278,8 +1306,12 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "capability_adoption": capability_adoption,
         "loki_config": loki_config,
         "label_risk": label_risk,
+        **({"label_inventory": label_inventory} if label_inventory_enabled else {}),
     }
     sources = {
+        "label_inventory": (label_inventory_source_report(selected, label_inventory)
+                            if label_inventory_enabled else
+                            {**source_report(0, {}, available=bool), "reason": "not_selected"}),
         "label_risk": source_report(expected, label_risk, available=lambda r: bool(r.get("available"))),
         "stack_detail": source_report(expected, detail, available=lambda _r: True),
         "service_accounts": source_report(
@@ -1433,7 +1465,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         expected_retention_policy=getattr(cfg, "expected_retention_policy", ()),
         fleet_default_scrape_interval_seconds=getattr(
             cfg, "fleet_default_scrape_interval_seconds", 60.0),
-        **inputs,
+        **label_inventory_src.composition_inputs(inputs),
     )
     scan_inputs = prov
 
@@ -1486,7 +1518,7 @@ def run_t3(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         expected_retention_policy=getattr(cfg, "expected_retention_policy", ()),
         fleet_default_scrape_interval_seconds=getattr(
             cfg, "fleet_default_scrape_interval_seconds", 60.0),
-        **inputs,
+        **label_inventory_src.composition_inputs(inputs),
     )
     scan_inputs = prov
 
@@ -1755,7 +1787,8 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
         console_log("info", f"  {uri}")
 
     if args.out:
-        payload = json.dumps(label_risk_pillar.diagnostic_scan(scan), indent=2, default=str)
+        payload = json.dumps(label_inventory_src.diagnostic_scan(
+            label_risk_pillar.diagnostic_scan(scan)), indent=2, default=str)
         with open(args.out, "w") as fh:
             fh.write(payload)
         console_log("info", f"wrote {args.out} ({len(payload):,} bytes)")

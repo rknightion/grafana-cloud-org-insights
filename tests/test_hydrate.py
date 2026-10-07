@@ -174,6 +174,42 @@ class AdaptiveSchemaCompatibilityTest(unittest.TestCase):
                     self.assertFalse(row[" Metric"].startswith("Remediable series"))
 
 
+class LabelInventoryHydrationContract(unittest.TestCase):
+    def test_thirtieth_input_owner_schema_windows_and_no_self_hydration(self):
+        from collector.emit import budget
+        from collector.sources import label_inventory as source
+        from tests.test_label_inventory import SourceContracts, STACK
+        contract = SourceContracts()
+        contract.setUp()
+        payload = {STACK["slug"]: contract.probe()}
+        self.assertEqual(len(hydrate.INPUT_OWNER), 30)
+        self.assertEqual(budget.INPUT, 30)
+        self.assertEqual(hydrate.INPUT_OWNER["label_inventory"], "t2")
+        self.assertEqual(hydrate.INPUT_SCHEMA_VERSION["label_inventory"], 1)
+        owner = _scan("t2", "label_inventory", payload)
+        owner["meta"]["inputs"] = {"label_inventory": {"schema_version": 1}}
+        for tier in ("t1", "t3", "t4"):
+            with self.subTest(tier=tier):
+                inputs, prov = hydrate.hydrate(tier, {}, now=NOW, loader=_loader(t2=owner))
+                self.assertEqual(inputs["label_inventory"], payload)
+                self.assertTrue(prov.satisfied("label_inventory"))
+                self.assertEqual(prov["label_inventory"]["schema_version"], 1)
+                self.assertNotIn("label_inventory", source.composition_inputs(inputs),
+                                 "source-only stage cannot call a not-yet-shipped consumer")
+                windows = {s: p["window"] for s, p in inputs["label_inventory"][STACK["slug"]]["signals"].items()}
+                self.assertEqual(windows, {"metrics": "head", "logs": "24h", "traces": "24h", "profiles": "24h"})
+        inputs, prov = hydrate.hydrate("t2", {}, now=NOW, loader=_loader(t2=owner))
+        self.assertNotIn("label_inventory", inputs)
+        self.assertFalse(prov.satisfied("label_inventory"), "a disabled or failed owner cannot revive last run")
+        inputs, prov = hydrate.hydrate("t2", {"label_inventory": payload}, now=NOW, loader=_loader())
+        self.assertEqual(inputs["label_inventory"], payload)
+        self.assertEqual(prov["label_inventory"]["source"], "own")
+        self.assertEqual(prov["label_inventory"]["schema_version"], 1)
+        provenance_metrics = hydrate.report_metrics(prov, "t2")
+        self.assertEqual(len([m for m in provenance_metrics if m[1]["input"] == "label_inventory"]), 2)
+        self.assertNotIn("request_id", json.dumps(provenance_metrics))
+
+
 class InputSchemaVersionTest(unittest.TestCase):
     def test_every_own_input_has_an_integer_writer_version(self):
         self.assertEqual(set(hydrate.INPUT_SCHEMA_VERSION), set(hydrate.INPUT_OWNER))
@@ -555,6 +591,12 @@ class ViewInputsAreDerivedNotAssumed(unittest.TestCase):
             raise unittest.SkipTest(
                 f"{cls.fixture} absent - regenerate with bin/make_compose_fixture.py")
         cls.data = json.loads(cls.fixture.read_text())
+        # The source-only stage has no pillar yet. Include its REAL synthetic source envelope
+        # in the derivation universe and use the same composition fence as every tier runner.
+        from tests.test_label_inventory import SourceContracts
+        contract = SourceContracts()
+        contract.setUp()
+        cls.data["label_inventory"] = {cls.data["stacks"][0]["slug"]: contract.probe()}
 
     def _build(self, subset):
         stacks = self.data["stacks"]
@@ -567,7 +609,8 @@ class ViewInputsAreDerivedNotAssumed(unittest.TestCase):
         # Every subset must see one instant. Several views contain age/recency values, so allowing
         # each composition to call the wall clock can invent a dependency when the loop crosses a
         # bucket boundary.
-        _, views, _ = compose.build_all(stacks, cov, now=NOW, **kw)
+        from collector.sources import label_inventory as source
+        _, views, _ = compose.build_all(stacks, cov, now=NOW, **source.composition_inputs(kw))
         return {n: json.dumps(r, default=str, sort_keys=True) for n, r in views.items()}
 
     def test_derivation_does_not_depend_on_the_wall_clock(self):

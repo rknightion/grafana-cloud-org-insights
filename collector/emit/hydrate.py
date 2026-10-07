@@ -139,6 +139,9 @@ INPUT_OWNER: dict[str, str] = {
     "library_panels_inventory": "t2",
     # Bounded classified label matches. Clear values stay in this private input and S3-only risk views.
     "label_risk": "t2",
+    # Private minimized names/counts, default-off. The source stage stores this for the later pillar;
+    # scan excludes it from composition until that consumer ships. Each signal records head or 24h.
+    "label_inventory": "t2",
 }
 
 # Per-input writer version and highest version this consumer understands. Version 1 introduces the

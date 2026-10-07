@@ -1132,9 +1132,18 @@ class EnvelopePersistenceTest(unittest.TestCase):
 
         available = ({"alpha": {"available": True}}, [])
         service_accounts = ({"alpha": {"state": "ok", "accounts": []}}, [])
+        # This contract intentionally enables all T2 inputs. The new source is default-off;
+        # mock its frozen private envelope explicitly rather than changing the persistence assertion.
+        label_inventory = {"alpha": {"schema_version": 1, "signals": {
+            signal: {"data": "unknown", "state": "partial", "reason": "truncated",
+                     "window": "head" if signal == "metrics" else "24h",
+                     "register": [], "register_truncated": 0, "inputs": {}}
+            for signal in ("metrics", "logs", "traces", "profiles")
+        }}}
         client = SimpleNamespace(attempts=SimpleNamespace(requests=0, retries=0))
         cfg = SimpleNamespace(
             tier="t2", stack=None, limit=None, concurrency=1, cap="read", org_id="1",
+            label_inventory_enabled=True,
         )
         with (
             mock.patch.object(scan.gcom, "fetch_inventory", return_value=stacks),
@@ -1155,6 +1164,7 @@ class EnvelopePersistenceTest(unittest.TestCase):
                 synthetic_reads_enabled=mock.Mock(return_value=True)),
             mock.patch.object(scan, "gather_signal_inventory", return_value=available),
             mock.patch.object(scan.label_risk_src, "probe_all", return_value=available[0]),
+            mock.patch.object(scan.label_inventory_src, "probe_all", return_value=label_inventory),
             mock.patch.object(
                 scan, "gather_capability_adoption",
                 return_value=({"available": True, "values": {}}, []),

@@ -114,6 +114,8 @@ def build_all(
     library_panels_inventory: dict[str, Any] | None = None,
     loki_config: dict[str, Any] | None = None,
     label_risk: dict[str, Any] | None = None,
+    # Source-only private hydration seam. Accept additive plumbing without changing any pillar output.
+    label_inventory: dict[str, Any] | None = None,
     expected_retention_policy: tuple[dict[str, str], ...] = (),
     fleet_default_scrape_interval_seconds: float = 60.0,
     score_weights: dict[str, float] | None = None,

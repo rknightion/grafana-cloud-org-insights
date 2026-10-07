@@ -1,0 +1,10 @@
+{
+  "provenance": "Synthetic shapes from the accepted C1 summary and existing four-signal label-risk contracts, not live measurements or copied identities.",
+  "metrics_names": {"label_values_count_total": 205, "label_names_count": 3, "cardinality": [{"label_name": "job", "label_values_count": 2}, {"label_name": "request_id", "label_values_count": 200}, {"label_name": "cluster", "label_values_count": 3}]},
+  "logs_names": {"status": "success", "data": ["service_name", "request_id", "cluster"]},
+  "logs_values": {"status": "success", "data": ["orders", "550e8400-e29b-41d4-a716-446655440000", "0123456789abcdef0123456789abcdef", "1700000000", "https://example.test/orders/123456"]},
+  "traces_names": {"scopes": [{"name": "resource", "tags": ["service.name", "cluster"]}, {"name": "span", "tags": ["request_id"]}, {"name": "intrinsic", "tags": ["name", "duration"]}]},
+  "traces_values": {"tagValues": [{"type": "string", "value": "orders"}, {"type": "string", "value": "550e8400-e29b-41d4-a716-446655440000"}]},
+  "profiles_names": {"names": ["service_name", "request_id", "cluster"]},
+  "profiles_values": {"names": ["orders", "550e8400-e29b-41d4-a716-446655440000"]}
+}

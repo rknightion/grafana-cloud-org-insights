@@ -121,6 +121,7 @@ WRITER_SCOPES = ("metrics:write", "logs:write")
 # consequence of drift is the coverage alert firing for ever on a stack we were asked to leave alone.
 OPT_OUT_ENV = "GCINSIGHT_OPT_OUT"
 DASHBOARD_DETAIL_ENV = "GCINSIGHT_DASHBOARD_DETAIL_ENABLED"
+LABEL_INVENTORY_ENV = "GCINSIGHT_LABEL_INVENTORY_ENABLED"
 RETENTION_POLICY_ENV = "GCINSIGHT_EXPECTED_RETENTION_POLICY"
 # The organisation's expected scrape cadence. A Fleet Management pipeline scraping faster than this raises
 # DPM and is published as a finding (GCI-0046). Policy, not inventory, so it is a tunable.
@@ -197,6 +198,7 @@ class Config:
     opt_out: tuple[str, ...] = ()
     coverage_score_weights: dict[str, float] | None = None
     dashboard_detail_enabled: bool = False
+    label_inventory_enabled: bool = False
     expected_retention_policy: tuple[dict[str, str], ...] = ()
     fleet_default_scrape_interval_seconds: float = FLEET_SCRAPE_INTERVAL_DEFAULT_SECONDS
 
@@ -221,6 +223,7 @@ class Config:
             "opt_out": list(self.opt_out),
             "coverage_score_weights": self.coverage_score_weights,
             "dashboard_detail_enabled": self.dashboard_detail_enabled,
+            "label_inventory_enabled": self.label_inventory_enabled,
             # Selectors can contain customer label names and values. Count the policy, never log it.
             "expected_retention_policy_count": len(self.expected_retention_policy),
             "fleet_default_scrape_interval_seconds": self.fleet_default_scrape_interval_seconds,
@@ -273,6 +276,7 @@ def load(
         opt_out=tuple(s.strip() for s in os.environ.get(OPT_OUT_ENV, "").split(",") if s.strip()),
         coverage_score_weights=score_weights,
         dashboard_detail_enabled=_optional_bool(DASHBOARD_DETAIL_ENV),
+        label_inventory_enabled=_optional_bool(LABEL_INVENTORY_ENV),
         expected_retention_policy=_retention_policy(),
         fleet_default_scrape_interval_seconds=_fleet_scrape_interval(),
     )
