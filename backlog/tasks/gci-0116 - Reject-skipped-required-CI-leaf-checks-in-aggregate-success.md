@@ -1,9 +1,10 @@
 ---
 id: GCI-0116
 title: Reject skipped required CI leaf checks in aggregate success
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-10-06 11:19'
+updated_date: '2026-10-07 01:19'
 labels:
   - ci
   - owner-decision
@@ -31,3 +32,9 @@ The guarded loop13 release review found that the existing CI aggregate rejects f
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Fail-first bounded aggregate negative control; require success for all required leaves; local validators, CodeRabbit and independent guarded review before landing.
+<!-- SECTION:PLAN:END -->
