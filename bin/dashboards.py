@@ -5377,8 +5377,23 @@ def verify_persisted(uid: str, expected: dict, resource: dict) -> None:
                 query_spec = inner["spec"]
                 if query_spec.get("parser") != "backend":
                     raise ValueError(f"Infinity query in {name!r} is not using the backend parser")
-                if query_spec.get("root_selector") != "rows":
-                    raise ValueError(f"Infinity query in {name!r} has no rows root_selector")
+                expected_inner = expected_query
+                for field in ("spec", "query", "spec"):
+                    expected_inner = (expected_inner.get(field)
+                                      if isinstance(expected_inner, dict) else None)
+                if not isinstance(expected_inner, dict):
+                    raise ValueError(f"expected Infinity query in {name!r} has no query spec")
+                expected_query_spec = expected_inner
+                # Selectors belong to the authored query contract: ordinary tables use rows,
+                # while metadata helpers use JSONata. This checks preservation, not validity
+                # of arbitrary expressions; the exact subset guard below still pins both.
+                for contract, candidate in (("authored", expected_query_spec),
+                                            ("persisted", query_spec)):
+                    selector = candidate.get("root_selector")
+                    if not isinstance(selector, str) or not selector.strip():
+                        raise ValueError(
+                            f"Infinity query in {name!r} has no nonempty {contract} root_selector"
+                        )
                 columns = query_spec.get("columns")
                 if not isinstance(columns, list) or not columns:
                     raise ValueError(f"Infinity query in {name!r} has no explicit columns")

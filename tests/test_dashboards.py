@@ -2028,10 +2028,10 @@ class CrossLinkShapeTest(unittest.TestCase):
 
 
 class PersistedDashboardVerificationTest(unittest.TestCase):
-    def _spec(self, *, with_infinity=False, links=()):
-        import bin.dashboards as dash
-
-        if with_infinity:
+    def _spec(self, *, with_infinity=False, with_metadata=False, links=()):
+        if with_metadata:
+            panel = build.rules_coverage_panel("Neutral title", "cost_summary", "infinity")
+        elif with_infinity:
             query = build.data_query(build.INFINITY_TYPE, "infinity", {
                 "parser": "backend", "root_selector": "rows",
                 "columns": [{"selector": " Stack", "text": "Stack", "type": "string"}],
@@ -2055,6 +2055,12 @@ class PersistedDashboardVerificationTest(unittest.TestCase):
     def test_valid_persisted_envelopes_pass(self):
         import bin.dashboards as dash
         spec = self._spec(with_infinity=True, links=build.cross_links("gcinsight-estate"))
+        dash.verify_persisted("uid", spec, self._resource("uid", spec))
+
+    def test_real_metadata_helper_under_neutral_element_passes(self):
+        import bin.dashboards as dash
+
+        spec = self._spec(with_metadata=True)
         dash.verify_persisted("uid", spec, self._resource("uid", spec))
 
     def test_a_persisted_flat_link_losing_its_title_is_refused(self):
@@ -2091,6 +2097,9 @@ class PersistedDashboardVerificationTest(unittest.TestCase):
                 "datasource", {"name": "wrong-uid"}
             ),
             "group": lambda query: query.__setitem__("group", "prometheus"),
+            "parser": lambda query: query["spec"].__setitem__("parser", "frontend"),
+            "root_selector": lambda query: query["spec"].__setitem__("root_selector", "meta"),
+            "envelope": lambda query: query.__setitem__("kind", "WrongQuery"),
         }
         for label, mutate in mutations.items():
             with self.subTest(label=label):
@@ -2099,8 +2108,52 @@ class PersistedDashboardVerificationTest(unittest.TestCase):
                 query = saved["spec"]["elements"]["panel"]["spec"]["data"]["spec"] \
                     ["queries"][0]["spec"]["query"]
                 mutate(query)
-                with self.assertRaisesRegex(ValueError, "query"):
+                with self.assertRaisesRegex(ValueError, "query|DataQuery"):
                     dash.verify_persisted("uid", spec, saved)
+
+    def test_malformed_authored_query_envelope_is_refused(self):
+        import copy
+        import bin.dashboards as dash
+
+        spec = self._spec(with_infinity=True)
+        saved = copy.deepcopy(self._resource("uid", spec))
+        spec["spec"]["elements"]["panel"]["spec"]["data"]["spec"]["queries"][0] \
+            ["spec"]["query"] = None
+        with self.assertRaisesRegex(ValueError, "expected Infinity query.*no query spec"):
+            dash.verify_persisted("uid", spec, saved)
+
+    def test_metadata_selector_change_is_refused(self):
+        import copy
+        import bin.dashboards as dash
+
+        spec = self._spec(with_metadata=True)
+        saved = copy.deepcopy(self._resource("uid", spec))
+        saved["spec"]["elements"]["panel"]["spec"]["data"]["spec"]["queries"][0] \
+            ["spec"]["query"]["spec"]["root_selector"] = "rows"
+        with self.assertRaisesRegex(ValueError, "root_selector.*changed"):
+            dash.verify_persisted("uid", spec, saved)
+
+    def test_missing_blank_or_non_string_selectors_are_refused(self):
+        import copy
+        import bin.dashboards as dash
+
+        # Check both boundaries: even an identically persisted invalid authored selector is refused.
+        for boundary in ("authored", "persisted"):
+            for label, value in (("missing", None), ("blank", " \t"), ("non-string", 7)):
+                with self.subTest(boundary=boundary, selector=label):
+                    spec = self._spec(with_infinity=True)
+                    saved = copy.deepcopy(self._resource("uid", spec))
+                    target = spec if boundary == "authored" else saved
+                    query_spec = target["spec"]["elements"]["panel"]["spec"]["data"] \
+                        ["spec"]["queries"][0]["spec"]["query"]["spec"]
+                    if label == "missing":
+                        query_spec.pop("root_selector")
+                    else:
+                        query_spec["root_selector"] = value
+                    if boundary == "authored":
+                        saved = copy.deepcopy(self._resource("uid", spec))
+                    with self.assertRaisesRegex(ValueError, "root_selector"):
+                        dash.verify_persisted("uid", spec, saved)
 
     def test_authored_layout_placement_cannot_disappear_on_read_back(self):
         import copy
@@ -2161,21 +2214,31 @@ class PersistedDashboardVerificationTest(unittest.TestCase):
     def test_publish_reads_back_and_verifies_before_reporting_success(self):
         from unittest import mock
         import bin.dashboards as dash
-        spec = self._spec()
-        calls = []
+        import copy
 
-        def fake_api(method, path, token, body=None):
-            calls.append((method, path, body))
-            if method == "GET" and len([c for c in calls if c[0] == "GET"]) == 1:
-                return 404, {}
-            if method == "POST":
-                return 201, {}
-            return 200, self._resource("uid", spec)
+        for contract in ("ordinary", "metadata"):
+            with self.subTest(contract=contract):
+                spec = self._spec(with_infinity=contract == "ordinary",
+                                  with_metadata=contract == "metadata")
+                calls = []
+                saved = copy.deepcopy(self._resource("uid", spec))
 
-        with mock.patch.object(dash, "_api", side_effect=fake_api):
-            code, _body = dash.publish("uid", spec, "folder", "token")
-        self.assertEqual(code, 201)
-        self.assertEqual([method for method, _path, _body in calls], ["GET", "POST", "GET"])
+                def fake_api(method, path, token, body=None):
+                    calls.append((method, path, body))
+                    if method == "GET" and len([c for c in calls if c[0] == "GET"]) == 1:
+                        return 404, {}
+                    if method == "POST":
+                        return 201, {}
+                    return 200, saved
+
+                with mock.patch.object(dash, "_api", side_effect=fake_api):
+                    code, response = dash.publish("uid", spec, "folder", "token")
+                self.assertEqual(code, 201, response)
+                self.assertEqual(response, saved)
+                self.assertEqual(calls[1][2]["spec"], spec["spec"])
+                self.assertEqual(saved["spec"], spec["spec"])
+                self.assertEqual([method for method, _path, _body in calls],
+                                 ["GET", "POST", "GET"])
 
 
 class EveryPanelExplainsItselfTest(unittest.TestCase):
