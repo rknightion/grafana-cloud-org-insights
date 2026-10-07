@@ -86,8 +86,9 @@ FINDING_KIND = 18
 # Cardinality follows `len(hydrate.INPUT_OWNER)`; the test below the catalogue re-derives it so adding an
 # input cannot silently leave this declaration stale.
 INPUT = 30
-# Assistant's chat taxonomy (pillars/ai.py). Declared at 8 x 8 = 64 to leave room for product additions
-# without an unplanned series jump. Estate-wide ONLY; the per-stack cross product is a view.
+# Planning capacity, NOT upstream enums. Assistant metric projections currently use seven
+# categories and eight surfaces, including other; the category slot left over is unnamed.
+# Estate-wide ONLY; the per-stack cross product is a view.
 CATEGORY = 8
 SURFACE = 8
 GRAFANA_SURFACE = 8  # closed `data-request.source` mapping in sources.usage_insights
@@ -126,7 +127,7 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("gcinsight_scan_stacks_scanned", "scan", {"tier": TIER}),
     MetricSpec("gcinsight_scan_coverage_ratio", "scan", {"tier": TIER}),
     MetricSpec("gcinsight_scan_stacks_failed", "scan", {"tier": TIER, "reason": 8},
-               note="planning capacity only; actual exception-class reason vocabulary remains UNKNOWN"),
+               note="fixed publication projection plus other; 8-slot capacity is not an exception taxonomy"),
     MetricSpec("gcinsight_scan_stacks_skipped", "scan", {"tier": TIER, "reason": 3},
                note="runtime reasons paused / unavailable, with a source-backed tier/reason relation"),
     MetricSpec("gcinsight_scan_completed_timestamp_seconds", "scan", {"tier": TIER},
@@ -542,12 +543,11 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                     "slack). Absent where nothing was categorised. Exists in no other datasource"),
 
     MetricSpec("gcinsight_ai_estate_messages", "I", {"category": CATEGORY, "surface": SURFACE},
-               note="estate-wide category x surface, NO `stack` label  -  the per-stack cross product "
-                    "belongs in the existing `ai_category_surface` view"),
+               note="fixed category/surface projections plus other, summed after projection; NO `stack` "
+                    "label. Original per-stack names remain in `ai_category_surface`"),
     MetricSpec("gcinsight_ai_estate_category_combos", "I",
-               note="how many category x surface combinations are in use. A drift detector: this rising "
-                    "is Assistant adding to its taxonomy, and it explains a series increase before "
-                    "somebody has to go looking for one"),
+               note="unprojected category x surface combination count; upstream drift remains visible "
+                    "even when new names collapse into other rather than creating metric series"),
     MetricSpec("gcinsight_ai_estate_messages_total", "I"),
     MetricSpec("gcinsight_ai_estate_messages_uncategorised", "I",
                note="messages carrying no category. The honesty metric: no category chart may be "
@@ -715,6 +715,8 @@ def runtime_domains() -> dict[tuple[str, str], RuntimeDomain]:
     checked against producer source/output. Open upstream text remains UNKNOWN.
     """
     from collector import label_cardinality, observability_score
+    from collector.sources import assistant
+    from scan import SCAN_FAILURE_REASONS
     from collector.emit import hydrate
     from collector.pillars import ai, cost, coverage, findings, insights, labelling, maturity, retention, risk, usage, value
 
@@ -805,13 +807,15 @@ def runtime_domains() -> dict[tuple[str, str], RuntimeDomain]:
     for key, index in (("component", 0), ("reason", 1)):
         fixed("gcinsight_coverage_unscored", key, sorted({p[index] for p in coverage.UNSCORED_PAIRS}),
               "pillars.coverage.UNSCORED_PAIRS -> exact pair emission loop")
-    for key in ("category", "surface"):
-        domains[("gcinsight_ai_estate_messages", key)] = RuntimeDomain(
-            "unknown", "sources.assistant.frame_sums/split_category accepts upstream names -> pillars.ai.build",
-            reserve="8-slot capacity is not proof of upstream vocabulary or combinations; exhaustive proof remains open.")
-    domains[("gcinsight_scan_stacks_failed", "reason")] = RuntimeDomain(
-        "unknown", "sources.gcom/dataplane catch arbitrary Exception -> type(exc).__name__ -> Coverage.as_metrics",
-        reserve="8-slot capacity is not a closed failure vocabulary; exhaustive proof remains open.")
+    for key, values in (("category", assistant.METRIC_CATEGORIES), ("surface", assistant.METRIC_SURFACES)):
+        fixed("gcinsight_ai_estate_messages", key, values,
+              "sources.assistant metric projection -> pillars.ai.build; scan.project_metric_domains "
+              "before carry storage and remote_write",
+              "Projection only; upstream strings remain open/UNKNOWN. Spare capacity is unnamed, not an accepted input.")
+    fixed("gcinsight_scan_stacks_failed", "reason", SCAN_FAILURE_REASONS,
+          "gcom/dataplane exception accounting -> scan.ScanCoverage.as_metrics; "
+          "scan.project_metric_domains before carry storage and remote_write",
+          "Projection only; residual exception taxonomy remains UNKNOWN. Spare capacity is unnamed.")
     expected = {(s.name, key) for s in CATALOGUE if s.store == "mimir" for key in s.labels}
     if domains.keys() != expected:
         raise RuntimeDomainError(f"domain declarations differ: missing={sorted(expected - domains.keys())}, "
@@ -1020,9 +1024,10 @@ def render_table() -> str:
               "Runtime vocabularies below come from producer/source contracts, not capacity integers or "
               "fixture observations. Stack and region remain fresh-inventory discovery domains. Spare "
               "capacity has no extra supported value; current versions are not numerical capacities. "
-              "These offline coverage/conformance helpers are NOT publisher enforcement. UNKNOWN "
-              "domains preclude exhaustive coverage and conformance claims; the existing open-label "
-              "producer/guard risk remains unresolved.", "",
+              "These offline coverage/conformance helpers are NOT publisher enforcement. The Assistant "
+              "category/surface and scan-failure reason projections are separately enforced in producers "
+              "and scan's common publication boundary. Their fixed output contracts do not make upstream "
+              "strings or runtime exception classes exhaustive enums.", "",
               "| Metric | Label | Class | Runtime values | Capacity | Spare capacity / limitation | Witness |",
               "|---|---|---|---|---|---|---|"]
     specs = {s.name: s for s in mimir}
@@ -1032,6 +1037,17 @@ def render_table() -> str:
         spare = (f"{capacity - len(domain.values)} unnamed slot(s). " if domain.kind == "fixed" else "")
         lines.append(f"| `{name}` | `{key}` | {domain.kind} | {values} | {capacity} | "
                      f"{spare}{domain.reserve} | {domain.witness} |")
+    lines += ["", "### Open upstream inputs and residual uncertainty", "",
+              "Assistant category/surface names and scan-failure exception-class names remain open. "
+              "The five documented Assistant categories are Investigate, Observe, Dashboard, Learn and Other; "
+              "Errors and the retained named surfaces reflect existing collector observations, not an "
+              "exhaustive upstream contract. Unseen inputs project to lowercase other. Capitalized Other "
+              "retains its existing category meaning; unknown retains the missing-surface fallback. "
+              "Projected collisions are summed, preserving message/failure counts and existing selectors. "
+              "The raw combination-count gauge and existing Assistant view remain unprojected.", "",
+              "Residual upstream taxonomy is UNKNOWN, separate from the fixed publication domains above. "
+              "No future product name or exception family is inferred from an unnamed capacity slot, "
+              "and neither output conformance nor selector coverage proves upstream completeness.", ""]
     lines += ["", "### Restricted runtime combinations", "",
               "Unscored component/reason and dispatched skip tier/reason relations are exact, "
               "not their Cartesian capacity rectangles. Skip source witnesses are scan.run_t1, "

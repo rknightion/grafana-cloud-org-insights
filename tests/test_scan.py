@@ -43,6 +43,239 @@ class FakeClient:
     attempts = Attempts()
 
 
+class LabelDomainPublicationTest(unittest.TestCase):
+    """Real T3 runner/source accounting/compose and shared publication, with offline I/O."""
+
+    def exercise(self, seed=()):
+        from collector.httpclient import DeadlineExceeded, MethodNotAllowed, ReadOnlyClient, Response
+
+        categories = {
+            "Learn (web)": 2, "Errors (lodestone)": 3,
+            "person-id-canary (tenant-path-canary)": 5,
+            "new-category (new-surface)": 7, "other (other)": 11,
+            "Investigate": 13, "Other (cli)": 17,
+        }
+        def transport(request, timeout):
+            path = request.full_url.split("?")[0]
+            if path.endswith("hero-stats"):
+                body = {"data": {"totalUserMessages": sum(categories.values())}}
+            elif path.endswith("chat-categories"):
+                body = {"data": {"schema": {"fields": [
+                    {"name": name, "type": "number"} for name in categories]},
+                    "data": {"values": [[count] for count in categories.values()]}}}
+            else:
+                body = {"data": {}}
+            return Response(200, json.dumps(body).encode(), request.full_url)
+
+        client = ReadOnlyClient(transport=transport, max_attempts=1)
+        # Exercise the public source parser: names are open even when a metric domain is fixed.
+        assistant = scan.assistant_src.probe_stack(client, "s0", "synthetic")
+        inventory = [{"slug": f"s{i}", "status": "active"} for i in range(100)]
+        errors = [type("NovelError_one", (Exception,), {})("synthetic"),
+                  type("NovelError_two", (Exception,), {})("synthetic"),
+                  type("person@example.test", (Exception,), {})("synthetic"),
+                  RuntimeError("synthetic"), ValueError("synthetic"), KeyError("synthetic"),
+                  MethodNotAllowed("synthetic"), DeadlineExceeded("synthetic"),
+                  json.JSONDecodeError("synthetic", "", 0)]
+        def probe(client, stack, cap):
+            index = int(stack["slug"][1:])
+            if index < len(errors):
+                raise errors[index]
+            return {}
+
+        def hydrated(tier, gathered, **kwargs):
+            return {**gathered, "assistant": {"s0": assistant}}, {}
+
+        saved, published, wire = [], [], []
+        real_push, real_runner = scan.mimir.RemoteWriter.push, scan.run_t3
+        def runner(client, cfg):
+            result = real_runner(client, cfg)
+            result["_emit"]["metrics"].extend(seed)
+            return result
+        def post(request, timeout):
+            self.assertEqual(request.full_url, "https://mimir.invalid/api/prom/push")
+            self.assertEqual(request.method, "POST")
+            wire.append(scan.mimir.snappy_decompress(request.data))
+            response = mock.MagicMock()
+            response.__enter__.return_value.status = 204
+            return response
+        def save(metrics, *args, **kwargs):
+            saved.extend(metrics)
+            return "offline carry sink"
+        def push(writer, metrics):
+            published.extend(metrics)
+            # Real writer validation, externalization, protobuf and snappy; fake only its HTTP sink.
+            return real_push(writer, metrics)
+
+        from dataclasses import replace
+        cfg = replace(cfg_for("t3"), dry_run=False)
+        with (
+            mock.patch.object(scan, "_verified_ecs_runtime", return_value=True),
+            mock.patch.object(scan, "run_t3", side_effect=runner),
+            mock.patch.object(scan.gcom, "fetch_inventory", return_value=inventory),
+            mock.patch.object(scan.dataplane, "probe_stack", side_effect=probe),
+            mock.patch.object(scan.hydrate, "hydrate", side_effect=hydrated),
+            mock.patch.object(scan, "load_ratecard", return_value=None),
+            mock.patch.object(scan, "assistant_gaps", return_value={}),
+            mock.patch.object(scan.carry, "save_state", side_effect=save),
+            mock.patch.object(scan.s3emit, "write_views", return_value=[]),
+            mock.patch.object(scan.s3emit, "write_scan", return_value=[]),
+            mock.patch.object(scan.mimir.RemoteWriter, "push", autospec=True, side_effect=push),
+            mock.patch.object(scan.loki.LokiWriter, "push", return_value=0),
+            mock.patch("urllib.request.urlopen", side_effect=post),
+            mock.patch("socket.socket.connect", side_effect=AssertionError("no network")),
+            mock.patch.object(subprocess, "run", side_effect=AssertionError("no subprocess")),
+            contextlib.redirect_stdout(io.StringIO()),
+            contextlib.redirect_stderr(io.StringIO()),
+        ):
+            self.assertEqual(scan.run(client, cfg, SimpleNamespace(out=None)), 0)
+        self.assertEqual(len(wire), 1, "exercise actual native remote_write transport")
+        for canary in (b"person-id-canary", b"tenant-path-canary", b"NovelError", b"person@example.test"):
+            self.assertNotIn(canary, wire[0])
+        self.assertEqual(assistant["categories"], categories, "projection must not mutate source input")
+        return saved, published, sum(categories.values())
+
+    def assert_sinks(self, saved, published, *, other_messages=23, other_failures=3):
+        from collector.emit import guard
+        expected = {
+            ("Learn", "web"): 2, ("Errors", "lodestone"): 3,
+            ("other", "other"): other_messages, ("Investigate", "unknown"): 13, ("Other", "cli"): 17,
+        }
+        for sink in (saved, published):
+            self.assertTrue(sink, "both carry and push must actually receive samples")
+            guard.check_no_duplicates(sink)
+            ai = {(labels["category"], labels["surface"]): value for name, labels, value in sink
+                  if name == "gcinsight_ai_estate_messages"}
+            self.assertEqual(ai, expected)
+            failed = {labels["reason"]: value for name, labels, value in sink
+                      if name == "gcinsight_scan_stacks_failed"}
+            self.assertEqual(failed, {"RuntimeError": 1, "ValueError": 1, "KeyError": 1,
+                                      "MethodNotAllowed": 1, "DeadlineExceeded": 1,
+                                      "JSONDecodeError": 1, "other": other_failures})
+            self.assertEqual(sum(ai.values()), sum(expected.values()))
+            self.assertNotIn("person-id-canary", json.dumps([labels for _, labels, _ in sink]))
+            self.assertNotIn("NovelError", json.dumps([labels for _, labels, _ in sink]))
+
+    def test_open_inputs_are_projected_and_collisions_summed_before_every_metric_sink(self):
+        saved, published, total = self.exercise()
+        self.assert_sinks(saved, published)
+        self.assertEqual(sum(v for n, _, v in published if n == "gcinsight_ai_estate_messages"), total)
+
+    def test_gcom_open_exception_names_are_bounded_at_the_common_publication_boundary(self):
+        # Use the original public Coverage interface and real gcom exception catcher so this
+        # also proves the common boundary, independently of ScanCoverage's early projection.
+        from collector.coverage import Coverage
+        inventory = [{"slug": f"s{i}"} for i in range(30)]
+        coverage = Coverage("t2", len(inventory))
+        errors = [type("NovelFailure_one", (Exception,), {}),
+                  type("NovelFailure_two", (Exception,), {})]
+        def detail(client, cfg, slug):
+            index = int(slug[1:])
+            if index < len(errors):
+                raise errors[index]("synthetic")
+            return {}
+        with mock.patch.object(scan.gcom, "fetch_stack_detail", side_effect=detail):
+            records = scan.gcom.fetch_all_stack_detail(FakeClient(), cfg_for(), inventory, coverage)
+        result = {"meta": {"tier": "t2", **coverage.as_meta()}, "data": {"stack_detail": records},
+                  "_emit": {"metrics": coverage.as_metrics(), "views": {}, "view_coverage": {}}}
+        published = []
+        def push(metrics):
+            published.extend(metrics)
+            return len(metrics)
+        with (
+            mock.patch.object(scan, "run_t2", return_value=result),
+            mock.patch.object(scan.s3emit, "write_views", return_value=[]),
+            mock.patch.object(scan.s3emit, "write_scan", return_value=[]),
+            mock.patch.object(scan.mimir.RemoteWriter, "push", side_effect=push),
+            mock.patch.object(scan.loki.LokiWriter, "push", return_value=0),
+            mock.patch("socket.socket.connect", side_effect=AssertionError("no network")),
+            mock.patch.object(subprocess, "run", side_effect=AssertionError("no subprocess")),
+            contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()),
+        ):
+            self.assertEqual(scan.run(FakeClient(), cfg_for(), SimpleNamespace(out=None)), 0)
+        failed = [(labels, value) for name, labels, value in published
+                  if name == "gcinsight_scan_stacks_failed"]
+        self.assertEqual(failed, [({"tier": "t2", "reason": "other"}, 2)])
+        self.assertEqual(result["meta"]["failures_by_reason"],
+                         {"NovelFailure_one": 1, "NovelFailure_two": 1},
+                         "raw diagnostics are not the metric domain")
+
+    def test_unrelated_duplicate_series_are_still_refused_at_publication(self):
+        from collector.emit import guard
+        with self.assertRaises(guard.DuplicateSeries):
+            self.exercise([("gcinsight_estate_stacks", {"status": "total"}, 999)])
+
+    def test_t1_live_hydration_deduplicates_legacy_carry_before_native_publication(self):
+        import copy
+        import datetime as dt
+        from dataclasses import replace
+
+        live = [{"slug": "live", "status": "active"}]
+        assistant = scan.assistant_src.summarise_stack(
+            "live", {"totalUserMessages": 7}, {"NovelCategory (NovelSurface)": 7},
+            {}, 1, {}, [])
+        legacy = {"tier": "t3", "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+                  "metrics": [["gcinsight_ai_estate_messages",
+                               {"category": "NovelCategory", "surface": "NovelSurface"}, 7]]}
+        original = copy.deepcopy(legacy)
+        published, wire = [], []
+        real_push = scan.mimir.RemoteWriter.push
+
+        def push(writer, metrics):
+            published.extend(metrics)
+            return real_push(writer, metrics)
+
+        def post(request, timeout):
+            self.assertEqual(request.full_url, "https://mimir.invalid/api/prom/push")
+            wire.append(scan.mimir.snappy_decompress(request.data))
+            response = mock.MagicMock()
+            response.__enter__.return_value.status = 204
+            return response
+
+        with (
+            mock.patch.object(scan, "_verified_ecs_runtime", return_value=True),
+            mock.patch.object(scan.gcom, "fetch_inventory", return_value=live),
+            mock.patch.object(scan.gcom, "fetch_access_policies", return_value=[]),
+            mock.patch.object(scan.gcom, "fetch_org_members", return_value={"state": "ok", "members": []}),
+            mock.patch.object(scan, "gather_fleet", return_value=({}, [])),
+            mock.patch.object(scan.hydrate, "hydrate", return_value=({"assistant": {"live": assistant}}, {})),
+            mock.patch.object(scan, "assistant_gaps", return_value={}),
+            mock.patch.object(scan, "load_ratecard", return_value=None),
+            mock.patch.object(scan.carry, "load_state", return_value=legacy),
+            mock.patch.object(scan.s3emit, "write_views", return_value=[]),
+            mock.patch.object(scan.s3emit, "write_scan", return_value=[]),
+            mock.patch.object(scan.mimir.RemoteWriter, "push", autospec=True, side_effect=push),
+            mock.patch.object(scan.loki.LokiWriter, "push", return_value=0),
+            mock.patch("urllib.request.urlopen", side_effect=post),
+            mock.patch("socket.socket.connect", side_effect=AssertionError("no network")),
+            contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()),
+        ):
+            self.assertEqual(scan.run(FakeClient(), replace(cfg_for("t1"), dry_run=False),
+                                      SimpleNamespace(out=None)), 0)
+        self.assertEqual(len(wire), 1, "exercise native remote_write with real T1 runner/compose/carry")
+        messages = [(labels, value) for name, labels, value in published
+                    if name == "gcinsight_ai_estate_messages"]
+        self.assertEqual(messages, [({"category": "other", "surface": "other"}, 7)])
+        self.assertNotIn(b"NovelCategory", wire[0])
+        self.assertEqual(legacy, original, "projection must not rewrite the retained source state")
+
+    def test_common_boundary_projects_legacy_runner_batches_before_carry_save_and_push(self):
+        # Seed AFTER real source accounting and compose, so early producer/helper projection
+        # cannot make this pass. Old carry state and later producers are fenced by run itself.
+        seed = [
+            ("gcinsight_ai_estate_messages", {"category": "one@example.test", "surface": "path/one"}, 4),
+            ("gcinsight_ai_estate_messages", {"category": "two@example.test", "surface": "path/two"}, 6),
+            ("gcinsight_ai_estate_messages", {"category": "other", "surface": "other"}, 8),
+            ("gcinsight_scan_stacks_failed", {"tier": "t3", "reason": "NovelError_legacy_one"}, 10),
+            ("gcinsight_scan_stacks_failed", {"tier": "t3", "reason": "NovelError_legacy_two"}, 12),
+            ("gcinsight_scan_stacks_failed", {"tier": "t3", "reason": "other"}, 14),
+        ]
+        saved, published, total = self.exercise(seed)
+        self.assert_sinks(saved, published, other_messages=41, other_failures=39)
+        self.assertEqual(sum(v for n, _, v in published if n == "gcinsight_ai_estate_messages"), total + 18)
+        self.assertEqual(seed[0][1]["category"], "one@example.test", "do not mutate the legacy batch")
+
+
 class EnterpriseProcessEdgeTest(unittest.TestCase):
     def test_anonymous_catalogue_once_from_fresh_inventory_attaches_only_live_successes(self):
         from collector.httpclient import ReadOnlyClient, Response

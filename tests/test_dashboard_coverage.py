@@ -293,18 +293,11 @@ def metadata_debt(path):
 ENUM_DEBTS = {}
 ENUM_RESERVES = budget.RUNTIME_RESERVES
 
-# GCI-0121 (declare runtime label domains independently of planning capacity)
-# resolves fixed/current contracts, NOT the source-proven open producer semantics.
-# GCI-0126 (close bounded-label proof for open Assistant/scan failure domains) owns
-# these exact UNKNOWNs. Neither name-only selectors nor helper checks prove them.
-DOMAIN_DEBTS = {
-    (metric, label): ("Source-proven open vocabulary; exhaustive coverage/conformance unavailable.", "GCI-0126")
-    for metric, label in (
-        ("gcinsight_ai_estate_messages", "category"),
-        ("gcinsight_ai_estate_messages", "surface"),
-        ("gcinsight_scan_stacks_failed", "reason"),
-    )
-}
+# GCI-0126 (bound Assistant and scan-failure publication labels) closes the three output-domain
+# debts with fixed projections plus other, proven at real publication seams in test_scan.
+# Upstream strings/classes remain open; output enum coverage never proves upstream completeness.
+# Keep the exact unknown-debt equality assertion below, not a blanket exemption.
+DOMAIN_DEBTS = {}
 # Stronger tab-specific ownership and dimension-preserving enum display are NOT
 # certified by structural placement or selector inclusion. GCI-0122 (define
 # per-tab field/enum display ownership) owns that separate contract.

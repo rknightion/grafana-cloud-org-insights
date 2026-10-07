@@ -742,10 +742,13 @@ class RuntimeSourceWitnessTest(unittest.TestCase):
                     {"NovelCategory (NovelSurface)": 1}, {}, 1, {}, [])
         metrics, _ = ai.build(live, Coverage("t2", 1), {"live": record})
         sample = [m for m in metrics if m[0] == "gcinsight_ai_estate_messages"]
-        self.assertEqual(sample[0][1], {"category": "NovelCategory", "surface": "NovelSurface"})
-        guard.check_all(sample)  # Existing guard acceptance is the residual risk, NOT a new guarantee.
-        self.assertEqual(budget.check_runtime_metrics(sample),
-                         {(sample[0][0], "category"), (sample[0][0], "surface")})
+        self.assertEqual(record["categories"], {"NovelCategory (NovelSurface)": 1},
+                         "upstream/source accounting stays open before metric projection")
+        self.assertEqual(sample, [("gcinsight_ai_estate_messages",
+                                   {"category": "other", "surface": "other"}, 1.0)])
+        guard.check_all(sample)
+        self.assertEqual(budget.check_runtime_metrics(sample), set(),
+                         "fixed output conformance is not an exhaustive upstream taxonomy")
         NovelShortError = type("NovelShortError", (RuntimeError,), {})
         for tier, module, method in (("t2", gcom, "fetch_stack_detail"), ("t3", dataplane, "probe_stack")):
             cov = Coverage(tier, 1)
@@ -756,8 +759,13 @@ class RuntimeSourceWitnessTest(unittest.TestCase):
                     dataplane.probe_all(None, "synthetic", live, cov, concurrency=1)
             failures = [m for m in cov.as_metrics() if m[0] == "gcinsight_scan_stacks_failed"]
             self.assertEqual(failures[0][1]["reason"], "NovelShortError")
-            guard.check_all(failures)
-            self.assertEqual(budget.check_runtime_metrics(failures), {(failures[0][0], "reason")})
+            self.assertEqual(failures[0][2], 1.0)
+            self.assertEqual(cov.as_meta()["failures_by_reason"], {"NovelShortError": 1})
+            guard.check_all(failures)  # Generic guard alone still does not enforce the output domain.
+            with self.assertRaisesRegex(budget.RuntimeDomainError, "unsupported reason"):
+                budget.check_runtime_metrics(failures)
+            # Actual publication projection/collision sums are proven by test_scan's fail-first
+            # witnesses; raw Coverage.as_metrics is deliberately not the publication boundary.
 
     def test_t2_http409_and_t3_paused_source_outputs_match_dispatched_relation(self):
         from types import SimpleNamespace

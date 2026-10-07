@@ -21,9 +21,9 @@ justify itself by needing a trend, an alert or a Grafana time-range interaction.
 Per-stack Assistant *users* is deliberately NOT emitted: `grafanacloud-usage` already carries it against
 `stack_id`, and the estate rule is that a datasource already on the target stack beats a pipeline.
 
-`category` x `surface` is emitted **estate-wide only, with no `stack` label** - 21 real combinations
-today, 64 declared. The per-stack cross product would be 273 x 21 and it is a table, which is exactly
-what `ai_category_surface` is.
+`category` x `surface` is emitted **estate-wide only, with no `stack` label**, projected to fixed
+presentation vocabularies plus `other`. The per-stack breakdown remains a table (`ai_category_surface`)
+with the original parsed names; the combination-count gauge still measures unprojected source drift.
 
 ## Three measured facts a consumer must not paper over
 
@@ -53,7 +53,7 @@ from collector.emit import gapstate
 from collector.sources.assistant import (
     AGENT_ADOPTION_NOT_GATHERED, INVESTIGATION_INVENTORY_NOT_MEASURABLE, NO_CREDENTIAL,
     ORG_USERS_NOT_GATHERED, USER_SCOPED_NOT_MEASURABLE, WATCHERS_NOT_MEASURABLE,
-    WINDOW_DAYS, split_category,
+    WINDOW_DAYS, metric_category, metric_surface, split_category,
 )
 
 # --- Finding thresholds. Each sits at a measured point in the estate's own distribution ------------
@@ -73,11 +73,9 @@ TOKENS_PER_USER_OUTLIER = 25_000_000
 # gradient.
 MACHINE_DRIVEN_SHARE = 0.5
 
-# Label enums, declared in emit/budget.py at these ceilings. Observed 2026-08-20: 6 categories
-# (Dashboard, Investigate, Learn, Observe, Other, Errors) and 6 surfaces (web, automation, a2a, cli,
-# slack, lodestone) in 21 combinations. Both are Assistant's own taxonomy, not anything a tenant authors,
-# so they are bounded - but `gcinsight_ai_estate_category_combos` is emitted so drift is visible
-# rather than silently expanding the series count.
+# Assistant field names are open upstream strings, not closed product enums. Metric projection
+# is defined by sources.assistant.METRIC_CATEGORIES/METRIC_SURFACES; the original names remain
+# in the existing view and the unprojected combination-count gauge still makes drift visible.
 TENANT_KINDS = ("skills", "rules", "automations", "integrations")
 INVESTIGATION_ORIGINS = ("assistant", "user")
 
@@ -240,6 +238,7 @@ def build(
 
     rows: list[dict[str, Any]] = []
     combos: dict[tuple[str, str], int] = {}
+    metric_combos: dict[tuple[str, str], int] = {}
     per_stack_combo: list[dict[str, Any]] = []
     objects: list[dict[str, Any]] = []
     coverage_rows: list[dict[str, Any]] = []
@@ -305,6 +304,8 @@ def build(
         for name, count in record["categories"].items():
             category, surface = split_category(name)
             combos[(category, surface)] = combos.get((category, surface), 0) + int(count)
+            projected = (metric_category(category), metric_surface(surface))
+            metric_combos[projected] = metric_combos.get(projected, 0) + int(count)
             per_stack_combo.append({
                 " Stack": slug, "Category": category, "Surface": surface,
                 "Messages": int(count),
@@ -320,14 +321,14 @@ def build(
          float(max(0, est_messages - est_categorised))),
         ("gcinsight_ai_estate_users", {}, float(est_users)),
         ("gcinsight_ai_estate_tokens", {}, float(est_tokens)),
-        # Series count drift detector: 21 combinations today. A jump means Assistant added a category or
-        # a surface, which is worth noticing before it shows up as an unexplained series increase.
+        # Raw combination drift detector, not the projected metric series count. New upstream
+        # category/surface names still change this gauge even when they collapse into other.
         ("gcinsight_ai_estate_category_combos", {}, float(len(combos))),
         ("gcinsight_ai_estate_stacks", {"kind": "measured"}, float(measured)),
         ("gcinsight_ai_estate_stacks", {"kind": "with_usage"}, float(with_usage)),
         ("gcinsight_ai_estate_stacks", {"kind": "with_tenant_config"}, float(with_config)),
     ]
-    for (category, surface), count in sorted(combos.items()):
+    for (category, surface), count in sorted(metric_combos.items()):
         metrics.append((
             "gcinsight_ai_estate_messages",
             {"category": category, "surface": surface}, float(count),

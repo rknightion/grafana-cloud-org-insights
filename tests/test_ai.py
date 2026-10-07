@@ -146,6 +146,49 @@ class EstateRollupTest(unittest.TestCase):
             self.flat[("gcinsight_ai_estate_investigations", (("kind", "assistant"),))], 3.0)
 
 
+class MetricProjectionTest(unittest.TestCase):
+    def test_projection_sums_collisions_but_preserves_raw_views_drift_and_human_split(self):
+        categories = {
+            "Learn (web)": 2, "Other (cli)": 3, "Errors (lodestone)": 5,
+            "one@example.test (private/path)": 7, "two@example.test (second/path)": 11,
+            "other (other)": 13, "unfamiliar (web)": 17, "Observe (unfamiliar)": 19,
+            "Investigate": 23,
+        }
+        data = {"a": record("a", messages=sum(categories.values()), categories=categories),
+                "b": record("b", messages=29, categories={"novel (unseen)": 29}),
+                "departed": record("departed", categories={"novel (unseen)": 999})}
+        metrics, views = ai.build([stack("a"), stack("b")], coverage(2, 2), data, now=NOW)
+        guard.check_all(metrics)
+        guard.check_no_duplicates(metrics)
+        projected = {(labels["category"], labels["surface"]): count
+                     for name, labels, count in metrics if name == "gcinsight_ai_estate_messages"}
+        self.assertEqual(projected, {
+            ("Learn", "web"): 2, ("Other", "cli"): 3, ("Errors", "lodestone"): 5,
+            ("other", "other"): 60, ("other", "web"): 17,
+            ("Observe", "other"): 19, ("Investigate", "unknown"): 23,
+        })
+        self.assertEqual(sum(projected.values()), sum(categories.values()) + 29)
+        self.assertEqual(next(v for n, _, v in metrics if n == "gcinsight_ai_estate_category_combos"), 10)
+        raw = {(r["Category"], r["Surface"]): r["Messages"] for r in views["ai_category_surface"]}
+        self.assertEqual(raw[("one@example.test", "private/path")], 7)
+        self.assertEqual(raw[("novel", "unseen")], 29)
+        self.assertAlmostEqual(sum(v for (_, surface), v in projected.items() if surface != "web")
+                               / sum(projected.values()), (sum(categories.values()) + 29 - 19)
+                               / (sum(categories.values()) + 29))
+        self.assertEqual(data["a"]["categories"], categories)
+
+    def test_all_presentation_values_survive_the_real_emission_loop(self):
+        from collector.sources.assistant import METRIC_CATEGORIES, METRIC_SURFACES
+        categories = {f"{category} ({surface})": 1
+                      for category in METRIC_CATEGORIES for surface in METRIC_SURFACES}
+        metrics, _ = ai.build([stack("a")], coverage(1, 1), {"a": record("a", categories=categories)})
+        emitted = [labels for name, labels, _ in metrics if name == "gcinsight_ai_estate_messages"]
+        self.assertEqual(len(emitted), 56)
+        self.assertEqual({labels["category"] for labels in emitted}, set(METRIC_CATEGORIES))
+        self.assertEqual({labels["surface"] for labels in emitted}, set(METRIC_SURFACES))
+        guard.check_no_duplicates(metrics)
+
+
 class CredentialCoverageTest(unittest.TestCase):
     def setUp(self):
         self.stacks = [stack("ok"), stack("missing"), stack("sleepy", "paused"), stack("declined")]

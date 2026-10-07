@@ -64,10 +64,10 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_stack_fleet_fast_scrape_pipelines` | E | `stack`(271) | 271 | 1 | enabled, reaching Fleet pipelines scraping faster than the default interval. Per stack because the alert names the stack and remediation is a trend; ABSENT where Fleet was not read or the payload predates the interval parser |
 | `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(30) | 120 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
 | `gcinsight_input_available` | scan | `tier`(4), `input`(30) | 120 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
-| `gcinsight_ai_estate_messages` | I | `category`(8), `surface`(8) | 64 | 1 | estate-wide category x surface, NO `stack` label  -  the per-stack cross product belongs in the existing `ai_category_surface` view |
+| `gcinsight_ai_estate_messages` | I | `category`(8), `surface`(8) | 64 | 1 | fixed category/surface projections plus other, summed after projection; NO `stack` label. Original per-stack names remain in `ai_category_surface` |
 | `gcinsight_coverage_technology_stacks` | K | `kind`(63) | 63 | 1 | one bounded registry enum per technology; value is measured stacks present |
 | `gcinsight_coverage_unscored` | K | `component`(8), `reason`(7) | 56 | 1 | bounded component/reason counts; product absence and unavailable evidence are excluded from the score rather than published as failed coverage |
-| `gcinsight_scan_stacks_failed` | scan | `tier`(4), `reason`(8) | 32 | 1 | planning capacity only; actual exception-class reason vocabulary remains UNKNOWN |
+| `gcinsight_scan_stacks_failed` | scan | `tier`(4), `reason`(8) | 32 | 1 | fixed publication projection plus other; 8-slot capacity is not an exception taxonomy |
 | `gcinsight_findings` | scan | `kind`(18) | 18 | 1 | count per finding kind, derived from the pillar views by pillars/findings.py. A kind the running tier cannot compute is ABSENT, never 0 |
 | `gcinsight_maturity_dimension_mean` | D | `dimension`(9), `version`(2) | 18 | 1 | estate mean per rubric dimension  -  answers 'which dimension is the estate weakest on', which the per-stack view cannot trend without a stack-by-dimension cross product. Mean is over the stacks that SCORED that dimension, excluding the four unscored reasons |
 | `gcinsight_dashboards_estate_surface_requests` | J | `surface`(8), `version`(2) | 16 | 1 | daily query-request trend by the closed Grafana surface enum; point-in-time per-stack detail stays in insights_surface_usage |
@@ -125,7 +125,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_dashboards_estate_views` | J | `version`(2) | 2 | 1 |  |
 | `gcinsight_estate_test_leftover_stacks` | A | `kind`(2) | 2 | 1 | idle vs billing  -  conflating them produced a bogus saving once already |
 | `gcinsight_risk_service_accounts_total` | E | `kind`(2) | 2 | 1 | extsvc (auto-provisioned) vs custom |
-| `gcinsight_ai_estate_category_combos` | I |  -  | 1 | 1 | how many category x surface combinations are in use. A drift detector: this rising is Assistant adding to its taxonomy, and it explains a series increase before somebody has to go looking for one |
+| `gcinsight_ai_estate_category_combos` | I |  -  | 1 | 1 | unprojected category x surface combination count; upstream drift remains visible even when new names collapse into other rather than creating metric series |
 | `gcinsight_ai_estate_messages_total` | I |  -  | 1 | 1 |  |
 | `gcinsight_ai_estate_messages_uncategorised` | I |  -  | 1 | 1 | messages carrying no category. The honesty metric: no category chart may be normalised to total messages |
 | `gcinsight_ai_estate_tokens` | I |  -  | 1 | 1 |  |
@@ -260,15 +260,15 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 
 ## Runtime label contracts
 
-Runtime vocabularies below come from producer/source contracts, not capacity integers or fixture observations. Stack and region remain fresh-inventory discovery domains. Spare capacity has no extra supported value; current versions are not numerical capacities. These offline coverage/conformance helpers are NOT publisher enforcement. UNKNOWN domains preclude exhaustive coverage and conformance claims; the existing open-label producer/guard risk remains unresolved.
+Runtime vocabularies below come from producer/source contracts, not capacity integers or fixture observations. Stack and region remain fresh-inventory discovery domains. Spare capacity has no extra supported value; current versions are not numerical capacities. These offline coverage/conformance helpers are NOT publisher enforcement. The Assistant category/surface and scan-failure reason projections are separately enforced in producers and scan's common publication boundary. Their fixed output contracts do not make upstream strings or runtime exception classes exhaustive enums.
 
 | Metric | Label | Class | Runtime values | Capacity | Spare capacity / limitation | Witness |
 |---|---|---|---|---|---|---|
 | `gcinsight_adaptive_recommendations` | `stack` | discovered | Not enumerated | 271 | Planning baseline is not a configured or exhaustive estate roster. | sources.gcom.fetch_inventory -> scan.run_t1/t2/t3 -> live inventory slug left joins; carry.carry_forward drops departed stacks |
 | `gcinsight_adaptive_recommendations` | `status` | fixed | `pending`, `applied` | 2 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | pillars.cost.build literal status sites |
 | `gcinsight_ai_estate_investigations` | `kind` | fixed | `assistant`, `user` | 2 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | pillars.ai.INVESTIGATION_ORIGINS -> build |
-| `gcinsight_ai_estate_messages` | `category` | unknown | Not enumerated | 8 | 8-slot capacity is not proof of upstream vocabulary or combinations; exhaustive proof remains open. | sources.assistant.frame_sums/split_category accepts upstream names -> pillars.ai.build |
-| `gcinsight_ai_estate_messages` | `surface` | unknown | Not enumerated | 8 | 8-slot capacity is not proof of upstream vocabulary or combinations; exhaustive proof remains open. | sources.assistant.frame_sums/split_category accepts upstream names -> pillars.ai.build |
+| `gcinsight_ai_estate_messages` | `category` | fixed | `Investigate`, `Observe`, `Dashboard`, `Learn`, `Other`, `Errors`, `other` | 8 | 1 unnamed slot(s). Projection only; upstream strings remain open/UNKNOWN. Spare capacity is unnamed, not an accepted input. | sources.assistant metric projection -> pillars.ai.build; scan.project_metric_domains before carry storage and remote_write |
+| `gcinsight_ai_estate_messages` | `surface` | fixed | `web`, `cli`, `a2a`, `automation`, `slack`, `lodestone`, `unknown`, `other` | 8 | 0 unnamed slot(s). Projection only; upstream strings remain open/UNKNOWN. Spare capacity is unnamed, not an accepted input. | sources.assistant metric projection -> pillars.ai.build; scan.project_metric_domains before carry storage and remote_write |
 | `gcinsight_ai_estate_stacks` | `kind` | fixed | `measured`, `with_usage`, `with_tenant_config` | 4 | 1 unnamed slot(s). Unused capacity has no supported runtime label value. | pillars.ai.build literal kind sites |
 | `gcinsight_ai_estate_tenant_objects` | `kind` | fixed | `skills`, `rules`, `automations`, `integrations` | 4 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | pillars.ai.TENANT_KINDS -> build |
 | `gcinsight_ai_machine_share` | `stack` | discovered | Not enumerated | 271 | Planning baseline is not a configured or exhaustive estate roster. | sources.gcom.fetch_inventory -> scan.run_t1/t2/t3 -> live inventory slug left joins; carry.carry_forward drops departed stacks |
@@ -364,7 +364,7 @@ Runtime vocabularies below come from producer/source contracts, not capacity int
 | `gcinsight_scan_completed_timestamp_seconds` | `tier` | fixed | `t1`, `t2`, `t3`, `t4` | 4 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | scan.TIERS/run dispatch; run_t4 has only completion/duration; run_t1 alone reports carry; failure accounting is sourced by gcom/dataplane |
 | `gcinsight_scan_coverage_ratio` | `tier` | fixed | `t1`, `t2`, `t3` | 4 | 1 unnamed slot(s). Unused capacity has no supported runtime label value. | scan.TIERS/run dispatch; run_t4 has only completion/duration; run_t1 alone reports carry; failure accounting is sourced by gcom/dataplane |
 | `gcinsight_scan_duration_seconds` | `tier` | fixed | `t1`, `t2`, `t3`, `t4` | 4 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | scan.TIERS/run dispatch; run_t4 has only completion/duration; run_t1 alone reports carry; failure accounting is sourced by gcom/dataplane |
-| `gcinsight_scan_stacks_failed` | `reason` | unknown | Not enumerated | 8 | 8-slot capacity is not a closed failure vocabulary; exhaustive proof remains open. | sources.gcom/dataplane catch arbitrary Exception -> type(exc).__name__ -> Coverage.as_metrics |
+| `gcinsight_scan_stacks_failed` | `reason` | fixed | `RuntimeError`, `KeyError`, `ValueError`, `MethodNotAllowed`, `JSONDecodeError`, `DeadlineExceeded`, `other` | 8 | 1 unnamed slot(s). Projection only; residual exception taxonomy remains UNKNOWN. Spare capacity is unnamed. | gcom/dataplane exception accounting -> scan.ScanCoverage.as_metrics; scan.project_metric_domains before carry storage and remote_write |
 | `gcinsight_scan_stacks_failed` | `tier` | fixed | `t2`, `t3` | 4 | 2 unnamed slot(s). Unused capacity has no supported runtime label value. | scan.TIERS/run dispatch; run_t4 has only completion/duration; run_t1 alone reports carry; failure accounting is sourced by gcom/dataplane |
 | `gcinsight_scan_stacks_scannable` | `tier` | fixed | `t1`, `t2`, `t3` | 4 | 1 unnamed slot(s). Unused capacity has no supported runtime label value. | scan.TIERS/run dispatch; run_t4 has only completion/duration; run_t1 alone reports carry; failure accounting is sourced by gcom/dataplane |
 | `gcinsight_scan_stacks_scanned` | `tier` | fixed | `t1`, `t2`, `t3` | 4 | 1 unnamed slot(s). Unused capacity has no supported runtime label value. | scan.TIERS/run dispatch; run_t4 has only completion/duration; run_t1 alone reports carry; failure accounting is sourced by gcom/dataplane |
@@ -381,6 +381,13 @@ Runtime vocabularies below come from producer/source contracts, not capacity int
 | `gcinsight_usage_users_last_seen_bucket` | `kind` | fixed | `7d`, `30d`, `90d`, `older`, `never` | 5 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | pillars.usage.LAST_SEEN_BUCKETS -> build |
 | `gcinsight_value_adoption_ratio` | `signal` | fixed | `metrics`, `logs`, `traces`, `profiles`, `graphite` | 6 | 1 unnamed slot(s). Unused capacity has no supported runtime label value. | pillars.value imports usage.SIGNAL_FIELDS -> build emission loop |
 | `gcinsight_value_benchmark` | `kind` | fixed | `active_series`, `series_per_billed_user`, `dashboards_per_user`, `stickiness`, `alert_rules`, `admin_share`, `datasource_types`, `signals_in_use`, `maturity_score`, `adaptive_adoption` | 10 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | pillars.value.BENCHMARKS -> build |
+
+### Open upstream inputs and residual uncertainty
+
+Assistant category/surface names and scan-failure exception-class names remain open. The five documented Assistant categories are Investigate, Observe, Dashboard, Learn and Other; Errors and the retained named surfaces reflect existing collector observations, not an exhaustive upstream contract. Unseen inputs project to lowercase other. Capitalized Other retains its existing category meaning; unknown retains the missing-surface fallback. Projected collisions are summed, preserving message/failure counts and existing selectors. The raw combination-count gauge and existing Assistant view remain unprojected.
+
+Residual upstream taxonomy is UNKNOWN, separate from the fixed publication domains above. No future product name or exception family is inferred from an unnamed capacity slot, and neither output conformance nor selector coverage proves upstream completeness.
+
 
 ### Restricted runtime combinations
 

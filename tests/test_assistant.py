@@ -146,6 +146,23 @@ class FrameParsingTest(unittest.TestCase):
 
 
 class CategoryParsingTest(unittest.TestCase):
+    def test_metric_projection_is_distinct_from_open_source_parsing(self):
+        self.assertEqual(A.METRIC_CATEGORIES,
+                         ("Investigate", "Observe", "Dashboard", "Learn", "Other", "Errors", "other"))
+        self.assertEqual(A.METRIC_SURFACES,
+                         ("web", "cli", "a2a", "automation", "slack", "lodestone", "unknown", "other"))
+        for category in A.METRIC_CATEGORIES:
+            self.assertEqual(A.metric_category(category), category)
+        for surface in A.METRIC_SURFACES:
+            self.assertEqual(A.metric_surface(surface), surface)
+        for value in ("novel", "person@example.test", "private/path", "x" * 4096, "", "learn", "WEB"):
+            self.assertEqual(A.metric_category(value), "other")
+            self.assertEqual(A.metric_surface(value), "other")
+        # Parsing and source accounting remain open: projection must not change these facts.
+        self.assertEqual(A.split_category("novel (surface)"), ("novel", "surface"))
+        self.assertEqual(A.split_category("Investigate"), ("Investigate", "unknown"))
+        self.assertEqual(A.machine_share({"novel (web)": 2, "novel (surface)": 3}), 0.6)
+
     def test_every_observed_surface_parses(self):
         for name, expected in (
             ("Dashboard (web)", ("Dashboard", "web")),

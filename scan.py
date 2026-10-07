@@ -31,7 +31,7 @@ import subprocess
 import sys
 import urllib.parse
 import urllib.request
-from typing import Any
+from typing import Any, Iterable
 
 from collector import config, ratecard
 from collector.coverage import FAILURE_ABORT_RATIO, Coverage
@@ -74,6 +74,13 @@ TIERS = ("t1", "t2", "t3", "t4")
 RATECARD_KEY = "config/ratecard.csv"
 # D-LBL12: only label_inventory health uses this floor; shared coverage stays at 0.10 failures.
 LABEL_INVENTORY_FLOOR = 0.80
+# Concrete exception names on the public gcom/data-plane accounting paths, plus a residual
+# bucket. Transport/callback Exception subclasses remain open; this is a metric projection,
+# not an exhaustive runtime exception taxonomy. Capacity in the budget does not enforce it.
+SCAN_FAILURE_REASONS = (
+    "RuntimeError", "KeyError", "ValueError", "MethodNotAllowed", "JSONDecodeError",
+    "DeadlineExceeded", "other",
+)
 LOG_LEVELS = frozenset({"info", "warn", "error"})
 SUMMARY_KEYS = (
     "tier", "generated_at", "org_id", "scan_healthy", "sources_healthy",
@@ -81,6 +88,41 @@ SUMMARY_KEYS = (
     "stacks_skipped", "coverage_ratio", "requests", "retries", "series_emitted",
     "duration_seconds", "mimir_push_failed", "loki_push_failed",
 )
+
+
+def project_metric_domains(
+    metrics: Iterable[tuple[str, dict[str, str], float]],
+) -> list[tuple[str, dict[str, str], float]]:
+    """Bound the open Assistant/failure labels before carry storage and remote_write.
+
+    Handles legacy carry batches as well as newly gathered/hydrated data. Sum collisions
+    AFTER projection: two novel names must not become duplicate differently counted series.
+    Leave other metric families untouched so their duplicate/shape guards stay effective.
+    """
+    out: list[tuple[str, dict[str, str], float]] = []
+    projected: dict[tuple[str, tuple[tuple[str, str], ...]], float] = {}
+    for name, labels, value in metrics:
+        if name == "gcinsight_ai_estate_messages":
+            labels = {**labels,
+                      "category": assistant_src.metric_category(labels["category"]),
+                      "surface": assistant_src.metric_surface(labels["surface"])}
+        elif name == "gcinsight_scan_stacks_failed":
+            reason = labels["reason"]
+            labels = {**labels, "reason": reason if reason in SCAN_FAILURE_REASONS else "other"}
+        else:
+            out.append((name, labels, value))
+            continue
+        key = (name, tuple(sorted(labels.items())))
+        projected[key] = projected.get(key, 0.0) + value
+    out.extend((name, dict(labels), value) for (name, labels), value in sorted(projected.items()))
+    return out
+
+
+class ScanCoverage(Coverage):
+    """Keep raw failure diagnostics/accounting, but bound metrics before composition's guard."""
+
+    def as_metrics(self) -> list[tuple[str, dict[str, str], float]]:
+        return project_metric_domains(super().as_metrics())
 
 
 class RateCardReadFailed(RuntimeError):
@@ -1228,8 +1270,14 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         # The live slug set is the authority on what exists (golden rule: the estate is
         # discovered, never configured). Without it a decommissioned stack's T3 series would be
         # re-stamped as current for up to MAX_CARRY_AGE.
+        # Compare publication identities before deduplication. A legacy unprojected
+        # Assistant series can be the same observation freshly hydrated as other/other;
+        # projecting only the combined output would add that observation twice.
+        metrics = project_metric_domains(metrics)
+        projected_state = ({**state, "metrics": project_metric_domains(state.get("metrics", []))}
+                           if state else state)
         carried, report = carry.carry_forward(
-            metrics, state, live_stacks={str(s['slug']) for s in stacks})
+            metrics, projected_state, live_stacks={str(s['slug']) for s in stacks})
         # These additive Adaptive estate metrics are deliberately absent from live composition
         # unless all required reads are complete. Carry must not undo that coverage decision by
         # re-stamping an older complete estate over today's partial live inventory.
@@ -1289,7 +1337,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         slugs = slugs[: cfg.limit]
 
     selected = [s for s in stacks if str(s["slug"]) in set(slugs)]
-    coverage = Coverage(tier=cfg.tier, total=len(selected))
+    coverage = ScanCoverage(tier=cfg.tier, total=len(selected))
     # Reserve the bounded privacy sample before slower daily gatherers can consume the tier deadline.
     # The source spends at most a quarter of remaining time (and at most 15 minutes), leaving the
     # existing daily inputs their budget. Exhausted/partial reads are explicit, never a clean audit.
@@ -1601,7 +1649,7 @@ def run_t3(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     elif cfg.limit:
         stacks = stacks[: cfg.limit]
 
-    coverage = Coverage(tier=cfg.tier, total=len(stacks))
+    coverage = ScanCoverage(tier=cfg.tier, total=len(stacks))
     errors: list[str] = []
     data = dataplane.probe_all(
         client, cfg.cap, stacks, coverage, concurrency=cfg.concurrency,
@@ -1797,6 +1845,10 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
         )
         return 2
 
+    # The real publication boundary also fences legacy/unprojected carry or runner output.
+    # Do this before the carry-state write, not only immediately before Mimir publication.
+    emit["metrics"] = project_metric_domains(emit["metrics"])
+
     # Persist the accepted T3 batch so T1 can republish it hourly (PLAN 5.3). This MUST live after the
     # common publication-floor decision above. Saving inside `run_t3` let a rejected partial scan replace
     # the carry state before `run()` returned 1; the next healthy T1 then republished the poisoned batch
@@ -1836,6 +1888,7 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
         for name, why in sorted(withheld.items()):
             console_log("warn", f"  WITHHELD {name}: {why}")
 
+    emit["metrics"] = project_metric_domains(emit["metrics"])
     n = guard.check_all(emit["metrics"])
     # The runners' provisional count predates completion, findings and provenance metrics, and T4 has
     # no runner-owned metrics at all. Publish the final guarded count as the common contract.

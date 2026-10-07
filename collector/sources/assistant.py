@@ -204,6 +204,23 @@ def split_category(field_name: str) -> tuple[str, str]:
     return text, "unknown"
 
 
+# Metric presentation only, NOT an upstream enum. Keep the five documented categories and
+# the collector's existing Errors observation; keep its observed surfaces and missing-suffix
+# unknown. New upstream strings remain possible and project to lowercase other. Capitalized
+# Other is the existing product category, distinct from the residual bucket.
+METRIC_CATEGORIES = ("Investigate", "Observe", "Dashboard", "Learn", "Other", "Errors", "other")
+METRIC_SURFACES = ("web", "cli", "a2a", "automation", "slack", "lodestone", "unknown", "other")
+
+
+def metric_category(value: str) -> str:
+    """Exact fixed projection; never admit arbitrary upstream text to a metric label."""
+    return value if value in METRIC_CATEGORIES else "other"
+
+
+def metric_surface(value: str) -> str:
+    return value if value in METRIC_SURFACES else "other"
+
+
 # Surfaces a human drives directly. Everything else is machine-driven - a CLI session, an
 # agent-to-agent call, an automation or a Lodestone run. This is the human-vs-machine split, and it is a
 # signal that exists nowhere in `grafanacloud-usage`.

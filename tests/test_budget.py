@@ -227,8 +227,7 @@ class EveryPillarsEmissionIsDeclaredTest(unittest.TestCase):
 
     def test_composed_samples_conform_without_defining_the_vocabulary(self):
         unresolved = budget.check_runtime_metrics(self.metrics, inventory=self.stacks)
-        self.assertEqual(unresolved, {("gcinsight_ai_estate_messages", "category"),
-                                      ("gcinsight_ai_estate_messages", "surface")})
+        self.assertEqual(unresolved, set())
 
     def test_every_pillar_i_view_is_declared(self):
         """Scoped to Pillar I on purpose, and this is a note about the rest.
@@ -434,17 +433,36 @@ class RuntimeDomainTest(unittest.TestCase):
                 with self.assertRaisesRegex(budget.RuntimeDomainError, name):
                     budget.check_runtime_metrics([(name, labels, 0)], inventory=[{"slug": "live"}])
 
-    def test_unknown_domains_preclude_exhaustive_conformance(self):
-        unknown = {pair for pair, domain in budget.runtime_domains().items() if domain.kind == "unknown"}
-        expected = {("gcinsight_ai_estate_messages", "category"),
-                    ("gcinsight_ai_estate_messages", "surface"),
-                    ("gcinsight_scan_stacks_failed", "reason")}
-        self.assertEqual(unknown, expected)
-        unresolved = budget.check_runtime_metrics([
-            ("gcinsight_ai_estate_messages", {"category": "NovelCategory", "surface": "NovelSurface"}, 1),
+    def test_publication_projections_are_fixed_but_upstream_taxonomy_remains_unknown(self):
+        import scan
+        from collector.sources import assistant
+        domains = budget.runtime_domains()
+        expected = {
+            ("gcinsight_ai_estate_messages", "category"): assistant.METRIC_CATEGORIES,
+            ("gcinsight_ai_estate_messages", "surface"): assistant.METRIC_SURFACES,
+            ("gcinsight_scan_stacks_failed", "reason"): scan.SCAN_FAILURE_REASONS,
+        }
+        for pair, values in expected.items():
+            self.assertEqual(domains[pair].kind, "fixed")
+            self.assertEqual(domains[pair].values, values)
+            self.assertIn("other", values)
+            self.assertIn("UNKNOWN", domains[pair].reserve)
+        self.assertIn("Residual upstream taxonomy is UNKNOWN", budget.render_table())
+        required, unknown = budget.runtime_requirements()
+        self.assertEqual(unknown, set(), "fixed output is not proof of exhaustive upstream inputs")
+        self.assertEqual(sum(name == "gcinsight_ai_estate_messages" for name, _ in required), 7 * 8)
+        self.assertEqual(sum(name == "gcinsight_scan_stacks_failed" for name, _ in required), 2 * 7)
+        self.assertEqual(budget.check_runtime_metrics([
+            ("gcinsight_ai_estate_messages", {"category": "other", "surface": "other"}, 23),
+            ("gcinsight_scan_stacks_failed", {"tier": "t2", "reason": "other"}, 2),
+        ]), set())
+        for sample in (
+            ("gcinsight_ai_estate_messages", {"category": "NovelCategory", "surface": "web"}, 1),
+            ("gcinsight_ai_estate_messages", {"category": "Learn", "surface": "NovelSurface"}, 1),
             ("gcinsight_scan_stacks_failed", {"tier": "t2", "reason": "NovelShortError"}, 1),
-        ])
-        self.assertEqual(unresolved, expected, "passing open values is NOT exhaustive conformance")
+        ):
+            with self.assertRaises(budget.RuntimeDomainError):
+                budget.check_runtime_metrics([sample])
 
 
     def test_each_fixed_dimension_rejects_unsupported_values_and_shapes(self):
