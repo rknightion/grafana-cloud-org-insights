@@ -309,7 +309,17 @@ class LabelInventoryProcessEdgeTest(unittest.TestCase):
                 if mode in {"valid", "overflow"}:
                     self.assertIn(evidence["ordinary"], json.dumps(evidence["source"]))
                     self.assertIn(evidence["ordinary"], json.dumps(evidence["scans"][0]["data"]["label_inventory"]))
-                for boundary in ("views", "metrics", "events", "stdout", "stderr", "out"):
+                # Shipping permits ordinary names only in the private S3 register, never other views.
+                if mode in {"valid", "overflow"}:
+                    self.assertTrue(evidence["views"], "successful CLI must observe S3 view publication")
+                for view_map in evidence["views"]:
+                    private_register = view_map.get("labelling_label_register", [])
+                    other_views = {name: rows for name, rows in view_map.items()
+                                   if name != "labelling_label_register"}
+                    self.assertNotIn(evidence["ordinary"], json.dumps(other_views), "non-register views")
+                    if mode in {"valid", "overflow"}:
+                        self.assertIn(evidence["ordinary"], json.dumps(private_register))
+                for boundary in ("metrics", "events", "stdout", "stderr", "out"):
                     self.assertNotIn(evidence["ordinary"], json.dumps(evidence[boundary]), boundary)
                 if evidence["code"] == 0:
                     self.assertTrue(evidence["out"])
