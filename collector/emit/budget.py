@@ -23,6 +23,7 @@ rather than leaving a future session to rediscover it.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import itertools
 from typing import Iterable, Literal, Mapping
 
 from collector import identity, technology_registry
@@ -73,10 +74,10 @@ class MetricSpec:
 
 # Cardinality planning assumptions. They never become published estate denominators.
 STACK = 271          # cardinality planning baseline only; never used as a published estate denominator
-REGION = 8           # regionSlug
-TIER = 4             # t1..t4
+REGION = 8           # planning baseline, not a regionSlug vocabulary
+TIER = 4             # capacity; per-metric dispatched populations are declared independently below
 ROLE = 3             # admin/editor/viewer
-SIGNAL = 6           # metrics/logs/traces/profiles/alerts/grafana
+SIGNAL = 6           # shared capacity; producer signal maps define runtime names
 RUBRIC_VERSION = 2   # one live version, plus one during a rubric transition
 PILLAR_J_EPOCHS = 2  # contaminated unversioned history plus the clean v2 epoch during transition
 # Finding kinds in pillars/findings.py SPECS, with headroom for a few more. tests/test_findings.py
@@ -125,9 +126,9 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("gcinsight_scan_stacks_scanned", "scan", {"tier": TIER}),
     MetricSpec("gcinsight_scan_coverage_ratio", "scan", {"tier": TIER}),
     MetricSpec("gcinsight_scan_stacks_failed", "scan", {"tier": TIER, "reason": 8},
-               note="reason is a closed failure vocabulary: http_429, http_5xx, timeout, auth, ..."),
+               note="planning capacity only; actual exception-class reason vocabulary remains UNKNOWN"),
     MetricSpec("gcinsight_scan_stacks_skipped", "scan", {"tier": TIER, "reason": 3},
-               note="paused, unresolvable, out_of_scope"),
+               note="runtime reasons paused / unavailable, with a source-backed tier/reason relation"),
     MetricSpec("gcinsight_scan_completed_timestamp_seconds", "scan", {"tier": TIER},
                note="PLAN 1.8  -  alerting is on ITS AGE, not on exit code"),
     MetricSpec("gcinsight_scan_duration_seconds", "scan", {"tier": TIER}),
@@ -688,6 +689,222 @@ CATALOGUE: tuple[MetricSpec, ...] = (
 )
 
 
+@dataclass(frozen=True)
+class RuntimeDomain:
+    """Vocabulary proof independent of planning capacity; unknown is not conformance.
+
+    These contracts support offline coverage/conformance checks. They are not wired
+    into publication and do not strengthen the publisher's generic label guard.
+    """
+
+    kind: Literal["fixed", "discovered", "unknown"]
+    witness: str
+    values: tuple[str, ...] = ()
+    reserve: str = "Unused capacity has no supported runtime label value."
+
+
+class RuntimeDomainError(ValueError):
+    """A fixed value, relation, metric shape or exact reserve violates its contract."""
+
+
+def runtime_domains() -> dict[tuple[str, str], RuntimeDomain]:
+    """Source-backed runtime vocabularies, never integers or fixture observations.
+
+    Imports are lazy: hydration and producers use the budget indirectly. Public
+    producer constants stay authoritative; literal-site declarations are separately
+    checked against producer source/output. Open upstream text remains UNKNOWN.
+    """
+    from collector import label_cardinality, observability_score
+    from collector.emit import hydrate
+    from collector.pillars import ai, cost, coverage, findings, insights, labelling, maturity, retention, risk, usage, value
+
+    domains: dict[tuple[str, str], RuntimeDomain] = {}
+    tier_values = {
+        **{name: ("t1", "t2", "t3") for name in (
+            "gcinsight_scan_stacks_total", "gcinsight_scan_stacks_scannable", "gcinsight_scan_stacks_scanned",
+            "gcinsight_scan_coverage_ratio", "gcinsight_scan_stacks_skipped",
+            "gcinsight_input_available", "gcinsight_input_age_seconds")},
+        **{name: ("t1", "t2", "t3", "t4") for name in (
+            "gcinsight_scan_completed_timestamp_seconds", "gcinsight_scan_duration_seconds")},
+        **{name: ("t1",) for name in (
+            "gcinsight_carry_forward_series", "gcinsight_carry_forward_age_seconds", "gcinsight_carry_forward_dropped_absent")},
+        "gcinsight_scan_stacks_failed": ("t2", "t3"),
+    }
+
+    def fixed(name, key, values, witness, reserve=None):
+        domains[(name, key)] = RuntimeDomain(
+            "fixed", witness, tuple(map(str, values)),
+            reserve or "Unused capacity has no supported runtime label value.")
+
+    for spec in CATALOGUE:
+        if spec.store != "mimir":
+            continue
+        for key in spec.labels:
+            if key in ("stack", "region"):
+                domains[(spec.name, key)] = RuntimeDomain(
+                    "discovered", "sources.gcom.fetch_inventory -> scan.run_t1/t2/t3 -> live inventory "
+                    + ("slug left joins; carry.carry_forward drops departed stacks" if key == "stack" else
+                       "pillars.estate.build regionSlug union, with unknown fallback"),
+                    reserve="Planning baseline is not a configured or exhaustive estate roster.")
+            elif key == "tier" and spec.name in tier_values:
+                fixed(spec.name, key, tier_values[spec.name], "scan.TIERS/run dispatch; run_t4 has only completion/duration; "
+                      "run_t1 alone reports carry; failure accounting is sourced by gcom/dataplane")
+            elif key == "version" and spec.pillar in ("D", "J", "K"):
+                versions = {"D": (maturity.RUBRIC_VERSION, "pillars.maturity.RUBRIC_VERSION -> build"),
+                            "J": (insights.METRIC_EPOCH, "pillars.insights.METRIC_EPOCH -> final build output seam"),
+                            "K": (observability_score.VERSION, "observability_score.VERSION -> pillars.coverage.build")}
+                version, witness = versions[spec.pillar]
+                fixed(spec.name, key, (version,), witness,
+                      "Contaminated prior history is unversioned, not version=1." if spec.pillar == "J" else
+                      "Transition capacity is unnamed; no historical/future version is invented.")
+
+    declarations = (
+        ("gcinsight_estate_stacks", "status", ("total", "active", "paused"), "pillars.estate.build literal status sites"),
+        ("gcinsight_estate_test_leftover_stacks", "kind", ("idle", "billing"), "pillars.estate.build literal leftover sites"),
+        ("gcinsight_estate_feature_stacks", "kind", ("incident", "machine_learning", "k6"), "pillars.estate.build kind/enabled loop"),
+        ("gcinsight_estate_users_by_role", "role", ("admin", "editor", "viewer"), "pillars.estate.build role/field loop"),
+        ("gcinsight_adaptive_recommendations", "status", ("pending", "applied"), "pillars.cost.build literal status sites"),
+        ("gcinsight_findings", "kind", findings.KINDS, "pillars.findings.SPECS -> derive -> metrics"),
+        ("gcinsight_cost_usage_by_signal", "signal", cost.SIGNAL_USAGE, "pillars.cost.SIGNAL_USAGE -> build emission loop"),
+        ("gcinsight_usage_stacks_by_signal", "signal", usage.SIGNAL_FIELDS, "pillars.usage.SIGNAL_FIELDS -> build emission loop"),
+        ("gcinsight_value_adoption_ratio", "signal", usage.SIGNAL_FIELDS, "pillars.value imports usage.SIGNAL_FIELDS -> build emission loop"),
+        ("gcinsight_usage_users_last_seen_bucket", "kind", usage.LAST_SEEN_BUCKETS, "pillars.usage.LAST_SEEN_BUCKETS -> build"),
+        ("gcinsight_maturity_percentile", "kind", ("median", "p90", "worst"), "pillars.maturity.build percentile literal sites"),
+        ("gcinsight_maturity_stacks_by_tier", "kind", (k for k, _ in maturity.TIERS), "pillars.maturity.TIERS -> build"),
+        ("gcinsight_maturity_dimension_mean", "dimension", (d.key for d in maturity.RUBRIC), "pillars.maturity.RUBRIC -> dimension_means -> build"),
+        ("gcinsight_maturity_unscored", "reason", maturity.UNSCORED_REASONS, "pillars.maturity.UNSCORED_REASONS -> build"),
+        ("gcinsight_risk_org_members_staff_access", "status", risk.ORG_MEMBER_STAFF_ACCESS_STATES, "pillars.risk.ORG_MEMBER_STAFF_ACCESS_STATES -> build"),
+        ("gcinsight_risk_service_accounts_total", "kind", ("extsvc", "custom"), "sources.serviceaccounts.record -> pillars.risk.build"),
+        ("gcinsight_stack_label_cardinality_findings", "kind", label_cardinality.METRIC_KIND.values(), "label_cardinality.METRIC_KIND -> pillars.risk"),
+        ("gcinsight_risk_retention_change_requests", "status", retention.REQUEST_STATUSES, "pillars.retention.REQUEST_STATUSES -> build"),
+        ("gcinsight_value_benchmark", "kind", value.BENCHMARKS, "pillars.value.BENCHMARKS -> build"),
+        ("gcinsight_dashboards_estate_stacks", "kind", ("measured", "with_views", "with_public_dashboards"), "pillars.insights.build literal kind sites"),
+        ("gcinsight_ai_estate_stacks", "kind", ("measured", "with_usage", "with_tenant_config"), "pillars.ai.build literal kind sites"),
+        ("gcinsight_ai_estate_tenant_objects", "kind", ai.TENANT_KINDS, "pillars.ai.TENANT_KINDS -> build"),
+        ("gcinsight_ai_estate_investigations", "kind", ai.INVESTIGATION_ORIGINS, "pillars.ai.INVESTIGATION_ORIGINS -> build"),
+        ("gcinsight_scan_stacks_skipped", "reason", ("paused", "unavailable"), "scan.run_t1; sources.gcom.fetch_all_stack_detail; sources.dataplane.probe_all literal skip sites"),
+        ("gcinsight_labelling_findings", "severity", labelling.SEVERITIES, "pillars.labelling.SEVERITIES -> build"),
+        ("gcinsight_coverage_services_by_depth", "kind", ("1", "2", "3", "4"), "pillars.coverage.build depth_counts range(1,5) -> emission"),
+        ("gcinsight_coverage_services_by_signal", "kind", ("metrics", "logs", "traces", "profiles"), "pillars.coverage.build signal_counts -> emission"),
+        ("gcinsight_coverage_technology_stacks", "kind", (e.key for e in technology_registry.REGISTRY.entries), "technology_registry.REGISTRY.entries -> pillars.coverage.build"),
+        ("gcinsight_coverage_instrumentation_stacks", "kind", ("sdk", "sdk_equivalent"), "pillars.coverage.build instrumentation_stacks -> emission"),
+        ("gcinsight_coverage_stacks_by_technology_count", "kind", ("0", "1", "2-4", "5+"), "pillars.coverage.build technology_count_distribution -> emission"),
+        ("gcinsight_coverage_metric_names", "kind", ("matched", "unmatched"), "pillars.coverage.build classified_counts -> emission"),
+        ("gcinsight_coverage_service_identity", "kind", ("canonical", "legacy_only", "overlap"), "pillars.coverage.build identity_counts -> emission"),
+        ("gcinsight_coverage_service_population", "kind", ("application", "platform", "infrastructure_unit"), "pillars.coverage.build population_counts -> emission"),
+        ("gcinsight_coverage_capability_gap", "kind", coverage.ADOPTION_CAPABILITIES, "pillars.coverage.ADOPTION_CAPABILITIES -> _adoption_surface"),
+    )
+    for name, key, values, witness in declarations:
+        fixed(name, key, values, witness)
+    for name in ("gcinsight_input_available", "gcinsight_input_age_seconds"):
+        fixed(name, "input", hydrate.INPUT_OWNER, "emit.hydrate.INPUT_OWNER -> hydrate -> report_metrics")
+    for name in ("gcinsight_labelling_score", "gcinsight_labelling_rules_evaluated", "gcinsight_labelling_rules_passed"):
+        fixed(name, "signal", labelling.SIGNALS, "pillars.labelling.SIGNALS -> build")
+    for name in ("gcinsight_dashboards_estate_surface_requests", "gcinsight_dashboards_estate_surface_stacks"):
+        fixed(name, "surface", insights.SURFACE_VALUES, "sources.usage_insights.SURFACE_VALUES -> pillars.insights.build")
+    for key, index in (("component", 0), ("reason", 1)):
+        fixed("gcinsight_coverage_unscored", key, sorted({p[index] for p in coverage.UNSCORED_PAIRS}),
+              "pillars.coverage.UNSCORED_PAIRS -> exact pair emission loop")
+    for key in ("category", "surface"):
+        domains[("gcinsight_ai_estate_messages", key)] = RuntimeDomain(
+            "unknown", "sources.assistant.frame_sums/split_category accepts upstream names -> pillars.ai.build",
+            reserve="8-slot capacity is not proof of upstream vocabulary or combinations; exhaustive proof remains open.")
+    domains[("gcinsight_scan_stacks_failed", "reason")] = RuntimeDomain(
+        "unknown", "sources.gcom/dataplane catch arbitrary Exception -> type(exc).__name__ -> Coverage.as_metrics",
+        reserve="8-slot capacity is not a closed failure vocabulary; exhaustive proof remains open.")
+    expected = {(s.name, key) for s in CATALOGUE if s.store == "mimir" for key in s.labels}
+    if domains.keys() != expected:
+        raise RuntimeDomainError(f"domain declarations differ: missing={sorted(expected - domains.keys())}, "
+                                 f"extra={sorted(domains.keys() - expected)}")
+    for pair, domain in domains.items():
+        if not domain.witness or (domain.kind == "fixed" and
+                                 (not domain.values or len(domain.values) != len(set(domain.values)))):
+            raise RuntimeDomainError(f"{pair}: invalid runtime domain")
+    return domains
+
+
+def runtime_relations() -> dict[str, tuple[tuple[tuple[str, str], ...], ...]]:
+    """Restricted combinations, independent of the rectangular capacity budget."""
+    from collector.pillars import coverage
+    return {
+        "gcinsight_coverage_unscored": tuple(
+            (("component", component), ("reason", reason)) for component, reason in coverage.UNSCORED_PAIRS),
+        # scan.run_t1 and the two dispatched gcom/dataplane accounting sources.
+        # This is a producer relation, not an expansion of the ten named reserves.
+        "gcinsight_scan_stacks_skipped": tuple(
+            (("reason", reason), ("tier", tier)) for tier, reason in
+            (("t1", "paused"), ("t2", "paused"), ("t2", "unavailable"), ("t3", "paused"))),
+    }
+
+
+def runtime_requirements() -> tuple[set[tuple[str, tuple[tuple[str, str], ...]]], set[tuple[str, str]]]:
+    """Coverage obligations and explicit unknowns; neither is fixture-derived.
+
+    Live identity dimensions are discovery-backed, not enumerated. Unknown-domain
+    metrics receive name-level selector obligations only, never exhaustive credit.
+    Exact dispatch reserves are not runtime obligations. CEILING bounds work, not vocabulary.
+    """
+    domains, relations = runtime_domains(), runtime_relations()
+    required: set[tuple[str, tuple[tuple[str, str], ...]]] = set()
+    unknown = {pair for pair, domain in domains.items() if domain.kind == "unknown"}
+    for spec in CATALOGUE:
+        if spec.store != "mimir":
+            continue
+        if any((spec.name, key) in unknown for key in spec.labels):
+            required.add((spec.name, ()))  # Name-level credit explicitly lacks exhaustive enum proof.
+            continue
+        dims = {key: domains[(spec.name, key)].values for key in sorted(spec.labels)
+                if domains[(spec.name, key)].kind == "fixed"}
+        combinations = relations.get(spec.name)
+        count = len(combinations) if combinations is not None else 1
+        if combinations is None:
+            for values in dims.values():
+                count *= len(values)
+        if count + len(required) > CEILING:
+            raise RuntimeDomainError(f"{spec.name}: runtime proof exceeds resource bound")
+        if combinations is None:
+            combinations = (tuple(zip(dims, values)) for values in itertools.product(*dims.values()))
+        for labels in combinations:
+            if not any(name == spec.name and set(reserved) <= set(labels)
+                       for name, reserved in RUNTIME_RESERVES):
+                required.add((spec.name, labels))
+    if len(required) > CEILING:
+        raise RuntimeDomainError("runtime proof exceeds resource bound")
+    return required, unknown
+
+
+def check_runtime_metrics(metrics, *, inventory=None) -> set[tuple[str, str]]:
+    """Offline conformance check returning unresolved domains, NOT a publisher gate.
+
+    Open values are accepted only with an explicit UNKNOWN result; no full conformance
+    claim is possible for them. Empty/missing inventory likewise cannot certify identities.
+    Fixed drift, undeclared shapes, impossible relations and named reserves are errors.
+    """
+    domains, relations = runtime_domains(), runtime_relations()
+    declared = {s.name: s for s in CATALOGUE if s.store == "mimir"}
+    discovered = None if not inventory else {
+        "stack": {str(s["slug"]) for s in inventory},
+        "region": {str(s.get("regionSlug") or "unknown") for s in inventory},
+    }
+    unresolved: set[tuple[str, str]] = set()
+    for name, labels, _value in metrics:
+        if name not in declared or set(labels) != set(declared[name].labels):
+            raise RuntimeDomainError(f"{name}: undeclared metric or label dimensions {sorted(labels)}")
+        for key, value in labels.items():
+            domain = domains[(name, key)]
+            if domain.kind == "unknown" or (domain.kind == "discovered" and discovered is None):
+                unresolved.add((name, key))
+            elif (not isinstance(value, str) or value not in
+                  (domain.values if domain.kind == "fixed" else discovered[key])):
+                raise RuntimeDomainError(f"{name}: unsupported {key}={value!r}")
+        if name in relations and tuple(sorted(labels.items())) not in relations[name]:
+            raise RuntimeDomainError(f"{name}: unsupported runtime relation {labels}")
+        if any(metric == name and all(labels.get(k) == v for k, v in reserved)
+               for metric, reserved in RUNTIME_RESERVES):
+            raise RuntimeDomainError(f"{name}: reserved selector emitted {labels}")
+    return unresolved
+
+
 class BudgetExceeded(ValueError):
     """The declared catalogue does not fit the ceiling."""
 
@@ -799,6 +1016,29 @@ def render_table() -> str:
         for card in s.labels.values():
             would *= card
         lines.append(f"| `{s.name}` | {s.pillar} | {would:,} | {s.phase} | {s.note} |")
+    lines += ["", "## Runtime label contracts", "",
+              "Runtime vocabularies below come from producer/source contracts, not capacity integers or "
+              "fixture observations. Stack and region remain fresh-inventory discovery domains. Spare "
+              "capacity has no extra supported value; current versions are not numerical capacities. "
+              "These offline coverage/conformance helpers are NOT publisher enforcement. UNKNOWN "
+              "domains preclude exhaustive coverage and conformance claims; the existing open-label "
+              "producer/guard risk remains unresolved.", "",
+              "| Metric | Label | Class | Runtime values | Capacity | Spare capacity / limitation | Witness |",
+              "|---|---|---|---|---|---|---|"]
+    specs = {s.name: s for s in mimir}
+    for (name, key), domain in sorted(runtime_domains().items()):
+        capacity = specs[name].labels[key]
+        values = ", ".join(f"`{v}`" for v in domain.values) or "Not enumerated"
+        spare = (f"{capacity - len(domain.values)} unnamed slot(s). " if domain.kind == "fixed" else "")
+        lines.append(f"| `{name}` | `{key}` | {domain.kind} | {values} | {capacity} | "
+                     f"{spare}{domain.reserve} | {domain.witness} |")
+    lines += ["", "### Restricted runtime combinations", "",
+              "Unscored component/reason and dispatched skip tier/reason relations are exact, "
+              "not their Cartesian capacity rectangles. Skip source witnesses are scan.run_t1, "
+              "sources.gcom.fetch_all_stack_detail and sources.dataplane.probe_all.", ""]
+    for name, combinations in runtime_relations().items():
+        for labels in combinations:
+            lines.append(f"- `{name}`: " + ", ".join(f"`{k}={v}`" for k, v in labels))
     lines += ["", "## Exact runtime reserves", "",
               "These combinations reserve planning capacity, not runtime populations. Source-backed "
               "runner and shared-publication output contracts are tested; bounded query absence "

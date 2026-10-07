@@ -636,11 +636,17 @@ def d_estate(ds: str):
                         "dead tier. Actual sampled publications are shown together, not independent "
                         "24h maxima from different scans. A gap is unavailable, not interpolated accounting."),
         "b_skipped": build.barchart_panel(
-            "Stacks skipped, by reason",
-            'max_over_time(gcinsight_scan_stacks_skipped{tier="t1"}[24h])', legend="{{reason}}",
-            description="Stacks a healthy scan deliberately does not reach, by reason. `paused` stacks "
-                        "have no running Grafana to query. These are excluded from the coverage "
-                        "denominator rather than counted as failures."),
+            "Published skipped-stack peaks (36h), by tier and reason",
+            'max_over_time(gcinsight_scan_stacks_skipped{tier=~"t1|t2|t3"}[36h])',
+            legend="{{tier}} / {{reason}}", endpoint=True,
+            description="Peak published skip counts in the preceding 36h at the selected range end, "
+                        "including carried samples; not the latest scan or immediate process health. "
+                        "The lookback exceeds daily T2's cadence. Each bar keeps its tier and reason; "
+                        "these maxima are not additive across reasons or tiers. `paused` applies to "
+                        "T1/T2/T3; T2 also records `unavailable` when gcom answers HTTP 409. Both are "
+                        "excluded from the scannable denominator, not recorded as failures. Absence "
+                        "means no published reason sample in this window, not zero skipped stacks. "
+                        "T4 reads history and has no stack-skip population."),
         "b_failed": build.barchart_panel(
             "Published failure peaks (24h), by tier and reason", _scan_failure_peaks(), endpoint=True,
             description="Endpoint of the selected time range, not last non-null historical health. "

@@ -20,6 +20,30 @@ from collector.dashboards import build
 class CollectorIntegrityTest(unittest.TestCase):
     """Integrity must be read from endpoint evidence and actual sampled trends."""
 
+    def test_dispatched_skips_are_placed_and_separated_without_zero_fill(self):
+        from bin import dashboards
+        from tests.test_dashboard_coverage import consumers, selects
+        document = dashboards.assemble("estate", "infinity-uid")[1]
+        _fields, expressions, tabs = consumers({"estate": document})
+        self.assertIn("b_skipped", tabs[("estate", "Scan health")])
+        for tier, reason in (("t1", "paused"), ("t2", "paused"),
+                             ("t2", "unavailable"), ("t3", "paused")):
+            with self.subTest(tier=tier, reason=reason):
+                self.assertTrue(any(panel == "b_skipped" and selects(expr,
+                    "gcinsight_scan_stacks_skipped", {"tier": tier, "reason": reason})
+                    for _tab, panel, expr in expressions), "dispatched skip population omitted")
+        panel = document["spec"]["elements"]["b_skipped"]["spec"]
+        query = panel["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+        self.assertEqual(query["legendFormat"], "{{tier}} / {{reason}}")
+        self.assertTrue(query["instant"])
+        self.assertFalse(query["range"])
+        self.assertIn("[36h]", query["expr"], "lookback must exceed daily T2's cadence")
+        self.assertNotIn("vector(0)", query["expr"])
+        self.assertNotIn(" or ", query["expr"])
+        self.assertFalse(selects(query["expr"], "gcinsight_scan_stacks_skipped", {"tier": "t4"}))
+        for text in ("not zero", "HTTP 409", "not the latest scan", "not additive", "carried"):
+            self.assertIn(text, panel["description"])
+
     def test_failure_bars_use_endpoint_query_and_matching_tier_evidence(self):
         from bin import dashboards, alerts
         panel = dashboards.assemble("estate", "infinity-uid")[1]["spec"]["elements"]["b_failed"]["spec"]

@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import ast
+import inspect
 import unittest
 from unittest import mock
 
 from collector import observability_score
 from collector.pillars import coverage
-from collector.emit import hydrate
+from collector.emit import budget, guard, hydrate
 from collector.coverage import Coverage, rollup
 
 
@@ -710,6 +712,69 @@ class FootprintComposeTest(unittest.TestCase):
             self.assertEqual(query["root_selector"], "rows")
             payload = json.loads((local / query["url"].rsplit("/", 1)[-1]).read_text())
             self.assertIn("Database Observability", {row["Capability"] for row in payload["rows"]})
+
+
+class RuntimeSourceWitnessTest(unittest.TestCase):
+    def test_exact_unscored_pairs_govern_real_producer_output_and_reject_crosses(self):
+        metrics, _ = coverage.build(STACKS, SIGNALS, dashboard_inventory=DASHBOARDS, alert_routing=ALERTS)
+        population = [m for m in metrics if m[0] == "gcinsight_coverage_unscored"]
+        self.assertEqual(len(population), 9)
+        self.assertEqual({(labels["component"], labels["reason"]) for _, labels, _ in population},
+                         set(coverage.UNSCORED_PAIRS))
+        self.assertEqual(budget.check_runtime_metrics(population), set())
+        tree = ast.parse(inspect.getsource(coverage.build))
+        emission = next(n for n in ast.walk(tree) if isinstance(n, ast.GeneratorExp) and
+                        isinstance(n.generators[0].iter, ast.Name) and
+                        n.generators[0].iter.id == "UNSCORED_PAIRS")
+        self.assertEqual(ast.literal_eval(emission.elt.elts[0]), "gcinsight_coverage_unscored")
+        self.assertEqual(ast.unparse(emission.elt.elts[1]),
+                         "{'component': component, 'reason': reason}")
+        with self.assertRaisesRegex(budget.RuntimeDomainError, "unsupported runtime relation"):
+            budget.check_runtime_metrics([("gcinsight_coverage_unscored",
+                                          {"component": "profiles", "reason": "inventory_unavailable"}, 1)])
+
+    def test_real_sources_prove_open_unknowns_not_complete_vocabulary(self):
+        from types import SimpleNamespace
+        from collector.sources import assistant, gcom, dataplane
+        from collector.pillars import ai
+        live = [{"slug": "live", "status": "active"}]
+        record = assistant.summarise_stack("live", {"totalUserMessages": 1},
+                    {"NovelCategory (NovelSurface)": 1}, {}, 1, {}, [])
+        metrics, _ = ai.build(live, Coverage("t2", 1), {"live": record})
+        sample = [m for m in metrics if m[0] == "gcinsight_ai_estate_messages"]
+        self.assertEqual(sample[0][1], {"category": "NovelCategory", "surface": "NovelSurface"})
+        guard.check_all(sample)  # Existing guard acceptance is the residual risk, NOT a new guarantee.
+        self.assertEqual(budget.check_runtime_metrics(sample),
+                         {(sample[0][0], "category"), (sample[0][0], "surface")})
+        NovelShortError = type("NovelShortError", (RuntimeError,), {})
+        for tier, module, method in (("t2", gcom, "fetch_stack_detail"), ("t3", dataplane, "probe_stack")):
+            cov = Coverage(tier, 1)
+            with mock.patch.object(module, method, side_effect=NovelShortError("synthetic")):
+                if tier == "t2":
+                    gcom.fetch_all_stack_detail(None, SimpleNamespace(concurrency=1), live, cov)
+                else:
+                    dataplane.probe_all(None, "synthetic", live, cov, concurrency=1)
+            failures = [m for m in cov.as_metrics() if m[0] == "gcinsight_scan_stacks_failed"]
+            self.assertEqual(failures[0][1]["reason"], "NovelShortError")
+            guard.check_all(failures)
+            self.assertEqual(budget.check_runtime_metrics(failures), {(failures[0][0], "reason")})
+
+    def test_t2_http409_and_t3_paused_source_outputs_match_dispatched_relation(self):
+        from types import SimpleNamespace
+        from collector.sources import gcom, dataplane
+        paused = {"slug": "paused", "status": "paused"}
+        active = {"slug": "not-running", "status": "active"}
+        client = SimpleNamespace(get=mock.Mock(return_value=SimpleNamespace(status=409)))
+        cov = Coverage("t2", 2)
+        gcom.fetch_all_stack_detail(client, SimpleNamespace(cap="synthetic", concurrency=1), [paused, active], cov)
+        self.assertEqual(client.get.call_count, 1, "paused skips without attempting its endpoint")
+        self.assertEqual(cov.as_meta()["skipped_by_reason"], {"paused": 1, "unavailable": 1})
+        self.assertEqual(budget.check_runtime_metrics(cov.as_metrics()), set())
+        cov = Coverage("t3", 1)
+        with mock.patch.object(dataplane, "probe_stack", side_effect=AssertionError("paused must not be queried")):
+            dataplane.probe_all(None, "synthetic", [paused], cov, concurrency=1)
+        self.assertEqual(cov.as_meta()["skipped_by_reason"], {"paused": 1})
+        self.assertEqual(budget.check_runtime_metrics(cov.as_metrics()), set())
 
 
 class ObservabilityScoreConfigTest(unittest.TestCase):

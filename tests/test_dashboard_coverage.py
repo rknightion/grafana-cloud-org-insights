@@ -8,9 +8,7 @@ from __future__ import annotations
 import copy
 import functools
 import importlib
-import itertools
 import json
-import math
 import pathlib
 import pkgutil
 import re
@@ -20,11 +18,9 @@ from unittest import mock
 
 from bin import alerts, dashboards, make_local_views
 from collector import pillars
-from collector.coverage import Coverage
 from collector.dashboards import build
 from collector.emit import budget, hydrate, s3
-from collector.pillars import ai, compose, coverage, findings, labelling, library_panels, maturity, retention
-from collector.sources import usage_insights
+from collector.pillars import coverage, library_panels
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -239,69 +235,14 @@ def artifact_fixture():
     return payloads, documents
 
 
-def bounded_combinations(domains, capacity):
-    count = math.prod(len(values) for values in domains)
-    if count > capacity:
-        raise AssertionError(f"enum proof needs {count} combinations, above its {capacity} cap")
-    return list(itertools.product(*domains))
-
-
 def enum_requirements():
-    """Independently compose producer data, then cross dimensions (not just series).
+    """Fixed/current producer contracts, with open domains explicitly unresolved.
 
-    Producer public vocabularies fill fixture holes. Cardinalities are ceilings,
-    not vocabularies: this cannot invent names for unused budget headroom. The
-    returned incomplete-domain ledger explicitly prevents claiming exhaustive
-    declared-enum coverage for such dimensions.
+    No compose fixture or capacity number supplies a vocabulary. Discovery-backed
+    identities are not configured rosters. UNKNOWN metrics obtain name-only credit,
+    never exhaustive enum coverage, and named reserves are not runtime obligations.
     """
-    fixture = json.loads((ROOT / "tests" / "fixtures" / "compose_inputs.json").read_text())
-    cov = Coverage(tier="t3", total=len(fixture["stacks"]))
-    metrics, _views, _coverage = compose.build_all(
-        fixture["stacks"], cov, **{key: fixture.get(key) for key in hydrate.INPUT_OWNER})
-    domains = {}
-    for name, labels, _value in metrics:
-        for key, value in labels.items():
-            if key not in ("stack", "region"):
-                domains.setdefault((name, key), set()).add(str(value))
-    overrides = {
-        ("gcinsight_findings", "kind"): findings.KINDS,
-        ("gcinsight_input_available", "input"): hydrate.INPUT_OWNER,
-        ("gcinsight_input_age_seconds", "input"): hydrate.INPUT_OWNER,
-        ("gcinsight_ai_estate_tenant_objects", "kind"): ai.TENANT_KINDS,
-        ("gcinsight_ai_estate_investigations", "kind"): ai.INVESTIGATION_ORIGINS,
-        ("gcinsight_maturity_stacks_by_tier", "kind"): [key for key, _ in maturity.TIERS],
-        ("gcinsight_maturity_unscored", "reason"): maturity.UNSCORED_REASONS,
-        ("gcinsight_risk_retention_change_requests", "status"): retention.REQUEST_STATUSES,
-        ("gcinsight_coverage_capability_gap", "kind"): coverage.ADOPTION_CAPABILITIES,
-        ("gcinsight_coverage_unscored", "component"): {c for c, _ in coverage.UNSCORED_PAIRS},
-        ("gcinsight_coverage_unscored", "reason"): {r for _, r in coverage.UNSCORED_PAIRS},
-    }
-    overrides[("gcinsight_labelling_findings", "severity")] = labelling.SEVERITIES
-    for name in ("gcinsight_labelling_score", "gcinsight_labelling_rules_evaluated", "gcinsight_labelling_rules_passed"):
-        overrides[(name, "signal")] = labelling.SIGNALS
-    for name in ("gcinsight_dashboards_estate_surface_requests", "gcinsight_dashboards_estate_surface_stacks"):
-        overrides[(name, "surface")] = usage_insights.SURFACE_VALUES
-    specs = [spec for spec in budget.CATALOGUE if spec.store == "mimir"]
-    for spec in specs:
-        if "tier" in spec.labels:
-            overrides[(spec.name, "tier")] = alerts.TIERS
-    for pair, values in overrides.items():
-        domains.setdefault(pair, set()).update(map(str, values))
-    required, incomplete = set(), {}
-    for spec in specs:
-        dims = {key: domains.get((spec.name, key), set()) for key in spec.labels
-                if key not in ("stack", "region")}
-        for key, values in dims.items():
-            if len(values) < spec.labels[key]:
-                incomplete[(spec.name, key)] = (tuple(sorted(values)), spec.labels[key])
-        count = math.prod(len(values) for values in dims.values())
-        if count > spec.series or len(required) + count > budget.CEILING:
-            raise AssertionError(f"{spec.name}: enum proof exceeds declared resource bound")
-        if all(dims.values()):
-            combinations = bounded_combinations(tuple(dims.values()), spec.series)
-            for values in combinations:
-                required.add((spec.name, tuple(zip(dims, values))))
-    return required, incomplete
+    return budget.runtime_requirements()
 
 
 def metadata_leaves(value, prefix="meta"):
@@ -352,52 +293,16 @@ def metadata_debt(path):
 ENUM_DEBTS = {}
 ENUM_RESERVES = budget.RUNTIME_RESERVES
 
-# Exact incomplete domains, not permission to ignore new values or new metrics.
 # GCI-0121 (declare runtime label domains independently of planning capacity)
-# distinguishes runtime vocabulary from headroom and historical version reserves.
+# resolves fixed/current contracts, NOT the source-proven open producer semantics.
+# GCI-0126 (close bounded-label proof for open Assistant/scan failure domains) owns
+# these exact UNKNOWNs. Neither name-only selectors nor helper checks prove them.
 DOMAIN_DEBTS = {
-    (metric, label): ("Capacity is not a closed runtime vocabulary; only observed/public values are checked.", "GCI-0121")
+    (metric, label): ("Source-proven open vocabulary; exhaustive coverage/conformance unavailable.", "GCI-0126")
     for metric, label in (
         ("gcinsight_ai_estate_messages", "category"),
         ("gcinsight_ai_estate_messages", "surface"),
-        ("gcinsight_ai_estate_stacks", "kind"),
-        ("gcinsight_cost_usage_by_signal", "signal"),
-        ("gcinsight_coverage_service_applicable_components_mean", "version"),
-        ("gcinsight_coverage_service_completeness_mean", "version"),
-        ("gcinsight_coverage_unscored", "component"),
-        ("gcinsight_dashboards_anonymous_views", "version"),
-        ("gcinsight_dashboards_cache_hit_ratio", "version"),
-        ("gcinsight_dashboards_estate_anonymous_views", "version"),
-        ("gcinsight_dashboards_estate_dashboards_viewed", "version"),
-        ("gcinsight_dashboards_estate_datasources_queried", "version"),
-        ("gcinsight_dashboards_estate_panels_queried", "version"),
-        ("gcinsight_dashboards_estate_viewers", "version"),
-        ("gcinsight_dashboards_estate_public", "version"),
-        ("gcinsight_dashboards_estate_surface_requests", "version"),
-        ("gcinsight_dashboards_estate_surface_stacks", "version"),
-        ("gcinsight_dashboards_estate_requests", "version"),
-        ("gcinsight_dashboards_estate_provisioned", "version"),
-        ("gcinsight_dashboards_estate_public_events", "version"),
-        ("gcinsight_dashboards_estate_queries_cached", "version"),
-        ("gcinsight_dashboards_estate_queries_total", "version"),
-        ("gcinsight_dashboards_estate_request_errors", "version"),
-        ("gcinsight_dashboards_estate_stacks", "version"),
-        ("gcinsight_dashboards_estate_views", "version"),
-        ("gcinsight_dashboards_panel_queries", "version"),
-        ("gcinsight_dashboards_public_events", "version"),
-        ("gcinsight_dashboards_query_errors", "version"),
-        ("gcinsight_dashboards_viewed", "version"),
-        ("gcinsight_dashboards_viewers", "version"),
-        ("gcinsight_dashboards_views", "version"),
-        ("gcinsight_maturity_dimension_mean", "version"),
-        ("gcinsight_maturity_percentile", "version"),
-        ("gcinsight_maturity_score", "version"),
-        ("gcinsight_maturity_stacks_by_tier", "version"),
-        ("gcinsight_maturity_unscored", "version"),
         ("gcinsight_scan_stacks_failed", "reason"),
-        ("gcinsight_scan_stacks_skipped", "reason"),
-        ("gcinsight_usage_stacks_by_signal", "signal"),
-        ("gcinsight_value_adoption_ratio", "signal"),
     )
 }
 # Stronger tab-specific ownership and dimension-preserving enum display are NOT
@@ -407,6 +312,15 @@ DISPLAY_CONTRACT_DEBT = (
     "Structural placement and selector inclusion do not certify separate enum granularity or tab ownership.",
     "GCI-0122",
 )
+
+
+class RuntimeRequirementsTest(unittest.TestCase):
+    def test_unscored_relation_is_exact_not_cartesian(self):
+        requirements, _unknown = enum_requirements()
+        actual = {labels for name, labels in requirements if name == "gcinsight_coverage_unscored"}
+        expected = {(("component", component), ("reason", reason))
+                    for component, reason in coverage.UNSCORED_PAIRS}
+        self.assertEqual(actual, expected, "only nine source-backed pairs are runtime obligations")
 
 
 class SelectorLexicalTest(unittest.TestCase):
@@ -471,7 +385,7 @@ class DashboardCoverageTest(unittest.TestCase):
     def setUpClass(cls):
         cls.payloads, cls.documents = artifact_fixture()
         cls.schemas = declared_schemas()
-        cls.enums, cls.incomplete_domains = enum_requirements()
+        cls.enums, cls.unknown_domains = enum_requirements()
 
     def assert_fields_covered(self, payloads, schemas, documents):
         self.assertEqual(field_gaps(payloads, schemas, documents), set(), "Unrendered published row fields")
@@ -537,10 +451,11 @@ class DashboardCoverageTest(unittest.TestCase):
         self.assert_enums_covered(self.enums, self.documents)
 
     def test_current_debts_have_exact_owners_without_claiming_coverage(self):
-        self.assertEqual(metric_gaps(self.enums, self.documents), ENUM_DEBTS.keys() | ENUM_RESERVES.keys(),
-                         "New gaps need owners; resolved selector debts must leave the ledger")
-        self.assertEqual(set(self.incomplete_domains), DOMAIN_DEBTS.keys(),
-                         "New incomplete enum domain needs an explicit contract owner")
+        self.assertEqual(metric_gaps(self.enums, self.documents), ENUM_DEBTS.keys(),
+                         "New runtime gaps need owners; reserves are not emitted obligations")
+        self.assertFalse(self.enums & ENUM_RESERVES.keys(), "reserved capacity is not runtime data")
+        self.assertEqual(self.unknown_domains, DOMAIN_DEBTS.keys(),
+                         "New unknown domain needs an explicit contract owner")
         for debt in (*ENUM_DEBTS.values(), *DOMAIN_DEBTS.values(), DISPLAY_CONTRACT_DEBT):
             reason, owner = debt
             self.assertTrue(reason)
