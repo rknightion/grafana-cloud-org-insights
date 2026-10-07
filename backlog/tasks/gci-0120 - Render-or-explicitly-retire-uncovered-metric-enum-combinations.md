@@ -1,10 +1,10 @@
 ---
 id: GCI-0120
 title: Render or explicitly retire uncovered metric enum combinations
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-10-06 17:49'
-updated_date: '2026-10-06 18:21'
+updated_date: '2026-10-07 15:09'
 labels:
   - dashboards
   - coverage-debt
@@ -33,6 +33,14 @@ The final dashboard coverage gate exposed 19 exact selector debts: seven value-b
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Loop15: consume M-0120 actual-emission witness; render debts meaningfully or provide source-backed retirement/reserve contract evidence; return owner-only omission choices, retain seeded-defect failures; hold landing until R-rel3 readback.
+
+Design reviewed independently: ten reserves require final-output/transitive emission proof including t2/t3 composition and shared processing, not callsite AST alone; preserve reserve-violation and older negative seeds. Wording must disclose truthy datasource counts, producer zero defaults and upper-middle quantile; Mimir completion timestamp is not all-sink success.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
