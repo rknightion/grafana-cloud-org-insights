@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.7.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.7.0...v0.7.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* show stack legends on backend observation trends ([9a002e8](https://github.com/rknightion/grafana-cloud-org-insights/commit/9a002e8368300310454634555323ed37c612eac2))
+
+
+### Documentation
+
+* **backlog:** accept capability rows and activate honest dashboard wording ([ef8f95b](https://github.com/rknightion/grafana-cloud-org-insights/commit/ef8f95b59723c81bb4d54d01a899edb3854a63e8))
+* **backlog:** accept dashboard-name repair and activate showback ([a96e20a](https://github.com/rknightion/grafana-cloud-org-insights/commit/a96e20a359bdd2562292243f0945c4661ceba936))
+* **backlog:** accept honest wording and activate publication-gap integrity ([0312759](https://github.com/rknightion/grafana-cloud-org-insights/commit/0312759c4d44690afd419133652a62a4ee46f0fb))
+* **backlog:** accept publication-gap integrity and activate scope labels ([75708b1](https://github.com/rknightion/grafana-cloud-org-insights/commit/75708b108aa7d0aeae277803e34275af0965e3ed))
+* **backlog:** accept repaired scope and activate final dashboard coverage gate ([c1c9a4e](https://github.com/rknightion/grafana-cloud-org-insights/commit/c1c9a4eb23279c873ba19b89acb532fedbb6e1bb))
+* **backlog:** give exact dashboard coverage debts explicit owners ([e5639b6](https://github.com/rknightion/grafana-cloud-org-insights/commit/e5639b6221787769cd70cb0d4ed86d743b74395a))
+* **backlog:** park unproven showback semantics and release independent cost context ([3dea900](https://github.com/rknightion/grafana-cloud-org-insights/commit/3dea900d5a829eb0948f17bbfdb9a0a6aa851376))
+* **backlog:** plan the labelling best-practice pillar (GCI-0119, doc-0008) ([ff87c0c](https://github.com/rknightion/grafana-cloud-org-insights/commit/ff87c0c395e2189fdcf7c3f1569f6974a23ce181))
+* **backlog:** qualify partial cost context and activate independent Operations health ([fad4c93](https://github.com/rknightion/grafana-cloud-org-insights/commit/fad4c93c5b541c5fbf5b14b158deb7d8758f3ea8))
+* **backlog:** qualify partial health proof and activate independent adoption rows ([fa3344e](https://github.com/rknightion/grafana-cloud-org-insights/commit/fa3344edbd341e7df7fd8baee091621faef53e20))
+* **backlog:** record exact showback contract research ([17a03f0](https://github.com/rknightion/grafana-cloud-org-insights/commit/17a03f0550d23e477725eac5b3ee3ba28c510966))
+* **backlog:** record repair acceptance and release readback gaps ([2a1f9ed](https://github.com/rknightion/grafana-cloud-org-insights/commit/2a1f9ed595d0be62d2be65c5c59b590fea40e363))
+* record exact AWS empty response and shared future-skew contracts ([9da34ba](https://github.com/rknightion/grafana-cloud-org-insights/commit/9da34ba0e938eb4dffa28260b1091bac1671f591))
+
 ## [0.7.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.6.0...v0.7.0) (2026-10-06)
 
 
