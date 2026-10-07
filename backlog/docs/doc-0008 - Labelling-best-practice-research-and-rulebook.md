@@ -3,7 +3,7 @@ id: doc-0008
 title: Labelling best-practice research and rulebook
 type: specification
 created_date: '2026-10-06 14:43'
-updated_date: '2026-10-07 02:36'
+updated_date: '2026-10-07 02:45'
 ---
 # Labelling best-practice research and rulebook
 
@@ -543,7 +543,374 @@ Severity: H high, M medium, L low, I info. Det = deterministic; Judge = needs ju
 | T-43 | Sampling vs span metrics: generated metrics need 100% sampling upstream of the generator; ratio-based head sampling or Adaptive Traces policies change counts | M | Adaptive Traces policies (drop/probabilistic/volumetric/diversity); collector config unavailable | Judge | n/a | Quality report: "This approach requires a 100% span sampling rate to ensure that all traffic is represented." Cloud generator doc: "If traces are down-sampled before reaching Tempo, the metrics will be lower than reality." Whether Adaptive Traces runs before or after the generator is not stated in the pages read (GAP) |
 | T-44 | Adaptive Traces diversity fingerprint attributes present on server/consumer spans: `service.name`, `k8s.cluster.name`, `k8s.namespace.name`, `db.system.name`, `db.collection.name`, `http.route`, `http.response.status_code`, `rpc.method`, `rpc.grpc.status_code` | L | span/resource tags vs Adaptive Traces policies | Det (tag presence) | n/a | https://grafana.com/docs/grafana-cloud/observe-and-act/adaptive-telemetry/adaptive-traces/manage-recommendations/diversity-policy/ "The fingerprint is built from the following attributes". Note it still lists `rpc.grpc.status_code`, deprecated in semconv v1.39.0 for `rpc.response.status_code`. Volumetric policy groups by e.g. `service.name`, `http.method` |
 | T-45 | Traces Drilldown readiness: TraceQL metrics query works on the stack | M | probe `{} | rate()` via TraceQL metrics API | Det | success/failure | https://grafana.com/docs/grafana/latest/visualizations/simplified-exploration/traces/access/ : "Traces Drilldown requires Grafana Tempo 2.6 or later with TraceQL metrics configured". Cloud: "TraceQL metrics can query metrics for a time range of 24 hours." Drilldown has no further attribute requirements published (it breaks down by `resource.service.name`, `span.name`, `span.status`, `span.http.status_code` in its example docs, so old HTTP names matter: INFERENCE) |
-| T-46 | Scanner caveat: tag-listing completeness. Tag lists/values are capped by `limit`, `maxStaleValues`, time window (`start`/`end`) and `max_bytes_per_tag_values_query` (default 1 MB); an `intrinsic` scope exists | I | API params | Det | n/a | https://grafana.com/docs/tempo/latest/api_docs/ : scopes `resource|span|intrinsic|event|l
+| T-46 | Scanner caveat: tag-listing completeness. Tag lists/values are capped by `limit`, `maxStaleValues`, time window (`start`/`end`) and `max_bytes_per_tag_values_query` (default 1 MB); an `intrinsic` scope exists | I | API params | Det | n/a | https://grafana.com/docs/tempo/latest/api_docs/ : scopes `resource|span|intrinsic|event|link|instrumentation`; `limit` "Sets the maximum number of tags names allowed per scope". Treat a truncated list as "at least N", never as full |
+
+### Cross-signal (X)
+
+| ID | Rule | Sev | Input | Det/Judge | Threshold | Source and quote |
+|---|---|---|---|---|---|---|
+| X-01 | Service identity string matches across signals: trace `resource.service.name` = Loki `service_name` = Pyroscope `service_name` = metric `service_name`/`job` | H | trace service values, Pyroscope `service_name` values, Loki/Mimir values (other scanners) | Det (set comparison) | exact string match | https://grafana.com/docs/grafana-cloud/telemetry-signals/use-signals-together/key-concepts/ : "Correlation works by matching labels and attributes across different signals"; "`service="api"` doesn't match `service_name="api"`, it fails because the name is different". "For profiles, use consistent `service_name` labels to enable trace-to-profile correlation" |
+| X-02 | `job` = `${service.namespace}/${service.name}` and `instance` = `service.instance.id` are derived the same way everywhere | M | trace attrs vs metric `job`/`instance` | Det | match | Grafana resource-attributes page; OTLP page: "`service.namespace/service.name` added to the `job` label. If `service.namespace` is empty, only `service.name`"; these three attrs are excluded from `target_info` by default |
+| X-03 | K8s correlation attrs identical across signals (`k8s.cluster.name`, `k8s.namespace.name`, `k8s.pod.name` -> `k8s_cluster_name` etc.) | M | trace values vs Loki/Mimir | Det | match | Loki OTel page default index labels include `k8s.cluster.name`, `k8s.namespace.name`, `service.name`, `service.namespace`, `deployment.environment.name`; Mimir promotion list in Cloud OTLP page (below). Quality report purpose: link App O11y and K8s Monitoring |
+| X-04 | Environment attr consistency across signals | M | see T-05 | Det | match | KG prerequisites (quoted in T-05). INFERENCE: Loki OSS default index-label list contains `deployment.environment.name` but not `deployment.environment`, while the Cloud Mimir list has both, so legacy-name logs land as structured metadata, not an index label (verify per stack; Cloud log mappings are support/self-serve configurable) |
+| X-05 | Default Cloud OTLP->metric-label promotion list (reference set for "which resource attrs become labels"): `service.instance.id`, `service.name`, `service.namespace`, `service.version`, `cloud.availability_zone`, `cloud.region`, `container.name`, `deployment.environment`, `deployment.environment.name`, `k8s.cluster.name`, `k8s.container.name`, `k8s.cronjob.name`, `k8s.daemonset.name`, `k8s.deployment.name`, `k8s.job.name`, `k8s.namespace.name`, `k8s.pod.name`, `k8s.replicaset.name`, `k8s.statefulset.name` | I | n/a | reference | n/a | https://grafana.com/docs/grafana-cloud/send-data/otlp/otlp-format-considerations/ ("automatically promotes the following OTel resource attributes to labels, with periods replaced by underscores") |
+| X-06 | Do not use `k8s.pod.name`/`service.instance.id` as Loki index labels (move to structured metadata); mind Loki label caps | L | Loki config (other scanner) | Det | Loki: 15 index labels max per stream | Loki OTel page: "Because of the potential for high cardinality, `k8s.pod.name` and `service.instance.id` are no longer recommended as default labels." Conflict: Cloud metrics promotion still includes them. Key-concepts: "Keep metrics labels under 30 per series (40 maximum allowed...)", "Keep logs labels under 15 per stream (hard limit)" |
+| X-07 | Trace to profile link: spans that can have a profile carry `pyroscope.profile.id` (value = span id); profile samples carry `span_id`/`trace_id` labels (legacy `profile_id`) | L | span tags (`span.pyroscope.profile.id`), Pyroscope label names | Det | n/a | https://grafana.com/docs/pyroscope/latest/configure-client/trace-span-profiles/ : "Spans that can have a profile are marked with the `pyroscope.profile.id` span attribute, whose value is the span ID despite the name." |
+| X-08 | Logs carry `traceid`/`spanid` for trace to logs | L | Loki (other scanner) | Det | n/a | App O11y configure page: "Your logs must include the trace ID and/or span ID fields, typically as `traceid` and `spanid` attributes". |
+| X-09 | One histogram type per service (native vs classic); only native shown if mixed | M | metrics | Det | n/a | Quality report: "If a service uses both types, only data from the native histogram appears." |
+
+### Profiles (P)
+
+| ID | Rule | Sev | Input | Det/Judge | Threshold | Source and quote |
+|---|---|---|---|---|---|---|
+| P-01 | `service_name` is a label name present on the stack's profile series | H | Pyroscope LabelNames | Det | present | https://grafana.com/docs/pyroscope/latest/configure-client/grafana-alloy/java/ : "The special label `service_name` is required and must always be present." |
+| P-02 | No `service_name` value `unspecified` (Alloy fallback when not set/inferred); also no `unknown_service*` | H | LabelValues(`service_name`) | Det | any hit | Same page: "If `service_name` isn't specified and couldn't be inferred, then it's set to `unspecified`." |
+| P-03 | `service_name` values equal trace service names (see X-01); report profile-only and trace-only names | M | LabelValues(`service_name`) vs trace values | Det | set difference | key-concepts quote in X-01 |
+| P-04 | Label names valid: `[a-zA-Z_][a-zA-Z0-9_]*`, no dots | L | LabelNames | Det | any dotted name | https://grafana.com/docs/pyroscope/latest/configure-client/ : "It must match the regex `[a-zA-Z_][a-zA-Z0-9_]`. In Pyroscope, a period (`.`) isn't a valid character inside of tags and labels." (published regex lacks `*`; API can return UTF-8 names only with `Accept: */*; allow-utf8-labelnames=true`) |
+| P-05 | Label name length <=1024 bytes; value length <=2048 bytes | M | LabelNames/LabelValues | Det | 1024 / 2048 | Pyroscope reference config: `max_label_name_length` default 1024, `max_label_value_length` default 2048 |
+| P-06 | Label names per series <=30; proxy: total distinct label names | L | LabelNames count (proxy only; per-series count not visible via LabelNames) | Det for proxy, Judge | per-series default 30 (`max_label_names_per_series`). A high total of distinct names (INFERENCE threshold >~50) hints at dynamic label names | Pyroscope reference config |
+| P-07 | High-cardinality labels: distinct value counts for non-`service_name` labels; ID-like regex on values; names like `pod`, `instance`, `request_id`, `user*`, `uuid`, `session*`. Exempt `span_id`, `trace_id`, `profile_id` (documented per-sample labels) | M | LabelValues per label | Judge (count) / Det (regex) | NO published value-count threshold. Related documented limit: `max_global_series_per_tenant` default 5000 (v1 storage only, OSS config; Cloud value unpublished). Generic Grafana guidance: "Don't use user IDs/request IDs/timestamps/UUIDs as labels"; "Use low-cardinality labels for correlation (service, environment, cluster)" | key-concepts page https://grafana.com/docs/grafana-cloud/telemetry-signals/use-signals-together/key-concepts/ ; Pyroscope intro: "high-cardinality tag/label handling" is a feature of the Advanced Analysis UI (no number) |
+| P-08 | Enrichment labels exist for correlation: version, region, environment (match `service.version`, `cloud.region`, `deployment.environment(.name)` spelled with underscores) | I | LabelNames | Det | present | Pyroscope configure-client: "Commonly used tags include version, region, environment, and request types." Alloy `pyroscope.scrape` auto-injects `job`, `instance`, `service_name` (from search results, not re-verified) |
+| P-09 | Quality report check: service has profiles at all | L | Pyroscope series per service_name | Det | n/a | Quality report: "Your service is missing profiles." |
+
+## 3. Deprecated -> current semantic-convention names (lookup table; semconv v1.44.0, extracted from model/*/deprecated yaml, versions from CHANGELOG/release notes)
+
+Stability of replacements in v1.44.0: HTTP and `server.*`/`url.*`/`error.type`/`network.peer.*` stable; `db.system.name`, `db.namespace`, `db.collection.name`, `db.operation.name`, `db.query.text`, `db.query.summary`, `db.response.status_code` stable; `deployment.environment.name`, `service.name|namespace|version|instance.id`, `k8s.cluster|namespace|pod|node|container|deployment|statefulset|daemonset|job|cronjob|replicaset.name` stable (k8s promoted v1.42.0); `rpc.*` release_candidate; `messaging.*` and `cloud.*`, `host.*`, `service.peer.name` development.
+
+| Deprecated | Current | Since / note |
+|---|---|---|
+| deployment.environment | deployment.environment.name | renamed v1.27.0; new name stable v1.41.0 |
+| http.method | http.request.method | HTTP stable v1.23.0 |
+| http.status_code | http.response.status_code | v1.23.0 |
+| http.url | url.full | v1.23.0 |
+| http.target | url.path + url.query | split, v1.23.0 |
+| http.scheme | url.scheme | v1.23.0 |
+| http.client_ip | client.address | |
+| http.server_name | server.address | |
+| http.host | (no direct; use `server.address`/`url.*`; "uncategorized") | |
+| http.user_agent | user_agent.original | v1.19.0 |
+| http.request_content_length | http.request.header.content-length | |
+| http.response_content_length | http.response.header.content-length | |
+| http.request_content_length_uncompressed | http.request.body.size | |
+| http.response_content_length_uncompressed | http.response.body.size | |
+| http.resend_count | http.request.resend_count | |
+| http.flavor | network.protocol.name + network.protocol.version | |
+| net.peer.name | server.address (client spans) / client.address (server spans) | net.* renamed v1.21.0 |
+| net.peer.port | server.port (client) / client.port (server) | |
+| net.peer.ip, net.sock.peer.addr | network.peer.address | |
+| net.sock.peer.port | network.peer.port | |
+| net.host.name | server.address | |
+| net.host.port | server.port | |
+| net.host.ip, net.sock.host.addr | network.local.address | |
+| net.sock.host.port | network.local.port | |
+| net.protocol.name / net.protocol.version | network.protocol.name / network.protocol.version | |
+| net.transport | network.transport | |
+| db.system | db.system.name | v1.30.0 (values also changed); DB stable v1.33.0 |
+| db.name | db.namespace | v1.26.0 |
+| db.statement | db.query.text | v1.26.0 |
+| db.operation | db.operation.name | |
+| db.sql.table, db.cassandra.table, db.mongodb.collection, db.cosmosdb.container | db.collection.name | |
+| db.redis.database_index | db.namespace | |
+| db.elasticsearch.cluster.name | db.namespace | v1.27.0 |
+| db.user, db.connection_string, db.mssql.instance_name, db.instance.id | (removed, no replacement) | |
+| db.cosmosdb.status_code | db.response.status_code | |
+| db.client.connections.* metrics | db.client.connection.* | |
+| rpc.system | rpc.system.name | v1.39.0 (value renames: `connect_rpc`->`connectrpc`, `apache_dubbo`->`dubbo`) |
+| rpc.grpc.status_code, rpc.connect_rpc.error_code, rpc.jsonrpc.error_code | rpc.response.status_code | v1.39.0 |
+| rpc.service | merged into fully-qualified `rpc.method` | v1.39.0 |
+| rpc.grpc.request.metadata / rpc.connect_rpc.request.metadata | rpc.request.metadata | v1.39.0 (same for response.metadata) |
+| rpc.jsonrpc.request_id / rpc.jsonrpc.version | jsonrpc.request.id / jsonrpc.protocol.version | v1.39.0 |
+| rpc.client.duration / rpc.server.duration (metrics, ms) | rpc.client.call.duration / rpc.server.call.duration (s) | v1.39.0 |
+| messaging.operation | messaging.operation.type (value `publish` -> `send`, v1.28.0) | v1.26.0 |
+| messaging.client_id | messaging.client.id | v1.26.0 |
+| messaging.kafka.consumer.group, messaging.eventhubs.consumer.group | messaging.consumer.group.name | v1.27.0 |
+| messaging.servicebus.destination.subscription_name | messaging.destination.subscription.name | v1.27.0 |
+| messaging.kafka.message.offset | messaging.kafka.offset | v1.27.0 |
+| messaging.kafka.destination.partition | messaging.destination.partition.id | |
+| messaging.destination_publish.name / .anonymous | (removed) | |
+| peer.service | service.peer.name (+ service.peer.namespace) | deprecated v1.39.0; Tempo service-graph defaults still use `peer.service` |
+| enduser.role | user.roles | |
+| enduser.scope | (removed) | |
+| error.message | domain-specific message attr (e.g. `feature_flag.error.message`) | deprecated v1.40.0 |
+| exception.escaped | (removed) | exception recording on span events being replaced by logs (v1.40.0 `OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN`) |
+| k8s.pod.labels | k8s.pod.label.<key> | |
+| gen_ai.* | moved to separate semantic-conventions-genai repo | v1.42.0 |
+| graphql.document | still defined but Opt-In (sensitive/high cardinality) | v1.41.0 |
+
+Tempo-side observations tied to renames (from the Tempo/Grafana docs read): span-metrics example dimensions still list `http.method`, `http.status_code`; service-graph `peer_attributes` default `peer.service, db.name, db.system, db.system.name`; Tempo best-practices page examples use `http.url`, `k8s.namespace`, `k8s.cluster`, `k8s.container_name` (stale, undated).
+
+## 4. Gaps (nothing published, or only partial)
+- No Grafana-published numeric thresholds for: distinct values per attribute, distinct span names per service, distinct tag names per scope, label values per Pyroscope label, active series per dimension. Only qualitative ("high", "low", "handful") and the tag-values 1 MB query cap. Any threshold chosen is INFERENCE.
+- No Grafana/Tempo statement of which `service.name` values count as "unknown" for traces or App O11y (only the semconv SDK fallback and Loki's `unknown_service` label default).
+- Traces Drilldown: only "Tempo 2.6+ with TraceQL metrics configured"; no required attribute list.
+- Adaptive Traces: no statement whether span metrics are computed before or after sampling; no rule about required attributes beyond the diversity fingerprint list.
+- Cloud Traces: no published per-stack list of dedicated columns, no self-serve procedure found for Cloud (INFERENCE: via support/overrides), no published tag-count limits. "Maximum number of resource attributes / span attributes: Limits are on the size of the traces."
+- No Grafana doc stating the migration deadline for `deployment.environment` -> `.name`; App O11y accepts both.
+- Pyroscope: no published cardinality threshold or tag-count guidance beyond limits in the reference config; Cloud's profile limits are not in the usage-limits page (only metrics/logs/traces tables).
+- PII/sensitive-attribute guidance from Grafana is thin (Tempo OOM page and reduce-trace-size page); semconv only flags `enduser.id`, `url.full`, `db.query.text`, `exception.message` as sensitive. Name/regex lists in T-20/T-21 are INFERENCE.
+- Messaging semconv is still "development" in v1.44.0, so no stable compliance target exists; RPC is release_candidate.
+- No published way to read per-attribute block size via the HTTP API (dedicated-column candidate selection needs `tempo-cli analyse blocks`).
+
+## 5. Conflicts and version notes
+- Max trace size in Cloud: usage-limits page lists `max_bytes_per_trace` 3,000,000 (https://grafana.com/docs/grafana-cloud/billing-and-usage/usage-limits); OTLP format page says "5 megabytes (MB) per trace, ingest rate of 15 MB/s and bursts of 20 MB/s"; Tempo OSS default 5,000,000; ingestion rate in usage-limits table is 500,000 B/s. Treat the per-stack live limit (`grafanacloud_traces_instance_limits`) as authoritative.
+- `max_attribute_bytes`: distributor config default 2048 and Cloud docs say truncation at 2 KB; the per-tenant ingestion override block in the same configuration reference says `default = 0` (unlimited). Do not infer truncation is off from the override alone.
+- Dedicated columns: vParquet4 10 string per scope (Tempo 2.x/older docs, e.g. v2.8) vs vParquet5 20 string + 5 int (default in Tempo 3.1). Block version per stack decides the limit.
+- Environment attribute: older Grafana pages list only `deployment.environment`; newer quality/KG pages prefer `.name`. Semconv: deprecated v1.27.0, new name stable v1.41.0 (2026-04-28).
+- Tempo/Grafana docs lag semconv: `peer.service` (deprecated v1.39.0, 2026-01-12) remains a Tempo default; Adaptive Traces diversity list has `rpc.grpc.status_code` (deprecated v1.39.0).
+- Loki OSS default index labels list only `deployment.environment.name`; Cloud Mimir promotion list has both names.
+- Grafana "metrics labels under 30 per series" vs Loki "15 index labels" vs Pyroscope default 30 label names: different limits per signal.
+
+## 6. Source index
+- App O11y instrumentation quality: https://grafana.com/docs/grafana-cloud/observe-and-act/monitor-applications/application-observability/setup/instrumentation-quality/
+- App O11y resource attributes: https://grafana.com/docs/grafana-cloud/observe-and-act/monitor-applications/application-observability/setup/resource-attributes/
+- KG instrumentation (required metrics/labels): https://grafana.com/docs/grafana-cloud/observe-and-act/monitor-applications/application-observability-kg/setup/instrumentation.md
+- KG prerequisites (environment): https://grafana.com/docs/grafana-cloud/platform/knowledge-graph/get-started/prerequisites/
+- Cloud OTLP format considerations (promoted attrs, trace attr limits): https://grafana.com/docs/grafana-cloud/send-data/otlp/otlp-format-considerations/
+- Tempo span metrics: https://grafana.com/docs/tempo/latest/metrics-from-traces/span-metrics/span-metrics-metrics-generator/
+- Tempo service graphs: https://grafana.com/docs/tempo/latest/metrics-from-traces/service_graphs/
+- Tempo cardinality: https://grafana.com/docs/tempo/latest/metrics-from-traces/metrics-generator/cardinality/
+- Tempo metrics-generator troubleshooting: https://grafana.com/docs/tempo/latest/troubleshooting/metrics-generator/
+- Tempo dedicated columns: https://grafana.com/docs/tempo/latest/operations/dedicated_columns/ ; schema: https://grafana.com/docs/tempo/latest/operations/schema/
+- Tempo configuration reference: https://grafana.com/docs/tempo/latest/configuration/ ; API: https://grafana.com/docs/tempo/latest/api_docs/
+- Tempo OOM / large attributes: https://grafana.com/docs/tempo/latest/troubleshooting/out-of-memory-errors/
+- Tempo best practices: https://grafana.com/docs/tempo/latest/getting-started/best-practices/
+- Cloud Traces metrics-generator: https://grafana.com/docs/grafana-cloud/send-data/traces/configure/metrics-generator/ ; reduce trace size: https://grafana.com/docs/grafana-cloud/observe-and-act/send-data/traces/configure/reduce-trace-size/
+- Adaptive Traces diversity/volumetric: https://grafana.com/docs/grafana-cloud/observe-and-act/adaptive-telemetry/adaptive-traces/manage-recommendations/diversity-policy/
+- Signals together / key concepts: https://grafana.com/docs/grafana-cloud/telemetry-signals/use-signals-together/key-concepts/
+- Loki labels and OTel: https://grafana.com/docs/loki/latest/get-started/labels/ , https://grafana.com/docs/loki/latest/send-data/otel/
+- Pyroscope: https://grafana.com/docs/pyroscope/latest/configure-client/ , .../configure-client/grafana-alloy/java/ , .../configure-client/trace-span-profiles/ , .../configure-server/reference-configuration-parameters/ , .../reference-server-api/
+- Traces Drilldown access: https://grafana.com/docs/grafana/latest/visualizations/simplified-exploration/traces/access/
+- OTel semconv v1.44.0 (https://github.com/open-telemetry/semantic-conventions/releases/tag/v1.44.0): docs/general/naming.md, docs/http/http-spans.md, docs/db/database-spans.md, docs/rpc/rpc-spans.md, model/service/registry.yaml, model/*/deprecated/*.yaml; migration guides https://opentelemetry.io/docs/specs/semconv/non-normative/http-migration/ and .../db-migration/; span-name guidance https://opentelemetry.io/docs/specs/otel/trace/api/
+
+# Part 5: Professional Services best-practice-guides mining
+
+Repo: /Users/rob/repos/best-practice-guides (read-only mining; nothing edited). Root for all paths below: /Users/rob/repos/best-practice-guides/guides
+
+## 1. TL;DR
+
+- The repo is ~1,100 files, 2 trees: `public/` (customer-facing PDFs) and `internal/` (PS-only). Only ONE labelling guide is internal: `internal/loki/label-analyzer-skill/`. Everything else relevant is public.
+- Git history is a single squashed commit (2026-10-01) so `git log -1 --format=%cs` is 2026-10-01 for every file and tells you nothing about freshness. Use content staleness cues instead (e.g. "Grafana Agent Flow", "only Grafana Agent supports structured metadata").
+- The label-analyzer-skill guide is NOT the methodology itself. It is a how-to-run-it wrapper. The methodology lives upstream in the public `grafana/skills` repo (`skills/grafana-cloud/loki-label-analyzer/SKILL.md` + 4 reference files, last commit 2026-07-24), which I read read-only with `gh api`. It is a prompt/skill (no scripts, no numeric scoring, no code). Scoring is a qualitative banded table (cardinality band -> keep/evaluate/demote/never).
+- Upstream also has `prometheus-label-strategy`, `prometheus-cardinality-troubleshooter`, `adaptive-metrics`, `cost-management`, `dpm-finder` skills (only first ~260 lines of the first two read). `prometheus-label-strategy` is the metrics twin and CONTRADICTS the PS cost-optimization guide on label dropping (see section 3 "Conflicts").
+- PS guidance is strongest and most checkable for Loki (labels, structured metadata, stream/chunk diagnostics) and for Prometheus cardinality (series maths, thresholds 100/1,000 values). It is thin or absent for profiles (Pyroscope dir is empty), Tempo attribute design, OTel semantic-convention compliance (one line each), Adaptive Logs/Traces label guidance, and any numeric cardinality thresholds for traces.
+- Numbers that exist and are scanner-usable: label value counts 100+ (investigate) / 1,000+ (likely problematic); focus on metrics with 1,000+ series / top 10 by series; dynamic Loki label values "single digits or tens"; Loki chunk-size diagnostic `total_bytes / cache_chunk_req` (KB not MB = over-split); histogram multiplier 10-20x (PS) or bucket+3 (upstream); attribution tracker defaults max_cardinality 10000 (Tempo, Mimir) and 2000 (Loki example), max 2 Mimir attribution labels.
+
+## 2. Inventory
+
+All dates are 2026-10-01 (single-commit repo) unless stated.
+
+### Internal
+| Path | Summary |
+|---|---|
+| /Users/rob/repos/best-practice-guides/guides/internal/loki/label-analyzer-skill/ (00-metadata, 01-intro, 02-prep-context, 03-claude-code, 04-grafana-assistant, 05-customer-handoff, 98-appendix-tools, 99-references) | SA runbook for running the `loki-label-analyzer` skill (Claude Code or Grafana Assistant): when to use, inputs to gather, invocation prompts, report format, handoff/sequencing, verification metrics. |
+| /Users/rob/repos/best-practice-guides/guides/internal/datadog/migration/12-tags.md | PS tooling (`tags-download`, `tags-mappings`) that extracts Datadog tags from dashboards/monitors into `tagmap.csv`. Tooling doc, little guidance. |
+
+### Public: Loki
+| Path | Summary |
+|---|---|
+| /Users/rob/repos/best-practice-guides/guides/public/loki/label-strategies/ (01-intro, 02-label-best-practices, 03-common-labels, 04-log-metadata, 05-practical-label-example) | THE core PS label guide that the skill encodes. Cardinality/selectivity, 12 best-practice headings, common label set, k8s good/bad labels, structured metadata and embedding, 98.4% worked example. |
+| .../public/loki/query-administration/02-limits-config.md, 04-lbac.md, 06-logcli.md | `cardinality_limit`, `required_labels`, `minimum_labels_number`; LBAC; `logcli series --analyze-labels` label cardinality discovery. |
+| .../public/loki/query-logs/01-intro.md, 04-query-stages.md | `metrics.go` fields; chunk size diagnostic tied back to labels. |
+| .../public/loki/log-optimizations/01-log-best-practices.md, 04-metrics.md | Remove duplicated level from line once it is a label; `stage.metrics` inherits all labels (cardinality risk). |
+| .../public/loki/helm-install/03-helm-values.md | Persona limits (`max_global_streams_per_user: 10e3`, `minimum_labels_number: 2`), `allow_structured_metadata`. |
+| .../public/loki/cost-attribution/ (01-intro, 02-custom-usage-tracker) | Enterprise `custom_usage_trackers` per-label usage. |
+| .../public/grafana/datasource-strategies-and-best-practices/01-lbac.md, 03-loki.md | LBAC via access policies; `X-Loki-Query-Limits` requiredLabels (commented out in source, API-only). |
+
+### Public: metrics / cost / alerting
+| Path | Summary |
+|---|---|
+| .../public/grafana-cloud/cost-optimization/06-metrics-cardinality-optimization.md | Core metrics cardinality guide: thresholds, dangerous labels, drop vs aggregate, Cardinality Management dashboards, scenarios (pod, path, tenant, span_name, http_route). |
+| .../public/grafana-cloud/cost-optimization/02,03,05,07,08,09 | Active series, Adaptive Metrics (40-60%), histograms (native, 80-90%), strategies, logs (Adaptive Logs, level policy), traces (Adaptive Traces 75-90%, sampling). |
+| .../public/irm/alerting/alerting-on-high-cardinality/ (01-04, 99-cardinality-rules.md) | Queries and cardinality API (`/api/v1/cardinality/label_names|label_values`) plus alert-rule JSON with example thresholds. |
+| .../public/metrics/query-strategies/05-high-cardinality-metrics.md, 02-utilizing-specific-label-filters.md | Query-side cardinality and selector guidance. |
+| .../public/mimir/cost-attribution/ (01-intro, 02-cost-attribution), .../public/tempo/cost-attribution/ (01-intro, 02-cost-attribution) | Built-in cost attribution config for Mimir and Tempo. |
+| .../public/cloud-providers/aws/aws-metrics-collection/ (03, 06, 07-cost-and-cardinality, 08) and .../aws/ec2-tag-label-mapping/ (01-04) | AWS tag to label policy: small approved set, required tag set, relabel at scrape vs join at query. |
+| .../public/collectors/servicenow-cmdb-into-alloy/ (01-04) | CMDB fields to labels; choosing labels, labeldrop of raw columns, normalization, fail-safe. |
+| .../public/migrations/datadog/migration-overview/08-mappings.md | Datadog tag vs Prometheus label semantics (case, curly braces), tag injection. |
+
+### Public: traces / OTel / collectors / correlation
+| Path | Summary |
+|---|---|
+| .../public/grafana/correlations-metrics-logs-traces/ (01-08) | Correlation: identical labels from same SD, exemplars, trace ID in logs, traces-to-logs tag mapping, span metrics. |
+| .../public/migrations/apm-migration/03-telemetry-collection.md, 05-faq.md, 06-troubleshooting.md | Minimum resource attributes, span-metrics series limit, normalizing `http.route`/`span.name`, metrics-generator limits and PromQL to monitor them. |
+| .../public/collectors/alloy/instrumentation-playbooks/03-runbook-opentelemetry.md | OTLP via Alloy: resource attribute pruning, copying resource attrs to datapoint attrs, `resource_to_telemetry_conversion` warning, `disable_high_cardinality_metrics`. |
+| .../public/collectors/otel/multistack_app_o11y/02-collector_setup.md | otelcol-contrib: spanmetrics/servicegraph dimensions list, resource attribute deletes. |
+| .../public/collectors/otel/instrumentation_guides/python/01-python.md | Semantic attributes, baggage, log-trace correlation (generic). |
+| .../public/grafana-cloud/app-o11y/02-java.md, 03-dotnet.md | Resource attribute env examples (.NET one is malformed, see conflicts). |
+| .../public/tempo/traceql/01-best-practices.md | Explicit `span.`/`resource.` scope is ~4x faster; follow semantic conventions. |
+| .../public/collectors/agent/helm-install/08-logs-overview.md, 02-methodology.md | Legacy (Agent/Promtail) log pipeline: labelallow default list, filename normalization, level default `unknown`. |
+| .../public/collectors/k8s-meta-monitoring-overview/03-k8s-configuration.md | k8s-monitoring `labelsToKeep` and `k8sattributes` metadata list (meta-monitoring context). |
+| .../public/collectors/alloy/ha-deployment/03-clustering-concepts.md | Target labels must be identical across cluster nodes. |
+| .../public/collectors/alloy-vs-otel-collector/03,04 | Preserve job/instance labels; `prometheusreceiver` translation can alter names/labels; audit cardinality at migration. |
+| .../public/kubernetes/k8s-monitoring-openshift/01-overview.md | `dropEmptyImageLabels` default silently drops `container_network_*`. |
+
+## 3. Checkable rules
+
+Signals: L=logs, M=metrics, T=traces, P=profiles, O=OTel generic, A=attribution/cost. Short quotes are verbatim.
+
+### Logs (Loki)
+| ID | Sig | Rule | Threshold | Source and quote |
+|---|---|---|---|---|
+| PS-01 | L | Dynamic label values must be bounded and small | "single digits or tens"; 1,000 hosts acceptable for a static-ish label like instance | /Users/rob/repos/best-practice-guides/guides/public/loki/label-strategies/02-label-best-practices.md "Keep the set of possible values for any dynamic label small, ideally within single digits or tens." |
+| PS-02 | L | Never unbounded IDs as labels (user_id, request_id) | n/a | same file: "unique identifiers (user_id, request_id), can drastically increase the size of your index" |
+| PS-03 | L | A dynamic label earns its place only if used in most queries | "used 9 out of 10 queries" | .../loki/label-strategies/03-common-labels.md "Will this label be used 9 of out 10 queries consistently?" |
+| PS-04 | L | Label names and values must be consistent and case-normalized; enforce in CI/pipeline | `level` normalized to info/warn/error/debug | 02-label-best-practices.md "Case sensitivity ... prevent increased cardinality"; 03-common-labels.md normalize_log_level pipeline |
+| PS-05 | L | `pod` must not be an index label; use `workload` = `{controller_kind}/{controller_name}`; keep pod as structured metadata or embedded in line | n/a | 03-common-labels.md "Using `pod` as a label is a poor choice, due to the high-cardinality and transient nature of pods" |
+| PS-06 | L | `filename`: drop or normalize on k8s (strip pod name suffix/uid/rotation); strip date suffixes on hosts | target form `/var/log/pods/{namespace}/{controller_name}/{container}.log` | 03-common-labels.md "the `filename` label should be dropped or at the very least normalized" |
+| PS-07 | L | Journal logs: keep only `systemd_unit` (as `unit`) plus `instance` | 16 `__journal__*` labels, 1 kept | 03-common-labels.md "the only recommended label to keep would be 'systemd_unit'" |
+| PS-08 | L | End every `loki.process` with `stage.label_keep` allowlist | n/a | 03-common-labels.md "best practice to use `stage.label_keep` as the final step" |
+| PS-09 | L | Recommended common set | app, classification, source, cluster, datacenter, env, job, level, region, squad, team | 03-common-labels.md "Recommended Common Labels" |
+| PS-10 | L | k8s good labels: container, namespace, service, workload; bad: pod, raw filename | n/a | 03-common-labels.md Good/Bad Labels |
+| PS-11 | L | Static aggregate labels (owner/squad/category/classification/source) are the LBAC selector, avoid per-file allowlists and regex | n/a | 02-label-best-practices.md "Use Static Labels"; 04-lbac.md |
+| PS-12 | L | Soft enforcement: inject `unknown` for missing required labels before hard rejecting | n/a | 02-label-best-practices.md "Inject missing labels with placeholder values like unknown" |
+| PS-13 | L | Structured metadata for high-card, occasionally queried fields (pod, node, process_id, version, restarted, image, tag, trace IDs, user IDs); needs `allow_structured_metadata`; embed in line (`stage.template`/`stage.pack`) when unavailable | Loki 2.9+ (skill) | .../loki/label-strategies/04-log-metadata.md. STALE: "only the Grafana Agent has support for writing structured metadata" |
+| PS-14 | L | Level label default `unknown` when undetectable; TRACE/DEBUG dropped by default, INFO kept | n/a | .../collectors/agent/helm-install/08-logs-overview.md steps 6, 10-12 |
+| PS-15 | L | Legacy Agent pipeline allowlist (starting point only) | cluster, component, container, deployment, env, filename, instance, job, level, log_type, namespace, region, team, service | 08-logs-overview.md step 19. NOTE includes `filename`, which PS-06 says to drop/normalize. |
+| PS-16 | L | Remove duplicated data from the line once extracted to a label/SM (e.g. level) | n/a | .../loki/log-optimizations/01-log-best-practices.md "Remove Duplicate Values" |
+| PS-17 | L | `stage.metrics` copies all stream labels onto metrics; `label_keep` first; budget series as labels x values x instances | n/a | .../loki/log-optimizations/04-metrics.md; internal/.../02-prep-context.md |
+| PS-18 | L | Chunk size diagnostic: avg chunk = `total_bytes / cache_chunk_req`; KB/hundreds of bytes means labels over-split streams | MB range healthy | .../loki/query-logs/04-query-stages.md "a low average value (a few hundred bytes or kilobytes instead of megabytes)" |
+| PS-19 | L | Discover candidate high-card labels with `logcli series --analyze-labels --since 1h '{}'` (Label Name, Unique Values, Found In Streams) | example flags pod 8,673, version 472 | .../loki/query-administration/06-logcli.md |
+| PS-20 | L | Query-side guardrails | `minimum_labels_number: 2`; `required_labels` e.g. cluster,namespace,container (k8s), instance,filename (VM), level | .../loki/query-administration/02-limits-config.md; .../loki/helm-install/03-helm-values.md; datasource-strategies/03-loki.md (commented out in source) |
+| PS-21 | L | Stream limits / index cardinality limit | `cardinality_limit` default 100000; `max_global_streams_per_user` 10e3 for 20MB/s persona; customer example 150k/user | 02-limits-config.md; helm-install/03-helm-values.md; internal/.../03-claude-code.md |
+| PS-22 | L | Alerts need their own label strategy | n/a | 02-label-best-practices.md "Include Alerts in Label Strategy" |
+
+### Metrics
+| ID | Sig | Rule | Threshold | Source and quote |
+|---|---|---|---|---|
+| PS-23 | M | Prioritise by impact: top 10 metrics by active series; metrics with 1,000+ series; labels with 100+ values on high-volume metrics | 1,000+ series; 100+ values | .../grafana-cloud/cost-optimization/06-metrics-cardinality-optimization.md "Focus your efforts on: ... Metrics consuming 1,000+ active series; Labels with 100+ unique values" |
+| PS-24 | M | Red flags per label | 100+ values = investigate; 1,000+ = likely problematic; continuously growing = unbounded | same file, Dashboard 2 "Red Flags" |
+| PS-25 | M | Dangerous label patterns: user/customer ID, request ID, IP, email, timestamp, full URL, error message, span_name, http_route with IDs | n/a | same file "Dangerous Label Patterns" |
+| PS-26 | M | Safe alternatives: status codes, path templates (`/api/users/:id`), bounded categories/tiers (`tenant_tier`), exemplars | n/a | same file "Safe Alternatives", Scenario 3 |
+| PS-27 | M | Series = product of label cardinalities; histograms multiply by bucket count (10-20+/combination); native histograms 80-90% reduction | 15 buckets x 100 combos = 1,500 | .../cost-optimization/05-metrics-histogram-optimization.md; 06 "Total series = 4 x 100 x 10 = 4,000" |
+| PS-28 | M | Label drop caveat: dropping a label that distinguishes series creates duplicates; aggregate with a recording rule instead | n/a | 06 "Removing a label can cause duplicate series, which Prometheus will reject" |
+| PS-29 | M | Remediation order: fix instrumentation > relabel labeldrop (only if no dupes) > recording rules > normalize values > Adaptive Metrics | n/a | 06 "Optimization Strategies"; 07-metrics-strategies.md "Fix at Source (Recommended)" |
+| PS-30 | M | Adaptive Metrics expectation and unused-metric prioritisation | 40-60% active series reduction; integrations 60-80%; `mimirtool` cardinality > 100 first; 20-60% of metrics used in dashboards | 03-metrics-active-series-optimization.md |
+| PS-31 | M | Count per-label unique values / top metrics by label with PromQL or cardinality API | `count(count by(label)({__name__=~".+"}))`; `/api/v1/cardinality/label_names|label_values` | 06; .../irm/alerting/alerting-on-high-cardinality/03-count-labels-queries.md |
+| PS-32 | M | Example alert thresholds for the cardinality API/alerts (illustrative, sample JSON) | label_names count > 100; metric count > 500; series > 30,000; monthly active-series budget sample 200 | .../alerting-on-high-cardinality/99-cardinality-rules.md |
+| PS-33 | M | DPM > 1 per series per stack = investigate scrape interval | DPM > 1 | .../alerting-on-high-cardinality/04-usage-insights.md |
+| PS-34 | M | Metric names: single-word app prefix, unit suffix, one logical quantity across labels | n/a | .../correlations-metrics-logs-traces/02-metrics-to-logs.md |
+| PS-35 | M | AWS/CMDB-sourced labels: small approved set; avoid request IDs, deployment IDs, full names, timestamps, random suffixes, owner emails; required set environment, team, service, application, cost_center, owner; review cardinality after first rollout | n/a | .../aws-metrics-collection/07-cost-and-cardinality.md, 06-large-scale-multi-account.md |
+| PS-36 | M | "A label exists to find series, an attribute exists to explain them"; bounded enumerations only; never sys_id, timestamps, free text, ip_address; lowercase + synonym-collapse values; `labeldrop` raw columns; fallback `unknown` | n/a | .../servicenow-cmdb-into-alloy/04-validation.md "Choosing Labels" |
+| PS-37 | M | Target labels identical across Alloy cluster nodes (no node-specific label in discovery) | n/a | .../alloy/ha-deployment/03-clustering-concepts.md |
+| PS-38 | M | Preserve integration-expected `job`/`instance` labels when migrating collectors | n/a | .../alloy-vs-otel-collector/04-migration-path.md |
+| PS-39 | M | `cadvisor.metricsTuning.dropEmptyImageLabels` default true silently drops container_network_* on OpenShift | n/a | .../k8s-monitoring-openshift/01-overview.md |
+
+### Traces / OTel / attributes
+| ID | Sig | Rule | Threshold | Source and quote |
+|---|---|---|---|---|
+| PS-40 | O | Minimum resource attributes | service.name, deployment.environment, service.instance.id, service.version (examples also service.namespace) | .../migrations/apm-migration/03-telemetry-collection.md "At a minimum, Grafana Cloud recommends `service.name`, `deployment.environment`, `service.instance.id`, and `service.version`" |
+| PS-41 | O | `service.name` is the most important: populates App O11y and correlates traces to logs | n/a | same file |
+| PS-42 | O | Prune noisy resource attributes at collector | delete k8s.pod.start_time, os.description, os.type, process.command_args, process.executable.path, process.pid, process.runtime.description/name/version | .../alloy/instrumentation-playbooks/03-runbook-opentelemetry.md; .../otel/multistack_app_o11y/02-collector_setup.md |
+| PS-43 | O | Do not enable `resource_to_telemetry_conversion`; copy only chosen resource attrs (deployment.environment, service.version) to datapoint attrs via transform | n/a | runbook-opentelemetry.md "Setting `resource_to_telemetry_conversion` to true would convert all of them to Prometheus labels, which may not be what you want" |
+| PS-44 | O | `otelcol.exporter.prometheus` `disable_high_cardinality_metrics` strips IP/port attributes | n/a | same file |
+| PS-45 | T | Span-metrics dimension set | service.namespace, service.version, deployment.environment, k8s.cluster.name, k8s.namespace.name, cloud.region, cloud.availability_zone | .../otel/multistack_app_o11y/02-collector_setup.md |
+| PS-46 | T | Span-derived metric labels: normalise `span.name` and `http.route` (do not drop); use `http.route` template; strip query strings; drop user.id/request.id/instance.id | n/a | .../apm-migration/05-faq.md "Key attributes like `span.name` and `http.route` should be normalized rather than dropped" |
+| PS-47 | T | Monitor generator series limit | `grafanacloud_instance_active_spanmetrics_series`; `grafanacloud_traces_instance_metrics_generator_series_limit_percentage_used`; error `metrics_generator_active_series limit reached` | .../apm-migration/06-troubleshooting.md |
+| PS-48 | T | Metrics-generator: only SERVER/CLIENT/PRODUCER/CONSUMER spans counted; INTERNAL-only services invisible | n/a | 06-troubleshooting.md |
+| PS-49 | T | Use explicit `span.`/`resource.` scope in TraceQL | ~4x faster (100 ms vs 400 ms) | .../tempo/traceql/01-best-practices.md |
+| PS-50 | O | Use OTel semantic-convention names and matching types; baggage only for essential attrs | n/a | tempo/traceql/01-best-practices.md section 5; otel python guide "Use Semantic Attributes" (generic, no checks) |
+| PS-51 | T | Large span attributes (HTTP bodies, SQL, serialized objects) removed/truncated | Tempo rejects trace payloads > 50 MB | 06-troubleshooting.md |
+| PS-52 | O | k8sattributes metadata set | k8s.namespace/pod/deployment/statefulset/daemonset/cronjob/job/node name, pod.uid, container.name, container.image.name/tag | .../k8s-meta-monitoring-overview/03-k8s-configuration.md |
+
+### Correlation
+| ID | Sig | Rule | Source and quote |
+|---|---|---|---|
+| PS-53 | M/L | Prometheus and Loki labels must be identical (same SD/relabeling) so metric -> logs works | .../correlations-metrics-logs-traces/02-metrics-to-logs.md "use the auto discovery feature ... same labels as for the metrics" |
+| PS-54 | M/T | Exemplars carry trace ID; Time series panel + `histogram_quantile` needed | 04-metrics-to-traces.md |
+| PS-55 | L/T | Trace ID must be in log lines; Loki derived fields link to Tempo | 05-logs-to-traces.md |
+| PS-56 | T/L | Trace-to-logs default tags cluster, hostname, namespace, pod; map `service.name` to `service` | 06-traces-to-logs.md |
+| PS-57 | T/M | Trace-to-metrics via span metrics; tags map span attribute to label name | 07-traces-to-metrics.md |
+
+### Attribution (cost)
+| ID | Sig | Rule | Threshold | Source and quote |
+|---|---|---|---|---|
+| PS-58 | A/T | Tempo `cost_attribution` | `max_cardinality: 10000`, `stale_duration: 15m0s`, dimensions `service.name` | .../tempo/cost-attribution/02-cost-attribution.md |
+| PS-59 | A/M | Mimir `cost_attribution_labels` (experimental) | example "namespace"; `max_cost_attribution_labels_per_user: 2`; `max_cost_attribution_cardinality_per_user: 10000`; cooldown 0s; endpoint `/usage_metrics`; alt `active_series_custom_trackers` | .../mimir/cost-attribution/02-cost-attribution.md |
+| PS-60 | A/L | Loki Enterprise `custom_usage_trackers` | `max_cardinality: 2000`, `stale_timeout: 10m`, labels [job]; `purge_period: 10m` | .../loki/cost-attribution/02-custom-usage-tracker.md ("isn't officially documented") |
+| PS-61 | A | Standardise team/environment/cost labels before onboarding; use cost attribution per team and set budgets | n/a | .../cost-optimization/07-metrics-strategies.md "Team-Based"; AWS 07 |
+
+### Conflicts, contradictions and stale items
+1. labeldrop of distinguishing labels. PS .../cost-optimization/06 Strategy 2 and Scenario 1 recommend `labeldrop` of `pod|pod_name` (with a duplicate-series warning). Upstream `prometheus-label-strategy` and `prometheus-cardinality-troubleshooter` skills say NEVER drop a label that makes a series unique (counter-reset merge, inflated DPM); aggregate with Adaptive Metrics instead. Upstream is stricter. Treat PS-28/PS-29 as superseded by the stricter rule for any scanner recommendation.
+2. `pod` for logs vs metrics. Loki guide says `pod` is a bad index label (PS-05). Metrics skill (upstream) says keep `pod` for k8s metrics. k8s meta-monitoring `labelsToKeep` includes `pod` for logs (.../k8s-meta-monitoring-overview/03-k8s-configuration.md). Rule must be signal-specific.
+3. `filename`: PS-06 says drop/normalize; PS-15 default allowlist includes it.
+4. Stale: "only the Grafana Agent" supports structured metadata (04-log-metadata.md); Grafana Agent/Flow/Promtail naming throughout; "Loki ... structured metadata 2.9+".
+5. .../public/grafana-cloud/app-o11y/03-dotnet.md sets `OTEL_RESOURCE_ATTRIBUTES=service_name:webmvc,service_namespace:eshop,deployment_environment:dev`, wrong OTel format (needs dotted keys and `=`). Java example is correct.
+6. .../apm-migration/06-troubleshooting.md "normalize" snippet uses `merge_maps(attributes, {"user.id": "{user_id}"}, "upsert")`, which writes a literal constant; works only as a dimension collapse, not real normalisation.
+7. .../cost-optimization/06 "Actual: 50,000 active series due to Prometheus limits" is unsupported; .../09-traces-optimization.md example math ($2.15k -> $750 but "Savings: $350/month"). Do not copy these numbers.
+8. .../ec2-tag-label-mapping/02 example promotes the AWS `Name` tag to `instance_name`, which conflicts with AWS 07's "avoid full names".
+9. Alerts on cardinality: Grafana Cloud Cardinality dashboards cannot be alerted on (PS .../alerting-on-high-cardinality/01-introduction.md); must use queries/API.
+10. I did not compare against Grafana product docs. No PS text explicitly says it is stricter than or differs from Grafana docs; the only explicit disagreements found are internal to PS/upstream skills (items 1-3).
+
+## 4. label-analyzer-skill methodology (detailed)
+
+### What the internal guide is
+/Users/rob/repos/best-practice-guides/guides/internal/loki/label-analyzer-skill/ is a 7-chapter SA runbook for operating a published skill (`loki-label-analyzer` in `grafana/skills` marketplace, plugin `grafana-cloud@grafana-skills`). It contains NO scripts and no scoring code. It references only: `logcli`, Loki HTTP API, `helm template`, Claude Code plugin commands, Grafana Assistant, Logs Drilldown, `grafanacloud-usage` datasource, three PS Ops dashboards on ops.grafana-ops.net (Customer Dashboard / Datasource Managed (Ruler) / Grafana Managed Alerts LogQL Query Insights). Use cases: health check, "why is Loki slow", pre-migration design (Datadog/Splunk/ELK), cost or stream blowup, post-incident.
+
+### Inputs (02-prep-context.md)
+Required: (1) label set per log source (`logcli labels` or `GET /loki/api/v1/labels`); (2) cardinality per label (`logcli labels <name>`, `logcli series '{sel}'`, Logs Drilldown table); (3) 3-5 sample log lines per source (redacted); (4) access patterns (which labels dashboards/alerts filter on; derive from query logs or the PS Ops dashboards).
+High value: full Alloy pipeline (render with `helm template ... --show-only templates/alloy-logs/configmap.yaml`), a slow query plus its `metrics.go` line, `limits_config` (`allow_structured_metadata`, `max_global_streams_per_user`, `cardinality_limit`), Loki version (>=2.9 for SM), business goals (cost, speed, LBAC).
+Env: LOKI_ADDR, LOKI_USERNAME (numeric tenant), LOKI_PASSWORD (CAP token with `logs:read`). Optional Grafana MCP with a Viewer service account in `--disable-write`.
+Guardrail: do not evaluate without cardinality data; do not paste PII.
+
+### Heuristics (public SKILL.md, read via gh api; guide 04 summarises as "Good / Acceptable / Avoid / Never")
+Source: https://github.com/grafana/skills/blob/main/skills/grafana-cloud/loki-label-analyzer/SKILL.md (last commit 2026-07-24).
+- Core: stream = unique label set. "Dual impact": ingest path (more streams, bigger index) and query path (a high-card label absent from the selector forces a scan of all matching streams).
+- Key question: "Will this label be used in 9 out of 10 queries?" If no, not a label, EXCEPT protected correlation labels.
+- Cardinality scoring table:
+  - `service_name` / `deployment_environment` / `job`: any cardinality -> keep key, remediate values
+  - `env` 2-5 values: good; `level` 3-6: good; `namespace` tens: acceptable
+  - `instance`/`hostname` hundreds-thousands: evaluate access patterns
+  - `pod` thousands + transient: demote to structured metadata (migrate selectors first)
+  - `user_id`, `request_id`: unbounded, never a label
+- Access-pattern checklist: on protected allowlist? used in most queries? segments data as users think? would demotion break alerts/dashboards/LBAC/correlation? force scanning more data?
+- Static vs dynamic: static values cost nothing relative to scope; dynamic values must be single digits to low tens.
+- Consistency: case-sensitive names, normalised values, one naming convention (snake_case or camelCase).
+- Protected labels (references/protected-labels.md): `service_name` (OTel service.name), `deployment_environment` (deployment.environment), `job`. Never drop or omit from `label_keep`; fix values (UUID/ephemeral service_name -> stable service identity). `app`/`service` are aliases: align to `service_name`, do not delete without migration plan. Downstream-dependency guardrail required before any demote/rename.
+- Labels-to-avoid table: pod, user_id, request_id/trace_id, raw k8s filename, unnormalised level, UUID service_name values, any dynamically-named label key.
+- Performance diagnosis from `metrics.go`: 4 stages: queue (`queue_time`), index (`chunk_refs_fetch_time`), storage (`store_chunks_download_time`), execution (`duration - chunk_refs_fetch_time - store_chunks_download_time`); ideal is mostly execution time. Avg chunk size = `total_bytes / cache_chunk_req` (KB = over-split). `post_filter_lines << total_lines` = low selectivity.
+- 80/20 rule: demote `pod`; add `level` and always query it (can cut 94%+ scanned); normalise label values; normalise/demote k8s `filename`.
+- Quick wins also: add `container`/`workload`, `|=` over `|~`.
+- Recommended common labels: service_name, deployment_environment, job, app/service (legacy), env, cluster, region, level, team/squad, source, classification; k8s: service_name, namespace, container, workload; host: instance, filename (normalised); journal: instance, unit.
+- Enforcement: `stage.label_keep` as final stage always including protected labels; soft enforcement via `stage.template` injecting `unknown`.
+- Sequencing (internal guide 05): normalise level -> normalise filename -> add workload -> remove pod (last, after dashboards/alerts updated) -> enforce `label_keep` (lock schema, roll out behind flagged config). Non-prod first, watch a full day for value drift.
+
+### Scoring
+There is no numeric score. Output is a per-label verdict (Keep / Evaluate / Demote / Never; emoji tiers) with Used-in-Queries and Action columns. The Assistant paste-prompt names the four grades "Good / Acceptable / Avoid / Never".
+
+### Output format (fixed)
+`## Loki Label Strategy Audit` with sections: Disclaimer (mandatory verbatim text from references/disclaimer.md, must contain "Confidential Information of Raintank, Inc."), Summary, Downstream dependency check, Label Analysis table (Label | Cardinality | Used in Queries? | Verdict | Action), Estimated Impact (stream reduction, query perf, storage, correlation impact), Cost Impact Analysis, Recommended Label Set (must include protected labels), Migration Notes (Alloy stages, dual-write). Internal guide 05 adds a 3-doc handoff: `label-audit.md`, `label-audit-summary.md`, `label-migration-plan.md`.
+
+### Cost impact (references/cost-impact.md)
+Label hygiene alone gives $0 direct ingest savings (billing is compressed bytes); it reduces streams/index/query cost. Scenarios: A labels only (streams -65 to -90%), B + approved debug/trace drop (~15-30% volume, customer-approved, env-scoped), C + log-line compaction (additional ~5-15%; Istio example 38% ceiling). Monthly GB = bytes/s x 86400 x 30 / 1e9. Measurements (Grafana Cloud usage datasource): `grafanacloud_logs_instance_active_streams`, `grafanacloud_logs_instance_billable_bytes_received_per_second`, `grafanacloud_org_logs_overage{monetary="true"}`, `sum by (<attr_label>) (grafanacloud_logs_instance_attributed_bytes_received_per_second)` (unattributed share shows as `__missing__`; Cloud attribution uses up to two customer-configured labels). Verification metrics in internal guide 05: `loki_ingester_streams_created_total` rate down, `loki_distributor_lines_received_total` unchanged, chunk size up, p95 latency, grep dashboard JSON for removed labels. Most `loki_*` metrics are not visible to Cloud customers: use `grafanacloud-usage` and PS Ops dashboards.
+Log-line optimisation (references/log-line-optimization.md): strip inline timestamps (~30-34 bytes, ~6%), `stage.decolorize`, duplicate level, JSON nulls/placeholders/empties.
+
+### Reusable by an automated estate-wide scanner
+- Deterministic checks that map directly from the skill/guides, all read-only API:
+  - Loki `GET /loki/api/v1/labels` + `/label/<n>/values` (or `logcli series --analyze-labels '{}'` equivalent via `/loki/api/v1/series`): per-label unique value count and stream count; compare to bands (<=6 good, tens acceptable, hundreds-thousands evaluate, thousands/unbounded flag).
+  - Flag-by-name: pod, filename, user_id, request_id, trace_id, case-variant duplicates (`Level` vs `level`), level value set not in {info,warn,error,debug,...}, UUID-shaped `service_name` values, absence of `service_name`/`deployment_environment`/`job`.
+  - Total active streams vs limit: `grafanacloud_logs_instance_active_streams` against `grafanacloud_logs_instance_limits`.
+  - Unattributed share: `__missing__` in attributed bytes metric.
+- Metrics twin: per-label unique value counts via Mimir cardinality API `/api/v1/cardinality/label_names|label_values` and TSDB status; thresholds 100/1,000 values, 1,000+ series per metric; histogram `_bucket` amplification; churn (`created/removed`).
+- Traces: `grafanacloud_instance_active_spanmetrics_series` and `grafanacloud_traces_instance_metrics_generator_series_limit_percentage_used`.
+- Judgement-only (not scannable without access patterns): "used in 9 of 10 queries", downstream dependency (needs query logs/dashboard JSON). A scanner should emit these as "needs access-pattern input" rather than a verdict.
+- Do not copy: the Disclaimer text (Raintank confidential) is part of PS report output, not a scanner concern.
+
+### Upstream adjacent skills worth reading before building (outside this repo)
+`grafana/skills` `skills/grafana-cloud/prometheus-label-strategy/SKILL.md` (cardinality bands: env 2-5, job 5-50, cluster/region tens, namespace tens-low hundreds, instance hundreds-low thousands evaluate, pod keep, path only templated, version/image_tag churn -> info metric, user_id/request_id/trace_id/error_message never; histogram multiplier bucket+3, 11 default buckets -> 14x; "The One Rule" never labeldrop distinguishing label), `prometheus-cardinality-troubleshooter` (tsdb status endpoint, any label with >10K unique values is almost certainly a bug, growth > a few % per day red flag), `adaptive-metrics`, `cost-management`, `dpm-finder`. Only partially read.
+
+## 5. Gaps
+
+- Profiles: `/Users/rob/repos/best-practice-guides/guides/public/pyroscope/` is empty. Only a .NET env example `PYROSCOPE_LABELS=namespace:eshop,environment:dev` in .../grafana-cloud/app-o11y/03-dotnet.md. No profile label guidance.
+- Tempo/trace attributes: no guidance on span attribute cardinality, dedicated columns, `generic_dimensions`, or which attributes to index; only span-metrics dimension examples and TraceQL scoping.
+- OTel semantic conventions: one-line exhortations only; no registry/Weaver, no attribute-placement rules (resource vs span vs metric), no compliance checks. OTLP-to-Loki index label promotion (Grafana Cloud default promoted resource attributes) not covered.
+- Adaptive Logs / Adaptive Traces: cost-level only (Strategy 1), no label/attribute requirements or exemptions, no guidance on how labels affect Adaptive Logs patterns.
+- Mimir/Prometheus: no limits discussion beyond sample alert JSON (no per-metric series limit, `max_label_names_per_series`, label value length), no churn thresholds, no recording-rule label guidance.
+- Structured metadata: no cardinality/size limits, no guidance on SM key count, bytes (only `total_bytes_structured_metadata` field described).
+- K8s Monitoring Helm: only OpenShift and meta-monitoring pages touch labels; no recommended `labelsToKeep`/`podLogs` label policy for general use beyond the legacy Agent allowlist.
+- No machine-readable assets: no scripts, schemas, CSVs or code for label analysis anywhere in the repo (`tools/` is lint/build only).
+- No freshness signal (single squashed commit); the internal skill guide's own claims (e.g. "Alloy rather than legacy Agent") are consistent with upstream, but several public guides are Grafana-Agent-era.
+- Upstream SKILL.md changed after the internal guide was written (protected labels, mandatory disclaimer, cost-impact scenario cards are not described in the guide's 01-intro). Re-read upstream, not the guide, for current behaviour.
+
 ## Loop14 catalogue source re-verification (2026-10-07)
 
 Current uncached full-page passages below were successfully retrieved. Firecrawl CLI reported Not authenticated, so usage was keyless rather than attributed to a per-home key. This is an attribution/runtime-wiring caveat, not a failed content retrieval; no credentials were created or changed. Root accepts the observed dated passages, not a claim of authenticated lookup. Unverified rules remain excluded.
