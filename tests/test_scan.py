@@ -138,10 +138,16 @@ class LabelInventoryProcessEdgeTest(unittest.TestCase):
             if mode == "exception":
                 raise RuntimeError(value + suppressed)
             if signal == "metrics":
-                names_list = [ordinary, suppressed, "job"]
-                doc = {"label_names_count": 3, "label_values_count_total": 3,
-                       "cardinality": [{"label_name": n, "label_values_count": 1} for n in names_list],
-                       "untrusted_extra": value}
+                if names:
+                    names_list = [ordinary, suppressed, "job"]
+                    doc = {"label_names_count": 3, "label_values_count_total": 3,
+                           "cardinality": [{"label_name": n, "label_values_count": 1} for n in names_list],
+                           "untrusted_extra": value}
+                else:
+                    label = urllib.parse.parse_qs(parts.query)["label_names[]"][0]
+                    doc = {"series_count_total": 1, "labels": [{"label_name": label,
+                           "label_values_count": 1, "series_count": 1,
+                           "cardinality": [{"label_value": value, "series_count": 1}]}]}
             elif names:
                 names_list = [ordinary, suppressed, "service_name"]
                 doc = ({"scopes": [{"name": "resource", "tags": names_list}]} if signal == "traces" else
