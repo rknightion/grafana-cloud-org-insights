@@ -1,0 +1,196 @@
+{
+  "meta": {
+    "generated_at": "2026-10-07T05:37:14.865617+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_traces": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "slo_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "synthetic_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_integrations": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_alert_groups": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "faro_apps": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "ml_jobs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "cloud_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "pdc_networks": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "reports_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "playlists_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "library_panels_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_risk": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack158",
+      "Signal": "metrics",
+      "Label name": "synthetic_request_key",
+      "Name class": "ordinary",
+      "Name count": 1,
+      "Scope": "label",
+      "Distinct count": 10000,
+      "Count semantics": "exact",
+      "Series count": 1000,
+      "Stream count": null,
+      "Window": "head",
+      "Input state": "complete",
+      "Input reason": "none",
+      "Register truncated": 0,
+      "Catalogue version": 1,
+      "UUID shapes": 0,
+      "Hex ID shapes": 0,
+      "Epoch shapes": 0,
+      "URL with ID shapes": 0,
+      "Long value shapes": 0
+    },
+    {
+      " Stack": "stack158",
+      "Signal": "logs",
+      "Label name": "synthetic_session_key",
+      "Name class": "ordinary",
+      "Name count": 1,
+      "Scope": "label",
+      "Distinct count": 1,
+      "Count semantics": "exact",
+      "Series count": null,
+      "Stream count": 1000,
+      "Window": "24h",
+      "Input state": "complete",
+      "Input reason": "none",
+      "Register truncated": 0,
+      "Catalogue version": 1,
+      "UUID shapes": 1,
+      "Hex ID shapes": 0,
+      "Epoch shapes": 0,
+      "URL with ID shapes": 0,
+      "Long value shapes": 0
+    },
+    {
+      " Stack": "stack145",
+      "Signal": "metrics",
+      "Label name": "synthetic_request_key",
+      "Name class": "ordinary",
+      "Name count": 1,
+      "Scope": "label",
+      "Distinct count": 200,
+      "Count semantics": "exact",
+      "Series count": null,
+      "Stream count": null,
+      "Window": "head",
+      "Input state": "complete",
+      "Input reason": "none",
+      "Register truncated": 0,
+      "Catalogue version": 1,
+      "UUID shapes": 0,
+      "Hex ID shapes": 0,
+      "Epoch shapes": 0,
+      "URL with ID shapes": 0,
+      "Long value shapes": 0
+    }
+  ]
+}

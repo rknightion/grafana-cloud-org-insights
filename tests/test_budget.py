@@ -76,6 +76,23 @@ class BudgetShapeTest(unittest.TestCase):
         self.assertEqual(len(ADOPTION_CAPABILITIES), len(set(ADOPTION_CAPABILITIES)))
         self.assertEqual(spec.store, "mimir")
 
+    def test_labelling_shape_is_fifteen_per_stack_plus_one_estate_version(self):
+        from collector.pillars import labelling
+        specs = [s for s in CATALOGUE if s.pillar == labelling.PILLAR and s.store == "mimir"]
+        expected = {
+            "gcinsight_labelling_findings": {"stack": budget.STACK, "severity": len(labelling.SEVERITIES)},
+            "gcinsight_labelling_score": {"stack": budget.STACK, "signal": len(labelling.SIGNALS)},
+            "gcinsight_labelling_rules_evaluated": {"stack": budget.STACK, "signal": len(labelling.SIGNALS)},
+            "gcinsight_labelling_rules_passed": {"stack": budget.STACK, "signal": len(labelling.SIGNALS)},
+            "gcinsight_labelling_catalogue_version": {},
+        }
+        self.assertEqual({s.name: s.labels for s in specs}, expected)
+        self.assertEqual(sum(s.series for s in specs), 15 * budget.STACK + 1)
+        for spec in specs:
+            check_shape(spec)
+        self.assertEqual({s.name for s in CATALOGUE if s.pillar == labelling.PILLAR and s.store == "view"},
+                         set(labelling.VIEW_SCHEMAS))
+
     def test_technology_cardinality_tracks_the_registry(self):
         from collector import technology_registry
         self.assertEqual(budget.TECHNOLOGY, len(technology_registry.REGISTRY.entries))

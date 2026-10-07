@@ -942,6 +942,7 @@ DASHBOARDS = (
     ("gcinsight-ai", "AI usage"),
     ("gcinsight-dashboards", "Dashboard usage"),
     ("gcinsight-coverage", "Coverage"),
+    ("gcinsight-labelling", "Labelling"),
 )
 
 BANNER_MD = """\
@@ -975,6 +976,7 @@ BANNER_MD = """\
 # therefore claimed to be minutes old when their contents could be hours old.
 DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     "estate": (),
+    "labelling": ("label_inventory", "signal_inventory"),
     # The Adaptive Logs recommendation table is T2-owned while Adaptive Metrics/cardinality are T3.
     # Both ages belong on the page: showing only the 6-hourly data-plane age makes the daily named
     # recommendation queue look materially fresher than it is.
@@ -1042,6 +1044,22 @@ MIXED_BANNER_MD: dict[str, str] = {
 """,
 }
 
+LABELLING_BANNER_MD = """\
+
+- **Labelling is deterministic and uses bounded samples**, not an exhaustive inventory or privacy audit.
+  Mimir counts are head-window observations; other signals use 24h samples. Unknown populations,
+  missing inputs, truncation and deadlines reduce weighted rule coverage, not confidence in a zero.
+- **Score requires weighted coverage of at least 0.8 (or the configured stricter floor).** Read coverage
+  and catalogue version beside every score. Compare scores only within one catalogue version; current
+  scorecard coverage is a snapshot, not a historical coverage time series.
+- **Findings count failed rules, not all offending labels.** A severity count is absent below that
+  severity's coverage floor. Rules that can escalate severity remain in its denominator. Judgement,
+  unverified and parked rules are excluded; not-evaluated reasons remain visible in the rule tables.
+- **The register contains minimized names, classes and counts only**, at most 256 rows per signal and
+  stack. `at_least` is a lower bound, never an exact count. PII matches belong to `risk_label_hygiene`,
+  not this register; raw values and service/cluster identities are never shown here.
+"""
+
 LIVE_BANNER_MD = """\
 **Live from `grafanacloud-usage`: no scan, collector or S3 view; coverage and input age do not apply.**
 
@@ -1069,7 +1087,9 @@ def banner_elements(dashboard: str = "estate") -> dict[str, Any]:
 
     out: dict[str, Any] = {
         "_banner": text_panel("How to read this",
-                              BANNER_MD + MIXED_BANNER_MD.get(dashboard, "")),
+                              BANNER_MD + MIXED_BANNER_MD.get(dashboard, "") +
+                              (LABELLING_BANNER_MD if dashboard == "labelling" else "")),
+
         "_coverage": stat_panel(
             "Scan coverage",
             'gcinsight_scan_coverage_ratio{tier="t1"}',
@@ -1103,6 +1123,7 @@ def banner_elements(dashboard: str = "estate") -> dict[str, Any]:
 
 
 INPUT_LABELS = {
+    "label_inventory": "Bounded labelling sample",
     "ml_jobs": "Configured forecast jobs",
     "cloud_accounts": "Configured AWS accounts",
     "pdc_networks": "Configured PDC private networks",
@@ -1133,6 +1154,9 @@ INPUT_LABELS = {
 }
 
 INPUT_DESCRIPTIONS = {
+    "label_inventory": "Age of the default-off daily minimized labelling input. Head-window Mimir "
+                       "counts and bounded 24h samples are not exhaustive inventories; scores depend "
+                       "on weighted coverage and catalogue version, not the age alone.",
     "library_panels_inventory": "Age of the default-off daily configured library panel count, after "
                                 "same-token folder-wide coverage and complete paging. Not usage or "
                                 "rendered instances; unreadable stacks are absent, never zero.",

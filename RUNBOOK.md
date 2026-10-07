@@ -1,5 +1,183 @@
 # Runbook - estate insights platform
 
+## Label inventory policy interface (default off)
+
+Frozen handoff for composition: `Config.label_inventory_tunables` is the evaluator-ready
+mapping (`size_floor=100`, `static_multiplier=10`, `coverage_floor=0.8`, `thresholds={}`).
+The producer accepts `compose.build_all(..., label_inventory_tunables=None)` and passes
+that mapping to `label_rules.evaluate(..., tunables=...)` and threshold provenance.
+All composing tiers forward it; policy is not stored in the frozen private input schema.
+`Config.label_inventory_static_names` is a tuple passed via `probe_all(static_names=...)`
+to each `probe_stack`; `Config.label_inventory_budget_seconds` is passed as `max_seconds`.
+Defaults preserve the existing static-infrastructure names and 900-second ceiling.
+The source still takes at most a quarter of remaining T2 time after label_risk.
+
+Deployment environment: `GCINSIGHT_LABEL_INVENTORY_ENABLED` (default `0`),
+`GCINSIGHT_LABEL_INVENTORY_TUNABLES` (JSON evaluator mapping, default `{}`),
+`GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES` (JSON unique name list, at most 64 entries),
+and `GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS` (finite seconds, >0 and <=900).
+Coverage can be raised to 1 but never lowered below 0.8. Size floor and static multiplier
+are positive whole numbers. Threshold overrides must name catalogue rules, supply every
+existing band, stay positive and ordered, and cannot override published hard limits.
+Tuned bands retain the source URL as rationale but carry policy provenance.
+No setting adds a permission, widens a response cap or promises bounded process memory.
+The existing shared opt-out policy remains unchanged.
+
+Explicit consumers: old manifests with the entire new field group absent retain their old
+digests/defaults. Explicit regenerate/upgrade supplies the new defaults and new digests;
+check rejects partial groups. Regenerate explicitly fills missing new fields.
+Old digests remain valid with module-injected new fields only at their exact canonical defaults.
+Wire every new module variable from that projection before
+using the regenerated manifest; check never silently rewrites a deployment.
+
+## Read-only labelling stability evidence v1
+
+Verify already captured local evidence with
+`just verify-labelling-stability "$LABELLING_STABILITY_EVIDENCE"`.
+This is the `verify-cmd` for the later natural-T2 proof, not permission to run a task,
+read a live tenant, change schedules, fetch credentials or modify evidence. The recipe
+makes no AWS/HTTP calls and disables Python bytecode writes. It reads at most 32 daily
+observations, each JSON artifact <=64 MiB, with a 60-second CPU bound. Relative artifact
+paths resolve against the supplied evidence file's directory. Errors print no payload.
+The fixture test exercises synthetic artifacts only; it is not a development stability proof.
+
+The selected evidence JSON has this contract (all named fields are required except tunables):
+
+```json
+{
+  "v": 1,
+  "source_sha": "<full lowercase tested source SHA>",
+  "image_digest": "sha256:<64 lowercase hex>",
+  "catalogue_version": 1,
+  "runtime_projection_digest": "<64 lowercase hex, actual scan runtime projection>",
+  "deadline_seconds": 3600,
+  "max_score_delta": 5,
+  "tunables": {},
+  "observations": [
+    {
+      "source_sha": "<same tested SHA>",
+      "image_digest": "sha256:<same immutable digest>",
+      "catalogue_version": 1,
+      "runtime_projection_digest": "<same verified scan projection digest>",
+      "task_arn": "<exact natural T2 task ARN>",
+      "container_name": "<collector container name>",
+      "scan_path": "<exact downloaded published scan envelope bytes, not a re-serialization>",
+      "publication_path": "<captured version-specific GetObject request/response and downloaded-body digest>",
+      "stopped_path": "<local describe-tasks STOPPED JSON>",
+      "schedule_path": "<actual GetSchedule response captured for this invocation>",
+      "launch_path": "<captured CloudTrail ECS RunTask event, or one-event Records array>",
+      "task_definition_path": "<actual describe-task-definition response for this revision>",
+      "memory_path": "<local measured memory witness JSON>"
+    }
+  ]
+}
+```
+
+Repeat observations in chronological order, with at least three observations spanning
+>=48 hours and consecutive UTC calendar days, each 23..25 hours apart. Two dated files
+only 24 hours apart cannot establish a 48-hour span. `max_score_delta` is the caller's
+explicit acceptance tolerance in score points (0..100), not a published Grafana limit;
+the example 5 is illustrative, not an owner decision. `tunables` is the archived evaluator
+policy used by these runs; a changed policy needs a new comparable evidence set. Source
+SHA comes from the reviewed immutable build record, not an invented scan field. Image
+identity must also match the actual collector container's stopped descriptor. The
+catalogue version must match the current accepted catalogue. Do not manufacture source,
+scheduling, publication or memory witnesses to satisfy this interface.
+
+`stopped_path` is the actual AWS describe-tasks response: no failures, exactly one task,
+matching `taskArn`, `lastStatus=STOPPED`, timezone-bearing `startedAt`/`stoppedAt`, task
+`memory` in MiB, and `containers` with exact integer `exitCode=0`; the named collector
+also has the matching `imageDigest`. Every task is distinct. Task elapsed time and the
+scan's measured `meta.duration_seconds` must be positive and <=`deadline_seconds` (<=3600).
+The scan is an actual T2 envelope with healthy sources/scan, generated and published
+within that task's window; future stopped times beyond five minutes are rejected.
+Publication time and object identity must come from the bound object witness below,
+not a caller timestamp or a privacy/publication pass bit.
+
+`publication_path` contains a captured **version-specific successful GetObject** request
+and its unmodified response metadata, plus the SHA256 measured over its downloaded body:
+
+```json
+{
+  "request": {"Bucket": "<captured scan runtime bucket>", "Key": "<timestamped scans/t2 object key>", "VersionId": "<non-null object version>"},
+  "response": {
+    "VersionId": "<same requested version>",
+    "ETag": "<actual quoted S3 ETag>",
+    "LastModified": "<actual timezone-bearing object modification time>",
+    "ContentLength": 1234,
+    "ServerSideEncryption": "AES256"
+  },
+  "body_sha256": "<64 lowercase hex measured over exact downloaded bytes>"
+}
+```
+
+The bucket must equal the captured task runtime `GCINSIGHT_S3_BUCKET`; the key must equal
+`scans/t2/<meta.generated_at with colons/hyphens removed>.json`, exactly the publisher's
+timestamped key. `latest.json` is not an immutable observation. Both version IDs must
+match and cannot be absent, blank or `null`; the downloaded byte length and SHA256 must
+match the witness. A SHA256 declaration alone is not object linkage: the actual S3
+response must also bind those bytes via either its quoted single-part MD5 ETag under
+SSE-S3 (`ServerSideEncryption=AES256`, no SSE-C), or native `ChecksumSHA256` (base64)
+with `ChecksumType=FULL_OBJECT`. Multipart, SSE-KMS and SSE-C ETags are not treated as
+MD5; without a native full-object SHA256 they remain unverified. This does not authorize
+rewriting an object or changing encryption/checksum settings to manufacture evidence.
+`LastModified` must follow the envelope generation and lie within this exact stopped
+task's start/stop window. A legacy observation `publication_at`, if supplied, must agree
+with that response timestamp but never substitutes for the object witness. Preserve
+the exact downloaded bytes: pretty-printing or re-serializing changes the checksum.
+These checks authenticate consistency of supplied captured artifacts, not the origin
+of arbitrary fabricated local JSON; root retains provenance of the actual AWS capture.
+
+`schedule_path` is an actual GetSchedule response (`Arn`, `State=ENABLED`,
+`Target.Arn`, `Target.RoleArn`, `Target.EcsParameters.TaskDefinitionArn`), not an invented
+natural-run summary. The cluster and task definition must match the stopped task and the
+schedule ARN must be the same across days. `launch_path` must preserve the captured
+CloudTrail event (or a `Records` array containing exactly that event):
+`eventName=RunTask`, `eventSource=ecs.amazonaws.com`, timezone-bearing `eventTime`,
+`userIdentity.sessionContext.sessionIssuer.arn` matching that scheduler target role,
+and `userIdentity.invokedBy` or `userAgent` exactly `scheduler.amazonaws.com`.
+The actual `requestParameters.cluster`/`taskDefinition` must match, and
+`responseElements.tasks` must link exactly one successful launch to this task ARN and
+revision, with no failures. `eventTime` supplies the daily invocation date and must
+precede task start by <=900 seconds. An unsupported/truncated CloudTrail schema,
+missing response linkage or missing service identity is unverified; no new collection
+permission or substitute provenance bit is granted by this verifier.
+
+`task_definition_path` is the captured response with `taskDefinition.taskDefinitionArn`
+and `containerDefinitions` for the exact revision. The collector image must be digest-pinned;
+its actual command (including captured ECS overrides) must select T2 and the declared
+deadline. Only exact `--tier`, `--deadline-seconds`, and optional positive-integer
+`--concurrency` options are admitted (separate or equals-form values); repeated options,
+non-T2, dry-run, limit/stack/subset, diagnostic output, lock bypass, abbreviations and
+unknown flags fail closed. The effective captured ECS command includes any container
+command override, not just the task-definition default.
+Environment overrides are merged before validating the scan runtime projection:
+the captured `GCINSIGHT_RUNTIME_CONFIG_DIGEST` must match the shared root/observation
+`runtime_projection_digest` and its computed canonical environment digest. Actual label
+inventory enablement must be `1`, actual evaluator policy must equal archived `tunables`,
+and actual static-name/source-budget policy must stay identical across days. Missing
+policy identity or a mismatch is unverified, never silently replaced by default tunables.
+
+`memory_path` contains `task_arn`, `method`, `peak_bytes`, `limit_bytes`, `window_start`
+and `window_end`. Supported measured methods are `cgroup-memory.peak` and
+`container-insights-memory-utilized-max`. Preserve the measurement's raw provenance
+alongside that witness. The window must lie within the same task and cover start/end to
+within 60 seconds. Peak must be >0 and <=limit, and limit must equal the actual task's
+MiB memory allocation converted to bytes. A sampled Container Insights maximum is a
+sampled witness, not an unsampled strict process peak or general memory bound. Missing
+memory fails/unverified; do not substitute the configured memory limit for measurement.
+
+The recipe validates every stack's actual `data.label_inventory` through the frozen
+minimized schema, with all four signals and at least one non-unavailable signal. Raw
+values, unknown fields, PII names/shapes and oversize clear names fail schema validation.
+It recomputes same-version scores from these inputs and compares published-score-eligible
+stack/signal pairs across each adjacent day, reporting maximum absolute change against
+the caller's tolerance. No comparable score pairs is unverified, not stable; departed or
+new stack pairs do not become zeros. It reports aggregate evidence only, never names.
+This schema check is not a privacy-pass bit or proof of absence in every downstream S3,
+Loki, metrics, stdout or error artifact. The separately authorized live proof must collect
+those sink checks and per-stack p95 runtime; this local recipe does not fabricate them.
+
 ## Standing up a new deployment
 
 Before starting these live phases, follow [Clean-room validation](docs/clean-room-validation.md).

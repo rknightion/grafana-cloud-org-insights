@@ -48,6 +48,7 @@ from collector.pillars import (
     retention as retention_pillar,
     risk as risk_pillar,
     label_risk as label_risk_pillar,
+    labelling as labelling_pillar,
     usage as usage_pillar,
 )
 from collector.sources import assistant as assistant_src
@@ -5063,12 +5064,124 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
          "Feature activity tab for the three boundaries that no credential can widen."), el, tabs
 
 
+def d_labelling(ds: str):
+    """Pillar L: deterministic bounded labelling, with score context on the same tab."""
+    stack = '{stack=~"$stack"}'
+
+    def table(title, view, *, columns=None, predicate=None, description=""):
+        try:
+            panel = build.table_panel(title, view, ds, columns=columns,
+                                      schema=labelling_pillar.VIEW_SCHEMAS[view],
+                                      units={"Score": "percent", "Coverage": "percentunit",
+                                             "Low coverage": "percentunit", "Medium coverage": "percentunit",
+                                             "High coverage": "percentunit"},
+                                      description=description)
+        except FileNotFoundError:
+            return build.text_panel(title, "No published labelling observation is available. The reader "
+                                    "is default-off; missing or withheld inputs mean unknown, not zero. "
+                                    "A last-good table, if present, keeps its own timestamp.")
+        if predicate:
+            query = panel["spec"]["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+            query["filterExpression"] = f'({query["filterExpression"]}) && ({predicate})'
+        return panel
+
+    context = "Score is absent below weighted coverage 0.8 or the stricter configured floor. " \
+              "Coverage and catalogue version accompany the score; compare only within one version."
+    el = {
+        "overview": table("Observed worst severity and score with coverage", "labelling_stack_summary",
+                          columns=["Stack", "Signal", "Worst severity", "Score", "Coverage", "Catalogue version",
+                                   "Rules evaluated", "Not evaluated"], description=context),
+        "scorecard": table("Per-stack and signal scorecard, coverage and catalogue version", "labelling_stack_summary",
+                           description=context + " Severity coverage includes rules that may escalate into that severity. "
+                           "Blank severity counts mean insufficient applicable evidence, not zero findings."),
+        "coverage": table("Not evaluated and weighted coverage", "labelling_stack_summary",
+                          columns=["Stack", "Signal", "Data", "Input state", "Input reason", "Window",
+                                   "Applicable weight", "Evaluated weight", "Passed weight", "Rules evaluated",
+                                   "Rules passed", "Rules failed", "Not evaluated", "Not applicable", "Excluded rules",
+                                   "Coverage", "Catalogue version"],
+                          description="Missing, truncated and deadline inputs stay in applicable weight. "
+                          "Judgement, unverified and parked rules do not. This is rule coverage, not input age."),
+        "cross_signal": table("Cross-signal service consistency, counts only", "labelling_cross_signal",
+                              description="Six signal pairs: discovered service-set sizes, shared/union and each side's "
+                              "difference. Names are transient. Metric clusters is the metrics-only set size, "
+                              "not proof of cross-signal cluster consistency. Unavailable atomic inventory is blank."),
+        "register": table("Bounded minimized label register", "labelling_label_register",
+                          description="At most 256 whole rows per stack/signal from the private envelope. "
+                          "Only minimized names, non-PII shape counts, series/stream counts and exact/at_least "
+                          "distinct counts persist. Suppressed names retain class/count, not identity. "
+                          "PII match detail remains in risk_label_hygiene, never duplicated here."),
+        "not_evaluated": table("Rules not evaluated, including excluded catalogue entries", "labelling_findings",
+                               predicate='Result == "not_evaluated"',
+                               description="Closed reasons explain unknown or excluded rules. No missing input can pass. "
+                               "Threshold provenance distinguishes verified claims from policy overrides."),
+        "cross_rules": table("Cross-signal rule results", "labelling_findings",
+                             predicate='Signal == "cross_signal"',
+                             description="Cross-signal rules stay view-only, excluded from the four signal metric enums."),
+        "findings_trend": build.timeseries_panel(
+            "Failed-rule trend by severity, only sufficiently covered stacks",
+            [(f'sum(gcinsight_labelling_findings{{stack=~"$stack",severity="{severity}"}})', severity)
+             for severity in labelling_pillar.SEVERITIES], integrity=True,
+            description="Counts failed rules at observed severity, not all offending objects. "
+                        "Only stacks reaching that severity's weighted coverage floor contribute; "
+                        "an absent count is not zero. This is not a complete estate total."),
+        "evaluated": build.barchart_panel("Rules evaluated by stack and signal",
+                                         f"gcinsight_labelling_rules_evaluated{stack}",
+                                         legend="{{stack}} / {{signal}}",
+                                         description="Pass/fail rules actually evaluated. Entirely unmeasured signals are absent."),
+        "passed": build.barchart_panel("Rules passed by stack and signal",
+                                      f"gcinsight_labelling_rules_passed{stack}", legend="{{stack}} / {{signal}}",
+                                      description="Same evaluated population as the companion panel, not total applicable weight."),
+        "catalogue_version": build.stat_panel("Catalogue version, compare scores only within this version",
+                                              "gcinsight_labelling_catalogue_version",
+                                              description="Estate numeric version, not a metric label. Every row carries its own version."),
+    }
+    for signal in labelling_pillar.SIGNALS:
+        el[f"rules_{signal}"] = table(f"{signal.title()} rule results", "labelling_findings",
+                                     predicate=f'Signal == "{signal}"',
+                                     description="One result per rule and stack; evidence contains only numbers and closed enums. "
+                                     "Offending objects uses each input's unit, not label identities.")
+    if el["overview"]["spec"]["vizConfig"]["group"] == "table":
+        el["score_trend"] = build.timeseries_panel(
+            "Score trend, current coverage and catalogue version beside it",
+            [(f'gcinsight_labelling_score{{stack=~"$stack",signal="{signal}"}}', "{{stack}} / " + signal)
+             for signal in labelling_pillar.SIGNALS] +
+            [("gcinsight_labelling_catalogue_version", "catalogue version")],
+            unit="percent", integrity=True,
+            description=context + " Current coverage is in the companion scorecard, not a historical coverage series. "
+                        "Points do not bridge collection gaps or imply continuous measurements.")
+        el["score_trend"]["spec"]["vizConfig"]["spec"]["fieldConfig"]["overrides"].append({
+            "matcher": {"id": "byName", "options": "catalogue version"},
+            "properties": [{"id": "unit", "value": "short"}, {"id": "custom.axisPlacement", "value": "right"}],
+        })
+    else:
+        el["score_trend"] = build.text_panel("Score context unavailable", "A score trend is withheld here until "
+                                            "its coverage and catalogue-version scorecard is available.")
+    tabs = [
+        build.rows_tab("Estate overview", [
+            build.row("Worst observed severity, score and context", ["overview"], max_columns=1),
+            build.row("Version and failed-rule observations", ["catalogue_version", "findings_trend"], max_columns=2),
+            build.row("Score trend and current weighted coverage", ["score_trend", "coverage"], max_columns=2),
+        ]),
+        build.rows_tab("Stack scorecard", [
+            build.row("Score with coverage and catalogue version", ["scorecard"], max_columns=1),
+            build.row("Evaluated vs passed", ["evaluated", "passed"], max_columns=2),
+        ]),
+        build.tab("Cross-signal consistency", ["cross_signal", "cross_rules"], max_columns=1),
+        build.tab("Per-signal rules", [f"rules_{signal}" for signal in labelling_pillar.SIGNALS], max_columns=1),
+        build.tab("Not evaluated and coverage", ["coverage", "not_evaluated"], max_columns=1),
+        build.tab("Label register", ["register"], max_columns=1),
+    ]
+    return "gcinsight-labelling", "Grafana Cloud Org Insights - Labelling", \
+        "Pillar L: deterministic bounded labelling samples, versioned scores with weighted coverage, " \
+        "rule evidence and a private minimized register. No exhaustive completeness or privacy claim.", el, tabs
+
+
 # Dashboard name -> pillar letter, so each dashboard shows only its OWN finding kinds. Derived from
 # pillars/findings.py rather than restated, so adding a finding kind reaches the right dashboard with no
 # edit here.
 PILLAR_OF = {"estate": "A", "cost": "B", "usage": "C", "maturity": "D", "risk": "E", "value": "F",
              "operations": "G", "commercial": "H", "ai": "I", "dashboards": "J",
-             "coverage": "K"}
+             "coverage": "K", "labelling": "L"}
 
 
 # The named rows behind each pillar's finding counts, as (element key, panel title, view name).
@@ -5122,7 +5235,7 @@ BUILDERS = {
     "estate": d_estate, "cost": d_cost, "usage": d_usage,
     "maturity": d_maturity, "risk": d_risk, "value": d_value,
     "operations": d_operations, "commercial": d_commercial, "ai": d_ai,
-    "dashboards": d_dashboards, "coverage": d_coverage,
+    "dashboards": d_dashboards, "coverage": d_coverage, "labelling": d_labelling,
 }
 
 

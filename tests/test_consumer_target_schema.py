@@ -11,11 +11,11 @@ import pytest
 from tests.test_consumer_manifest import ROOT, consumer_manifest, fixture
 from tests.test_scan_product_policy import KEY, cli, legacy_manifest
 
-def old_target_repository(temp):
-    # CI is shallow. Retain the captured old declarations instead of fetching history in an offline test.
+def old_target_repository(temp, source=None):
+    # CI is shallow. Use real Git artifacts: frozen old schema or the current additive schema.
     product = temp / "old-product"
     (product / "collector").mkdir(parents=True)
-    shutil.copyfile(ROOT / "tests/fixtures/consumer_identity_v030.txt",
+    shutil.copyfile(source or ROOT / "tests/fixtures/consumer_identity_v030.txt",
                     product / "collector/identity.py")
     for args in (("init", "-q"), ("add", "collector/identity.py"),
                  ("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
@@ -72,13 +72,13 @@ def test_real_cli_supported_forward_legacy_preserves_policy_and_checks_old_diges
     with tempfile.TemporaryDirectory() as name:
         temp = pathlib.Path(name)
         body = legacy_manifest("slo")
-        target = fixture()["generic_source"]["revision"]
+        product, target = old_target_repository(temp, ROOT / "collector/identity.py")
         if corrupt:
             body["runtime_projection_digests"]["scan"] = "0" * 64
         manifest, terraform = files(temp, body)
         before = (manifest.read_bytes(), terraform.read_bytes())
         result = cli("upgrade", target, "--manifest", str(manifest), "--terraform", str(terraform),
-                     env=offline_git(temp))
+                     "--generic-source", str(product), env=offline_git(temp))
         if corrupt:
             assert result.returncode == 2
             assert "digest drift" in result.stderr

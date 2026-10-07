@@ -1118,6 +1118,7 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         expected_retention_policy=getattr(cfg, "expected_retention_policy", ()),
         fleet_default_scrape_interval_seconds=getattr(
             cfg, "fleet_default_scrape_interval_seconds", 60.0),
+        label_inventory_tunables=getattr(cfg, "label_inventory_tunables", None),
         **label_inventory_src.composition_inputs(inputs),
     )
     scan_inputs = prov
@@ -1205,6 +1206,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     label_inventory_enabled = getattr(cfg, "label_inventory_enabled", False)
     label_inventory = label_inventory_src.probe_all(
         client, selected, cfg.cap, enabled=label_inventory_enabled, concurrency=cfg.concurrency,
+        max_seconds=getattr(cfg, "label_inventory_budget_seconds", 900.0),
+        static_names=getattr(cfg, "label_inventory_static_names", label_inventory_src.STATIC_NAMES),
     )
     errors: list[str] = []
     detail = gcom.fetch_all_stack_detail(
@@ -1465,6 +1468,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         expected_retention_policy=getattr(cfg, "expected_retention_policy", ()),
         fleet_default_scrape_interval_seconds=getattr(
             cfg, "fleet_default_scrape_interval_seconds", 60.0),
+        label_inventory_tunables=getattr(cfg, "label_inventory_tunables", None),
         **label_inventory_src.composition_inputs(inputs),
     )
     scan_inputs = prov
@@ -1518,6 +1522,7 @@ def run_t3(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         expected_retention_policy=getattr(cfg, "expected_retention_policy", ()),
         fleet_default_scrape_interval_seconds=getattr(
             cfg, "fleet_default_scrape_interval_seconds", 60.0),
+        label_inventory_tunables=getattr(cfg, "label_inventory_tunables", None),
         **label_inventory_src.composition_inputs(inputs),
     )
     scan_inputs = prov

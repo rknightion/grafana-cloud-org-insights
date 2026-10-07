@@ -302,6 +302,28 @@ Synthetic uses guarded GET `/api/datasources/proxy/uid/<discovered uid>/sm/check
 enabled state and public/private probe class leave the source. Targets, scripts, headers, labels
 and identities are discarded. These are inventory counts, not probe usage or execution results.
 
+### Default-off label inventory collection
+
+The base T2 source uses the existing metrics/logs/traces/profiles reader scopes, not
+new per-stack grants. It calls exact-200 GET Mimir
+`/api/prom/api/v1/cardinality/label_names`, Loki `/loki/api/v1/labels` and
+`/loki/api/v1/label/{name}/values`, and Tempo `/tempo/api/v2/search/tags` and
+`/tempo/api/v2/search/tag/{scope.name}/values`. Only Pyroscope
+`/querier.v1.QuerierService/LabelNames` and `/querier.v1.QuerierService/LabelValues`
+may use POST, exclusively through `label_risk.profile_read`'s existing fence.
+Mimir counts are head-only; the others are bounded 24-hour samples. Current base does
+not activate series/index/config/intrinsic-name extensions just because they were witnessed.
+
+S3 views and the private hydration input alone may hold minimized names, distinct-value
+counts (`exact`/`at_least`), closed non-PII shape counts (`uuid`, `hex_id`, `epoch`,
+`url_with_id`, `long_value`) and measured series/stream counts. These items never go to
+Loki, finding events, metrics, stdout, `--out` or errors. No raw values or email/IP/phone/
+JWT/card shapes persist on this path; PII and >512-byte names become class/count only.
+`label_risk`'s separate retention-governed exception is not widened. Unsupported or missing
+inputs remain absent, never defaults, zeros or a privacy/completeness claim.
+Default-off enablement and tunables add no permission. Source caller-wait budgeting
+cannot establish response/process-memory bounds or tenant-wide visibility.
+
 ### Labelling witness boundary (2026-10-07)
 
 Staff slugs robknight, portina, portinapushtests, rkaidev and robk were each queried

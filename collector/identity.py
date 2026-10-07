@@ -17,6 +17,14 @@ from typing import Any, Iterable, Mapping
 CANONICAL_METRIC_PREFIX = "gcinsight"
 _SAFE_ID = re.compile(r"^[a-z][a-z0-9_.-]*$")
 
+# An all-absent additive group preserves old consumer digests. Explicit upgrades freeze defaults.
+LABEL_INVENTORY_DEFAULTS = {
+    "GCINSIGHT_LABEL_INVENTORY_ENABLED": "0",
+    "GCINSIGHT_LABEL_INVENTORY_TUNABLES": "{}",
+    "GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES": '["cluster","host","hostname","k8s.cluster.name","k8s.namespace.name","k8s.node.name","k8s_cluster_name","k8s_namespace_name","k8s_node_name","namespace","node"]',
+    "GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS": "900",
+}
+
 SCAN_ENV = (
     "GCINSIGHT_ORG_ID", "GCINSIGHT_WRITE_STACK", "GCINSIGHT_MIMIR_URL",
     "GCINSIGHT_MIMIR_TENANT", "GCINSIGHT_LOKI_URL", "GCINSIGHT_LOKI_TENANT",
@@ -27,6 +35,8 @@ SCAN_ENV = (
     "GCINSIGHT_EXPECTED_RETENTION_POLICY",
     "GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL",
     "GCINSIGHT_READER_PRODUCT_READS",
+    "GCINSIGHT_LABEL_INVENTORY_ENABLED", "GCINSIGHT_LABEL_INVENTORY_TUNABLES",
+    "GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES", "GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS",
 )
 PROVISIONER_ENV = (
     "GCINSIGHT_ORG_ID", "GCINSIGHT_SSM_REGION", "GCINSIGHT_STACK_TOKEN_PREFIX",
@@ -118,6 +128,7 @@ def map_tree(value: Any) -> Any:
 JSON_VALUED_ENV = frozenset({
     "GCINSIGHT_COVERAGE_SCORE_WEIGHTS", "GCINSIGHT_EXPECTED_RETENTION_POLICY",
     "GCINSIGHT_ALERT_RULE_UIDS_JSON",
+    "GCINSIGHT_LABEL_INVENTORY_TUNABLES", "GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES",
 })
 
 
@@ -150,6 +161,8 @@ def canonical_projection(kind: str, environ: Mapping[str, str] | None = None) ->
     except KeyError as exc:
         raise InvalidIdentity(f"unknown runtime projection {kind!r}") from exc
     source = os.environ if environ is None else environ
+    if kind == "scan" and not any(name in source for name in LABEL_INVENTORY_DEFAULTS):
+        names = tuple(name for name in names if name not in LABEL_INVENTORY_DEFAULTS)
     out = {name: str(source.get(name, "")).strip() for name in names}
     return {name: canonical_json_text(value) if name in JSON_VALUED_ENV and value else value
             for name, value in out.items()}
@@ -171,6 +184,20 @@ def verify_runtime_projection(kind: str, *, environ: Mapping[str, str] | None = 
             raise InvalidIdentity("GCINSIGHT_RUNTIME_CONFIG_DIGEST is required for this consumer")
         return None
     actual = projection_digest(kind, source)
+    if kind == "scan" and actual != expected:
+        # Old immutable consumers can run the default-off additive interface. Never accept an old
+        # digest for a changed policy: every new field must render the exact canonical default.
+        defaults_match = all(
+            canonical_json_text(str(source.get(name, default)).strip()) == canonical_json_text(default)
+            if name in JSON_VALUED_ENV else str(source.get(name, default)).strip() == default
+            for name, default in LABEL_INVENTORY_DEFAULTS.items()
+        )
+        if defaults_match:
+            legacy = {name: value for name, value in source.items()
+                      if name not in LABEL_INVENTORY_DEFAULTS}
+            legacy_digest = projection_digest(kind, legacy)
+            if legacy_digest == expected:
+                actual = legacy_digest
     if actual != expected:
         raise InvalidIdentity(
             f"{kind} runtime projection digest mismatch: expected {expected}, resolved {actual}"

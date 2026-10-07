@@ -291,7 +291,7 @@ class SourceContracts(unittest.TestCase):
 
 
 class CompositionPlumbingContract(unittest.TestCase):
-    def test_optional_private_argument_preserves_the_complete_old_return(self):
+    def test_shipping_private_consumer_preserves_existing_pillar_outputs(self):
         from collector.coverage import Coverage
         from collector.pillars import compose
         contract = SourceContracts()
@@ -304,7 +304,14 @@ class CompositionPlumbingContract(unittest.TestCase):
         for payload in (None, {}, private):
             with self.subTest(payload_present=bool(payload)):
                 after = compose.build_all([STACK], coverage, now=NOW, label_inventory=payload)
-                self.assertEqual(after, before, "additive source plumbing must not add or change pillar output")
+                existing_metrics = [m for m in after[0] if not m[0].startswith("gcinsight_labelling_")]
+                existing_views = {name: rows for name, rows in after[1].items()
+                                  if not name.startswith("labelling_")}
+                self.assertEqual((existing_metrics, existing_views, after[2]), before,
+                                 "shipping labelling must preserve every existing pillar output")
+                if payload:
+                    self.assertIn("labelling_label_register", after[1])
+                    self.assertIn("labelling_stack_summary", after[1])
 
 
 class ConfigurationContract(unittest.TestCase):

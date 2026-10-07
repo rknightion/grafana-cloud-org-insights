@@ -3000,5 +3000,56 @@ class EveryEmittedMetricIsRenderedOrAlertedTest(unittest.TestCase):
                 self.assertFalse(self._contains_metric(src, name))
 
 
+class LabellingDashboardTest(unittest.TestCase):
+    def test_registered_shipping_consumer_exists(self):
+        import bin.dashboards as dash
+        self.assertIn("labelling", dash.BUILDERS)
+        self.assertEqual(dash.PILLAR_OF["labelling"], "L")
+        self.assertIn(("gcinsight-labelling", "Labelling"), build.DASHBOARDS)
+
+    def test_score_context_is_selected_on_every_score_tab(self):
+        import copy
+        import json
+        import bin.dashboards as dash
+        from tests.test_dashboard_coverage import consumers
+        document = dash.assemble("labelling", "infinity-offline")[1]
+
+        def assert_context(doc):
+            fields, expressions, tabs = consumers({"labelling": doc})
+            score_tabs = {tab for tab, _panel, expr in expressions if "gcinsight_labelling_score" in expr}
+            score_tabs.update(fields.get(("labelling_stack_summary", "rows.Score"), set()))
+            self.assertTrue(score_tabs)
+            for tab in score_tabs:
+                for column in ("Coverage", "Catalogue version"):
+                    self.assertIn(tab, fields.get(("labelling_stack_summary", f"rows.{column}"), set()),
+                                  f"Score on {tab} lacks {column}")
+        assert_context(document)
+        broken = copy.deepcopy(document)
+        for element in broken["spec"]["elements"].values():
+            for query in element["spec"].get("data", {}).get("spec", {}).get("queries", []):
+                q = query["spec"]["query"]["spec"]
+                q["columns"] = [c for c in q.get("columns", []) if c["selector"] != "Coverage"]
+        with self.assertRaisesRegex(AssertionError, "Coverage"):
+            assert_context(broken)
+        text = json.dumps(document)
+        self.assertIn("deterministic", text.lower())
+        self.assertIn("bounded", text.lower())
+        self.assertIn("not measurable", text.lower())
+        self.assertNotIn("LLM", text)
+
+    def test_per_signal_and_not_evaluated_tables_use_public_results(self):
+        import bin.dashboards as dash
+        from collector.pillars import labelling
+        document = dash.assemble("labelling", "infinity-offline")[1]
+        elements = document["spec"]["elements"]
+        for signal in labelling.SIGNALS:
+            q = elements[f"rules_{signal}"]["spec"]["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+            self.assertIn(f'Signal == "{signal}"', q["filterExpression"])
+            self.assertIn("rows", q["root_selector"])
+        q = elements["not_evaluated"]["spec"]["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+        self.assertIn('Result == "not_evaluated"', q["filterExpression"])
+        self.assertEqual(set(build.DASHBOARD_INPUTS["labelling"]), {"label_inventory", "signal_inventory"})
+
+
 if __name__ == "__main__":
     unittest.main()

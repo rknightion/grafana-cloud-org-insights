@@ -72,6 +72,24 @@ class RuntimeProjectionTest(unittest.TestCase):
             env["GCINSIGHT_RUNTIME_CONFIG_DIGEST"],
         )
 
+    def test_legacy_digest_accepts_only_canonical_default_label_policy(self):
+        env = self._complete("scan")
+        for name in identity.LABEL_INVENTORY_DEFAULTS:
+            env.pop(name)
+        old = identity.projection_digest("scan", env)
+        env.update(identity.LABEL_INVENTORY_DEFAULTS)
+        env["GCINSIGHT_REQUIRE_EXPLICIT_CONFIG"] = "1"
+        env["GCINSIGHT_RUNTIME_CONFIG_DIGEST"] = old
+        self.assertEqual(identity.verify_runtime_projection("scan", environ=env), old)
+        env["GCINSIGHT_LABEL_INVENTORY_ENABLED"] = "1"
+        with self.assertRaises(identity.InvalidIdentity):
+            identity.verify_runtime_projection("scan", environ=env)
+
+    def test_default_static_policy_matches_source(self):
+        from collector.sources import label_inventory
+        self.assertEqual(set(json.loads(identity.LABEL_INVENTORY_DEFAULTS[
+            "GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES"])), set(label_inventory.STATIC_NAMES))
+
     def test_alert_projection_owns_display_and_routing_identity(self):
         self.assertTrue({
             "GCINSIGHT_ALERT_TITLE_PREFIX",

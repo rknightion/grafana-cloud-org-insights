@@ -10,11 +10,13 @@ reading it automatically would put a `set:cloud-admin` token on the collector's 
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-from collector import identity, observability_score
+from collector import identity, label_rules, observability_score
+from collector.sources.label_inventory import STATIC_NAMES
 from collector.sources import scrape_intervals
 
 GCOM = "https://grafana.com/api"
@@ -142,6 +144,52 @@ def _optional_bool(name: str, default: bool = False) -> bool:
     raise MissingConfig(f"{name} must be one of 1, 0, true or false")
 
 
+def label_inventory_tunables(raw: str) -> dict:
+    """Validate policy against the accepted catalogue, never change published limits."""
+    name = "GCINSIGHT_LABEL_INVENTORY_TUNABLES"
+    try:
+        value = json.loads(raw or "{}")
+        catalogue = label_rules.CATALOGUE
+        settings = label_rules._tunables(value, catalogue)
+        for rule in catalogue.rules:
+            override = settings["thresholds"].get(rule["id"])
+            if override is None:
+                continue
+            if set(override) != set(rule["thresholds"]):
+                raise ValueError("incomplete bands")
+            if any(band["provenance"] == "published" for band in
+                   label_rules.threshold_provenance(rule["id"], catalogue).values()):
+                raise ValueError("published limit")
+            bands = [override[b] for b in ("warn", "high", "critical") if b in override]
+            if any(b <= 0 for b in bands) or bands != sorted(set(bands)):
+                raise ValueError("invalid bands")
+        return settings
+    except (ValueError, TypeError):
+        raise MissingConfig(f"{name} must match catalogue policy bands and coverage >=0.8") from None
+
+
+def label_inventory_static_names(raw: str) -> tuple[str, ...]:
+    try:
+        value = json.loads(raw) if raw else sorted(STATIC_NAMES)
+        if (not isinstance(value, list) or len(value) > 64 or
+                any(not isinstance(n, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.:-]{0,127}", n)
+                    for n in value) or len(set(value)) != len(value)):
+            raise ValueError()
+        return tuple(value)
+    except (ValueError, TypeError):
+        raise MissingConfig("GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES must be <=64 unique label names") from None
+
+
+def label_inventory_budget(raw: str) -> float:
+    try:
+        seconds = float(raw or "900")
+        if not math.isfinite(seconds) or not 0 < seconds <= 900:
+            raise ValueError()
+        return seconds
+    except ValueError:
+        raise MissingConfig("GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS must be finite, >0 and <=900") from None
+
+
 def _retention_policy(name: str = RETENTION_POLICY_ENV) -> tuple[dict[str, str], ...]:
     """Parse deployment policy without embedding an organisation's selectors in source."""
     raw = os.environ.get(name, "").strip()
@@ -199,6 +247,9 @@ class Config:
     coverage_score_weights: dict[str, float] | None = None
     dashboard_detail_enabled: bool = False
     label_inventory_enabled: bool = False
+    label_inventory_tunables: dict = field(default_factory=lambda: label_inventory_tunables(""))
+    label_inventory_static_names: tuple[str, ...] = tuple(sorted(STATIC_NAMES))
+    label_inventory_budget_seconds: float = 900.0
     expected_retention_policy: tuple[dict[str, str], ...] = ()
     fleet_default_scrape_interval_seconds: float = FLEET_SCRAPE_INTERVAL_DEFAULT_SECONDS
 
@@ -224,6 +275,8 @@ class Config:
             "coverage_score_weights": self.coverage_score_weights,
             "dashboard_detail_enabled": self.dashboard_detail_enabled,
             "label_inventory_enabled": self.label_inventory_enabled,
+            "label_inventory_budget_seconds": self.label_inventory_budget_seconds,
+            "label_inventory_static_name_count": len(self.label_inventory_static_names),
             # Selectors can contain customer label names and values. Count the policy, never log it.
             "expected_retention_policy_count": len(self.expected_retention_policy),
             "fleet_default_scrape_interval_seconds": self.fleet_default_scrape_interval_seconds,
@@ -277,6 +330,9 @@ def load(
         coverage_score_weights=score_weights,
         dashboard_detail_enabled=_optional_bool(DASHBOARD_DETAIL_ENV),
         label_inventory_enabled=_optional_bool(LABEL_INVENTORY_ENV),
+        label_inventory_tunables=label_inventory_tunables(os.environ.get("GCINSIGHT_LABEL_INVENTORY_TUNABLES", "")),
+        label_inventory_static_names=label_inventory_static_names(os.environ.get("GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES", "")),
+        label_inventory_budget_seconds=label_inventory_budget(os.environ.get("GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS", "")),
         expected_retention_policy=_retention_policy(),
         fleet_default_scrape_interval_seconds=_fleet_scrape_interval(),
     )

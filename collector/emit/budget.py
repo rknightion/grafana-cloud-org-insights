@@ -584,6 +584,28 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("public_dashboard_inventory", "E", {"stack": STACK}, store="view", phase=3,
                note="complete configured public-dashboard inventory for comparison with local policy"),
 
+    # --- Pillar L: deterministic bounded labelling, four data signals only. ---
+    MetricSpec("gcinsight_labelling_findings", "L", {"stack": STACK, "severity": 3},
+               note="observed failed rules by severity; absent below severity coverage floor. "
+                    "Escalatable rules remain in every affected severity denominator"),
+    MetricSpec("gcinsight_labelling_score", "L", {"stack": STACK, "signal": 4},
+               note="fixed-weight 0-100 score, only at coverage >=0.8; compare within catalogue version"),
+    MetricSpec("gcinsight_labelling_rules_evaluated", "L", {"stack": STACK, "signal": 4},
+               note="pass/fail rule counts where evidence was evaluated; missing input is absent"),
+    MetricSpec("gcinsight_labelling_rules_passed", "L", {"stack": STACK, "signal": 4},
+               note="passed rules over the same evaluated population; no cross-signal metric"),
+    MetricSpec("gcinsight_labelling_catalogue_version", "L",
+               note="estate-level numeric catalogue version, no version label"),
+    MetricSpec("labelling_findings", "L", {"stack": STACK}, store="view",
+               note="S3-only rule results and numeric/enum evidence, never FindingSpec/events"),
+    MetricSpec("labelling_stack_summary", "L", {"stack": STACK}, store="view",
+               note="per-signal score with weighted coverage, severity coverage and catalogue version"),
+    MetricSpec("labelling_cross_signal", "L", {"stack": STACK}, store="view",
+               note="service-set sizes and differences plus metric cluster count; sets stay transient"),
+    MetricSpec("labelling_label_register", "L", {"stack": STACK}, store="view",
+               note="S3-only minimized names/class/counts, capped at 256 whole rows per stack/signal; "
+                    "no raw values or PII shape counts"),
+
     # --- Pillar K: affirmative observed estate and coverage depth. ---
     MetricSpec("gcinsight_coverage_stacks_measured", "K",
                note="stacks whose atomic four-signal inventory succeeded"),

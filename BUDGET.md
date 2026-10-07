@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **9,746** |
-| Phase 1 only | 9,745 |
+| **Declared (all phases)** | **13,812** |
+| Phase 1 only | 13,811 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -28,13 +28,18 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | I | 895 |
 | J | 4,400 |
 | K | 973 |
+| L | 4,066 |
 | scan | 338 |
-| **Total** | **9,746** |
+| **Total** | **13,812** |
 
 ## Metrics
 
 | Metric | Pillar | Labels | Series | Phase | Note |
 |---|---|---|---|---|---|
+| `gcinsight_labelling_rules_evaluated` | L | `stack`(271), `signal`(4) | 1,084 | 1 | pass/fail rule counts where evidence was evaluated; missing input is absent |
+| `gcinsight_labelling_rules_passed` | L | `stack`(271), `signal`(4) | 1,084 | 1 | passed rules over the same evaluated population; no cross-signal metric |
+| `gcinsight_labelling_score` | L | `stack`(271), `signal`(4) | 1,084 | 1 | fixed-weight 0-100 score, only at coverage >=0.8; compare within catalogue version |
+| `gcinsight_labelling_findings` | L | `stack`(271), `severity`(3) | 813 | 1 | observed failed rules by severity; absent below severity coverage floor. Escalatable rules remain in every affected severity denominator |
 | `gcinsight_adaptive_recommendations` | B | `stack`(271), `status`(2) | 542 | 1 | pending vs applied  -  the largest remediable lever in the estate |
 | `gcinsight_dashboards_anonymous_views` | J | `stack`(271), `version`(2) | 542 | 1 | dashboard opens with userId=-1, an unauthenticated reader |
 | `gcinsight_dashboards_cache_hit_ratio` | J | `stack`(271), `version`(2) | 542 | 1 | cachedQueries/totalQueries, 0-1. WITHHELD below CACHE_RATIO_FLOOR requests - a ratio over a handful of queries swings between 0 and 1 and means nothing |
@@ -143,6 +148,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_estate_dashboards` | A |  -  | 1 | 1 |  |
 | `gcinsight_estate_us_region_stacks` | A |  -  | 1 | 1 |  |
 | `gcinsight_estate_version_drift_stacks` | A |  -  | 1 | 1 |  |
+| `gcinsight_labelling_catalogue_version` | L |  -  | 1 | 1 | estate-level numeric catalogue version, no version label |
 | `gcinsight_missing_credential_age_seconds` | I |  -  | 1 | 1 | age of the OLDEST individual gap, from emit/gapstate.py. THIS is the alert, at 48h. A `for` clause on the count never resets while stacks keep appearing, so it would fire having never seen one gap last two days. ABSENT when there is no gap |
 | `gcinsight_risk_admin_heavy_stacks` | E |  -  | 1 | 1 | admin share above threshold |
 | `gcinsight_risk_alert_routing_stacks_measured` | E |  -  | 1 | 1 | stacks whose alert-rule and contact-point provisioning endpoints both answered |
@@ -228,6 +234,10 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `insights_surface_usage` | J | 1 | 1 | per-stack query requests, share and distinct users by closed surface enum |
 | `insights_surface_usage_estate` | J | 1 | 1 | estate query requests, stacks queried and sum of per-stack distinct users by surface |
 | `insights_top_dashboards` | J | 1 | 1 |  |
+| `labelling_cross_signal` | L | 271 | 1 | service-set sizes and differences plus metric cluster count; sets stay transient |
+| `labelling_findings` | L | 271 | 1 | S3-only rule results and numeric/enum evidence, never FindingSpec/events |
+| `labelling_label_register` | L | 271 | 1 | S3-only minimized names/class/counts, capped at 256 whole rows per stack/signal; no raw values or PII shape counts |
+| `labelling_stack_summary` | L | 271 | 1 | per-signal score with weighted coverage, severity coverage and catalogue version |
 | `library_panels_inventory` | C | 1 | 1 | default-off configured library panel counts after same-token wildcard folder coverage; zero product series, one input adds eight planned existing provenance series across four tiers; not usage, rendered instances or panel details |
 | `maturity_dimensions` | D | 2,439 | 1 | a table shows every dimension's contribution; only the composite needs trending |
 | `public_dashboard_inventory` | E | 271 | 3 | complete configured public-dashboard inventory for comparison with local policy |

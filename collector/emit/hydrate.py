@@ -139,8 +139,8 @@ INPUT_OWNER: dict[str, str] = {
     "library_panels_inventory": "t2",
     # Bounded classified label matches. Clear values stay in this private input and S3-only risk views.
     "label_risk": "t2",
-    # Private minimized names/counts, default-off. The source stage stores this for the later pillar;
-    # scan excludes it from composition until that consumer ships. Each signal records head or 24h.
+    # Private minimized names/counts, default-off. Labelling consumes only strict envelopes;
+    # diagnostics still exclude the input and register. Each signal records head or 24h.
     "label_inventory": "t2",
 }
 
@@ -158,6 +158,11 @@ INPUT_SCHEMA_VERSION: dict[str, int] = {name: 1 for name in INPUT_OWNER}
 # alternate inputs. `tests/test_hydrate.py::ViewInputsAreDerivedNotAssumed` caps that proof before
 # composing any subsets, so adding inputs cannot turn the gate into an exponential resource failure.
 VIEW_INPUTS: dict[str, frozenset[str]] = {
+    # Re-derived from all subsets through size two against the synthetic private envelope fixture.
+    "labelling_findings": frozenset({"label_inventory"}),
+    "labelling_stack_summary": frozenset({"label_inventory"}),
+    "labelling_label_register": frozenset({"label_inventory"}),
+    "labelling_cross_signal": frozenset({"label_inventory", "signal_inventory"}),
     # Derived from the offline minimized IRM projection in compose_inputs.json.
     "irm_integrations": frozenset({"irm_integrations"}),
     # Mechanically derived by ViewInputsAreDerivedNotAssumed from compose_inputs.json.

@@ -387,7 +387,8 @@ def probe_stack(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str, *,
 
 
 def probe_all(client: ReadOnlyClient, stacks: list[dict[str, Any]], cap: str, *, enabled=False,
-              concurrency=4, bounds: Bounds = Bounds(), max_seconds=MAX_SECONDS) -> dict:
+              concurrency=4, bounds: Bounds = Bounds(), max_seconds=MAX_SECONDS,
+              static_names=STATIC_NAMES) -> dict:
     """Iterate only the runner's fresh inventory; disabled means no transport or client construction."""
     if not enabled:
         return {}
@@ -413,7 +414,8 @@ def probe_all(client: ReadOnlyClient, stacks: list[dict[str, Any]], cap: str, *,
     bounded = ReadOnlyClient(max_attempts=1, timeout=10.0, deadline=budget, transport=send)
     selected = [s for s in stacks if str(s.get("status", "")).lower() != "paused"]
     with ThreadPoolExecutor(max_workers=max(1, min(concurrency, 8))) as pool:
-        rows = pool.map(lambda s: probe_stack(bounded, s, cap, bounds=bounds, rpc_transport=send), selected)
+        rows = pool.map(lambda s: probe_stack(bounded, s, cap, bounds=bounds,
+                                            rpc_transport=send, static_names=static_names), selected)
         result = {str(s["slug"]): row for s, row in zip(selected, rows)}
     client.attempts.requests += requests
     for status, count in statuses.items():
@@ -422,8 +424,8 @@ def probe_all(client: ReadOnlyClient, stacks: list[dict[str, Any]], cap: str, *,
 
 
 def composition_inputs(inputs: dict) -> dict:
-    """Source-only stage: preserve private hydration, withhold it from the not-yet-shipped pillar."""
-    return {k: v for k, v in inputs.items() if k != "label_inventory"}
+    """Pass private inputs to composition; diagnostic and publication fences remain separate."""
+    return dict(inputs)
 
 
 def diagnostic_scan(scan: dict) -> dict:

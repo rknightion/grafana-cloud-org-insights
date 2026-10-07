@@ -60,13 +60,17 @@ module "insights" {
   # First deployment keeps both schedules off. After separate live-change approval, write all three
   # tokens, pin the image digest, run the provisioner first, then T2 -> T3 -> T1 -> T4 serially.
   # Verify the published views and dashboards before enabling scans; enable the provisioner last.
-  image                         = var.image
-  provisioner_enabled           = var.provisioner_enabled
-  schedules_enabled             = var.schedules_enabled
-  coverage_score_weights        = var.coverage_score_weights
-  dashboard_detail_enabled      = var.dashboard_detail_enabled
-  expected_retention_policy     = var.expected_retention_policy
-  fleet_default_scrape_interval = var.fleet_default_scrape_interval
+  image                          = var.image
+  provisioner_enabled            = var.provisioner_enabled
+  schedules_enabled              = var.schedules_enabled
+  coverage_score_weights         = var.coverage_score_weights
+  dashboard_detail_enabled       = var.dashboard_detail_enabled
+  label_inventory_enabled        = var.label_inventory_enabled
+  label_inventory_tunables       = var.label_inventory_tunables
+  label_inventory_static_names   = var.label_inventory_static_names
+  label_inventory_budget_seconds = var.label_inventory_budget_seconds
+  expected_retention_policy      = var.expected_retention_policy
+  fleet_default_scrape_interval  = var.fleet_default_scrape_interval
 
   # Optional two-stage CloudWatch Logs -> Firehose -> the same Loki target. First enable the stream,
   # manually prove delivery, and only then enable the subscription. The secret is adopted by ARN; its

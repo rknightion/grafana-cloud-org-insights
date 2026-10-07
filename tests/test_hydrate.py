@@ -194,8 +194,8 @@ class LabelInventoryHydrationContract(unittest.TestCase):
                 self.assertEqual(inputs["label_inventory"], payload)
                 self.assertTrue(prov.satisfied("label_inventory"))
                 self.assertEqual(prov["label_inventory"]["schema_version"], 1)
-                self.assertNotIn("label_inventory", source.composition_inputs(inputs),
-                                 "source-only stage cannot call a not-yet-shipped consumer")
+                self.assertEqual(source.composition_inputs(inputs)["label_inventory"], payload,
+                                 "shipping labelling consumer must receive the private hydrated input")
                 windows = {s: p["window"] for s, p in inputs["label_inventory"][STACK["slug"]]["signals"].items()}
                 self.assertEqual(windows, {"metrics": "head", "logs": "24h", "traces": "24h", "profiles": "24h"})
         inputs, prov = hydrate.hydrate("t2", {}, now=NOW, loader=_loader(t2=owner))
@@ -591,12 +591,10 @@ class ViewInputsAreDerivedNotAssumed(unittest.TestCase):
             raise unittest.SkipTest(
                 f"{cls.fixture} absent - regenerate with bin/make_compose_fixture.py")
         cls.data = json.loads(cls.fixture.read_text())
-        # The source-only stage has no pillar yet. Include its REAL synthetic source envelope
-        # in the derivation universe and use the same composition fence as every tier runner.
-        from tests.test_label_inventory import SourceContracts
-        contract = SourceContracts()
-        contract.setUp()
-        cls.data["label_inventory"] = {cls.data["stacks"][0]["slug"]: contract.probe()}
+        # The committed fixture includes ideal and incomplete synthetic private envelopes.
+        # Keep it identical to offline dashboard composition, not an injected source-only proxy.
+        if not cls.data.get("label_inventory"):
+            raise AssertionError("labelling dependency derivation needs its private synthetic fixture")
 
     def _build(self, subset):
         stacks = self.data["stacks"]

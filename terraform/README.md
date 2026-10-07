@@ -18,6 +18,29 @@ Works on OpenTofu and Terraform. Requires the AWS provider v6.
 | ECR | optional repository for the collector image |
 | Data Firehose | optional, default-off ECS-log delivery to the same Grafana Cloud Loki target, with failed-record S3 backup |
 
+## Default-off label inventory policy
+
+`label_inventory_enabled` defaults to false. `label_inventory_tunables` is a JSON string
+(default `{}`) containing only evaluator `size_floor` (positive whole, default 100),
+`static_multiplier` (whole >=1, default 10), `coverage_floor` (0.8..1, default 0.8),
+and complete ordered positive threshold-band overrides keyed by accepted catalogue rule.
+Published hard limits are not overridable. The module validates against the repository's
+accepted catalogue; module packaging must retain the sibling `collector/label_rules.json`.
+`label_inventory_static_names` defaults to the source's static-infrastructure names,
+is limited to 64 unique syntactically valid names, and can be an empty list.
+`label_inventory_budget_seconds` defaults to 900 positive whole seconds, cannot exceed
+900, and is further limited to a quarter of remaining T2 time. No variable changes
+permissions, response caps, persisted schemas, opt-outs or process-memory guarantees.
+The standalone example projects these fields and inherits the module's validations.
+
+ECS renders all four fields into the non-secret scan projection. Old consumer digests
+remain admissible only for exact canonical new defaults; any changed policy requires
+regenerated digests and explicit matching consumer module wiring. No secret, estate list,
+source scope, IAM grant or deployment enablement is introduced here. See
+/Users/rob/repos/grafana-cloud-org-insights/RUNBOOK.md for config names, privacy boundaries
+and the strictly local read-only stability verification recipe. Missing/unreadable inputs
+stay absent; enablement is not a route grant or customer-rollout proof.
+
 ## Raw label-risk retention
 
 `scan_retention_days` is a positive whole number of days (default 90). In the existing

@@ -164,6 +164,10 @@ def validate(manifest: dict[str, Any], *, allow_legacy_scan_policy: bool = False
     legacy_scan_policy = (allow_legacy_scan_policy and isinstance(runtime.get("scan"), dict)
                           and product_env not in runtime["scan"])
     for kind, expected_names in identity.PROJECTION_ENVS.items():
+        if kind == "scan" and isinstance(runtime.get("scan"), dict) and not any(
+                name in runtime["scan"] for name in identity.LABEL_INVENTORY_DEFAULTS):
+            expected_names = tuple(name for name in expected_names
+                                   if name not in identity.LABEL_INVENTORY_DEFAULTS)
         if kind == "scan" and legacy_scan_policy:
             expected_names = tuple(name for name in expected_names if name != product_env)
         values = runtime.get(kind)
@@ -182,6 +186,19 @@ def validate(manifest: dict[str, Any], *, allow_legacy_scan_policy: bool = False
                 raise ManifestError(f"runtime.{kind}.{name} is not environment-safe")
 
     validate_json_runtime_types(runtime)
+    if any(name in runtime["scan"] for name in identity.LABEL_INVENTORY_DEFAULTS):
+        from collector import config
+        scan_policy = runtime["scan"]
+        if scan_policy["GCINSIGHT_LABEL_INVENTORY_ENABLED"] not in {"0", "1"}:
+            raise ManifestError("runtime.scan.GCINSIGHT_LABEL_INVENTORY_ENABLED must be 1 or 0")
+        try:
+            config.label_inventory_tunables(scan_policy["GCINSIGHT_LABEL_INVENTORY_TUNABLES"])
+            config.label_inventory_static_names(scan_policy["GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES"])
+            budget = config.label_inventory_budget(scan_policy["GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS"])
+            if str(int(budget)) != scan_policy["GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS"]:
+                raise ValueError("budget must use whole seconds for Terraform rendering")
+        except (config.MissingConfig, ValueError) as exc:
+            raise ManifestError(str(exc)) from None
 
     # Values Terraform cannot round-trip. The consumer wiring renders the flag as `== "1"`, so "true"
     # (which the collector accepts) renders "0"; and both tasks render OPT_OUT from ONE module input,
@@ -280,6 +297,11 @@ def regenerate(manifest: dict[str, Any]) -> dict[str, Any]:
             updated["runtime"] = dict(updated["runtime"], scan=dict(
                 scan, **{product_env: provisioner[product_env]}
             ))
+    scan = updated["runtime"].get("scan")
+    if isinstance(scan, dict):
+        updated["runtime"] = dict(updated["runtime"], scan={
+            **identity.LABEL_INVENTORY_DEFAULTS, **scan,
+        })
     # Validate before digest calculation too: an overflowing JSON number must be a contract error,
     # not an exception in identity's canonicalisation. Leave malformed projection shapes to validate.
     scan = updated["runtime"].get("scan")
@@ -530,6 +552,16 @@ def module_default_render(module_root: pathlib.Path, variable: str, expr: str) -
             except ValueError:
                 return None
         return identity.canonical_json_text(json.dumps(mapping))
+    if expr.strip() in {f"jsonencode(var.{variable})", f"jsonencode(jsondecode(var.{variable}))"}:
+        try:
+            value = json.loads(raw)
+            if expr.strip() == f"jsonencode(jsondecode(var.{variable}))":
+                value = json.loads(value)
+            return identity.canonical_json_text(json.dumps(value))
+        except (ValueError, TypeError):
+            return None
+    if expr.strip() == f"tostring(var.{variable})" and re.fullmatch(r"[0-9]+", raw):
+        return raw
     bare = expr.strip() == f"var.{variable}"
     if bare and re.fullmatch(r'"[^"]*"', raw):
         return raw[1:-1]

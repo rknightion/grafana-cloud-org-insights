@@ -694,6 +694,29 @@ the collector already uses for cardinality: `<per-signal instance id>:<CAP>`, th
  classification: a curated registry always lags the estate, and a panel that hides the remainder claims
  a completeness it does not have.
 
+## Label inventory policy and stability traps
+
+Config is not an evaluator/input schema extension: the policy mapping goes directly to
+composition/evaluation, budget seconds to the existing source slice, and the static-name
+allowlist to pre-minimization classification. Raising a deadline never enlarges body
+caps, kills surviving daemon reads or proves peak process memory. The feature is default
+off; shared opt-outs are not replaced by an estate list.
+
+A route witness is not a shipping-extension claim. Base Mimir reads only head cardinality
+names; no invented per-label series denominator or metric value shapes. Loki/Tempo/profile
+samples remain bounded and can be partial below caps. Unsupported/missing inputs stay
+absent, not measured zeros. Only S3 holds minimized names/counts/closed non-PII shapes;
+never raw values, PII shapes, Loki/events/metrics/stdout/`--out`/errors. Applied self-serve
+limits require a WRITE scope and remain unapproved; unreadable Tempo overrides stay parked.
+
+`just verify-labelling-stability` only reads supplied local observation, scan, stopped-task,
+schedule and measured-memory files. An exit-zero task or an asserted privacy bit is not
+sufficient. It validates the frozen minimized input schema itself, and refuses absent
+memory, missing artifacts, incomparable scores and less than 48 hours of consecutive
+natural daily observations. This is schema/outcome evidence, not proof of raw-value absence
+in every downstream sink or a universal memory bound. Exact artifact contract and
+caller-chosen score-change tolerance: /Users/rob/repos/grafana-cloud-org-insights/RUNBOOK.md.
+
 ## Labelling route witnesses - 2026-10-07
 
 GCI-0119.03 (Mimir labelling witness), GCI-0119.04 (Loki series/index witness),

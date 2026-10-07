@@ -1,5 +1,43 @@
 # Grafana Cloud org insights - design spec
 
+## Bounded labelling input and policy
+
+`label_inventory` is a default-off T2 input over fresh live inventory, not a configured
+estate or an exhaustive inventory. Current base collection reads exact-200 GET
+`/api/prom/api/v1/cardinality/label_names` (head-only counts), Loki
+`/loki/api/v1/labels` and `/loki/api/v1/label/{name}/values`, Tempo
+`/tempo/api/v2/search/tags` and `/tempo/api/v2/search/tag/{scope.name}/values`
+(bounded 24-hour samples), and the two exact Pyroscope read RPCs
+`/querier.v1.QuerierService/LabelNames` and `LabelValues` through
+`label_risk.profile_read`. Those POST exceptions do not change the GET-only shared client.
+Metric value shapes, series denominators and cross-signal value-set comparisons remain
+missing where not measured. Non-metric below-cap samples do not establish completeness.
+
+Witnessed extensions are separately bounded: exact GET Mimir
+`/api/prom/api/v1/cardinality/label_values`, Loki `/loki/api/v1/series`,
+`/loki/api/v1/index/stats`, `/loki/api/v1/index/volume`, legacy
+`/config/tenant/v1/limits`, and Tempo `/tempo/api/v2/search/tag/name/values`.
+A witness is not evidence those extensions are shipping in this base source.
+Write-scoped `/loki/api/v1/config/limits/applied` is not approved; unreadable Tempo
+overrides remain parked. No log-line route, new permission, YAML feature or scope follows.
+
+Only minimized label/attribute names, distinct counts (`exact` or `at_least`), closed
+non-PII shape counts (`uuid`, `hex_id`, `epoch`, `url_with_id`, `long_value`), and
+series/stream counts where actually measured may persist in S3 views and the private
+hydration input. These register items never reach Loki, finding events, metrics,
+stdout, diagnostic `--out` or errors. Raw values remain transient. Email, IP, phone,
+JWT and card shapes are not duplicated from `label_risk`; names over 512 UTF-8 bytes
+or matching PII become class/count only. Missing, unsupported, parked or incomplete
+inputs do not become clean passes, fabricated zeros or a score below coverage 0.8.
+Unsatisfied views remain absent, preserving last-good S3 objects.
+
+Evaluator policy, source budget and static allowlist use the existing environment/config
+path, not a persisted-schema extension. Shared opt-outs remain genuine policy. The
+caller slice is <=900 seconds and <=a quarter of remaining T2 time; tuning cannot
+relax transport/body caps or imply bounded daemon-read lifetime or process memory.
+See /Users/rob/repos/grafana-cloud-org-insights/RUNBOOK.md for the frozen policy API
+and read-only dated stability artifact contract.
+
 ## 1. Purpose
 
 Give a platform team and its leadership an estate-wide view of a dynamically discovered Grafana Cloud

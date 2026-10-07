@@ -27,6 +27,7 @@ from collector.pillars import (
     coverage as coverage_pillar,
     estate,
     label_risk as label_risk_pillar,
+    labelling,
     maturity,
     producing_signals,
     retention,
@@ -114,8 +115,9 @@ def build_all(
     library_panels_inventory: dict[str, Any] | None = None,
     loki_config: dict[str, Any] | None = None,
     label_risk: dict[str, Any] | None = None,
-    # Source-only private hydration seam. Accept additive plumbing without changing any pillar output.
+    # Private minimized source input. Diagnostic and finding-event fences stay separate.
     label_inventory: dict[str, Any] | None = None,
+    label_inventory_tunables: dict[str, Any] | None = None,
     expected_retention_policy: tuple[dict[str, str], ...] = (),
     fleet_default_scrape_interval_seconds: float = 60.0,
     score_weights: dict[str, float] | None = None,
@@ -173,6 +175,7 @@ def build_all(
         playlists_pillar.build(stacks, playlists_inventory),
         library_panels_pillar.build(stacks, library_panels_inventory),
         label_risk_pillar.build(stacks, label_risk),
+        labelling.build(stacks, label_inventory, signal_inventory, tunables=label_inventory_tunables),
     ):
         metrics.extend(pillar_metrics)
         for name, rows in pillar_views.items():

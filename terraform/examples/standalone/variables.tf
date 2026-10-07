@@ -97,6 +97,28 @@ variable "dashboard_detail_enabled" {
   default     = false
 }
 
+# The module validates these policy inputs against its accepted catalogue.
+variable "label_inventory_enabled" {
+  description = "Enable bounded T2 label inventory; no additional permission grant."
+  type        = bool
+  default     = false
+}
+variable "label_inventory_tunables" {
+  description = "JSON evaluator policy; module enforces hard limits and coverage >=0.8."
+  type        = string
+  default     = "{}"
+}
+variable "label_inventory_static_names" {
+  description = "Static-infrastructure name allowlist; module enforces unique bounded names."
+  type        = list(string)
+  default     = ["cluster", "host", "hostname", "k8s.cluster.name", "k8s.namespace.name", "k8s.node.name", "k8s_cluster_name", "k8s_namespace_name", "k8s_node_name", "namespace", "node"]
+}
+variable "label_inventory_budget_seconds" {
+  description = "Whole-second caller-wait slice <=900, also <=a quarter of remaining T2 time."
+  type        = number
+  default     = 900
+}
+
 variable "expected_retention_policy" {
   description = "Optional per-stream Loki retention expectations. Empty disables policy-gap reporting."
   type = list(object({

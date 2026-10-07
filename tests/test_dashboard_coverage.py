@@ -23,7 +23,7 @@ from collector import pillars
 from collector.coverage import Coverage
 from collector.dashboards import build
 from collector.emit import budget, hydrate, s3
-from collector.pillars import ai, compose, coverage, findings, library_panels, maturity, retention
+from collector.pillars import ai, compose, coverage, findings, labelling, library_panels, maturity, retention
 from collector.sources import usage_insights
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -276,6 +276,9 @@ def enum_requirements():
         ("gcinsight_coverage_unscored", "component"): {c for c, _ in coverage.UNSCORED_PAIRS},
         ("gcinsight_coverage_unscored", "reason"): {r for _, r in coverage.UNSCORED_PAIRS},
     }
+    overrides[("gcinsight_labelling_findings", "severity")] = labelling.SEVERITIES
+    for name in ("gcinsight_labelling_score", "gcinsight_labelling_rules_evaluated", "gcinsight_labelling_rules_passed"):
+        overrides[(name, "signal")] = labelling.SIGNALS
     for name in ("gcinsight_dashboards_estate_surface_requests", "gcinsight_dashboards_estate_surface_stacks"):
         overrides[(name, "surface")] = usage_insights.SURFACE_VALUES
     # GCI-0085 (inventory/remediate published dashboard data) retains this

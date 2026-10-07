@@ -44,6 +44,7 @@ def fixture(revision: str | None = None) -> dict:
     runtime["provisioner"]["GCINSIGHT_OPT_OUT"] = ""
     runtime["provisioner"]["GCINSIGHT_READER_PRODUCT_READS"] = ""
     runtime["scan"]["GCINSIGHT_READER_PRODUCT_READS"] = ""
+    runtime["scan"].update(identity.LABEL_INVENTORY_DEFAULTS)
     runtime["scan"]["GCINSIGHT_DASHBOARD_DETAIL_ENABLED"] = "0"
     runtime["scan"]["GCINSIGHT_EXPECTED_RETENTION_POLICY"] = "[]"
     runtime["scan"]["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"] = json.dumps({
@@ -109,6 +110,37 @@ class ManifestValidationTest(unittest.TestCase):
         overlay_digest, projections = consumer_manifest.calculated_digests(body)
         self.assertEqual(body["overlay_digest"], overlay_digest)
         self.assertEqual(body["runtime_projection_digests"], projections)
+
+    def test_additive_label_policy_preserves_old_digest_and_regenerates_explicit_defaults(self):
+        body = fixture()
+        for name in identity.LABEL_INVENTORY_DEFAULTS:
+            body["runtime"]["scan"].pop(name)
+        body["overlay_digest"], body["runtime_projection_digests"] = consumer_manifest.calculated_digests(body)
+        consumer_manifest.validate(body)
+        old = body["runtime_projection_digests"]["scan"]
+        upgraded = consumer_manifest.regenerate(body)
+        self.assertNotEqual(old, upgraded["runtime_projection_digests"]["scan"])
+        for name, default in identity.LABEL_INVENTORY_DEFAULTS.items():
+            self.assertNotIn(name, body["runtime"]["scan"])
+            self.assertEqual(upgraded["runtime"]["scan"][name], default)
+        body["runtime"]["scan"]["GCINSIGHT_LABEL_INVENTORY_ENABLED"] = "0"
+        with self.assertRaisesRegex(consumer_manifest.ManifestError, "keys differ"):
+            consumer_manifest.validate(body)
+
+    def test_label_policy_canonicalization_and_invalid_limits(self):
+        body = fixture()
+        body["runtime"]["scan"]["GCINSIGHT_LABEL_INVENTORY_TUNABLES"] = '{"coverage_floor": 1.0}'
+        one = consumer_manifest.regenerate(body)
+        body["runtime"]["scan"]["GCINSIGHT_LABEL_INVENTORY_TUNABLES"] = '{ "coverage_floor":1 }'
+        two = consumer_manifest.regenerate(body)
+        self.assertEqual(one["runtime_projection_digests"], two["runtime_projection_digests"])
+        for name, value in (("TUNABLES", '{"coverage_floor":0.7}'),
+                            ("STATIC_NAMES", '["invalid value"]'),
+                            ("BUDGET_SECONDS", "900.0"), ("ENABLED", "true")):
+            bad = fixture()
+            bad["runtime"]["scan"]["GCINSIGHT_LABEL_INVENTORY_" + name] = value
+            with self.assertRaises(consumer_manifest.ManifestError):
+                consumer_manifest.regenerate(bad)
 
     def test_regenerate_reports_a_malformed_manifest_as_a_contract_error(self):
         with self.assertRaisesRegex(consumer_manifest.ManifestError, "runtime projection object"):
