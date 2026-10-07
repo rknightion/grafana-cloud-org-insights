@@ -3,11 +3,11 @@ id: GCI-0072
 title: >-
   Publish a coverage-qualified Adaptive Metrics total when rule coverage is
   partial
-status: Parked
+status: Done
 assignee:
   - '@loop10-root'
 created_date: '2026-10-02 08:17'
-updated_date: '2026-10-02 19:09'
+updated_date: '2026-10-07 03:53'
 labels:
   - adaptive-metrics
   - accuracy
@@ -66,4 +66,6 @@ Loop10 a4 final implementation locally proved AC1-3, gate1688pass/2skipped/8016s
 Root-landed exact immutable candidate f908c07baa45a622c3e1014ed57a7b0ec09ddb2d CI37023316214 success. Implementation delivery accepted locally+hosted, no live partial-estate claim; R-dev release readback still owed. L-seg source packet prerequisite unlocked by landed coverage seam.
 
 Loop10 offline/publicboundary/exactCI/release0.5.0 allAC1-3 met, Goal liveR-dev qualifiedfieldsreadbackunproven (AWSauthblocked) thereforecampaignacceptancePARKED, notpartial-liveproof. No livepartialestateobserved; no newmetricnames. a1-a4consumed/infra0, no implementationallowance reset; resume deployment/readback only existinggatedcode, notanotherimplementation.
+
+loop14 live readback only; all4 historical implementation attempts remain consumed, no code or ceiling reset. Fresh v0.7.1 manual-T1 views03:24:08Z carry measured4/in_scope5/completefalse; qualified row labels inspected, all4 actual installed Infinity backend metadata queries returned matching count/boolean frames. Real partial qualification observed from4 unsegmented plus1 unknown segment discovery; no complete-estate total claimed. Shared publisher verifier false rejection is separately tracked as GCI-0123 (accept intact Infinity metadata queries), not another Adaptive-total implementation. No visible browser claim. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/R-dev/qualified-live-acceptance.json.
 <!-- SECTION:NOTES:END -->

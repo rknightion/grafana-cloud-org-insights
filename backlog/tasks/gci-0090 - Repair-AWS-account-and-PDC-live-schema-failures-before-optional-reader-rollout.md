@@ -1,11 +1,11 @@
 ---
 id: GCI-0090
 title: Repair AWS-account and PDC live schema failures before optional-reader rollout
-status: Parked
+status: Done
 assignee:
   - '@loop13-root'
 created_date: '2026-10-03 18:50'
-updated_date: '2026-10-06 11:18'
+updated_date: '2026-10-07 03:53'
 labels: []
 dependencies: []
 priority: high
@@ -23,7 +23,7 @@ The v0.6.0 dev T2 rollout read five live stacks but cloud_accounts was available
 <!-- AC:BEGIN -->
 - [x] #1 Reproduce each schema failure through its real guarded GET source with a red check derived from minimized non-secret live response shape; preserve fail-closed publication and last-good semantics.
 - [x] #2 Fix only witnessed contracts within approved route/pair scope, retaining fresh inventory-led joins and strict completeness; pass repository gate and independent review.
-- [ ] #3 A separately authorized dev rerun proves both readers before any customer rollout; use saved manifests, immutable image identity and unchanged working reader credentials.
+- [x] #3 A separately authorized dev rerun proves both readers before any customer rollout; use saved manifests, immutable image identity and unchanged working reader credentials.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -47,4 +47,6 @@ Loop12: 1 implementation attempt,0 review-repair rounds. Bounded PDC metadata re
 Owner decision D-AWS13 (Rob, 2026-10-06): exact HTTP 200 with body exactly {"data": null} from the AWS cloud-accounts route means zero accounts (complete empty), witnessed by owner ground truth that m7kni, portinapushtests and rkaidev have no AWS accounts configured, with robk and portina returning arrays under the same reader scope as positive controls. Any other null placement, extra key, non-200 or error body stays unavailable. Release, dev and customer may proceed on this repair.
 
 Loop13: total 2 implementation attempts including loop12 PDC cycle, 0 repair rounds in loop13. AWS exact-200 exact data:null repair accepted and landed9a76608afdf7aba22e7891b238e7ffe3af6cf1c0; integrated composed gate and CI37453753883 success at4b4a6b8060e08de78c5049dc2a0c2033079bc4f4; independently verified real GET/publication boundary, CodeRabbit clean. Shipped v0.7.0. AC3 remains parked: original infra checkout preflight refused retained untracked backups. Resume after approved clean preflight and separately completed dev live proof; no deployment writes.
+
+loop14 live proof only; total2 historical implementation attempts unchanged, no new code cycle. Signed v0.7.1 dev source7eed31f, immutable consumer03cd35e5, one provisioner plus T3/T2/T1 exact-ARN runs exited0/published. Fresh T2 AWS/PDC availability5/5, account counts0/1/0/0/1 under owner complete-empty witness and network counts1/0/0/1/1. Reader IDs/tokens/SSM versions unchanged, only exact approved pairs added. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/R-dev/; customer rollout remains held on complete dev acceptance.
 <!-- SECTION:NOTES:END -->

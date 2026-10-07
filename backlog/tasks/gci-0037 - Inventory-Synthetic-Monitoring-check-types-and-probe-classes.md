@@ -1,11 +1,11 @@
 ---
 id: GCI-0037
 title: Inventory Synthetic Monitoring check types and probe classes
-status: Parked
+status: Done
 assignee:
   - '@loop10-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-10-02 19:09'
+updated_date: '2026-10-07 03:53'
 labels:
   - feature-usage
   - follow-on
@@ -25,7 +25,7 @@ Rank 4 - high value, moderate access and privacy cost. The current usage metric 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 GET check and probe routes are verified on more than one stack before use
+- [x] #1 GET check and probe routes are verified on more than one stack before use
 - [x] #2 Output retains only bounded check type and public/private probe class, not target URLs or scripts
 - [x] #3 Unavailable coverage is absent, not zero
 <!-- AC:END -->
@@ -65,4 +65,6 @@ Reviewrepairr1 consumes1round infra0; real redirectedUIDgrant redrepro fixed via
 IndependentR-sec focusedround2 PASS exactaf5b2a1:6candidatefunctions loadedfromexactgitobjects passed, negativecontrolpredecessorfailedarbitrarygrant; no newmustfix. ExactCI37037362309success. Review1HIGHclosed; rawround1/2 appendedmanagedartifact preserved plusrootdistinct R-sec/return-r2.md. Live2stack/devproof stillowed.
 
 Loop10 code/release stable0.5.0 and exactCI/securityproved, but taskAC1 andgoalR-dev remainPARKED: AWS SSOexpired beforedevconsumer/provisioner/deploy, no freshdeployedreader two-stack counts. Archive targetcandidate/restoredownlocalprep exactproven0.4.4. a1/a2/a3implementationconsumed/r1reviewrepair/infra0/a4unused; resumeexternalauthreconcile+freshtwo-stackreaderproof, never substituteAdminhistoricalshapes ormintworkingcredential.
+
+loop14 live proof only; historical3 implementation attempts and1 review-repair round unchanged, no new allowance. Three uniquely discovered valid Synthetic datasource UIDs receive only exact query plus probes-read pairs; BasicNone and token/SSM identities unchanged. Fresh deployed-reader T2 counts11/3/4 on3 stacks, bounded type/probe classes; absent on2 without datasource, never manufactured zeros. Exact manual T2 task39d80514 exited0 and published. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/R-dev/.
 <!-- SECTION:NOTES:END -->
