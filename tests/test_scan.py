@@ -148,6 +148,13 @@ class LabelInventoryProcessEdgeTest(unittest.TestCase):
                     doc = {"series_count_total": 1, "labels": [{"label_name": label,
                            "label_values_count": 1, "series_count": 1,
                            "cardinality": [{"label_value": value, "series_count": 1}]}]}
+            elif parts.path == "/loki/api/v1/series":
+                if mode == "overflow":
+                    return (value + suppressed).encode() + b"x" * (2 * 1024 * 1024)
+                if mode == "malformed":
+                    return (value + suppressed).encode()
+                doc = {"status": "success", "data": [
+                    {ordinary: value, suppressed: value, "service_name": value}]}
             elif names:
                 names_list = [ordinary, suppressed, "service_name"]
                 doc = ({"scopes": [{"name": "resource", "tags": names_list}]} if signal == "traces" else

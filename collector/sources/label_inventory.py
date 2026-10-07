@@ -6,7 +6,11 @@ and metric names are transient; no 24h values are mixed into that head window.
 Cross-signal value-set comparisons remain missing, not clean zeros.
 The other three signals use existing 24h names/values reads. Their undocumented
 server completeness remains partial/truncated even below the local caps or empty.
-No series, OTLP config, intrinsic Tempo name or overrides routes are activated.
+Loki additionally reads the witnessed 24h service_name-selected /series GET. Stream
+sizes can prove a positive L1 violation, never a whole-tenant pass or empty signal.
+Register distinct/stream counts from this read are paired selected lower bounds,
+not a ratio: L3 still lacks a whole-label population and cannot be evaluated. No
+index totals, ratio policy, OTLP config, intrinsic Tempo name or overrides activate.
 
 The isolated source gets <=900s and <=one quarter of the tier's remaining time,
 immediately after label_risk and before gcom detail in run_t2. Exhaustion produces
@@ -34,6 +38,8 @@ from collector.sources import label_risk
 
 SIGNALS = label_risk.SIGNALS
 MAX_SECONDS = 900.0
+LOKI_SERIES_SELECTOR = '{service_name=~".+"}'
+LOKI_SERIES_BYTES = 1024 * 1024  # Frozen C2 24h witness; never enlarge the existing transport cap.
 STATIC_NAMES = frozenset({"host", "hostname", "cluster", "namespace", "node",
                           "k8s_cluster_name", "k8s_namespace_name", "k8s_node_name",
                           "k8s.cluster.name", "k8s.namespace.name", "k8s.node.name"})
@@ -367,6 +373,84 @@ def _metric_inputs(client, stack, cap, start, end, bounds, transport, kept, payl
                                          values_overflow=int(overflow))
 
 
+def _loki_inputs(client, stack, cap, start, end, bounds, payload):
+    """C2 selected 24h label sets, never a whole-tenant census or ratio denominator.
+
+    Only observed stream sizes enter L1 (top sizes retain positive violations).
+    Per-name counts share the same selected population, deduplicated by full label
+    set. Both register counts are at_least; they must not be divided into a ratio.
+    L3's population stays null: index stats are approximate, not per-label counts,
+    and an exact selected count cannot establish the whole-label size floor. Raw
+    values/label sets remain transient. An enumeration byte cap is not a values
+    overflow finding and cannot manufacture a labels-per-stream violation.
+    """
+    try:
+        if client.remaining() <= 0:
+            raise TimeoutError("deadline")
+        host, tenant, prefix = SIGNALS["logs"]
+        base = stack.get(host)
+        parts = urllib.parse.urlsplit(base if isinstance(base, str) else "")
+        if (parts.scheme != "https" or not parts.hostname or parts.username or parts.password
+                or parts.path not in ("", "/") or parts.query or parts.fragment or not stack.get(tenant)):
+            raise ValueError("missing_endpoint")
+        response = client.get(base.rstrip("/") + prefix + "/series",
+            params={"match[]": LOKI_SERIES_SELECTOR, "start": start * 1_000_000_000,
+                    "end": end * 1_000_000_000},
+            headers={"Accept": "application/json; allow-utf8-labelnames=true"},
+            basic=(str(stack[tenant]), cap))
+        if response.status != 200:
+            raise ValueError("http_error")
+        if len(response.body) > min(bounds.response_bytes, LOKI_SERIES_BYTES):
+            raise ValueError("response_byte_cap")
+        doc = response.json()
+        if (not isinstance(doc, dict) or doc.get("status") != "success"
+                or not isinstance(doc.get("data"), list)):
+            raise ValueError("invalid_response")
+        streams = set()
+        for stream in doc["data"]:
+            if not isinstance(stream, dict) or not stream:
+                raise ValueError("invalid_response")
+            for name, value in stream.items():
+                if not isinstance(name, str) or not name or not isinstance(value, str):
+                    raise ValueError("invalid_response")
+                name.encode("utf-8")
+                value.encode("utf-8")
+            streams.add(tuple(sorted(stream.items())))
+    except Exception as exc:
+        reason = "deadline" if client.remaining() <= 0 else _reason(exc)
+        reason = "truncated" if reason == "overflow" else reason
+        payload["inputs"]["labels_per_stream"] = _input(
+            "partial" if reason in {"deadline", "truncated"} else "unavailable", reason)
+        payload["state"] = "partial"
+        if payload["reason"] not in {"deadline", "overflow", "missing_input"}:
+            payload["reason"] = reason
+        return
+    # Selection alone means partial, regardless of server warnings, caps or empty.
+    payload["inputs"]["labels_per_stream"] = _input("partial", "truncated", truncated=True,
+        samples=[_sample(size, "at_least") for size in
+                 sorted((len(s) for s in streams), reverse=True)[:label_rules.MAX_SAMPLES]])
+    if streams:
+        payload["data"] = "present"
+    payload["state"] = "partial"
+    if payload["reason"] not in {"deadline", "overflow", "missing_input"}:
+        payload["reason"] = "truncated"
+    # Do not fabricate rows for unobserved names or overwrite them with zero.
+    selected = {r["name"]: r for r in payload["register"][:bounds.keys]
+                if r["name_class"] == "ordinary"}
+    values = {name: set() for name in selected}
+    populations = {name: 0 for name in selected}
+    for stream in streams:
+        for name, value in stream:
+            if name in selected:
+                populations[name] += 1
+                if len(values[name]) < bounds.values:
+                    values[name].add(value)
+    for name, row in selected.items():
+        if populations[name]:
+            row.update(distinct_count=len(values[name]), stream_count=populations[name],
+                       count_semantics="at_least")
+
+
 def _priority(row: tuple) -> tuple:
     scope, name, count = row
     return (name != "__name__", not bool(pii.key_classes(name) or _NAME_PRIORITY.search(name)),
@@ -392,6 +476,8 @@ def _signal(client, stack, cap, signal, start, end, bounds, transport, static_na
                    state="partial" if truncated else "complete", reason="truncated" if truncated else "none",
                    register_truncated=int(len(names) > len(kept)))
     if not names:
+        if signal == "logs":
+            _loki_inputs(client, stack, cap, start, end, bounds, payload)
         return payload
     inputs = payload["inputs"]
     state, reason = ("partial", "truncated") if truncated else ("complete", "none")
@@ -460,6 +546,8 @@ def _signal(client, stack, cap, signal, start, end, bounds, transport, static_na
                             values_overflow=int(shape_overflow))
     if signal == "metrics":
         _metric_inputs(client, stack, cap, start, end, bounds, transport, kept, payload, static_names)
+    elif signal == "logs":
+        _loki_inputs(client, stack, cap, start, end, bounds, payload)
     # Coalesce suppressed names by class/scope; their measurements remain null/empty.
     rows, suppressed = [], {}
     for row in payload["register"]:

@@ -270,7 +270,7 @@ def test_fail_and_missing_weights_are_not_dynamic_severity_weights():
     assert out["results"][0]["weight"] == 3
     summary = out["summaries"][0]
     assert summary["coverage"] == 1 and summary["score"] == 0
-    assert lr.evaluate({}) == {"catalogue_version": 2, "results": [], "summaries": []}
+    assert lr.evaluate({}) == {"catalogue_version": 3, "results": [], "summaries": []}
 
 
 def test_zero_coverage_no_score_and_no_applicable_rules_no_score():
@@ -317,8 +317,8 @@ def test_raw_size_extension_compares_sizes_and_counts_offending_objects(
     assert result(env, catalogue)["result"] == "fail"
     env["signals"][signal]["inputs"][input_id]["samples"] = [sample(threshold, "at_least")]
     assert result(env, catalogue)["evidence"]["at_least"] == 1
-    # Only the C1-witnessed metric-series extension is shipping; series/stream routes stay parked.
-    assert lr.CATALOGUE.inputs[input_id]["route"] == ("approved" if rule_id == "M5" else "parked")
+    # C1 metric-series and C2 selected stream sizes now ship; metric series samples stay parked.
+    assert lr.CATALOGUE.inputs[input_id]["route"] == ("approved" if rule_id in {"M5", "L1"} else "parked")
 
 
 @pytest.mark.parametrize("values,expected,lower", [

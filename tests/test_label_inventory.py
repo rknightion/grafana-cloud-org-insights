@@ -19,6 +19,7 @@ from collector.sources import label_inventory as source
 
 FIXTURE = json.loads((Path(__file__).parent / "fixtures/label_inventory/contracts.json").read_text())
 C1 = json.loads((Path(__file__).parent / "fixtures/label_inventory/c1_series.json").read_text())
+C2 = json.loads((Path(__file__).parent / "fixtures/label_inventory/c2_streams.json").read_text())
 NOW = dt.datetime(2026, 10, 7, 12, tzinfo=dt.timezone.utc)
 STACK = {"slug": "synthetic", "status": "active"}
 for signal, (host, tenant, _) in source.SIGNALS.items():
@@ -41,7 +42,9 @@ class SourceContracts(unittest.TestCase):
         self.requests.append(req)
         signal = urllib.parse.urlsplit(req.full_url).hostname.split(".")[0]
         names = urllib.parse.urlsplit(req.full_url).path.endswith(("/label_names", "/labels", "/tags", "/LabelNames"))
-        if signal == "metrics" and not names:
+        if urllib.parse.urlsplit(req.full_url).path == "/loki/api/v1/series":
+            body = C2["series"]
+        elif signal == "metrics" and not names:
             query = urllib.parse.parse_qs(urllib.parse.urlsplit(req.full_url).query)
             name = query["label_names[]"][0]
             count = next(r["label_values_count"] for r in FIXTURE["metrics_names"]["cardinality"] if r["label_name"] == name)
@@ -68,8 +71,10 @@ class SourceContracts(unittest.TestCase):
         self.assertEqual(samples[1]["label_kind"], "static")
         self.assertEqual(metrics["inputs"]["shape_count"]["samples"][0]["value"], 0)
         self.assertEqual(metrics["inputs"]["metric_series"]["state"], "unavailable", "__name__ was not observed")
+        # E2 now ships the witnessed stream consumer; the other routes remain unsupported.
+        self.assertIn("labels_per_stream", record["signals"]["logs"]["inputs"])
         self.assertFalse(any(k in p["inputs"] for p in record["signals"].values()
-                             for k in ("service_gap", "span_names", "labels_per_stream", "drilldown_missing")))
+                             for k in ("service_gap", "span_names", "drilldown_missing")))
         trace = record["signals"]["traces"]
         self.assertEqual({r["scope"] for r in trace["register"]}, {"resource", "span"})
         for signal in ("logs", "traces", "profiles"):
@@ -251,8 +256,173 @@ class SourceContracts(unittest.TestCase):
             serialized = run.stdout + run.stderr + "".join(p.read_text() for p in out.glob("*.json"))
             self.assertNotIn("canary", serialized)
             output = json.loads((out / "labelling_findings.json").read_text())
-            self.assertTrue(any(r["Rule"] == "M5" and r["Result"] == "fail" and r["Catalogue version"] == 2
+            self.assertTrue(any(r["Rule"] == "M5" and r["Result"] == "fail" and r["Catalogue version"] == 3
                                 for r in output["rows"]))
+
+    def c2_probe(self, transform=None, **kw):
+        original = self.send
+        def send(req, timeout):
+            parts = urllib.parse.urlsplit(req.full_url)
+            if parts.path != "/loki/api/v1/series":
+                return original(req, timeout)
+            self.requests.append(req)
+            self.assertEqual(req.get_method(), "GET")
+            query = urllib.parse.parse_qs(parts.query)
+            self.assertEqual(query, {"match[]": [C2["selector"]],
+                "start": [str(int(NOW.timestamp() - C2["window_seconds"]) * 1_000_000_000)],
+                "end": [str(int(NOW.timestamp()) * 1_000_000_000)]})
+            doc = copy.deepcopy(C2["series"])
+            return transform(doc) if transform else Response(200, json.dumps(doc).encode(), "")
+        self.send = send
+        try:
+            return self.probe(**kw)
+        finally:
+            self.send = original
+
+    def test_c2_witnessed_stream_shape_true_label_population_and_no_ratio_policy(self):
+        record = self.c2_probe()
+        logs = record["signals"]["logs"]
+        self.assertEqual((logs["window"], logs["state"], logs["reason"]), ("24h", "partial", "truncated"))
+        sizes = logs["inputs"]["labels_per_stream"]
+        self.assertEqual(sorted(s["value"] for s in sizes["samples"]), [2, 3, 16])
+        self.assertTrue(all(s["semantics"] == "at_least" for s in sizes["samples"]))
+        rows = {r["name"]: r for r in logs["register"]}
+        self.assertEqual((rows["request_id"]["distinct_count"], rows["request_id"]["stream_count"]), (1, 2))
+        self.assertEqual((rows["service_name"]["distinct_count"], rows["service_name"]["stream_count"]), (2, 3))
+        self.assertEqual(rows["request_id"]["count_semantics"], "at_least")
+        # Selected populations are real lower bounds, NOT whole-label denominators.
+        self.assertTrue(all(s["population"] is None for s in logs["inputs"]["distinct_values"]["samples"]))
+        results = {r["rule"]: r for r in label_rules.evaluate({"synthetic": record})["results"]}
+        self.assertEqual((results["L1"]["result"], results["L1"]["evidence"]["offending_labels"]), ("fail", 1))
+        self.assertEqual(results["L1"]["evidence"]["at_least"], 1)
+        self.assertEqual((results["L3"]["result"], results["L3"]["reason"]), ("not_evaluated", "missing_input"))
+        self.assertEqual(label_rules.CATALOGUE.version, 3)
+        self.assertNotIn("STREAM_VALUE_canary", json.dumps(record))
+        self.assertEqual(sum("/loki/api/v1/series" in r.full_url for r in self.requests), 1)
+        self.assertFalse(any("ratio" in k for k in label_rules.CATALOGUE.inputs))
+
+    def test_c2_selected_below_threshold_or_empty_never_whole_signal_pass(self):
+        for data in ([], C2["series"]["data"][1:]):
+            for warnings in ([], ["untrusted_warning_VALUE_canary"]):
+                with self.subTest(empty=not data, warning=bool(warnings)):
+                    def selected(doc):
+                        doc.update(data=data, warnings=warnings)
+                        return Response(200, json.dumps(doc).encode(), "")
+                    record = self.c2_probe(selected)
+                    logs = record["signals"]["logs"]
+                    self.assertNotEqual(logs["data"], "empty")
+                    self.assertEqual(logs["state"], "partial")
+                    results = {r["rule"]: r for r in label_rules.evaluate({"synthetic": record})["results"]}
+                    self.assertEqual(results["L1"]["result"], "not_evaluated")
+                    self.assertEqual(results["L3"]["result"], "not_evaluated")
+                    self.assertNotIn("canary", json.dumps(results))
+        # Even many selected streams do not supply a whole-label denominator to L3.
+        def many(doc):
+            doc["data"] = [{"service_name": "VALUE_canary", "request_id": str(i)} for i in range(300)]
+            return Response(200, json.dumps(doc).encode(), "")
+        record = self.c2_probe(many)
+        row = next(r for r in record["signals"]["logs"]["register"] if r["name"] == "request_id")
+        self.assertEqual((row["distinct_count"], row["stream_count"], row["count_semantics"]), (256, 300, "at_least"))
+        l3 = next(r for r in label_rules.evaluate({"synthetic": record})["results"] if r["rule"] == "L3")
+        self.assertEqual((l3["result"], l3["reason"]), ("not_evaluated", "missing_input"))
+
+    def test_c2_caps_prioritize_positive_sizes_and_deduplicate_streams_not_add_samples(self):
+        def capped(doc):
+            offender = doc["data"][0]
+            doc["data"] = [{"service_name": "VALUE_canary", "cluster": str(i)} for i in range(300)]
+            doc["data"].extend([offender, copy.deepcopy(offender)])
+            return Response(200, json.dumps(doc).encode(), "")
+        record = self.c2_probe(capped, bounds=source.Bounds(keys=1, values=1))
+        logs = record["signals"]["logs"]
+        self.assertEqual(len(logs["inputs"]["labels_per_stream"]["samples"]), 256)
+        self.assertEqual(logs["inputs"]["labels_per_stream"]["samples"][0]["value"], 16)
+        request = next(r for r in logs["register"] if r["name"] == "request_id")
+        self.assertEqual((request["stream_count"], request["distinct_count"]), (1, 1))
+        self.assertTrue(all(r["stream_count"] is None for r in logs["register"] if r["name"] != "request_id"))
+        l1 = next(r for r in label_rules.evaluate({"synthetic": record})["results"] if r["rule"] == "L1")
+        self.assertEqual((l1["result"], l1["evidence"]["offending_labels"]), ("fail", 1))
+        self.assertNotIn("VALUE_canary", json.dumps(record))
+
+    def test_c2_missing_partial_malformed_deadline_and_byte_cap_do_not_invent_violations(self):
+        responses = [Response(status, json.dumps(C2["series"]).encode(), "") for status in (206, 302, 401, 403, 500)]
+        responses.extend(Response(200, json.dumps(doc).encode(), "") for doc in (
+            {"status": "error", "data": C2["series"]["data"]},
+            {"status": "success", "data": None}, {"status": "success", "data": ["VALUE_canary"]},
+            {"status": "success", "data": [{}]}, {"status": "success", "data": [{"service_name": True}]},
+            {"status": "success", "data": [{"service_name": chr(0xD800)}]},
+            {"status": "success", "data": [{chr(0xD800): "VALUE_canary"}]}))
+        responses.extend([Response(200, b"VALUE_canary_malformed", ""),
+                          Response(200, b"VALUE_canary" + b"x" * C2["byte_cap"], "")])
+        for response in responses:
+            with self.subTest(status=response.status, bytes=len(response.body)):
+                record = self.c2_probe(lambda _: response)
+                l1 = next(r for r in label_rules.evaluate({"synthetic": record})["results"] if r["rule"] == "L1")
+                self.assertEqual(l1["result"], "not_evaluated")
+                self.assertEqual(l1["evidence"]["condition"], "none")
+                self.assertNotIn("canary", json.dumps(record))
+        # Exercise expiry of the actual source caller budget. The existing GET
+        # client wraps a transport-only TimeoutError as missing_input; that is
+        # not evidence that the tier's deadline has expired, and is not repaired here.
+        clock = [0.0]
+        original = self.send
+        def expired(req, timeout):
+            if urllib.parse.urlsplit(req.full_url).path == "/loki/api/v1/series":
+                clock[0] = 2.0
+                return Response(200, json.dumps(C2["series"]).encode(), "")
+            return original(req, timeout)
+        client = ReadOnlyClient(transport=expired, deadline=1, max_attempts=1, clock=lambda: clock[0])
+        record = source.probe_stack(client, STACK, "synthetic-cap", now=NOW, rpc_transport=expired)
+        l1 = next(r for r in label_rules.evaluate({"synthetic": record})["results"] if r["rule"] == "L1")
+        self.assertEqual((l1["result"], l1["reason"]), ("not_evaluated", "deadline"))
+        self.assertNotIn("canary", json.dumps(record))
+
+    def test_c2_stream_values_pii_names_and_oversize_keys_are_transient(self):
+        def private(doc):
+            doc["data"] = [{"service_name": "reader_VALUE_canary@example.test",
+                "person_NAME_canary@example.test": "VALUE_canary", "user_email": "VALUE_canary",
+                "x" * 513: "VALUE_canary", "request_id": "VALUE_canary"}]
+            return Response(200, json.dumps(doc).encode(), "")
+        record = self.c2_probe(private)
+        serialized = json.dumps(record)
+        self.assertNotIn("canary", serialized)
+        self.assertNotIn("user_email", serialized)
+        self.assertNotIn("x" * 513, serialized)
+        self.assertTrue(all(r["stream_count"] is None for r in record["signals"]["logs"]["register"]
+                            if r["name_class"] != "ordinary"))
+        self.assertEqual(record["signals"]["logs"]["inputs"]["labels_per_stream"]["samples"][0]["value"], 5)
+
+    def test_c2_actual_scan_cli_uses_new_get_without_leaking_values_or_names(self):
+        from tests.test_scan import LabelInventoryProcessEdgeTest
+        evidence = LabelInventoryProcessEdgeTest().exercise()
+        self.assertEqual(evidence["code"], 0, evidence["stderr"])
+        requests = [r for r in evidence["requests"] if "/loki/api/v1/series" in r.full_url]
+        self.assertEqual(len(requests), 1)
+        self.assertEqual(requests[0].get_method(), "GET")
+        self.assertEqual(urllib.parse.parse_qs(urllib.parse.urlsplit(requests[0].full_url).query)["match[]"], [C2["selector"]])
+        logs = evidence["source"][0]["synthetic"]["signals"]["logs"]
+        self.assertEqual(logs["inputs"]["labels_per_stream"]["samples"][0]["value"], 3)
+        for boundary in ("source", "scans", "views", "metrics", "events", "stdout", "stderr", "out"):
+            for sentinel in (evidence["value"], evidence["suppressed"]):
+                self.assertNotIn(sentinel, json.dumps(evidence[boundary]), boundary)
+        for boundary in ("metrics", "events", "stdout", "stderr", "out"):
+            self.assertNotIn(evidence["ordinary"], json.dumps(evidence[boundary]), boundary)
+
+    def test_c2_positive_violation_survives_real_offline_view_cli_and_only_private_counts(self):
+        record = self.c2_probe()
+        with tempfile.TemporaryDirectory(prefix="label-loki-cli-") as directory:
+            scan, out = Path(directory) / "scan.json", Path(directory) / "views"
+            scan.write_text(json.dumps({"stacks": [STACK], "label_inventory": {STACK["slug"]: record}}))
+            run = subprocess.run([sys.executable, str(Path(__file__).resolve().parents[1] / "bin/make_local_views.py"),
+                                  "--scan", str(scan), "--out", str(out)],
+                                 capture_output=True, text=True, timeout=60)
+            self.assertEqual(run.returncode, 0, run.stderr)
+            serialized = run.stdout + run.stderr + "".join(p.read_text() for p in out.glob("*.json"))
+            self.assertNotIn("STREAM_VALUE_canary", serialized)
+            rows = json.loads((out / "labelling_findings.json").read_text())["rows"]
+            l1 = next(r for r in rows if r["Rule"] == "L1")
+            self.assertEqual((l1["Result"], l1["Offending objects"], l1["Catalogue version"]), ("fail", 1, 3))
+            l3 = next(r for r in rows if r["Rule"] == "L3")
+            self.assertEqual((l3["Result"], l3["Reason"]), ("not_evaluated", "missing_input"))
 
     def test_disabled_zero_calls_and_no_isolated_client_construction(self):
         with mock.patch.object(source, "ReadOnlyClient") as client, mock.patch.object(source, "bounded_transport") as transport:

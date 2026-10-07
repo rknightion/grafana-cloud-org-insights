@@ -1,0 +1,15 @@
+{
+  "provenance": "Synthetic label-set/string response derived from frozen C2 24h-contract.json and witnessed Loki series API schema, 2026-10-07. No live label values or counts are copied. Selection is not whole tenant; no result-limit/completeness guarantee.",
+  "window_seconds": 86400,
+  "selector": "{service_name=~\".+\"}",
+  "selection_is_not_whole_tenant": true,
+  "byte_cap": 1048576,
+  "series": {
+    "status": "success",
+    "data": [
+      {"service_name": "STREAM_VALUE_canary_orders", "request_id": "STREAM_VALUE_canary_request", "cluster": "STREAM_VALUE_canary_a", "k00": "STREAM_VALUE_canary", "k01": "STREAM_VALUE_canary", "k02": "STREAM_VALUE_canary", "k03": "STREAM_VALUE_canary", "k04": "STREAM_VALUE_canary", "k05": "STREAM_VALUE_canary", "k06": "STREAM_VALUE_canary", "k07": "STREAM_VALUE_canary", "k08": "STREAM_VALUE_canary", "k09": "STREAM_VALUE_canary", "k10": "STREAM_VALUE_canary", "k11": "STREAM_VALUE_canary", "k12": "STREAM_VALUE_canary"},
+      {"service_name": "STREAM_VALUE_canary_orders", "request_id": "STREAM_VALUE_canary_request", "cluster": "STREAM_VALUE_canary_b"},
+      {"service_name": "STREAM_VALUE_canary_payments", "cluster": "STREAM_VALUE_canary_a"}
+    ]
+  }
+}
