@@ -98,14 +98,16 @@ jobs:
     if: always()
     needs: [tests, identifiers, terraform]
     steps:
-      - name: Fail if any required job did not pass
-        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+      - name: Require explicit success from every required job
+        # Named results fail closed for skipped or absent leaves; filtering a
+        # wildcard result list for failure/cancelled would accept those states.
         env:
-          RESULTS: ${{ join(needs.*.result, ', ') }}
+          TESTS_RESULT: ${{ needs.tests.result }}
+          IDENTIFIERS_RESULT: ${{ needs.identifiers.result }}
+          TERRAFORM_RESULT: ${{ needs.terraform.result }}
         run: |
-          echo "A required job failed or was cancelled: ${RESULTS}"
-          exit 1
-      - name: All required jobs passed
-        env:
-          RESULTS: ${{ join(needs.*.result, ', ') }}
-        run: echo "ci-success - ${RESULTS}"
+          if [[ "$TESTS_RESULT" != success || "$IDENTIFIERS_RESULT" != success || "$TERRAFORM_RESULT" != success ]]; then
+            echo "Required jobs must succeed: tests=${TESTS_RESULT}, identifiers=${IDENTIFIERS_RESULT}, terraform=${TERRAFORM_RESULT}"
+            exit 1
+          fi
+          echo "ci-success - all required jobs explicitly succeeded"
