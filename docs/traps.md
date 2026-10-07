@@ -694,6 +694,99 @@ the collector already uses for cardinality: `<per-signal instance id>:<CAP>`, th
  classification: a curated registry always lags the estate, and a panel that hides the remainder claims
  a completeness it does not have.
 
+## Labelling route witnesses - 2026-10-07
+
+GCI-0119.03 (Mimir labelling witness), GCI-0119.04 (Loki series/index witness),
+GCI-0119.05 (Loki limits witness) and GCI-0119.06 (Tempo names/overrides witness):
+these are staff route/auth/schema observations, not implementation or whole-estate findings.
+Every names, cardinality, Loki series/index and Loki limits witness queried **robknight,
+portina, portinapushtests, rkaidev and robk**. Root status complements establish exact
+statuses where earlier probe summaries said only 2xx. No customer identifiers or raw values
+are reproduced. No D-LBL11 policy change, scope addition or credential remint occurred;
+there is no new policy object ID to record. Root-only READ-scope additions still require
+fresh policy witness and readback; WRITE scopes are outside that allowance. D-LBL1
+minimization/retention and witness-first exact-route fences remain unchanged.
+
+### Mimir: bounded cardinality, not a complete value inventory
+
+GET `/api/prom/api/v1/cardinality/label_names` and
+`/api/prom/api/v1/cardinality/label_values` returned exact 200 for both staff Admin
+positive controls and deployed org reader on all five. Names returned respectively
+500, 421, 0, 52 and 500 rows. Selected `__name__` was actually witnessed on each
+nonempty stack before the values read; portinapushtests was measured empty (zero
+names, zero label rows, zero total series), not a failed selection. Values responses
+had numeric series totals and per-label cardinality objects, not a flat string list.
+Use `label_names[]`, selector and limit deliberately. At-limit names on robknight and
+robk are bounded results, not exhaustive lists. Current upstream describes ingester
+cardinality, `inmemory`/`active` count methods and possible query-result caching;
+request limits constrain returned items, not necessarily backend work. Older docs'
+500 maximum and later removal of that maximum are version-dependent, not a reason
+to enlarge this witnessed bound. No retention-wide or time-window completeness follows.
+Reference: https://grafana.com/docs/mimir/latest/references/http-api/.
+Evidence: /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C1/root-status-scope.json
+and /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C1-docs.json.
+
+### Loki: one-hour service-name selection only
+
+GET `/loki/api/v1/series`, `/loki/api/v1/index/stats` and
+`/loki/api/v1/index/volume` returned exact 200 for Admin and deployed reader on all
+five. The witness used a one-hour `service_name` matcher, not every stream. Series
+returned label-set objects; stats returned numeric streams/chunks/entries/bytes;
+volume returned a Prometheus-style vector. Reader series rows were respectively
+286, 81, 0, 0 and 258 (portina Admin returned 80: no equality guarantee across reads).
+Volume limit 20 was reached on robknight, portina and robk; the other two returned
+zero rows. Index stats are approximate and exclude ingesters. None of this establishes
+whole-stack or whole-estate ingest, exhaustive stream coverage or log-line permission
+for the collector. Empty results measure only the selected window/matcher.
+Reference: https://grafana.com/docs/loki/latest/reference/loki-http-api/.
+Evidence: /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C2/root-status-scope.json
+and /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C2-docs.log.
+
+### Loki limits: choose legacy effective tenant YAML, reject write-scoped applied
+
+GET `/loki/api/v1/config/limits/applied` and `/config/tenant/v1/limits` both returned
+Admin 200 on all five, **YAML even with Accept: application/json**. Applied uses
+application/yaml; legacy tenant uses text/plain. Applied reader returned 401
+`invalid_scope` on every stack. Official Cloud self-serve docs require logs WRITE:
+this is outside D-LBL11 READ-only authority, so applied stays unapproved for collector
+use and no scope was added. Legacy tenant reader returned exact 200 on all five;
+choose that already-readable route, with no `/loki` prefix.
+
+Tenant YAML exposes `otlp_config` as a mapping (one `resource_attributes` key),
+`discover_service_name` as a 13-item list, and `discover_log_levels` and
+`volume_enabled` as booleans (true in this witness). Applied exposed an OTLP mapping
+with one key on robknight and empty mappings on the other four. Missing
+`allow_structured_metadata` and `max_label_names_per_series` are **unknown**, never
+inferred defaults. The shipping YAML parser supports retention only: local witness
+PyYAML analysis is not product OTLP-subtree support or permission to add YAML features.
+Reference: https://grafana.com/docs/grafana-cloud/send-data/logs/config-self-serve-api/.
+Evidence: /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C3/root-status-scope.json,
+/Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C3/tenant-reader-status.json
+and /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C3-docs.log.
+
+### Tempo: names readable, overrides parked
+
+GET `/tempo/api/v2/search/tag/name/values` returned exact Admin and deployed-reader
+200 on all five, with typed string objects. The 24-hour witness requested limit 500
+and returned respectively 500, 7, 0, 49 and 500; robknight and robk were at limit.
+Below-limit counts (including zero) do not prove completeness. The documented
+1,000,000-byte default query cap was not live-config verified; byte/block caps can
+limit results, and no pagination/completeness proof was established. Name reads
+remain approved with those limitations, not an exhaustive intrinsic vocabulary.
+
+On robk, user overrides GET `/tempo/api/overrides?scope=merged` returned deployed-reader
+404. Root's tenant-specific effective GET `/tempo/status/overrides/{staff_tenant}`
+returned Admin and reader 404. The placeholder avoids retaining a tenant identifier.
+Overrides are unreadable/parked, not empty: infer no missing fields or default limits,
+and exclude override-dependent rules from applicable weight. Earlier probe JSON parsing
+failed on the 404 body; that failure is not an empty successful override schema.
+References: https://grafana.com/docs/tempo/latest/api_docs/ and
+https://grafana.com/docs/tempo/latest/operations/manage-advanced-systems/user-configurable-overrides/.
+Evidence: /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C4/root-status-scope.json,
+/Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C4/effective-overrides-status.json,
+/Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C4/probe.log
+and /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C4-docs.log.
+
 ## Writing about any of this
 
 - **Never put a measured figure in always-on prose** - a banner, a panel description that is really an

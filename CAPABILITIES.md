@@ -302,11 +302,36 @@ Synthetic uses guarded GET `/api/datasources/proxy/uid/<discovered uid>/sm/check
 enabled state and public/private probe class leave the source. Targets, scripts, headers, labels
 and identities are discarded. These are inventory counts, not probe usage or execution results.
 
+### Labelling witness boundary (2026-10-07)
+
+Staff slugs robknight, portina, portinapushtests, rkaidev and robk were each queried
+with staff Admin positive controls and the deployed org reader. This proves operational
+sufficiency of that reader, not isolated minimum scopes or universal visibility.
+
+| Exact GET route | Witness and collector boundary |
+|---|---|
+| `/api/prom/api/v1/cardinality/label_names` and `/api/prom/api/v1/cardinality/label_values` | Admin/reader exact 200 all five under existing metrics reader; selected `__name__` witnessed on nonempty stacks, portinapushtests measured empty. Bounded cardinality/series counts, not exhaustive values; names hit 500 on robknight and robk. |
+| `/loki/api/v1/series`, `/loki/api/v1/index/stats`, `/loki/api/v1/index/volume` | Admin/reader exact 200 all five under existing logs reader. One-hour service_name selection only; label-set, numeric count and vector schemas respectively. Stats approximate, no ingesters; volume limit 20 reached on robknight, portina and robk. Not whole-estate ingest. |
+| `/config/tenant/v1/limits` | Admin/reader exact 200 all five; chosen legacy effective tenant route. YAML/text/plain, not JSON. OTLP mapping, service-name list and discovery/volume booleans witnessed; missing allow_structured_metadata/max_label_names_per_series remain unknown. Shipping YAML parsing supports retention only, not OTLP subtree parsing or new YAML features. |
+| `/loki/api/v1/config/limits/applied` | Admin exact 200 YAML even AcceptJSON; reader 401 invalid_scope all five. Official self-serve docs require logs WRITE, outside D-LBL11 READ-only authority. Not approved for collector, no scope added. |
+| `/tempo/api/v2/search/tag/name/values` | Admin/reader exact 200 all five under existing traces reader; typed string objects, 24-hour limit 500, counts 500/7/0/49/500 in the staff order above. Two at limit; below-limit counts do not prove completeness. Documented 1MB default cap not live-config verified. Names remain approved. |
+| `/tempo/api/overrides?scope=merged` and `/tempo/status/overrides/{staff_tenant}` | robk reader user route 404; tenant-specific effective route Admin/reader 404. Unreadable, not empty; infer no field absence. Overrides parked, override-dependent rules excluded. No override route grant follows. |
+
+No D-LBL11 policy change or credential remint occurred, so no new policy object IDs exist.
+Root-only scope changes still require a fresh policy witness, READ-only scope and readback;
+these failures do not authorize WRITE. Witness-first exact paths, no log-line reads and
+D-LBL1 retention/minimization are preserved. Raw values are not reproduced here and
+staff observations confer no additional customer grant. Detailed evidence and upstream
+contracts: /Users/rob/repos/grafana-cloud-org-insights/docs/traps.md, labelling route witnesses.
+These observations do not change the implementation-inventory scope table above.
+
 ### Loki retention
 
 Effective tenant limits come from `/config/tenant/v1/limits` on the Loki dataplane under the existing
 org CAP and `logs:read`. The path has no `/loki` prefix. The deprecated
-`/loki/api/v1/config/limits/applied` route needs a different scope and is not used. Self-serve change
+`/loki/api/v1/config/limits/applied` route requires logs WRITE according to official
+self-serve docs, returned reader 401 invalid_scope on all five staff stacks, and is not used
+or approved for the collector. Self-serve change
 requests come from the stack-local Databases Configuration app resource route; they are evidence that
 a request happened, never evidence that no direct override exists.
 

@@ -167,10 +167,20 @@ The approved source is doc-0008 Part 1 (Labelling best-practice research and rul
   The exact approved witness paths are Mimir `/api/prom/api/v1/cardinality/label_names` and
   `/api/prom/api/v1/cardinality/label_values`; Loki `/loki/api/v1/series`,
   `/loki/api/v1/index/stats`, `/loki/api/v1/index/volume`,
-  `/loki/api/v1/config/limits/applied` and `/config/tenant/v1/limits`; Tempo
-  `/tempo/api/v2/search/tag/name/values`. Tempo overrides has no frozen exact path yet:
-  its witness must first resolve and record one; no overrides implementation is granted until
-  that witness passes and the exact path is appended here. The family names are not wildcard
+  `/config/tenant/v1/limits`; Tempo `/tempo/api/v2/search/tag/name/values`.
+  The 2026-10-07 witnesses queried staff slugs robknight, portina, portinapushtests,
+  rkaidev and robk with Admin controls and the deployed reader. These successful reads
+  prove bounded coverage, not complete inventories. The applied route
+  `/loki/api/v1/config/limits/applied` is NOT approved for the collector: reader 401
+  invalid_scope on all five and official docs require logs WRITE, outside D-LBL11.
+  Choose legacy tenant limits (reader 200 all five); absent fields remain unknown.
+  Shipping YAML parsing supports retention only, not OTLP subtrees or new YAML features.
+  Tempo overrides remain parked: robk `/tempo/api/overrides?scope=merged` and
+  `/tempo/status/overrides/{staff_tenant}` returned 404; infer no field absence and exclude
+  override-dependent rules. No overrides implementation is granted until a readable exact
+  route witness passes and the path is appended here. No scope was added or credential
+  re-minted. Detailed limitations are in
+  /Users/rob/repos/grafana-cloud-org-insights/docs/traps.md. The family names are not wildcard
   route grants. Pyroscope is limited to the two exact
   RPC paths and `label_risk.profile_read` fence in the bounded daily label privacy risk section.
 - **D-LBL7 Customer grant.** The customer deployment may enable `label-inventory` once it
