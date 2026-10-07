@@ -254,6 +254,12 @@ Never pass `--yes` or `JUST_YES=1` to get past that gate.
 `testdata/` is a synthetic estate and `tests/fixtures/` a synthetic scan. Read `testdata/README.md`
 before treating any number in either as a measurement.
 
+Memory evidence must name the measured boundary. The guarded pytest runner's peak RSS measures
+its test process, not a full-estate collector workload or an ECS task. A task memory reservation is
+not observed usage. Record immutable source/image identity and whether a collector memory witness
+was local or deployed; never present either as the other, or infer a CloudWatch peak when no
+measurement exists.
+
 Four kinds of test here are required because each catches a class of bug that looks like working code:
 
 - Contract tests that read a real artifact back. A test written from the implementation cannot catch
