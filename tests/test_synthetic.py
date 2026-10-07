@@ -133,6 +133,75 @@ def test_known_absence_is_not_failure_but_unknown_coverage_still_is():
         assert not scan.synthetic_reads_enabled()
 
 
+@pytest.mark.parametrize("path,size", [
+    ("/api/datasources", 6_281_868),
+    ("/api/datasources", 11_027_145),
+    ("/api/datasources/proxy/uid/synthetic-sm/sm/check/list", 32 * 1024 * 1024),
+    ("/api/datasources/proxy/uid/synthetic-sm/sm/probe/list", 32 * 1024 * 1024),
+])
+def test_oversized_synthetic_lists_use_real_guarded_transport(path, size):
+    """Synthetic bytes at the observed sizes and cap, never a live customer body."""
+    from collector.sources import synthetic
+    payloads = {
+        "/api/datasources": [{"type": "synthetic-monitoring-datasource", "uid": "synthetic-sm"}],
+        "/api/datasources/proxy/uid/synthetic-sm/sm/check/list": [
+            {"enabled": True, "settings": {"http": {}}}],
+        "/api/datasources/proxy/uid/synthetic-sm/sm/probe/list": [{"public": True}],
+    }
+    def open_response(req, timeout):
+        route = req.full_url.removeprefix(STACK["url"])
+        raw = json.dumps(payloads[route]).encode()
+        if route == path:
+            raw += b" " * (size - len(raw))
+        import io
+        fh = io.BytesIO(raw)
+        fh.code, fh.headers = 200, {"Content-Length": str(len(raw))}
+        fh.read1 = fh.read
+        return fh
+    with mock.patch("collector.httpclient.urllib.request.build_opener") as opener:
+        opener.return_value.open.side_effect = open_response
+        record = synthetic.probe_stack(ReadOnlyClient(), STACK, "synthetic-token")
+    assert record["available"], record
+    assert record["check_count"] == 1
+    assert record["probe_counts"] == {"public": 1, "private": 0}
+
+
+@pytest.mark.parametrize("failed_path", [
+    "/api/datasources",
+    "/api/datasources/proxy/uid/synthetic-sm/sm/check/list",
+    "/api/datasources/proxy/uid/synthetic-sm/sm/probe/list",
+])
+def test_over_cap_stays_transport_error_and_withholds_publication(failed_path, capsys):
+    from collector.httpclient import MAX_SYNTHETIC_BYTES
+    from collector.pillars import synthetic as pillar
+    from collector.sources import synthetic
+    payloads = {
+        "/api/datasources": [{"type": "synthetic-monitoring-datasource", "uid": "synthetic-sm"}],
+        "/api/datasources/proxy/uid/synthetic-sm/sm/check/list": [],
+        "/api/datasources/proxy/uid/synthetic-sm/sm/probe/list": [],
+    }
+    def open_response(req, timeout):
+        import io
+        path = req.full_url.removeprefix(STACK["url"])
+        fh = io.BytesIO(json.dumps(payloads[path]).encode())
+        fh.code = 200
+        fh.headers = {"Content-Length": str(MAX_SYNTHETIC_BYTES + 1)} if path == failed_path else {}
+        fh.read1 = fh.read
+        return fh
+    errors = []
+    with mock.patch("collector.httpclient.urllib.request.build_opener") as opener:
+        opener.return_value.open.side_effect = open_response
+        data = synthetic.probe_all(ReadOnlyClient(), [STACK], {"obs-hub": {"token": "synthetic-token"}},
+                                   on_error=lambda slug, msg: errors.append(msg))
+    assert data == {"obs-hub": {"available": False, "reason": "transport_error"}}
+    assert errors == ["synthetic_inventory: transport_error"]
+    assert pillar.build([STACK], data) == ([], {})
+    report = scan.synthetic_source_report(1, data, errors)
+    assert report["expected"] == 1 and report["not_applicable"] == 0
+    assert not report["healthy"]
+    assert capsys.readouterr().out == ""
+
+
 def test_transport_failures_empty_lists_and_unknown_type():
     from collector.sources import synthetic
     client, _ = fixture_client(exception=True)

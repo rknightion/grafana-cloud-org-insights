@@ -27,18 +27,19 @@ def probe_stack(client: ReadOnlyClient, stack: Mapping[str, Any], reader: str) -
     if not reader:
         return {"available": False, "reason": "no_credential"}
     try:
-        response = client.get(base + "/api/datasources", bearer=reader, guarded=True)
+        response = client.get(base + "/api/datasources", bearer=reader, guarded=True,
+                              synthetic=True)
         if not response.ok:
             return {"available": False, "reason": "unreadable"}
         uid, state = synthetic_datasource_uid(response.json())
         if uid is None:
             return {"available": False, "reason": state}
         prefix = base + f"/api/datasources/proxy/uid/{uid}/sm/"
-        checks = client.get(prefix + "check/list", bearer=reader, guarded=True)
+        checks = client.get(prefix + "check/list", bearer=reader, guarded=True, synthetic=True)
         if not checks.ok:
             return {"available": False, "reason": "checks_unreadable"}
         checks = checks.json()
-        probes = client.get(prefix + "probe/list", bearer=reader, guarded=True)
+        probes = client.get(prefix + "probe/list", bearer=reader, guarded=True, synthetic=True)
         if not probes.ok:
             return {"available": False, "reason": "probes_unreadable"}
         probes = probes.json()

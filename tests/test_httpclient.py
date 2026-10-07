@@ -1,11 +1,19 @@
 from __future__ import annotations
 
+import io
 import threading
 import unittest
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
+from unittest import mock
+
+import pytest
 
 from collector.httpclient import (
     DeadlineExceeded,
+    MAX_GUARDED_BYTES,
+    MAX_SYNTHETIC_BYTES,
+    MAX_SYNTHETIC_READS,
     MethodNotAllowed,
     ReadOnlyClient,
     Response,
@@ -158,6 +166,155 @@ class ReadOnlyTest(unittest.TestCase):
     def test_host_concurrency_must_be_positive(self):
         with self.assertRaises(ValueError):
             ReadOnlyClient(host_concurrency=0)
+
+
+SYNTHETIC_PATHS = (
+    "/api/datasources",
+    "/api/datasources/proxy/uid/synthetic-sm/sm/check/list",
+    "/api/datasources/proxy/uid/synthetic-sm/sm/probe/list",
+)
+
+
+@pytest.mark.parametrize("path", (*SYNTHETIC_PATHS, "/api/search", "/api/playlists"))
+def test_ordinary_guarded_get_retains_two_mib_even_on_synthetic_routes(path):
+    assert MAX_GUARDED_BYTES == 2 * 1024 * 1024
+    body = b"x" * (MAX_GUARDED_BYTES + 1)
+    client = ReadOnlyClient(transport=lambda req, _: Response(200, body, req.full_url))
+    with pytest.raises(ValueError, match="response too large"):
+        client.get("https://example.test" + path, guarded=True)
+
+
+@pytest.mark.parametrize("url", [
+    "https://example.test/api/search",
+    "https://example.test/api/datasources/",
+    "https://example.test/api/datasources?limit=1",
+    "https://example.test/api/datasources#fragment",
+    "http://example.test/api/datasources",
+    "https://user:pass@example.test/api/datasources",
+    "https://example.test/api/datasources/proxy/uid/bad%2Fuid/sm/check/list",
+    "https://example.test/api/datasources/proxy/uid/bad:uid/sm/check/list",
+    "https://example.test/api/datasources/proxy/uid/" + "a" * 41 + "/sm/check/list",
+    "https://example.test/api/datasources/proxy/uid/sm/sm/check/list/extra",
+    "https://example.test/api/datasources/proxy/uid/sm/sm/check/other",
+])
+def test_larger_body_profile_refuses_other_urls_before_transport(url):
+    transport = mock.Mock()
+    client = ReadOnlyClient(transport=transport)
+    with pytest.raises(ValueError, match="invalid Synthetic GET route"):
+        client.get(url, guarded=True, synthetic=True)
+    transport.assert_not_called()
+
+
+def test_larger_body_profile_requires_guarded_get():
+    client = ReadOnlyClient(transport=mock.Mock())
+    with pytest.raises(ValueError, match="requires guarded"):
+        client.get("https://example.test/api/datasources", synthetic=True)
+    with pytest.raises(MethodNotAllowed):
+        client.request("POST", "https://example.test/api/datasources", guarded=True, synthetic=True)
+    client._transport.assert_not_called()
+
+
+@pytest.mark.parametrize("synthetic", [False, True])
+@pytest.mark.parametrize("length_header", [False, True])
+@pytest.mark.parametrize("overflow", [False, True])
+def test_native_guarded_body_cap_and_overflow_sentinel(synthetic, length_header, overflow):
+    """Exercise the actual chunk reader, with and without an early length fence."""
+    cap = MAX_SYNTHETIC_BYTES if synthetic else MAX_GUARDED_BYTES
+    assert MAX_SYNTHETIC_BYTES == 32 * 1024 * 1024
+    size = cap + int(overflow)
+    fh = io.BytesIO(b"x" * size)
+    fh.code = 200
+    fh.headers = {"Content-Length": str(size)} if length_header else {}
+    fh.read1 = mock.Mock(wraps=fh.read)
+    with mock.patch("collector.httpclient.urllib.request.build_opener") as opener:
+        opener.return_value.open.return_value = fh
+        client = ReadOnlyClient()
+        if overflow:
+            with pytest.raises(ValueError, match="response too large"):
+                client.get("https://example.test/api/datasources", guarded=True, synthetic=synthetic)
+            if length_header:
+                fh.read1.assert_not_called()
+        else:
+            resp = client.get("https://example.test/api/datasources", guarded=True, synthetic=synthetic)
+            assert len(resp.body) == cap
+    assert fh.closed
+
+
+def test_injected_larger_profile_also_enforces_cap():
+    client = ReadOnlyClient(transport=lambda req, _: Response(
+        200, b"x" * (MAX_SYNTHETIC_BYTES + 1), req.full_url))
+    with pytest.raises(ValueError, match="response too large"):
+        client.get("https://example.test/api/datasources", guarded=True, synthetic=True)
+
+
+def test_oversized_slots_are_global_across_hosts_and_clients():
+    assert MAX_SYNTHETIC_READS == 2
+    release, two_started = threading.Event(), threading.Event()
+    lock = threading.Lock()
+    active, peak, started = 0, 0, 0
+    def transport(req, timeout):
+        nonlocal active, peak, started
+        with lock:
+            active += 1
+            started += 1
+            peak = max(peak, active)
+            if started == 2:
+                two_started.set()
+        try:
+            assert release.wait(2)
+            return Response(200, b"x" * (MAX_GUARDED_BYTES + 1), req.full_url)
+        finally:
+            with lock:
+                active -= 1
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        futures = [pool.submit(ReadOnlyClient(transport=transport).get,
+                               f"https://host{i}.test/api/datasources", guarded=True, synthetic=True)
+                   for i in range(8)]
+        try:
+            assert two_started.wait(1)
+            # Ordinary guarded traffic is not forced to wait on the larger-profile slots.
+            ordinary = ReadOnlyClient(transport=responder(200))
+            assert ordinary.get("https://other.test/api/search", guarded=True).ok
+            with lock:
+                assert started == 2
+        finally:
+            release.set()
+        assert all(f.result(timeout=3).ok for f in futures)
+    assert started == 8 and peak == 2 and active == 0
+
+
+def test_timed_out_workers_keep_oversized_slots_until_transport_exits():
+    release, two_started = threading.Event(), threading.Event()
+    started = 0
+    lock = threading.Lock()
+    def stalled(req, timeout):
+        nonlocal started
+        with lock:
+            started += 1
+            if started == 2:
+                two_started.set()
+        assert release.wait(2)
+        return Response(200, b"{}", req.full_url)
+    clients = [ReadOnlyClient(transport=stalled, timeout=0.1) for _ in range(2)]
+    def read(client):
+        with pytest.raises(DeadlineExceeded):
+            client.get("https://example.test/api/datasources", guarded=True, synthetic=True)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(read, client) for client in clients]
+        try:
+            assert two_started.wait(1)
+            for future in futures:
+                future.result(timeout=1)
+            edge = mock.Mock(return_value=Response(200, b"{}", "https://third.test/api/datasources"))
+            with pytest.raises(DeadlineExceeded):
+                ReadOnlyClient(transport=edge, timeout=0.1).get(
+                    "https://third.test/api/datasources", guarded=True, synthetic=True)
+            edge.assert_not_called()
+        finally:
+            release.set()
+    # A following read succeeds once the surviving transports have exited.
+    assert ReadOnlyClient(transport=responder(200)).get(
+        "https://next.test/api/datasources", guarded=True, synthetic=True).ok
 
 
 if __name__ == "__main__":

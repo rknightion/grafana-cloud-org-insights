@@ -616,6 +616,25 @@ shape. Read the schema at `/openapi/v3/apis/dashboard.grafana.app/v2` rather tha
  stack/type/count mapping and per-type ranking as S3 views. Mimir may carry the scalar distinct-type
  count, never one labelled series per discovered vendor type or per stack.
 - **Synthetic Monitoring rejects an org-realm token and 500s even from an Admin service account.**
+- **Synthetic list bodies can exceed the ordinary guarded GET cap.** The opt-in Synthetic
+ reader alone selects `MAX_SYNTHETIC_BYTES` (32 MiB) for its existing GET `/api/datasources`,
+ `/api/datasources/proxy/uid/<validated-uid>/sm/check/list` and
+ `/api/datasources/proxy/uid/<validated-uid>/sm/probe/list`. Every other guarded GET,
+ including datasource discovery without the Synthetic body profile, retains
+ `MAX_GUARDED_BYTES` (2 MiB). No route, query, uid validation, scope, credential or
+ publication-floor change follows. An over-cap body remains `transport_error`, unavailable,
+ never measured zero or proven datasource absence; dependent last-good views stay preserved.
+ Two process-wide slots bound all larger-profile reads across hosts and client instances,
+ including reads whose callers timed out. A worker holds its slot through transport and
+ the final body copy; waiting for a slot consumes the same caller deadline. With eight
+ `probe_all` workers, at most two can be reading above 2 MiB at once, not eight. The maximum
+ in-flight response payload is `2 * (33,554,432 + 1) = 67,108,866` bytes (64 MiB plus two
+ overflow sentinels). Conservatively counting a simultaneous bytearray-to-bytes copy and
+ a 64 KiB read chunk for each slot gives `2 * (2 * 33,554,432 + 1 + 65,536) = 134,348,802`
+ raw buffer-content bytes. Neither figure is peak RSS or a general collector memory bound:
+ allocator slack, TLS/socket buffers, completed response bodies, JSON decoding and parsed
+ objects retained by the eight probe workers are additional. Slots fence live transport,
+ not parsed-object lifetimes or hard termination; never infer deployed memory usage from them.
 - **`POST /api/v1/rule/backtest` returns HTTP 400 and is not worth pursuing.** To prove an alert fires,
  evaluate the live rule's own expression over a window where the fault really happened. That is
  stronger evidence than a synthetic backtest, because the fault window is real.

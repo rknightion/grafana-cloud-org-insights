@@ -90,7 +90,9 @@ off anything but the live inventory.
   reports it; every other query pair stays dangerous. A v0.4.3-correct role makes zero discovery
   calls. With the token absent, scans make zero SM calls.
 - Synthetic reader-role proof is not source-health proof. The current guarded GET path caps each
-  datasource-discovery, check-list and probe-list response at 2 MiB. Overflow, ambiguous datasource
+  Synthetic datasource-discovery, check-list and probe-list response at
+  `MAX_SYNTHETIC_BYTES` (32 MiB), with two process-wide oversized-read slots retained by
+  surviving workers; every other guarded GET retains `MAX_GUARDED_BYTES` (2 MiB). Overflow, ambiguous datasource
   sets, missing credentials and unreadable product routes remain unavailable, not zero or known
   absence. Only a complete discovery proving no Synthetic datasource is not applicable. A selected
   Synthetic owner input below the publication floor refuses the entire T2 publication, even when

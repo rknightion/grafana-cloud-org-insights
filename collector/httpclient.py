@@ -17,6 +17,7 @@ import http.client
 import io
 import json
 import random
+import re
 import threading
 import time
 import urllib.error
@@ -182,9 +183,10 @@ class ReadOnlyClient:
         basic: tuple[str, str] | None = None,
         guarded: bool = False,
         status_only: bool = False,
+        synthetic: bool = False,
     ) -> Response:
         return self.request("GET", url, params=params, headers=headers, bearer=bearer, basic=basic,
-                            guarded=guarded, status_only=status_only)
+                            guarded=guarded, status_only=status_only, synthetic=synthetic)
 
     def request(
         self,
@@ -197,7 +199,10 @@ class ReadOnlyClient:
         basic: tuple[str, str] | None = None,
         guarded: bool = False,
         status_only: bool = False,
+        synthetic: bool = False,
     ) -> Response:
+        if synthetic and not guarded:
+            raise ValueError("synthetic body bound requires guarded transport")
         if status_only and not guarded:
             raise ValueError("status_only requires guarded transport")
         if method.upper() != "GET":
@@ -205,6 +210,8 @@ class ReadOnlyClient:
                 f"{method} refused: this collector is read-only by construction (SPEC §8)"
             )
         full = _with_params(url, params)
+        if synthetic:
+            _validate_synthetic_route(full)
         req = urllib.request.Request(full, method="GET")
         for key, value in (headers or {}).items():
             req.add_header(key, value)
@@ -213,7 +220,8 @@ class ReadOnlyClient:
         if basic:
             req.add_header("Authorization", _basic_auth(*basic))
         if guarded:
-            return self._send_guarded(req, _host_of(full), status_only=status_only)
+            return self._send_guarded(req, _host_of(full), status_only=status_only,
+                                      synthetic=synthetic)
         return self._send_with_retries(req, _host_of(full))
 
     def remaining(self) -> float:
@@ -243,18 +251,20 @@ class ReadOnlyClient:
                 self._semaphores[host] = sem
             return sem
 
-    def _send_guarded(self, req: urllib.request.Request, host: str, *, status_only: bool) -> Response:
+    def _send_guarded(self, req: urllib.request.Request, host: str, *, status_only: bool,
+                      synthetic: bool) -> Response:
         """One fixed-route attempt; caller wait includes queue, DNS, connect and reads."""
         timeout = min(self._timeout, self.remaining())
         end = self._clock() + timeout
         try:
             return bounded_call(
-                lambda: self._guarded_attempt(req, host, end, status_only=status_only), timeout)
+                lambda: self._guarded_attempt(req, host, end, status_only=status_only,
+                                              synthetic=synthetic), timeout)
         except TimeoutError:
             raise DeadlineExceeded("guarded GET deadline") from None
 
     def _guarded_attempt(self, req: urllib.request.Request, host: str, end: float,
-                         *, status_only: bool) -> Response:
+                         *, status_only: bool, synthetic: bool) -> Response:
         # The worker owns the host slot, including if its caller has timed out.
         # Guarded socket reads additionally clamp to the remaining total budget.
         remaining = lambda: end - self._clock()
@@ -265,25 +275,37 @@ class ReadOnlyClient:
         wait = remaining()
         if wait <= 0 or not sem.acquire(timeout=wait):
             raise DeadlineExceeded("guarded GET deadline")
+        oversized_slot = False
+        max_bytes = MAX_SYNTHETIC_BYTES if synthetic else MAX_GUARDED_BYTES
         try:
+            # Process-wide, not per host/client. The worker retains this slot even
+            # after caller timeout, until its transport and body copy really exit.
+            if synthetic and not status_only:
+                wait = remaining()
+                if wait <= 0 or not _SYNTHETIC_READS.acquire(timeout=wait):
+                    raise DeadlineExceeded("Synthetic GET queue deadline")
+                oversized_slot = True
             wait = remaining()
             if wait <= 0:
                 raise DeadlineExceeded("guarded GET deadline")
             self.attempts.requests += 1
             if self._transport is _urllib_transport:
-                resp = _guarded_transport(req, remaining, status_only=status_only)
+                resp = _guarded_transport(req, remaining, status_only=status_only,
+                                          max_bytes=max_bytes)
             else:
                 # Injected network edge is trusted; enforce the output fences as well.
                 resp = self._transport(req, wait)
                 if status_only or not resp.ok:
                     resp = Response(resp.status, b"", resp.url, resp.headers)
-                elif len(resp.body) > MAX_GUARDED_BYTES:
+                elif len(resp.body) > max_bytes:
                     raise ValueError("guarded GET response too large")
             if remaining() <= 0:
                 raise DeadlineExceeded("guarded GET deadline")
             self.attempts.record(resp.status)
             return resp
         finally:
+            if oversized_slot:
+                _SYNTHETIC_READS.release()
             sem.release()
 
     def _send_with_retries(self, req: urllib.request.Request, host: str) -> Response:
@@ -365,6 +387,20 @@ def _host_of(url: str) -> str:
 
 
 MAX_GUARDED_BYTES = 2 * 1024 * 1024
+MAX_SYNTHETIC_BYTES = 32 * 1024 * 1024
+MAX_SYNTHETIC_READS = 2
+_SYNTHETIC_READS = threading.BoundedSemaphore(MAX_SYNTHETIC_READS)
+
+
+def _validate_synthetic_route(url: str) -> None:
+    """The larger body profile grants no sibling route or query-bearing URL."""
+    parsed = urllib.parse.urlsplit(url)
+    if (parsed.scheme != "https" or not parsed.hostname or parsed.username is not None
+            or parsed.password is not None or parsed.query or parsed.fragment
+            or not (parsed.path == "/api/datasources" or re.fullmatch(
+                r"/api/datasources/proxy/uid/[A-Za-z0-9_-]{1,40}/sm/(check|probe)/list",
+                parsed.path))):
+        raise ValueError("invalid Synthetic GET route")
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -433,8 +469,8 @@ class _GuardedHTTPSHandler(urllib.request.HTTPSHandler):
         return self.do_open(Connection, req, context=self._context)
 
 
-def _guarded_transport(req, remaining, *, status_only):
-    """No redirect or error body. Read at most 2 MiB plus one overflow sentinel.
+def _guarded_transport(req, remaining, *, status_only, max_bytes=MAX_GUARDED_BYTES):
+    """No redirect or error body. Read at most the selected cap plus one sentinel.
 
     DNS resolution and initial TCP/TLS connect run behind netbound's caller fence;
     urllib cannot interrupt DNS. A surviving worker retains its bounded pool/host slot.
@@ -460,19 +496,19 @@ def _guarded_transport(req, remaining, *, status_only):
             if not raw_length.isascii() or not raw_length.isdigit():
                 raise ValueError("invalid guarded GET content length")
             expected = int(raw_length)
-            if expected > MAX_GUARDED_BYTES:
+            if expected > max_bytes:
                 raise ValueError("guarded GET response too large")
         body = bytearray()
         while True:
             if remaining() <= 0:
                 raise DeadlineExceeded("guarded GET deadline")
-            chunk = fh.read1(min(64 * 1024, MAX_GUARDED_BYTES + 1 - len(body)))
+            chunk = fh.read1(min(64 * 1024, max_bytes + 1 - len(body)))
             if remaining() <= 0:
                 raise DeadlineExceeded("guarded GET deadline")
             if not chunk:
                 break
             body.extend(chunk)
-            if len(body) > MAX_GUARDED_BYTES:
+            if len(body) > max_bytes:
                 raise ValueError("guarded GET response too large")
         if expected is not None and len(body) != expected:
             raise ValueError("incomplete guarded GET response")
