@@ -592,6 +592,18 @@ def d_estate(ds: str):
             description="Below 1.0 means stacks failed. A partial scan is reported as partial, never as "
                         "a smaller estate. Points are sampled publications; a gap is unavailable, "
                         "not interpolated coverage."),
+        "t_completion_age": build.timeseries_panel(
+            "Completion timestamp age by tier (Mimir)",
+            [("time() - max_over_time("
+              f'gcinsight_scan_completed_timestamp_seconds{{tier="{tier}"}}'
+              f"[{build.FRESHNESS_LOOKBACK}])", tier) for tier in ("t1", "t2", "t3", "t4")],
+            unit="s", integrity=True,
+            description="Age of the latest completion timestamp observed in Mimir within the "
+                        f"{build.FRESHNESS_LOOKBACK} lookback, not all-destination success: a later "
+                        "Loki or S3 failure can follow an accepted Mimir timestamp. T4 completion is "
+                        "not baseline discovery or stack coverage. A gap means no timestamp in the "
+                        "lookback, not zero age. Points evaluate the bounded age expression; they "
+                        "are not new scan events or immediate process-liveness evidence."),
         "t_carry": build.timeseries_panel(
             "Carry-forward age", [('gcinsight_carry_forward_age_seconds{tier="t1"}', "t1 state age")],
             unit="s", integrity=True,
@@ -700,7 +712,7 @@ def d_estate(ds: str):
         build.tab("Leakage", ["b_leftover", "idle", "billing"]),
         build.tab("Change", ["diff_daily", "diff_weekly"]),
         build.tab("Scan health", ["t_coverage", "t_accounting", "b_skipped", "b_failed",
-                                  "t_duration", "t_carry", "t_carry_series", "t_carry_dropped"]),
+                                  "t_duration", "t_completion_age", "t_carry", "t_carry_series", "t_carry_dropped"]),
         build.tab("Data freshness", ["t_inputs", "t_input_avail"]),
     ]
     return "gcinsight-estate", "Grafana Cloud Org Insights - Estate", \
@@ -3031,6 +3043,25 @@ def d_value(ds: str):
                         "other, and 'your own p90 team already does this' is a stronger argument than any "
                         "industry average because nobody can dispute the comparison."),
     }
+    # Keep distinct units and populations on separate axes, with producer arithmetic explicit.
+    benchmark_populations = {
+        "active_series": ("Active series per stack", "All inventory stacks; missing active-series numerators become zero."),
+        "alert_rules": ("Configured alert rules per stack", "All inventory stacks; missing alertCnt becomes zero. Not firing instances or evaluations."),
+        "dashboards_per_user": ("Dashboards per active user", "Stacks with nonzero currentActiveUsers; missing dashboardCnt becomes zero. Not billed users or dashboard activity."),
+        "datasource_types": ("Configured datasource types per stack", "All inventory stacks; count of truthy datasourceCnts entries, not necessarily positive counts. Missing mappings become zero; not queried or globally distinct types."),
+        "maturity_score": ("Available maturity score", "Stacks with an available score_stack result only; unscored stacks excluded. A 0-100 score, not adoption percent; absent score is not zero."),
+        "series_per_billed_user": ("Active series per billed user", "Stacks with nonzero billingActiveUsers; missing active-series numerators become zero. Median of per-stack ratios, not the estate aggregate ratio."),
+        "signals_in_use": ("Positive-usage signals per stack", "All inventory stacks; count of positive usage fields in SIGNAL_FIELDS, with missing fields treated as zero. Inventory observation, not human adoption or entitlement."),
+    }
+    for kind, (caption, population) in benchmark_populations.items():
+        el[f"t_bench_{kind}"] = build.timeseries_panel(
+            f"{caption}: per-stack median",
+            [(f'gcinsight_value_benchmark{{kind="{kind}"}}', caption)],
+            description="Producer discrete median: upper-middle for even-sized populations, not "
+                        f"the average of two central values. Measured population: {population} "
+                        "Current Stacks with data, p90 and worst are in the table beside these trends, "
+                        "not historical per-point denominators. These are sampled publications, "
+                        "not continuous measurements; an absent series is not an invented zero.")
     el["coverage_value_savings"] = build.rules_coverage_panel(
         "Adaptive rules coverage: savings view", "value_savings", ds)
     tabs = [
@@ -3057,7 +3088,12 @@ def d_value(ds: str):
             build.row("Current adoption", ["b_activation", "b_capability"], max_columns=2),
             build.row("Trend", ["t_capability"], max_columns=1),
         ]),
-        build.tab("Benchmarks", ["b_bench_pct", "b_bench_ratio", "bench"]),
+        build.rows_tab("Benchmarks", [
+            build.row("Current populations and percentiles", ["bench"], max_columns=1),
+            build.row("Percentage and ratio medians", ["b_bench_pct", "b_bench_ratio"], max_columns=2),
+            *[build.row(caption, [f"t_bench_{kind}"], max_columns=1)
+              for kind, (caption, _population) in benchmark_populations.items()],
+        ]),
     ]
     return "gcinsight-value", "Grafana Cloud Org Insights - Business value", \
         "Pillar F: unit economics and internal benchmarking, for weekly reading.", el, tabs
@@ -3989,6 +4025,13 @@ def d_coverage(ds: str):
             unit="percentunit", decimals=1,
             description="Legacy-only identities divided by canonical plus legacy-only identities. The "
                         "generic service label is reported separately and never promoted silently."),
+        "n_metric_matched": build.stat_panel(
+            "Registry-matched metric names across measured stacks",
+            'gcinsight_coverage_metric_names{kind="matched"}',
+            description="Sum of per-stack matched metric-name counts over measured stacks. A name "
+                        "on two stacks contributes twice: not globally distinct names or series, "
+                        "not a coverage share or classifier confidence. Read alongside the unmatched "
+                        "backlog and the named evidence table; absent observations are not zero."),
         "n_metric_backlog": build.stat_panel(
             "Unmatched metric names in the registry backlog",
             'gcinsight_coverage_metric_names{kind="unmatched"}',
@@ -4372,7 +4415,7 @@ def d_coverage(ds: str):
             build.row("Clusters", ["tbl_clusters"], max_columns=1),
         ]),
         build.rows_tab("Classification evidence", [
-            build.row("Registry-development backlog", ["n_metric_backlog"], max_columns=1,
+            build.row("Registry classification counts", ["n_metric_matched", "n_metric_backlog"], max_columns=2,
                       row_height="short"),
             build.row("Metric names", ["tbl_metrics"], max_columns=1, row_height="tall"),
             build.row("Legacy service identity", ["tbl_legacy"], max_columns=1),

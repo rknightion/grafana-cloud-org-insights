@@ -3051,5 +3051,65 @@ class LabellingDashboardTest(unittest.TestCase):
         self.assertEqual(set(build.DASHBOARD_INPUTS["labelling"]), {"label_inventory", "signal_inventory"})
 
 
+class EnumDebtDispositionTest(unittest.TestCase):
+    KINDS = ("active_series", "alert_rules", "dashboards_per_user", "datasource_types",
+             "maturity_score", "series_per_billed_user", "signals_in_use")
+
+    def test_each_benchmark_has_a_separate_placed_population_trend(self):
+        from bin import dashboards
+        from tests.test_dashboard_coverage import consumers
+        doc = dashboards.assemble("value", "infinity-uid")[1]
+        _fields, expressions, tabs = consumers({"value": doc})
+        for kind in self.KINDS:
+            key = f"t_bench_{kind}"
+            with self.subTest(kind=kind):
+                panel = doc["spec"]["elements"][key]["spec"]
+                self.assertIn(key, tabs[("value", "Benchmarks")])
+                queries = panel["data"]["spec"]["queries"]
+                self.assertEqual(len(queries), 1)
+                q = queries[0]["spec"]["query"]["spec"]
+                self.assertEqual(q["expr"], f'gcinsight_value_benchmark{{kind="{kind}"}}')
+                self.assertTrue(q["range"])
+                self.assertFalse(q["instant"])
+                self.assertNotIn("_", q["legendFormat"])
+                self.assertEqual(panel["vizConfig"]["spec"]["fieldConfig"]["defaults"]["unit"], "short")
+                self.assertIn("upper-middle", panel["description"])
+                self.assertIn("population", panel["description"])
+                self.assertIn("not historical", panel["description"])
+        text = " ".join(doc["spec"]["elements"][f"t_bench_{k}"]["spec"]["description"] for k in self.KINDS)
+        for contract in ("truthy", "zero", "currentActiveUsers", "billingActiveUsers", "0-100", "not human"):
+            self.assertIn(contract, text)
+
+    def test_matched_names_and_t4_completion_have_meaningful_placement(self):
+        from bin import dashboards, alerts
+        from tests.test_dashboard_coverage import consumers
+        doc = dashboards.assemble("coverage", "infinity-uid")[1]
+        _fields, _expr, tabs = consumers({"coverage": doc})
+        self.assertIn("n_metric_matched", tabs[("coverage", "Classification evidence")])
+        panel = doc["spec"]["elements"]["n_metric_matched"]["spec"]
+        self.assertEqual(panel["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]["expr"],
+                         'gcinsight_coverage_metric_names{kind="matched"}')
+        for contract in ("per-stack", "not globally distinct", "not a coverage share"):
+            self.assertIn(contract, panel["description"])
+        doc = dashboards.assemble("estate", "infinity-uid")[1]
+        _fields, _expr, tabs = consumers({"estate": doc})
+        self.assertIn("t_completion_age", tabs[("estate", "Scan health")])
+        panel = doc["spec"]["elements"]["t_completion_age"]["spec"]
+        queries = panel["data"]["spec"]["queries"]
+        self.assertEqual(len(queries), len(alerts.TIERS))
+        for tier, query in zip(alerts.TIERS, queries):
+            q = query["spec"]["query"]["spec"]
+            self.assertEqual(q["expr"], 'time() - max_over_time('
+                             f'gcinsight_scan_completed_timestamp_seconds{{tier="{tier}"}}'
+                             f'[{build.FRESHNESS_LOOKBACK}])')
+            self.assertEqual(q["legendFormat"], tier)
+            self.assertTrue(q["range"])
+        custom = panel["vizConfig"]["spec"]["fieldConfig"]["defaults"]["custom"]
+        self.assertEqual(custom["drawStyle"], "points")
+        self.assertFalse(custom["spanNulls"])
+        for contract in ("observed in Mimir", "not all-destination success", "not baseline", "gap"):
+            self.assertIn(contract, panel["description"])
+
+
 if __name__ == "__main__":
     unittest.main()

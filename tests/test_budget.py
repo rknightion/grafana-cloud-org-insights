@@ -2,11 +2,18 @@
 
 from __future__ import annotations
 
+import contextlib
+import copy
 import datetime as dt
+import io
 import json
+import os
+import socket
+import subprocess
 import pathlib
 import unittest
 from unittest import mock
+from types import SimpleNamespace
 
 from collector.coverage import Coverage
 from collector.emit import budget
@@ -259,6 +266,157 @@ class RenderTest(unittest.TestCase):
         # Every mimir metric appears as a row.
         for spec in CATALOGUE:
             self.assertIn(f"`{spec.name}`", table)
+
+
+def assert_runtime_reserves_absent(metrics):
+    # Project the reserved dimension: adding another bounded label must not hide
+    # an emitted reserved tier from the exact-combination contract.
+    emitted = {(name, (("tier", str(labels["tier"])),)) for name, labels, _ in metrics
+               if "tier" in labels}
+    violations = emitted & budget.RUNTIME_RESERVES.keys()
+    if violations:
+        raise AssertionError(f"reserved selector emitted: {sorted(violations)}")
+
+
+class RuntimeReserveTest(unittest.TestCase):
+    """Observe full transitive output, not merely carry reporter callsite topology.
+
+    Real dispatched runners, composer, hydration, findings, provenance and generic
+    label guard stay active. Only existing upstream/destination seams are replaced.
+    These synthetic observations complement source contracts; they are not lifetime
+    absence or exhaustive input-state proof. No actual destinations are written.
+    """
+
+    def exercise(self, tier, baseline=True, seed=None, shared_seed=False):
+        import scan
+        from collector.emit import hydrate
+        from tests.test_scan import cfg_for, LabelInventoryProcessEdgeTest
+        with contextlib.ExitStack() as patches:
+            patches.enter_context(mock.patch("socket.create_connection", side_effect=AssertionError("network prohibited")))
+            patches.enter_context(mock.patch.object(socket.socket, "connect", side_effect=AssertionError("network prohibited")))
+            patches.enter_context(mock.patch.object(subprocess, "run", side_effect=AssertionError("AWS/process prohibited")))
+            if tier == "t2":
+                result = LabelInventoryProcessEdgeTest().exercise(enabled=False)
+                self.assertEqual(result["code"], 0, result["stderr"])
+                self.assertTrue(result["scans"][0]["_emit"]["metrics"])
+                return result["metrics"]
+            fixture = json.loads((TESTDATA.parent / "tests/fixtures/compose_inputs.json").read_text())
+            now = dt.datetime.now(dt.timezone.utc)
+            snapshot = {"meta": {"generated_at": now.isoformat(), "inputs": {
+                name: {"schema_version": hydrate.INPUT_SCHEMA_VERSION[name]} for name in hydrate.INPUT_OWNER}},
+                "data": fixture}
+            cfg = cfg_for(tier)
+            client = SimpleNamespace(attempts=SimpleNamespace(requests=0, retries=0, by_status={}))
+            captured, runner_metrics, runner_views = [], [], []
+            real_hydrate, real_compose = hydrate.hydrate, scan.compose.build_all
+            real_report, real_runner = hydrate.report_metrics, getattr(scan, f"run_{tier}")
+
+            def probe(_client, _cap, selected, coverage, **_kwargs):
+                for stack in selected:
+                    if stack.get("status") == "paused":
+                        coverage.record_skipped(str(stack["slug"]), "paused")
+                    else:
+                        coverage.record_ok(str(stack["slug"]))
+                return copy.deepcopy(fixture["dataplane"])
+
+            def compose(*args, **kwargs):
+                metrics, views, cov = real_compose(*args, **kwargs)
+                if seed and not shared_seed:
+                    metrics.append(seed)
+                return metrics, views, cov
+
+            def runner(*args):
+                result = real_runner(*args)
+                runner_metrics.extend(result.get("_emit", {}).get("metrics", []))
+                runner_views.extend(result.get("_emit", {}).get("views", {}))
+                return result
+
+            def report(*args):
+                metrics = real_report(*args)
+                if seed and shared_seed:
+                    metrics.append(seed)
+                return metrics
+
+            def push(metrics):
+                captured.extend(metrics)
+                return len(metrics)
+
+            histories = [(f"scans/t3/synthetic-{hours}.json", now - dt.timedelta(hours=hours))
+                         for hours in ((0, 24, 168) if baseline else (0,))]
+            patches.enter_context(mock.patch.dict(os.environ, {"GCINSIGHT_READER_PRODUCT_READS": ""}))
+            for obj, name, kwargs in (
+                (scan.gcom, "fetch_inventory", {"return_value": copy.deepcopy(fixture["stacks"])}),
+                (scan.dataplane, "probe_all", {"side_effect": probe}),
+                (hydrate, "hydrate", {"side_effect": lambda *a, **kw: real_hydrate(*a, loader=lambda *_: snapshot, **kw)}),
+                (scan, "load_ratecard", {"return_value": None}),
+                (scan, "assistant_gaps", {"return_value": {}}),
+                (scan.compose, "build_all", {"side_effect": compose}),
+                (hydrate, "report_metrics", {"side_effect": report}),
+                (scan, f"run_{tier}", {"side_effect": runner}),
+                (scan.diff, "list_scans", {"return_value": histories}),
+                (scan.diff, "load_scan", {"return_value": snapshot}),
+                (scan.s3emit, "write_views", {"return_value": []}),
+                (scan.s3emit, "write_scan", {"return_value": []}),
+                (scan.mimir.RemoteWriter, "push", {"side_effect": push}),
+                (scan.loki.LokiWriter, "push", {"side_effect": lambda events: len(events)}),
+            ):
+                patches.enter_context(mock.patch.object(obj, name, **kwargs))
+            patches.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            stderr = patches.enter_context(contextlib.redirect_stderr(io.StringIO()))
+            self.assertEqual(scan.run(client, cfg, SimpleNamespace(out=None)), 0, stderr.getvalue())
+            if tier == "t4":
+                self.assertEqual(runner_metrics, [])
+                self.assertEqual(len(runner_views), 2 if baseline else 0)
+            else:
+                self.assertTrue(runner_metrics)
+            self.assertTrue(captured, "must observe final Mimir push, not an empty proxy")
+            return captured
+
+    def test_exact_reserves_match_source_backed_dispatch_populations(self):
+        expected = {(metric, (("tier", tier),)) for metric in
+                    ("gcinsight_carry_forward_series", "gcinsight_carry_forward_age_seconds")
+                    for tier in ("t2", "t3", "t4")}
+        expected.update({(metric, (("tier", "t4"),)) for metric in
+                         ("gcinsight_scan_coverage_ratio", "gcinsight_scan_stacks_total",
+                          "gcinsight_scan_stacks_scannable", "gcinsight_scan_stacks_scanned")})
+        self.assertEqual(set(budget.RUNTIME_RESERVES), expected)
+        for tier, baseline in (("t2", True), ("t3", True), ("t4", True), ("t4", False)):
+            with self.subTest(tier=tier, baseline=baseline):
+                metrics = self.exercise(tier, baseline)
+                assert_runtime_reserves_absent(metrics)
+                self.assertIn(("gcinsight_scan_completed_timestamp_seconds", {"tier": tier}),
+                              [(name, labels) for name, labels, _ in metrics])
+                if tier != "t4":
+                    for metric in ("gcinsight_scan_stacks_total", "gcinsight_scan_stacks_scannable",
+                                   "gcinsight_scan_stacks_scanned", "gcinsight_scan_coverage_ratio"):
+                        self.assertTrue(any(n == metric and labels == {"tier": tier} for n, labels, _ in metrics))
+                else:
+                    self.assertEqual({n for n, _, _ in metrics},
+                                     {"gcinsight_scan_completed_timestamp_seconds", "gcinsight_scan_duration_seconds"})
+
+    def test_reserve_violation_seed_observes_composer_and_shared_publication_output(self):
+        for tier, metric, shared in (("t3", "gcinsight_carry_forward_age_seconds", False),
+                                     ("t4", "gcinsight_scan_stacks_scanned", True)):
+            metrics = self.exercise(tier, seed=(metric, {"tier": tier}, 1.0), shared_seed=shared)
+            with self.assertRaisesRegex(AssertionError, metric):
+                assert_runtime_reserves_absent(metrics)
+        # Every exact key independently rejected, never a family-wide exemption.
+        metrics = self.exercise("t3")
+        for (name, labels) in budget.RUNTIME_RESERVES:
+            for extra in ({}, {"region": "synthetic"}):
+                with self.subTest(name=name, labels=labels, extra=extra):
+                    with self.assertRaisesRegex(AssertionError, name):
+                        assert_runtime_reserves_absent([*metrics, (name, {**dict(labels), **extra}, 1.0)])
+
+
+class RetiredCatalogueTest(unittest.TestCase):
+    def test_retired_public_dashboard_scalar_is_not_active_capacity(self):
+        name = "gcinsight_risk_public_dashboards_total"
+        self.assertNotIn(name, {s.name for s in CATALOGUE})
+        self.assertIn(name, budget.RETIRED_METRICS)
+        self.assertIn("## Retired metrics", budget.render_table())
+        for replacement in ("measured", "enumerated", "enabled", "stacks"):
+            self.assertIn(f"gcinsight_risk_public_dashboards_{replacement}", {s.name for s in CATALOGUE})
 
 
 if __name__ == "__main__":

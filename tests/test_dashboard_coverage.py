@@ -281,10 +281,7 @@ def enum_requirements():
         overrides[(name, "signal")] = labelling.SIGNALS
     for name in ("gcinsight_dashboards_estate_surface_requests", "gcinsight_dashboards_estate_surface_stacks"):
         overrides[(name, "surface")] = usage_insights.SURFACE_VALUES
-    # GCI-0085 (inventory/remediate published dashboard data) retains this
-    # superseded never-emitted declaration. It is not claimed as rendered.
-    specs = [spec for spec in budget.CATALOGUE if spec.store == "mimir"
-             and spec.name != "gcinsight_risk_public_dashboards_total"]
+    specs = [spec for spec in budget.CATALOGUE if spec.store == "mimir"]
     for spec in specs:
         if "tier" in spec.labels:
             overrides[(spec.name, "tier")] = alerts.TIERS
@@ -348,29 +345,12 @@ def metadata_debt(path):
     return None
 
 
-# Root-approved exact current selector debts. GCI-0120 (render or retire
-# uncovered enum combinations) closes these; exemptions are NOT rendering.
-ENUM_DEBTS = {
-    ("gcinsight_value_benchmark", (("kind", kind),)):
-        ("Current Value panels select other benchmark kinds; display/retirement remains unproved.", "GCI-0120")
-    for kind in ("active_series", "alert_rules", "dashboards_per_user", "datasource_types",
-                 "maturity_score", "series_per_billed_user", "signals_in_use")
-}
-ENUM_DEBTS.update({
-    (metric, (("tier", tier),)):
-        ("Current carry panels pin t1; other declared tiers need emission/display disposition.", "GCI-0120")
-    for metric in ("gcinsight_carry_forward_series", "gcinsight_carry_forward_age_seconds")
-    for tier in ("t2", "t3", "t4")
-})
-ENUM_DEBTS.update({
-    (metric, (("tier", "t4"),)):
-        ("Current scan panels omit t4; accounting/reserve/alert-only status needs explicit disposition.", "GCI-0120")
-    for metric in ("gcinsight_scan_completed_timestamp_seconds", "gcinsight_scan_coverage_ratio",
-                   "gcinsight_scan_stacks_scannable", "gcinsight_scan_stacks_scanned",
-                   "gcinsight_scan_stacks_total")
-})
-ENUM_DEBTS[("gcinsight_coverage_metric_names", (("kind", "matched"),))] = (
-    "Technology-presence redesign did not establish rendering of the matched-name enum.", "GCI-0120")
+# GCI-0120 (render or retire uncovered enum combinations): nine real renderings
+# close selector debts. Ten exact reserves are NOT rendering or bounded-absence
+# exemptions: tests/test_budget.py exercises transitive final emission and seeds
+# violations in both composition and common publication processing.
+ENUM_DEBTS = {}
+ENUM_RESERVES = budget.RUNTIME_RESERVES
 
 # Exact incomplete domains, not permission to ignore new values or new metrics.
 # GCI-0121 (declare runtime label domains independently of planning capacity)
@@ -497,7 +477,7 @@ class DashboardCoverageTest(unittest.TestCase):
         self.assertEqual(field_gaps(payloads, schemas, documents), set(), "Unrendered published row fields")
 
     def assert_enums_covered(self, requirements, documents):
-        self.assertEqual(metric_gaps(requirements, documents) - ENUM_DEBTS.keys(), set(),
+        self.assertEqual(metric_gaps(requirements, documents) - ENUM_DEBTS.keys() - ENUM_RESERVES.keys(), set(),
                          "Unrendered bounded enum combinations without a specific debt owner")
 
     def test_every_published_row_field_including_empty_schema_is_selected(self):
@@ -557,7 +537,7 @@ class DashboardCoverageTest(unittest.TestCase):
         self.assert_enums_covered(self.enums, self.documents)
 
     def test_current_debts_have_exact_owners_without_claiming_coverage(self):
-        self.assertEqual(metric_gaps(self.enums, self.documents), ENUM_DEBTS.keys(),
+        self.assertEqual(metric_gaps(self.enums, self.documents), ENUM_DEBTS.keys() | ENUM_RESERVES.keys(),
                          "New gaps need owners; resolved selector debts must leave the ledger")
         self.assertEqual(set(self.incomplete_domains), DOMAIN_DEBTS.keys(),
                          "New incomplete enum domain needs an explicit contract owner")
@@ -565,6 +545,25 @@ class DashboardCoverageTest(unittest.TestCase):
             reason, owner = debt
             self.assertTrue(reason)
             self.assertRegex(owner, r"^GCI-\d{4}$")
+
+    def test_resolved_selectors_cannot_hide_behind_reserves(self):
+        required = {("gcinsight_value_benchmark", (("kind", kind),)) for kind in
+                    ("active_series", "alert_rules", "dashboards_per_user", "datasource_types",
+                     "maturity_score", "series_per_billed_user", "signals_in_use")}
+        required.update({("gcinsight_coverage_metric_names", (("kind", "matched"),)),
+                         ("gcinsight_scan_completed_timestamp_seconds", (("tier", "t4"),))})
+        self.assertEqual(metric_gaps(required, self.documents), set())
+        for metric, labels in required:
+            documents = copy.deepcopy(self.documents)
+            for document in documents.values():
+                for element in document["spec"]["elements"].values():
+                    for query in element["spec"].get("data", {}).get("spec", {}).get("queries", []):
+                        spec = query["spec"]["query"]["spec"]
+                        if "expr" in spec and selects(spec["expr"], metric, dict(labels)):
+                            spec["expr"] = "up"
+            with self.subTest(metric=metric, labels=labels):
+                with self.assertRaisesRegex(AssertionError, metric):
+                    self.assert_enums_covered({(metric, labels)}, documents)
 
     def test_per_tab_queries_are_placed_and_resolve_public_columns(self):
         fields, expressions, tabs = consumers(self.documents)

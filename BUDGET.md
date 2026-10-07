@@ -7,7 +7,7 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **13,812** |
+| **Declared (all phases)** | **13,811** |
 | Phase 1 only | 13,811 |
 | Runaway ceiling | 100,000 |
 
@@ -23,14 +23,14 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | B | 1,101 |
 | C | 14 |
 | D | 582 |
-| E | 1,126 |
+| E | 1,125 |
 | F | 21 |
 | I | 895 |
 | J | 4,400 |
 | K | 973 |
 | L | 4,066 |
 | scan | 338 |
-| **Total** | **13,812** |
+| **Total** | **13,811** |
 
 ## Metrics
 
@@ -74,7 +74,7 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_dashboards_estate_surface_stacks` | J | `surface`(8), `version`(2) | 16 | 1 | daily count of measured stacks with at least one request through each observed surface |
 | `gcinsight_coverage_capability_gap` | K | `kind`(14) | 14 | 1 | fixed capability enum; four additional estate-only observation gaps track SM, Kubernetes, Knowledge Graph and PDC outreach closure with no stack multiplier. Reporting populations exclude missing observations; unknown populations emit nothing, measured zero gaps remain findings, not human adoption |
 | `gcinsight_scan_stacks_skipped` | scan | `tier`(4), `reason`(3) | 12 | 1 | paused, unresolvable, out_of_scope |
-| `gcinsight_value_benchmark` | F | `kind`(10) | 10 | 1 | internal benchmarking: median/p90/worst across the dimensions that have data |
+| `gcinsight_value_benchmark` | F | `kind`(10) | 10 | 1 | per-stack discrete median (upper-middle for even populations); p90/worst and current population counts are in value_benchmarks, not this metric |
 | `gcinsight_estate_stacks_by_region` | A | `region`(8) | 8 | 1 |  |
 | `gcinsight_maturity_stacks_by_tier` | D | `kind`(4), `version`(2) | 8 | 1 |  |
 | `gcinsight_maturity_unscored` | D | `reason`(4), `version`(2) | 8 | 1 | paused / too_few_users / no_signal_above_floor / insufficient_rubric_coverage. An unexplained 'unscored' on a dashboard reads as a collector bug |
@@ -175,7 +175,6 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_risk_public_dashboards_enumerated` | E |  -  | 1 | 1 | public dashboards that EXIST across the measured stacks |
 | `gcinsight_risk_public_dashboards_measured` | E |  -  | 1 | 1 | stacks the enumeration actually read. Never assume the rest are zero |
 | `gcinsight_risk_public_dashboards_stacks` | E |  -  | 1 | 1 | how many stacks carry at least one - the number of owner conversations |
-| `gcinsight_risk_public_dashboards_total` | E |  -  | 1 | 2 | RETIRED name, never emitted. Superseded twice: first by gcinsight_dashboards_estate_public (Pillar J, event-derived), then by the `_enumerated` family below, which counts the ones that EXIST. Kept declared so the decision stays on the record. PLAN 0.4, 18.17 |
 | `gcinsight_risk_retention_change_request_stacks` | E |  -  | 1 | 1 | stacks whose Databases Configuration request queue was readable |
 | `gcinsight_risk_retention_policy_compliant_stacks` | E |  -  | 1 | 1 | stacks satisfying every configured selector expectation; absent without a readable policy measurement |
 | `gcinsight_risk_retention_policy_gap_stacks` | E |  -  | 1 | 1 | confirmed breaches among readable stacks; unreadable stacks are counted separately |
@@ -258,6 +257,29 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `usage_datasource_inventory` | C | 271 | 1 | live-inventory stack, vendor datasource type and instance count; type names stay out of metric labels |
 | `usage_enterprise_catalogue` | C | 1 | 1 | configured datasource rollup qualified by measured inventory/catalogue coverage; current public Enterprise status, never installed licence or activity |
 | `usage_query_cost_attribution` | C | 271 | 2 |  |
+
+## Exact runtime reserves
+
+These combinations reserve planning capacity, not runtime populations. Source-backed runner and shared-publication output contracts are tested; bounded query absence alone cannot establish a reserve.
+
+| Metric | Labels | Contract |
+|---|---|---|
+| `gcinsight_carry_forward_age_seconds` | `tier=t2` | Only run_t1 reports carry-forward state. |
+| `gcinsight_carry_forward_age_seconds` | `tier=t3` | Only run_t1 reports carry-forward state. |
+| `gcinsight_carry_forward_age_seconds` | `tier=t4` | Only run_t1 reports carry-forward state. |
+| `gcinsight_carry_forward_series` | `tier=t2` | Only run_t1 reports carry-forward state. |
+| `gcinsight_carry_forward_series` | `tier=t3` | Only run_t1 reports carry-forward state. |
+| `gcinsight_carry_forward_series` | `tier=t4` | Only run_t1 reports carry-forward state. |
+| `gcinsight_scan_coverage_ratio` | `tier=t4` | run_t4 reads prior scans; it never composes stack accounting. |
+| `gcinsight_scan_stacks_scannable` | `tier=t4` | run_t4 reads prior scans; it never composes stack accounting. |
+| `gcinsight_scan_stacks_scanned` | `tier=t4` | run_t4 reads prior scans; it never composes stack accounting. |
+| `gcinsight_scan_stacks_total` | `tier=t4` | run_t4 reads prior scans; it never composes stack accounting. |
+
+## Retired metrics
+
+No active capacity is allocated to these names.
+
+- `gcinsight_risk_public_dashboards_total`: Never emitted; superseded by Pillar J's event-derived public count and then Pillar E's measured/enumerated/enabled/stacks enumeration family. Configured shares and observed activity are different populations.
 
 ## Rules this table enforces
 

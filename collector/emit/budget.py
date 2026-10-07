@@ -93,6 +93,31 @@ GRAFANA_SURFACE = 8  # closed `data-request.source` mapping in sources.usage_ins
 TECHNOLOGY = len(technology_registry.REGISTRY.entries)
 
 
+# Exact planning reserves, not emitted populations. scan.run dispatches matched tier/config
+# pairs: only run_t1 reports carry; run_t4 computes diff views without estate composition.
+# Output-level tests exercise real runners AND common publication processing, and reject
+# these selectors if a transitive producer starts emitting them. Bounded absence is not proof.
+RUNTIME_RESERVES = {
+    (metric, (("tier", tier),)): "Only run_t1 reports carry-forward state."
+    for metric in ("gcinsight_carry_forward_series", "gcinsight_carry_forward_age_seconds")
+    for tier in ("t2", "t3", "t4")
+}
+RUNTIME_RESERVES.update({
+    (metric, (("tier", "t4"),)): "run_t4 reads prior scans; it never composes stack accounting."
+    for metric in ("gcinsight_scan_coverage_ratio", "gcinsight_scan_stacks_total",
+                   "gcinsight_scan_stacks_scannable", "gcinsight_scan_stacks_scanned")
+})
+
+# History belongs outside active capacity. risk.build emits the measured/enumerated/
+# enabled/stacks family instead; its source and emission tests reject the retired name.
+RETIRED_METRICS = {
+    "gcinsight_risk_public_dashboards_total":
+        "Never emitted; superseded by Pillar J's event-derived public count and then "
+        "Pillar E's measured/enumerated/enabled/stacks enumeration family. "
+        "Configured shares and observed activity are different populations."
+}
+
+
 CATALOGUE: tuple[MetricSpec, ...] = (
     # --- Scan health. Non-negotiable: the dead-man's switch (PLAN 1.8) alerts on these. ---
     MetricSpec("gcinsight_scan_stacks_total", "scan", {"tier": TIER}),
@@ -232,11 +257,6 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                     "An unexplained 'unscored' on a dashboard reads as a collector bug"),
 
     # --- Pillar E: risk rollups. ---
-    MetricSpec("gcinsight_risk_public_dashboards_total", "E", phase=2,
-               note="RETIRED name, never emitted. Superseded twice: first by "
-                    "gcinsight_dashboards_estate_public (Pillar J, event-derived), then by the "
-                    "`_enumerated` family below, which counts the ones that EXIST. Kept declared so the "
-                    "decision stays on the record. PLAN 0.4, 18.17"),
 
     # Public dashboards ENUMERATED per stack. This makes the configured inventory measurable even when
     # a dashboard has never been opened. The organisation decides the acceptable policy target.
@@ -339,7 +359,8 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("gcinsight_value_unit_cost_per_billed_user", "F"),
     MetricSpec("gcinsight_value_adoption_ratio", "F", {"signal": SIGNAL}),
     MetricSpec("gcinsight_value_benchmark", "F", {"kind": 10},
-               note="internal benchmarking: median/p90/worst across the dimensions that have data"),
+               note="per-stack discrete median (upper-middle for even populations); p90/worst and current "
+                    "population counts are in value_benchmarks, not this metric"),
     MetricSpec("gcinsight_value_savings_identified_series", "F",
                note="remediable series, summed from the per-metric reduction each Adaptive "
                     "recommendation declares under ?verbose=true. Emitted whenever T3 data is present"),
@@ -778,6 +799,17 @@ def render_table() -> str:
         for card in s.labels.values():
             would *= card
         lines.append(f"| `{s.name}` | {s.pillar} | {would:,} | {s.phase} | {s.note} |")
+    lines += ["", "## Exact runtime reserves", "",
+              "These combinations reserve planning capacity, not runtime populations. Source-backed "
+              "runner and shared-publication output contracts are tested; bounded query absence "
+              "alone cannot establish a reserve.", "",
+              "| Metric | Labels | Contract |", "|---|---|---|"]
+    for (name, labels), reason in sorted(RUNTIME_RESERVES.items()):
+        rendered_labels = ", ".join(f"{key}={value}" for key, value in labels)
+        lines.append(f"| `{name}` | `{rendered_labels}` | {reason} |")
+    lines += ["", "## Retired metrics", "", "No active capacity is allocated to these names.", ""]
+    for name, reason in sorted(RETIRED_METRICS.items()):
+        lines.append(f"- `{name}`: {reason}")
     lines += [
         "",
         "## Rules this table enforces",
