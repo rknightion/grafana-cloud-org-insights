@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.8.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.7.1...v0.8.0) (2026-10-07)
+
+
+### Features
+
+* add bounded private label inventory with strict response framing ([b9c459d](https://github.com/rknightion/grafana-cloud-org-insights/commit/b9c459d11675c10d5b790c5d45bf9053ce9b3a4d))
+* add bounded private labelling pillar with dashboard and default-off policy wiring ([8649e30](https://github.com/rknightion/grafana-cloud-org-insights/commit/8649e30273ccd5b9d57c04247f8020443c2779e6))
+* add bounded Tempo intrinsic name count and shape reductions ([df3b9b5](https://github.com/rknightion/grafana-cloud-org-insights/commit/df3b9b5f3ce3c558602056fd533c436f57f34ffe))
+* add conservative selected Loki stream label reductions ([d71035b](https://github.com/rknightion/grafana-cloud-org-insights/commit/d71035b66ba0f25a951a26b1e567834257895363))
+* add deterministic labelling catalogue and bounded evaluator seam ([c04ce60](https://github.com/rknightion/grafana-cloud-org-insights/commit/c04ce607ed94eaff786f054b3513dba790f54ff1))
+* extend bounded label inventory with Mimir numeric series reductions ([113bb15](https://github.com/rknightion/grafana-cloud-org-insights/commit/113bb15f496c99ff0b9bf776204bcc000605579e))
+
+
+### Bug Fixes
+
+* preserve full research body when appending source verification ([87dd266](https://github.com/rknightion/grafana-cloud-org-insights/commit/87dd2662559ac72890639e8055cf480c340c137e))
+* reject skipped and missing required CI leaves ([dff0803](https://github.com/rknightion/grafana-cloud-org-insights/commit/dff0803816f0d615d7407c40050fb49387be2c67))
+* verify authored Infinity metadata selectors without false row-only rejection ([9161424](https://github.com/rknightion/grafana-cloud-org-insights/commit/9161424048b5446983739ee9d90b01eaa85e4709))
+
+
+### Documentation
+
+* accept gated labelling core and stage Mimir extension ([1ca2c11](https://github.com/rknightion/grafana-cloud-org-insights/commit/1ca2c1195d4494e56aa262af253a5018442537d2))
+* accept gated Mimir extension and stage Loki stream extension ([a00ffc9](https://github.com/rknightion/grafana-cloud-org-insights/commit/a00ffc99a1dac36d092235a22edcc652bbc7b834))
+* accept gated Tempo span count and shape half ([62947b5](https://github.com/rknightion/grafana-cloud-org-insights/commit/62947b5afcc5bc039c5b6803882532c167837a1b))
+* accept initial gates and start catalogue and Mimir witness ([4880edb](https://github.com/rknightion/grafana-cloud-org-insights/commit/4880edb10387aa73c7dbebcec9f3a178e8cec2cb))
+* accept labelling witnesses and start bounded inventory source ([35fef6e](https://github.com/rknightion/grafana-cloud-org-insights/commit/35fef6e45f631aae1ee6542d218ffe00ae419582))
+* accept source and publisher repair and stage labelling composition ([84f2228](https://github.com/rknightion/grafana-cloud-org-insights/commit/84f222835a43c500d73f9986140f12d2fbf129f3))
+* distinguish collector memory from test and reservation evidence ([135cfd5](https://github.com/rknightion/grafana-cloud-org-insights/commit/135cfd56971e4e3bfe3a91c0aab1b840501d5ec5))
+* record CI aggregate execution plan ([9fb033b](https://github.com/rknightion/grafana-cloud-org-insights/commit/9fb033bdfff72765188b5427469e786005292438))
+* record dated catalogue source verification and provenance caveats ([adc1cc6](https://github.com/rknightion/grafana-cloud-org-insights/commit/adc1cc6d78d400e6f1c62ad13329e9bd3a81ba2c))
+* record dev reader and qualified-total proof and publisher repair ([bc3f923](https://github.com/rknightion/grafana-cloud-org-insights/commit/bc3f9239444d245ea3ad44dc5ebd403643a75ec9))
+* record labelling retention and witness-first route decisions ([e7aacdb](https://github.com/rknightion/grafana-cloud-org-insights/commit/e7aacdbeabb156fc33c9fd4ceabdb40de06eefb6))
+* record witnessed labelling routes and unavailable configuration surfaces ([072121c](https://github.com/rknightion/grafana-cloud-org-insights/commit/072121c426ea32590b7c09fa3bd7d8909e183a73))
+* retain unsupported Loki policies and stage witnessed Tempo inspection ([5626193](https://github.com/rknightion/grafana-cloud-org-insights/commit/5626193a00e35c678c1b24cb302040e8cf60a7d4))
+* start Loki shape and applied-limits witnesses ([21fdf90](https://github.com/rknightion/grafana-cloud-org-insights/commit/21fdf902b31b223ccdc305978c494db6e0235102))
+* start witness-first Tempo name and overrides reads ([0474588](https://github.com/rknightion/grafana-cloud-org-insights/commit/0474588fca844ace7a6ca32323461a4b80b0e487))
+
 ## [0.7.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.7.0...v0.7.1) (2026-10-06)
 
 
