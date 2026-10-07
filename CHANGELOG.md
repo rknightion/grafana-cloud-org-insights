@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.8.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.8.0...v0.8.1) (2026-10-07)
+
+
+### Bug Fixes
+
+* distinguish disabled opt-in inputs from unavailable reads ([56d5f24](https://github.com/rknightion/grafana-cloud-org-insights/commit/56d5f24f5c6067d135784331c51296d3fcf81f9f))
+
+
+### Documentation
+
+* park dev labelling proof after bounded auth hold ([33954ad](https://github.com/rknightion/grafana-cloud-org-insights/commit/33954adc6af21823ba02cc3f3fee97e3917fe4f9))
+* record signed labelling release and held dev proof ([c7812ef](https://github.com/rknightion/grafana-cloud-org-insights/commit/c7812ef48c3a9527d229aeef684e3d370afa93f1))
+
 ## [0.8.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.7.1...v0.8.0) (2026-10-07)
 
 
