@@ -130,6 +130,42 @@ def test_legacy_cli_regenerate_upgrade_and_real_scan_eligibility(policy):
                 assert data == {"current": {"available": True, "library_panel_count": 2}}
 
 
+@pytest.mark.parametrize("policy", ["", "library-panels"])
+def test_gather_publication_and_policy_override_round_trip(policy):
+    from collector.emit import hydrate
+    from tests.test_library_panels import STACK as LIBRARY_STACK, client_for as library_client, page
+    cfg = SimpleNamespace(concurrency=1, label_inventory_enabled=False)
+    name = "library_panels_inventory"
+    with mock.patch.dict(os.environ, {KEY: policy}), mock.patch.object(
+        scan.credentials, "load_all", return_value={"current": {"token": "synthetic"}}
+    ) as store:
+        calls = []
+        data, errors = scan.gather_library_panels_inventory(
+            library_client([(page([1]), 200)], calls), cfg, [LIBRARY_STACK])
+        report = scan.source_report(1 if policy else 0, data, available=lambda r: r.get("available"))
+        disabled = scan.disabled_inputs(cfg)
+        if name in disabled:
+            report.update(disabled[name])
+        accepted, unavailable = scan.publication_inputs({name: data}, {name: report})
+        owner_inputs, prov = hydrate.hydrate("t2", accepted,
+            unavailable={**unavailable, **disabled}, loader=lambda *_: None)
+        assert store.called == bool(policy)
+        assert bool(calls) == bool(policy)
+        assert not errors
+        assert prov.satisfied(name) == bool(policy)
+        if not policy:
+            assert accepted[name] == {}, "retain the disabled key, never any payload"
+            assert prov[name]["state"] == "disabled"
+            assert name not in owner_inputs
+            # Even a prior enabled owner payload cannot override the current policy.
+            for tier in ("t1", "t2", "t3", "t4"):
+                inputs, downstream = hydrate.hydrate(tier, {name: {"old": {"available": True}}},
+                    unavailable=disabled, loader=lambda *_: None)
+                assert name not in inputs
+                assert downstream[name]["state"] == "disabled"
+                assert not downstream.satisfied(name)
+
+
 def test_cli_rejects_mismatch_without_rewriting_manifest():
     body = legacy_manifest("slo")
     body["runtime"]["scan"][KEY] = ""

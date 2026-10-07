@@ -251,6 +251,11 @@ def publication_inputs(
     unavailable: dict[str, dict[str, str]] = {}
     for name, payload in gathered.items():
         report = sources.get(name)
+        if report and report.get("state") == "disabled":
+            # Keep the persisted input key, but never its payload or composition eligibility.
+            accepted[name] = {}
+            unavailable[name] = {"state": "disabled", "reason": "disabled by configuration"}
+            continue
         if report is None or report.get("healthy"):
             accepted[name] = payload
             continue
@@ -797,6 +802,30 @@ def gather_irm_alert_groups(
     return data, errors
 
 
+def disabled_inputs(cfg: config.Config) -> dict[str, dict[str, str]]:
+    """Current deployment policy wins over carried payloads on every tier.
+
+    Use the gatherers' eligibility predicates: never infer disabled from an empty
+    payload, a zero population or a failed credential read.
+    """
+    enabled = {
+        "slo_inventory": slo_reads_enabled(),
+        "synthetic_inventory": synthetic_reads_enabled(),
+        "irm_integrations": irm_integrations_reads_enabled(),
+        "irm_alert_groups": irm_alert_groups_reads_enabled(),
+        "faro_apps": faro_apps_reads_enabled(),
+        "ml_jobs": ml_jobs_reads_enabled(),
+        "cloud_accounts": cloud_accounts_reads_enabled(),
+        "pdc_networks": pdc_networks_reads_enabled(),
+        "reports_inventory": reports_reads_enabled(),
+        "playlists_inventory": playlists_reads_enabled(),
+        "library_panels_inventory": library_panels_reads_enabled(),
+        "label_inventory": getattr(cfg, "label_inventory_enabled", False),
+    }
+    return {name: {"state": "disabled", "reason": "disabled by configuration"}
+            for name, selected in enabled.items() if not selected}
+
+
 def label_inventory_source_report(stacks: list[dict[str, Any]], payload: dict) -> dict:
     """Coverage in stack-signal units, left-joined to fresh scannable inventory only.
 
@@ -1106,7 +1135,8 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     inputs, prov = hydrate.hydrate(
         cfg.tier,
         {"access_policies": policies, **publishable},
-        unavailable=unavailable_inputs,
+        unavailable={**unavailable_inputs, **disabled_inputs(cfg)},
+        enabled=set(hydrate.INPUT_OWNER) - disabled_inputs(cfg).keys(),
         bucket=s3emit.BUCKET,
     )
     rate_card = load_ratecard(bucket=s3emit.BUCKET)
@@ -1309,7 +1339,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "capability_adoption": capability_adoption,
         "loki_config": loki_config,
         "label_risk": label_risk,
-        **({"label_inventory": label_inventory} if label_inventory_enabled else {}),
+        "label_inventory": label_inventory,
     }
     sources = {
         "label_inventory": (label_inventory_source_report(selected, label_inventory)
@@ -1442,6 +1472,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
             errors=loki_config_errors,
         ),
     }
+    for name in disabled_inputs(cfg):
+        sources[name].update(state="disabled", reason="not_selected")
     source_failures = sorted(name for name, report in sources.items() if not report["healthy"])
     publishable_inputs, unavailable_inputs = publication_inputs(gathered_inputs, sources)
 
@@ -1450,7 +1482,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     inputs, prov = hydrate.hydrate(
         cfg.tier,
         publishable_inputs,
-        unavailable=unavailable_inputs,
+        unavailable={**unavailable_inputs, **disabled_inputs(cfg)},
+        enabled=set(hydrate.INPUT_OWNER) - disabled_inputs(cfg).keys(),
         bucket=s3emit.BUCKET,
     )
     rate_card = load_ratecard(bucket=s3emit.BUCKET)
@@ -1512,7 +1545,10 @@ def run_t3(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
     )
     # The richest tier: Pillars B, D and F only become real here, and Pillar E gains Fleet Management.
-    inputs, prov = hydrate.hydrate(cfg.tier, {"dataplane": data}, bucket=s3emit.BUCKET)
+    inputs, prov = hydrate.hydrate(
+        cfg.tier, {"dataplane": data}, unavailable=disabled_inputs(cfg),
+        enabled=set(hydrate.INPUT_OWNER) - disabled_inputs(cfg).keys(), bucket=s3emit.BUCKET,
+    )
     rate_card = load_ratecard(bucket=s3emit.BUCKET)
     metrics, views, view_coverage = compose.build_all(
         stacks, coverage,
@@ -1584,6 +1620,13 @@ def run_t4(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         console_log("info", "t4: no window could be diffed  -  not an error on a young deployment")
 
     scan = envelope(cfg, coverage, {"diff": payload})
+    # T4 does not compose optional inputs, but still reports explicit disabled policy.
+    scan["meta"]["inputs"] = {
+        name: {**detail, "available": False, "source": "own", "tier": cfg.tier,
+               "age_seconds": None, "stale": False,
+               "schema_version": hydrate.INPUT_SCHEMA_VERSION[name]}
+        for name, detail in disabled_inputs(cfg).items()
+    }
     if views:
         scan["_emit"] = {"metrics": [], "views": views, "view_coverage": {}}
     return scan

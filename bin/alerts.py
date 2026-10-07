@@ -279,6 +279,12 @@ def input_rule(*, paused: bool = True, receiver: str | None = None) -> dict:
     Alerts on `_available` rather than on `_age_seconds` because the age is emitted only while the input
     IS available - an unavailable input has no age at all, on purpose, since a zero would read as
     "gathered just now". So availability is the signal and age is the diagnosis.
+    Disabled opt-in inputs emit neither availability nor age. Gate historical failure on
+    an availability sample from the latest completed scan, using existing sample timestamps
+    and the completion gauge. All metrics in a push share a timestamp after completion.
+    The timestamp subquery retains sparse enabled failures throughout the pending period;
+    an instant intersection would vanish after five minutes and never satisfy `for: 30m`.
+    A one-minute subquery step observes each sample within normal Prometheus lookback.
     """
     return {
         "uid": RULE_UIDS["input"],
@@ -314,7 +320,11 @@ def input_rule(*, paused: bool = True, receiver: str | None = None) -> dict:
             ),
         },
         "data": [
-            _expr_node("min_over_time(gcinsight_input_available[6h])"),
+            _expr_node(
+                "min_over_time(gcinsight_input_available[6h]) and "
+                "(max_over_time(timestamp(gcinsight_input_available)[6h:1m]) "
+                ">= on(tier) group_left max_over_time(gcinsight_scan_completed_timestamp_seconds[6h]))"
+            ),
             _threshold_node("query", lt=1),
         ],
     }

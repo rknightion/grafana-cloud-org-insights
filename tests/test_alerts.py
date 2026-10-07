@@ -11,12 +11,22 @@ SILENTLY  -  the rule exists, looks right in the UI, and never fires:
 from __future__ import annotations
 
 import re
+import json
+import shutil
+import subprocess
 import pathlib
 import tempfile
 import unittest
 from unittest import mock
 
 from bin import alerts
+
+
+INPUT_FAILURE_EXPR = (
+    "min_over_time(gcinsight_input_available[6h]) and "
+    "(max_over_time(timestamp(gcinsight_input_available)[6h:1m]) "
+    ">= on(tier) group_left max_over_time(gcinsight_scan_completed_timestamp_seconds[6h]))"
+)
 
 
 def parse_duration(text: str) -> int:
@@ -164,6 +174,81 @@ class TestNoDataSemantics(unittest.TestCase):
         """A dead tier has no coverage series either, and it already has its own rule. Alerting here
         would page twice for one fault."""
         self.assertEqual(alerts.coverage_rule()["noDataState"], "OK")
+
+    def test_disabled_input_has_no_series_for_the_shipped_unavailable_rule(self):
+        from collector.emit import hydrate
+        rule = alerts.input_rule()
+        self.assertEqual(rule["noDataState"], "OK")
+        self.assertEqual(rule["data"][0]["model"]["expr"], INPUT_FAILURE_EXPR)
+        name = "library_panels_inventory"
+        for state in ("disabled", "unavailable"):
+            with self.subTest(state=state):
+                prov = hydrate.Provenance({name: {
+                    "available": False, "state": state, "age_seconds": None}})
+                samples = [value for metric, labels, value in hydrate.report_metrics(prov, "t2")
+                           if metric == "gcinsight_input_available" and labels["input"] == name]
+                if state == "disabled":
+                    self.assertEqual(samples, [])
+                else:
+                    self.assertEqual(samples, [0.0])
+                    self.assertLess(min(samples), 1, "enabled failure still satisfies the alert")
+
+    def test_input_alert_range_failure_requires_current_series(self):
+        expression = alerts.input_rule()["data"][0]["model"]["expr"]
+        # Optional local executable witness; the expression contract runs everywhere.
+        # JSON is also YAML, so this needs no Python YAML dependency or live Prometheus.
+        promtool = shutil.which("promtool")
+        if promtool:
+            series = 'gcinsight_input_available{tier="t2",input="%s"}'
+            fixture = {"evaluation_interval": "1m", "tests": [{
+                "interval": "1m", "input_series": [
+                    {"series": series % "disabled_lookback", "values": "0 _x10"},
+                    {"series": series % "disabled_stale", "values": "0 stale _x9"},
+                    {"series": series % "enabled_failure", "values": "0+0x10"},
+                    {"series": series % "enabled_healthy", "values": "1+0x10"},
+                    {"series": 'gcinsight_scan_completed_timestamp_seconds{tier="t2"}',
+                     "values": "0 60+0x9"},
+                ], "promql_expr_test": [{
+                    "expr": "(" + expression + ") < 1", "eval_time": "10m",
+                    "exp_samples": [{"labels": '{tier="t2",input="enabled_failure"}', "value": 0}],
+                }],
+            }]}
+            with tempfile.TemporaryDirectory() as directory:
+                path = pathlib.Path(directory) / "input-alert.json"
+                path.write_text(json.dumps(fixture))
+                result = subprocess.run([promtool, "test", "rules", str(path)],
+                                        capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(expression, INPUT_FAILURE_EXPR)
+
+    def test_enabled_hourly_failure_survives_the_real_alert_pending_period(self):
+        rule = alerts.input_rule()
+        evaluator = rule["data"][1]["model"]["conditions"][0]["evaluator"]
+        self.assertEqual(evaluator, {"type": "lt", "params": [1]})
+        promtool = shutil.which("promtool")
+        if promtool:
+            rule_file = {"groups": [{"name": "input", "interval": "1m", "rules": [{
+                "alert": "InputUnavailable", "expr": "(" + rule["data"][0]["model"]["expr"] + ") < 1",
+                "for": rule["for"],
+            }]}]}
+            fixture = {"rule_files": ["rule.json"], "evaluation_interval": "1m", "tests": [{
+                "interval": "1m", "input_series": [
+                    {"series": 'gcinsight_input_available{tier="t1",input="enabled_failure"}',
+                     "values": "0 _x59 0 _x59"},
+                    {"series": 'gcinsight_scan_completed_timestamp_seconds{tier="t1"}',
+                     "values": "0 _x59 3600 _x59"},
+                ], "alert_rule_test": [{
+                    "alertname": "InputUnavailable", "eval_time": "40m",
+                    "exp_alerts": [{"exp_labels": {"tier": "t1", "input": "enabled_failure"}}],
+                }],
+            }]}
+            with tempfile.TemporaryDirectory() as directory:
+                path = pathlib.Path(directory)
+                (path / "rule.json").write_text(json.dumps(rule_file))
+                (path / "test.json").write_text(json.dumps(fixture))
+                result = subprocess.run([promtool, "test", "rules", str(path / "test.json")],
+                                        capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_no_rule_escalates_on_a_query_error(self):
         """A Mimir blip is not an outage of the platform. `execErrState: Error` on a shared fleet is a

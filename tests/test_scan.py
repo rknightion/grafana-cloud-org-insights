@@ -308,8 +308,18 @@ class LabelInventoryProcessEdgeTest(unittest.TestCase):
         self.assertEqual(evidence["code"], 0, evidence["stderr"])
         self.assertEqual(evidence["source"], [{}])
         self.assertTrue(all("grafana.com" in r.full_url for r in evidence["requests"]))
-        self.assertNotIn("label_inventory", evidence["scans"][0]["data"])
+        # Disabled inputs retain an empty persisted key, not a measured-empty payload.
+        self.assertEqual(evidence["scans"][0]["data"]["label_inventory"], {})
+        self.assertEqual(evidence["scans"][0]["data"]["library_panels_inventory"], {})
         self.assertEqual(evidence["scans"][0]["meta"]["sources"]["label_inventory"]["reason"], "not_selected")
+        self.assertEqual(evidence["scans"][0]["meta"]["sources"]["label_inventory"]["state"], "disabled")
+        for name in ("label_inventory", "library_panels_inventory"):
+            self.assertEqual(evidence["scans"][0]["meta"]["inputs"][name]["state"], "disabled")
+            self.assertFalse(evidence["scans"][0]["meta"]["inputs"][name]["available"])
+            self.assertFalse(any(labels.get("input") == name for _, labels, _ in evidence["metrics"]))
+        self.assertTrue(all("library_panels_inventory" not in views for views in evidence["views"]))
+        diagnostic = json.loads(evidence["out"])
+        self.assertEqual(diagnostic["meta"]["inputs"]["library_panels_inventory"]["state"], "disabled")
 
     def test_unique_values_and_minimized_names_absent_at_every_real_cli_public_boundary(self):
         for mode in ("valid", "malformed", "overflow", "exception"):
@@ -880,7 +890,7 @@ class T2SourceHealthTest(unittest.TestCase):
             coverage.record_ok("alpha")
             return {"alpha": {"slug": "alpha", "users": [], "plugins": []}}
 
-        def hydrate_own(_tier, own, *, unavailable, bucket):
+        def hydrate_own(_tier, own, *, unavailable, enabled, bucket):
             prov = hydrate.Provenance({
                 name: {"available": bool(value), "source": "own", "tier": "t2",
                        "age_seconds": 0.0, "stale": not bool(value)}
@@ -1019,7 +1029,7 @@ class T2SourceHealthTest(unittest.TestCase):
 
         def local_hydrate(tier, own, **kwargs):
             return real_hydrate(
-                tier, own, unavailable=kwargs.get("unavailable"),
+                tier, own, unavailable=kwargs.get("unavailable"), enabled=kwargs.get("enabled", ()),
                 loader=lambda _tier, _bucket: None,
             )
 
@@ -1090,7 +1100,7 @@ class T1FleetSourceHealthTest(unittest.TestCase):
         }
         seen: dict[str, object] = {}
 
-        def local_hydrate(_tier, own, *, unavailable, bucket):
+        def local_hydrate(_tier, own, *, unavailable, enabled, bucket):
             seen["own"] = own
             seen["unavailable"] = unavailable
             prov = hydrate.Provenance({
@@ -1160,7 +1170,7 @@ class T1OrgMembershipSourceHealthTest(unittest.TestCase):
         org_members = {"state": "ok", "members": []}
         seen: dict[str, object] = {}
 
-        def local_hydrate(_tier, own, *, unavailable, bucket):
+        def local_hydrate(_tier, own, *, unavailable, enabled, bucket):
             seen["own"] = own
             seen["unavailable"] = unavailable
             return dict(own), hydrate.Provenance()
@@ -1192,7 +1202,7 @@ class T1OrgMembershipSourceHealthTest(unittest.TestCase):
         stacks = [{"slug": "alpha", "status": "active"}]
         seen: dict[str, object] = {}
 
-        def local_hydrate(_tier, own, *, unavailable, bucket):
+        def local_hydrate(_tier, own, *, unavailable, enabled, bucket):
             seen["own"] = own
             seen["unavailable"] = unavailable
             return dict(own), hydrate.Provenance()

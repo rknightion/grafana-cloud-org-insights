@@ -59,7 +59,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import subprocess
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Collection, Mapping
 
 from collector.emit import s3 as s3emit
 from collector.emit.carry import MAX_CARRY_AGE, MAX_FUTURE_SKEW
@@ -324,6 +324,7 @@ def hydrate(
     own: dict[str, Any],
     *,
     unavailable: Mapping[str, Mapping[str, Any] | str] | None = None,
+    enabled: Collection[str] = (),
     bucket: str = s3emit.BUCKET,
     now: dt.datetime | None = None,
     max_age: dt.timedelta = MAX_INPUT_AGE,
@@ -341,6 +342,9 @@ def hydrate(
     integer `schema_version` in provenance, serialized by the runners as `meta.inputs[name]`.
     Missing version metadata means legacy version 0. Explicit malformed or newer versions are
     unavailable before composition, so `filter_views` preserves their dependent last-good views.
+    `enabled` is the current configuration's eligible input set. A historical disabled owner
+    envelope is unavailable for an enabled reader until that owner gathers fresh data; it is
+    neither an available empty inventory nor permission to suppress failures indefinitely.
     """
     now = now or dt.datetime.now(dt.timezone.utc)
     inputs: dict[str, Any] = {}
@@ -402,6 +406,16 @@ def hydrate(
                 "reason": (f"input schema version {version} newer than supported "
                            f"{INPUT_SCHEMA_VERSION[name]}" if valid_version
                            else "invalid input schema version: expected a non-negative integer"),
+            }
+            continue
+        if ((isinstance(version_entry, Mapping) and version_entry.get("state") == "disabled")
+                or (isinstance(source_health, Mapping) and source_health.get("state") == "disabled")):
+            prov[name] = {
+                "available": False, "source": "hydrated", "tier": owner,
+                "age_seconds": None, "stale": False, "schema_version": version,
+                "state": "unavailable" if name in enabled else "disabled",
+                "reason": ("enabled by current configuration; awaiting fresh owner gather"
+                           if name in enabled else "disabled by configuration in owner scan"),
             }
             continue
         if isinstance(source_health, Mapping) and source_health.get("healthy") is False:
@@ -494,6 +508,10 @@ def report_metrics(prov: Provenance, tier: str) -> list[tuple[str, dict[str, str
     """
     out: list[tuple[str, dict[str, str], float]] = []
     for name, entry in sorted(prov.items()):
+        # Disabled is not healthy data and not a failed read. Omit both gauges, so the
+        # unavailable alert has no zero series and freshness cannot suggest a measurement.
+        if entry.get("state") == "disabled":
+            continue
         out.append((
             "gcinsight_input_available",
             {"tier": tier, "input": name},
@@ -517,6 +535,8 @@ def summarise(prov: Provenance, withheld: dict[str, str]) -> str:
             age = entry.get("age_seconds") or 0.0
             parts.append(f"{name}={entry['source']}"
                          + (f"({age / 3600:.1f}h)" if entry["source"] == "hydrated" else ""))
+        elif entry.get("state") == "disabled":
+            parts.append(f"{name}=DISABLED({entry.get('reason', '?')})")
         else:
             parts.append(f"{name}=UNAVAILABLE({entry.get('reason', '?')})")
     line = "inputs: " + ", ".join(parts)

@@ -141,6 +141,55 @@ class HydrationSourcesTest(unittest.TestCase):
         self.assertIn("0 of 0", prov["insights"]["reason"])
 
 
+class DisabledInputContract(unittest.TestCase):
+    def test_current_enabled_policy_rejects_historical_disabled_owner_payload(self):
+        name = "library_panels_inventory"
+        for marker in ("inputs", "sources"):
+            for payload in ({}, {"old": {"available": True}}):
+                owner = _scan("t2", name, payload)
+                owner["meta"][marker] = {name: {"state": "disabled", "schema_version": 1}}
+                for tier in ("t1", "t3", "t4"):
+                    with self.subTest(marker=marker, payload=payload, tier=tier):
+                        inputs, prov = hydrate.hydrate(tier, {}, enabled={name}, now=NOW,
+                                                      loader=_loader(t2=owner))
+                        self.assertNotIn(name, inputs)
+                        self.assertFalse(prov.satisfied(name))
+                        self.assertEqual(prov[name]["state"], "unavailable")
+                        self.assertIn(("gcinsight_input_available", {"tier": tier, "input": name}, 0.0),
+                                      hydrate.report_metrics(prov, tier))
+                        self.assertNotIn(name, hydrate.filter_views({name: []}, prov)[0])
+
+    def test_disabled_owner_round_trips_without_alert_series_on_every_tier(self):
+        name = "library_panels_inventory"
+        _, own_prov = hydrate.hydrate(
+            "t2", {}, unavailable={name: {"state": "disabled", "reason": "disabled by configuration"}},
+            now=NOW, loader=_loader())
+        owner = _scan("t2", name, {})
+        owner["meta"]["inputs"] = json.loads(json.dumps(own_prov))
+        owner["meta"]["sources"] = {name: {"state": "disabled", "healthy": True}}
+        for tier in ("t1", "t2", "t3", "t4"):
+            with self.subTest(tier=tier):
+                inputs, prov = (({}, own_prov) if tier == "t2" else hydrate.hydrate(
+                    tier, {}, now=NOW, loader=_loader(t2=owner)))
+                self.assertFalse(prov.satisfied(name))
+                self.assertNotIn(name, inputs)
+                self.assertEqual(prov[name].get("state"), "disabled")
+                metrics = hydrate.report_metrics(prov, tier)
+                # The shipped min_over_time(...[6h]) < 1 rule fires on this zero.
+                alert_series = [value for metric, labels, value in metrics
+                                if metric == "gcinsight_input_available" and labels["input"] == name]
+                self.assertEqual(alert_series, [], "disabled must not supply the alert's zero series")
+                keep, withheld = hydrate.filter_views({name: []}, prov)
+                self.assertNotIn(name, keep)
+                self.assertIn(name, withheld)
+
+    def test_enabled_failure_keeps_the_unavailable_alert_zero(self):
+        name = "library_panels_inventory"
+        _, prov = hydrate.hydrate("t2", {}, now=NOW, loader=_loader())
+        self.assertIn(("gcinsight_input_available", {"tier": "t2", "input": name}, 0.0),
+                      hydrate.report_metrics(prov, "t2"))
+
+
 class AdaptiveSchemaCompatibilityTest(unittest.TestCase):
     """Exercise the public hydration/composition boundary, not just dict merging."""
 
