@@ -31,6 +31,9 @@ grafana-stack: none
   explicit dispatch. An automated RC tag is not authority to publish a stable release.
 - A generated `CHANGELOG.md` can carry characters the shipped-text gate forbids: normalise it in a
   workflow step, never rewrite history or exempt the file.
+- `no-em-dashes` (part of `just check`) scans the whole tree except `codex/`, `backlog/` and `testdata/`.
+  Write fetched or research files with em dashes under `codex/` or the scratchpad, never elsewhere in
+  the repo, or the gate fails.
 - Schema-validation "skipped" is unproven. One empty instant read is not an absent series; read the
   tier's real lookback window. A gap is an absent series, never a zero.
 - Promoted images are pinned by immutable digest. Consumer images are separate and unsigned; verify the

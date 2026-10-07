@@ -4,12 +4,13 @@ title: Resolve Synthetic owner-input coverage before deployment acceptance
 status: Parked
 assignee: []
 created_date: '2026-10-07 16:48'
-updated_date: '2026-10-07 16:48'
+updated_date: '2026-10-07 18:24'
 labels:
   - synthetic
   - deployment-blocker
   - owner-decision
-dependencies: []
+dependencies:
+  - GCI-0127
 references:
   - >-
     /Users/rob/repos/grafana-cloud-org-insights/codex/loop15-evidence/R-cust/synthetic-failure-traces.json
@@ -44,4 +45,6 @@ A full native T2 on the held release refused every publication because Synthetic
 
 <!-- SECTION:NOTES:BEGIN -->
 loop15: GCI-0125 (resolve Synthetic owner-input coverage before deployment acceptance) parked owner; implementation attempts 0, review-repair rounds 0. Read-only diagnosis is complete and the older deployment acceptance is negative. Recommend an explicitly approved temporary Synthetic-query deselection with the legacy Synthetic token/pairs preserved, or remediate the unavailable product configuration under a fresh grant; no choice was made unattended.
+
+Owner disposition (Rob, 2026-10-07, loop16 prep): fix the oversized reads forward under GCI-0127 (route-specific Synthetic body bound), then move the customer to the release containing it with no manual runs; Rob checks the overnight natural runs. After the fix 6 of 81 stacks stay unavailable (2 ambiguous, 3 new-stack credential gaps, 1 HTTP 403), inside FAILURE_ABORT_RATIO 0.10. Floor, scope and credentials unchanged.
 <!-- SECTION:NOTES:END -->
