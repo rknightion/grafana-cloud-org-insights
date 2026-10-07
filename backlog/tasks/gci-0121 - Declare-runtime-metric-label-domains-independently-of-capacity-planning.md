@@ -1,9 +1,10 @@
 ---
 id: GCI-0121
 title: Declare runtime metric label domains independently of capacity planning
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-10-06 17:49'
+updated_date: '2026-10-07 16:53'
 labels:
   - dashboards
   - coverage-debt
@@ -32,3 +33,9 @@ The new coverage inventory exposes 40 domain declarations whose catalogue values
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+loop15: identify all 40 incomplete domains from real producer contracts as fixed enums, discovery-backed domains or explicit reserves; preserve unknowns, estate discovery and capacity ceilings. Derive coverage obligations from independently witnessed vocabularies, demonstrate unsupported-value seeds fail, preserve prior negative rendering/reserve tests; final just check, completed CodeRabbit, independent review and exact-SHA CI.
+<!-- SECTION:PLAN:END -->
