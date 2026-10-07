@@ -4,7 +4,7 @@ title: Close bounded-label proof for open Assistant and scan-failure domains
 status: Parked
 assignee: []
 created_date: '2026-10-07 17:03'
-updated_date: '2026-10-07 17:04'
+updated_date: '2026-10-07 18:45'
 labels:
   - cardinality
   - owner-decision
@@ -42,4 +42,6 @@ Runtime-domain source inspection and independent local helper checks prove three
 
 <!-- SECTION:NOTES:BEGIN -->
 loop15: GCI-0126 (close bounded-label proof for open Assistant and scan-failure domains) parked owner, implementation attempts 0 and review-repair rounds 0. Source inspection and local generic-guard helper reproduction complete; no deployed novel-value occurrence or publisher-path enforcement claim. Existing producer seams and consumer taxonomy cannot be silently changed by the domain-reporting task.
+
+loop16: GCI-0126 (bound Assistant and scan-failure metric label domains) remains parked, implementation attempts 0. Upstream checkout preflight refused; mapper produced only local open exception catch-boundary witness. D-TAX16 requires observable upstream taxonomy; no guessed vocabulary or private reads. Resume after safe upstream checkout and complete taxonomy witness.
 <!-- SECTION:NOTES:END -->
