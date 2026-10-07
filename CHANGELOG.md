@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.8.3](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.8.2...v0.8.3) (2026-10-07)
+
+
+### Bug Fixes
+
+* isolate label inventory floor and guard side writes ([ee4bdcc](https://github.com/rknightion/grafana-cloud-org-insights/commit/ee4bdcc68d118a056581fccf30f81aa270c3695b))
+
+
+### Documentation
+
+* record accepted Synthetic bound and loop live-proof status ([137cf01](https://github.com/rknightion/grafana-cloud-org-insights/commit/137cf01493d4bdff46d76e5c7a8374939c1aa300))
+* record rollout acceptance and conditional labelling parks ([0655572](https://github.com/rknightion/grafana-cloud-org-insights/commit/0655572685a3e55269ce27ced3fe381e0e7d1934))
+* retain failed labelling proof and measured dev evidence ([60ce5ea](https://github.com/rknightion/grafana-cloud-org-insights/commit/60ce5ea6b0a40ab3313a36436968fbf0f3ebeaa8))
+
 ## [0.8.2](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.8.1...v0.8.2) (2026-10-07)
 
 
