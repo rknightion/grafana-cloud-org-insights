@@ -138,7 +138,7 @@ def test_coverage_floor_is_weighted_and_withholds_score():
 
 def test_excluded_rules_do_not_dilute_coverage():
     raw = json.loads(lr.CATALOGUE_PATH.read_text())
-    raw["rules"] = [r for r in raw["rules"] if r["id"] in {"M4", "M5", "L_query_use", "T_semconv"}]
+    raw["rules"] = [r for r in raw["rules"] if r["id"] in {"M4", "M6", "L_query_use", "T_semconv"}]
     output = evaluate(catalogue=lr.validate_catalogue(raw))
     for r in output["results"]:
         if r["rule"] != "M4":
@@ -270,7 +270,7 @@ def test_fail_and_missing_weights_are_not_dynamic_severity_weights():
     assert out["results"][0]["weight"] == 3
     summary = out["summaries"][0]
     assert summary["coverage"] == 1 and summary["score"] == 0
-    assert lr.evaluate({}) == {"catalogue_version": 1, "results": [], "summaries": []}
+    assert lr.evaluate({}) == {"catalogue_version": 2, "results": [], "summaries": []}
 
 
 def test_zero_coverage_no_score_and_no_applicable_rules_no_score():
@@ -317,8 +317,8 @@ def test_raw_size_extension_compares_sizes_and_counts_offending_objects(
     assert result(env, catalogue)["result"] == "fail"
     env["signals"][signal]["inputs"][input_id]["samples"] = [sample(threshold, "at_least")]
     assert result(env, catalogue)["evidence"]["at_least"] == 1
-    # Do not mistake the simulated extension for a change to production eligibility.
-    assert lr.CATALOGUE.inputs[input_id]["route"] == "parked"
+    # Only the C1-witnessed metric-series extension is shipping; series/stream routes stay parked.
+    assert lr.CATALOGUE.inputs[input_id]["route"] == ("approved" if rule_id == "M5" else "parked")
 
 
 @pytest.mark.parametrize("values,expected,lower", [

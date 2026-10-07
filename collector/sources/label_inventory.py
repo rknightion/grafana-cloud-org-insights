@@ -1,8 +1,9 @@
 """Default-off bounded T2 labelling input, private S3 hydration only (schema v1).
 
-Mimir uses ONE cardinality/label_names read per stack: head counts, no invented
-series denominator and no 24h values mixed into that head window. Metric value
-shapes and cross-signal value-set comparisons remain missing, not clean zeros.
+Mimir uses cardinality/label_names then capped, prioritized label_values reads:
+head counts, per-label series populations and numeric per-metric sizes. Values
+and metric names are transient; no 24h values are mixed into that head window.
+Cross-signal value-set comparisons remain missing, not clean zeros.
 The other three signals use existing 24h names/values reads. Their undocumented
 server completeness remains partial/truncated even below the local caps or empty.
 No series, OTLP config, intrinsic Tempo name or overrides routes are activated.
@@ -120,9 +121,8 @@ def _input(state="complete", reason="none", *, truncated=False, overflow=False, 
             "values_overflow": int(overflow), "samples": samples or []}
 
 
-def _sample(value: int, semantics="exact", *, kind="dynamic"):
-    # label_names gives counts, NOT series; no stream route is used in this task.
-    return {"value": value, "semantics": semantics, "population": None,
+def _sample(value: int, semantics="exact", *, kind="dynamic", population=None):
+    return {"value": value, "semantics": semantics, "population": population,
             "population_semantics": "exact", "label_kind": kind}
 
 
@@ -179,9 +179,10 @@ def _read(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str, signal: st
     else:
         params: dict[str, object] = {"start": start, "end": end}
         if signal == "metrics":
-            # The proven head-only response has no series population. No per-value-series extension.
-            params = {"limit": bounds.names, "count_method": "inmemory"}
-            route = "/cardinality/label_names"
+            params = {"limit": bounds.names if key is None else bounds.values, "count_method": "inmemory"}
+            route = "/cardinality/label_names" if key is None else "/cardinality/label_values"
+            if key is not None:
+                params["label_names[]"] = key[1]
         elif signal == "logs":
             params = {"start": start * 1_000_000_000, "end": end * 1_000_000_000}
             route = "/labels" if key is None else "/label/" + urllib.parse.quote(key[1], safe="") + "/values"
@@ -199,6 +200,8 @@ def _read(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str, signal: st
         raise ValueError("invalid_response")
     partial = bool(doc.get("warnings"))
     if signal == "metrics":
+        if key is not None:
+            return _mimir_values(doc, key[1], bounds.values), partial
         raw = doc.get("cardinality")
         total = doc.get("label_names_count")
         values_total = doc.get("label_values_count_total")
@@ -257,9 +260,116 @@ def _read(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str, signal: st
     return sorted(set(values)), True  # At least observed values, never a complete inventory.
 
 
+def _mimir_values(doc: dict, name: str, limit: int) -> dict:
+    """C1 head-only shape; reconcile before reducing. Never persist this document."""
+    labels, total = doc.get("labels"), doc.get("series_count_total")
+    if (not label_rules._count(total) or not isinstance(labels, list) or len(labels) != 1
+            or not isinstance(labels[0], dict) or labels[0].get("label_name") != name):
+        raise ValueError("invalid_response")
+    label = labels[0]
+    count, population, values = label.get("label_values_count"), label.get("series_count"), label.get("cardinality")
+    if (not label_rules._count(count) or not label_rules._count(population)
+            or population > total or not isinstance(values, list) or len(values) > limit
+            or count < len(values)):
+        raise ValueError("invalid_response")
+    seen, series = set(), 0
+    for value in values:
+        if (not isinstance(value, dict) or not isinstance(value.get("label_value"), str)
+                or not label_rules._count(value.get("series_count"))):
+            raise ValueError("invalid_response")
+        raw = value["label_value"]
+        raw.encode("utf-8")
+        if raw in seen:
+            raise ValueError("invalid_response")
+        seen.add(raw)
+        series += value["series_count"]
+    if (series > population or (count == len(values) and series != population)
+            or (not count and population) or (count and not values)):
+        raise ValueError("invalid_response")
+    return {"count": count, "population": population, "values": values,
+            "partial": count != len(values) or len(values) >= limit}
+
+
+def _shape_counts(name, values):
+    shapes, offending = {}, 0
+    for value in values:
+        if pii.value_classes(name, value):
+            continue
+        classes = [kind for kind, pattern in _SHAPES.items() if pattern.fullmatch(value)]
+        if len(value.encode("utf-8")) > 256:
+            classes.append("long_value")
+        offending += bool(classes)
+        for kind in classes:
+            shapes[kind] = shapes.get(kind, 0) + 1
+    return shapes, offending
+
+
+def _metric_inputs(client, stack, cap, start, end, bounds, transport, kept, payload, static_names):
+    """Reduce at most keys head reads; no value or metric-name string survives."""
+    inputs = payload["inputs"]
+    truncated = payload["state"] == "partial"
+    inputs["shape_count"] = _input("unavailable", "missing_input")
+    inputs["metric_series"] = _input("unavailable", "missing_input")
+    distinct, shape_count, successful = [], 0, 0
+    shape_partial, overflow, failure = truncated, False, None
+    for index, ((scope, name, count), row) in enumerate(zip(kept, payload["register"])):
+        population = None
+        if index < bounds.keys and row["name_class"] != "oversize":
+            try:
+                measurement, warned = _read(client, stack, cap, "metrics", start, end,
+                                             bounds, transport, (scope, name))
+            except Exception as exc:
+                failure = "deadline" if client.remaining() <= 0 else _reason(exc)
+                overflow |= failure == "overflow"
+                shape_partial = True
+                payload.update(state="partial", reason="overflow" if overflow else failure)
+                if name == "__name__":
+                    inputs["metric_series"] = _input("partial" if failure in {"deadline", "overflow"} else "unavailable",
+                        failure, truncated=truncated and failure in {"deadline", "overflow"},
+                        overflow=failure == "overflow")
+            else:
+                successful += name != "__name__"
+                count, population = measurement["count"], measurement["population"]
+                partial = warned or measurement["partial"]
+                shape_partial |= partial
+                if partial and failure is None:
+                    payload.update(state="partial", reason="truncated")
+                values = measurement["values"]
+                if name == "__name__":
+                    inputs["metric_series"] = _input("partial" if partial or truncated else "complete",
+                        "truncated" if partial or truncated else "none", truncated=truncated,
+                        samples=[_sample(v["series_count"], "at_least" if partial else "exact") for v in values])
+                else:
+                    shapes, offending = _shape_counts(name, (v["label_value"] for v in values))
+                    shape_count += offending
+                    if row["name_class"] == "ordinary":
+                        row["shape_counts"] = shapes
+                if row["name_class"] == "ordinary":
+                    row.update(distinct_count=count, series_count=population)
+        else:
+            shape_partial = True
+            if failure is None:
+                payload.update(state="partial", reason="truncated")
+        distinct.append(_sample(count, population=population,
+            kind="static" if name in static_names else "dynamic"))
+    inputs["distinct_values"]["samples"] = distinct
+    if successful or overflow:
+        partial = shape_partial or failure is not None
+        inputs["shape_count"] = _input("partial" if partial else "complete",
+            "overflow" if overflow else (failure or ("truncated" if partial else "none")),
+            truncated=truncated, overflow=overflow,
+            samples=[_sample(shape_count, "at_least" if partial else "exact")])
+    elif failure:
+        inputs["shape_count"] = _input("partial" if failure in {"deadline", "overflow"} else "unavailable",
+                                      failure, overflow=overflow)
+    if failure or payload["state"] == "partial":
+        inputs["distinct_values"].update(state="partial", reason="overflow" if overflow else (failure or "truncated"),
+                                         values_overflow=int(overflow))
+
+
 def _priority(row: tuple) -> tuple:
     scope, name, count = row
-    return (not bool(pii.key_classes(name) or _NAME_PRIORITY.search(name)),
+    return (name != "__name__", not bool(pii.key_classes(name) or _NAME_PRIORITY.search(name)),
             -(count if count is not None else 0), scope, name)
 
 
@@ -292,7 +402,6 @@ def _signal(client, stack, cap, signal, start, end, bounds, transport, static_na
         samples=[_sample(int(not any((s, n) in identities[signal] for s, n, _ in kept)))])
     if signal in {"metrics", "logs", "profiles"}:
         inputs["distinct_values"] = _input(state, reason, truncated=truncated)
-    # Metric shape reads cannot truthfully share the head-only window. Missing is intentional.
     if signal != "metrics":
         inputs["shape_count"] = _input("unavailable", "missing_input")
     shape_count = successful_reads = 0
@@ -349,6 +458,8 @@ def _signal(client, stack, cap, signal, start, end, bounds, transport, static_na
         if distinct is not None and failure:
             distinct.update(state="partial", reason="overflow" if shape_overflow else failure,
                             values_overflow=int(shape_overflow))
+    if signal == "metrics":
+        _metric_inputs(client, stack, cap, start, end, bounds, transport, kept, payload, static_names)
     # Coalesce suppressed names by class/scope; their measurements remain null/empty.
     rows, suppressed = [], {}
     for row in payload["register"]:

@@ -1,10 +1,14 @@
 """Recorded synthetic response contracts and minimized source -> strict consumer seam."""
 from __future__ import annotations
 
+import copy
 import datetime as dt
 import io
 import json
 from pathlib import Path
+import subprocess
+import sys
+import tempfile
 import unittest
 from unittest import mock
 import urllib.parse
@@ -14,10 +18,19 @@ from collector.httpclient import ReadOnlyClient, Response
 from collector.sources import label_inventory as source
 
 FIXTURE = json.loads((Path(__file__).parent / "fixtures/label_inventory/contracts.json").read_text())
+C1 = json.loads((Path(__file__).parent / "fixtures/label_inventory/c1_series.json").read_text())
 NOW = dt.datetime(2026, 10, 7, 12, tzinfo=dt.timezone.utc)
 STACK = {"slug": "synthetic", "status": "active"}
 for signal, (host, tenant, _) in source.SIGNALS.items():
     STACK.update({host: f"https://{signal}.example.test", tenant: 5_000_001})
+
+
+def mimir_values(name, count, *, limit=256):
+    """Synthetic body with the frozen C1 label/value row fields, not live data."""
+    return {"series_count_total": count * 10, "labels": [{"label_name": name,
+            "label_values_count": count, "series_count": count * 10,
+            "cardinality": [{"label_value": f"VALUE_canary_{i}", "series_count": 10}
+                            for i in range(min(count, limit))]}]}
 
 
 class SourceContracts(unittest.TestCase):
@@ -28,7 +41,14 @@ class SourceContracts(unittest.TestCase):
         self.requests.append(req)
         signal = urllib.parse.urlsplit(req.full_url).hostname.split(".")[0]
         names = urllib.parse.urlsplit(req.full_url).path.endswith(("/label_names", "/labels", "/tags", "/LabelNames"))
-        return Response(200, json.dumps(FIXTURE[f"{signal}_{'names' if names else 'values'}"]).encode(), "")
+        if signal == "metrics" and not names:
+            query = urllib.parse.parse_qs(urllib.parse.urlsplit(req.full_url).query)
+            name = query["label_names[]"][0]
+            count = next(r["label_values_count"] for r in FIXTURE["metrics_names"]["cardinality"] if r["label_name"] == name)
+            body = mimir_values(name, count, limit=int(query["limit"][0]))
+        else:
+            body = FIXTURE[f"{signal}_{'names' if names else 'values'}"]
+        return Response(200, json.dumps(body).encode(), "")
 
     def probe(self, **kw):
         return source.probe_stack(ReadOnlyClient(transport=self.send, deadline=60, max_attempts=1),
@@ -44,11 +64,12 @@ class SourceContracts(unittest.TestCase):
         self.assertEqual(counts, {"request_id": 200, "cluster": 3, "job": 2})
         samples = metrics["inputs"]["distinct_values"]["samples"]
         self.assertEqual([s["value"] for s in samples], [200, 3, 2])
-        self.assertTrue(all(s["population"] is None for s in samples))
+        self.assertEqual([s["population"] for s in samples], [2000, 30, 20])
         self.assertEqual(samples[1]["label_kind"], "static")
-        self.assertNotIn("shape_count", metrics["inputs"], "24h values cannot masquerade as head measurements")
+        self.assertEqual(metrics["inputs"]["shape_count"]["samples"][0]["value"], 0)
+        self.assertEqual(metrics["inputs"]["metric_series"]["state"], "unavailable", "__name__ was not observed")
         self.assertFalse(any(k in p["inputs"] for p in record["signals"].values()
-                             for k in ("service_gap", "span_names", "metric_series", "labels_per_stream", "drilldown_missing")))
+                             for k in ("service_gap", "span_names", "labels_per_stream", "drilldown_missing")))
         trace = record["signals"]["traces"]
         self.assertEqual({r["scope"] for r in trace["register"]}, {"resource", "span"})
         for signal in ("logs", "traces", "profiles"):
@@ -59,14 +80,19 @@ class SourceContracts(unittest.TestCase):
         evaluated = label_rules.evaluate({"synthetic": record})
         self.assertNotIn("request_id", json.dumps(evaluated))
         m4 = next(r for r in evaluated["results"] if r["rule"] == "M4")
-        self.assertEqual((m4["result"], m4["reason"]), ("not_evaluated", "missing_input"))
+        self.assertEqual((m4["result"], m4["reason"]), ("fail", None))
         for req in self.requests:
             parts = urllib.parse.urlsplit(req.full_url)
             signal = parts.hostname.split(".")[0]
             query = urllib.parse.parse_qs(parts.query)
             if signal == "metrics":
-                self.assertEqual(parts.path, "/api/prom/api/v1/cardinality/label_names")
-                self.assertEqual(query, {"limit": ["500"], "count_method": ["inmemory"]})
+                if parts.path.endswith("/label_names"):
+                    self.assertEqual(query, {"limit": ["500"], "count_method": ["inmemory"]})
+                else:
+                    self.assertEqual(parts.path, "/api/prom/api/v1/cardinality/label_values")
+                    self.assertEqual(set(query), {"limit", "count_method", "label_names[]"})
+                    self.assertEqual(query["limit"], ["256"])
+                    self.assertEqual(query["count_method"], ["inmemory"])
             elif signal == "profiles":
                 self.assertEqual(req.get_method(), "POST")
                 self.assertIn(parts.path, source.label_risk.PROFILE_PATHS)
@@ -78,6 +104,155 @@ class SourceContracts(unittest.TestCase):
                 factor = 1_000_000_000 if signal == "logs" else 1
                 self.assertEqual(int(query["end"][0]) - int(query["start"][0]), 86400 * factor)
         self.assertEqual(sum("/cardinality/label_names" in r.full_url for r in self.requests), 1)
+
+    def test_c1_series_reductions_activate_verified_rules_without_values(self):
+        names, values = C1["names"], C1["values"]
+        self.assertEqual(sorted(values), C1["witness_top_keys"])
+        self.assertEqual(sorted(values["labels"][0]), C1["witness_label_row_keys"])
+        self.assertEqual(sorted(values["labels"][0]["cardinality"][0]), C1["witness_value_row_keys"])
+        original = self.send
+        def send(req, timeout):
+            parts = urllib.parse.urlsplit(req.full_url)
+            if parts.hostname != "metrics.example.test":
+                return original(req, timeout)
+            self.requests.append(req)
+            if parts.path.endswith("/label_names"):
+                body = names
+            else:
+                self.assertTrue(parts.path.endswith("/cardinality/label_values"))
+                query = urllib.parse.parse_qs(parts.query)
+                self.assertEqual(query["limit"], ["256"])
+                self.assertEqual(query["count_method"], ["inmemory"])
+                self.assertNotIn("start", query)
+                body = json.loads(json.dumps(values))
+                body["labels"][0]["label_name"] = query["label_names[]"][0]
+            return Response(200, json.dumps(body).encode(), "")
+        self.send = send
+        record = self.probe()
+        p = record["signals"]["metrics"]
+        self.assertEqual(p["state"], "complete")
+        self.assertEqual([s["value"] for s in p["inputs"]["metric_series"]["samples"]], [1200, 300])
+        self.assertTrue(all(s["population"] == 1500 for s in p["inputs"]["distinct_values"]["samples"]))
+        self.assertTrue(all(r["series_count"] == 1500 for r in p["register"]))
+        results = {r["rule"]: r for r in label_rules.evaluate({"synthetic": record})["results"]}
+        self.assertEqual((results["M5"]["result"], results["M5"]["evidence"]["offending_labels"]), ("fail", 1))
+        self.assertEqual(results["M4"]["result"], "pass")
+        self.assertGreater(label_rules.CATALOGUE.version, 1)
+        self.assertNotIn("METRIC_canary", json.dumps(record))
+        requests = [urllib.parse.parse_qs(urllib.parse.urlsplit(r.full_url).query)
+                    for r in self.requests if "/cardinality/label_values" in r.full_url]
+        self.assertEqual([q["label_names[]"][0] for q in requests], ["__name__", "job"])
+
+    def c1_probe(self, transform=None, **kw):
+        original = self.send
+        def send(req, timeout):
+            parts = urllib.parse.urlsplit(req.full_url)
+            if parts.hostname != "metrics.example.test":
+                return original(req, timeout)
+            self.requests.append(req)
+            if parts.path.endswith("/label_names"):
+                return Response(200, json.dumps(C1["names"]).encode(), "")
+            doc = copy.deepcopy(C1["values"])
+            doc["labels"][0]["label_name"] = urllib.parse.parse_qs(parts.query)["label_names[]"][0]
+            if transform is not None:
+                return transform(doc)
+            return Response(200, json.dumps(doc).encode(), "")
+        self.send = send
+        try:
+            return self.probe(**kw)
+        finally:
+            self.send = original
+
+    def test_c1_capped_priority_partial_missing_and_overflow_never_false_pass(self):
+        record = self.c1_probe(bounds=source.Bounds(keys=1))
+        self.assertEqual(record["signals"]["metrics"]["state"], "partial")
+        calls = [r for r in self.requests if "/cardinality/label_values" in r.full_url]
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(urllib.parse.parse_qs(urllib.parse.urlsplit(calls[0].full_url).query)["label_names[]"], ["__name__"])
+        def results(record):
+            return {r["rule"]: r for r in label_rules.evaluate({"synthetic": record})["results"]}
+        self.assertEqual(results(record)["M4"]["result"], "not_evaluated")
+        self.assertEqual(results(record)["M5"]["result"], "fail")
+        def partial(doc):
+            doc["labels"][0]["label_values_count"] = 3
+            doc["labels"][0]["series_count"] = doc["series_count_total"] = 2000
+            doc["labels"][0]["cardinality"][0]["series_count"] = 800
+            return Response(200, json.dumps(doc).encode(), "")
+        bounded = results(self.c1_probe(partial))
+        self.assertEqual((bounded["M5"]["result"], bounded["M5"]["reason"]), ("not_evaluated", "truncated"))
+        for status in (206, 302, 403, 500):
+            with self.subTest(status=status):
+                unavailable = results(self.c1_probe(lambda doc: Response(status, json.dumps(doc).encode(), "")))
+                self.assertEqual(unavailable["M5"]["result"], "not_evaluated")
+                self.assertEqual(unavailable["M4"]["result"], "not_evaluated")
+        overflow = results(self.c1_probe(lambda _: Response(200, b"raw_canary" * 1000, ""),
+                                        bounds=source.Bounds(response_bytes=1024)))
+        self.assertEqual((overflow["M5"]["result"], overflow["M5"]["evidence"]["condition"]), ("fail", "overflow"))
+
+    def test_c1_value_shapes_are_closed_unweighted_and_pii_values_are_transient(self):
+        def shapes(doc):
+            if doc["labels"][0]["label_name"] != "__name__":
+                doc["series_count_total"] = 600
+                doc["labels"][0].update(label_values_count=3, series_count=600, cardinality=[
+                    {"label_value": "550e8400-e29b-41d4-a716-446655440000", "series_count": 300},
+                    {"label_value": "PII_VALUE_canary@example.test", "series_count": 200},
+                    {"label_value": "long_VALUE_canary" * 20, "series_count": 100}])
+            return Response(200, json.dumps(doc).encode(), "")
+        record = self.c1_probe(shapes)
+        p = record["signals"]["metrics"]
+        row = next(r for r in p["register"] if r["name"] == "job")
+        self.assertEqual(row["shape_counts"], {"uuid": 1, "long_value": 1})
+        self.assertEqual(row["series_count"], 600)
+        self.assertEqual(p["inputs"]["shape_count"]["samples"][0]["value"], 2)
+        self.assertNotIn("canary", json.dumps(record))
+        self.assertNotIn("550e8400", json.dumps(record))
+
+    def test_c1_rejects_inconsistent_numeric_duplicate_missing_and_identity_shapes(self):
+        mutations = [lambda d: d.update(series_count_total=True),
+                     lambda d: d.update(series_count_total=label_rules.MAX_COUNT + 1),
+                     lambda d: d.update(labels=[]),
+                     lambda d: d["labels"].append(copy.deepcopy(d["labels"][0])),
+                     lambda d: d["labels"][0].update(label_name="WRONG_NAME_canary"),
+                     lambda d: d["labels"][0].update(series_count=100),
+                     lambda d: d["labels"][0].update(series_count=1400),
+                     lambda d: d["labels"][0].update(label_values_count=1),
+                     lambda d: d["labels"][0]["cardinality"][0].update(series_count=-1),
+                     lambda d: d["labels"][0]["cardinality"][0].update(label_value=chr(0xD800)),
+                     lambda d: d["labels"][0]["cardinality"][1].update(label_value="METRIC_canary_853121")]
+        for mutation in mutations:
+            with self.subTest(mutation=mutation):
+                def invalid(doc):
+                    mutation(doc)
+                    return Response(200, json.dumps(doc).encode(), "")
+                record = self.c1_probe(invalid)
+                result = next(r for r in label_rules.evaluate({"synthetic": record})["results"] if r["rule"] == "M5")
+                self.assertEqual((result["result"], result["reason"]), ("not_evaluated", "missing_input"))
+                self.assertNotIn("canary", json.dumps(record))
+
+    def test_c1_source_to_real_offline_cli_and_all_publication_fences(self):
+        from collector.coverage import Coverage
+        from collector.emit import loki
+        from collector.pillars import compose, findings
+        record = self.c1_probe()
+        metrics, views, _ = compose.build_all([STACK], Coverage(tier="t2", total=1),
+                                             label_inventory={STACK["slug"]: record})
+        events, totals = findings.derive(views)
+        public = [metrics, loki.finding_events("t2", events), findings.metrics(totals),
+                  source.diagnostic_scan({"data": {"label_inventory": {STACK["slug"]: record}}, "views": views})]
+        self.assertNotIn("canary", json.dumps([record, views, public]))
+        self.assertTrue(any(r["Rule"] == "M5" and r["Result"] == "fail" for r in views["labelling_findings"]))
+        with tempfile.TemporaryDirectory(prefix="label-mimir-cli-") as directory:
+            scan, out = Path(directory) / "scan.json", Path(directory) / "views"
+            scan.write_text(json.dumps({"stacks": [STACK], "label_inventory": {STACK["slug"]: record}}))
+            command = [sys.executable, str(Path(__file__).resolve().parents[1] / "bin/make_local_views.py"),
+                       "--scan", str(scan), "--out", str(out)]
+            run = subprocess.run(command, capture_output=True, text=True, timeout=60)
+            self.assertEqual(run.returncode, 0, run.stderr)
+            serialized = run.stdout + run.stderr + "".join(p.read_text() for p in out.glob("*.json"))
+            self.assertNotIn("canary", serialized)
+            output = json.loads((out / "labelling_findings.json").read_text())
+            self.assertTrue(any(r["Rule"] == "M5" and r["Result"] == "fail" and r["Catalogue version"] == 2
+                                for r in output["rows"]))
 
     def test_disabled_zero_calls_and_no_isolated_client_construction(self):
         with mock.patch.object(source, "ReadOnlyClient") as client, mock.patch.object(source, "bounded_transport") as transport:
@@ -192,6 +367,11 @@ class SourceContracts(unittest.TestCase):
 
     def test_bound_upper_envelope_and_priority_are_deterministic(self):
         def many(req, timeout):
+            query = urllib.parse.parse_qs(urllib.parse.urlsplit(req.full_url).query)
+            if "label_names[]" in query:
+                name = query["label_names[]"][0]
+                count = 1 if name == "request_id" else int(name[500:])
+                return Response(200, json.dumps(mimir_values(name, count)).encode(), "")
             return Response(200, json.dumps({"label_names_count": 500, "label_values_count_total": 125250,
                 "cardinality": [{"label_name": ("request_id" if n == 1 else "a" * 500 + str(n)), "label_values_count": n}
                                 for n in range(1, 501)]}).encode(), "")
@@ -206,16 +386,20 @@ class SourceContracts(unittest.TestCase):
 
     def test_escaped_name_serialization_drops_whole_rows_before_strict_validator(self):
         names = [str(n) + chr(34) * 508 for n in range(256)]
-        self.send = lambda *_: Response(200, json.dumps({"label_names_count": 256,
-            "label_values_count_total": 256,
-            "cardinality": [{"label_name": n, "label_values_count": 1} for n in names]}).encode(), "")
+        def escaped(req, timeout):
+            query = urllib.parse.parse_qs(urllib.parse.urlsplit(req.full_url).query)
+            doc = (mimir_values(query["label_names[]"][0], 1) if "label_names[]" in query else
+                   {"label_names_count": 256, "label_values_count_total": 256,
+                    "cardinality": [{"label_name": n, "label_values_count": 1} for n in names]})
+            return Response(200, json.dumps(doc).encode(), "")
+        self.send = escaped
         payload = self.probe()["signals"]["metrics"]
         self.assertEqual(payload["register_truncated"], 1)
         self.assertEqual((payload["state"], payload["reason"]), ("partial", "truncated"))
         self.assertLess(len(payload["register"]), 256)
         self.assertTrue(all(r["name"] in names for r in payload["register"]))
         self.assertLessEqual(len(json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode()), label_rules.MAX_SIGNAL_BYTES)
-        self.assertTrue(all(i["names_truncated"] for i in payload["inputs"].values()))
+        self.assertTrue(all(i["names_truncated"] for i in payload["inputs"].values() if i["state"] != "unavailable"))
 
     def test_bounded_transport_keeps_overflow_status_and_existing_post_fences(self):
         class Body(io.BytesIO):

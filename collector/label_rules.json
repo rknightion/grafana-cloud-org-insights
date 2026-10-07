@@ -1,5 +1,5 @@
 {
-  "catalogue_version": 1,
+  "catalogue_version": 2,
   "threshold_sources": {
     "M4": {"critical": {"provenance": "policy", "source_url": "https://github.com/grafana/skills/blob/f32d43dd9a682b7215cc2185c0340ba664f57c92/skills/grafana-cloud/prometheus-cardinality-troubleshooter/SKILL.md"}}
   },
@@ -12,7 +12,7 @@
     "missing_identity": {"signals": ["metrics", "logs", "traces", "profiles"], "route": "approved", "kind": "absence", "unit": "missing_names", "aggregation": "sum_violations"},
     "shape_count": {"signals": ["metrics", "logs", "traces", "profiles"], "route": "approved", "kind": "count", "unit": "violation_count", "aggregation": "sum_violations"},
     "service_gap": {"signals": ["metrics", "logs", "traces", "profiles"], "route": "approved", "kind": "count", "unit": "violation_count", "aggregation": "sum_violations"},
-    "metric_series": {"signals": ["metrics"], "route": "parked", "kind": "count", "unit": "series_per_metric", "aggregation": "offending_objects"},
+    "metric_series": {"signals": ["metrics"], "route": "approved", "kind": "count", "unit": "series_per_metric", "aggregation": "offending_objects"},
     "labels_per_series": {"signals": ["metrics"], "route": "parked", "kind": "count", "unit": "labels_per_series", "aggregation": "offending_objects"},
     "labels_per_stream": {"signals": ["logs"], "route": "parked", "kind": "count", "unit": "labels_per_stream", "aggregation": "offending_objects"},
     "otlp_churn_labels": {"signals": ["logs"], "route": "parked", "kind": "count", "unit": "violation_count", "aggregation": "sum_violations"},

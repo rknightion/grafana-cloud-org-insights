@@ -1,0 +1,26 @@
+{
+  "provenance": "Synthetic bodies derived from accepted frozen C1 rkaidev label_values row keys and head/inmemory counting contract (2026-10-07); numbers and strings below are illustrative, not observations.",
+  "witness_top_keys": ["labels", "series_count_total"],
+  "witness_label_row_keys": ["cardinality", "label_name", "label_values_count", "series_count"],
+  "witness_value_row_keys": ["label_value", "series_count"],
+  "names": {
+    "label_names_count": 2,
+    "label_values_count_total": 4,
+    "cardinality": [
+      {"label_name": "__name__", "label_values_count": 2},
+      {"label_name": "job", "label_values_count": 2}
+    ]
+  },
+  "values": {
+    "series_count_total": 1500,
+    "labels": [{
+      "label_name": "__name__",
+      "label_values_count": 2,
+      "series_count": 1500,
+      "cardinality": [
+        {"label_value": "METRIC_canary_853121", "series_count": 1200},
+        {"label_value": "METRIC_canary_559901", "series_count": 300}
+      ]
+    }]
+  }
+}
