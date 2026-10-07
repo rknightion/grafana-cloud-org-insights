@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.8.2](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.8.1...v0.8.2) (2026-10-07)
+
+
+### Documentation
+
+* record blocked live acceptance and runtime-domain work ([4ff6484](https://github.com/rknightion/grafana-cloud-org-insights/commit/4ff6484bb43b06bd87b1fcff4d1efa829c0a8901))
+* record guarded Synthetic reads and remaining label-domain risk ([2823e00](https://github.com/rknightion/grafana-cloud-org-insights/commit/2823e00ce2983ab6a4d78307fd56ecf26f4b03d2))
+* record runtime-domain acceptance and retained proof limits ([dc048c1](https://github.com/rknightion/grafana-cloud-org-insights/commit/dc048c11945d60019ca28234d94495264340aa8d))
+* record the no-em-dashes scan trap and the Synthetic oversize disposition ([aa89baa](https://github.com/rknightion/grafana-cloud-org-insights/commit/aa89baa6c45c05f5a7873df0d90546fff6ddd80e))
+
 ## [0.8.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.8.0...v0.8.1) (2026-10-07)
 
 
