@@ -38,6 +38,13 @@ off anything but the live inventory.
   uids, user identities and rule names never become labels. Identity-bearing detail may enter Loki or
   S3 only when the deployment explicitly accepts it and enforces minimization, access control,
   encryption and retention for those stores. Cardinality safety is not that privacy decision.
+  D-LBL1: `label_inventory` may persist the following in S3 views and the private
+  `label_inventory` hydration input only: label and attribute NAMES; distinct-value counts
+  (`exact` or `at_least`); closed non-PII value-shape class counts (uuid, hex_id, epoch,
+  url_with_id, long_value); series and stream counts. These items never go to Loki, finding
+  events, metric labels, stdout, `--out` or errors. A name over 512 bytes, or one matching a
+  `pii` key or value class, persists only as a class and a count. Raw values are transient and
+  never written. The GCI-0018 raw-value exception is not widened.
 - Every metric a pillar emits is declared in `budget.py`'s `CATALOGUE`, or `tests/test_budget.py`
   fails. A per-stack metric costs one series per live stack multiplied by every bounded enum
   dimension, so it has to justify itself by needing a time series: a trend, an alert, or a Grafana
@@ -134,6 +141,60 @@ off anything but the live inventory.
   explicitly excludes DPM, or `dpm_aware`, which applies the contracted included-DPM divisor per
   stack.
 
+## Labelling inventory (D-LBL1..11)
+
+The approved source is doc-0008 Part 1 (Labelling best-practice research and rulebook).
+
+- **D-LBL1 Retention.** The identity-bearing detail rule above governs `label_inventory`.
+  Raw values are transient and never written; the existing raw-value exception is not widened.
+- **D-LBL2 Deterministic only.** No LLM in the scanner or operator tooling. Judgement rules
+  are catalogued and excluded from applicable weight.
+- **D-LBL3 Layered, tunable thresholds.** Published limits are hard rules. The Professional
+  Services bands are the defaults: metrics warn at 100, high at 1,000, critical at 10,000;
+  Loki dynamic labels warn at 100+. Everything else is policy. Each threshold carries a
+  provenance tag (`published`, `ps` or `policy`) and a source URL, and is overridable through
+  the tunables.
+- **D-LBL4 Presentation.** Per stack and signal: findings by severity, rules evaluated vs
+  passed, a 0-100 score, and the coverage figure. The score is computed only at coverage of
+  0.8 or more; otherwise it is absent.
+- **D-LBL5 Maturity.** The labelling score replaces `cardinality_discipline`. This waits for
+  the dev proof.
+- **D-LBL6 Routes.** Staff witnesses are approved for Mimir `cardinality/label_values` and
+  `label_names` (limit/selector); Loki `/series`, `index/stats` and `index/volume`; Loki applied
+  limits/OTLP config; Tempo intrinsic `name` values and Tempo overrides. Each route is
+  implemented only after its witness. A parked route's rules are excluded from applicable
+  weight. Calls returning log lines are never covered: never `query`, `query_range` or `tail`.
+  The exact approved witness paths are Mimir `/api/prom/api/v1/cardinality/label_names` and
+  `/api/prom/api/v1/cardinality/label_values`; Loki `/loki/api/v1/series`,
+  `/loki/api/v1/index/stats`, `/loki/api/v1/index/volume`,
+  `/loki/api/v1/config/limits/applied` and `/config/tenant/v1/limits`; Tempo
+  `/tempo/api/v2/search/tag/name/values`. Tempo overrides has no frozen exact path yet:
+  its witness must first resolve and record one; no overrides implementation is granted until
+  that witness passes and the exact path is appended here. The family names are not wildcard
+  route grants. Pyroscope is limited to the two exact
+  RPC paths and `label_risk.profile_read` fence in the bounded daily label privacy risk section.
+- **D-LBL7 Customer grant.** The customer deployment may enable `label-inventory` once it
+  ships in a release and the task K dev proof is recorded. No further owner decision is needed.
+  Routes without a passing witness are not covered. Every reader-role, route, privacy and
+  publication rule is preserved.
+- **D-LBL8 Fairness.** Cardinality bands apply only to metrics and streams above a size floor
+  (tunable, same pattern as `CARDINALITY_MIN_SERIES`). A static-infrastructure allowlist
+  (host, cluster, namespace, node and similar) has its own higher band.
+- **D-LBL9 PII shapes.** Email, ip, phone, jwt and card shapes stay on label_risk's
+  retention-governed path. The labelling register refers to `risk_label_hygiene` and does not
+  duplicate them.
+- **D-LBL10 Witness stacks.** Witnesses may query all five staff stacks and choose or combine
+  evidence. Each recorded witness names the stack slug.
+- **D-LBL11 Pre-approved read scopes.** When a witness shows the org reader lacks a READ
+  scope for an approved route, only the root may add that one read-only scope to this project's
+  own access policy, after a fresh policy witness and with readback. The addition is recorded
+  with its object ID, and the capability document
+  is updated. Write or admin scopes, other policies and the per-stack reader role are never
+  covered. A new scope can 401 for about 46 minutes; wait it out, never re-mint.
+
+Not amended: `MAX_PER_STACK_FANOUT`, the one-extra-label rule, gap-is-absent, the limited-run
+guard, own-input hydration and derived `VIEW_INPUTS`.
+
 ## Hydration: every tier composes from the FULL input set
 
 `collector/emit/hydrate.py`. A tier hydrates the inputs it lacks from `scans/<tier>/latest.json`, so
@@ -208,9 +269,13 @@ Four kinds of test here are required because each catches a class of bug that lo
 
 ## Bounded daily label privacy risk (GCI-0018)
 
-`collector/sources/label_risk.py` may POST the native Pyroscope
-`/querier.v1.QuerierService/LabelNames` and `/querier.v1.QuerierService/LabelValues`
-read RPCs on each live inventory `hpInstanceUrl`, with `hpInstanceId`. This dedicated two-route
+`collector/sources/label_risk.py` and `collector/sources/label_inventory.py` may POST only
+`/querier.v1.QuerierService/LabelNames` and `/querier.v1.QuerierService/LabelValues`, the two
+exact Pyroscope read RPCs, on each live inventory `hpInstanceUrl`, with `hpInstanceId`.
+They do so only through `label_risk.profile_read`, which keeps the exact path set, the
+inventory HTTPS host, no redirects and the bounded body and response. No other module,
+path or helper is granted by this exception, and `collector/httpclient.py` stays GET-only.
+This dedicated two-route
 exception is separate from `collector/sources/dataplane.py`'s `CONNECT_RPC_READ_ROUTES` helper:
 Fleet `/collector.v1.CollectorService/ListCollectors`, Fleet
 `/pipeline.v1.PipelineService/ListPipelines`, and Pyroscope

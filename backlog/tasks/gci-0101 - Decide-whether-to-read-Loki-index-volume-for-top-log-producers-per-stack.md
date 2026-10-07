@@ -4,6 +4,7 @@ title: Decide whether to read Loki index volume for top log producers per stack
 status: To Do
 assignee: []
 created_date: '2026-10-06 10:23'
+updated_date: '2026-10-07 01:21'
 labels:
   - owner-decision
   - cost
@@ -31,3 +32,9 @@ Loop13 assessment gap 9: Loki GET /loki/api/v1/index/volume or index/stats on hl
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Loop14: D-LBL6 covers Loki /series, index/stats and index/volume routes for labelling purposes after recorded staff witnesses; the top-producers dimension remains open and is not admitted in this loop.
+<!-- SECTION:NOTES:END -->
