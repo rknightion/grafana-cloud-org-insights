@@ -20,6 +20,7 @@ from collector.sources import label_inventory as source
 FIXTURE = json.loads((Path(__file__).parent / "fixtures/label_inventory/contracts.json").read_text())
 C1 = json.loads((Path(__file__).parent / "fixtures/label_inventory/c1_series.json").read_text())
 C2 = json.loads((Path(__file__).parent / "fixtures/label_inventory/c2_streams.json").read_text())
+C4 = json.loads((Path(__file__).parent / "fixtures/label_inventory/c4_span_names.json").read_text())
 NOW = dt.datetime(2026, 10, 7, 12, tzinfo=dt.timezone.utc)
 STACK = {"slug": "synthetic", "status": "active"}
 for signal, (host, tenant, _) in source.SIGNALS.items():
@@ -42,7 +43,9 @@ class SourceContracts(unittest.TestCase):
         self.requests.append(req)
         signal = urllib.parse.urlsplit(req.full_url).hostname.split(".")[0]
         names = urllib.parse.urlsplit(req.full_url).path.endswith(("/label_names", "/labels", "/tags", "/LabelNames"))
-        if urllib.parse.urlsplit(req.full_url).path == "/loki/api/v1/series":
+        if urllib.parse.urlsplit(req.full_url).path == C4["route"]:
+            body = C4["values"]
+        elif urllib.parse.urlsplit(req.full_url).path == "/loki/api/v1/series":
             body = C2["series"]
         elif signal == "metrics" and not names:
             query = urllib.parse.parse_qs(urllib.parse.urlsplit(req.full_url).query)
@@ -71,12 +74,13 @@ class SourceContracts(unittest.TestCase):
         self.assertEqual(samples[1]["label_kind"], "static")
         self.assertEqual(metrics["inputs"]["shape_count"]["samples"][0]["value"], 0)
         self.assertEqual(metrics["inputs"]["metric_series"]["state"], "unavailable", "__name__ was not observed")
-        # E2 now ships the witnessed stream consumer; the other routes remain unsupported.
+        # E2/C4 ship their witnessed consumers; policy and overrides stay excluded.
         self.assertIn("labels_per_stream", record["signals"]["logs"]["inputs"])
+        self.assertIn("span_names", record["signals"]["traces"]["inputs"])
         self.assertFalse(any(k in p["inputs"] for p in record["signals"].values()
-                             for k in ("service_gap", "span_names", "drilldown_missing")))
+                             for k in ("service_gap", "drilldown_missing", "span_dimensions")))
         trace = record["signals"]["traces"]
-        self.assertEqual({r["scope"] for r in trace["register"]}, {"resource", "span"})
+        self.assertEqual({r["scope"] for r in trace["register"]}, {"resource", "span", "intrinsic"})
         for signal in ("logs", "traces", "profiles"):
             payload = record["signals"][signal]
             self.assertEqual((payload["window"], payload["state"], payload["reason"]), ("24h", "partial", "truncated"))
@@ -256,7 +260,7 @@ class SourceContracts(unittest.TestCase):
             serialized = run.stdout + run.stderr + "".join(p.read_text() for p in out.glob("*.json"))
             self.assertNotIn("canary", serialized)
             output = json.loads((out / "labelling_findings.json").read_text())
-            self.assertTrue(any(r["Rule"] == "M5" and r["Result"] == "fail" and r["Catalogue version"] == 3
+            self.assertTrue(any(r["Rule"] == "M5" and r["Result"] == "fail" and r["Catalogue version"] == 4
                                 for r in output["rows"]))
 
     def c2_probe(self, transform=None, **kw):
@@ -296,7 +300,7 @@ class SourceContracts(unittest.TestCase):
         self.assertEqual((results["L1"]["result"], results["L1"]["evidence"]["offending_labels"]), ("fail", 1))
         self.assertEqual(results["L1"]["evidence"]["at_least"], 1)
         self.assertEqual((results["L3"]["result"], results["L3"]["reason"]), ("not_evaluated", "missing_input"))
-        self.assertEqual(label_rules.CATALOGUE.version, 3)
+        self.assertEqual(label_rules.CATALOGUE.version, 4)
         self.assertNotIn("STREAM_VALUE_canary", json.dumps(record))
         self.assertEqual(sum("/loki/api/v1/series" in r.full_url for r in self.requests), 1)
         self.assertFalse(any("ratio" in k for k in label_rules.CATALOGUE.inputs))
@@ -420,9 +424,178 @@ class SourceContracts(unittest.TestCase):
             self.assertNotIn("STREAM_VALUE_canary", serialized)
             rows = json.loads((out / "labelling_findings.json").read_text())["rows"]
             l1 = next(r for r in rows if r["Rule"] == "L1")
-            self.assertEqual((l1["Result"], l1["Offending objects"], l1["Catalogue version"]), ("fail", 1, 3))
+            self.assertEqual((l1["Result"], l1["Offending objects"], l1["Catalogue version"]), ("fail", 1, 4))
             l3 = next(r for r in rows if r["Rule"] == "L3")
             self.assertEqual((l3["Result"], l3["Reason"]), ("not_evaluated", "missing_input"))
+
+    def c4_probe(self, transform=None, **kw):
+        original = self.send
+        def send(req, timeout):
+            parts = urllib.parse.urlsplit(req.full_url)
+            if parts.path != C4["route"]:
+                return original(req, timeout)
+            self.requests.append(req)
+            self.assertEqual(req.get_method(), "GET")
+            self.assertEqual(urllib.parse.parse_qs(parts.query), {
+                "start": [str(int(NOW.timestamp()) - C4["window_seconds"])],
+                "end": [str(int(NOW.timestamp()))], "limit": [str(C4["limit"])],
+                "maxStaleValues": [str(C4["maxStaleValues"])]})
+            doc = copy.deepcopy(C4["values"])
+            return transform(doc) if transform else Response(200, json.dumps(doc).encode(), "")
+        self.send = send
+        try:
+            return self.probe(**kw)
+        finally:
+            self.send = original
+
+    def test_c4_witnessed_intrinsic_reduction_uses_verified_shape_consumer_only(self):
+        self.assertEqual(sorted(C4["values"]), C4["witness_top_keys"])
+        self.assertEqual(sorted(C4["values"]["tagValues"][0]), C4["witness_row_keys"])
+        record = self.c4_probe()
+        trace = record["signals"]["traces"]
+        row = next(r for r in trace["register"] if r["scope"] == "intrinsic")
+        self.assertEqual((row["name"], row["distinct_count"], row["count_semantics"]), ("name", 4, "at_least"))
+        self.assertEqual(row["shape_counts"], {"uuid": 1, "hex_id": 1})
+        count = trace["inputs"]["span_names"]
+        self.assertEqual((count["state"], count["reason"], count["samples"][0]["value"],
+                          count["samples"][0]["semantics"]), ("partial", "truncated", 4, "at_least"))
+        # Three attribute reads each have one UUID; intrinsic contributes two,
+        # not two samples of the same aggregate or shape classes counted twice.
+        self.assertEqual(trace["inputs"]["shape_count"]["samples"][0]["value"], 5)
+        results = {r["rule"]: r for r in label_rules.evaluate({"synthetic": record})["results"]}
+        self.assertEqual((results["T_shape"]["result"], results["T_shape"]["evidence"]["offending_labels"]), ("fail", 5))
+        for rule in ("T3", "T9", "T_semconv"):
+            self.assertEqual((results[rule]["result"], results[rule]["reason"]), ("not_evaluated", "route_parked"))
+        summary = next(r for r in label_rules.evaluate({"synthetic": record})["summaries"] if r["signal"] == "traces")
+        self.assertEqual(summary["applicable_weight"], 8)  # T_identity + T_shape only
+        self.assertFalse(any("overrides" in r.full_url or "intrinsic.name" in r.full_url for r in self.requests))
+        self.assertEqual(sum(C4["route"] in r.full_url for r in self.requests), 1)
+        for sentinel in ("canary", "550e8400", "abcdef0123456789"):
+            self.assertNotIn(sentinel, json.dumps(record))
+
+    def test_c4_counts_deduplicate_cap_values_and_reserve_existing_key_slot(self):
+        def capped(doc):
+            doc["tagValues"] = [{"type": "string", "value": f"SPAN_VALUE_canary_{i}"} for i in range(600)]
+            doc["tagValues"].append(copy.deepcopy(doc["tagValues"][0]))
+            return Response(200, json.dumps(doc).encode(), "")
+        record = self.c4_probe(capped, bounds=source.Bounds(keys=1, values=2, rows=1))
+        trace = record["signals"]["traces"]
+        self.assertEqual(len(trace["register"]), 1)
+        self.assertEqual((trace["register"][0]["scope"], trace["register"][0]["distinct_count"]), ("intrinsic", 2))
+        self.assertEqual(trace["register_truncated"], 1)
+        self.assertEqual(trace["inputs"]["span_names"]["samples"][0]["value"], 2)
+        calls = [r for r in self.requests if urllib.parse.urlsplit(r.full_url).hostname == "traces.example.test"]
+        self.assertEqual(len(calls), 2, "tags + one reserved intrinsic values read; no extra per-key fanout")
+        self.assertNotIn("canary", json.dumps(trace))
+
+    def test_c4_empty_and_below_limit_cannot_pass_or_claim_no_signal_data(self):
+        original = self.send
+        def ordinary(req, timeout):
+            if urllib.parse.urlsplit(req.full_url).hostname == "traces.example.test":
+                self.requests.append(req)
+                if urllib.parse.urlsplit(req.full_url).path.endswith("/tags"):
+                    doc = {"scopes": []}
+                else:
+                    doc = {"tagValues": [{"type": "string", "value": "ordinary"}]}
+                return Response(200, json.dumps(doc).encode(), "")
+            return original(req, timeout)
+        self.send = ordinary
+        for values in ([], [{"type": "string", "value": "SPAN_VALUE_canary"}]):
+            with self.subTest(empty=not values):
+                record = self.c4_probe(lambda _: Response(200, json.dumps({"tagValues": values}).encode(), ""))
+                trace = record["signals"]["traces"]
+                self.assertEqual(trace["data"], "present" if values else "unknown")
+                self.assertEqual((trace["state"], trace["window"]), ("partial", "24h"))
+                self.assertEqual(trace["register"][0]["distinct_count"], len(values))
+                results = {r["rule"]: r for r in label_rules.evaluate({"synthetic": record})["results"]}
+                self.assertEqual(results["T_shape"]["result"], "not_evaluated")
+                for rule in ("T3", "T9", "T_semconv"):
+                    self.assertEqual(results[rule]["reason"], "route_parked")
+
+    def test_c4_missing_malformed_typed_shape_and_overflow_keep_real_attribute_evidence(self):
+        responses = [Response(status, json.dumps(C4["values"]).encode(), "") for status in (206, 302, 401, 403, 500)]
+        responses += [Response(200, json.dumps(doc).encode(), "") for doc in (
+            {}, {"tagValues": None}, {"tagValues": ["SPAN_VALUE_canary"]},
+            {"tagValues": [{"value": "SPAN_VALUE_canary"}]},
+            {"tagValues": [{"type": "int", "value": "SPAN_VALUE_canary"}]},
+            {"tagValues": [{"type": "string", "value": True}]},
+            {"tagValues": [{"type": "string", "value": chr(0xD800)}]})]
+        responses += [Response(200, b"SPAN_VALUE_canary_malformed", ""),
+                      Response(200, b"SPAN_VALUE_canary" + b"x" * (2 * 1024 * 1024), "")]
+        for response in responses:
+            with self.subTest(status=response.status, bytes=len(response.body)):
+                record = self.c4_probe(lambda _: response)
+                trace = record["signals"]["traces"]
+                self.assertFalse(any(r["scope"] == "intrinsic" for r in trace["register"]))
+                count = trace["inputs"]["span_names"]
+                overflow = len(response.body) > source.Bounds().response_bytes
+                self.assertEqual(count["reason"], "overflow" if overflow else "missing_input")
+                self.assertEqual(trace["inputs"]["shape_count"]["samples"][0]["value"], 3)
+                self.assertEqual(trace["inputs"]["shape_count"]["values_overflow"], int(overflow))
+                self.assertNotIn("canary", json.dumps(record))
+
+    def test_c4_deadline_uses_actual_caller_budget_and_bounded_shapes_count_once(self):
+        clock = [0.0]
+        original = self.send
+        def expired(req, timeout):
+            if urllib.parse.urlsplit(req.full_url).path == C4["route"]:
+                clock[0] = 2.0
+                return Response(200, json.dumps(C4["values"]).encode(), "")
+            return original(req, timeout)
+        client = ReadOnlyClient(transport=expired, deadline=1, max_attempts=1, clock=lambda: clock[0])
+        record = source.probe_stack(client, STACK, "synthetic-cap", now=NOW, rpc_transport=expired)
+        results = {r["rule"]: r for r in label_rules.evaluate({"synthetic": record})["results"]}
+        self.assertEqual((results["T_shape"]["result"], results["T_shape"]["reason"]), ("not_evaluated", "deadline"))
+        self.assertEqual(record["signals"]["traces"]["inputs"]["span_names"]["reason"], "deadline")
+        import base64
+        def encode(doc):
+            return base64.urlsafe_b64encode(json.dumps(doc).encode()).decode().rstrip("=")
+        jwt = encode({"alg": "HS256"}) + "." + encode({"synthetic": "SPAN_PII_canary" * 30}) + ".synthetic"
+        self.assertTrue(source.pii.value_classes("name", jwt), "use an actually classified long PII fixture")
+        def shapes(doc):
+            doc["tagValues"] += [
+                {"type": "string", "value": "https://example.test/123456/" + "a" * 300},
+                {"type": "string", "value": jwt},
+                copy.deepcopy(doc["tagValues"][1])]
+            return Response(200, json.dumps(doc).encode(), "")
+        trace = self.c4_probe(shapes)["signals"]["traces"]
+        row = next(r for r in trace["register"] if r["scope"] == "intrinsic")
+        self.assertEqual(row["shape_counts"], {"uuid": 1, "hex_id": 1, "url_with_id": 1, "long_value": 1})
+        self.assertEqual(trace["inputs"]["shape_count"]["samples"][0]["value"], 6,
+                         "one URL with two closed classes is one offending value; PII and duplicates excluded")
+        self.assertNotIn("canary", json.dumps(trace))
+        self.assertNotIn(jwt, json.dumps(trace))
+
+    def test_c4_actual_scan_cli_and_real_offline_views_preserve_privacy_and_exclusions(self):
+        from tests.test_scan import LabelInventoryProcessEdgeTest
+        evidence = LabelInventoryProcessEdgeTest().exercise()
+        self.assertEqual(evidence["code"], 0, evidence["stderr"])
+        calls = [r for r in evidence["requests"] if C4["route"] in r.full_url]
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0].get_method(), "GET")
+        trace = evidence["source"][0]["synthetic"]["signals"]["traces"]
+        self.assertEqual(trace["inputs"]["span_names"]["samples"][0]["value"], 5)
+        self.assertEqual(next(r for r in trace["register"] if r["scope"] == "intrinsic")["shape_counts"], {"uuid": 1, "hex_id": 1})
+        for boundary in ("source", "scans", "views", "metrics", "events", "stdout", "stderr", "out"):
+            for sentinel in (evidence["value"], evidence["suppressed"], "SPAN_VALUE_canary", "SPAN_PII_canary", "550e8400"):
+                self.assertNotIn(sentinel, json.dumps(evidence[boundary]), boundary)
+        for boundary in ("metrics", "events", "stdout", "stderr", "out"):
+            self.assertNotIn(evidence["ordinary"], json.dumps(evidence[boundary]), boundary)
+        record = self.c4_probe()
+        with tempfile.TemporaryDirectory(prefix="label-tempo-cli-") as directory:
+            scan, out = Path(directory) / "scan.json", Path(directory) / "views"
+            scan.write_text(json.dumps({"stacks": [STACK], "label_inventory": {STACK["slug"]: record}}))
+            run = subprocess.run([sys.executable, str(Path(__file__).resolve().parents[1] / "bin/make_local_views.py"),
+                                  "--scan", str(scan), "--out", str(out)], capture_output=True, text=True, timeout=60)
+            self.assertEqual(run.returncode, 0, run.stderr)
+            rows = json.loads((out / "labelling_findings.json").read_text())["rows"]
+            shape = next(r for r in rows if r["Rule"] == "T_shape")
+            self.assertEqual((shape["Result"], shape["Offending objects"], shape["Catalogue version"]), ("fail", 5, 4))
+            for rule in ("T3", "T9", "T_semconv"):
+                self.assertEqual(next(r for r in rows if r["Rule"] == rule)["Reason"], "route_parked")
+            serialized = run.stdout + run.stderr + "".join(p.read_text() for p in out.glob("*.json"))
+            for sentinel in ("canary", "550e8400", "abcdef0123456789"):
+                self.assertNotIn(sentinel, serialized)
 
     def test_disabled_zero_calls_and_no_isolated_client_construction(self):
         with mock.patch.object(source, "ReadOnlyClient") as client, mock.patch.object(source, "bounded_transport") as transport:

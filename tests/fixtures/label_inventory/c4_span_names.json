@@ -1,0 +1,15 @@
+{
+  "provenance": "Synthetic typed string objects matching the C4 staff witness; no copied live span names or measurements. Counts are lower bounds even below limit.",
+  "route": "/tempo/api/v2/search/tag/name/values",
+  "window_seconds": 86400,
+  "limit": 500,
+  "maxStaleValues": 0,
+  "witness_top_keys": ["tagValues"],
+  "witness_row_keys": ["type", "value"],
+  "values": {"tagValues": [
+    {"type": "string", "value": "SPAN_VALUE_canary_7b445a"},
+    {"type": "string", "value": "550e8400-e29b-41d4-a716-446655440000"},
+    {"type": "string", "value": "abcdef0123456789abcdef0123456789"},
+    {"type": "string", "value": "SPAN_PII_canary@example.test"}
+  ]}
+}

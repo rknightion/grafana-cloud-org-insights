@@ -313,6 +313,13 @@ new per-stack grants. It calls exact-200 GET Mimir
 may use POST, exclusively through `label_risk.profile_read`'s existing fence.
 Mimir counts are head-only; the others are bounded 24-hour samples. Current base does
 not activate series/index/config/intrinsic-name extensions just because they were witnessed.
+The implemented extensions separately add capped Mimir `cardinality/label_values` head
+reductions, selected 24-hour Loki `/series` label counts, and one bounded Tempo intrinsic
+name-value read in an existing trace slot. These retain numeric lower bounds and closed
+non-PII shapes, not value or metric-name strings. Selected Loki counts cannot establish a
+whole-label ratio denominator or a below-threshold pass. Tempo overrides and unverified
+Loki/Tempo policies remain parked and excluded from applicable weight; readable APIs do
+not verify scoring policy. No configuration route or additional permission is enabled.
 
 S3 views and the private hydration input alone may hold minimized names, distinct-value
 counts (`exact`/`at_least`), closed non-PII shape counts (`uuid`, `hex_id`, `epoch`,

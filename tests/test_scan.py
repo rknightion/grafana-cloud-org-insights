@@ -165,7 +165,10 @@ class LabelInventoryProcessEdgeTest(unittest.TestCase):
             elif mode == "malformed":
                 return (value + suppressed).encode()
             else:
-                doc = fixtures[f"{signal}_values"]
+                if parts.path == "/tempo/api/v2/search/tag/name/values":
+                    doc = json.loads((pathlib.Path(__file__).parent / "fixtures/label_inventory/c4_span_names.json").read_text())["values"]
+                else:
+                    doc = fixtures[f"{signal}_values"]
                 if signal == "traces":
                     doc = {"tagValues": doc["tagValues"] + [{"type": "string", "value": value}]}
                 else:

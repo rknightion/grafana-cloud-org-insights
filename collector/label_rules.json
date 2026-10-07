@@ -1,5 +1,5 @@
 {
-  "catalogue_version": 3,
+  "catalogue_version": 4,
   "threshold_sources": {
     "M4": {"critical": {"provenance": "policy", "source_url": "https://github.com/grafana/skills/blob/f32d43dd9a682b7215cc2185c0340ba664f57c92/skills/grafana-cloud/prometheus-cardinality-troubleshooter/SKILL.md"}}
   },
@@ -17,7 +17,7 @@
     "labels_per_stream": {"signals": ["logs"], "route": "approved", "kind": "count", "unit": "labels_per_stream", "aggregation": "offending_objects"},
     "otlp_churn_labels": {"signals": ["logs"], "route": "parked", "kind": "count", "unit": "violation_count", "aggregation": "sum_violations"},
     "drilldown_missing": {"signals": ["logs"], "route": "parked", "kind": "absence", "unit": "missing_names", "aggregation": "sum_violations"},
-    "span_names": {"signals": ["traces"], "route": "parked", "kind": "cardinality", "unit": "distinct_values", "aggregation": "offending_objects"},
+    "span_names": {"signals": ["traces"], "route": "approved", "kind": "cardinality", "unit": "distinct_values", "aggregation": "offending_objects"},
     "span_dimensions": {"signals": ["traces"], "route": "unapproved", "kind": "count", "unit": "violation_count", "aggregation": "sum_violations"},
     "deprecated_names": {"signals": ["traces"], "route": "approved", "kind": "count", "unit": "violation_count", "aggregation": "sum_violations"},
     "query_use": {"signals": ["logs"], "route": "unapproved", "kind": "count", "unit": "violation_count", "aggregation": "sum_violations"},

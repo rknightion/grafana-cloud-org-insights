@@ -270,7 +270,7 @@ def test_fail_and_missing_weights_are_not_dynamic_severity_weights():
     assert out["results"][0]["weight"] == 3
     summary = out["summaries"][0]
     assert summary["coverage"] == 1 and summary["score"] == 0
-    assert lr.evaluate({}) == {"catalogue_version": 3, "results": [], "summaries": []}
+    assert lr.evaluate({}) == {"catalogue_version": 4, "results": [], "summaries": []}
 
 
 def test_zero_coverage_no_score_and_no_applicable_rules_no_score():

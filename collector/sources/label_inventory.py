@@ -10,7 +10,10 @@ Loki additionally reads the witnessed 24h service_name-selected /series GET. Str
 sizes can prove a positive L1 violation, never a whole-tenant pass or empty signal.
 Register distinct/stream counts from this read are paired selected lower bounds,
 not a ratio: L3 still lacks a whole-label population and cannot be evaluated. No
-index totals, ratio policy, OTLP config, intrinsic Tempo name or overrides activate.
+index totals, ratio policy, OTLP config or overrides activate. Tempo reserves one
+existing value-read slot for C4 intrinsic name counts and the already-verified
+shape consumer. Counts are at_least even below the witnessed limit; unverified
+span-cardinality policy and override rules remain excluded from scoring.
 
 The isolated source gets <=900s and <=one quarter of the tier's remaining time,
 immediately after label_risk and before gcom detail in run_t2. Exhaustion produces
@@ -193,7 +196,12 @@ def _read(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str, signal: st
             params = {"start": start * 1_000_000_000, "end": end * 1_000_000_000}
             route = "/labels" if key is None else "/label/" + urllib.parse.quote(key[1], safe="") + "/values"
         else:
-            route = "/tags" if key is None else "/tag/" + urllib.parse.quote(".".join(key), safe="") + "/values"
+            if key == ("intrinsic", "name"):
+                # C4's intrinsic alias is name, NOT the guessed intrinsic.name.
+                route = "/tag/name/values"
+                params.update(limit=500, maxStaleValues=0)
+            else:
+                route = "/tags" if key is None else "/tag/" + urllib.parse.quote(".".join(key), safe="") + "/values"
         response = client.get(base.rstrip("/") + prefix + route, params=params,
             headers={"Accept": "application/json; allow-utf8-labelnames=true"},
             basic=(str(stack[tenant]), cap))
@@ -246,6 +254,8 @@ def _read(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str, signal: st
         raw = doc.get("tagValues")
         if not isinstance(raw, list) or any(not isinstance(v, dict) or
             not isinstance(v.get("value"), str) for v in raw):
+            raise ValueError("invalid_response")
+        if key == ("intrinsic", "name") and any(v.get("type") != "string" for v in raw):
             raise ValueError("invalid_response")
         # Empty label VALUES are valid; unlike names they need not be nonempty.
         values = [v["value"] for v in raw]
@@ -451,6 +461,51 @@ def _loki_inputs(client, stack, cap, start, end, bounds, payload):
                        count_semantics="at_least")
 
 
+def _tempo_inputs(client, stack, cap, start, end, bounds, transport, payload):
+    """C4 intrinsic values, one reserved read; no raw span name or new shape policy.
+
+    The virtual intrinsic is not a measured attribute and cannot prove identity or
+    a no-data signal. Only positive values establish data=present. Even zero and
+    below-limit counts stay partial. Existing T_shape receives one disjoint count
+    added to its attribute aggregate; T3 remains unverified/excluded. No overrides.
+    """
+    inputs = payload["inputs"]
+    shape = inputs.get("shape_count", _input("unavailable", "missing_input"))
+    try:
+        values, _ = _read(client, stack, cap, "traces", start, end, bounds, transport,
+                          ("intrinsic", "name"))
+    except Exception as exc:
+        reason = "deadline" if client.remaining() <= 0 else _reason(exc)
+        inputs["span_names"] = _input("partial" if reason in {"deadline", "overflow"} else "unavailable",
+                                      reason, overflow=reason == "overflow")
+        overflow = shape["values_overflow"] or reason == "overflow"
+        # Preserve earlier positive attribute samples; a missing read cannot pass.
+        inputs["shape_count"] = {**shape, "state": "partial", "reason": "overflow" if overflow else reason,
+                                 "values_overflow": int(overflow)}
+        payload.update(state="partial", reason="overflow" if overflow else reason)
+        return
+    sampled = values[:bounds.values]
+    shapes, offending = _shape_counts("name", sampled)
+    inputs["span_names"] = _input("partial", "truncated",
+                                  samples=[_sample(len(sampled), "at_least")])
+    overflow = shape["values_overflow"]
+    reason = "overflow" if overflow else (shape["reason"] if shape["reason"] in {"deadline", "missing_input"} else "truncated")
+    count = sum(s["value"] for s in shape["samples"]) + offending
+    inputs["shape_count"] = _input("partial", reason, truncated=bool(shape["names_truncated"]),
+                                   overflow=bool(overflow), samples=[_sample(count, "at_least")])
+    row = _row("intrinsic", "name", len(sampled), "at_least")
+    row["shape_counts"] = shapes
+    if len(payload["register"]) >= min(bounds.names, bounds.rows):
+        payload["register"].pop()
+        payload["register_truncated"] = 1
+    payload["register"].append(row)
+    if values:
+        payload["data"] = "present"
+    payload["state"] = "partial"
+    if payload["reason"] not in {"overflow", "deadline", "missing_input"}:
+        payload["reason"] = "truncated"
+
+
 def _priority(row: tuple) -> tuple:
     scope, name, count = row
     return (name != "__name__", not bool(pii.key_classes(name) or _NAME_PRIORITY.search(name)),
@@ -478,6 +533,8 @@ def _signal(client, stack, cap, signal, start, end, bounds, transport, static_na
     if not names:
         if signal == "logs":
             _loki_inputs(client, stack, cap, start, end, bounds, payload)
+        elif signal == "traces":
+            _tempo_inputs(client, stack, cap, start, end, bounds, transport, payload)
         return payload
     inputs = payload["inputs"]
     state, reason = ("partial", "truncated") if truncated else ("complete", "none")
@@ -498,7 +555,9 @@ def _signal(client, stack, cap, signal, start, end, bounds, transport, static_na
         row = _row(scope, name, count)
         payload["register"].append(row)
         semantics = "exact"
-        if signal != "metrics" and index < bounds.keys and row["name_class"] != "oversize":
+        # C4 consumes one of the existing trace value-read slots, not extra fanout.
+        value_keys = bounds.keys - int(signal == "traces")
+        if signal != "metrics" and index < value_keys and row["name_class"] != "oversize":
             try:
                 values, values_partial = _read(client, stack, cap, signal, start, end, bounds,
                                                transport, (scope, name))
@@ -548,6 +607,8 @@ def _signal(client, stack, cap, signal, start, end, bounds, transport, static_na
         _metric_inputs(client, stack, cap, start, end, bounds, transport, kept, payload, static_names)
     elif signal == "logs":
         _loki_inputs(client, stack, cap, start, end, bounds, payload)
+    elif signal == "traces":
+        _tempo_inputs(client, stack, cap, start, end, bounds, transport, payload)
     # Coalesce suppressed names by class/scope; their measurements remain null/empty.
     rows, suppressed = [], {}
     for row in payload["register"]:
