@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.8.4](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.8.3...v0.8.4) (2026-10-08)
+
+
+### Bug Fixes
+
+* bound open metric labels at publication ([026db25](https://github.com/rknightion/grafana-cloud-org-insights/commit/026db25ef95fa136bd125b852981ba32f1ac365c))
+
+
+### Documentation
+
+* park live proof after bounded AWS auth hold ([d7812b6](https://github.com/rknightion/grafana-cloud-org-insights/commit/d7812b67bc59588d112b15297e6a374b406c9980))
+* record bounded publication proofs and carry follow-up ([8c4bd61](https://github.com/rknightion/grafana-cloud-org-insights/commit/8c4bd616fcbbcc54a8db1418b0dd5d31b6ab46a6))
+
 ## [0.8.3](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.8.2...v0.8.3) (2026-10-07)
 
 
