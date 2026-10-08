@@ -198,7 +198,7 @@ The approved source is doc-0008 Part 1 (Labelling best-practice research and rul
   Routes without a passing witness are not covered. Every reader-role, route, privacy and
   publication rule is preserved.
 - **D-LBL8 Fairness.** Cardinality bands apply only to metrics and streams above a size floor
-  (tunable, same pattern as `CARDINALITY_MIN_SERIES`). A static-infrastructure allowlist
+  (the `size_floor` label rule tunable, default 100). A static-infrastructure allowlist
   (host, cluster, namespace, node and similar) has its own higher band.
 - **D-LBL9 PII shapes.** Email, ip, phone, jwt and card shapes stay on label_risk's
   retention-governed path. The labelling register refers to `risk_label_hygiene` and does not
@@ -217,8 +217,8 @@ The approved source is doc-0008 Part 1 (Labelling best-practice research and rul
   left-joined to fresh scannable inventory. Bounded partial reads are not complete inventories;
   deadline and missing-input signals remain unavailable. Below this floor, label inventory is
   partial/unavailable in `meta.sources` and provenance, omitted from composition and the new
-  owner envelope. Only its dependent labelling views are withheld; other healthy T2 inputs
-  publish. Last-good labelling views and historical accepted input envelopes are not overwritten
+  owner envelope. Only its dependent labelling, maturity and value-benchmark views and the
+  maturity-score metrics are withheld; other healthy T2 inputs publish. Last-good labelling views and historical accepted input envelopes are not overwritten
   with partial payloads. The new latest owner envelope records the failure, not a revived old
   input; own-input hydration remains forbidden. All other sources and primary coverage retain
   `FAILURE_ABORT_RATIO = 0.10` and their whole-publication refusal. Source/scan health remains

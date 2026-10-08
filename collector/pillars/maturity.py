@@ -15,11 +15,10 @@ argument is won or lost on fairness, so three obligations are built in rather th
 - **Ratios punish small stacks.** A 2-user stack with 1 admin is 50% admins, structurally, and no
   governance change can fix that. Admin share is therefore only scored where `users >= ADMIN_MIN_USERS`;
   below that the test is the absolute count.
-- **Cardinality ratios punish small stacks the other way.** `label_values / series` is *best* on
-  `stack094` (0.0115 at 3.0M series) and worst on stacks with a few thousand series, because volume
-  amortises label values. Measured p50 is 0.14 and the worst is `stack030` at 1.02 on 5,960 series.
-  Scoring it estate-wide would rank the biggest stack the most disciplined. So the dimension applies
-  **only above `CARDINALITY_MIN_SERIES`** and is `None` below it.
+- **Labelling scores are only as good as their coverage.** Rubric version 2 replaced the size-biased
+  `label_values / series` ratio with the labelling pillar's own per-signal score (D-LBL5). That score is
+  published only at D-LBL4 coverage of 0.8 or more, so the dimension averages only the signals that
+  published one, weighted by each signal's applicable rule weight, and is withheld when none did.
 - **Missing data must not flatter.** T3 dimensions are absent on a T1/T2 run. The composite renormalises
   over the weight actually available, and every score carries `dimensions_scored` and `weight_covered`
   so a stack judged on four dimensions is never silently ranked against one judged on nine.
@@ -39,10 +38,11 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 from collector.coverage import Coverage
+from collector.pillars import labelling
 from collector.pillars.usage import EXCLUDED_DATASOURCES, SIGNAL_FIELDS, USAGE_FLOOR
 
 # Bump when any weight or scorer changes. The metric carries it, so history stays honest.
-RUBRIC_VERSION = "1"
+RUBRIC_VERSION = "2"
 
 # Eligibility. A stack has to be doing real work before "how mature is it" is a meaningful question.
 # Without this the leaderboard is won by near-empty stacks: `stack030` (1 user, scored on 7 of 9
@@ -58,10 +58,6 @@ MIN_WEIGHT_COVERED = 0.8
 # Below this many users, admin *share* is structural noise; score the absolute count instead.
 ADMIN_MIN_USERS = 5
 ADMIN_MAX_ABSOLUTE = 2
-# Below this many series, label-value counts say nothing about discipline. 5,000 rather than 10,000 so
-# the dimension actually reaches the mid-sized stacks - `stack030` at 5,960 series carries a ratio of
-# 1.02, the worst in the estate, and a 10,000 floor excused it.
-CARDINALITY_MIN_SERIES = 5_000
 
 # Alert rules per dashboard. Measured estate: p75 = 0.53, p90 = 4.14, max = 10.61.
 ALERT_BAND = (0.2, 3.0)
@@ -196,15 +192,61 @@ def _adaptive_adoption(_s, dp):
     return 100.0 * applied / total, f"{applied} applied / {pending} pending"
 
 
-def _cardinality_discipline(s, dp):
-    """Only above CARDINALITY_MIN_SERIES - the ratio is size-biased and meaningless below it."""
-    card = (dp or {}).get("cardinality") or {}
-    series = s.get("hmInstancePromCurrentActiveSeries") or 0
-    if not card.get("available") or series < CARDINALITY_MIN_SERIES:
+# Default of the label rule `coverage_floor` tunable (`label_rules._tunables`). The published rubric
+# row renders the CONFIGURED floor, passed to `build`; this only names the shipped default.
+DEFAULT_LABEL_COVERAGE_FLOOR = 0.8
+
+
+def _labelling_how(floor: float) -> str:
+    return ("labelling score per signal, weighted by applicable rule weight; a signal counts only at "
+            f"coverage >= {floor:g} (the label coverage_floor tunable), and the dimension is not "
+            "scored when none does")
+
+
+def _labelling_score(_s, dp):
+    """Weight-averaged labelling score over the signals that published one (D-LBL5).
+
+    Reads `dp["labelling"]`, rows of `{"signal", "score", "weight"}` taken from the labelling pillar's
+    `labelling_stack_summary` (`Score`, `Applicable weight`). The pillar withholds a signal's score
+    below its coverage floor, so an unscored signal is skipped here, never counted as zero. No scored
+    signal means the dimension is not evaluable.
+    """
+    rows = [r for r in (dp or {}).get("labelling") or []
+            if r.get("score") is not None and (r.get("weight") or 0) > 0]
+    if not rows:
         return None
-    values = card.get("label_values_count_total") or 0
-    ratio = values / series
-    return _lower_better(ratio, 0.05, 0.5), f"{values:,} values / {series:,} series = {ratio:.3f}"
+    total = sum(r["weight"] for r in rows)
+    score = sum(r["score"] * r["weight"] for r in rows) / total
+    detail = ", ".join(f"{r['signal']} {r['score']:.0f}" for r in rows)
+    return score, f"{len(rows)} of {len(labelling.SIGNALS)} signals scored ({detail})"
+
+
+def labelling_inputs(summary_rows: list[dict[str, Any]] | None) -> dict[str, list[dict[str, Any]]]:
+    """Per-stack scored signals from the labelling pillar's `labelling_stack_summary` rows."""
+    out: dict[str, list[dict[str, Any]]] = {}
+    for row in summary_rows or []:
+        if row.get("Score") is None:
+            continue
+        out.setdefault(str(row[" Stack"]), []).append({
+            "signal": row["Signal"], "score": float(row["Score"]),
+            "weight": float(row["Applicable weight"] or 0),
+        })
+    return out
+
+
+def with_labelling(dataplane: dict[str, Any] | None,
+                   summary_rows: list[dict[str, Any]] | None) -> dict[str, Any]:
+    """A copy of `dataplane` carrying each scored stack's labelling rows under `labelling`.
+
+    Only stacks already in `dataplane` are annotated, so no stack gains a data-plane record it never
+    had. Every caller of `score_stack` must receive this copy, or two pillars would rank one stack
+    differently.
+    """
+    out = dict(dataplane or {})
+    for slug, rows in labelling_inputs(summary_rows).items():
+        if slug in out:
+            out[slug] = {**(out[slug] or {}), "labelling": rows}
+    return out
 
 
 def _collector_health(_s, dp):
@@ -233,9 +275,9 @@ RUBRIC: tuple[Dimension, ...] = (
     Dimension("access_hygiene", 0.10, "Admin rights not handed to everyone",
               f"admin share, 100 at <=20% and 0 at >=75%; under {ADMIN_MIN_USERS} users scored on "
               f"absolute count (<={ADMIN_MAX_ABSOLUTE})", _access_hygiene),
-    Dimension("cardinality_discipline", 0.10, "Label values proportionate to volume",
-              f"label values / series, 100 at <=0.05; only scored above {CARDINALITY_MIN_SERIES:,} series",
-              _cardinality_discipline),
+    Dimension("cardinality_discipline", 0.10, "Labelling follows best practice",
+              _labelling_how(DEFAULT_LABEL_COVERAGE_FLOOR),
+              _labelling_score),
     Dimension("dashboard_utilisation", 0.10, "Dashboards proportionate to the audience",
               f"dashboards per active user, ideal {DASHBOARD_BAND[0]}-{DASHBOARD_BAND[1]}",
               _dashboard_utilisation),
@@ -356,6 +398,7 @@ def build(
     coverage: Coverage,
     dataplane: dict[str, Any] | None = None,
     stack_detail: dict[str, Any] | None = None,
+    label_coverage_floor: float = DEFAULT_LABEL_COVERAGE_FLOOR,
 ) -> tuple[list[tuple[str, dict[str, str], float]], dict[str, list[dict[str, Any]]]]:
     dataplane = dataplane or {}
     stack_detail = stack_detail or {}
@@ -456,7 +499,8 @@ def build(
         # Published beside the score. Without this the leaderboard is unarguable-with, which is worse.
         "maturity_rubric": [
             {" Dimension": d.key, "Weight": d.weight, "What it measures": d.what,
-             "How it is scored": d.how}
+             "How it is scored": (_labelling_how(label_coverage_floor)
+                                  if d.score is _labelling_score else d.how)}
             for d in RUBRIC
         ] + [{" Dimension": "RUBRIC VERSION", "Weight": None,
               "What it measures": RUBRIC_VERSION,

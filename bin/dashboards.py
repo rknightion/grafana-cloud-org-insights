@@ -1789,25 +1789,25 @@ def d_usage(ds: str):
 def d_maturity(ds: str):
     el = {
         "n_median": build.stat_panel(
-            "Median score", 'gcinsight_maturity_percentile{kind="median",version="1"}', decimals=1,
+            "Median score", 'gcinsight_maturity_percentile{kind="median",version="2"}', decimals=1,
             description="The MIDDLE stack's overall maturity score out of 100 - half the scored estate is "
                         "below this. Median rather than mean on purpose: a handful of very mature or very "
                         "empty stacks would drag an average and misrepresent the typical stack. Only "
                         "SCORED stacks count; dormant and test-leftover stacks are excluded and the Not "
                         "scored tab says why."),
         "n_p90": build.stat_panel(
-            "p90 score", 'gcinsight_maturity_percentile{kind="p90",version="1"}', decimals=1,
+            "p90 score", 'gcinsight_maturity_percentile{kind="p90",version="2"}', decimals=1,
             description="The score 90% of scored stacks fall below - what GOOD looks like inside the organisation's "
                         "own estate rather than against an industry benchmark. The gap between this and "
                         "the median is the realistic improvement available: it is already being achieved "
                         "by their own teams, so it is an argument that needs no external evidence."),
         "n_worst": build.stat_panel(
-            "Worst ranked", 'gcinsight_maturity_percentile{kind="worst",version="1"}', decimals=1,
+            "Worst ranked", 'gcinsight_maturity_percentile{kind="worst",version="2"}', decimals=1,
             description="The lowest score among stacks that COULD be scored - so it is a real stack with "
                         "real users, not an empty one. Genuinely dormant and test stacks are excluded "
                         "rather than filling this with noise; the Leaderboard tab names it."),
         "n_ranked": build.stat_panel(
-            "Stacks ranked", 'count(gcinsight_maturity_score{stack=~"$stack",version="1"})',
+            "Stacks ranked", 'count(gcinsight_maturity_score{stack=~"$stack",version="2"})',
             description="How many selected stacks got a score at all. This is NOT the denominator of the "
                         "estate-wide percentile stats or dimension means. A stack is unscored when it is "
                         "paused, has too few users, or the weekly data-plane tier could not reach it; the "
@@ -1815,22 +1815,22 @@ def d_maturity(ds: str):
                         "describe a different population, not an improving estate."),
         "t_pct": build.timeseries_panel(
             "Score distribution over time",
-            [('gcinsight_maturity_percentile{kind="median",version="1"}', "median"),
-             ('gcinsight_maturity_percentile{kind="p90",version="1"}', "p90"),
-             ('gcinsight_maturity_percentile{kind="worst",version="1"}', "worst")],
+            [('gcinsight_maturity_percentile{kind="median",version="2"}', "median"),
+             ('gcinsight_maturity_percentile{kind="p90",version="2"}', "p90"),
+             ('gcinsight_maturity_percentile{kind="worst",version="2"}', "worst")],
             description="Is the estate getting better? This is the line to watch quarter on quarter."),
         "t_tiers": build.timeseries_panel(
-            "Stacks per tier", [('gcinsight_maturity_stacks_by_tier{version="1"}', "{{kind}}")], stacked=True,
+            "Stacks per tier", [('gcinsight_maturity_stacks_by_tier{version="2"}', "{{kind}}")], stacked=True,
             description="leading >=75, solid >=50, lagging >=25, dormant below."),
         "b_top": build.barchart_panel(
-            "Top 15 by score", 'topk(15, gcinsight_maturity_score{stack=~"$stack",version="1"})',
+            "Top 15 by score", 'topk(15, gcinsight_maturity_score{stack=~"$stack",version="2"})',
             legend="{{stack}}",
             description="The most mature stacks - the internal reference implementations, and the most "
                         "useful thing to point another team at. A small stack can score well on breadth "
                         "with very little in it, so check a leader's size on the Estate dashboard before "
                         "holding it up as an example."),
         "b_bottom": build.barchart_panel("Bottom 15 by score",
-                                          'bottomk(15, gcinsight_maturity_score{stack=~"$stack",version="1"})',
+                                          'bottomk(15, gcinsight_maturity_score{stack=~"$stack",version="2"})',
                                           legend="{{stack}}", sort="asc",
                                           # Amber below 25 (the `lagging` tier boundary), red below 10, so
                                           # the bottom chart cannot be mistaken for the top chart at a
@@ -1849,17 +1849,17 @@ def d_maturity(ds: str):
             # `sort()` is applied by the DATASOURCE and then discarded: the `reduce` transformation
             # rebuilds the frame in series order, so the PromQL sort never reached the chart and the bars
             # rendered alphabetically. `sort="asc"` on the panel is what actually orders them.
-            'gcinsight_maturity_dimension_mean{version="1"}', sort="asc", legend="{{dimension}}",
+            'gcinsight_maturity_dimension_mean{version="2"}', sort="asc", legend="{{dimension}}",
             description="The mean is over the stacks that SCORED each dimension, excluding the four "
                         "unscored reasons - so a dormant estate cannot drag it down and each dimension "
                         "carries its own denominator."),
         "t_dims": build.timeseries_panel(
             "Dimension means over time",
-            [('gcinsight_maturity_dimension_mean{version="1"}', "{{dimension}}")],
+            [('gcinsight_maturity_dimension_mean{version="2"}', "{{dimension}}")],
             description="Which dimension is enablement actually moving? A flat line here next to a "
                         "rising composite means the score improved by stacks dropping out, not improving."),
         "b_unscored": build.barchart_panel(
-            "Not scored, and why", 'gcinsight_maturity_unscored{version="1"}', legend="{{reason}}",
+            "Not scored, and why", 'gcinsight_maturity_unscored{version="2"}', legend="{{reason}}",
             description="Why each excluded stack was excluded, biggest reason first. An unexplained "
                         "'unscored' would read as a collector bug, so the reason is a metric rather than "
                         "a footnote. The table beneath names the individual stacks behind each reason - "

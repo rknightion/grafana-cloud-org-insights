@@ -162,6 +162,56 @@ def add_synthetic_reports() -> int:
     return 0
 
 
+def add_synthetic_label_scores() -> int:
+    """Offline: give several stacks DIFFERENT published labelling scores and applicable weights.
+
+    Every envelope is a deep copy of the committed ideal `stack158` one with an invented numeric
+    change, so maturity and value dependency derivation can tell labelling inputs apart. Never reads
+    deployment scans. Idempotent: an existing identical projection is left untouched.
+    """
+    import copy
+
+    original = COMMITTED_FIXTURE.read_text()
+    payload = json.loads(original)
+    inventory = payload["label_inventory"]
+    base = inventory["stack158"]
+
+    def fail_profiles(env):
+        sample = env["signals"]["profiles"]["inputs"]["distinct_values"]["samples"][0]
+        sample["value"], sample["population"] = 50000, 100000
+
+    def full_metrics(env):
+        inputs = env["signals"]["metrics"]["inputs"]
+        inputs["metric_series"] = copy.deepcopy(inputs["distinct_values"])
+
+    recipes = {
+        # traces 100 at weight 8, profiles about 72.7 at weight 11.
+        "stack177": (fail_profiles,),
+        # metrics about 57.1 at weight 14, traces 100 at 8, profiles 100 at 11.
+        "stack001b": (full_metrics,),
+        # all three scored: metrics about 57.1 at 14, traces 100 at 8, profiles about 72.7 at 11.
+        "stack019": (full_metrics, fail_profiles),
+        # The median ranked stack and its neighbour, so a labelling score moves the estate median.
+        "stack036": (),
+        "stack072": (fail_profiles,),
+    }
+    added = {}
+    for slug, steps in recipes.items():
+        env = copy.deepcopy(base)
+        for step in steps:
+            step(env)
+        added[slug] = env
+    if all(inventory.get(slug) == env for slug, env in added.items()):
+        return 0
+    marker = '"label_inventory": '
+    start = original.index(marker) + len(marker)
+    _, end = json.JSONDecoder().raw_decode(original, start)
+    merged = {**inventory, **added}
+    block = json.dumps(merged, indent=1).replace("\n", "\n ")
+    COMMITTED_FIXTURE.write_text(original[:start] + block + original[end:])
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--stacks", type=int, default=40)
@@ -177,9 +227,15 @@ def main(argv: list[str] | None = None) -> int:
                     help="add only synthetic minimized Faro counts, offline")
     ap.add_argument("--synthetic-irm", action="store_true",
                     help="add only synthetic minimized IRM counts to the committed fixture, offline")
+    ap.add_argument("--synthetic-label-scores", action="store_true",
+                    help="add only synthetic labelling envelopes with differing scores, offline")
     ap.add_argument("--output",
                     help="export path outside the committed synthetic fixture")
     args = ap.parse_args(argv)
+    if args.synthetic_label_scores:
+        if args.output:
+            ap.error("--synthetic-label-scores cannot be combined with --output")
+        return add_synthetic_label_scores()
     if args.synthetic_reports:
         if args.output or args.synthetic_pdc or args.synthetic_cloud or args.synthetic_ml or args.synthetic_faro or args.synthetic_irm:
             ap.error("--synthetic-reports cannot be combined with other export modes")

@@ -15,6 +15,7 @@ import unittest
 from unittest import mock
 
 from collector.dashboards import build
+from collector.pillars.maturity import RUBRIC_VERSION
 
 
 class CollectorIntegrityTest(unittest.TestCase):
@@ -202,7 +203,7 @@ class DashboardNameAndGenericTextTest(unittest.TestCase):
             pattern = query["filterExpression"].split('"')[1].replace("${stack:regex}", selection)
             self.assertEqual([s for s in ("obs-hub", "obs-hub-dev", "other") if re.search(pattern, s)], expected)
         ranked = spec["elements"]["n_ranked"]["spec"]["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
-        self.assertEqual(ranked["expr"], 'count(gcinsight_maturity_score{stack=~"$stack",version="1"})')
+        self.assertEqual(ranked["expr"], f'count(gcinsight_maturity_score{{stack=~"$stack",version="{RUBRIC_VERSION}"}})')
         self.assertIn("Selected stacks", spec["elements"]["board"]["spec"]["title"])
 
     def test_assembled_interpretation_respects_producer_windows_and_unknown_absence(self):
@@ -2570,7 +2571,7 @@ class RecentDashboardPresentationContractsTest(unittest.TestCase):
         self.assertTrue(expressions)
         for expression in expressions:
             with self.subTest(expression=expression):
-                self.assertIn('version="1"', expression)
+                self.assertIn(f'version="{RUBRIC_VERSION}"', expression)
 
     def test_fleet_detail_tables_use_fixture_derived_columns_on_the_collectors_tab(self):
         from unittest import mock

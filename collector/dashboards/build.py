@@ -982,10 +982,10 @@ DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     # recommendation queue look materially fresher than it is.
     "cost": ("adaptive_logs", "dataplane"),
     "usage": ("irm_integrations", "irm_alert_groups", "faro_apps", "ml_jobs", "cloud_accounts", "pdc_networks", "reports_inventory", "playlists_inventory", "library_panels_inventory", "stack_detail"),
-    "maturity": ("dataplane", "stack_detail"),
+    "maturity": ("dataplane", "label_inventory", "stack_detail"),
     "risk": ("access_policies", "alert_routing", "dataplane", "fleet", "label_risk", "loki_config",
              "org_members", "public_dashboards", "service_accounts", "stack_detail"),
-    "value": ("dataplane",),
+    "value": ("dataplane", "label_inventory"),
     # Operations and Commercial read `grafanacloud-usage` DIRECTLY - no collector, no view, no input.
     # Their freshness is the datasource's own, which is why they get no input-age panel at all.
     "operations": (),

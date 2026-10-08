@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "generated_at": "2026-10-08T15:12:54.584629+00:00",
     "tier": "t3",
     "stacks_total": 44,
     "stacks_scannable": 40,
@@ -43,11 +43,83 @@
         "source": "local",
         "age_seconds": 0.0
       },
+      "adaptive_traces": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
       "public_dashboards": {
         "source": "local",
         "age_seconds": 0.0
       },
       "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "slo_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "synthetic_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_integrations": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_alert_groups": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "faro_apps": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "ml_jobs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "cloud_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "pdc_networks": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "reports_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "playlists_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "library_panels_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_risk": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_inventory": {
         "source": "local",
         "age_seconds": 0.0
       }
@@ -104,7 +176,7 @@
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
       "Score": 100,
-      "Raw": "5,236 values / 128,779 series = 0.041",
+      "Raw": "2 of 4 signals scored (traces 100, profiles 100)",
       "Contribution": 10,
       "Applicable": true
     },
@@ -265,9 +337,9 @@
       " Stack": "stack177",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 94.7,
-      "Raw": "398 values / 5,390 series = 0.074",
-      "Contribution": 9.47,
+      "Score": 84.2,
+      "Raw": "2 of 4 signals scored (traces 100, profiles 73)",
+      "Contribution": 8.42,
       "Applicable": true
     },
     {
@@ -508,9 +580,9 @@
       " Stack": "stack001b",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 75.7,
-      "Raw": "10,538 values / 66,141 series = 0.159",
-      "Contribution": 7.57,
+      "Score": 81.8,
+      "Raw": "3 of 4 signals scored (metrics 57, traces 100, profiles 100)",
+      "Contribution": 8.18,
       "Applicable": true
     },
     {
@@ -751,9 +823,9 @@
       " Stack": "stack019",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 92.4,
-      "Raw": "468 values / 5,568 series = 0.084",
-      "Contribution": 9.24,
+      "Score": 72.7,
+      "Raw": "3 of 4 signals scored (metrics 57, traces 100, profiles 73)",
+      "Contribution": 7.27,
       "Applicable": true
     },
     {
@@ -832,10 +904,10 @@
       " Stack": "stack049",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 69.9,
-      "Raw": "10,550 values / 56,868 series = 0.186",
-      "Contribution": 6.99,
-      "Applicable": true
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
     },
     {
       " Stack": "stack049",
@@ -994,10 +1066,10 @@
       " Stack": "stack020",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 93.5,
-      "Raw": "3,161 values / 39,860 series = 0.079",
-      "Contribution": 9.35,
-      "Applicable": true
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
     },
     {
       " Stack": "stack020",
@@ -1075,10 +1147,10 @@
       " Stack": "obs-hub",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 82.2,
-      "Raw": "36,302 values / 278,835 series = 0.130",
-      "Contribution": 8.22,
-      "Applicable": true
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
     },
     {
       " Stack": "obs-hub",
@@ -1156,10 +1228,10 @@
       " Stack": "obs-hub-dev",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 0,
-      "Raw": "3,546 values / 6,242 series = 0.568",
-      "Contribution": 0,
-      "Applicable": true
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
     },
     {
       " Stack": "obs-hub-dev",
@@ -1237,10 +1309,10 @@
       " Stack": "stack035",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 99.2,
-      "Raw": "5,083 values / 95,158 series = 0.053",
-      "Contribution": 9.92,
-      "Applicable": true
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
     },
     {
       " Stack": "stack035",
@@ -1319,7 +1391,7 @@
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
       "Score": 100,
-      "Raw": "5,390 values / 235,765 series = 0.023",
+      "Raw": "2 of 4 signals scored (traces 100, profiles 100)",
       "Contribution": 10,
       "Applicable": true
     },
@@ -1561,10 +1633,10 @@
       " Stack": "stack037",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 89.1,
-      "Raw": "2,358 values / 23,773 series = 0.099",
-      "Contribution": 8.91,
-      "Applicable": true
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
     },
     {
       " Stack": "stack037",
@@ -2128,10 +2200,10 @@
       " Stack": "stack038",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 71.2,
-      "Raw": "17,217 values / 95,970 series = 0.179",
-      "Contribution": 7.12,
-      "Applicable": true
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
     },
     {
       " Stack": "stack038",
@@ -2209,10 +2281,10 @@
       " Stack": "stack052",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 74.1,
-      "Raw": "6,384 values / 38,321 series = 0.167",
-      "Contribution": 7.41,
-      "Applicable": true
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
     },
     {
       " Stack": "stack052",
@@ -2290,10 +2362,10 @@
       " Stack": "stack053",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 58.1,
-      "Raw": "5,047 values / 21,141 series = 0.239",
-      "Contribution": 5.81,
-      "Applicable": true
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
     },
     {
       " Stack": "stack053",
@@ -2857,9 +2929,9 @@
       " Stack": "stack072",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 91.5,
-      "Raw": "27,053 values / 306,601 series = 0.088",
-      "Contribution": 9.15,
+      "Score": 84.2,
+      "Raw": "2 of 4 signals scored (traces 100, profiles 73)",
+      "Contribution": 8.42,
       "Applicable": true
     },
     {
@@ -3100,10 +3172,10 @@
       " Stack": "stack170",
       "Dimension": "cardinality_discipline",
       "Weight": 0.1,
-      "Score": 90.4,
-      "Raw": "822 values / 8,840 series = 0.093",
-      "Contribution": 9.04,
-      "Applicable": true
+      "Score": null,
+      "Raw": null,
+      "Contribution": null,
+      "Applicable": false
     },
     {
       " Stack": "stack170",

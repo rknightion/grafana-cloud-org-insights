@@ -1861,7 +1861,11 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
     # every hour even though the rejection log claimed every write was refused. Keep the state payload at
     # the pre-health-metric shape used historically; scan completion/duration belong to their live tier.
     if cfg.tier == "t3" and not cfg.dry_run:
-        console_log("info", f"  {carry.save_state(emit['metrics'], 't3', bucket=s3emit.BUCKET)}")
+        # Series that rest on an unsatisfied label_inventory must not be carried by a later tier
+        # either: apply the same filter the publication seam uses before they enter the state.
+        saved, _ = hydrate.filter_metrics(
+            emit["metrics"], hydrate.Provenance(scan["meta"].get("inputs") or {}))
+        console_log("info", f"  {carry.save_state(saved, 't3', bucket=s3emit.BUCKET)}")
 
     # PLAN 1.8  -  the dead-man's switch. Alerting is on the AGE of this timestamp, never on exit code:
     # a tier that cannot pull its image or reach Secrets Manager exits nothing at all, so there is no
@@ -1890,6 +1894,9 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
     if prov:
         emit["metrics"] = list(emit["metrics"]) + hydrate.report_metrics(prov, cfg.tier)
         emit["views"], withheld = hydrate.filter_views(emit["views"], prov)
+        emit["metrics"], dropped = hydrate.filter_metrics(emit["metrics"], prov)
+        if dropped:
+            console_log("warn", f"  ABSENT {dropped} maturity-dependent series: label_inventory unsatisfied")
         console_log("warn" if withheld else "info", hydrate.summarise(prov, withheld))
         for name, why in sorted(withheld.items()):
             console_log("warn", f"  WITHHELD {name}: {why}")

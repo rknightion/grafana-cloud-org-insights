@@ -127,11 +127,21 @@ def build_all(
     metrics: Metrics = []
     views: Views = {}
 
+    # Labelling is built first because maturity and value rank stacks on its published scores (D-LBL5).
+    # It still lands in the same position in the pillar order below.
+    labelling_result = labelling.build(stacks, label_inventory, signal_inventory,
+                                       tunables=label_inventory_tunables)
+    ranked_dataplane = maturity.with_labelling(
+        dataplane, labelling_result[1].get("labelling_stack_summary"))
+
     for pillar_metrics, pillar_views in (
         estate.build(stacks, coverage, now=now),
         cost.build(stacks, coverage, dataplane, adaptive_logs),
         usage.build(stacks, coverage, stack_detail, now=now),
-        maturity.build(stacks, coverage, dataplane, stack_detail),
+        maturity.build(
+            stacks, coverage, ranked_dataplane, stack_detail,
+            label_coverage_floor=(label_inventory_tunables or {}).get(
+                "coverage_floor", maturity.DEFAULT_LABEL_COVERAGE_FLOOR)),
         risk.build(stacks, coverage, dataplane, stack_detail, access_policies, fleet=fleet,
                    public_dashboards=public_dashboards, service_accounts=service_accounts,
                    alert_routing=alert_routing, org_members=org_members,
@@ -143,7 +153,7 @@ def build_all(
             loki_config,
             expected_policy=expected_retention_policy,
         ),
-        value.build(stacks, coverage, dataplane, ratecard=ratecard),
+        value.build(stacks, coverage, ranked_dataplane, ratecard=ratecard),
         ai.build(stacks, coverage, assistant, capability_adoption=capability_adoption,
                  gap_first_seen=gap_first_seen, now=now),
         insights_pillar.build(stacks, coverage, insights),
@@ -175,7 +185,7 @@ def build_all(
         playlists_pillar.build(stacks, playlists_inventory),
         library_panels_pillar.build(stacks, library_panels_inventory),
         label_risk_pillar.build(stacks, label_risk),
-        labelling.build(stacks, label_inventory, signal_inventory, tunables=label_inventory_tunables),
+        labelling_result,
     ):
         metrics.extend(pillar_metrics)
         for name, rows in pillar_views.items():

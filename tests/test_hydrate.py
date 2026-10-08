@@ -190,6 +190,72 @@ class DisabledInputContract(unittest.TestCase):
                       hydrate.report_metrics(prov, "t2"))
 
 
+class MaturityPublishesWithoutDisabledLabelInventoryTest(unittest.TestCase):
+    """D-LBL5 owner decision: a DISABLED label_inventory leaves the labelling dimension not
+    evaluable but maturity still publishes; an ENABLED one that is unavailable withholds it."""
+
+    VIEWS = ("maturity", "maturity_dimensions", "maturity_summary",
+             "value_benchmarks", "value_summary")
+    DISABLED = {"state": "disabled", "reason": "disabled by configuration"}
+
+    def _prov(self, **kw):
+        prov = hydrate.Provenance()
+        prov["dataplane"] = {"available": True, "stale": False, "source": "own"}
+        prov["label_inventory"] = kw
+        return prov
+
+    def test_fresh_disabled_publishes_and_enabled_unavailable_withholds(self):
+        _, prov = hydrate.hydrate("t3", {"dataplane": {"a": 1}}, unavailable={"label_inventory": self.DISABLED},
+                                  enabled=set(), now=NOW, loader=_loader())
+        keep, withheld = hydrate.filter_views({v: [] for v in self.VIEWS}, prov)
+        self.assertEqual(set(keep), set(self.VIEWS))
+        self.assertEqual(withheld, {})
+        _, prov = hydrate.hydrate("t3", {"dataplane": {"a": 1}}, enabled={"label_inventory"},
+                                  now=NOW, loader=_loader())  # enabled, owner scan unreadable
+        keep, withheld = hydrate.filter_views({v: [] for v in self.VIEWS}, prov)
+        self.assertEqual(set(withheld), set(self.VIEWS))
+
+    def test_hydrated_disabled_owner_publishes_and_enabled_reader_withholds(self):
+        name = "label_inventory"
+        owner = _scan("t2", name, {})
+        owner["meta"]["sources"] = {name: {"state": "disabled", "healthy": True}}
+        for enabled, expect_keep in ((set(), True), ({name}, False)):
+            with self.subTest(enabled=bool(enabled)):
+                _, prov = hydrate.hydrate("t3", {"dataplane": {"a": 1}}, enabled=enabled, now=NOW,
+                                          loader=_loader(t2=owner))
+                self.assertEqual(prov[name]["state"], "unavailable" if enabled else "disabled")
+                keep, _ = hydrate.filter_views({v: [] for v in self.VIEWS}, prov)
+                self.assertEqual(set(keep), set(self.VIEWS) if expect_keep else set())
+
+    def test_only_exact_disabled_is_skipped_and_other_views_still_withhold(self):
+        for state in ("unavailable", "partial", "incompatible_schema", None):
+            with self.subTest(state=state):
+                keep, _ = hydrate.filter_views(
+                    {v: [] for v in self.VIEWS}, self._prov(available=False, state=state))
+                self.assertEqual(keep, {})
+        keep, withheld = hydrate.filter_views(
+            {"maturity": [], "labelling_findings": []}, self._prov(available=False, **{"state": "disabled"}))
+        self.assertEqual(set(keep), {"maturity"})
+        self.assertIn("labelling_findings", withheld)
+
+    def test_scan_plumbing_marks_unselected_label_inventory_disabled_on_every_tier(self):
+        import scan
+        from types import SimpleNamespace
+        for selected in (False, True):
+            cfg = SimpleNamespace(label_inventory_enabled=selected)
+            disabled = scan.disabled_inputs(cfg)
+            self.assertEqual("label_inventory" in disabled, not selected)
+            _, prov = hydrate.hydrate(
+                "t3", {"dataplane": {"a": 1}}, unavailable=disabled,
+                enabled=set(hydrate.INPUT_OWNER) - disabled.keys(), now=NOW, loader=_loader())
+            keep, _ = hydrate.filter_views({"maturity": []}, prov)
+            self.assertEqual("maturity" in keep, not selected)
+
+    def test_disabled_ok_never_widens_view_inputs(self):
+        for view, inputs in hydrate.DISABLED_OK.items():
+            self.assertLessEqual(inputs, hydrate.VIEW_INPUTS[view])
+
+
 class AdaptiveSchemaCompatibilityTest(unittest.TestCase):
     """Exercise the public hydration/composition boundary, not just dict merging."""
 

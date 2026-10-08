@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "generated_at": "2026-10-08T15:12:54.584629+00:00",
     "tier": "t3",
     "stacks_total": 44,
     "stacks_scannable": 40,
@@ -43,11 +43,83 @@
         "source": "local",
         "age_seconds": 0.0
       },
+      "adaptive_traces": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
       "public_dashboards": {
         "source": "local",
         "age_seconds": 0.0
       },
       "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "slo_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "synthetic_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_integrations": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_alert_groups": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "faro_apps": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "ml_jobs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "cloud_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "pdc_networks": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "reports_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "playlists_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "library_panels_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_risk": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_inventory": {
         "source": "local",
         "age_seconds": 0.0
       }
@@ -56,11 +128,11 @@
   "rows": [
     {
       " Stack": "stack035",
-      "Score": 66.9,
+      "Score": 63.3,
       "Tier": "solid",
       "Unscored reason": null,
-      "Dimensions scored": "9 of 9",
-      "Partial": false,
+      "Dimensions scored": "8 of 9",
+      "Partial": true,
       "Active series": 95158,
       "Users (active)": 4,
       "signal_breadth": 33.3,
@@ -68,18 +140,18 @@
       "adaptive_adoption": 0,
       "engagement": 66.7,
       "access_hygiene": 100,
-      "cardinality_discipline": 99.2,
+      "cardinality_discipline": null,
       "dashboard_utilisation": 100,
       "datasource_breadth": 40,
       "collector_health": 100
     },
     {
       " Stack": "stack020",
-      "Score": 63.5,
+      "Score": 60.2,
       "Tier": "solid",
       "Unscored reason": null,
-      "Dimensions scored": "9 of 9",
-      "Partial": false,
+      "Dimensions scored": "8 of 9",
+      "Partial": true,
       "Active series": 39860,
       "Users (active)": 36,
       "signal_breadth": 33.3,
@@ -87,33 +159,14 @@
       "adaptive_adoption": 0,
       "engagement": 37,
       "access_hygiene": 85.9,
-      "cardinality_discipline": 93.5,
-      "dashboard_utilisation": 100,
-      "datasource_breadth": 100,
-      "collector_health": 100
-    },
-    {
-      " Stack": "stack037",
-      "Score": 59.3,
-      "Tier": "solid",
-      "Unscored reason": null,
-      "Dimensions scored": "9 of 9",
-      "Partial": false,
-      "Active series": 23773,
-      "Users (active)": 6,
-      "signal_breadth": 33.3,
-      "alerting_proportionality": 100,
-      "adaptive_adoption": 37.1,
-      "engagement": 22.2,
-      "access_hygiene": 15.2,
-      "cardinality_discipline": 89.1,
+      "cardinality_discipline": null,
       "dashboard_utilisation": 100,
       "datasource_breadth": 100,
       "collector_health": 100
     },
     {
       " Stack": "stack019",
-      "Score": 59.2,
+      "Score": 57.3,
       "Tier": "solid",
       "Unscored reason": null,
       "Dimensions scored": "9 of 9",
@@ -125,47 +178,9 @@
       "adaptive_adoption": 0,
       "engagement": 100,
       "access_hygiene": 0,
-      "cardinality_discipline": 92.4,
+      "cardinality_discipline": 72.7,
       "dashboard_utilisation": 100,
       "datasource_breadth": 0,
-      "collector_health": 100
-    },
-    {
-      " Stack": "obs-hub",
-      "Score": 58.8,
-      "Tier": "solid",
-      "Unscored reason": null,
-      "Dimensions scored": "9 of 9",
-      "Partial": false,
-      "Active series": 278835,
-      "Users (active)": 11,
-      "signal_breadth": 33.3,
-      "alerting_proportionality": 81.2,
-      "adaptive_adoption": 29,
-      "engagement": 60.6,
-      "access_hygiene": 0,
-      "cardinality_discipline": 82.2,
-      "dashboard_utilisation": 100,
-      "datasource_breadth": 100,
-      "collector_health": 100
-    },
-    {
-      " Stack": "stack052",
-      "Score": 58.1,
-      "Tier": "solid",
-      "Unscored reason": null,
-      "Dimensions scored": "9 of 9",
-      "Partial": false,
-      "Active series": 38321,
-      "Users (active)": 5,
-      "signal_breadth": 33.3,
-      "alerting_proportionality": 100,
-      "adaptive_adoption": 0,
-      "engagement": 80,
-      "access_hygiene": 27.3,
-      "cardinality_discipline": 74.1,
-      "dashboard_utilisation": 100,
-      "datasource_breadth": 20,
       "collector_health": 100
     },
     {
@@ -188,8 +203,65 @@
       "collector_health": 100
     },
     {
+      " Stack": "stack052",
+      "Score": 56.4,
+      "Tier": "solid",
+      "Unscored reason": null,
+      "Dimensions scored": "8 of 9",
+      "Partial": true,
+      "Active series": 38321,
+      "Users (active)": 5,
+      "signal_breadth": 33.3,
+      "alerting_proportionality": 100,
+      "adaptive_adoption": 0,
+      "engagement": 80,
+      "access_hygiene": 27.3,
+      "cardinality_discipline": null,
+      "dashboard_utilisation": 100,
+      "datasource_breadth": 20,
+      "collector_health": 100
+    },
+    {
+      " Stack": "obs-hub",
+      "Score": 56.3,
+      "Tier": "solid",
+      "Unscored reason": null,
+      "Dimensions scored": "8 of 9",
+      "Partial": true,
+      "Active series": 278835,
+      "Users (active)": 11,
+      "signal_breadth": 33.3,
+      "alerting_proportionality": 81.2,
+      "adaptive_adoption": 29,
+      "engagement": 60.6,
+      "access_hygiene": 0,
+      "cardinality_discipline": null,
+      "dashboard_utilisation": 100,
+      "datasource_breadth": 100,
+      "collector_health": 100
+    },
+    {
+      " Stack": "stack037",
+      "Score": 56,
+      "Tier": "solid",
+      "Unscored reason": null,
+      "Dimensions scored": "8 of 9",
+      "Partial": true,
+      "Active series": 23773,
+      "Users (active)": 6,
+      "signal_breadth": 33.3,
+      "alerting_proportionality": 100,
+      "adaptive_adoption": 37.1,
+      "engagement": 22.2,
+      "access_hygiene": 15.2,
+      "cardinality_discipline": null,
+      "dashboard_utilisation": 100,
+      "datasource_breadth": 100,
+      "collector_health": 100
+    },
+    {
       " Stack": "stack072",
-      "Score": 55,
+      "Score": 54.3,
       "Tier": "solid",
       "Unscored reason": null,
       "Dimensions scored": "9 of 9",
@@ -201,7 +273,7 @@
       "adaptive_adoption": 0,
       "engagement": 100,
       "access_hygiene": 0,
-      "cardinality_discipline": 91.5,
+      "cardinality_discipline": 84.2,
       "dashboard_utilisation": 98.5,
       "datasource_breadth": 20,
       "collector_health": 0
@@ -227,7 +299,7 @@
     },
     {
       " Stack": "stack001b",
-      "Score": 45.5,
+      "Score": 46.1,
       "Tier": "lagging",
       "Unscored reason": null,
       "Dimensions scored": "9 of 9",
@@ -239,18 +311,18 @@
       "adaptive_adoption": 0,
       "engagement": 62.2,
       "access_hygiene": 39.4,
-      "cardinality_discipline": 75.7,
+      "cardinality_discipline": 81.8,
       "dashboard_utilisation": 100,
       "datasource_breadth": 0,
       "collector_health": 100
     },
     {
       " Stack": "obs-hub-dev",
-      "Score": 41.2,
+      "Score": 45.8,
       "Tier": "lagging",
       "Unscored reason": null,
-      "Dimensions scored": "9 of 9",
-      "Partial": false,
+      "Dimensions scored": "8 of 9",
+      "Partial": true,
       "Active series": 6242,
       "Users (active)": 11,
       "signal_breadth": 33.3,
@@ -258,18 +330,18 @@
       "adaptive_adoption": 10.3,
       "engagement": 48.5,
       "access_hygiene": 0,
-      "cardinality_discipline": 0,
+      "cardinality_discipline": null,
       "dashboard_utilisation": 100,
       "datasource_breadth": 80,
       "collector_health": 100
     },
     {
       " Stack": "stack038",
-      "Score": 37.3,
+      "Score": 33.5,
       "Tier": "lagging",
       "Unscored reason": null,
-      "Dimensions scored": "9 of 9",
-      "Partial": false,
+      "Dimensions scored": "8 of 9",
+      "Partial": true,
       "Active series": 95970,
       "Users (active)": 13,
       "signal_breadth": 33.3,
@@ -277,14 +349,14 @@
       "adaptive_adoption": 0,
       "engagement": 30.8,
       "access_hygiene": 0,
-      "cardinality_discipline": 71.2,
+      "cardinality_discipline": null,
       "dashboard_utilisation": 100,
       "datasource_breadth": 20,
       "collector_health": 0
     },
     {
       " Stack": "stack177",
-      "Score": 31,
+      "Score": 29.9,
       "Tier": "lagging",
       "Unscored reason": null,
       "Dimensions scored": "8 of 9",
@@ -296,7 +368,7 @@
       "adaptive_adoption": 0,
       "engagement": 33.3,
       "access_hygiene": 0,
-      "cardinality_discipline": 94.7,
+      "cardinality_discipline": 84.2,
       "dashboard_utilisation": 100,
       "datasource_breadth": 0,
       "collector_health": null
@@ -401,8 +473,8 @@
       "Score": null,
       "Tier": "unscored",
       "Unscored reason": "too_few_users",
-      "Dimensions scored": "9 of 9",
-      "Partial": false,
+      "Dimensions scored": "8 of 9",
+      "Partial": true,
       "Active series": 56868,
       "Users (active)": 2,
       "signal_breadth": 33.3,
@@ -410,7 +482,7 @@
       "adaptive_adoption": 0,
       "engagement": 66.7,
       "access_hygiene": 100,
-      "cardinality_discipline": 69.9,
+      "cardinality_discipline": null,
       "dashboard_utilisation": 100,
       "datasource_breadth": 0,
       "collector_health": 0
@@ -591,8 +663,8 @@
       "Score": null,
       "Tier": "unscored",
       "Unscored reason": "too_few_users",
-      "Dimensions scored": "9 of 9",
-      "Partial": false,
+      "Dimensions scored": "8 of 9",
+      "Partial": true,
       "Active series": 21141,
       "Users (active)": 2,
       "signal_breadth": 33.3,
@@ -600,7 +672,7 @@
       "adaptive_adoption": 0,
       "engagement": 100,
       "access_hygiene": 100,
-      "cardinality_discipline": 58.1,
+      "cardinality_discipline": null,
       "dashboard_utilisation": 100,
       "datasource_breadth": 40,
       "collector_health": 0
@@ -762,7 +834,7 @@
       "Score": null,
       "Tier": "unscored",
       "Unscored reason": "too_few_users",
-      "Dimensions scored": "8 of 9",
+      "Dimensions scored": "7 of 9",
       "Partial": true,
       "Active series": 8840,
       "Users (active)": 1,
@@ -771,7 +843,7 @@
       "adaptive_adoption": 0,
       "engagement": 100,
       "access_hygiene": 100,
-      "cardinality_discipline": 90.4,
+      "cardinality_discipline": null,
       "dashboard_utilisation": 100,
       "datasource_breadth": 0,
       "collector_health": null

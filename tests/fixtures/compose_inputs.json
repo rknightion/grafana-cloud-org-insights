@@ -1,74 +1,1733 @@
 {
  "_note": "synthetic compose fixture; accepted source changes translated through testdata identifiers. label_inventory is invented numeric seam data, not a live export: stack158 is an ideal complete envelope for consumer branches, NOT a completeness claim for shipping sources; stack145 has an unmeasured metric population, truncated names and a deadline. All names are synthetic; register rows are bounded at 256 per signal by validation.",
  "label_inventory": {
-    "stack158": {
-      "schema_version": 1,
-      "signals": {
-        "metrics": {
-          "data": "present", "state": "complete", "reason": "none", "window": "head",
-          "register": [{"name": "synthetic_request_key", "name_class": "ordinary", "name_count": 1, "scope": "label", "distinct_count": 10000, "count_semantics": "exact", "shape_counts": {}, "series_count": 1000, "stream_count": null}],
-          "register_truncated": 0,
-          "inputs": {
-            "distinct_values": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 10000, "semantics": "exact", "population": 1000, "population_semantics": "exact", "label_kind": "dynamic"}]},
-            "missing_identity": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 0, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]},
-            "shape_count": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 0, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]},
-            "service_gap": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 0, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]}
-          }
-        },
-        "logs": {
-          "data": "present", "state": "complete", "reason": "none", "window": "24h",
-          "register": [{"name": "synthetic_session_key", "name_class": "ordinary", "name_count": 1, "scope": "label", "distinct_count": 1, "count_semantics": "exact", "shape_counts": {"uuid": 1}, "series_count": null, "stream_count": 1000}],
-          "register_truncated": 0,
-          "inputs": {
-            "distinct_values": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 1, "semantics": "exact", "population": 1000, "population_semantics": "exact", "label_kind": "dynamic"}]},
-            "missing_identity": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 0, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]},
-            "shape_count": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 1, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]}
-          }
-        },
-        "traces": {
-          "data": "present", "state": "complete", "reason": "none", "window": "24h",
-          "register": [], "register_truncated": 0,
-          "inputs": {
-            "missing_identity": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 0, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]},
-            "shape_count": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 0, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]},
-            "service_gap": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 0, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]}
-          }
-        },
-        "profiles": {
-          "data": "present", "state": "complete", "reason": "none", "window": "24h",
-          "register": [], "register_truncated": 0,
-          "inputs": {
-            "distinct_values": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 1, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]},
-            "missing_identity": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 0, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]},
-            "shape_count": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 0, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]}
-          }
+  "stack158": {
+   "schema_version": 1,
+   "signals": {
+    "metrics": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "head",
+     "register": [
+      {
+       "name": "synthetic_request_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 10000,
+       "count_semantics": "exact",
+       "shape_counts": {},
+       "series_count": 1000,
+       "stream_count": null
+      }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 10000,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
         }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "service_gap": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
       }
+     }
     },
-    "stack145": {
-      "schema_version": 1,
-      "signals": {
-        "metrics": {
-          "data": "present", "state": "complete", "reason": "none", "window": "head",
-          "register": [{"name": "synthetic_request_key", "name_class": "ordinary", "name_count": 1, "scope": "label", "distinct_count": 200, "count_semantics": "exact", "shape_counts": {}, "series_count": null, "stream_count": null}],
-          "register_truncated": 0,
-          "inputs": {
-            "distinct_values": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 200, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]},
-            "missing_identity": {"state": "complete", "reason": "none", "names_truncated": 0, "values_overflow": 0, "samples": [{"value": 1, "semantics": "exact", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]}
-          }
-        },
-        "logs": {
-          "data": "present", "state": "partial", "reason": "truncated", "window": "24h",
-          "register": [], "register_truncated": 1,
-          "inputs": {
-            "shape_count": {"state": "partial", "reason": "truncated", "names_truncated": 1, "values_overflow": 0, "samples": [{"value": 1, "semantics": "at_least", "population": null, "population_semantics": "exact", "label_kind": "dynamic"}]}
-          }
-        },
-        "traces": {"data": "present", "state": "partial", "reason": "truncated", "window": "24h", "register": [], "register_truncated": 1, "inputs": {}},
-        "profiles": {"data": "unknown", "state": "unavailable", "reason": "deadline", "window": "24h", "register": [], "register_truncated": 0, "inputs": {}}
+    "logs": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [
+      {
+       "name": "synthetic_session_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 1,
+       "count_semantics": "exact",
+       "shape_counts": {
+        "uuid": 1
+       },
+       "series_count": null,
+       "stream_count": 1000
       }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "traces": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "service_gap": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "profiles": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
     }
+   }
   },
+  "stack145": {
+   "schema_version": 1,
+   "signals": {
+    "metrics": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "head",
+     "register": [
+      {
+       "name": "synthetic_request_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 200,
+       "count_semantics": "exact",
+       "shape_counts": {},
+       "series_count": null,
+       "stream_count": null
+      }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 200,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "logs": {
+     "data": "present",
+     "state": "partial",
+     "reason": "truncated",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 1,
+     "inputs": {
+      "shape_count": {
+       "state": "partial",
+       "reason": "truncated",
+       "names_truncated": 1,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "at_least",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "traces": {
+     "data": "present",
+     "state": "partial",
+     "reason": "truncated",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 1,
+     "inputs": {}
+    },
+    "profiles": {
+     "data": "unknown",
+     "state": "unavailable",
+     "reason": "deadline",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {}
+    }
+   }
+  },
+  "stack177": {
+   "schema_version": 1,
+   "signals": {
+    "metrics": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "head",
+     "register": [
+      {
+       "name": "synthetic_request_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 10000,
+       "count_semantics": "exact",
+       "shape_counts": {},
+       "series_count": 1000,
+       "stream_count": null
+      }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 10000,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "service_gap": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "logs": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [
+      {
+       "name": "synthetic_session_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 1,
+       "count_semantics": "exact",
+       "shape_counts": {
+        "uuid": 1
+       },
+       "series_count": null,
+       "stream_count": 1000
+      }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "traces": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "service_gap": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "profiles": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 50000,
+         "semantics": "exact",
+         "population": 100000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "stack001b": {
+   "schema_version": 1,
+   "signals": {
+    "metrics": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "head",
+     "register": [
+      {
+       "name": "synthetic_request_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 10000,
+       "count_semantics": "exact",
+       "shape_counts": {},
+       "series_count": 1000,
+       "stream_count": null
+      }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 10000,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "service_gap": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "metric_series": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 10000,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "logs": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [
+      {
+       "name": "synthetic_session_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 1,
+       "count_semantics": "exact",
+       "shape_counts": {
+        "uuid": 1
+       },
+       "series_count": null,
+       "stream_count": 1000
+      }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "traces": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "service_gap": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "profiles": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "stack019": {
+   "schema_version": 1,
+   "signals": {
+    "metrics": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "head",
+     "register": [
+      {
+       "name": "synthetic_request_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 10000,
+       "count_semantics": "exact",
+       "shape_counts": {},
+       "series_count": 1000,
+       "stream_count": null
+      }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 10000,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "service_gap": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "metric_series": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 10000,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "logs": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [
+      {
+       "name": "synthetic_session_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 1,
+       "count_semantics": "exact",
+       "shape_counts": {
+        "uuid": 1
+       },
+       "series_count": null,
+       "stream_count": 1000
+      }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "traces": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "service_gap": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "profiles": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 50000,
+         "semantics": "exact",
+         "population": 100000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "stack036": {
+   "schema_version": 1,
+   "signals": {
+    "metrics": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "head",
+     "register": [
+      {
+       "name": "synthetic_request_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 10000,
+       "count_semantics": "exact",
+       "shape_counts": {},
+       "series_count": 1000,
+       "stream_count": null
+      }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 10000,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "service_gap": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "logs": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [
+      {
+       "name": "synthetic_session_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 1,
+       "count_semantics": "exact",
+       "shape_counts": {
+        "uuid": 1
+       },
+       "series_count": null,
+       "stream_count": 1000
+      }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "traces": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "service_gap": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "profiles": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "stack072": {
+   "schema_version": 1,
+   "signals": {
+    "metrics": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "head",
+     "register": [
+      {
+       "name": "synthetic_request_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 10000,
+       "count_semantics": "exact",
+       "shape_counts": {},
+       "series_count": 1000,
+       "stream_count": null
+      }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 10000,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "service_gap": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "logs": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [
+      {
+       "name": "synthetic_session_key",
+       "name_class": "ordinary",
+       "name_count": 1,
+       "scope": "label",
+       "distinct_count": 1,
+       "count_semantics": "exact",
+       "shape_counts": {
+        "uuid": 1
+       },
+       "series_count": null,
+       "stream_count": 1000
+      }
+     ],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": 1000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 1,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "traces": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "service_gap": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    },
+    "profiles": {
+     "data": "present",
+     "state": "complete",
+     "reason": "none",
+     "window": "24h",
+     "register": [],
+     "register_truncated": 0,
+     "inputs": {
+      "distinct_values": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 50000,
+         "semantics": "exact",
+         "population": 100000,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "missing_identity": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      },
+      "shape_count": {
+       "state": "complete",
+       "reason": "none",
+       "names_truncated": 0,
+       "values_overflow": 0,
+       "samples": [
+        {
+         "value": 0,
+         "semantics": "exact",
+         "population": null,
+         "population_semantics": "exact",
+         "label_kind": "dynamic"
+        }
+       ]
+      }
+     }
+    }
+   }
+  }
+ },
  "library_panels_inventory": {
   "obs-hub": {"available": true, "library_panel_count": 2},
   "stack158": {"available": true, "library_panel_count": 0}

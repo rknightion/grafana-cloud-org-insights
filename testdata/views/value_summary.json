@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-21T18:08:49.212549+00:00",
+    "generated_at": "2026-10-08T15:12:54.584629+00:00",
     "tier": "t3",
     "stacks_total": 44,
     "stacks_scannable": 40,
@@ -43,11 +43,83 @@
         "source": "local",
         "age_seconds": 0.0
       },
+      "adaptive_traces": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
       "public_dashboards": {
         "source": "local",
         "age_seconds": 0.0
       },
       "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "slo_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "synthetic_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_integrations": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_alert_groups": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "faro_apps": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "ml_jobs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "cloud_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "pdc_networks": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "reports_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "playlists_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "library_panels_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_risk": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_inventory": {
         "source": "local",
         "age_seconds": 0.0
       }
@@ -76,11 +148,11 @@
     },
     {
       " Metric": "Median maturity score",
-      "Value": 56.7
+      "Value": 56
     },
     {
       " Metric": "Rubric version",
-      "Value": "1"
+      "Value": "2"
     }
   ]
 }

@@ -1219,6 +1219,65 @@ class T3CarryPublicationOrderTest(unittest.TestCase):
         self.assertNotIn(("gcinsight_findings", {"kind": "adaptive_headroom"}, 0.0),
                          remote_writer.return_value.push.call_args.args[0])
 
+    def _pushed_metrics_for_label_inventory(self, entry):
+        maturity_series = [
+            ("gcinsight_maturity_score", {"stack": "alpha", "version": "2"}, 50.0),
+            ("gcinsight_maturity_percentile", {"kind": "median", "version": "2"}, 50.0),
+            ("gcinsight_value_benchmark", {"kind": "maturity_score"}, 50.0),
+        ]
+        other = [("gcinsight_value_benchmark", {"kind": "active_series"}, 7.0),
+                 ("gcinsight_cost_active_series", {"stack": "alpha"}, 1.0)]
+        inputs = {} if entry is None else {"label_inventory": entry}
+        result = {
+            "meta": {"tier": "t3", "generated_at": "2026-08-21T00:00:00+00:00",
+                     "coverage_ratio": 1.0, "stacks_failed": 0, "stacks_scannable": 1,
+                     "stacks_total": 1, "source_failures": [], "inputs": inputs},
+            "data": {},
+            "_emit": {"metrics": maturity_series + other, "views": {}, "view_coverage": {}},
+        }
+        cfg = config.Config(**{**cfg_for("t3").__dict__, "dry_run": False})
+        with (
+            mock.patch.object(scan, "_verified_ecs_runtime", return_value=True),
+            mock.patch.object(scan, "run_t3", return_value=result),
+            mock.patch.object(scan.carry, "save_state", return_value="s3://bucket/state/t3.json") as save_state,
+            mock.patch.object(scan.s3emit, "write_views", return_value=[]),
+            mock.patch.object(scan.s3emit, "write_scan", return_value=[]),
+            mock.patch.object(scan.mimir, "RemoteWriter") as remote_writer,
+            mock.patch.object(scan.loki, "LokiWriter") as loki_writer,
+        ):
+            remote_writer.return_value.push.return_value = 3
+            loki_writer.return_value.push.return_value = 1
+            self.assertEqual(scan.run(FakeClient(), cfg, SimpleNamespace(out=None)), 0)
+        names = [(n, l.get("kind")) for n, l, _ in remote_writer.return_value.push.call_args.args[0]]
+        saved = [(n, l.get("kind")) for n, l, _ in save_state.call_args.args[0]]
+        def rests_on_maturity(item):
+            return item[0].startswith("gcinsight_maturity_") or item == ("gcinsight_value_benchmark", "maturity_score")
+        self.assertEqual([m for m in saved if rests_on_maturity(m)],
+                         [m for m in names if rests_on_maturity(m)],
+                         "carry state must hold the same maturity-dependent series as are published")
+        self.assertIn(("gcinsight_value_benchmark", "active_series"), saved)
+        self.assertIn(("gcinsight_cost_active_series", None), saved)
+        return names, maturity_series, other
+
+    def test_maturity_series_are_absent_when_enabled_label_inventory_is_unsatisfied(self):
+        for state in ("unavailable", "partial", "incompatible_schema", "future_timestamp"):
+            with self.subTest(state=state):
+                names, _, other = self._pushed_metrics_for_label_inventory(
+                    {"available": False, "stale": False, "state": state, "reason": "synthetic"})
+                self.assertFalse([n for n, _ in names if n.startswith("gcinsight_maturity_")])
+                self.assertNotIn(("gcinsight_value_benchmark", "maturity_score"), names)
+                self.assertIn(("gcinsight_value_benchmark", "active_series"), names)
+                self.assertIn(("gcinsight_cost_active_series", None), names)
+
+    def test_maturity_series_are_emitted_when_label_inventory_is_disabled_or_satisfied(self):
+        for entry in ({"available": False, "stale": False, "state": "disabled", "reason": "off"},
+                      {"available": True, "stale": False, "source": "hydrated"}, None):
+            with self.subTest(entry=entry):
+                names, *_ = self._pushed_metrics_for_label_inventory(entry)
+                self.assertIn(("gcinsight_maturity_score", None), names)
+                self.assertIn(("gcinsight_maturity_percentile", "median"), names)
+                self.assertIn(("gcinsight_value_benchmark", "maturity_score"), names)
+
     def test_retention_change_rows_are_forwarded_to_loki_after_view_withholding(self):
         row = {
             " Stack": "alpha",

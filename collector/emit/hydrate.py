@@ -233,11 +233,13 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     "cost_cardinality_outliers": frozenset({"dataplane"}),
     "risk_label_cardinality": frozenset({"dataplane"}),
     "cost_summary": frozenset({"dataplane"}),
-    "maturity": frozenset({"dataplane"}),
-    "maturity_dimensions": frozenset({"dataplane"}),
+    # Rubric v2 (D-LBL5): the labelling dimension reads label_inventory, so these three need it too.
+    # Re-derived by ViewInputsAreDerivedNotAssumed; `maturity_rubric` is text only and stays dataplane.
+    "maturity": frozenset({"dataplane", "label_inventory"}),
+    "maturity_dimensions": frozenset({"dataplane", "label_inventory"}),
     "maturity_owners": frozenset({"dataplane", "stack_detail"}),
     "maturity_rubric": frozenset({"dataplane"}),
-    "maturity_summary": frozenset({"dataplane"}),
+    "maturity_summary": frozenset({"dataplane", "label_inventory"}),
     "risk": frozenset({"fleet", "service_accounts"}),
     "risk_access_policies": frozenset({"access_policies"}),
     "risk_org_members": frozenset({"org_members"}),
@@ -268,9 +270,10 @@ VIEW_INPUTS: dict[str, frozenset[str]] = {
     "ai_agent_observability": frozenset({"capability_adoption"}),
     "ai_tenant_config": frozenset({"assistant"}),
     "ai_token_outliers": frozenset({"assistant"}),
-    "value_benchmarks": frozenset({"dataplane"}),
+    # D-LBL5: both rank stacks on the maturity score, so they read label_inventory through it.
+    "value_benchmarks": frozenset({"dataplane", "label_inventory"}),
     "value_savings": frozenset({"dataplane"}),
-    "value_summary": frozenset({"dataplane"}),
+    "value_summary": frozenset({"dataplane", "label_inventory"}),
 }
 
 
@@ -283,6 +286,19 @@ class Provenance(dict):
 
     def unsatisfied(self) -> list[str]:
         return sorted(n for n in self if not self.satisfied(n))
+
+
+# Per view: inputs whose provenance `state == "disabled"` (source not selected in configuration) do not
+# withhold it. The view composes without that input and the dependent figure is simply not evaluable.
+# Only an exact "disabled" is skipped: unavailable, partial, stale and incompatible inputs still
+# withhold, so an ENABLED source that failed never publishes a quietly degraded view.
+DISABLED_OK: dict[str, frozenset[str]] = {
+    "maturity": frozenset({"label_inventory"}),
+    "maturity_dimensions": frozenset({"label_inventory"}),
+    "maturity_summary": frozenset({"label_inventory"}),
+    "value_benchmarks": frozenset({"label_inventory"}),
+    "value_summary": frozenset({"label_inventory"}),
+}
 
 
 def _load_latest(tier: str, bucket: str) -> dict[str, Any] | None:
@@ -491,7 +507,12 @@ def filter_views(
     keep: dict[str, list[Any]] = {}
     withheld: dict[str, str] = {}
     for name, rows in views.items():
-        missing = sorted(n for n in VIEW_INPUTS.get(name, frozenset()) if not prov.satisfied(n))
+        missing = sorted(
+            n for n in VIEW_INPUTS.get(name, frozenset())
+            if not prov.satisfied(n)
+            and not (n in DISABLED_OK.get(name, frozenset())
+                     and (prov.get(n) or {}).get("state") == "disabled")
+        )
         if missing:
             reasons = "; ".join(
                 f"{n}: {(prov.get(n) or {}).get('reason', 'unavailable')}" for n in missing
@@ -500,6 +521,24 @@ def filter_views(
         else:
             keep[name] = rows
     return keep, withheld
+
+
+def _maturity_metric(name: str, labels: Mapping[str, str]) -> bool:
+    return name.startswith("gcinsight_maturity_") or (
+        name == "gcinsight_value_benchmark" and labels.get("kind") == "maturity_score")
+
+
+def filter_metrics(metrics: list[tuple[str, dict[str, str], float]], prov: Provenance
+                   ) -> tuple[list[tuple[str, dict[str, str], float]], int]:
+    """Drop every series whose value rests on the maturity score when label_inventory is ENABLED
+    and unsatisfied. A gap is an absent series, never a renormalised value. A DISABLED
+    label_inventory (the same exact state `DISABLED_OK` honours) leaves them untouched. Returns the
+    kept series and how many were dropped."""
+    entry = prov.get("label_inventory")
+    if entry is None or prov.satisfied("label_inventory") or entry.get("state") == "disabled":
+        return metrics, 0
+    kept = [m for m in metrics if not _maturity_metric(m[0], m[1])]
+    return kept, len(metrics) - len(kept)
 
 
 def report_metrics(prov: Provenance, tier: str) -> list[tuple[str, dict[str, str], float]]:

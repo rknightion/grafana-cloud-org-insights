@@ -105,34 +105,94 @@ class FairnessTest(unittest.TestCase):
         assert small is not None
         self.assertEqual(small[0], 0.0)
 
-    def test_cardinality_is_not_scored_below_the_volume_floor(self):
-        """label_values/series is best on the largest stack. Below the floor it says nothing."""
-        dp = {"cardinality": {"available": True, "label_values_count_total": 6093,
-                              "label_names_count": 40}}
-        below = maturity.CARDINALITY_MIN_SERIES - 1
-        self.assertIsNone(maturity._cardinality_discipline(
-            {"hmInstancePromCurrentActiveSeries": below}, dp))
-        self.assertIsNotNone(maturity._cardinality_discipline(
-            {"hmInstancePromCurrentActiveSeries": 50_000}, dp))
+    def test_labelling_dimension_is_withheld_when_no_signal_publishes_a_score(self):
+        """D-LBL5: absent, never zero. Replaces the cardinality ratio tests (dimension replaced)."""
+        self.assertIsNone(maturity._labelling_score({}, None))
+        self.assertIsNone(maturity._labelling_score({}, {}))
+        unscored = {"labelling": [{"signal": "metrics", "score": None, "weight": 4.0}]}
+        self.assertIsNone(maturity._labelling_score({}, unscored))
+        entry = score_stack({"slug": "x", "currentActiveUsers": 5, "dashboardCnt": 5}, unscored)
+        dim = next(d for d in entry["dimensions"] if d["dimension"] == "cardinality_discipline")
+        self.assertFalse(dim["applicable"])
+        self.assertIsNone(dim["score"])
 
-    def test_the_worst_ratio_in_the_estate_is_scored_rather_than_excused(self):
-        """`stack030`: 6,093 values on 5,960 series = 1.02, 20x the estate median. A 10,000-series
-        floor excused it; 5,000 catches it."""
-        dp = {"cardinality": {"available": True, "label_values_count_total": 6093,
-                              "label_names_count": 40}}
-        got = maturity._cardinality_discipline({"hmInstancePromCurrentActiveSeries": 5_960}, dp)
+    def test_labelling_dimension_weight_averages_scored_signals_and_ignores_unscored(self):
+        dp = {"labelling": [
+            {"signal": "metrics", "score": 80.0, "weight": 3.0},
+            {"signal": "logs", "score": 20.0, "weight": 1.0},
+            {"signal": "traces", "score": None, "weight": 5.0},  # below the coverage floor
+        ]}
+        got = maturity._labelling_score({}, dp)
         assert got is not None
-        self.assertEqual(got[0], 0.0)
+        self.assertAlmostEqual(got[0], (80.0 * 3 + 20.0 * 1) / 4)  # 65.0, traces ignored
 
-    def test_the_biggest_stack_does_not_win_cardinality_by_being_big(self):
-        """stack094's raw ratio is the estate's best (0.0115). stack084's is 30x worse."""
-        stacks, dataplane, _ = _load()
-        by = {str(s["slug"]): s for s in stacks}
-        shared = maturity._cardinality_discipline(by["stack094"], dataplane["stack094"])
-        light = maturity._cardinality_discipline(by["stack084"], dataplane["stack084"])
-        assert shared is not None and light is not None
-        self.assertEqual(shared[0], 100.0)
-        self.assertLess(light[0], shared[0], "stack084 carries 7x the label values of any other stack")
+    def test_labelling_inputs_come_from_published_summary_rows_and_skip_unscored_signals(self):
+        rows = [
+            {" Stack": "a", "Signal": "metrics", "Score": 90.0, "Applicable weight": 6.0},
+            {" Stack": "a", "Signal": "logs", "Score": None, "Applicable weight": 6.0},
+            {" Stack": "b", "Signal": "logs", "Score": None, "Applicable weight": 2.0},
+        ]
+        got = maturity.labelling_inputs(rows)
+        self.assertEqual(got, {"a": [{"signal": "metrics", "score": 90.0, "weight": 6.0}]})
+        dp = maturity.with_labelling({"a": {"fleet": 1}, "b": {}, "c": {}}, rows)
+        self.assertEqual(dp["a"]["labelling"], got["a"])
+        self.assertEqual(dp["a"]["fleet"], 1)
+        self.assertNotIn("labelling", dp["b"])
+
+    def test_composed_labelling_dimension_equals_weighted_average_of_published_signal_scores(self):
+        """Through compose: the dimension reads what the labelling pillar actually published."""
+        fixture = json.loads((pathlib.Path(__file__).parent / "fixtures" /
+                              "compose_inputs.json").read_text())
+        from collector.sources import label_inventory as source
+        kw = {k: fixture[k] for k in hydrate.INPUT_OWNER if k in fixture}
+        coverage = Coverage(tier="t3", total=len(fixture["stacks"]))
+        _, views, _ = compose.build_all(
+            fixture["stacks"], coverage, now=dt.datetime(2026, 8, 19, 20, tzinfo=dt.timezone.utc),
+            **source.composition_inputs(kw))
+        published: dict[str, list[tuple[float, float]]] = {}
+        for r in views["labelling_stack_summary"]:
+            if r["Score"] is not None:
+                published.setdefault(r[" Stack"], []).append((r["Score"], r["Applicable weight"]))
+        self.assertTrue(published, "fixture must publish at least one labelling score")
+        # The fixture must be able to tell weighted from unweighted: at least two stacks publish
+        # several signals with differing scores and weights.
+        discriminating = [
+            slug for slug, pairs in published.items()
+            if len(pairs) >= 2 and len({w for _, w in pairs}) > 1
+            and abs(sum(s * w for s, w in pairs) / sum(w for _, w in pairs)
+                    - sum(s for s, _ in pairs) / len(pairs)) > 1.0
+        ]
+        self.assertGreaterEqual(len(discriminating), 3, discriminating)
+        dims = {r[" Stack"]: r for r in views["maturity_dimensions"]
+                if r["Dimension"] == "cardinality_discipline"}
+        for slug, row in dims.items():
+            pairs = published.get(slug)
+            if pairs and fixture["dataplane"].get(slug) is not None:
+                expected = sum(s * w for s, w in pairs) / sum(w for _, w in pairs)
+                self.assertTrue(row["Applicable"])
+                self.assertAlmostEqual(row["Score"], round(expected, 1), places=1)
+            else:
+                self.assertFalse(row["Applicable"], f"{slug} has no published labelling score")
+                self.assertIsNone(row["Score"])
+
+    def test_labelling_dimension_uses_applicable_weight_not_evaluated_weight(self):
+        rows = [
+            {" Stack": "s", "Signal": "metrics", "Score": 100.0, "Applicable weight": 10.0, "Evaluated weight": 10.0},
+            {" Stack": "s", "Signal": "logs", "Score": 0.0, "Applicable weight": 30.0, "Evaluated weight": 10.0},
+        ]
+        got = maturity._labelling_score({}, maturity.with_labelling({"s": {}}, rows)["s"])
+        assert got is not None
+        # Applicable: 100*10/40 = 25. Evaluated would give 50, an unweighted mean also 50.
+        self.assertAlmostEqual(got[0], 25.0)
+
+    def test_rubric_row_renders_the_configured_labelling_coverage_floor(self):
+        stacks, dataplane, coverage = _load()
+        for floor, text in ((None, "0.8"), (0.9, "0.9")):
+            with self.subTest(floor=floor):
+                kw = {} if floor is None else {"label_coverage_floor": floor}
+                _, views = maturity.build(stacks, coverage, dataplane, **kw)
+                row = next(r for r in views["maturity_rubric"] if r[" Dimension"] == "cardinality_discipline")
+                self.assertIn(f"coverage >= {text}", row["How it is scored"])
 
     def test_a_stack_with_no_adaptive_headroom_is_not_marked_down(self):
         dp = {"adaptive_metrics": {"available": True, "segment_coverage_state": "unsegmented", "rules_applied": 0,
