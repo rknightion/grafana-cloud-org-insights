@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.10.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.9.1...v0.10.0) (2026-10-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* **maturity:** replace cardinality_discipline with the labelling score
+
+### Features
+
+* **consumer:** manifest-driven module input and default omission ([a97b0d4](https://github.com/rknightion/grafana-cloud-org-insights/commit/a97b0d4a6bb4302d6f9760f5c44021d345603a4e))
+* **maturity:** replace cardinality_discipline with the labelling score ([317465c](https://github.com/rknightion/grafana-cloud-org-insights/commit/317465c31dba27c1e9bfc907a1a792be55759257))
+* **terraform:** manage an adopted bucket's configuration on request ([7ba5172](https://github.com/rknightion/grafana-cloud-org-insights/commit/7ba51722dd2ece1bec456e63826d600f3f624cdf))
+
+
+### Miscellaneous
+
+* **backlog:** close customer labelling rollout and Synthetic coverage proof ([16795b1](https://github.com/rknightion/grafana-cloud-org-insights/commit/16795b10b232a66f8755225c168c889971cb9168))
+* **backlog:** record consumer convergence and identity migration plan ([d680349](https://github.com/rknightion/grafana-cloud-org-insights/commit/d680349b008e987f243864eaf9528fdcad246f4e))
+* **backlog:** record customer dashboard republish at v0.9.1 ([cace704](https://github.com/rknightion/grafana-cloud-org-insights/commit/cace704d9309a2bfb95992694c0732a3856eadac))
+* **backlog:** record loop19 dev labelling proof and maturity landing ([de42ea4](https://github.com/rknightion/grafana-cloud-org-insights/commit/de42ea42b3c762273f5de21bffb254a38620a7e8))
+
 ## [0.9.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.9.0...v0.9.1) (2026-10-08)
 
 
