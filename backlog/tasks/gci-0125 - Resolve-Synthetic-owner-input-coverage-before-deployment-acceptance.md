@@ -4,7 +4,7 @@ title: Resolve Synthetic owner-input coverage before deployment acceptance
 status: Parked
 assignee: []
 created_date: '2026-10-07 16:48'
-updated_date: '2026-10-08 00:51'
+updated_date: '2026-10-08 10:35'
 labels:
   - synthetic
   - deployment-blocker
@@ -51,4 +51,6 @@ Owner disposition (Rob, 2026-10-07, loop16 prep): fix the oversized reads forwar
 loop16: GCI-0125 (resolve Synthetic owner-input coverage before deployment acceptance) owner disposition executed via GCI-0127 (route-specific Synthetic body bound), attempts0 for this disposition task. Accepted signed publicv0.8.2 source412ef5cb; dev nativeT2 exit0, Synthetic3applicable/3available+2known-no-datasource. Customer exact source-bound3d1 consumer rollout accepted with312existingbasicNone readers/pairs/tokens/SSM unchanged,3missing+1paused, privacy and8existingactive+routed rules preserved; no manual customer or provisioner run, no scope/floor/remint/datasource edit, no retag. AC3 stays OPEN for owner overnight naturalT2+immutable publication and remaining full dashboard/name proof; collectionmetadata is not fullv2/render/grading. Expected6/81 residual disposition is owner-approved planning evidence, not a new customerT2 observation.
 
 loop17: implementation attempts0 for this read-only disposition; source fix allowance untouched. Natural readback unaccepted. Fresh root baseline at22:30UTC showed0retainedSTOPPED/0RUNNINGcustomerT2, actual enabledschedule03:30UTC, last task-definition R-rel4 consumer3d1. No natural run observed in the available read window. AWSSSO expired22:50UTC; prescribed+30min,+1h,+2h STS eachfailed255, no login or credential repair. No manualreplacement or customerrun. AC3 remainsOPEN. Resume afterauth recovery with exact natural stoppedARN, R-rel4consumer digest, exit0, completeSynthetic report and immutable timestamped version-specificS3 publication tied to task; existing remainingdashboard/name grading not inferred.
+
+loop18: attempts0 for read-only disposition. Natural exact-ARN T2 found from scheduler CloudTrail, revision22 bound to R-rel4consumer3d1; healthy scan_complete duration1685.01s, immutable version-specific publication03:58:51Z, Synthetic73/76 applicable,3unavailable,239known-not-applicable (fresh discovered denominator differs from81 planning). AC3 remainsOPEN: stoppeddescriptorMISSING and no terminalECS event archive discovered, so exit0 unproven. No replacement/manualrun. Resume with exact-ARN archived terminal descriptor/event; never substitute publication for exit proof.
 <!-- SECTION:NOTES:END -->
