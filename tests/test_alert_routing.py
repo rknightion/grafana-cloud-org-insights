@@ -86,6 +86,25 @@ class HealthyInventoryTest(unittest.TestCase):
         ])
         self.assertTrue(all(kw["bearer"] == "tok" for _url, kw in client.calls))
 
+    def test_contact_type_counts_count_integrations_not_receiver_names(self):
+        contacts = [contact("platform"), contact("platform"), contact("chat")]
+        contacts[-1]["type"] = "slack"
+        out = ar.probe_stack(FakeClient([(200, []), (200, contacts)]), STACK, "tok")
+        self.assertEqual(out["contact_point_type_counts"], {"email": 2, "slack": 1})
+        self.assertEqual(out["contact_point_names"], 2)
+        self.assertNotIn("private@example.test", repr(out))
+        self.assertNotIn("password", repr(out))
+        empty = ar.probe_stack(FakeClient([(200, []), (200, [])]), STACK, "tok")
+        self.assertEqual(empty["contact_point_type_counts"], {})
+
+    def test_missing_or_invalid_contact_type_withholds_mix_not_existing_inventory(self):
+        for value in (None, "", 42, {}, " "):
+            with self.subTest(value=value):
+                item = dict(contact("platform"), type=value)
+                out = ar.probe_stack(FakeClient([(200, []), (200, [item])]), STACK, "tok")
+                self.assertTrue(out["available"])
+                self.assertIsNone(out["contact_point_type_counts"])
+
     def test_actionable_rows_are_allow_listed_and_never_carry_rule_or_contact_secrets(self):
         client = FakeClient([
             (200, [

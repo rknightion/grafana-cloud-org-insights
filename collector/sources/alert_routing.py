@@ -105,6 +105,21 @@ def _validate_contacts(contacts: list[Any]) -> str | None:
     return None
 
 
+def _contact_type_counts(contacts: list[Any]) -> dict[str, int] | None:
+    """Count configured integrations, not receiver names or successful deliveries.
+
+    Older responses may omit type. Keep the existing routing inventory usable, but withhold the
+    entire optional mix rather than silently undercounting it. Settings and secure fields never pass.
+    """
+    counts: dict[str, int] = {}
+    for contact in contacts:
+        kind = contact.get("type")
+        if not isinstance(kind, str) or not kind.strip():
+            return None
+        counts[kind] = counts.get(kind, 0) + 1
+    return counts
+
+
 def _receiver(rule: Mapping[str, Any]) -> str | None:
     settings = rule.get("notification_settings")
     if not isinstance(settings, Mapping):
@@ -262,6 +277,7 @@ def probe_stack(client: ReadOnlyClient, stack: Mapping[str, Any], token: str) ->
         "rules_unverified_builtin": len(builtin),
         "contact_point_integrations": len(contacts),
         "contact_point_names": len(contact_names),
+        "contact_point_type_counts": _contact_type_counts(contacts),
         "findings_total": len(findings),
         "findings_retained": min(len(findings), MAX_FINDINGS),
         "findings_truncated": len(findings) > MAX_FINDINGS,

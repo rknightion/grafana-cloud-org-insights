@@ -7,6 +7,8 @@ from types import SimpleNamespace
 import unittest
 
 from collector.config import GCOM
+from collector.coverage import Coverage
+from collector.pillars import compose, estate
 from collector.httpclient import Response
 from collector.sources import gcom
 
@@ -53,6 +55,45 @@ class FailingSecondPageClient(Client):
 
 
 CFG = SimpleNamespace(cap="read-token")
+
+
+class EstateInventoryColumnsTest(unittest.TestCase):
+    def test_existing_inventory_fields_reach_public_views_without_new_metrics(self):
+        fields = {
+            "billingStartDate": "2026-10-01T00:00:00Z",
+            "billingEndDate": "2026-11-01T00:00:00Z",
+            "provider": "aws", "providerRegion": "eu-west-2", "planName": "Advanced",
+            "dailyAdminCnt": 0, "dailyEditorCnt": 2, "dailyViewerCnt": 7,
+        }
+        expected = {
+            "Billing period start": fields["billingStartDate"],
+            "Billing period end": fields["billingEndDate"],
+            "Provider": "aws", "Provider region": "eu-west-2", "Plan name": "Advanced",
+            "Admins (daily)": 0, "Editors (daily)": 2, "Viewers (daily)": 7,
+        }
+        client = Client([{"items": [{"slug": "test-example", "status": "active", **fields}]}])
+        stacks = gcom.fetch_inventory(client, SimpleNamespace(cap="read-token", org_id="example"))
+        coverage = Coverage(tier="t1", total=1)
+        coverage.record_ok("test-example")
+        metrics, views, _ = compose.build_all(stacks, coverage)
+        row = views["estate"][0]
+        self.assertEqual({key: row[key] for key in expected}, expected)
+        self.assertEqual(views["estate_leftovers_idle"][0], row)
+        self.assertEqual(set(row), {name for name, _kind in estate.ROW_SCHEMA})
+        baseline, _, _ = compose.build_all([{"slug": "test-example", "status": "active"}], coverage)
+        self.assertEqual(metrics, baseline)
+        self.assertEqual(len(client.calls), 1)
+        self.assertEqual(client.calls[0][0], f"{GCOM}/instances")
+
+    def test_missing_fields_remain_unknown_in_public_estate_view(self):
+        coverage = Coverage(tier="t1", total=1)
+        coverage.record_ok("example")
+        _, views, _ = compose.build_all([{"slug": "example", "status": "active"}], coverage)
+        for column in (
+            "Billing period start", "Billing period end", "Provider", "Provider region",
+            "Plan name", "Admins (daily)", "Editors (daily)", "Viewers (daily)",
+        ):
+            self.assertIsNone(views["estate"][0][column], column)
 
 
 class OrgMembersTest(unittest.TestCase):

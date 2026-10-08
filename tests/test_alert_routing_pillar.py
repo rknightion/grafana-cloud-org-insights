@@ -5,7 +5,9 @@ from __future__ import annotations
 import unittest
 
 from collector.coverage import Coverage
-from collector.pillars import risk
+from collector.pillars import compose, risk
+from collector.sources import alert_routing
+from tests.test_alert_routing import FakeClient, STACK, contact, rule
 
 
 class AlertRoutingPillarTest(unittest.TestCase):
@@ -65,6 +67,31 @@ class AlertRoutingPillarTest(unittest.TestCase):
         self.assertEqual(len(views["risk_alert_routing"]), 1)
         self.assertEqual(len(views["risk_alert_routing_findings"]), 2)
         self.assertEqual(views["risk_alert_routing_findings"][0]["Rule uid"], "missing")
+
+    def test_contact_type_mix_reaches_public_composition_without_new_metrics(self):
+        contacts = [contact("platform"), dict(contact("chat"), type="slack")]
+        out = alert_routing.probe_stack(
+            FakeClient([(200, [rule("inherited")]), (200, contacts)]), STACK, "tok",
+        )
+        metrics, views, _ = compose.build_all(
+            self.stacks, self.coverage, alert_routing={"alpha": out},
+        )
+        self.assertEqual(
+            views["risk_alert_routing"][0]["Contact point type mix"],
+            '{"email": 1, "slack": 1}',
+        )
+        legacy = {key: value for key, value in out.items() if key != "contact_point_type_counts"}
+        old_metrics, old_views, _ = compose.build_all(
+            self.stacks, self.coverage, alert_routing={"alpha": legacy},
+        )
+        self.assertEqual(metrics, old_metrics)
+        self.assertIsNone(old_views["risk_alert_routing"][0]["Contact point type mix"])
+        for counts, expected in (({}, "{}"), (None, None)):
+            _, views, _ = compose.build_all(
+                self.stacks, self.coverage,
+                alert_routing={"alpha": dict(out, contact_point_type_counts=counts)},
+            )
+            self.assertEqual(views["risk_alert_routing"][0]["Contact point type mix"], expected)
 
     def test_missing_input_is_absent_not_zero(self):
         metrics, views = risk.build(self.stacks, self.coverage)
