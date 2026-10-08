@@ -691,6 +691,43 @@ class SourceContracts(unittest.TestCase):
         for signal in ("logs", "traces", "profiles"):
             self.assertEqual((record["signals"][signal]["data"], record["signals"][signal]["state"]), ("unknown", "partial"))
 
+    def test_loki_empty_tenant_exact_status_only_body_is_complete_empty(self):
+        """Loki labels/values omit `data` on an empty tenant; only the exact body is empty."""
+        base_send = self.send
+
+        def logs_probe(body, status=200):
+            def send(req, timeout):
+                host = urllib.parse.urlsplit(req.full_url).hostname.split(".")[0]
+                if host == "logs":
+                    if urllib.parse.urlsplit(req.full_url).path == "/loki/api/v1/series":
+                        # An empty tenant's /series still carries data: [].
+                        return Response(200, b'{"status":"success","data":[]}', "")
+                    return Response(status, json.dumps(body).encode(), "")
+                return base_send(req, timeout)
+            self.send = send
+            return self.probe()["signals"]["logs"]
+        empty = logs_probe({"status": "success"})
+        self.assertEqual((empty["data"], empty["state"], empty["reason"]), ("unknown", "partial", "truncated"))
+        # Counted available by scan's floor predicate (state partial, reason not deadline/missing_input).
+        self.assertIn(empty["state"], {"complete", "partial"})
+        self.assertNotIn(empty["reason"], {"deadline", "missing_input"})
+        client = ReadOnlyClient(transport=lambda req, timeout: Response(200, b'{"status":"success"}', ""),
+                                deadline=60, max_attempts=1)
+        values = source._read(client, STACK, "cap", "logs", 0, 1, source.Bounds(), None, key=("label", "service_name"))
+        self.assertEqual(values[0], [])
+        self.assertEqual(source._read(client, STACK, "cap", "logs", 0, 1, source.Bounds(), None)[0], [])
+        for body, status in [({"status": "success", "extra": 1}, 200), ({"status": "error"}, 200), ({}, 200),
+                             ({"status": "success"}, 206), ({"status": "error", "data": []}, 200),
+                             ({"data": []}, 200)]:
+            with self.subTest(body=body, status=status):
+                bad = logs_probe(body, status)
+                self.assertEqual((bad["state"], bad["reason"]), ("unavailable", "missing_input"))
+        # Other signals never gain this normalisation.
+        self.send = lambda *_: Response(200, b'{"status":"success"}', "")
+        record = self.probe()
+        for signal in ("metrics", "traces", "profiles"):
+            self.assertEqual(record["signals"][signal]["state"], "unavailable")
+
     def test_value_overflow_is_not_zero_or_pass_and_name_overflow_is_not_value_finding(self):
         original = self.send
         def overflowing(req, timeout):

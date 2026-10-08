@@ -264,9 +264,14 @@ def _read(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str, signal: st
             raise ValueError("invalid_response")
         values = doc.get("names", [])
     else:
-        if doc.get("status") != "success" or "data" not in doc:
+        # Loki labels and label-values omit `data` for a tenant with no data. Only the exact
+        # body {"status": "success"} (this one key and value) is that complete-empty result.
+        if doc == {"status": "success"}:
+            values = []
+        elif doc.get("status") != "success" or "data" not in doc:
             raise ValueError("invalid_response")
-        values = [] if doc["data"] is None else doc["data"]
+        else:
+            values = [] if doc["data"] is None else doc["data"]
     if not isinstance(values, list) or any(not isinstance(v, str) for v in values):
         raise ValueError("invalid_response")
     for value in values:

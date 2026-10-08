@@ -818,6 +818,14 @@ Reference: https://grafana.com/docs/loki/latest/reference/loki-http-api/.
 Evidence: /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C2/root-status-scope.json
 and /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C2-docs.log.
 
+### Loki labels and label values omit `data` on an empty tenant
+
+`/loki/api/v1/labels` and `/loki/api/v1/label/<name>/values` return HTTP 200 with the exact body
+`{"status":"success"}` (no `data` key) for a tenant with no data, while `/series` still carries
+`"data": []`. Only that exact body is a complete empty result; any extra key, other status, other
+missing-data shape or non-200 stays unavailable. The empty logs signal is `unknown`/`partial`/`truncated`,
+which the scan floor counts as available. Do not generalise this to other routes or signals.
+
 ### Loki limits: choose legacy effective tenant YAML, reject write-scoped applied
 
 GET `/loki/api/v1/config/limits/applied` and `/config/tenant/v1/limits` both returned
