@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.9.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.8.4...v0.9.0) (2026-10-08)
+
+
+### Features
+
+* expose existing estate and contact channel view fields ([72e089f](https://github.com/rknightion/grafana-cloud-org-insights/commit/72e089feaf2ffda9c2b24b92b38390e96ad33fe3))
+
+
+### Bug Fixes
+
+* reject stale carry before projecting legacy labels ([d60ed41](https://github.com/rknightion/grafana-cloud-org-insights/commit/d60ed418144d47ba5b965724e563f79120c187cf))
+
+
+### Documentation
+
+* close freshness-first carry proof ([a12f963](https://github.com/rknightion/grafana-cloud-org-insights/commit/a12f963c2a5e9a86d1320a1c513d12a0dad72ee7))
+* close operator-use view field proof ([ce971ad](https://github.com/rknightion/grafana-cloud-org-insights/commit/ce971ad67646ef7706a622d11165af26a590ae49))
+* park live chain on missing dev reader authority ([4131039](https://github.com/rknightion/grafana-cloud-org-insights/commit/4131039576bda7d6934fe95fd3d7974618f500cd))
+* record loop18 release and proof boundaries ([b954a82](https://github.com/rknightion/grafana-cloud-org-insights/commit/b954a82c5e38dd55601ad675bacf90630d5103ac))
+* retain converged dev configuration after failed live proof ([f86f423](https://github.com/rknightion/grafana-cloud-org-insights/commit/f86f42304f5d70c4436c1fa59366bd7d785eb862))
+
 ## [0.8.4](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.8.3...v0.8.4) (2026-10-08)
 
 
