@@ -1274,10 +1274,16 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         # Assistant series can be the same observation freshly hydrated as other/other;
         # projecting only the combined output would add that observation twice.
         metrics = project_metric_domains(metrics)
-        projected_state = ({**state, "metrics": project_metric_domains(state.get("metrics", []))}
-                           if state else state)
+        # Validate freshness without inspecting the payload: rejected legacy state may have
+        # malformed labels. Reuse carry's policy and one clock instant for both passes.
+        carry_now = dt.datetime.now(dt.timezone.utc)
         carried, report = carry.carry_forward(
-            metrics, projected_state, live_stacks={str(s['slug']) for s in stacks})
+            metrics, {**state, "metrics": []} if state else state, now=carry_now)
+        if report["available"] and not report["too_old"]:
+            projected_state = {**state, "metrics": project_metric_domains(state.get("metrics", []))}
+            carried, report = carry.carry_forward(
+                metrics, projected_state, now=carry_now,
+                live_stacks={str(s['slug']) for s in stacks})
         # These additive Adaptive estate metrics are deliberately absent from live composition
         # unless all required reads are complete. Carry must not undo that coverage decision by
         # re-stamping an older complete estate over today's partial live inventory.
