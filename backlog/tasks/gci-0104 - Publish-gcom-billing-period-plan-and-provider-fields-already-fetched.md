@@ -1,9 +1,10 @@
 ---
 id: GCI-0104
 title: 'Publish gcom billing-period, plan and provider fields already fetched'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-10-06 10:23'
+updated_date: '2026-10-08 10:13'
 labels:
   - estate
 dependencies: []
@@ -30,3 +31,9 @@ Loop13 assessment gap 15: gcom.py:15-34 fetch billingStartDate, billingEndDate, 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+loop18: select existing payload fields with named operator uses; view-only columns within owned files; test public composition, independent review and exact-SHA gate.
+<!-- SECTION:PLAN:END -->

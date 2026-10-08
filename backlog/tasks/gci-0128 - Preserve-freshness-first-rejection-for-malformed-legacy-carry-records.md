@@ -1,9 +1,10 @@
 ---
 id: GCI-0128
 title: Preserve freshness-first rejection for malformed legacy carry records
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-10-07 23:55'
+updated_date: '2026-10-08 10:13'
 labels: []
 dependencies: []
 references:
@@ -33,3 +34,9 @@ loop17 independent review found a minor robustness regression outside the suppor
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+loop18: fail-first real T1 malformed expired-state reproduction, freshness-first fix, supported dedup and immutability checks, independent review and exact-SHA gate.
+<!-- SECTION:PLAN:END -->
