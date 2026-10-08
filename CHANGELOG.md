@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.9.0...v0.9.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* **label-inventory:** treat Loki exact {"status":"success"} labels body as empty ([7b72bb5](https://github.com/rknightion/grafana-cloud-org-insights/commit/7b72bb56b0b5c574e1721edbf6a6f2b522ec3383))
+
+
+### Miscellaneous
+
+* **backlog:** record dev reader restoration ([1d24be8](https://github.com/rknightion/grafana-cloud-org-insights/commit/1d24be868475c57d99ec7e68b679295e09643c7a))
+
 ## [0.9.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.8.4...v0.9.0) (2026-10-08)
 
 
