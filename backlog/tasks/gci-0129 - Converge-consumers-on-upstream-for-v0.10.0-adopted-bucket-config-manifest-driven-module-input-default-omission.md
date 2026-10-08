@@ -6,7 +6,7 @@ title: >-
 status: In Progress
 assignee: []
 created_date: '2026-10-08 18:57'
-updated_date: '2026-10-08 18:57'
+updated_date: '2026-10-08 20:15'
 labels:
   - consumer
   - handover
@@ -27,6 +27,7 @@ Owner decisions 2026-10-08 (Rob), preparing the customer deployment for handover
 - [ ] #2 consumer_manifest module input and default omission shipped; explicit-wiring consumers and full manifests keep identical digests
 - [ ] #3 Dev consumer migrated to manifest mode on v0.10.0; one manual dev T2 exits 0 with immutable publication; no-change plan
 - [ ] #4 Customer consumer migrated to manifest mode with manage_adopted_bucket_config, its own TLS policy resource moved into the module, default-equal keys pruned and dated narration removed; saved-plan exact apply, readback incl. effective lifecycle, natural T2 verified; no-change plan
+- [ ] #5 Customer dashboards republished from the v0.10.0 source after the customer rollout, with a readback diff
 <!-- AC:END -->
 
 ## Definition of Done
@@ -35,3 +36,9 @@ Owner decisions 2026-10-08 (Rob), preparing the customer deployment for handover
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-10-08: customer dashboards were 1-3 weeks behind and labelling had never been published. With owner approval all 12 were republished from the deployed v0.9.1 source (11 updated, labelling created). Readback diff against the offline build shows only server normalisation (transformation spec.id dropped). Earlier non-service-account edits were the owner's own. Republish again after the v0.10.0 customer rollout for the maturity change.
+<!-- SECTION:NOTES:END -->
