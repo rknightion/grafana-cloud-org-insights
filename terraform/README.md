@@ -56,12 +56,15 @@ In the versioned bucket, current-object expiry makes the version noncurrent; the
 seven-day noncurrent-version rule then applies. AWS lifecycle processing is asynchronous.
 This is not a strict 90-day-from-observation erasure guarantee.
 
-With `create_bucket = false`, the bucket owner must configure and verify equivalent targeted
-retention in the bucket's existing lifecycle policy **before publishing raw matches**. This
-module does not manage an adopted bucket's lifecycle; do not add a competing lifecycle
-configuration resource. Deployment validation must read back effective lifecycle, versioning, encryption and reader access,
+With `create_bucket = false`, set `manage_adopted_bucket_config = true` to have this module apply
+the same lifecycle rules, versioning, encryption, public-access block and TLS-deny policy as a
+created bucket. Each resource replaces the bucket's existing configuration of that kind, so fold
+any extra owner lifecycle rules in first and pass extra policy statements as `bucket_policy_source_json`, and never manage the same configuration from a second
+lifecycle or policy resource. Without the flag, the bucket owner must configure and verify equivalent
+targeted retention in the bucket's existing lifecycle policy **before publishing raw matches**.
+Either way, deployment validation must read back effective lifecycle, versioning, encryption and reader access,
 plus a fresh effective bucket-policy witness denying non-TLS access, before allowing publication.
-Missing controls block raw publication; this prerequisite is not authority to add an adopted bucket policy.
+Missing controls block raw publication.
 
 ## The two credentials
 
@@ -120,6 +123,8 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 | `name_prefix`, `grafana_org_id`, `write_stack_slug`, `mimir_write_url`, `mimir_tenant`, `loki_write_url`, `loki_tenant`, `subnet_ids` | required; deployment identity, signal tenants and egress subnets |
 | `tags` | `{}`; merged over provider defaults |
 | `create_bucket`, `bucket_name` | `true`, empty; empty name resolves to `<name_prefix>-data`, explicit name required for adoption |
+| `manage_adopted_bucket_config` | `false`; with an adopted bucket, manage its lifecycle, versioning, encryption, public-access block and TLS-deny policy (never the bucket) |
+| `bucket_policy_source_json` | empty; extra policy statements merged into the managed bucket policy, which otherwise replaces any existing one |
 | `scan_retention_days` | `90` positive whole days; current scans and reserved raw-match view prefix |
 | `coverage_score_weights`, `dashboard_detail_enabled` | seven equal weights, `false`; detailed dashboard selector evidence is opt-in |
 | `expected_retention_policy`, `fleet_default_scrape_interval` | `[]`, `60s`; genuine deployment policy, not configured estate inventory |
@@ -364,8 +369,11 @@ Or copy `examples/standalone/`, which owns its own provider and backend.
 
 `create_bucket`, `create_secret`, `create_ecr_repository` and `create_views_reader_user` all default
 to true and can be turned off to adopt something provisioned earlier. When `create_bucket = false`
-Terraform manages neither lifecycle, public-access blocking, versioning, encryption nor bucket policy,
-so verify all separately; an adopted bucket is not a validated one.
+Terraform never manages the bucket itself, so `tofu destroy` cannot reach its objects. Its lifecycle,
+public-access blocking, versioning, encryption and bucket policy are managed only with
+`manage_adopted_bucket_config = true`; otherwise verify all separately, because an adopted bucket is
+not a validated one. Turning the flag back off destroys those resources, which suspends versioning and
+removes the lifecycle rules and policy.
 
 The Firehose access-key secret is different: it is **always adopted** and supplied by ARN. There is no
 create switch and no secret data source because even reading the value would put the credential on the

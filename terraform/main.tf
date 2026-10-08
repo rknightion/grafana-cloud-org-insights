@@ -12,6 +12,12 @@ locals {
 
   bucket_arn = "arn:${data.aws_partition.current.partition}:s3:::${local.bucket_name}"
 
+  # Bucket configuration is managed for a created bucket, and for an adopted one only on request.
+  # The bucket resource itself stays create-only, so adoption never puts the data in destroy scope.
+  manage_bucket_config = var.create_bucket || var.manage_adopted_bucket_config
+  bucket_id            = var.create_bucket ? aws_s3_bucket.data[0].id : local.bucket_name
+  bucket_config_arn    = var.create_bucket ? aws_s3_bucket.data[0].arn : local.bucket_arn
+
   # The Firehose endpoint is a property of the Loki write HOST, not of the stack's regionSlug or
   # clusterSlug. Prefixing the configured hostname is therefore both simpler and more correct than
   # reconstructing a host from unrelated control-plane inventory. `loki_write_url` is validated as an

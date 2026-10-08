@@ -38,11 +38,11 @@ lint:
 test filter="":
     .venv/bin/python3 -m tests.guarded_pytest tests -q {{ if filter == "" { "" } else { "-k " + quote(filter) } }}
 
-# validate the reusable terraform module and the standalone example, and check formatting
+# validate and test the reusable terraform module, validate the standalone example, check formatting
 [group('infra')]
 [no-exit-message]
 tf-validate:
-    cd terraform && tofu init -backend=false && tofu validate
+    cd terraform && tofu init -backend=false && tofu validate && tofu test
     cd terraform/examples/standalone && tofu init -backend=false && tofu validate
     tofu fmt -check -recursive terraform
 

@@ -337,8 +337,10 @@ bucket lifecycle configuration. Do not reuse that prefix for other keys or expir
 Eligibility starts at last publication; hydration resets it. Current expiry is followed by
 seven-day noncurrent-version expiry and asynchronous AWS processing, not strict erasure
 90 days from observation. Other last-good views and IAM remain unchanged. For adopted buckets
-(`create_bucket = false`), owners must configure equivalent targeted retention in the existing
-lifecycle policy before raw publication; root must verify effective retention, versioning,
+(`create_bucket = false`), either set `manage_adopted_bucket_config = true` so the module applies
+its own lifecycle, versioning, encryption, public-access block and TLS-deny policy (replacing the
+existing configuration of each kind), or owners must configure equivalent targeted retention in the
+existing lifecycle policy before raw publication; root must verify effective retention, versioning,
 encryption and reader access. This includes a fresh effective bucket-policy witness denying
-non-TLS access. A missing policy blocks raw publication; a lifecycle grant does not authorize
-adding a bucket policy. Never add a competing lifecycle configuration resource.
+non-TLS access. A missing policy blocks raw publication. Outside that module flag, a lifecycle grant does not
+authorize adding a bucket policy, and never add a competing lifecycle configuration resource.

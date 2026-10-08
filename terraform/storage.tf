@@ -12,6 +12,12 @@
 #           holder, and an expiry racing a live scan would silently permit the double run the lock
 #           exists to prevent.
 
+# The bucket itself is created only when `create_bucket` is true; an adopted bucket is never in this
+# module's destroy scope. Its configuration below (public-access block, versioning, encryption,
+# lifecycle, TLS-deny policy) is managed for a created bucket, and for an adopted one only when
+# `manage_adopted_bucket_config` is true. `local.bucket_id` references the created bucket when there is
+# one, keeping the implicit dependency, and the adopted bucket's name otherwise.
+
 resource "aws_s3_bucket" "data" {
   count = var.create_bucket ? 1 : 0
 
@@ -20,9 +26,9 @@ resource "aws_s3_bucket" "data" {
 }
 
 resource "aws_s3_bucket_public_access_block" "data" {
-  count = var.create_bucket ? 1 : 0
+  count = local.manage_bucket_config ? 1 : 0
 
-  bucket                  = aws_s3_bucket.data[0].id
+  bucket                  = local.bucket_id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -30,9 +36,9 @@ resource "aws_s3_bucket_public_access_block" "data" {
 }
 
 resource "aws_s3_bucket_versioning" "data" {
-  count = var.create_bucket ? 1 : 0
+  count = local.manage_bucket_config ? 1 : 0
 
-  bucket = aws_s3_bucket.data[0].id
+  bucket = local.bucket_id
   versioning_configuration {
     # Versioning is the recovery path for the failure this platform is most exposed to: a bad scan
     # overwriting a good `views/*.json` and blanking a dashboard. Noncurrent versions expire quickly
@@ -42,9 +48,9 @@ resource "aws_s3_bucket_versioning" "data" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "data" {
-  count = var.create_bucket ? 1 : 0
+  count = local.manage_bucket_config ? 1 : 0
 
-  bucket = aws_s3_bucket.data[0].id
+  bucket = local.bucket_id
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
@@ -53,9 +59,9 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "data" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "data" {
-  count = var.create_bucket ? 1 : 0
+  count = local.manage_bucket_config ? 1 : 0
 
-  bucket = aws_s3_bucket.data[0].id
+  bucket = local.bucket_id
 
   # Raw scans age out. The T4 diff only ever reaches back to the scan nearest T-7d, so the retention
   # window is about audit and replay, not about the platform working.
@@ -117,16 +123,20 @@ resource "aws_s3_bucket_lifecycle_configuration" "data" {
 
 # Deny any non-TLS request. Cheap, and it closes the one gap the public-access block does not cover.
 resource "aws_s3_bucket_policy" "data" {
-  count = var.create_bucket ? 1 : 0
+  count = local.manage_bucket_config ? 1 : 0
 
-  bucket = aws_s3_bucket.data[0].id
+  bucket = local.bucket_id
   policy = data.aws_iam_policy_document.bucket[0].json
 
   depends_on = [aws_s3_bucket_public_access_block.data]
 }
 
 data "aws_iam_policy_document" "bucket" {
-  count = var.create_bucket ? 1 : 0
+  count = local.manage_bucket_config ? 1 : 0
+
+  # The bucket policy is one document, so an owner's own statements must be merged here or they are
+  # replaced. A source statement reusing the DenyInsecureTransport sid is overridden by the one below.
+  source_policy_documents = var.bucket_policy_source_json != "" ? [var.bucket_policy_source_json] : []
 
   statement {
     sid    = "DenyInsecureTransport"
@@ -138,7 +148,7 @@ data "aws_iam_policy_document" "bucket" {
     }
 
     actions   = ["s3:*"]
-    resources = [aws_s3_bucket.data[0].arn, "${aws_s3_bucket.data[0].arn}/*"]
+    resources = [local.bucket_config_arn, "${local.bucket_config_arn}/*"]
 
     condition {
       test     = "Bool"

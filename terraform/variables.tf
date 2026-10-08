@@ -101,12 +101,37 @@ variable "loki_tenant" {
 
 variable "create_bucket" {
   description = <<-EOT
-    Create the S3 bucket. Set false to adopt a bucket that already exists. Adoption leaves lifecycle,
-    public-access blocking, versioning, encryption and bucket policy outside this module. Verify those
+    Create the S3 bucket. Set false to adopt a bucket that already exists. By default adoption leaves
+    lifecycle, public-access blocking, versioning, encryption and bucket policy outside this module;
+    set `manage_adopted_bucket_config` to have the module manage them. Otherwise verify those
     separately, including targeted raw label-risk retention and a non-TLS deny before raw publication.
   EOT
   type        = bool
   default     = true
+}
+
+variable "manage_adopted_bucket_config" {
+  description = <<-EOT
+    With `create_bucket = false`, manage the adopted bucket's public-access block, versioning,
+    encryption, lifecycle rules and TLS-deny bucket policy exactly as for a created bucket. The bucket
+    itself is never managed, so destroy cannot reach its objects. Each of these resources REPLACES the
+    bucket's existing configuration of that kind: merge any extra lifecycle rules or policy statements
+    the owner needs into the module first. Turning this back off later destroys the managed resources,
+    which suspends versioning and removes the lifecycle rules and policy; set the replacements first.
+  EOT
+  type        = bool
+  default     = false
+}
+
+variable "bucket_policy_source_json" {
+  description = "Optional JSON policy document whose statements are merged into the module-managed bucket policy, for an adopted bucket that needs extra statements kept. The module's DenyInsecureTransport statement always applies. Empty means the module statement alone."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.bucket_policy_source_json == "" || can(jsondecode(var.bucket_policy_source_json).Statement)
+    error_message = "bucket_policy_source_json must be empty or a JSON policy document with a Statement."
+  }
 }
 
 variable "bucket_name" {
