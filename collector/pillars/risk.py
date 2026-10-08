@@ -182,7 +182,8 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
         (" Stack", "string"), ("Rules", "number"), ("Active", "number"),
         ("Direct receiver", "number"), ("Active inherited", "number"),
         ("Active missing receiver", "number"), ("Unverified built-in receiver", "number"),
-        ("Contact point integrations", "number"), ("Completeness", "string"),
+        ("Contact point integrations", "number"), ("Contact point type mix", "string"),
+        ("Completeness", "string"),
         ("Findings retained", "number"), ("Findings total", "number"),
         ("Findings truncated", "boolean"),
     ),
@@ -716,6 +717,11 @@ def build(
                 "Active missing receiver": r.get("rules_active_missing_receiver"),
                 "Unverified built-in receiver": r.get("rules_unverified_builtin"),
                 "Contact point integrations": r.get("contact_point_integrations"),
+                # Channel-dependency review, not delivery health. Legacy hydrated inputs stay unknown.
+                "Contact point type mix": (
+                    json.dumps(r["contact_point_type_counts"], sort_keys=True)
+                    if isinstance(r.get("contact_point_type_counts"), dict) else None
+                ),
                 "Completeness": r.get("completeness"),
                 "Findings retained": r.get("findings_retained"),
                 "Findings total": r.get("findings_total"),

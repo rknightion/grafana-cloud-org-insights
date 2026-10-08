@@ -63,6 +63,7 @@
       "Active missing receiver": 1,
       "Unverified built-in receiver": 0,
       "Contact point integrations": 1,
+      "Contact point type mix": null,
       "Completeness": "api_has_no_total",
       "Findings retained": 2,
       "Findings total": 2,
