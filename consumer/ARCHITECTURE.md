@@ -21,6 +21,15 @@ deployment manifest ---> validated runtime projections ---> ECS, dashboards, and
         +-----------> overlay digest and deployment Git revision in image provenance
 ```
 
+From v0.10.0 the deployment passes the decoded manifest to the module as `consumer_manifest` (manifest
+mode) instead of copying its keys into module arguments. The module reads every key it represents,
+falls back to its own default for an absent key, renders both task projection digests, and applies the
+manifest's Purpose and Namespace tag values over the deployment's own `tags` (the manifest wins).
+`terraform/consumer_manifest.tf` is the one table of which key feeds which input. The manifest may omit
+any key whose value is the module default; `bin/consumer_manifest.py` validates and digests the
+effective manifest, so omission changes no digest. Explicit wiring still works for a deployment that
+has not moved.
+
 The image contains generic source only. Infrastructure is the runtime configuration source. Each task
 receives a digest of exactly the non-secret fields it consumes; the loader recomputes that digest and
 refuses a mismatch. The full overlay digest is provenance for the complete customer contract and is not
@@ -36,7 +45,9 @@ digests, externally supplied customer-identifier patterns, and declared retired-
 `just check-identifiers --patterns-file`; the pattern set must never be committed to the public product
 repository. A deployment wrapper passes
 each historical fork path with `--forbidden-core-path`; the checker also rejects the product's standard
-collector, scan, dashboard, and alert paths automatically. `just consumer-build` creates and verifies a
+collector, scan, dashboard, and alert paths automatically. In manifest mode it also refuses, by name, an
+explicit module argument for any input the manifest represents (only the `schedules_enabled` and
+`provisioner_enabled` kill switches may sit beside it). `just consumer-build` creates and verifies a
 local candidate without registry access.
 `just consumer-exec` validates the consumer and runs the supplied command under one exact runtime
 projection (`scan`, `provisioner`, `dashboards` or `alerts`). It is not a dry-run boundary: the command

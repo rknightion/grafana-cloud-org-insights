@@ -12,14 +12,14 @@
 # --- Failed-record S3 backup ----------------------------------------------------------------------
 
 resource "aws_s3_bucket" "firehose_failed" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
   bucket = local.firehose_backup_bucket_name
   tags   = local.tags
 }
 
 resource "aws_s3_bucket_public_access_block" "firehose_failed" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
   bucket                  = aws_s3_bucket.firehose_failed[0].id
   block_public_acls       = true
@@ -29,7 +29,7 @@ resource "aws_s3_bucket_public_access_block" "firehose_failed" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "firehose_failed" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
   bucket = aws_s3_bucket.firehose_failed[0].id
 
@@ -41,7 +41,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "firehose_failed" 
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "firehose_failed" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
   bucket = aws_s3_bucket.firehose_failed[0].id
 
@@ -62,7 +62,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "firehose_failed" {
 }
 
 data "aws_iam_policy_document" "firehose_failed_bucket" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
   statement {
     sid    = "DenyInsecureTransport"
@@ -88,7 +88,7 @@ data "aws_iam_policy_document" "firehose_failed_bucket" {
 }
 
 resource "aws_s3_bucket_policy" "firehose_failed" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
   bucket = aws_s3_bucket.firehose_failed[0].id
   policy = data.aws_iam_policy_document.firehose_failed_bucket[0].json
@@ -99,7 +99,7 @@ resource "aws_s3_bucket_policy" "firehose_failed" {
 # --- Firehose delivery identity -------------------------------------------------------------------
 
 data "aws_iam_policy_document" "firehose_assume" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
   statement {
     effect  = "Allow"
@@ -119,15 +119,15 @@ data "aws_iam_policy_document" "firehose_assume" {
 }
 
 resource "aws_iam_role" "firehose" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
-  name               = "${var.name_prefix}-firehose"
+  name               = "${local.inputs.name_prefix}-firehose"
   assume_role_policy = data.aws_iam_policy_document.firehose_assume[0].json
   tags               = local.tags
 }
 
 data "aws_iam_policy_document" "firehose" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
   statement {
     sid    = "WriteFailedRecords"
@@ -174,7 +174,7 @@ data "aws_iam_policy_document" "firehose" {
 }
 
 resource "aws_iam_role_policy" "firehose" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
   name   = "deliver-ecs-logs"
   role   = aws_iam_role.firehose[0].id
@@ -184,9 +184,9 @@ resource "aws_iam_role_policy" "firehose" {
 # --- Delivery stream ------------------------------------------------------------------------------
 
 resource "aws_kinesis_firehose_delivery_stream" "ecs_logs" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
-  name        = "${var.name_prefix}-ecs-logs"
+  name        = "${local.inputs.name_prefix}-ecs-logs"
   destination = "http_endpoint"
   tags        = local.tags
 
@@ -227,12 +227,12 @@ resource "aws_kinesis_firehose_delivery_stream" "ecs_logs" {
       # per module instantiation. Task ARN/id, container id and image digest remain in the record body.
       common_attributes {
         name  = "lbl_job"
-        value = var.name_prefix
+        value = local.inputs.name_prefix
       }
 
       common_attributes {
         name  = "lbl_service_name"
-        value = var.name_prefix
+        value = local.inputs.name_prefix
       }
 
       common_attributes {
@@ -271,7 +271,7 @@ resource "aws_kinesis_firehose_delivery_stream" "ecs_logs" {
 # --- CloudWatch Logs subscription identity --------------------------------------------------------
 
 data "aws_iam_policy_document" "firehose_subscription_assume" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
   statement {
     effect  = "Allow"
@@ -300,15 +300,15 @@ data "aws_iam_policy_document" "firehose_subscription_assume" {
 }
 
 resource "aws_iam_role" "firehose_subscription" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
-  name               = "${var.name_prefix}-logs-subscription"
+  name               = "${local.inputs.name_prefix}-logs-subscription"
   assume_role_policy = data.aws_iam_policy_document.firehose_subscription_assume[0].json
   tags               = local.tags
 }
 
 data "aws_iam_policy_document" "firehose_subscription" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
   statement {
     sid    = "WriteECSLogsToFirehose"
@@ -322,7 +322,7 @@ data "aws_iam_policy_document" "firehose_subscription" {
 }
 
 resource "aws_iam_role_policy" "firehose_subscription" {
-  count = var.firehose_logs_enabled ? 1 : 0
+  count = local.inputs.firehose_logs_enabled ? 1 : 0
 
   name   = "write-ecs-logs-to-firehose"
   role   = aws_iam_role.firehose_subscription[0].id
@@ -332,17 +332,17 @@ resource "aws_iam_role_policy" "firehose_subscription" {
 # The only resource controlled by the second-stage switch. Keeping this separate is the safety seam:
 # the stream can accept a deliberate DirectPut test before any customer task log is wired to it.
 resource "aws_cloudwatch_log_subscription_filter" "ecs_logs" {
-  count = var.firehose_log_subscription_enabled ? 1 : 0
+  count = local.inputs.firehose_log_subscription_enabled ? 1 : 0
 
-  name            = "${var.name_prefix}-ecs-logs"
+  name            = "${local.inputs.name_prefix}-ecs-logs"
   log_group_name  = aws_cloudwatch_log_group.tasks.name
   filter_pattern  = ""
-  destination_arn = var.firehose_logs_enabled ? aws_kinesis_firehose_delivery_stream.ecs_logs[0].arn : ""
-  role_arn        = var.firehose_logs_enabled ? aws_iam_role.firehose_subscription[0].arn : ""
+  destination_arn = local.inputs.firehose_logs_enabled ? aws_kinesis_firehose_delivery_stream.ecs_logs[0].arn : ""
+  role_arn        = local.inputs.firehose_logs_enabled ? aws_iam_role.firehose_subscription[0].arn : ""
 
   lifecycle {
     precondition {
-      condition     = var.firehose_logs_enabled
+      condition     = local.inputs.firehose_logs_enabled
       error_message = "firehose_log_subscription_enabled requires firehose_logs_enabled; create and test the delivery stream first."
     }
   }

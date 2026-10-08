@@ -39,6 +39,7 @@
     "runtime": {
       "type": "object",
       "additionalProperties": false,
+      "$comment": "Each projection holds exactly collector.identity.PROJECTION_ENVS once omitted keys are filled. Only scan and provisioner keys the module renders from a variable default may be omitted; dashboards and alerts are always complete.",
       "required": ["scan", "provisioner", "dashboards", "alerts"],
       "properties": {
         "scan": {"$ref": "#/$defs/stringMap"},
@@ -50,14 +51,17 @@
     "aws": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "name_prefix", "bucket_name", "secret_name", "reader_secret_key",
-        "writer_secret_key", "provisioner_secret_key", "create_bucket", "create_secret",
-        "create_views_reader_user", "create_provisioner", "firehose_logs_enabled",
-        "firehose_log_subscription_enabled", "assign_public_ip", "schedules_enabled",
-        "provisioner_enabled", "schedule_timezone", "t1_schedule", "t2_schedule",
-        "t3_schedule", "t4_schedule", "provisioner_schedule", "task_architecture",
-        "cost_namespace", "purpose_tag"
+      "$comment": "Every property is part of the effective manifest. One whose value is the module default may be omitted (bin/consumer_manifest.py regenerate --prune-defaults); bin/consumer_manifest.py fills it from the pinned module's terraform/ before validating or digesting. An adopted bucket or secret keeps its explicit name.",
+      "required": ["name_prefix", "cost_namespace", "purpose_tag"],
+      "allOf": [
+        {
+          "if": {"required": ["create_bucket"], "properties": {"create_bucket": {"const": false}}},
+          "then": {"required": ["bucket_name"]}
+        },
+        {
+          "if": {"required": ["create_secret"], "properties": {"create_secret": {"const": false}}},
+          "then": {"required": ["secret_name"]}
+        }
       ],
       "properties": {
         "name_prefix": {"type": "string"},
@@ -82,6 +86,10 @@
         "t4_schedule": {"type": "string"},
         "provisioner_schedule": {"type": "string"},
         "task_architecture": {"enum": ["ARM64", "X86_64"]},
+        "manage_adopted_bucket_config": {
+          "type": "boolean",
+          "$comment": "Optional; absent means false. With create_bucket false, the module manages the adopted bucket's configuration (never the bucket). Read terraform/README.md before setting it."
+        },
         "cost_namespace": {"type": "string"},
         "purpose_tag": {"type": "string"}
       }

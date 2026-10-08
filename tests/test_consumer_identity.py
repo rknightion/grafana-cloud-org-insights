@@ -107,7 +107,7 @@ class CrossLayerIdentityTest(unittest.TestCase):
         for source in (collector, provision):
             self.assertIn('identity.env("GCINSIGHT_STACK_TOKEN_PREFIX"', source)
         for source in (scan_tf, provision_tf):
-            self.assertIn('name = "GCINSIGHT_STACK_TOKEN_PREFIX", value = var.stack_token_prefix', source)
+            self.assertIn('name = "GCINSIGHT_STACK_TOKEN_PREFIX", value = local.inputs.stack_token_prefix', source)
 
     def test_provisioner_persistent_identity_fields_have_environment_seams(self):
         source = (ROOT / "collector" / "provision.py").read_text()

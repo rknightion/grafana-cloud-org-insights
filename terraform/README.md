@@ -4,7 +4,10 @@ Terraform/OpenTofu module for the scheduled collector: storage, identity, comput
 provisions the platform; it does not provision the Grafana dashboards, which are published separately
 by `bin/dashboards.py`.
 
-Works on OpenTofu and Terraform. Requires the AWS provider v6.
+Works on OpenTofu 1.8 or later and Terraform 1.9 or later, with the AWS provider v6. Variable
+validations reference other variables and locals, which needs those versions; `required_version`
+says `>= 1.8` because one constraint has to cover both tools, so Terraform 1.8 passes it and then
+fails on those validations.
 
 ## What it creates
 
@@ -120,7 +123,8 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 
 | Inputs | Module default / contract |
 |---|---|
-| `name_prefix`, `grafana_org_id`, `write_stack_slug`, `mimir_write_url`, `mimir_tenant`, `loki_write_url`, `loki_tenant`, `subnet_ids` | required; deployment identity, signal tenants and egress subnets |
+| `consumer_manifest` | `null`; the decoded consumer manifest, which then supplies every input it represents and the Purpose/Namespace tags (see [Manifest mode](#manifest-mode-for-consumer-deployments)) |
+| `name_prefix`, `grafana_org_id`, `write_stack_slug`, `mimir_write_url`, `mimir_tenant`, `loki_write_url`, `loki_tenant`, `subnet_ids` | required; deployment identity, signal tenants and egress subnets. In manifest mode all but `subnet_ids` come from the manifest and must be left out |
 | `tags` | `{}`; merged over provider defaults |
 | `create_bucket`, `bucket_name` | `true`, empty; empty name resolves to `<name_prefix>-data`, explicit name required for adoption |
 | `manage_adopted_bucket_config` | `false`; with an adopted bucket, manage its lifecycle, versioning, encryption, public-access block and TLS-deny policy (never the bucket) |
@@ -132,7 +136,7 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 | `reader_secret_key`, `writer_secret_key` | `GCINSIGHT_READ_TOKEN`, `GCINSIGHT_WRITE_TOKEN`; JSON keys, never token values |
 | `create_ecr_repository`, `image`, `task_architecture` | `true`, empty, `ARM64`; empty image uses created ECR `:latest`, unsuitable for reviewed runtime rollout |
 | `security_group_ids`, `assign_public_ip` | `[]`, `false`; empty creates HTTPS-egress group |
-| `schedules_enabled`, `schedule_timezone`, `tiers` | `true`, `UTC`, four default tiers; disable schedules explicitly for first deployment |
+| `schedules_enabled`, `schedule_timezone`, `tiers` | `true`, `UTC`, four default tiers; disable schedules explicitly for first deployment. A tier's `schedule_expression` is optional: t1-t4 fall back to `local.default_tier_schedules` |
 | `schedule_retry_attempts`, `log_retention_days` | `2`, `30`; invocation retry count and CloudWatch retention |
 | `firehose_logs_enabled`, `firehose_log_subscription_enabled` | both `false`; staged stream creation then subscription |
 | `firehose_access_key_secret_arn`, `firehose_access_key_secret_kms_key_arn` | both empty; dedicated adopted secret ARN required when enabled, KMS ARN only for a CMK |
@@ -158,6 +162,10 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 | `firehose_delivery_stream_name`, `firehose_delivery_stream_arn`, `firehose_failed_record_bucket_name`, `firehose_loki_endpoint` | null until Firehose is enabled |
 | `firehose_log_subscription_enabled` | subscription switch, distinct from stream existence |
 | `run_task_command` | command template with a task-definition placeholder; not live-run authority |
+| `task_environments` | non-secret container environment per tier and `provisioner`; compare with `bin/consumer_manifest.py env` on a digest mismatch |
+| `tags` | tags applied to every taggable resource, manifest tag values included |
+| `schedules` | expression, timezone and state per tier and `provisioner` |
+| `created_resources` | which optional resources this deployment creates rather than adopts or omits |
 
 The standalone example leaves collector and provisioner schedules off, unlike the module's schedule
 switch defaults. It does not wire `create_provisioner`, so enabling its provisioner schedule switch
@@ -364,6 +372,67 @@ module "insights" {
 ```
 
 Or copy `examples/standalone/`, which owns its own provider and backend.
+
+## Manifest mode for consumer deployments
+
+A consumer that keeps a deployment manifest (`consumer/manifest.schema.json`) passes it to the module
+instead of hand-copying it into arguments. Resource addresses are the same as explicit wiring, so
+switching an existing deployment needs no `moved` block; the plan must show only in-place changes,
+if any.
+
+```hcl
+module "<consumer>_insights" {
+  count  = var.<consumer>_insights_enabled ? 1 : 0
+  source = "git::https://github.com/rknightion/grafana-cloud-org-insights.git//terraform?ref=<40-character-sha>"
+
+  consumer_manifest = jsondecode(file("${path.module}/<consumer>-insights.overlay.json"))
+
+  # Kill switches, ANDed with the manifest's aws.schedules_enabled / aws.provisioner_enabled.
+  schedules_enabled   = var.<consumer>_insights_schedules_enabled
+  provisioner_enabled = var.<consumer>_insights_provisioner_enabled
+
+  # Inputs the manifest does not represent stay ordinary arguments.
+  image                          = var.<consumer>_insights_consumer_image
+  subnet_ids                     = module.vpc.private_subnets
+  firehose_access_key_secret_arn = var.<consumer>_insights_firehose_access_key_secret_arn
+  tiers = {
+    t1 = { cpu = 512, memory = 1024, deadline_seconds = 900, description = "Hourly inventory + carry-forward" }
+    t2 = { cpu = 1024, memory = 2048, deadline_seconds = 3600, description = "Daily per-stack identity, plugin and service-account detail" }
+    t3 = { cpu = 1024, memory = 4096, deadline_seconds = 3600, description = "6-hourly data-plane sweep" }
+    t4 = { cpu = 512, memory = 1024, deadline_seconds = 900, description = "Daily estate diff - 7-day and 1-day windows" }
+  }
+  tags = var.tags # the module sets Purpose and Namespace from the manifest over these; the manifest wins
+  # tag_adopted_secret        = true  # adopted secret only
+  # bucket_policy_source_json = ...   # adopted bucket with aws.manage_adopted_bucket_config only
+}
+```
+
+- Every manifest key takes effect when present, and the module default applies when it is absent.
+  `terraform/consumer_manifest.tf` holds the one table of which key feeds which input.
+- The module renders `scan_runtime_config_digest` and `provisioner_runtime_config_digest` from
+  `runtime_projection_digests` and forces `require_explicit_consumer_config = true`.
+- It applies `aws.purpose_tag` as tag `Purpose` and `aws.cost_namespace` as tag `Namespace`, merged
+  over `tags`, so the manifest wins a key clash, as the consumers' own `merge(var.tags, {...})` did.
+  Explicit mode applies `tags` alone.
+- `aws.manage_adopted_bucket_config` (optional, absent means `false`) feeds
+  `manage_adopted_bucket_config`; read [Adopting resources](#adopting-resources-that-already-exist)
+  before setting it. `bucket_policy_source_json` stays an ordinary argument.
+- At plan time the module refuses, by name, an argument for any input the manifest represents (other
+  than the two kill switches) whose value differs from the variable default, a tier
+  `schedule_expression` other than its module default (the `aws.t1_schedule`..`t4_schedule` keys own
+  it), and an `aws.<tier>_schedule` for a tier `tiers` does not declare. An argument passed with exactly
+  its default value cannot be told from an omitted one and is harmless; `bin/consumer_manifest.py check
+  --terraform` refuses even that, statically, by name.
+- At plan time the module refuses a manifest whose `GCINSIGHT_S3_BUCKET`, `GCINSIGHT_S3_REGION` or
+  `GCINSIGHT_SSM_REGION` differs from what it renders, rather than shipping tasks that refuse to start.
+- `bin/consumer_manifest.py regenerate --prune-defaults` removes every key whose value is exactly this
+  checkout's module default and leaves every digest unchanged. Run it with the tool from the module
+  revision you pin: a pruned manifest means "that revision's defaults". `upgrade` names (never values)
+  every omitted key whose default the target revision changes and refuses unless
+  `--accept-default-changes` is passed; it then re-derives the digests
+  for the target revision.
+- The explicit-argument interface is unchanged when `consumer_manifest` is null. A v0.9 manifest
+  validates with byte-identical digests.
 
 ## Adopting resources that already exist
 

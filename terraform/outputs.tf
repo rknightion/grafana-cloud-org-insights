@@ -50,7 +50,7 @@ output "task_role_arn" {
 
 output "views_reader_user_name" {
   description = "IAM user for the Grafana Infinity datasource. Mint its access key out of band."
-  value       = var.create_views_reader_user ? aws_iam_user.views_reader[0].name : null
+  value       = local.inputs.create_views_reader_user ? aws_iam_user.views_reader[0].name : null
 }
 
 output "log_group_name" {
@@ -60,27 +60,27 @@ output "log_group_name" {
 
 output "firehose_delivery_stream_name" {
   description = "Optional ECS-log Firehose stream name. Null while firehose_logs_enabled is false."
-  value       = var.firehose_logs_enabled ? aws_kinesis_firehose_delivery_stream.ecs_logs[0].name : null
+  value       = local.inputs.firehose_logs_enabled ? aws_kinesis_firehose_delivery_stream.ecs_logs[0].name : null
 }
 
 output "firehose_delivery_stream_arn" {
   description = "Optional ECS-log Firehose stream ARN. Null while firehose_logs_enabled is false."
-  value       = var.firehose_logs_enabled ? aws_kinesis_firehose_delivery_stream.ecs_logs[0].arn : null
+  value       = local.inputs.firehose_logs_enabled ? aws_kinesis_firehose_delivery_stream.ecs_logs[0].arn : null
 }
 
 output "firehose_failed_record_bucket_name" {
   description = "Optional bucket holding only Firehose records Grafana Cloud refused. Null while disabled."
-  value       = var.firehose_logs_enabled ? aws_s3_bucket.firehose_failed[0].bucket : null
+  value       = local.inputs.firehose_logs_enabled ? aws_s3_bucket.firehose_failed[0].bucket : null
 }
 
 output "firehose_loki_endpoint" {
   description = "Grafana Cloud AWS-log endpoint derived from loki_write_url; useful when verifying the staged delivery."
-  value       = var.firehose_logs_enabled ? local.firehose_loki_endpoint : null
+  value       = local.inputs.firehose_logs_enabled ? local.firehose_loki_endpoint : null
 }
 
 output "firehose_log_subscription_enabled" {
   description = "Whether the live ECS CloudWatch log group is connected to Firehose, distinct from stream existence."
-  value       = var.firehose_log_subscription_enabled
+  value       = local.inputs.firehose_log_subscription_enabled
 }
 
 output "run_task_command" {
@@ -90,7 +90,50 @@ output "run_task_command" {
     aws_ecs_cluster.this.name,
     join(",", var.subnet_ids),
     join(",", local.security_group_ids),
-    var.assign_public_ip ? "ENABLED" : "DISABLED",
+    local.inputs.assign_public_ip ? "ENABLED" : "DISABLED",
     data.aws_region.current.region,
   )
+}
+
+output "task_environments" {
+  description = "Non-secret container environment each task definition renders, keyed by tier and `provisioner` (when created). Compare it with `bin/consumer_manifest.py env` when a task refuses to start on a projection digest mismatch."
+  value = merge(
+    { for name, task in aws_ecs_task_definition.scan : name => { for entry in jsondecode(task.container_definitions)[0].environment : entry.name => entry.value } },
+    { for task in aws_ecs_task_definition.provisioner : "provisioner" => { for entry in jsondecode(task.container_definitions)[0].environment : entry.name => entry.value } },
+  )
+}
+
+output "task_secret_references" {
+  description = "Secret selectors (`<secret ARN>:<JSON key>::`, never values) each task definition injects, keyed by tier and `provisioner` (when created)."
+  value = merge(
+    { for name, task in aws_ecs_task_definition.scan : name => { for entry in jsondecode(task.container_definitions)[0].secrets : entry.name => entry.valueFrom } },
+    { for task in aws_ecs_task_definition.provisioner : "provisioner" => { for entry in jsondecode(task.container_definitions)[0].secrets : entry.name => entry.valueFrom } },
+  )
+}
+
+output "schedules" {
+  description = "Expression, timezone and state of every schedule, keyed by tier and `provisioner` (when created)."
+  value = merge(
+    { for name, schedule in aws_scheduler_schedule.scan : name => { expression = schedule.schedule_expression, timezone = schedule.schedule_expression_timezone, state = schedule.state } },
+    { for schedule in aws_scheduler_schedule.provisioner : "provisioner" => { expression = schedule.schedule_expression, timezone = schedule.schedule_expression_timezone, state = schedule.state } },
+  )
+}
+
+output "tags" {
+  description = "Tags applied to every taggable resource: `tags`, with the manifest's Purpose and Namespace values over them in manifest mode."
+  value       = local.tags
+}
+
+output "created_resources" {
+  description = "Which optional resources this deployment creates rather than adopts or omits."
+  value = {
+    bucket                = length(aws_s3_bucket.data) > 0
+    bucket_configuration  = length(aws_s3_bucket_policy.data) > 0
+    secret                = length(aws_secretsmanager_secret.tokens) > 0
+    views_reader_user     = length(aws_iam_user.views_reader) > 0
+    provisioner           = length(aws_ecs_task_definition.provisioner) > 0
+    firehose_stream       = length(aws_kinesis_firehose_delivery_stream.ecs_logs) > 0
+    firehose_subscription = length(aws_cloudwatch_log_subscription_filter.ecs_logs) > 0
+    ecr_repository        = length(aws_ecr_repository.collector) > 0
+  }
 }

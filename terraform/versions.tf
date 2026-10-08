@@ -2,10 +2,12 @@
 # configuration (region, credentials, default_tags). A provider block here would make the module
 # un-composable and would silently override the caller's region.
 #
-# Works on both OpenTofu and Terraform. `required_version` is the floor for the `moved`/`import`
-# semantics and optional object attributes used below.
+# Works on both OpenTofu and Terraform. The floor is set by variable validations that reference other
+# variables and locals (labelling.tf, consumer_manifest.tf): OpenTofu 1.8. The Terraform equivalent is
+# 1.9, which `required_version` cannot express for both tools at once, so Terraform 1.8 passes this
+# check and then fails on those validations.
 terraform {
-  required_version = ">= 1.6"
+  required_version = ">= 1.8"
 
   required_providers {
     aws = {

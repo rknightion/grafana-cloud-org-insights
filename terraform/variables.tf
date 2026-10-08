@@ -8,11 +8,12 @@ variable "name_prefix" {
     it and you collide.
   EOT
   type        = string
+  default     = null
 
   validation {
     # S3 bucket names, IAM names and ECS names have overlapping-but-different rules; this is the
     # intersection, so a prefix that validates here is safe for all of them.
-    condition     = can(regex("^[a-z0-9][a-z0-9-]{1,26}[a-z0-9]$", var.name_prefix))
+    condition     = var.name_prefix == null ? true : can(regex("^[a-z0-9][a-z0-9-]{1,26}[a-z0-9]$", var.name_prefix))
     error_message = "name_prefix must be 3-28 chars, lowercase alphanumeric and hyphens, not starting or ending with a hyphen."
   }
 }
@@ -53,26 +54,30 @@ variable "tags" {
 
 # --- Grafana Cloud target --------------------------------------------------------------------------
 #
-# NO DEFAULTS on any of these, on purpose. A default would mean a `terraform apply` in the lab
-# silently scanning one org and writing series into the wrong production stack. Making them
-# required turns that into a plan-time error.
+# NO USABLE DEFAULTS on any of these, on purpose. A default would mean a `terraform apply` in the lab
+# silently scanning one org and writing series into the wrong production stack. They default to null
+# only so that manifest mode can supply them; the consumer_manifest validation makes each one required
+# without a manifest, and refused alongside one, so a missing value is still a plan-time error.
 
 variable "grafana_org_id" {
   description = "Grafana Cloud organisation id the collector scans (gcom `/orgs/<id>`)."
   type        = string
+  default     = null
 }
 
 variable "write_stack_slug" {
   description = "Slug of the single stack the platform publishes to. Everything lands here, so this is also the series denominator."
   type        = string
+  default     = null
 }
 
 variable "mimir_write_url" {
   description = "Base URL for Mimir remote_write, e.g. https://prometheus-prod-NN-<region>.grafana.net. No path suffix."
   type        = string
+  default     = null
 
   validation {
-    condition     = startswith(var.mimir_write_url, "https://")
+    condition     = var.mimir_write_url == null ? true : startswith(var.mimir_write_url, "https://")
     error_message = "mimir_write_url must be https:// - the collector refuses a non-TLS endpoint by construction."
   }
 }
@@ -80,14 +85,16 @@ variable "mimir_write_url" {
 variable "mimir_tenant" {
   description = "Mimir tenant id - the stack's hmInstancePromId. NOT the stack id; that fails as a 401 rather than a crash."
   type        = string
+  default     = null
 }
 
 variable "loki_write_url" {
   description = "Base URL for the Loki push API, e.g. https://logs-prod-NNN.grafana.net. No path suffix."
   type        = string
+  default     = null
 
   validation {
-    condition     = can(regex("^https://[A-Za-z0-9.-]+/?$", var.loki_write_url))
+    condition     = var.loki_write_url == null ? true : can(regex("^https://[A-Za-z0-9.-]+/?$", var.loki_write_url))
     error_message = "loki_write_url must be an HTTPS origin with no path, query or fragment."
   }
 }
@@ -95,6 +102,7 @@ variable "loki_write_url" {
 variable "loki_tenant" {
   description = "Loki tenant id - the stack's hlInstanceId."
   type        = string
+  default     = null
 }
 
 # --- Storage ---------------------------------------------------------------------------------------
@@ -351,7 +359,9 @@ variable "tiers" {
     The four scan tiers. Each becomes one task definition and one EventBridge schedule, retained even
     when disabled. Module defaults: T1 hourly at :05, T2 daily, T3 six-hourly, T4 daily, interpreted in
     schedule_timezone (default UTC). Deployment expressions may override these cadences; RUNBOOK.md
-    holds the canonical operator timetable.
+    holds the canonical operator timetable. schedule_expression is optional: a t1-t4 entry without one
+    takes the same default from `local.default_tier_schedules`, and in manifest mode the aws.<tier>_schedule
+    key supplies it, so a manifest-mode consumer passes sizing only.
 
     Separate task definitions rather than one shared definition with per-schedule overrides, because
     EventBridge Scheduler's ECS target has NO container_overrides field - the AWS `EcsParameters` type
@@ -363,7 +373,7 @@ variable "tiers" {
     local computation or surviving HTTP reads. See docs/source-resource-fences.md.
   EOT
   type = map(object({
-    schedule_expression = string
+    schedule_expression = optional(string)
     cpu                 = optional(number, 512)
     memory              = optional(number, 1024)
     deadline_seconds    = optional(number)

@@ -7,27 +7,27 @@ data "aws_partition" "current" {}
 locals {
   # `coalesce` treats "" as a present value, so an empty variable would beat the computed default.
   # Hence explicit emptiness checks rather than coalesce throughout.
-  bucket_name = var.bucket_name != "" ? var.bucket_name : "${var.name_prefix}-data"
-  secret_name = var.secret_name != "" ? var.secret_name : "${var.name_prefix}/tokens"
+  bucket_name = local.inputs.bucket_name != "" ? local.inputs.bucket_name : "${local.inputs.name_prefix}-data"
+  secret_name = local.inputs.secret_name != "" ? local.inputs.secret_name : "${local.inputs.name_prefix}/tokens"
 
   bucket_arn = "arn:${data.aws_partition.current.partition}:s3:::${local.bucket_name}"
 
   # Bucket configuration is managed for a created bucket, and for an adopted one only on request.
   # The bucket resource itself stays create-only, so adoption never puts the data in destroy scope.
-  manage_bucket_config = var.create_bucket || var.manage_adopted_bucket_config
-  bucket_id            = var.create_bucket ? aws_s3_bucket.data[0].id : local.bucket_name
-  bucket_config_arn    = var.create_bucket ? aws_s3_bucket.data[0].arn : local.bucket_arn
+  manage_bucket_config = local.inputs.create_bucket || local.inputs.manage_adopted_bucket_config
+  bucket_id            = local.inputs.create_bucket ? aws_s3_bucket.data[0].id : local.bucket_name
+  bucket_config_arn    = local.inputs.create_bucket ? aws_s3_bucket.data[0].arn : local.bucket_arn
 
   # The Firehose endpoint is a property of the Loki write HOST, not of the stack's regionSlug or
   # clusterSlug. Prefixing the configured hostname is therefore both simpler and more correct than
   # reconstructing a host from unrelated control-plane inventory. `loki_write_url` is validated as an
   # origin above, so removing the scheme and optional trailing slash cannot retain a path.
-  loki_hostname          = trimsuffix(trimprefix(var.loki_write_url, "https://"), "/")
+  loki_hostname          = trimsuffix(trimprefix(local.inputs.loki_write_url, "https://"), "/")
   firehose_loki_endpoint = "https://aws-${local.loki_hostname}/aws-logs/api/v1/push"
 
   # Globally unique without asking the caller for another name. `name_prefix` is already the deployment
   # identity and the account suffix prevents a generic module consumer colliding with another account.
-  firehose_backup_bucket_name = "${var.name_prefix}-fh-failed-${data.aws_caller_identity.current.account_id}"
+  firehose_backup_bucket_name = "${local.inputs.name_prefix}-fh-failed-${data.aws_caller_identity.current.account_id}"
 
   # Common attributes become Loki stream labels after Grafana drops the required `lbl_` prefix. The
   # shared CloudWatch group multiplexes every scanner tier, so `tier=ecs` is deliberately a bounded
@@ -39,7 +39,7 @@ locals {
   # Per-stack reader credentials (PLAN 17D). The path is also parsed back into a slug by
   # `bin/provision.py::ssm_list_slugs`, which is how pruning knows which stacks hold a credential - so
   # the trailing element must stay exactly the slug and nothing else.
-  stack_token_prefix = var.stack_token_prefix
+  stack_token_prefix = local.inputs.stack_token_prefix
   stack_token_arn_prefix = join("", [
     "arn:${data.aws_partition.current.partition}:ssm:",
     data.aws_region.current.region,
@@ -50,7 +50,7 @@ locals {
   # A created secret's ARN is known from the resource; an adopted one must be looked up, because
   # Secrets Manager appends a random 6-character suffix to every ARN that cannot be derived from the
   # name. Getting this wrong yields a task that fails to start with an unhelpful ResourceNotFound.
-  secret_arn = var.create_secret ? aws_secretsmanager_secret.tokens[0].arn : data.aws_secretsmanager_secret.tokens[0].arn
+  secret_arn = local.inputs.create_secret ? aws_secretsmanager_secret.tokens[0].arn : data.aws_secretsmanager_secret.tokens[0].arn
 
   # Resolves to "" rather than indexing a repository that was not created. Indexing it directly fails
   # with "Invalid index" while EVALUATING this local, which happens before any resource precondition can
@@ -69,8 +69,8 @@ locals {
   # Task definitions likewise exist for every tier regardless, so a disabled tier can still be run by
   # hand with `aws ecs run-task`, which is how the runbook backfills after an outage.
   schedule_state = {
-    for name, cfg in var.tiers : name => (var.schedules_enabled && cfg.enabled) ? "ENABLED" : "DISABLED"
+    for name, cfg in local.tiers : name => (local.inputs.schedules_enabled && cfg.enabled) ? "ENABLED" : "DISABLED"
   }
 
-  tags = var.tags
+  tags = tomap(merge(var.tags, local.manifest_tags))
 }

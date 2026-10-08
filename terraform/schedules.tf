@@ -10,15 +10,22 @@
 # setting that would do it.
 
 resource "aws_scheduler_schedule" "scan" {
-  for_each = var.tiers
+  for_each = local.tiers
 
-  name        = "${var.name_prefix}-${each.key}"
-  description = each.value.description != "" ? each.value.description : "${var.name_prefix} ${each.key} scan"
+  name        = "${local.inputs.name_prefix}-${each.key}"
+  description = each.value.description != "" ? each.value.description : "${local.inputs.name_prefix} ${each.key} scan"
   group_name  = "default"
 
   schedule_expression          = each.value.schedule_expression
-  schedule_expression_timezone = var.schedule_timezone
+  schedule_expression_timezone = local.inputs.schedule_timezone
   state                        = local.schedule_state[each.key]
+
+  lifecycle {
+    precondition {
+      condition     = each.value.schedule_expression != null
+      error_message = "This tier has no schedule: set its schedule_expression, or in manifest mode the aws.<tier>_schedule key. Only t1-t4 have module defaults."
+    }
+  }
 
   flexible_time_window {
     # OFF, so the schedule fires at the stated minute. A flexible window would let two tiers drift into
@@ -48,7 +55,7 @@ resource "aws_scheduler_schedule" "scan" {
       network_configuration {
         subnets          = var.subnet_ids
         security_groups  = local.security_group_ids
-        assign_public_ip = var.assign_public_ip
+        assign_public_ip = local.inputs.assign_public_ip
       }
     }
 

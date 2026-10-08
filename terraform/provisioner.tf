@@ -16,9 +16,9 @@
 # two runs means this job is broken.
 
 resource "aws_ecs_task_definition" "provisioner" {
-  count = var.create_provisioner ? 1 : 0
+  count = local.inputs.create_provisioner ? 1 : 0
 
-  family                   = "${var.name_prefix}-provisioner"
+  family                   = "${local.inputs.name_prefix}-provisioner"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = var.provisioner_cpu
@@ -32,11 +32,15 @@ resource "aws_ecs_task_definition" "provisioner" {
       condition     = local.image != ""
       error_message = "No container image: set var.image, or leave create_ecr_repository = true so the module can default to the repository it creates."
     }
+    precondition {
+      condition     = try(local.manifest.provisioner.GCINSIGHT_SSM_REGION, data.aws_region.current.region) == data.aws_region.current.region
+      error_message = "consumer_manifest runtime.provisioner GCINSIGHT_SSM_REGION must equal the provider region the module renders."
+    }
   }
 
   runtime_platform {
     operating_system_family = "LINUX"
-    cpu_architecture        = var.task_architecture
+    cpu_architecture        = local.inputs.task_architecture
   }
 
   container_definitions = jsonencode([
@@ -52,36 +56,36 @@ resource "aws_ecs_task_definition" "provisioner" {
       command    = []
 
       environment = [
-        { name = "GCINSIGHT_ORG_ID", value = var.grafana_org_id },
+        { name = "GCINSIGHT_ORG_ID", value = local.inputs.grafana_org_id },
         # Only this stack's reader receives the second exact datasource query scope needed by the
         # capability-adoption collector input. Every other stack stays usage-insights-only.
-        { name = "GCINSIGHT_WRITE_STACK", value = var.write_stack_slug },
+        { name = "GCINSIGHT_WRITE_STACK", value = local.inputs.write_stack_slug },
         # The credential store's region, read by bin/provision.py. Distinct from the bucket region
         # variable so the two can diverge without a code change.
         { name = "GCINSIGHT_SSM_REGION", value = data.aws_region.current.region },
-        { name = "GCINSIGHT_STACK_TOKEN_PREFIX", value = var.stack_token_prefix },
-        { name = "GCINSIGHT_ROLE_NAME", value = var.role_name },
-        { name = "GCINSIGHT_ROLE_DISPLAY", value = var.role_display },
-        { name = "GCINSIGHT_ROLE_GROUP", value = var.role_group },
-        { name = "GCINSIGHT_READER_SA_NAME", value = var.reader_service_account_name },
-        { name = "GCINSIGHT_ADMIN_SA_NAME", value = var.admin_service_account_name },
-        { name = "GCINSIGHT_TOKEN_NAME_PREFIX", value = var.token_name_prefix },
-        { name = "GCINSIGHT_RUNTIME_CONFIG_DIGEST", value = var.provisioner_runtime_config_digest },
-        { name = "GCINSIGHT_REQUIRE_EXPLICIT_CONFIG", value = var.require_explicit_consumer_config ? "1" : "0" },
+        { name = "GCINSIGHT_STACK_TOKEN_PREFIX", value = local.inputs.stack_token_prefix },
+        { name = "GCINSIGHT_ROLE_NAME", value = local.inputs.role_name },
+        { name = "GCINSIGHT_ROLE_DISPLAY", value = local.inputs.role_display },
+        { name = "GCINSIGHT_ROLE_GROUP", value = local.inputs.role_group },
+        { name = "GCINSIGHT_READER_SA_NAME", value = local.inputs.reader_service_account_name },
+        { name = "GCINSIGHT_ADMIN_SA_NAME", value = local.inputs.admin_service_account_name },
+        { name = "GCINSIGHT_TOKEN_NAME_PREFIX", value = local.inputs.token_name_prefix },
+        { name = "GCINSIGHT_RUNTIME_CONFIG_DIGEST", value = local.inputs.provisioner_runtime_config_digest },
+        { name = "GCINSIGHT_REQUIRE_EXPLICIT_CONFIG", value = local.inputs.require_explicit_consumer_config ? "1" : "0" },
         { name = "AWS_REGION", value = data.aws_region.current.region },
         { name = "AWS_DEFAULT_REGION", value = data.aws_region.current.region },
         # Comma-separated slugs to leave alone. Empty by default. These
         # render as `opted out` in the coverage view rather than as failures - without that, the
         # missing-credential alert would fire forever on a stack we were told to leave alone.
-        { name = "GCINSIGHT_OPT_OUT", value = join(",", var.provision_opt_out) },
+        { name = "GCINSIGHT_OPT_OUT", value = join(",", local.inputs.provision_opt_out) },
         # Product object readers are explicitly selected per deployment and empty by default.
-        { name = "GCINSIGHT_READER_PRODUCT_READS", value = join(",", var.provisioner_product_reads) },
+        { name = "GCINSIGHT_READER_PRODUCT_READS", value = join(",", local.inputs.provisioner_product_reads) },
       ]
 
       # Deliberately NOT given GCINSIGHT_READ_TOKEN or GCINSIGHT_WRITE_TOKEN. This task provisions; it does not
       # scan and it does not publish. See the grammar note in ecs.tf for the trailing colons.
       secrets = [
-        { name = "GCINSIGHT_PROVISION_TOKEN", valueFrom = "${local.secret_arn}:${var.provisioner_secret_key}::" },
+        { name = "GCINSIGHT_PROVISION_TOKEN", valueFrom = "${local.secret_arn}:${local.inputs.provisioner_secret_key}::" },
       ]
 
       logConfiguration = {
@@ -97,18 +101,18 @@ resource "aws_ecs_task_definition" "provisioner" {
 }
 
 resource "aws_scheduler_schedule" "provisioner" {
-  count = var.create_provisioner ? 1 : 0
+  count = local.inputs.create_provisioner ? 1 : 0
 
-  name        = "${var.name_prefix}-provisioner"
+  name        = "${local.inputs.name_prefix}-provisioner"
   description = "Reconcile the per-stack read-only reader credential across the estate"
   group_name  = "default"
 
-  schedule_expression          = var.provisioner_schedule_expression
-  schedule_expression_timezone = var.schedule_timezone
+  schedule_expression          = local.inputs.provisioner_schedule_expression
+  schedule_expression_timezone = local.inputs.schedule_timezone
   # Gated by BOTH switches. `schedules_enabled` is the platform-wide kill switch, and someone reaching
   # for it to "stop the platform" would not expect a job with estate-wide write authority to keep
   # running. `provisioner_enabled` pauses only this one.
-  state = (var.schedules_enabled && var.provisioner_enabled) ? "ENABLED" : "DISABLED"
+  state = (local.inputs.schedules_enabled && local.inputs.provisioner_enabled) ? "ENABLED" : "DISABLED"
 
   flexible_time_window {
     mode = "OFF"
@@ -131,7 +135,7 @@ resource "aws_scheduler_schedule" "provisioner" {
       network_configuration {
         subnets          = var.subnet_ids
         security_groups  = local.security_group_ids
-        assign_public_ip = var.assign_public_ip
+        assign_public_ip = local.inputs.assign_public_ip
       }
     }
 

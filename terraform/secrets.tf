@@ -15,10 +15,10 @@
 # to it would be strictly more dangerous than the pair.
 
 resource "aws_secretsmanager_secret" "tokens" {
-  count = var.create_secret ? 1 : 0
+  count = local.inputs.create_secret ? 1 : 0
 
   name        = local.secret_name
-  description = "Grafana Cloud tokens for the ${var.name_prefix} collector: ${var.reader_secret_key} (read, org realm) and ${var.writer_secret_key} (write, single-stack realm)."
+  description = "Grafana Cloud tokens for the ${local.inputs.name_prefix} collector: ${local.inputs.reader_secret_key} (read, org realm) and ${local.inputs.writer_secret_key} (write, single-stack realm)."
   tags        = local.tags
 
   # Long enough to notice and recover a deletion, short enough that a name can be reused within a
@@ -28,7 +28,7 @@ resource "aws_secretsmanager_secret" "tokens" {
 }
 
 data "aws_secretsmanager_secret" "tokens" {
-  count = var.create_secret ? 0 : 1
+  count = local.inputs.create_secret ? 0 : 1
 
   name = local.secret_name
 }
@@ -62,7 +62,7 @@ data "aws_secretsmanager_secret" "tokens" {
 # would slow every apply to fix a cosmetic error. **`just check-tags` is the safety net** for the case
 # that would actually matter - a tag genuinely absent - and it exits non-zero on a miss.
 resource "aws_secretsmanager_tag" "adopted" {
-  for_each = var.create_secret || !var.tag_adopted_secret ? {} : local.tags
+  for_each = local.inputs.create_secret || !var.tag_adopted_secret ? {} : local.tags
 
   secret_id = local.secret_arn
   key       = each.key

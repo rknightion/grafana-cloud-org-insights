@@ -272,6 +272,24 @@ datasource with that stack's reader token and the mandatory `instance_id` guard 
 `collector/sources/usage_insights.py`; a selector without that filter silently attributes another
 stack's logs.
 
+## Consumer manifest mode
+
+- `terraform/consumer_manifest.tf`'s `local.inputs` is the one table of which manifest key feeds which
+  module input; `bin/consumer_manifest.py` parses it, so keep each entry on one line in one of its three
+  shapes. `local.input_arguments`/`local.input_defaults` list every represented input except the two kill
+  switches with the variable's default: tests re-derive both, and the module refuses at plan time any
+  differing argument beside a manifest. Only `schedules_enabled` and `provisioner_enabled` stay
+  arguments beside a manifest, ANDed with it.
+- Digests cover the effective manifest (an omitted key is the module default render of the checkout
+  validated against); a full v0.9 manifest keeps byte-identical digests. `upgrade` refuses a pruned
+  manifest whose defaults change across revisions unless `--accept-default-changes` is passed.
+- The manifest's Purpose/Namespace tags are applied OVER the caller's `tags`: the manifest wins, as the
+  consumers' own merge did, and the shared deployment `var.tags` carries a different `Purpose`.
+- An aws key added after manifests existed goes in `ADDITIVE_AWS_DEFAULTS` (absent means default,
+  never hashed). `terraform/tests/fixtures/manifest-full.json` is a golden written by the pre-0.10 tool:
+  regenerate it only when the projection contract itself changes.
+- The module floor is OpenTofu 1.8 / Terraform 1.9.
+
 ## Task interface
 
 `just check` is the gate and is exactly what CI enforces. The suite runs with no AWS credentials, no

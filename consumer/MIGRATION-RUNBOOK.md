@@ -53,10 +53,13 @@ The build requires a clean generic checkout and committed deployment manifest/wi
 generic revision, deployment revision, and overlay digest, verifies every runtime projection inside the
 image, and never logs in, pushes, or moves a tag.
 
-Both the build and `check --terraform` also compare the manifest with the consumer's module block. Any
-runtime key the module renders from a variable must be wired from the manifest, unless the manifest
-value equals the module default. A gap names the key, never its value, and stops the build before any
-push. JSON-valued keys are hashed in Terraform's `jsonencode` form (sorted keys, compact, integral
+Both the build and `check --terraform` also compare the manifest with the consumer's module block. In
+manifest mode (`consumer_manifest = jsondecode(file("${path.module}/<manifest>"))`, v0.10.0 and later)
+the check refuses any explicit argument for an input the manifest represents and any tier
+`schedule_expression`, and requires the `consumer_manifest` argument to read the manifest being
+checked. With explicit wiring, any runtime key the module renders from a variable must be wired from
+the manifest, unless the manifest value equals the module default. Either way a problem names the key
+or input, never its value, and stops the build before any push. JSON-valued keys are hashed in Terraform's `jsonencode` form (sorted keys, compact, integral
 numbers), so the key order a person typed no longer changes the digest.
 
 On the first upgrade to a revision with that normalisation, an existing manifest's recorded digests no
@@ -66,6 +69,35 @@ a clean checkout of the TARGET revision, then run `upgrade`.
 The upgrade command journals the original and target manifest/Terraform pair before replacing either
 file. A check refuses an incomplete journal. Re-running the upgrade restores the original pair from a
 valid journal before retrying; it refuses recovery if either file was independently edited.
+
+## Moving to manifest mode (v0.10.0)
+
+1. Upgrade to the v0.10.0 commit as above. The unchanged manifest validates with its old digests.
+2. Replace the module block's glue with `consumer_manifest`. Keep only the two kill switches
+   (`schedules_enabled`, `provisioner_enabled`, ANDed with the manifest), and the inputs the manifest
+   does not represent: `image`, `subnet_ids`, `firehose_access_key_secret_arn`, `tiers` sizing without
+   `schedule_expression`, `tags`, `tag_adopted_secret` and `bucket_policy_source_json`. Drop the
+   deployment's own merge of the Purpose and Namespace tags: the module applies `aws.purpose_tag` and
+   `aws.cost_namespace` over `tags`, so the manifest wins a key clash as the old merge did. Any other gate the
+   deployment ANDed into a represented input has no argument left; set the manifest value instead.
+   `aws.manage_adopted_bucket_config` (optional, absent means false) is the manifest key for that input.
+   The block shape is in
+   [terraform/README.md](../terraform/README.md#manifest-mode-for-consumer-deployments).
+3. Optionally prune: `python3 bin/consumer_manifest.py regenerate --manifest <m> --prune-defaults`
+   from the clean v0.10.0 checkout. Every projection and overlay digest is unchanged, so an image built
+   for the unpruned manifest still matches. Keys without a module default, and the names of an adopted
+   bucket or secret, always stay.
+4. Run the check above, then plan. The plan must show no task-definition, schedule, bucket, secret or
+   tag change; the module's `task_environments`, `schedules` and `tags` outputs give the rendered
+   values when a difference needs explaining.
+
+A later `upgrade` of a pruned manifest compares the module defaults of the current and target
+revisions. It prints the name (never the value) of every omitted key whose effective value would change
+and refuses unless `--accept-default-changes` is passed; restore such a key explicitly to keep its old
+value instead.
+
+A pruned manifest is valid only for a module revision with manifest mode. Rolling back below v0.10.0
+restores the saved unpruned manifest with its old module ref and image digest.
 
 ## Deployment stopping conditions
 

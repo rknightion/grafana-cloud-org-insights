@@ -19,7 +19,7 @@
 # one, keeping the implicit dependency, and the adopted bucket's name otherwise.
 
 resource "aws_s3_bucket" "data" {
-  count = var.create_bucket ? 1 : 0
+  count = local.inputs.create_bucket ? 1 : 0
 
   bucket = local.bucket_name
   tags   = local.tags

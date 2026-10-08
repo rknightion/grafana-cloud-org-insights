@@ -173,12 +173,12 @@ class FirehoseLogPathTest(unittest.TestCase):
         subscription = _block(
             FIREHOSE, 'resource "aws_cloudwatch_log_subscription_filter" "ecs_logs"'
         )
-        self.assertIn("count = var.firehose_logs_enabled ? 1 : 0", stream)
+        self.assertIn("count = local.inputs.firehose_logs_enabled ? 1 : 0", stream)
         self.assertIn(
-            "count = var.firehose_log_subscription_enabled ? 1 : 0",
+            "count = local.inputs.firehose_log_subscription_enabled ? 1 : 0",
             subscription,
         )
-        self.assertIn("var.firehose_logs_enabled", subscription)
+        self.assertIn("local.inputs.firehose_logs_enabled", subscription)
 
     def test_destination_is_derived_from_the_configured_loki_hostname(self):
         self.assertNotIn('variable "firehose_endpoint', VARIABLES)

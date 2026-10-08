@@ -1,7 +1,7 @@
 resource "aws_ecr_repository" "collector" {
   count = var.create_ecr_repository ? 1 : 0
 
-  name                 = var.name_prefix
+  name                 = local.inputs.name_prefix
   image_tag_mutability = "MUTABLE"
   tags                 = local.tags
 

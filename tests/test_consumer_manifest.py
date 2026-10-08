@@ -9,6 +9,7 @@ import io
 import json
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import tempfile
@@ -123,9 +124,13 @@ class ManifestValidationTest(unittest.TestCase):
         for name, default in identity.LABEL_INVENTORY_DEFAULTS.items():
             self.assertNotIn(name, body["runtime"]["scan"])
             self.assertEqual(upgraded["runtime"]["scan"][name], default)
+        # A partly present group is a pruned manifest whose omitted members are module defaults, never
+        # the legacy form: it cannot validate against the old digest, and it hashes as the upgraded one.
         body["runtime"]["scan"]["GCINSIGHT_LABEL_INVENTORY_ENABLED"] = "0"
-        with self.assertRaisesRegex(consumer_manifest.ManifestError, "keys differ"):
+        with self.assertRaisesRegex(consumer_manifest.ManifestError, "overlay_digest|digest drift"):
             consumer_manifest.validate(body)
+        _, partial = consumer_manifest.calculated_digests(body)
+        self.assertEqual(partial["scan"], upgraded["runtime_projection_digests"]["scan"])
 
     def test_label_policy_canonicalization_and_invalid_limits(self):
         body = fixture()
@@ -411,6 +416,325 @@ class TerraformWiringPreflightTest(unittest.TestCase):
         gaps = consumer_manifest.terraform_wiring_gaps(body, CONSUMER_TF % "", self.MODULE)
         self.assertTrue(any("GCINSIGHT_OPT_OUT" in gap for gap in gaps))
         self.assertNotIn("customer-stack-secret", " ".join(gaps))
+
+
+FIXTURES = ROOT / "terraform" / "tests" / "fixtures"
+
+
+def committed(name: str) -> dict:
+    return json.loads((FIXTURES / f"manifest-{name}.json").read_text())
+
+
+class DefaultOmissionTest(unittest.TestCase):
+    """v0.10: a manifest may omit a key whose value is the module default; digests cover the effective manifest."""
+
+    def test_a_manifest_written_by_the_previous_tool_keeps_its_exact_digests(self):
+        # manifest-full.json was written by this tool at 7ba5172, before default omission existed.
+        body = committed("full")
+        consumer_manifest.validate(body)
+        self.assertEqual(consumer_manifest.calculated_digests(body),
+                         (body["overlay_digest"], body["runtime_projection_digests"]))
+        self.assertEqual(consumer_manifest.effective(body), body)
+
+    def test_pruning_changes_no_digest_and_renders_the_same_environment(self):
+        for name, body in (("full", committed("full")), ("distinct", committed("distinct")),
+                           ("unit", fixture())):
+            with self.subTest(manifest=name):
+                pruned = consumer_manifest.regenerate(body, prune_defaults=True)
+                consumer_manifest.validate(pruned)
+                self.assertEqual(pruned["runtime_projection_digests"], body["runtime_projection_digests"])
+                self.assertEqual(pruned["overlay_digest"], body["overlay_digest"])
+                self.assertEqual(consumer_manifest.effective(pruned), body)
+                with tempfile.TemporaryDirectory() as temp:
+                    lines = {}
+                    for label, value in (("full", body), ("pruned", pruned)):
+                        path = pathlib.Path(temp) / f"{label}.json"
+                        consumer_manifest.write_json(path, value)
+                        out = io.StringIO()
+                        with contextlib.redirect_stdout(out):
+                            consumer_manifest.command_env(argparse.Namespace(manifest=path, kind="scan"))
+                        lines[label] = sorted(out.getvalue().splitlines())
+                    self.assertEqual(lines["pruned"], lines["full"])
+        self.assertLess(consumer_manifest._key_count(committed("pruned")),
+                        consumer_manifest._key_count(committed("full")))
+
+    def test_the_committed_pruned_fixture_is_the_pruned_full_fixture(self):
+        # The tofu equivalence test renders this file; it must be exactly what the tool produces.
+        self.assertEqual(consumer_manifest.regenerate(committed("full"), prune_defaults=True),
+                         committed("pruned"))
+
+    def test_prune_cli_is_idempotent(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = pathlib.Path(temp) / "manifest.json"
+            consumer_manifest.write_json(path, committed("full"))
+            outputs = []
+            for _ in range(2):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(consumer_manifest.main(
+                        ["regenerate", "--manifest", str(path), "--prune-defaults"]), 0)
+                outputs.append(path.read_bytes())
+            self.assertEqual(outputs[0], outputs[1])
+            self.assertNotEqual(outputs[0], consumer_manifest.json_text(committed("full")).encode())
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(consumer_manifest.main(["regenerate", "--manifest", str(path)]), 0)
+            self.assertEqual(path.read_bytes(), outputs[0], "plain regenerate must not refill a pruned manifest")
+
+    def test_what_pruning_must_keep(self):
+        pruned = committed("pruned")
+        scan, aws = pruned["runtime"]["scan"], pruned["aws"]
+        # An all-default label group keeps one member, or it would read as the pre-label legacy form.
+        body = committed("full")
+        body["runtime"]["scan"]["GCINSIGHT_LABEL_INVENTORY_ENABLED"] = "0"
+        body = consumer_manifest.regenerate(body)
+        label = consumer_manifest.regenerate(body, prune_defaults=True)["runtime"]["scan"]
+        self.assertEqual([name for name in identity.LABEL_INVENTORY_DEFAULTS if name in label],
+                         ["GCINSIGHT_LABEL_INVENTORY_ENABLED"])
+        # Keys without a module default, and non-default values, always stay.
+        for name in ("GCINSIGHT_ORG_ID", "GCINSIGHT_MIMIR_URL", "GCINSIGHT_S3_BUCKET", "GCINSIGHT_OPT_OUT",
+                     "GCINSIGHT_COVERAGE_SCORE_WEIGHTS"):
+            self.assertIn(name, scan)
+        self.assertIn("name_prefix", aws)
+        self.assertIn("t2_schedule", aws)
+        self.assertNotIn("t1_schedule", aws)
+        # An adopted resource keeps its explicit name even when it equals the derived default.
+        adopted = committed("full")
+        adopted["aws"].update(create_secret=False, secret_name=adopted["aws"]["name_prefix"] + "/tokens")
+        adopted = consumer_manifest.regenerate(adopted)
+        self.assertIn("secret_name", consumer_manifest.regenerate(adopted, prune_defaults=True)["aws"])
+
+    def test_omitting_a_key_without_a_default_still_fails(self):
+        body = committed("pruned")
+        body["runtime"]["scan"].pop("GCINSIGHT_MIMIR_TENANT")
+        with self.assertRaisesRegex(consumer_manifest.ManifestError, "missing=.*GCINSIGHT_MIMIR_TENANT"):
+            consumer_manifest.validate(body)
+        body = committed("pruned")
+        body["aws"].pop("purpose_tag")
+        with self.assertRaisesRegex(consumer_manifest.ManifestError, "aws keys differ"):
+            consumer_manifest.validate(body)
+        body = committed("full")
+        body["aws"].pop("secret_name")  # create_secret is false: the secret is adopted
+        with self.assertRaisesRegex(consumer_manifest.ManifestError, "secret_name must be explicit"):
+            consumer_manifest.validate(body)
+
+    def test_the_additive_adopted_bucket_switch_is_absent_by_default(self):
+        absent = committed("full")
+        self.assertNotIn("manage_adopted_bucket_config", absent["aws"])
+        explicit_false = consumer_manifest.regenerate(
+            dict(absent, aws=dict(absent["aws"], manage_adopted_bucket_config=False)))
+        self.assertEqual(explicit_false["overlay_digest"], absent["overlay_digest"])
+        self.assertNotIn("manage_adopted_bucket_config",
+                         consumer_manifest.regenerate(explicit_false, prune_defaults=True)["aws"])
+        enabled = consumer_manifest.regenerate(
+            dict(absent, aws=dict(absent["aws"], manage_adopted_bucket_config=True)))
+        self.assertNotEqual(enabled["overlay_digest"], absent["overlay_digest"])
+        self.assertIn("manage_adopted_bucket_config",
+                      consumer_manifest.regenerate(enabled, prune_defaults=True)["aws"])
+        bad = dict(absent, aws=dict(absent["aws"], manage_adopted_bucket_config="true"))
+        with self.assertRaisesRegex(consumer_manifest.ManifestError, "must be booleans"):
+            consumer_manifest.regenerate(bad)
+
+    def test_comma_lists_must_survive_the_module_compact_unchanged(self):
+        for env in ("GCINSIGHT_OPT_OUT", "GCINSIGHT_READER_PRODUCT_READS"):
+            for value in ("slo,,reports", ",slo", "slo,", ","):
+                with self.subTest(env=env, value=value):
+                    body = committed("full")
+                    body["runtime"]["scan"][env] = value
+                    body["runtime"]["provisioner"][env] = value
+                    with self.assertRaisesRegex(consumer_manifest.ManifestError, "canonical comma list"):
+                        consumer_manifest.regenerate(body)
+            for value in ("", "slo", "slo,reports"):
+                with self.subTest(env=env, value=value):
+                    body = committed("full")
+                    body["runtime"]["scan"][env] = value
+                    body["runtime"]["provisioner"][env] = value
+                    consumer_manifest.regenerate(body)
+
+    def test_the_schema_requires_exactly_the_keys_that_have_no_default(self):
+        schema = consumer_manifest.load_json(consumer_manifest.SCHEMA_PATH)["properties"]["aws"]
+        interface = consumer_manifest.module_manifest_interface()
+        self.assertEqual(set(schema["required"]), set(interface.required["aws"]))
+
+
+class ManifestModeInterfaceTest(unittest.TestCase):
+    """terraform/consumer_manifest.tf is the one table of what manifest mode reads; re-derive it."""
+
+    MODULE = ROOT / "terraform"
+
+    def test_every_rendered_input_reads_its_projected_key_in_manifest_mode(self):
+        interface = consumer_manifest.module_manifest_interface(self.MODULE)
+        for kind, entries in consumer_manifest.module_env_inputs(self.MODULE).items():
+            for env, (variable, _expr) in entries.items():
+                if env not in identity.PROJECTION_ENVS[kind]:
+                    continue
+                with self.subTest(kind=kind, env=env):
+                    reads = interface.inputs.get((kind, env)) or interface.inputs.get(("scan", env))
+                    self.assertEqual(reads, variable)
+        for (section, key), variable in interface.inputs.items():
+            if section != "aws":
+                self.assertIn(key, identity.PROJECTION_ENVS[section], variable)
+
+    def test_the_aws_section_is_fully_represented(self):
+        interface = consumer_manifest.module_manifest_interface(self.MODULE)
+        schema = consumer_manifest._required_keys("aws")
+        represented = {key for (section, key) in interface.inputs if section == "aws"}
+        represented |= {key for (_section, key), _absent in interface.kill_switches.values()}
+        represented |= {f"{tier}_schedule" for tier in interface.tier_schedules}
+        represented |= set(interface.tag_keys.values())
+        self.assertEqual(schema - represented, set())
+        self.assertEqual(interface.tag_keys, {"Purpose": "purpose_tag", "Namespace": "cost_namespace"})
+        self.assertEqual(set(interface.kill_switches), {"schedules_enabled", "provisioner_enabled"})
+        self.assertEqual(interface.rendered, {"scan_runtime_config_digest",
+                                              "provisioner_runtime_config_digest",
+                                              "require_explicit_consumer_config"})
+
+    def test_terraform_required_keys_are_exactly_the_keys_without_a_default(self):
+        interface = consumer_manifest.module_manifest_interface(self.MODULE)
+        defaults = consumer_manifest.module_default_renders(self.MODULE)
+        for section in ("scan", "provisioner"):
+            with self.subTest(section=section):
+                without = {env for env in identity.PROJECTION_ENVS[section]
+                           if (section, env) not in defaults}
+                self.assertEqual(set(interface.required[section]), without)
+        represented = {key for (section, key) in interface.inputs if section == "aws"}
+        represented |= set(interface.tag_keys.values())
+        self.assertEqual(set(interface.required["aws"]),
+                         {key for key in represented if ("aws", key) not in defaults})
+
+    def test_each_aws_key_feeds_the_input_of_its_own_name(self):
+        # Booleans cannot be pairwise distinct across two fixtures, so a swap between two of them is
+        # caught here by name rather than by a render.
+        interface = consumer_manifest.module_manifest_interface(self.MODULE)
+        renames = {"provisioner_schedule": "provisioner_schedule_expression"}
+        for (section, key), variable in interface.inputs.items():
+            if section == "aws":
+                with self.subTest(key=key):
+                    self.assertEqual(variable, renames.get(key, key))
+
+    def test_the_plan_time_refusal_table_reads_each_variable_and_covers_every_refused_input(self):
+        text = (self.MODULE / "consumer_manifest.tf").read_text()
+        block = consumer_manifest._local_block(text, "input_arguments")
+        entries = re.findall(r"^\s*([a-z0-9_]+)\s*=\s*var\.([a-z0-9_]+)\s*$", block, re.M)
+        self.assertEqual(len(entries), len([line for line in block.splitlines() if line.strip()]))
+        for name, variable in entries:
+            self.assertEqual(name, variable)
+        interface = consumer_manifest.module_manifest_interface(self.MODULE)
+        self.assertEqual({name for name, _ in entries}, set(interface.refused))
+
+    def test_default_tier_schedules_repeat_the_tiers_variable_defaults(self):
+        interface = consumer_manifest.module_manifest_interface(self.MODULE)
+        variables = (self.MODULE / "variables.tf").read_text()
+        block = variables[variables.index('variable "tiers"'):]
+        block = block[:block.index("\n}\n")]
+        declared = dict(re.findall(
+            r'^\s*(t\d)\s*=\s*\{[^}]*?schedule_expression\s*=\s*"([^"]*)"', block, re.M | re.S))
+        self.assertEqual(set(declared), {"t1", "t2", "t3", "t4"})
+        self.assertEqual(interface.tier_schedules, declared)
+
+    def test_shared_keys_are_exactly_the_keys_both_projections_carry(self):
+        interface = consumer_manifest.module_manifest_interface(self.MODULE)
+        self.assertEqual(set(interface.shared), set(identity.SCAN_ENV) & set(identity.PROVISIONER_ENV))
+
+    def test_an_unparseable_inputs_entry_fails_closed(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = pathlib.Path(temp)
+            for path in self.MODULE.glob("*.tf"):
+                shutil.copyfile(path, root / path.name)
+            text = (root / "consumer_manifest.tf").read_text().replace(
+                "    loki_job ", "    loki_job = try(local.manifest.scan.GCINSIGHT_LOKI_JOB, var.loki_job)\n    unused ", 1)
+            (root / "consumer_manifest.tf").write_text(text)
+            with self.assertRaisesRegex(consumer_manifest.ManifestError, "unsupported shape"):
+                consumer_manifest.module_manifest_interface(root)
+
+
+MANIFEST_MODE_TF = """
+module "insights" {
+  count  = var.enabled ? 1 : 0
+  source = "git::https://github.com/rknightion/grafana-cloud-org-insights.git//terraform?ref=%s"
+
+  consumer_manifest = jsondecode(file("${path.module}/%s"))
+
+  image      = var.image
+  subnet_ids = module.vpc.private_subnets
+  tiers = {
+    t1 = { cpu = 512, memory = 1024, deadline_seconds = 900 }
+  }
+  schedules_enabled   = var.schedules_enabled
+  provisioner_enabled = var.provisioner_enabled
+  tags                = var.tags
+  %s
+}
+"""
+
+
+class ManifestModeCheckTest(unittest.TestCase):
+    MODULE = ROOT / "terraform"
+
+    def problems(self, extra="", manifest_name="consumer.overlay.json"):
+        with tempfile.TemporaryDirectory() as temp:
+            root = pathlib.Path(temp)
+            manifest = root / "consumer.overlay.json"
+            consumer_manifest.write_json(manifest, committed("pruned"))
+            terraform = root / "consumer.tf"
+            text = MANIFEST_MODE_TF % ("a" * 40, manifest_name, extra)
+            terraform.write_text(text)
+            return consumer_manifest.manifest_mode_problems(manifest, terraform, text, self.MODULE)
+
+    def test_a_manifest_mode_block_with_only_ordinary_arguments_and_kill_switches_passes(self):
+        self.assertEqual(self.problems(), [])
+
+    def test_an_explicit_argument_for_a_represented_input_is_refused_by_name_only(self):
+        for argument, variable in (
+            ('grafana_org_id = "customer-org-secret-value"', "grafana_org_id"),
+            ("role_name = local.manifest.runtime.provisioner.GCINSIGHT_ROLE_NAME", "role_name"),
+            ("create_bucket = false", "create_bucket"),
+            ('scan_runtime_config_digest = "abc"', "scan_runtime_config_digest"),
+            ("require_explicit_consumer_config = true", "require_explicit_consumer_config"),
+        ):
+            with self.subTest(variable=variable):
+                problems = self.problems(argument)
+                self.assertEqual(len(problems), 1, problems)
+                self.assertIn(variable, problems[0])
+                self.assertNotIn("customer-org-secret-value", problems[0])
+
+    def test_a_tier_schedule_expression_is_refused(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = pathlib.Path(temp)
+            manifest = root / "consumer.overlay.json"
+            consumer_manifest.write_json(manifest, committed("pruned"))
+            source = (MANIFEST_MODE_TF % ("a" * 40, manifest.name, "")).replace(
+                "deadline_seconds = 900 }", 'deadline_seconds = 900, schedule_expression = "cron(1 * * * ? *)" }')
+            problems = consumer_manifest.manifest_mode_problems(
+                manifest, root / "consumer.tf", source, self.MODULE)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("schedule_expression", problems[0])
+
+    def test_the_manifest_argument_must_read_the_checked_manifest(self):
+        problems = self.problems(manifest_name="other.overlay.json")
+        self.assertEqual(len(problems), 1)
+        self.assertIn("consumer_manifest must be", problems[0])
+
+    def test_explicit_wiring_is_not_manifest_mode(self):
+        self.assertIsNone(consumer_manifest.manifest_mode_problems(
+            pathlib.Path("unused.json"), pathlib.Path("unused.tf"), CONSUMER_TF % "", self.MODULE))
+
+    def test_a_checkout_at_another_revision_is_reported_before_digest_drift(self):
+        body = committed("pruned")  # revision 000..., never this checkout's HEAD
+        body["runtime"]["scan"]["GCINSIGHT_MIMIR_TENANT"] = "changed"
+        with tempfile.TemporaryDirectory() as temp:
+            path = pathlib.Path(temp) / "manifest.json"
+            consumer_manifest.write_json(path, body)
+            err = io.StringIO()
+            with contextlib.redirect_stderr(err):
+                self.assertEqual(consumer_manifest.main(["check", "--manifest", str(path)]), 2)
+        self.assertIn("HEAD differs from the manifest revision", err.getvalue())
+
+    def test_a_module_revision_without_manifest_mode_is_refused(self):
+        with tempfile.TemporaryDirectory() as temp:
+            problems = consumer_manifest.manifest_mode_problems(
+                pathlib.Path(temp) / "consumer.overlay.json", pathlib.Path(temp) / "consumer.tf",
+                MANIFEST_MODE_TF % ("a" * 40, "consumer.overlay.json", ""), pathlib.Path(temp))
+        self.assertEqual(len(problems), 1)
+        self.assertIn("no consumer_manifest input", problems[0])
 
 
 class UpgradeTest(unittest.TestCase):
@@ -717,6 +1041,92 @@ class ConsumerShellTest(unittest.TestCase):
             )
             self.assertEqual(rejected.returncode, 2)
             self.assertIn("replacement product core at collector", rejected.stderr)
+
+    def test_upgrade_names_changed_defaults_of_omitted_keys_and_needs_acceptance(self):
+        with tempfile.TemporaryDirectory() as name:
+            temp = pathlib.Path(name)
+            product, before = self.clean_product_copy(temp)
+            variables = product / "terraform" / "variables.tf"
+            text = variables.read_text()
+            marker = 'variable "loki_job" {'
+            start = text.index(marker)
+            end = text.index("\n}\n", start)
+            variables.write_text(text[:start] + text[start:end].replace(
+                'default     = "gcinsight"', 'default     = "gcinsight-next"') + text[end:])
+            self.run_command("git", "commit", "-qam", "change a module default", cwd=product)
+            after = self.run_command("git", "rev-parse", "HEAD", cwd=product).stdout.strip()
+            body = committed("full")
+            body["generic_source"]["revision"] = before
+            body = consumer_manifest.regenerate(body, prune_defaults=True)
+            self.assertNotIn("GCINSIGHT_LOKI_JOB", body["runtime"]["scan"])
+            manifest = temp / "consumer.overlay.json"
+            terraform = temp / "consumer.tf"
+            manifest.write_text(consumer_manifest.json_text(body))
+            terraform.write_text(MANIFEST_MODE_TF % (before, manifest.name, ""))
+            original = (manifest.read_bytes(), terraform.read_bytes())
+
+            def upgrade(accept):
+                args = argparse.Namespace(revision=after, manifest=manifest, terraform=terraform,
+                                          generic_source=product, accept_default_changes=accept)
+                out = io.StringIO()
+                with mock.patch.object(consumer_manifest, "verify_remote_commit"), \
+                        contextlib.redirect_stdout(out):
+                    try:
+                        consumer_manifest.command_upgrade(args)
+                    except consumer_manifest.ManifestError as exc:
+                        return out.getvalue(), str(exc)
+                return out.getvalue(), None
+
+            output, error = upgrade(accept=False)
+            self.assertIn("runtime.scan.GCINSIGHT_LOKI_JOB", output)
+            self.assertNotIn("gcinsight-next", output + str(error))
+            self.assertIn("--accept-default-changes", str(error))
+            self.assertEqual((manifest.read_bytes(), terraform.read_bytes()), original)
+            output, error = upgrade(accept=True)
+            self.assertIsNone(error)
+            upgraded = json.loads(manifest.read_text())
+            self.assertEqual(upgraded["generic_source"]["revision"], after)
+            self.assertNotEqual(upgraded["runtime_projection_digests"]["scan"],
+                                body["runtime_projection_digests"]["scan"])
+            self.assertEqual(upgraded["runtime_projection_digests"]["provisioner"],
+                             body["runtime_projection_digests"]["provisioner"])
+
+    def test_manifest_mode_consumer_runs_pruned_and_refuses_an_explicit_input(self):
+        with tempfile.TemporaryDirectory() as name:
+            temp = pathlib.Path(name)
+            product, revision = self.clean_product_copy(temp)
+            root = temp / "deployment"
+            root.mkdir()
+            manifest = root / "consumer.overlay.json"
+            body = committed("full")
+            body["generic_source"]["revision"] = revision
+            body = consumer_manifest.regenerate(body, prune_defaults=True)
+            self.assertNotIn("GCINSIGHT_USER_AGENT", body["runtime"]["scan"])
+            manifest.write_text(consumer_manifest.json_text(body))
+            terraform = root / "consumer.tf"
+            terraform.write_text(MANIFEST_MODE_TF % (revision, manifest.name, ""))
+            self.git_repository(root)
+            command = [
+                str(product / "bin" / "consumer-exec"), "--manifest", str(manifest),
+                "--deployment-root", str(root), "--terraform", str(terraform), "--kind", "scan", "--",
+            ]
+            code = ("import os; print(os.environ['GCINSIGHT_RUNTIME_CONFIG_DIGEST']); "
+                    "print(os.environ['GCINSIGHT_USER_AGENT'])")
+            result = self.run_command(*command, "python3", "-c", code, cwd=product)
+            # The omitted key reaches the task as the module default, under the unchanged digest.
+            self.assertEqual(result.stdout.splitlines(), [
+                body["runtime_projection_digests"]["scan"], "gcinsight-collector/1 (+grafana-ps)",
+            ])
+            terraform.write_text(MANIFEST_MODE_TF % (revision, manifest.name, 'loki_job = "private-job-value"'))
+            rejected = subprocess.run(
+                [*command, "true"], cwd=product, check=False, text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                env={**os.environ, "GCINSIGHT_CUSTOMER_IDENTIFIER_PATTERN":
+                     "synthetic-private-identifier-[0-9]{20}"},
+            )
+            self.assertEqual(rejected.returncode, 2, rejected.stderr)
+            self.assertIn("module input loki_job comes from the manifest", rejected.stderr)
+            self.assertNotIn("private-job-value", rejected.stderr)
 
 
 if __name__ == "__main__":

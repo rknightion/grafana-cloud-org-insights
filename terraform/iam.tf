@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "ecs_assume" {
 }
 
 resource "aws_iam_role" "execution" {
-  name               = "${var.name_prefix}-execution"
+  name               = "${local.inputs.name_prefix}-execution"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume.json
   tags               = local.tags
 }
@@ -63,7 +63,7 @@ resource "aws_iam_role_policy" "execution_secrets" {
 # --- Task role -------------------------------------------------------------------------------------
 
 resource "aws_iam_role" "task" {
-  name               = "${var.name_prefix}-task"
+  name               = "${local.inputs.name_prefix}-task"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume.json
   tags               = local.tags
 }
@@ -180,15 +180,15 @@ resource "aws_iam_role_policy" "task_stack_tokens" {
 # separate role and the collector never gets either.
 
 resource "aws_iam_role" "provisioner" {
-  count = var.create_provisioner ? 1 : 0
+  count = local.inputs.create_provisioner ? 1 : 0
 
-  name               = "${var.name_prefix}-provisioner"
+  name               = "${local.inputs.name_prefix}-provisioner"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume.json
   tags               = local.tags
 }
 
 data "aws_iam_policy_document" "provisioner" {
-  count = var.create_provisioner ? 1 : 0
+  count = local.inputs.create_provisioner ? 1 : 0
 
   statement {
     sid    = "ReadStackTokens"
@@ -239,7 +239,7 @@ data "aws_iam_policy_document" "provisioner" {
 }
 
 resource "aws_iam_role_policy" "provisioner" {
-  count = var.create_provisioner ? 1 : 0
+  count = local.inputs.create_provisioner ? 1 : 0
 
   name   = "write-stack-tokens"
   role   = aws_iam_role.provisioner[0].id
@@ -267,7 +267,7 @@ data "aws_iam_policy_document" "scheduler_assume" {
 }
 
 resource "aws_iam_role" "scheduler" {
-  name               = "${var.name_prefix}-scheduler"
+  name               = "${local.inputs.name_prefix}-scheduler"
   assume_role_policy = data.aws_iam_policy_document.scheduler_assume.json
   tags               = local.tags
 }
@@ -338,14 +338,14 @@ resource "aws_iam_role_policy" "scheduler" {
 # --- Grafana views reader --------------------------------------------------------------------------
 
 resource "aws_iam_user" "views_reader" {
-  count = var.create_views_reader_user ? 1 : 0
+  count = local.inputs.create_views_reader_user ? 1 : 0
 
-  name = "${var.name_prefix}-views-ro"
+  name = "${local.inputs.name_prefix}-views-ro"
   tags = local.tags
 }
 
 data "aws_iam_policy_document" "views_reader" {
-  count = var.create_views_reader_user ? 1 : 0
+  count = local.inputs.create_views_reader_user ? 1 : 0
 
   statement {
     sid       = "ReadViewsOnly"
@@ -371,7 +371,7 @@ data "aws_iam_policy_document" "views_reader" {
 }
 
 resource "aws_iam_user_policy" "views_reader" {
-  count = var.create_views_reader_user ? 1 : 0
+  count = local.inputs.create_views_reader_user ? 1 : 0
 
   name   = "read-views"
   user   = aws_iam_user.views_reader[0].name

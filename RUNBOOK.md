@@ -24,10 +24,12 @@ No setting adds a permission, widens a response cap or promises bounded process 
 The existing shared opt-out policy remains unchanged.
 
 Explicit consumers: old manifests with the entire new field group absent retain their old
-digests/defaults. Explicit regenerate/upgrade supplies the new defaults and new digests;
-check rejects partial groups. Regenerate explicitly fills missing new fields.
+digests/defaults. Explicit regenerate/upgrade supplies the new defaults and new digests.
+A partly present group is a pruned manifest whose omitted members are module defaults; it never
+validates against the old all-absent digest. `regenerate --prune-defaults` therefore keeps
+`GCINSIGHT_LABEL_INVENTORY_ENABLED` even when the whole group is default.
 Old digests remain valid with module-injected new fields only at their exact canonical defaults.
-Wire every new module variable from that projection before
+Wire every new module variable from that projection (or use manifest mode) before
 using the regenerated manifest; check never silently rewrites a deployment.
 
 ## Read-only labelling stability evidence v1
@@ -615,6 +617,33 @@ Never update or delete another access policy while operating this platform.
 Use IAM policy simulation to prove the Infinity principal is allowed on `views/*` and denied on
 `scans/*` and `locks/*`. For `ssm:GetParametersByPath`, test the bare path ARN as well
 as a child ARN; the API authorises the path itself.
+
+## Consumer manifest mode (v0.10.0)
+
+From v0.10.0 a consumer passes its manifest to the module
+(`consumer_manifest = jsondecode(file(...))`) instead of copying keys into arguments; the block shape
+is in [terraform/README.md](terraform/README.md#manifest-mode-for-consumer-deployments). Moving an
+existing consumer onto it, with the generic checkout at the v0.10.0 commit:
+
+1. `bin/consumer_manifest.py upgrade <v0.10.0 sha> --manifest <m> --terraform <tf>`, as for any
+   release. The manifest keeps every key and validates with its old digests.
+2. Replace the module block's glue with `consumer_manifest`, keeping only the kill switches
+   (`schedules_enabled`, `provisioner_enabled`) and the inputs the manifest does not represent
+   (image, subnet_ids, tiers sizing without `schedule_expression`, tags, Firehose secret ARN,
+   `tag_adopted_secret`, `bucket_policy_source_json`). Drop the consumer's own Purpose/Namespace tag
+   merge: the module applies those manifest values over `tags` (the manifest wins). Any other gate a consumer ANDed into a
+   represented input, such as a Firehose subscription bootstrap variable, has no argument left: set the
+   manifest value instead.
+3. Optionally `bin/consumer_manifest.py regenerate --manifest <m> --prune-defaults`. Every projection
+   and overlay digest stays the same, so the image and its overlay label stay valid.
+4. `bin/consumer_manifest.py check --manifest <m> --deployment-root <root> --terraform <tf>` must
+   pass; it refuses an explicit argument for a represented input by name.
+5. `tofu plan` must show no change to any task definition, schedule, bucket, secret or tag. The module's
+   `task_environments` and `schedules` outputs give the rendered values if a diff needs explaining.
+
+Rollback is the usual triplet: the previous manifest, module ref and image digest together. A pruned
+manifest is only valid for a module revision with manifest mode; restore the unpruned file with the
+v0.9 ref.
 
 ## Rollback
 

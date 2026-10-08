@@ -53,8 +53,10 @@ configurable login exclusion list.
 Expected retention and Fleet scrape policy are described below. The Terraform module exposes
 `coverage_score_weights`, `dashboard_detail_enabled`, `provision_opt_out` and
 `provisioner_product_reads` for the corresponding runtime policies. Do not use these tunables to
-store discovered inventory. A consumer must populate every projection field, even where the generic
-runtime has a default.
+store discovered inventory. A consumer's effective manifest holds every projection field. The file
+may omit a scan or provisioner field whose value is the Terraform module default;
+`bin/consumer_manifest.py` fills it from the pinned module before validating or digesting, so the task
+still verifies a complete projection.
 
 ## Optional product readers
 
