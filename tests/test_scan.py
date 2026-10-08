@@ -205,7 +205,7 @@ class LabelDomainPublicationTest(unittest.TestCase):
         with self.assertRaises(guard.DuplicateSeries):
             self.exercise([("gcinsight_estate_stacks", {"status": "total"}, 999)])
 
-    def test_t1_live_hydration_deduplicates_legacy_carry_before_native_publication(self):
+    def exercise_t1_legacy_carry_publication(self, legacy=None):
         import copy
         import datetime as dt
         from dataclasses import replace
@@ -214,9 +214,10 @@ class LabelDomainPublicationTest(unittest.TestCase):
         assistant = scan.assistant_src.summarise_stack(
             "live", {"totalUserMessages": 7}, {"NovelCategory (NovelSurface)": 7},
             {}, 1, {}, [])
-        legacy = {"tier": "t3", "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
-                  "metrics": [["gcinsight_ai_estate_messages",
-                               {"category": "NovelCategory", "surface": "NovelSurface"}, 7]]}
+        if legacy is None:
+            legacy = {"tier": "t3", "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+                      "metrics": [["gcinsight_ai_estate_messages",
+                                   {"category": "NovelCategory", "surface": "NovelSurface"}, 7]]}
         original = copy.deepcopy(legacy)
         published, wire = [], []
         real_push = scan.mimir.RemoteWriter.push
@@ -248,6 +249,7 @@ class LabelDomainPublicationTest(unittest.TestCase):
             mock.patch.object(scan.loki.LokiWriter, "push", return_value=0),
             mock.patch("urllib.request.urlopen", side_effect=post),
             mock.patch("socket.socket.connect", side_effect=AssertionError("no network")),
+            mock.patch.object(subprocess, "run", side_effect=AssertionError("no subprocess")),
             contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()),
         ):
             self.assertEqual(scan.run(FakeClient(), replace(cfg_for("t1"), dry_run=False),
@@ -258,6 +260,27 @@ class LabelDomainPublicationTest(unittest.TestCase):
         self.assertEqual(messages, [({"category": "other", "surface": "other"}, 7)])
         self.assertNotIn(b"NovelCategory", wire[0])
         self.assertEqual(legacy, original, "projection must not rewrite the retained source state")
+
+    def test_t1_live_hydration_deduplicates_legacy_carry_before_native_publication(self):
+        self.exercise_t1_legacy_carry_publication()
+
+    def test_t1_rejects_malformed_carry_before_inspecting_payload_and_still_publishes(self):
+        import datetime as dt
+
+        now = dt.datetime.now(dt.timezone.utc)
+        rejected_stamps = [
+            (now - scan.carry.MAX_CARRY_AGE - dt.timedelta(hours=1)).isoformat(),
+            (now + scan.carry.MAX_FUTURE_SKEW + dt.timedelta(hours=1)).isoformat(),
+            "invalid", None,
+        ]
+        for stamp in rejected_stamps:
+            for labels in ({"surface": "NovelSurface"}, {"category": "NovelCategory"}, None):
+                with self.subTest(stamp=stamp, labels=labels):
+                    legacy = {"tier": "t3", "metrics": [
+                        ["gcinsight_ai_estate_messages", labels, 99]]}
+                    if stamp is not None:
+                        legacy["generated_at"] = stamp
+                    self.exercise_t1_legacy_carry_publication(legacy)
 
     def test_common_boundary_projects_legacy_runner_batches_before_carry_save_and_push(self):
         # Seed AFTER real source accounting and compose, so early producer/helper projection
