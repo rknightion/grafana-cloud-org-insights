@@ -1,10 +1,10 @@
 ---
 id: GCI-0125
 title: Resolve Synthetic owner-input coverage before deployment acceptance
-status: Parked
+status: Done
 assignee: []
 created_date: '2026-10-07 16:48'
-updated_date: '2026-10-08 10:35'
+updated_date: '2026-10-08 18:17'
 labels:
   - synthetic
   - deployment-blocker
@@ -31,7 +31,7 @@ A full native T2 on the held release refused every publication because Synthetic
 <!-- AC:BEGIN -->
 - [x] #1 Owner-approved disposition resolves each blocker class while preserving unique regex-valid Synthetic uid scope, basic None, no broad query/write grant, no re-mint of working credentials, bounded reads and the publication floor.
 - [x] #2 The accepted version and any change to the older-release acceptance or serial rollout prerequisite are explicitly recorded; no immutable release is retagged or accepted by substituting another tier.
-- [ ] #3 A subsequent full native T2 exits zero and its immutable timestamped publication is linked to the exact stopped task; reader, identity, privacy, remaining dashboard/name proof and intended alert state are verified.
+- [x] #3 A subsequent full native T2 exits zero and its immutable timestamped publication is linked to the exact stopped task; reader, identity, privacy, remaining dashboard/name proof and intended alert state are verified.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -53,4 +53,6 @@ loop16: GCI-0125 (resolve Synthetic owner-input coverage before deployment accep
 loop17: implementation attempts0 for this read-only disposition; source fix allowance untouched. Natural readback unaccepted. Fresh root baseline at22:30UTC showed0retainedSTOPPED/0RUNNINGcustomerT2, actual enabledschedule03:30UTC, last task-definition R-rel4 consumer3d1. No natural run observed in the available read window. AWSSSO expired22:50UTC; prescribed+30min,+1h,+2h STS eachfailed255, no login or credential repair. No manualreplacement or customerrun. AC3 remainsOPEN. Resume afterauth recovery with exact natural stoppedARN, R-rel4consumer digest, exit0, completeSynthetic report and immutable timestamped version-specificS3 publication tied to task; existing remainingdashboard/name grading not inferred.
 
 loop18: attempts0 for read-only disposition. Natural exact-ARN T2 found from scheduler CloudTrail, revision22 bound to R-rel4consumer3d1; healthy scan_complete duration1685.01s, immutable version-specific publication03:58:51Z, Synthetic73/76 applicable,3unavailable,239known-not-applicable (fresh discovered denominator differs from81 planning). AC3 remainsOPEN: stoppeddescriptorMISSING and no terminalECS event archive discovered, so exit0 unproven. No replacement/manualrun. Resume with exact-ARN archived terminal descriptor/event; never substitute publication for exit proof.
+
+loop19 R-cust5: AC3 closed under D-GCI125-19 on the one manual customer T2 (first exact-ARN stopped descriptor), graded to the deployed R-rel8 consumer (v0.9.1 source 45621a9, image sha256:83cd6aef...). Task exit 0 (EssentialContainerExited), descriptor captured, task-definition t2:23 image digest equal to the pinned consumer. Immutable timestamped publication scans/t2/20261008T175707+0000.json, version-specific read back, body sha256 309a6f5a. Primary coverage 1.0 (315/315, 0 failed), sources_healthy and scan_healthy true, no source failures. Synthetic 73/79 applicable available (0.924), inside the D-SYN16 floor. Reader readback: 314 observed, 1 paused, 1 partial (transient HTTP 522 on one read, a different stack from the pre-rollout partial), role pairs unchanged; identity sts checked; privacy after-witness PASS (9 checks, no bucket write); dashboard collection metadata (11 uids in the insights folder) and 8 existing alert rules active and routed, unchanged. Boundary: dashboard proof is collection metadata, not browser rendering. Customer no-change plan PASS at infra 6974a4a.
 <!-- SECTION:NOTES:END -->
