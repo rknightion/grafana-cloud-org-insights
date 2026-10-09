@@ -35,7 +35,6 @@ def test_never_returning_resolver_has_total_wall_time_bound(mode, phase):
             entered.set()
             threading.Event().wait()  # never returns, including after caller timeout
         socket.getaddrinfo = resolver
-        client = ReadOnlyClient(timeout=0.1, max_attempts=1, deadline=0.2)
         if PHASE == 'pool_start':
             # Hold the lazy-start lock at the process edge: admission must expire
             # before a job can be submitted or any resolver can be entered.
@@ -48,6 +47,7 @@ def test_never_returning_resolver_has_total_wall_time_bound(mode, phase):
             assert len(_WORKERS.threads) == MAX_WORKERS
             assert all(thread.is_alive() for thread in _WORKERS.threads)
         assert not entered.is_set()
+        client = ReadOnlyClient(timeout=0.1, max_attempts=1, deadline=0.2)
         started = time.monotonic()
         try:
             if MODE == 'rpc':
