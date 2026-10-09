@@ -84,7 +84,7 @@ class SourceContractTest(unittest.TestCase):
 
         self.assertTrue(result["available"])
         self.assertEqual(result["values"]["traces"], {"101": 0.0})
-        self.assertEqual(len(client.calls), len(source.QUERIES) + 4)
+        self.assertEqual(len(client.calls), len(source.QUERIES) + len(source.FOOTPRINT_QUERIES))
         self.assertTrue(all(call[0].startswith("https://hub.example.test/") for call in client.calls))
         self.assertTrue(all(call[2] == "write-reader" for call in client.calls))
 
@@ -135,6 +135,9 @@ class FootprintBoundaryTest(unittest.TestCase):
         bodies[FOOTPRINT_EXPRESSIONS["assistant_org_users"]] = {
             "status": "success", "data": {"resultType": "vector", "result": [
                 {"metric": {"private": "private-upstream"}, "value": [0, "5"]}]}}
+        # New reporting families are deliberately absent from the historical fixture.
+        # Only tests with explicit reporting observations may populate them.
+        bodies.update({query: prometheus([]) for query in REPORTING_EXPRESSIONS.values()})
         bodies.update(overrides or {})
 
         def transport(request, _timeout):
@@ -181,7 +184,7 @@ class FootprintBoundaryTest(unittest.TestCase):
         self.assertTrue(result["available"])
         self.assertEqual(result["values"], {key: {"101": 7.0} for key in source.QUERIES})
         footprint = result["footprint"]
-        self.assertEqual(set(footprint), set(FOOTPRINT_EXPRESSIONS) | {"db_observability"})
+        self.assertEqual(set(footprint), set(FOOTPRINT_EXPRESSIONS) | set(REPORTING_EXPRESSIONS))
         for key, basis, days in (
             ("adaptive_traces", "maximum_bytes_per_second", 1),
             ("app_observability", "maximum_service_entity_count", 1),
@@ -199,8 +202,10 @@ class FootprintBoundaryTest(unittest.TestCase):
             "window_end": NOW.isoformat(),
         })
         self.assertEqual(footprint["db_observability"], {
-            "available": False, "reason": "no_verified_stack_source", "basis": "per_stack_unknown",
-            "window": None, "window_start": None, "window_end": None,
+            "available": False, "reason": "empty_response", "basis": "reporting_marker_presence",
+            "window": "24h query observation; producer window and units unverified",
+            "window_start": (NOW - dt.timedelta(days=1)).isoformat(),
+            "window_end": NOW.isoformat(),
         })
         self.assertNotIn("private-upstream", json.dumps(result))
         observed = []
@@ -215,7 +220,7 @@ class FootprintBoundaryTest(unittest.TestCase):
             self.assertEqual(params["time"], [str(int(NOW.timestamp()))])
             observed.append(params["query"][0])
         self.assertEqual(set(observed), set(source.QUERIES.values()) |
-                         set(FOOTPRINT_EXPRESSIONS.values()))
+                         set(FOOTPRINT_EXPRESSIONS.values()) | set(REPORTING_EXPRESSIONS.values()))
         self.assertEqual(len(observed), len(set(observed)))
 
     def test_optional_errors_are_independent_closed_and_never_zero(self):
@@ -287,7 +292,7 @@ class FootprintBoundaryTest(unittest.TestCase):
                 {"metric": {}, "value": [0, True]},
                 {"metric": {}, "value": [0, None]},
                 {"metric": {}, "value": [0, {}]}]
-        for key, query in FOOTPRINT_EXPRESSIONS.items():
+        for key, query in (FOOTPRINT_EXPRESSIONS | REPORTING_EXPRESSIONS).items():
             for row in rows:
                 if isinstance(row, dict) and isinstance(row.get("metric"), dict):
                     row = {**row, "metric": {"stack_id": "101"}}
@@ -482,6 +487,186 @@ class NewObservationBoundaryTest(unittest.TestCase):
         self.assertIn("gauge", row["Window"])
         self.assertNotIn("cumulative", json.dumps(row))
         self.assertNotIn("counter", json.dumps(row))
+
+
+# Reporting-only queries: count label-bearing markers, never interpret their values as units.
+REPORTING_EXPRESSIONS = {
+    "db_observability": "max_over_time(count by(stack_id)("
+        "grafanacloud_instance_active_dbo11y_instance_count)[24h:5m])",
+    "db_observability_series": "max_over_time(count by(stack_id)("
+        "grafanacloud_instance_active_dbo11y_series)[24h:5m])",
+    "db_observability_stats": "max_over_time(count by(stack_id)("
+        "grafanacloud_instance_active_dbo11y_stats)[24h:5m])",
+    "app_host_count": "max_over_time(count by(stack_id)("
+        "grafanacloud_instance_app_o11y_host_count)[24h:5m])",
+    "app_host_v2_count": "max_over_time(count by(stack_id)("
+        "grafanacloud_instance_app_o11y_host_v2_count)[24h:5m])",
+    "app_host_v3_count": "max_over_time(count by(stack_id)("
+        "grafanacloud_instance_app_o11y_host_v3_count)[24h:5m])",
+    "app_billable_host_hours": "max_over_time(grafanacloud_org_app_o11y_billable_host_hours[24h])",
+    "app_included_host_hours": "max_over_time(grafanacloud_org_app_o11y_included_host_hours[24h])",
+    "infra_billable_host_hours": "max_over_time(grafanacloud_org_infra_o11y_billable_host_hours[24h])",
+    "infra_included_host_hours": "max_over_time(grafanacloud_org_infra_o11y_included_host_hours[24h])",
+}
+REPORTING_ORG = frozenset({"app_billable_host_hours", "app_included_host_hours",
+                           "infra_billable_host_hours", "infra_included_host_hours"})
+
+
+class ReportingFootprintTest(unittest.TestCase):
+    stacks = [
+        {"slug": "hub", "id": 101, "status": "active", "url": "https://hub.example.test"},
+        {"slug": "zero-marker", "id": 202, "status": "active"},
+        {"slug": "unknown", "id": 303, "status": "active"},
+        {"slug": "paused", "id": 404, "status": "paused"},
+    ]
+
+    def probe(self, overrides=None):
+        # Count queries report marker presence even when the original gauge value was zero.
+        bodies = {query: prometheus([(101, 2), (202, 1), (404, 1), (999, 1)])
+                  for key, query in REPORTING_EXPRESSIONS.items() if key not in REPORTING_ORG}
+        bodies.update({REPORTING_EXPRESSIONS[key]: {"status": "success", "data": {
+            "resultType": "vector", "result": [{"metric": {}, "value": [0, "12"]}]}}
+                       for key in REPORTING_ORG})
+        bodies.update(overrides or {})
+        return FootprintBoundaryTest.probe(self, bodies)
+
+    def compose(self, payload, stacks=None):
+        stacks = self.stacks if stacks is None else stacks
+        return compose.build_all(stacks, Coverage(tier="t2", total=len(stacks)),
+                                 signal_inventory={}, capability_adoption=payload, now=NOW)
+
+    def test_exact_reporting_queries_compose_without_inventing_adoption_or_units(self):
+        payload = self.probe()
+        observed = {parse_qs(urlsplit(r.full_url).query)["query"][0] for r in self.requests}
+        self.assertTrue(set(REPORTING_EXPRESSIONS.values()).issubset(observed))
+        for key in REPORTING_EXPRESSIONS:
+            entry = payload["footprint"][key]
+            self.assertTrue(entry["available"], key)
+            self.assertEqual(entry["window"], "24h query observation; producer window and units unverified")
+            self.assertEqual(entry["window_start"], (NOW - dt.timedelta(days=1)).isoformat())
+            self.assertEqual(entry["window_end"], NOW.isoformat())
+        metrics, views, _ = self.compose(payload)
+        rows = {r["Capability"]: r for r in views[coverage.ADOPTION_VIEW]}
+        for title in ("Database Observability", "Application Observability host reporting"):
+            row = rows[title]
+            self.assertEqual(row["Population stacks"], 2)
+            self.assertIsNone(row["Stacks using capability"])
+            self.assertIsNone(row["Opportunity stacks"])
+            self.assertIn("1 of 3", row["Finding"])
+            self.assertIn("marker presence", row["Population basis"])
+            self.assertIn("not configured", row["Finding"])
+            self.assertIn("units unverified", row["Window"])
+        for title, metric in (
+            ("Application Observability org host-hour reporting",
+             "grafanacloud_org_app_o11y_billable_host_hours"),
+            ("Infrastructure Observability", "grafanacloud_org_infra_o11y_billable_host_hours"),
+        ):
+            row = rows[title]
+            self.assertIn("Org-only", row["Population basis"])
+            self.assertIn(metric + "=12", row["Finding"])
+            self.assertIn("not verified host hours", row["Finding"])
+            self.assertIn("no per-stack sum", row["Population basis"])
+            for column in ("Population stacks", "Stacks using capability", "Opportunity stacks"):
+                self.assertIsNone(row[column])
+        baseline = {**payload, "footprint": {
+            key: entry for key, entry in payload["footprint"].items()
+            if key not in REPORTING_EXPRESSIONS}}
+        base_metrics, _, _ = self.compose(baseline)
+        self.assertEqual(metrics, base_metrics, "reporting observations add no series")
+        self.assertFalse(any(r["Capability"] == "Database Observability"
+                             for r in views[coverage.ADOPTION_TARGET_VIEW]))
+
+    def test_missing_families_partial_reads_and_org_ambiguity_stay_unknown(self):
+        for key, query in REPORTING_EXPRESSIONS.items():
+            outcomes = [prometheus([]), (206, prometheus([(101, 1)])),
+                        RuntimeError("private-upstream"), prometheus([(101, "NaN")])]
+            if key in REPORTING_ORG:
+                outcomes.extend([prometheus([(101, 1)]), prometheus([(101, 1), (202, 2)])])
+            else:
+                outcomes.extend([prometheus([(999, 1)]), prometheus([(101, 1), (101, 2)])])
+            for outcome in outcomes:
+                with self.subTest(key=key, outcome=outcome):
+                    payload = self.probe({query: outcome})
+                    entry = payload["footprint"][key]
+                    self.assertFalse(entry["available"])
+                    self.assertNotIn("value", entry)
+                    self.assertNotIn("values", entry)
+                    self.assertNotIn("private-upstream", json.dumps(payload))
+        payload = self.probe({query: prometheus([]) for query in REPORTING_EXPRESSIONS.values()})
+        _, views, _ = self.compose(payload)
+        rows = {r["Capability"]: r for r in views[coverage.ADOPTION_VIEW]}
+        for title in ("Database Observability", "Application Observability host reporting",
+                      "Application Observability org host-hour reporting", "Infrastructure Observability"):
+            self.assertIsNone(rows[title]["Population stacks"])
+            self.assertIn("unknown", rows[title]["Finding"].lower())
+            self.assertNotIn("=0", rows[title]["Finding"])
+
+    def test_disjoint_marker_families_deduplicate_and_org_precision_is_preserved(self):
+        value = 1234567.891234567
+        overrides = {query: prometheus([]) for key, query in REPORTING_EXPRESSIONS.items()
+                     if key not in REPORTING_ORG}
+        overrides.update({
+            REPORTING_EXPRESSIONS["db_observability"]: prometheus([(101, 2)]),
+            REPORTING_EXPRESSIONS["db_observability_stats"]: prometheus([(202, 1), (404, 1)]),
+            REPORTING_EXPRESSIONS["app_host_v2_count"]: prometheus([(202, 1)]),
+            REPORTING_EXPRESSIONS["app_billable_host_hours"]: {"status": "success", "data": {
+                "resultType": "vector", "result": [{"metric": {}, "value": [0, str(value)]}]}},
+        })
+        payload = self.probe(overrides)
+        self.assertEqual(payload["footprint"]["db_observability"]["values"], {"101": 1.0})
+        _, views, _ = self.compose(payload)
+        rows = {r["Capability"]: r for r in views[coverage.ADOPTION_VIEW]}
+        self.assertEqual(rows["Database Observability"]["Population stacks"], 2)
+        self.assertIn("grafanacloud_instance_active_dbo11y_series: unknown",
+                      rows["Database Observability"]["Finding"])
+        self.assertEqual(rows["Application Observability host reporting"]["Population stacks"], 1)
+        self.assertIn("grafanacloud_org_app_o11y_billable_host_hours=" + str(value),
+                      rows["Application Observability org host-hour reporting"]["Finding"])
+
+    def test_reporting_rows_are_read_back_through_the_assembled_dashboard(self):
+        import shutil
+        import tempfile
+        from bin import dashboards
+        from collector.dashboards import build
+        from collector.emit import s3
+
+        _, views, meta = self.compose(self.probe())
+        with tempfile.TemporaryDirectory() as tmp:
+            local = pathlib.Path(tmp)
+            for existing in (pathlib.Path(__file__).resolve().parent.parent /
+                             "testdata" / "views").glob("*.json"):
+                shutil.copyfile(existing, local / existing.name)
+            (local / (coverage.ADOPTION_VIEW + ".json")).write_text(
+                json.dumps(s3.view_payload(views[coverage.ADOPTION_VIEW], meta)))
+            with mock.patch.object(build, "VIEWS_DIR", tmp), mock.patch.object(build, "BUCKET", "offline"):
+                _, document = dashboards.assemble("coverage", "infinity-offline")
+            panel = document["spec"]["elements"]["tbl_adoption"]["spec"]
+            query = panel["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+            self.assertEqual(query["parser"], "backend")
+            self.assertEqual(query["root_selector"], "rows")
+            public = json.loads((local / query["url"].rsplit("/", 1)[-1]).read_text())
+            rendered = {column["selector"] for column in query["columns"]}
+            self.assertTrue({"Population basis", "Finding", "Window"}.issubset(rendered))
+            rows = {r["Capability"]: r for r in public["rows"]}
+            self.assertEqual(rows["Database Observability"]["Population stacks"], 2)
+            for title in ("Database Observability", "Application Observability host reporting",
+                          "Application Observability org host-hour reporting", "Infrastructure Observability"):
+                self.assertEqual(set(rows[title]), rendered)
+                self.assertIn("unverified", rows[title]["Window"])
+            self.assertIn("grafanacloud_org_app_o11y_billable_host_hours=12",
+                          rows["Application Observability org host-hour reporting"]["Finding"])
+
+    def test_fresh_inventory_filters_reporting_and_org_zero_is_a_returned_observation(self):
+        zero = {"status": "success", "data": {"resultType": "vector", "result": [
+            {"metric": {}, "value": [0, "0"]}]}}
+        payload = self.probe({REPORTING_EXPRESSIONS["infra_billable_host_hours"]: zero})
+        _, views, _ = self.compose(payload, [self.stacks[2], self.stacks[3]])
+        rows = {r["Capability"]: r for r in views[coverage.ADOPTION_VIEW]}
+        self.assertIsNone(rows["Database Observability"]["Population stacks"])
+        self.assertIn("0 of 1", rows["Database Observability"]["Finding"])
+        self.assertIn("grafanacloud_org_infra_o11y_billable_host_hours=0",
+                      rows["Infrastructure Observability"]["Finding"])
+        self.assertIsNone(rows["Infrastructure Observability"]["Stacks using capability"])
 
 
 class ComposeSeamTest(unittest.TestCase):

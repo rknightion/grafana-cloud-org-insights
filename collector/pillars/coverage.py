@@ -14,6 +14,9 @@ from typing import Any
 
 from collector import observability_score, technology_registry
 from collector.pillars.cost import adaptive_eligible
+from collector.sources.capability_adoption import (
+    REPORTING_ORG_METRICS, REPORTING_STACK_METRICS, REPORTING_WINDOW,
+)
 
 Metrics = list[tuple[str, dict[str, str], float]]
 Views = dict[str, list[dict[str, Any]]]
@@ -572,18 +575,71 @@ def _footprint_rows(
                   if str(stack.get("id") or "") in values]
         row(title, basis, counts, str(entry.get("window") or "unknown"),
             str(entry.get("window_end") or ""), evidence, next_step)
-    rows.append({
-        "Capability": "Database Observability",
-        "Population basis": "Per-stack population unknown: no verified per-stack adoption/unit contract",
-        "Population stacks": None,
-        "Stacks using capability": None,
-        "Opportunity stacks": None,
-        "Finding": "Unknown: no verified per-stack adoption/unit contract. Reporting markers exist, "
-                   "but do not establish DB totals, activity, human use or entitlement; org overage is not per-stack use.",
-        "Fundable next step": "Establish a verified per-stack observation contract before targeting adoption",
-        "Window": "unknown: no verified observation window",
-        "Last seen": "",
-    })
+    # These are reporting populations, not product-use populations. Keep the existing
+    # rendered schema, but never put marker presence in its adoption/opportunity columns.
+    live_ids = {str(stack.get("id")) for stack in live if stack.get("id") is not None}
+    for title, prefix in (("Database Observability", "db_observability"),
+                          ("Application Observability host reporting", "app_host")):
+        reporting: set[str] = set()
+        details: list[str] = []
+        seen: list[str] = []
+        for key, metric in REPORTING_STACK_METRICS.items():
+            if not key.startswith(prefix):
+                continue
+            entry = footprint.get(key) or {}
+            values = (entry.get("values") or {}) if entry.get("available") else {}
+            present = {stack_id for stack_id in live_ids if (values.get(stack_id) or 0) > 0}
+            reporting.update(present)
+            details.append(f"{metric}: {len(present)} reporting live stacks" if present
+                           else f"{metric}: unknown (no live marker observation)")
+            if present and entry.get("window_end"):
+                seen.append(str(entry["window_end"]))
+        rows.append({
+            "Capability": title,
+            "Population basis": "Non-paused live stacks with marker presence in any named family; "
+                                "deduplicated against live inventory. Units/producer window unverified; "
+                                "absent families unknown, not zero",
+            "Population stacks": len(reporting) if reporting else None,
+            "Stacks using capability": None,
+            "Opportunity stacks": None,
+            "Finding": f"{len(reporting)} of {len(live)} non-paused live stacks reporting; "
+                       f"{len(live) - len(reporting)} of {len(live)} unknown. "
+                       + "; ".join(details) + ". Reporting markers exist only where measured; "
+                       "not configured database totals, host counts, human activity, adoption or entitlement. "
+                       "No verified per-stack adoption/unit contract; no zero-use opportunities.",
+            "Fundable next step": "Verify units and producer semantics before interpreting reporting "
+                                  "as product use or configured object counts",
+            "Window": REPORTING_WINDOW,
+            "Last seen": min(seen) if seen else "",
+        })
+    for title, prefix in (("Application Observability org host-hour reporting", "app_"),
+                          ("Infrastructure Observability", "infra_")):
+        details = []
+        seen = []
+        for key, metric in REPORTING_ORG_METRICS.items():
+            if not key.startswith(prefix):
+                continue
+            entry = footprint.get(key) or {}
+            value = entry.get("value") if entry.get("available") else None
+            details.append(f"{metric}={value} (maximum observed numeric sample)" if value is not None
+                           else f"{metric}: unknown (no org observation)")
+            if value is not None and entry.get("window_end"):
+                seen.append(str(entry["window_end"]))
+        rows.append({
+            "Capability": title,
+            "Population basis": "Org-only named-family observations; no per-stack sum, "
+                                "population or attribution. Each family requires one returned org series",
+            "Population stacks": None,
+            "Stacks using capability": None,
+            "Opportunity stacks": None,
+            "Finding": "; ".join(details) + ". Units and producer accumulation/window unverified; "
+                       "not verified host hours, configured hosts, activity, adoption or entitlement. "
+                       "Families are separate observations, never added or compared; missing is unknown, not zero.",
+            "Fundable next step": "Verify the named families' units and accumulation/window contract "
+                                  "before quoting host hours or attributing them to stacks",
+            "Window": REPORTING_WINDOW,
+            "Last seen": min(seen) if seen else "",
+        })
     return rows
 
 

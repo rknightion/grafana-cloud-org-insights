@@ -653,7 +653,7 @@ class FootprintComposeTest(unittest.TestCase):
         db = rows["Database Observability"]
         for column in ("Population stacks", "Stacks using capability", "Opportunity stacks"):
             self.assertIsNone(db[column])
-        self.assertIn("no verified per-stack adoption/unit contract", db["Finding"])
+        self.assertIn("No verified per-stack adoption/unit contract", db["Finding"])
         self.assertIn("Reporting markers exist", db["Finding"])
         baseline_metrics, _, _ = self.compose()
         self.assertEqual({(name, tuple(sorted(labels.items()))) for name, labels, _ in metrics
@@ -671,7 +671,9 @@ class FootprintComposeTest(unittest.TestCase):
         _, views, _ = self.compose(dataplane=dataplane)
         rows = {row["Capability"]: row for row in views[coverage.ADOPTION_VIEW]}
         for title in ("Adaptive Metrics", "Adaptive Logs", "Adaptive Traces",
-                      "Application Observability", "Database Observability"):
+                      "Application Observability", "Database Observability",
+                      "Application Observability host reporting",
+                      "Application Observability org host-hour reporting", "Infrastructure Observability"):
             for column in ("Population stacks", "Stacks using capability", "Opportunity stacks"):
                 self.assertIsNone(rows[title][column], (title, column))
         self.assertIn("segmented", rows["Adaptive Metrics"]["Population basis"])

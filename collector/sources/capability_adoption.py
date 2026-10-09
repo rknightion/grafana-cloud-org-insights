@@ -30,7 +30,6 @@ HTTP_ERROR = "http_error"
 MALFORMED_RESPONSE = "malformed_response"
 TRANSPORT_ERROR = "transport_error"
 EMPTY_RESPONSE = "empty_response"
-NO_VERIFIED_STACK_SOURCE = "no_verified_stack_source"
 
 
 def _windowed(metric: str) -> str:
@@ -67,6 +66,24 @@ RATE_QUERIES = frozenset({
 })
 
 
+# Exact doc-0006 families, not a unit/adoption contract. Count markers rather than sum
+# unknown gauge values. A returned zero gauge still establishes reporting, not zero activity.
+REPORTING_STACK_METRICS: Mapping[str, str] = {
+    "db_observability": "grafanacloud_instance_active_dbo11y_instance_count",
+    "db_observability_series": "grafanacloud_instance_active_dbo11y_series",
+    "db_observability_stats": "grafanacloud_instance_active_dbo11y_stats",
+    "app_host_count": "grafanacloud_instance_app_o11y_host_count",
+    "app_host_v2_count": "grafanacloud_instance_app_o11y_host_v2_count",
+    "app_host_v3_count": "grafanacloud_instance_app_o11y_host_v3_count",
+}
+REPORTING_ORG_METRICS: Mapping[str, str] = {
+    "app_billable_host_hours": "grafanacloud_org_app_o11y_billable_host_hours",
+    "app_included_host_hours": "grafanacloud_org_app_o11y_included_host_hours",
+    "infra_billable_host_hours": "grafanacloud_org_infra_o11y_billable_host_hours",
+    "infra_included_host_hours": "grafanacloud_org_infra_o11y_included_host_hours",
+}
+REPORTING_WINDOW = "24h query observation; producer window and units unverified"
+
 FOOTPRINT_QUERIES: Mapping[str, str] = {
     "adaptive_traces": _windowed(
         "grafanacloud_traces_instance_adaptivetraces_bytes_received_per_second"
@@ -75,6 +92,11 @@ FOOTPRINT_QUERIES: Mapping[str, str] = {
     "agent_observability": "max_over_time(sum by(stack_id)("
         "grafanacloud_agent_observability_instance_generation_items_per_second)[30d:5m])",
     "assistant_org_users": "sum(grafanacloud_org_assistant_users)",
+    **{key: f"max_over_time(count by(stack_id)({metric})[{WINDOW}:5m])"
+       for key, metric in REPORTING_STACK_METRICS.items()},
+    # No sum, no integration and no per-stack attribution. Ambiguous org vectors are refused.
+    **{key: f"max_over_time({metric}[{WINDOW}])"
+       for key, metric in REPORTING_ORG_METRICS.items()},
 }
 
 # Basis names describe measurements, not adoption, accumulated volume or human activity.
@@ -83,7 +105,8 @@ FOOTPRINT_BASIS: Mapping[str, str] = {
     "app_observability": "maximum_service_entity_count",
     "agent_observability": "maximum_generation_items_per_second",
     "assistant_org_users": "current_billing_period_org_gauge",
-    "db_observability": "per_stack_unknown",
+    **{key: "reporting_marker_presence" for key in REPORTING_STACK_METRICS},
+    **{key: "org_only_maximum_observation_units_unverified" for key in REPORTING_ORG_METRICS},
 }
 
 
@@ -148,8 +171,8 @@ def _footprint_metadata(now: dt.datetime) -> dict[str, dict[str, Any]]:
         end: str | None = now.isoformat()
         if name == "assistant_org_users":
             window, start = "service_default_lookback_unknown", None
-        elif name == "db_observability":
-            window, start, end = None, None, None
+        elif name in REPORTING_STACK_METRICS or name in REPORTING_ORG_METRICS:
+            window = REPORTING_WINDOW
         out[name] = {"basis": basis, "window": window, "window_start": start, "window_end": end}
     return out
 
@@ -158,7 +181,6 @@ def _footprint(
     client: ReadOnlyClient, endpoint: str, token: str, now: dt.datetime, live_ids: set[str],
 ) -> dict[str, Any]:
     out = _footprint_metadata(now)
-    out["db_observability"].update(available=False, reason=NO_VERIFIED_STACK_SOURCE)
     for name, expression in FOOTPRINT_QUERIES.items():
         entry = out[name]
         try:
@@ -174,16 +196,22 @@ def _footprint(
             continue
         try:
             body = response.json()
-            if name == "assistant_org_users":
+            if name == "assistant_org_users" or name in REPORTING_ORG_METRICS:
                 rows = _vector(body)
                 if not rows:
                     entry.update(available=False, reason=EMPTY_RESPONSE)
                     continue
                 if len(rows) != 1:
-                    raise AdoptionSourceError("org sum did not return exactly one row")
-                measured = {"value": _sample(rows[0])}
+                    raise AdoptionSourceError("org observation did not return exactly one row")
+                value = _sample(rows[0])
+                if name in REPORTING_ORG_METRICS and "stack_id" in rows[0]["metric"]:
+                    raise AdoptionSourceError("org observation returned a per-stack row")
+                measured = {"value": value}
             else:
                 values = {key: value for key, value in _values(body).items() if key in live_ids}
+                if name in REPORTING_STACK_METRICS:
+                    # Persist only presence, not the number of unknown-unit marker series.
+                    values = {key: 1.0 for key, value in values.items() if value > 0}
                 if not values:
                     entry.update(available=False, reason=EMPTY_RESPONSE)
                     continue
@@ -240,8 +268,7 @@ def probe(
     def missing(reason: str, detail: str) -> dict[str, Any]:
         footprint = _footprint_metadata(now)
         for name, entry in footprint.items():
-            entry.update(available=False, reason=NO_VERIFIED_STACK_SOURCE
-                         if name == "db_observability" else reason)
+            entry.update(available=False, reason=reason)
         return {**unavailable(reason, detail), "footprint": footprint}
 
     stack = next(
