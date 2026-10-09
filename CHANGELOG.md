@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.11.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.10.0...v0.11.0) (2026-10-09)
+
+
+### Features
+
+* add default-off bounded Loki producer volume source ([9d34538](https://github.com/rknightion/grafana-cloud-org-insights/commit/9d3453879a84d9be24f94b0f2c0859745a4eee7a))
+* add default-off count-only alerting rule inventory source ([0dddad5](https://github.com/rknightion/grafana-cloud-org-insights/commit/0dddad5366db85613f0b0bb4ecc19ac060d3e2bc))
+* cross-link labelling to existing cardinality findings ([fd6d215](https://github.com/rknightion/grafana-cloud-org-insights/commit/fd6d2150f1f3b60a447202d30e1a692bbb57fa78))
+* expose qualified database and host reporting footprints ([b5f703e](https://github.com/rknightion/grafana-cloud-org-insights/commit/b5f703ed1f1e126677e833fe9ca8a2cd9b940fa1))
+* wire default-off producer and rule inventory views ([b2b6477](https://github.com/rknightion/grafana-cloud-org-insights/commit/b2b6477a429a4a7753e43456236e9b4b825e264d))
+
+
+### Miscellaneous
+
+* **backlog:** adopt loop20 bounded feature and cross-link decisions ([4760805](https://github.com/rknightion/grafana-cloud-org-insights/commit/476080572152abebc6acd4d5c1bbe24866b1cc51))
+* **backlog:** close bounded sources and labelling cross-links ([0764cd8](https://github.com/rknightion/grafana-cloud-org-insights/commit/0764cd8f2c965821ee1d248b9eb0347150f973ac))
+* **backlog:** record qualified footprint integration proof ([8939129](https://github.com/rknightion/grafana-cloud-org-insights/commit/89391293a3bd79625d4d4f7bb3128f914e6622e5))
+* **backlog:** record v0.10.0 dev and customer convergence rollout ([888baab](https://github.com/rknightion/grafana-cloud-org-insights/commit/888baabe6632cb759a4204295579d8fc77463dc5))
+* **backlog:** track composed DNS proof setup repair ([a8a08ee](https://github.com/rknightion/grafana-cloud-org-insights/commit/a8a08eebe3fd6ccfec24581d8d1c957cda4ac19c))
+* **deps:** update python:3.14-slim docker digest to a2b82f3 ([#61](https://github.com/rknightion/grafana-cloud-org-insights/issues/61)) ([58fcda2](https://github.com/rknightion/grafana-cloud-org-insights/commit/58fcda2eff88290d16babfc867ec35f1b4142ea3))
+
 ## [0.10.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.9.1...v0.10.0) (2026-10-08)
 
 
