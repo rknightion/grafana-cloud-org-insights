@@ -1,10 +1,10 @@
 ---
 id: GCI-0092
 title: Fill feature-footprint gaps found preparing a customer account-review slide
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-10-05 09:18'
-updated_date: '2026-10-05 21:50'
+updated_date: '2026-10-09 13:44'
 labels:
   - feature-usage
   - follow-on
@@ -48,6 +48,12 @@ Customer-facing figures that prompted this live in the consumer engagement, not 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+loop20: implement only gaps 2,3,4,6 in frozen owned files; qualifying existing observations; gate and independent review before landing; live proof remains R-dev10.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
