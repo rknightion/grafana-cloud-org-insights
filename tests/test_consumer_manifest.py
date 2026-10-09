@@ -46,6 +46,7 @@ def fixture(revision: str | None = None) -> dict:
     runtime["provisioner"]["GCINSIGHT_READER_PRODUCT_READS"] = ""
     runtime["scan"]["GCINSIGHT_READER_PRODUCT_READS"] = ""
     runtime["scan"].update(identity.LABEL_INVENTORY_DEFAULTS)
+    runtime["scan"].update(identity.PRODUCER_RULE_DEFAULTS)
     runtime["scan"]["GCINSIGHT_DASHBOARD_DETAIL_ENABLED"] = "0"
     runtime["scan"]["GCINSIGHT_EXPECTED_RETENTION_POLICY"] = "[]"
     runtime["scan"]["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"] = json.dumps({

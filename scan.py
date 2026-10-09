@@ -64,6 +64,8 @@ from collector.sources import fleet as fleet_src
 from collector.sources import serviceaccounts as sa_src
 from collector.sources import label_risk as label_risk_src
 from collector.sources import label_inventory as label_inventory_src
+from collector.sources import loki_volume as loki_volume_src
+from collector.sources import rule_inventory as rule_inventory_src
 from collector.pillars import label_risk as label_risk_pillar
 from collector.sources import loki_config as loki_config_src
 from collector.sources import signal_inventory as signal_inventory_src
@@ -865,6 +867,8 @@ def disabled_inputs(cfg: config.Config) -> dict[str, dict[str, str]]:
         "playlists_inventory": playlists_reads_enabled(),
         "library_panels_inventory": library_panels_reads_enabled(),
         "label_inventory": getattr(cfg, "label_inventory_enabled", False),
+        "loki_volume": getattr(cfg, "loki_volume_enabled", False),
+        "rule_inventory": getattr(cfg, "rule_inventory_enabled", False),
     }
     return {name: {"state": "disabled", "reason": "disabled by configuration"}
             for name, selected in enabled.items() if not selected}
@@ -950,6 +954,78 @@ def gather_label_inventory(
             unavailable_reasons=reasons,
         )
     return data, errors
+
+
+def gather_loki_volume(client, cfg, stacks):
+    """D-VOL20: only a private bounded producer input; no names in diagnostics."""
+    if not getattr(cfg, "loki_volume_enabled", False):
+        return {}, []
+    live = [s for s in stacks if str(s.get("status", "")).lower() != "paused"]
+    return loki_volume_src.probe_all(client, live, cfg.cap, enabled=True), []
+
+
+def gather_rule_inventory(client, cfg, stacks):
+    """D-RULE20: exact GET routes, count-only records; independently unknown peers."""
+    if not getattr(cfg, "rule_inventory_enabled", False):
+        return {}, []
+    live = [s for s in stacks if str(s.get("status", "")).lower() != "paused"]
+    return rule_inventory_src.probe_all(client, live, cfg.cap, enabled=True), []
+
+
+_RULE_ROUTE_FIELDS = {
+    "mimir_rules": ("mimir", ("rule_groups", "alerting_rules", "recording_rules")),
+    "mimir_alerts": ("mimir", ("firing", "pending")),
+    "loki_rules": ("loki", ("rule_groups", "alerting_rules", "recording_rules")),
+    "alertmanager_alerts": ("alertmanager", ("active", "suppressed", "unprocessed")),
+    "alertmanager_silences": ("alertmanager", ("silences_active", "silences_pending", "silences_expired")),
+}
+
+
+def producer_source_report(name, stacks, payload, *, enabled):
+    """Left-join health to fresh stack/routes; 10% shared floor, never D-LBL12.
+
+    Only classified counts leave this seam. An empty fresh estate is unknown,
+    never a healthy zero-estate input. Every rule subroute independently clears
+    the floor; successful peers retain their counts in an admitted payload.
+    """
+    if not enabled:
+        return {**source_report(0, {}, available=bool), "state": "disabled", "reason": "not_selected"}
+    live = [s for s in stacks if str(s.get("status", "")).lower() != "paused"]
+    records = (payload or {}).get("stacks", {})
+    if name == "loki_volume":
+        joined = {str(s["slug"]): records.get(str(s["slug"])) or {} for s in live}
+        report = source_report(len(live), joined, available=lambda r: r.get("state") == "complete")
+    else:
+        reports = {}
+        for route, (family, fields) in _RULE_ROUTE_FIELDS.items():
+            joined = {str(s["slug"]): (records.get(str(s["slug"])) or {}).get(family) or {} for s in live}
+            reports[route] = source_report(len(live), joined, available=lambda r: all(
+                type(r.get(field)) is int and r[field] >= 0 for field in fields))
+        available = sum(r["available"] for r in reports.values())
+        report = source_report(len(live) * len(reports), {i: True for i in range(available)}, available=bool)
+        report.update(routes=reports, unit="stack-routes", healthy=all(r["healthy"] for r in reports.values()))
+    report["healthy"] = bool(live) and report["healthy"]
+    report["state"] = ("available" if live and report["available"] == report["expected"] else
+                       "partial" if report["available"] else "unavailable")
+    if not live:
+        report["reason"] = "unknown_estate"
+    return report
+
+
+def producer_diagnostic_scan(scan):
+    """Private service values never enter --out, including future view attachments."""
+    safe = {**scan, "data": {k: v for k, v in scan.get("data", {}).items()
+                             if k not in {"loki_volume", "loki_volume_top_services"}}}
+    for field in ("views", "_emit"):
+        value = safe.get(field)
+        if not isinstance(value, dict):
+            continue
+        if field == "views":
+            safe[field] = {k: v for k, v in value.items() if k != "loki_volume_top_services"}
+        else:
+            safe[field] = {**value, "views": {k: v for k, v in value.get("views", {}).items()
+                                             if k != "loki_volume_top_services"}}
+    return safe
 
 
 def gather_signal_inventory(
@@ -1352,6 +1428,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     # and BEFORE gcom detail and every other daily gatherer. Exhaustion is partial/deadline.
     label_inventory_enabled = getattr(cfg, "label_inventory_enabled", False)
     label_inventory, label_inventory_errors = gather_label_inventory(client, cfg, selected)
+    loki_volume, _ = gather_loki_volume(client, cfg, selected)
+    rule_inventory, _ = gather_rule_inventory(client, cfg, selected)
     errors: list[str] = list(label_inventory_errors)
     detail = gcom.fetch_all_stack_detail(
         client, cfg, selected, coverage, on_error=lambda slug, msg: errors.append(f"{slug}: {msg}")
@@ -1453,8 +1531,14 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "loki_config": loki_config,
         "label_risk": label_risk,
         "label_inventory": label_inventory,
+        "loki_volume": loki_volume,
+        "rule_inventory": rule_inventory,
     }
     sources = {
+        "loki_volume": producer_source_report("loki_volume", selected, loki_volume,
+                                               enabled=getattr(cfg, "loki_volume_enabled", False)),
+        "rule_inventory": producer_source_report("rule_inventory", selected, rule_inventory,
+                                                  enabled=getattr(cfg, "rule_inventory_enabled", False)),
         "label_inventory": (label_inventory_source_report(selected, label_inventory, label_inventory_errors)
                             if label_inventory_enabled else
                             {**source_report(0, {}, available=bool), "reason": "not_selected"}),
@@ -1609,7 +1693,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
             # coverage and non-dry-run subset refusal here too, not only source-health refusal.
             # D-LBL12 still allows a healthy full-estate Assistant update despite label failure;
             # limited dry-runs retain their read/merge computation without writing state.
-            gathered=(not publication_failures and not coverage.should_abort
+            gathered=(bool(stacks) and bool(selected) and not publication_failures and not coverage.should_abort
                       and (cfg.dry_run or not (cfg.limit or cfg.stack))
                       and "assistant" in publishable_inputs),
         ),
@@ -1793,6 +1877,10 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
     # never have to infer health from a missing field on T1/T3/T4.
     scan["meta"].setdefault("sources_healthy", not source_failures)
     scan["meta"].setdefault("scan_healthy", not primary_unhealthy and not source_failures)
+    unknown_estate = cfg.tier in {"t1", "t2", "t3"} and scan["meta"].get("stacks_total") == 0
+    if unknown_estate:
+        console_log("error", "REFUSING all S3, Mimir and Loki writes: empty fresh estate is unknown")
+        return 1
     if primary_unhealthy or publication_failures:
         # Stop before EVERY publication seam for blocking inputs. D-LBL12 label_inventory
         # remains unhealthy in meta/provenance, but only its input and views are withheld.
@@ -1882,7 +1970,10 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
     # cardinality-checked nor written, and the only symptom is a metric that is quietly always absent.
     # The COUNTS go to Mimir as a bounded gauge so the trend outlives log retention; the DETAIL goes
     # to Loki, because the fields that make a finding actionable are the ones banned from a label.
-    derived, finding_totals = findings_mod.derive(emit["views"], emit["view_coverage"])
+    # D-VOL20 permits service values only in the private input and S3 view, never finding events.
+    finding_views = {name: rows for name, rows in emit["views"].items()
+                     if name != "loki_volume_top_services"}
+    derived, finding_totals = findings_mod.derive(finding_views, emit["view_coverage"])
     if finding_totals:
         emit["metrics"] = list(emit["metrics"]) + findings_mod.metrics(finding_totals)
     console_log("info", findings_mod.summarise(derived, finding_totals))
@@ -1967,8 +2058,8 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
         console_log("info", f"  {uri}")
 
     if args.out:
-        payload = json.dumps(label_inventory_src.diagnostic_scan(
-            label_risk_pillar.diagnostic_scan(scan)), indent=2, default=str)
+        payload = json.dumps(producer_diagnostic_scan(label_inventory_src.diagnostic_scan(
+            label_risk_pillar.diagnostic_scan(scan))), indent=2, default=str)
         with open(args.out, "w") as fh:
             fh.write(payload)
         console_log("info", f"wrote {args.out} ({len(payload):,} bytes)")

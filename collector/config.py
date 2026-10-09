@@ -103,9 +103,9 @@ READER_SCOPES = (
 #
 # `{amInstanceUrl}/alertmanager/api/v2/status` returns the stack's RAW Alertmanager configuration in
 # `config.original`, `http_config` included. On a stack whose contact points live in Alertmanager rather
-# than in Grafana, that YAML can carry webhook URLs and tokens. The scope is declared because
-# alert-routing inventory needs it; nothing derived from that body may be stored, logged or emitted
-# beyond bounded counts. Treat it exactly like `accessToken` on a public dashboard.
+# than in Grafana, that YAML can carry webhook URLs and tokens. D-RULE20 never calls status/config:
+# only the exact alert and silence GET routes are approved, with count-only parsing. The broader
+# credential reach is not permission to collect configuration.
 #
 # `{prom}/api/prom/api/v1/alerts` returns firing instances carrying their full customer label sets.
 # Those are unbounded and identity-bearing: count them, never carry them into a metric label.
@@ -124,6 +124,8 @@ WRITER_SCOPES = ("metrics:write", "logs:write")
 OPT_OUT_ENV = "GCINSIGHT_OPT_OUT"
 DASHBOARD_DETAIL_ENV = "GCINSIGHT_DASHBOARD_DETAIL_ENABLED"
 LABEL_INVENTORY_ENV = "GCINSIGHT_LABEL_INVENTORY_ENABLED"
+LOKI_VOLUME_ENV = "GCINSIGHT_LOKI_VOLUME_ENABLED"
+RULE_INVENTORY_ENV = "GCINSIGHT_RULE_INVENTORY_ENABLED"
 RETENTION_POLICY_ENV = "GCINSIGHT_EXPECTED_RETENTION_POLICY"
 # The organisation's expected scrape cadence. A Fleet Management pipeline scraping faster than this raises
 # DPM and is published as a finding (GCI-0046). Policy, not inventory, so it is a tunable.
@@ -247,6 +249,8 @@ class Config:
     coverage_score_weights: dict[str, float] | None = None
     dashboard_detail_enabled: bool = False
     label_inventory_enabled: bool = False
+    loki_volume_enabled: bool = False
+    rule_inventory_enabled: bool = False
     label_inventory_tunables: dict = field(default_factory=lambda: label_inventory_tunables(""))
     label_inventory_static_names: tuple[str, ...] = tuple(sorted(STATIC_NAMES))
     label_inventory_budget_seconds: float = 900.0
@@ -275,6 +279,8 @@ class Config:
             "coverage_score_weights": self.coverage_score_weights,
             "dashboard_detail_enabled": self.dashboard_detail_enabled,
             "label_inventory_enabled": self.label_inventory_enabled,
+            "loki_volume_enabled": self.loki_volume_enabled,
+            "rule_inventory_enabled": self.rule_inventory_enabled,
             "label_inventory_budget_seconds": self.label_inventory_budget_seconds,
             "label_inventory_static_name_count": len(self.label_inventory_static_names),
             # Selectors can contain customer label names and values. Count the policy, never log it.
@@ -330,6 +336,8 @@ def load(
         coverage_score_weights=score_weights,
         dashboard_detail_enabled=_optional_bool(DASHBOARD_DETAIL_ENV),
         label_inventory_enabled=_optional_bool(LABEL_INVENTORY_ENV),
+        loki_volume_enabled=_optional_bool(LOKI_VOLUME_ENV),
+        rule_inventory_enabled=_optional_bool(RULE_INVENTORY_ENV),
         label_inventory_tunables=label_inventory_tunables(os.environ.get("GCINSIGHT_LABEL_INVENTORY_TUNABLES", "")),
         label_inventory_static_names=label_inventory_static_names(os.environ.get("GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES", "")),
         label_inventory_budget_seconds=label_inventory_budget(os.environ.get("GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS", "")),

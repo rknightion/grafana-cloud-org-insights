@@ -9,6 +9,18 @@ locals {
   }
 }
 
+variable "loki_volume_enabled" {
+  description = "Opt in to bounded 24h top100 Loki service_name volume, private input/S3 view only; total and remainder remain unknown."
+  type        = bool
+  default     = false
+}
+
+variable "rule_inventory_enabled" {
+  description = "Opt in to count-only Mimir/Loki rules and current Alertmanager alert/silence states on witnessed GET routes."
+  type        = bool
+  default     = false
+}
+
 variable "label_inventory_enabled" {
   description = "Default-off bounded T2 label inventory; enabling does not grant permissions or customer rollout authority."
   type        = bool

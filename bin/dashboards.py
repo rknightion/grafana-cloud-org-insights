@@ -35,6 +35,7 @@ from collector.dashboards import build
 from collector.dashboards.retention_panels import retention_panels
 from collector.pillars import adaptive_traces as adaptive_traces_pillar
 from collector.pillars import library_panels as library_panels_pillar
+from collector.pillars import producer_inventory
 from collector.pillars import slo as slo_pillar, synthetic as synthetic_pillar
 from collector.pillars import (
     ai as ai_pillar,
@@ -1373,6 +1374,24 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
 
 
 def d_usage(ds: str):
+    producer_panels = {}
+    for view, title, description in (
+        ("loki_volume_top_services", "Bounded Loki top producers (24h)",
+         "Default-off service_name selection over 86400 seconds, bounded to top100. Bytes describe "
+         "returned producers, not whole-stack or estate volume. Total bytes and other bytes are unknown "
+         "even below the limit; never sum top100 as an estate total. Complete means a valid bounded "
+         "response, not exhaustive inventory. Service values live only in the private input and S3 view."),
+        ("alerting_rule_inventory", "Configured rules and current alert/silence counts",
+         "Default-off point-in-time counts from exact Mimir/Loki rules and Alertmanager GET routes. "
+         "Known peer counts survive individual route failures; unavailable/unqueried fields remain null. "
+         "Not execution history, delivery or routing configuration. Expressions, names, labels, "
+         "annotations, receivers and silence matchers are discarded. No status/config read."),
+    ):
+        try:
+            producer_panels[view] = build.table_panel(title, view, ds,
+                schema=producer_inventory.VIEW_SCHEMAS[view], description=description)
+        except FileNotFoundError:
+            pass
     library_panels_panel = None
     try:
         library_panels_panel = build.table_panel(
@@ -1714,6 +1733,7 @@ def d_usage(ds: str):
                         "those logs, or stopped shipping them - both are wins, and the per-stack chart "
                         "above says which."),
     }
+    el.update(producer_panels)
     if library_panels_panel is not None:
         el["library_panels_inventory"] = library_panels_panel
     if playlists_panel is not None:
@@ -1735,6 +1755,8 @@ def d_usage(ds: str):
     tabs = [
         build.tab("Overview", ["n_stick", "n_types", "t_stick", "summary"]),
         build.tab("Adoption", ["t_signals", "plugins", "enterprise_catalogue"]),
+        *([build.tab("Bounded producers and configured alerting", list(producer_panels), max_columns=1)]
+          if producer_panels else []),
         *([build.rows_tab("Configured library panels", [
             build.row("Configured library panels", ["library_panels_inventory"], max_columns=1),
         ])] if library_panels_panel is not None else []),

@@ -78,6 +78,8 @@ variable "consumer_manifest" {
       can(regex("^([0-9]+([.][0-9]+)?(ms|s|m|h))+$", try(var.consumer_manifest.runtime.scan.GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL, "60s"))) && !can(regex("^([0.]+(ms|s|m|h))+$", try(var.consumer_manifest.runtime.scan.GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL, "60s"))),
       contains(["0", "1"], try(var.consumer_manifest.runtime.scan.GCINSIGHT_DASHBOARD_DETAIL_ENABLED, "0")),
       contains(["0", "1"], try(var.consumer_manifest.runtime.scan.GCINSIGHT_LABEL_INVENTORY_ENABLED, "0")),
+      contains(["0", "1"], try(var.consumer_manifest.runtime.scan.GCINSIGHT_LOKI_VOLUME_ENABLED, "0")),
+      contains(["0", "1"], try(var.consumer_manifest.runtime.scan.GCINSIGHT_RULE_INVENTORY_ENABLED, "0")),
     ])
     error_message = "consumer_manifest has an invalid GCINSIGHT_STACK_TOKEN_PREFIX, GCINSIGHT_METRIC_PREFIX or GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL (the rules of the matching inputs), or a GCINSIGHT_*_ENABLED flag other than 1 or 0."
   }
@@ -207,6 +209,8 @@ locals {
     expected_retention_policy      = contains(local.manifest_keys.scan, "GCINSIGHT_EXPECTED_RETENTION_POLICY") ? [for policy in jsondecode(local.manifest.scan.GCINSIGHT_EXPECTED_RETENTION_POLICY) : { selector = tostring(policy.selector), minimum_period = tostring(policy.minimum_period) }] : var.expected_retention_policy
     fleet_default_scrape_interval  = contains(local.manifest_keys.scan, "GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL") ? tostring(local.manifest.scan.GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL) : var.fleet_default_scrape_interval
     label_inventory_enabled        = contains(local.manifest_keys.scan, "GCINSIGHT_LABEL_INVENTORY_ENABLED") ? local.manifest.scan.GCINSIGHT_LABEL_INVENTORY_ENABLED == "1" : var.label_inventory_enabled
+    loki_volume_enabled            = contains(local.manifest_keys.scan, "GCINSIGHT_LOKI_VOLUME_ENABLED") ? local.manifest.scan.GCINSIGHT_LOKI_VOLUME_ENABLED == "1" : var.loki_volume_enabled
+    rule_inventory_enabled         = contains(local.manifest_keys.scan, "GCINSIGHT_RULE_INVENTORY_ENABLED") ? local.manifest.scan.GCINSIGHT_RULE_INVENTORY_ENABLED == "1" : var.rule_inventory_enabled
     label_inventory_tunables       = contains(local.manifest_keys.scan, "GCINSIGHT_LABEL_INVENTORY_TUNABLES") ? tostring(local.manifest.scan.GCINSIGHT_LABEL_INVENTORY_TUNABLES) : var.label_inventory_tunables
     label_inventory_static_names   = contains(local.manifest_keys.scan, "GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES") ? [for name in jsondecode(local.manifest.scan.GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES) : tostring(name)] : var.label_inventory_static_names
     label_inventory_budget_seconds = contains(local.manifest_keys.scan, "GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS") ? tonumber(local.manifest.scan.GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS) : var.label_inventory_budget_seconds
@@ -276,6 +280,8 @@ locals {
     expected_retention_policy         = var.expected_retention_policy
     fleet_default_scrape_interval     = var.fleet_default_scrape_interval
     label_inventory_enabled           = var.label_inventory_enabled
+    loki_volume_enabled               = var.loki_volume_enabled
+    rule_inventory_enabled            = var.rule_inventory_enabled
     label_inventory_tunables          = var.label_inventory_tunables
     label_inventory_static_names      = var.label_inventory_static_names
     label_inventory_budget_seconds    = var.label_inventory_budget_seconds
@@ -324,6 +330,8 @@ locals {
     expected_retention_policy         = []
     fleet_default_scrape_interval     = "60s"
     label_inventory_enabled           = false
+    loki_volume_enabled               = false
+    rule_inventory_enabled            = false
     label_inventory_tunables          = "{}"
     label_inventory_static_names      = ["cluster", "host", "hostname", "k8s.cluster.name", "k8s.namespace.name", "k8s.node.name", "k8s_cluster_name", "k8s_namespace_name", "k8s_node_name", "namespace", "node"]
     label_inventory_budget_seconds    = 900

@@ -188,6 +188,9 @@ def validate(manifest: dict[str, Any], *, allow_legacy_scan_policy: bool = False
     legacy_scan_policy = (allow_legacy_scan_policy and isinstance(runtime.get("scan"), dict)
                           and product_env not in runtime["scan"])
     for kind, expected_names in identity.PROJECTION_ENVS.items():
+        if kind == "scan" and isinstance(runtime.get("scan"), dict):
+            expected_names = tuple(name for name in expected_names
+                                   if name not in identity.PRODUCER_RULE_DEFAULTS or name in runtime["scan"])
         if kind == "scan" and isinstance(runtime.get("scan"), dict) and not any(
                 name in runtime["scan"] for name in identity.LABEL_INVENTORY_DEFAULTS):
             expected_names = tuple(name for name in expected_names
@@ -209,6 +212,9 @@ def validate(manifest: dict[str, Any], *, allow_legacy_scan_policy: bool = False
             if "\n" in value or "\x00" in value:
                 raise ManifestError(f"runtime.{kind}.{name} is not environment-safe")
 
+    for name in identity.PRODUCER_RULE_DEFAULTS:
+        if name in runtime["scan"] and runtime["scan"][name] not in {"0", "1"}:
+            raise ManifestError(f"runtime.scan.{name} must be 1 or 0")
     validate_json_runtime_types(runtime)
     for kind in ("scan", "provisioner"):
         for name in ("GCINSIGHT_OPT_OUT", "GCINSIGHT_READER_PRODUCT_READS"):
@@ -839,6 +845,9 @@ def effective(manifest: Any, module_root: pathlib.Path | None = None) -> Any:
         values = runtime[section]
         if key in values:
             continue
+        if section == "scan" and key in identity.PRODUCER_RULE_DEFAULTS:
+            # Absent additive flags keep old overlay/runtime digests byte-identical.
+            continue
         if section == "scan" and key in identity.LABEL_INVENTORY_DEFAULTS and not label_present:
             continue
         other = "provisioner" if section == "scan" else "scan"
@@ -862,6 +871,8 @@ def omits_defaultable_keys(manifest: Any) -> bool:
         if not isinstance(values, dict) or not isinstance(peer, dict):
             return False
         missing = set(identity.PROJECTION_ENVS[kind]) - set(values)
+        if kind == "scan":
+            missing -= set(identity.PRODUCER_RULE_DEFAULTS)
         if kind == "scan" and not any(name in values for name in identity.LABEL_INVENTORY_DEFAULTS):
             missing -= set(identity.LABEL_INVENTORY_DEFAULTS)
         missing -= {name for name in missing if name in peer}  # pre-product-reads legacy form
@@ -904,6 +915,9 @@ def pruned(manifest: dict[str, Any], module_root: pathlib.Path | None = None) ->
                 adopted = {"bucket_name": "create_bucket", "secret_name": "create_secret"}.get(key)
                 if adopted is None or full["aws"].get(adopted) is True:
                     del aws[key]
+            continue
+        if section == "scan" and key in identity.PRODUCER_RULE_DEFAULTS:
+            # A present flag is a digest-bound marker; absence is the legacy interface.
             continue
         if runtime[section].get(key) == default:
             del runtime[section][key]

@@ -59,10 +59,14 @@ def test_legacy_cli_regenerate_upgrade_and_real_scan_eligibility(policy):
                              'rknightion/grafana-cloud-org-insights.git//terraform?ref='
                              + original["generic_source"]["revision"] + '"\n}\n')
         git = temp / "git"
+        # The synthetic target must expose the candidate's projection schema, not the
+        # pre-feature committed HEAD; the CLI still validates the real artifact contents.
+        target_identity = temp / "target-identity.py"
+        shutil.copyfile(ROOT / "collector/identity.py", target_identity)
         git.write_text('#!/bin/sh\ncase "$*" in\n*"remote get-url origin"*) echo '
                        'https://github.com/rknightion/grafana-cloud-org-insights.git;;\n'
-                       '*"show "*) exec "' + shutil.which("git") + '" -C "' + str(ROOT)
-                       + '" show HEAD:collector/identity.py;;\nesac\n')
+                       '*"show "*) exec python3 -c \'import pathlib; '
+                       'print(pathlib.Path("' + str(target_identity) + '").read_text(), end="")\';;\nesac\n')
         git.chmod(0o755)
         result = cli("upgrade", "b" * 40, "--manifest", str(manifest), "--terraform",
                      str(terraform), env=dict(os.environ, PATH=str(temp) + ":" + os.environ["PATH"]))

@@ -981,7 +981,7 @@ DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     # Both ages belong on the page: showing only the 6-hourly data-plane age makes the daily named
     # recommendation queue look materially fresher than it is.
     "cost": ("adaptive_logs", "dataplane"),
-    "usage": ("irm_integrations", "irm_alert_groups", "faro_apps", "ml_jobs", "cloud_accounts", "pdc_networks", "reports_inventory", "playlists_inventory", "library_panels_inventory", "stack_detail"),
+    "usage": ("irm_integrations", "irm_alert_groups", "faro_apps", "ml_jobs", "cloud_accounts", "pdc_networks", "reports_inventory", "playlists_inventory", "library_panels_inventory", "loki_volume", "rule_inventory", "stack_detail"),
     "maturity": ("dataplane", "label_inventory", "stack_detail"),
     "risk": ("access_policies", "alert_routing", "dataplane", "fleet", "label_risk", "loki_config",
              "org_members", "public_dashboards", "service_accounts", "stack_detail"),
@@ -1123,6 +1123,8 @@ def banner_elements(dashboard: str = "estate") -> dict[str, Any]:
 
 
 INPUT_LABELS = {
+    "loki_volume": "Bounded Loki producers",
+    "rule_inventory": "Configured alerting inventory",
     "label_inventory": "Bounded labelling sample",
     "ml_jobs": "Configured forecast jobs",
     "cloud_accounts": "Configured AWS accounts",
@@ -1154,7 +1156,10 @@ INPUT_LABELS = {
 }
 
 INPUT_DESCRIPTIONS = {
-    "label_inventory": "Age of the default-off daily minimized labelling input. Head-window Mimir "
+    "loki_volume": "Age of the default-off 86400s top100 service_name volume response. "
+                   "Valid bounded responses are not exhaustive; total and remainder stay unknown.",
+    "rule_inventory": "Age of the default-off minimized configured rule/current alert/silence counts. "
+                      "Independent unavailable routes stay null; not delivery or execution history.",    "label_inventory": "Age of the default-off daily minimized labelling input. Head-window Mimir "
                        "counts and bounded 24h samples are not exhaustive inventories; scores depend "
                        "on weighted coverage and catalogue version, not the age alone.",
     "library_panels_inventory": "Age of the default-off daily configured library panel count, after "

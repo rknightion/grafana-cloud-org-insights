@@ -36041,5 +36041,1773 @@
    "available": true,
    "report_count": 0
   }
+ },
+ "loki_volume": {
+  "stacks": {
+   "stack158": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack145": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack177": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack125": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack001": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack001b": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack001c": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack001a": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack019": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack049": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack110": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack020": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "obs-hub": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "obs-hub-dev": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack035": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack036": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack111": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack070": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack037": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack071": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack050": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack112": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack051": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack146": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack147": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack038": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack052": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack053": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack054": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack148": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack126": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack002": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack113": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack097": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack072": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack055": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack193": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack170": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack201": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   },
+   "stack149": {
+    "state": "complete",
+    "reason": "none",
+    "window_seconds": 86400,
+    "rows": [
+     {
+      "service_name": "private-service-canary",
+      "bytes": 23
+     }
+    ],
+    "other_bytes": null,
+    "total_bytes": null,
+    "truncated": false
+   }
+  }
+ },
+ "rule_inventory": {
+  "stacks": {
+   "stack158": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack145": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack177": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack125": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack001": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack001b": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack001c": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack001a": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack019": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack049": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack110": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack020": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "obs-hub": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "obs-hub-dev": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack035": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack036": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack111": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack070": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack037": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack071": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack050": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack112": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack051": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack146": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack147": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack038": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack052": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack053": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack054": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack148": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack126": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack002": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack113": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack097": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack072": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack055": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack193": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack170": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack201": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   },
+   "stack149": {
+    "mimir": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": 1,
+     "pending": 0
+    },
+    "loki": {
+     "state": "complete",
+     "reason": "none",
+     "rule_groups": 1,
+     "alerting_rules": 1,
+     "recording_rules": 1,
+     "firing": null,
+     "pending": null
+    },
+    "alertmanager": {
+     "state": "complete",
+     "reason": "none",
+     "active": 1,
+     "suppressed": 0,
+     "unprocessed": 0,
+     "silences_active": 1,
+     "silences_pending": 0,
+     "silences_expired": 0
+    }
+   }
+  }
  }
 }

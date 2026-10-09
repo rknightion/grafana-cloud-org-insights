@@ -24,8 +24,8 @@ dev acceptance remains unproven. No new customer product-read grant follows this
 | `logs:read` | `/loki/api/v1/labels`, `/loki/api/v1/label/<name>/values`, `/config/tenant/v1/limits` | `hlInstanceId` |
 | `traces:read` | `/tempo/api/v2/search/tags`, `/tempo/api/v2/search/tag/<t>/values` | `htInstanceId` |
 | `profiles:read` | native `querier.v1.QuerierService/LabelNames` and `LabelValues` | `hpInstanceId` |
-| `rules:read` | declared but no current source call; verified rule/alert routes discussed below | signal instance id |
-| `alerts:read` | declared but no current source call; verified Alertmanager routes discussed below | `amInstanceId` |
+| `rules:read` | default-off D-RULE20: Mimir `/api/prom/api/v1/rules`, `/api/prom/api/v1/alerts`; Loki `/prometheus/api/v1/rules`, count-only | signal instance id |
+| `alerts:read` | default-off D-RULE20: `/alertmanager/api/v2/alerts`, `/alertmanager/api/v2/silences`, count-only; no status/config | `amInstanceId` |
 | `adaptive-metrics-rules:read` | `/aggregations/rules` | `hmInstancePromId` |
 | `adaptive-metrics-recommendations:read` | `/aggregations/recommendations?verbose=true` | `hmInstancePromId` |
 | `adaptive-metrics-config:read` | `/aggregations/recommendations/config` | `hmInstancePromId` |
@@ -143,6 +143,26 @@ stack remain unverified; a missing result must not be interpreted as permission 
 Reference contracts: [Grafana Cloud access policies and tokens](https://grafana.com/docs/grafana/latest/developer-resources/api-reference/cloud-api/#access-policies-and-tokens)
 and [Pyroscope HTTP API](https://grafana.com/docs/pyroscope/latest/reference-server-api/).
 The observations above are from the scope-isolated live probe, not inferred from those documents.
+
+### D-VOL20 / D-RULE20 exact-route implementation boundary
+
+Both readers are default-off T2 inputs, with no new scope, credential or customer
+consent. D-VOL20 uses only GET `/loki/api/v1/index/volume` on fresh inventory's Loki
+endpoint/tenant, selecting `service_name`, limit 100, 86400 seconds. Service values
+are retained only in private hydration and S3 `loki_volume_top_services`, never
+metrics, events, diagnostics, stdout or errors. Complete describes a valid bounded
+response, not exhaustive coverage: measured total and remainder are unknown/null;
+query-work stats and top100 sums are not whole-stack ingest totals.
+
+D-RULE20 uses only the exact GET routes in the scope table above, authenticating
+Alertmanager with live `amInstanceUrl` / `amInstanceId`. Counts cover configured
+rule objects and current alert/silence states, not delivery or execution history.
+Expressions, labels, annotations, names, receivers and matchers never persist.
+Independent unreadable routes remain null without erasing known peer counts.
+Exact 200 is required; `/alertmanager/api/v2/status` and configuration reads are
+outside the collector grant, despite the broader credential reach described below.
+Both inputs use the shared 10% failure ceiling, not the D-LBL12 exception. Neither
+emits product metrics; each adds eight planned existing provenance series.
 
 ### The two scopes that reach beyond inventory
 

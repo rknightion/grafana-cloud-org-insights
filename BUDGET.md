@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **13,811** |
-| Phase 1 only | 13,811 |
+| **Declared (all phases)** | **13,827** |
+| Phase 1 only | 13,827 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -29,8 +29,8 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | J | 4,400 |
 | K | 973 |
 | L | 4,066 |
-| scan | 338 |
-| **Total** | **13,811** |
+| scan | 354 |
+| **Total** | **13,827** |
 
 ## Metrics
 
@@ -62,8 +62,8 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_stack_billed_users` | B | `stack`(271) | 271 | 1 | billingActiveUsers, NEVER currentActiveUsers. Named `stack_` not `cost_` so it cannot collide with the estate rollup of the same quantity |
 | `gcinsight_stack_collectors_active` | E | `stack`(271) | 271 | 1 | the per-stack half; use it to find registration concentration and churn |
 | `gcinsight_stack_fleet_fast_scrape_pipelines` | E | `stack`(271) | 271 | 1 | enabled, reaching Fleet pipelines scraping faster than the default interval. Per stack because the alert names the stack and remediation is a trend; ABSENT where Fleet was not read or the payload predates the interval parser |
-| `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(30) | 120 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
-| `gcinsight_input_available` | scan | `tier`(4), `input`(30) | 120 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
+| `gcinsight_input_age_seconds` | scan | `tier`(4), `input`(32) | 128 | 1 | age of the input the figures were computed from  -  NOT of the tier that ran. This is what the per-dashboard freshness panels read; the old single 'Data age' showed T1's timestamp on all eight dashboards and so claimed hourly freshness for 6-hourly data. ABSENT rather than 0 when the input is unavailable: a 0 would read as 'just gathered' |
+| `gcinsight_input_available` | scan | `tier`(4), `input`(32) | 128 | 1 | 1/0 per consumed input. 0 means the dependent views were WITHHELD this run |
 | `gcinsight_ai_estate_messages` | I | `category`(8), `surface`(8) | 64 | 1 | fixed category/surface projections plus other, summed after projection; NO `stack` label. Original per-stack names remain in `ai_category_surface` |
 | `gcinsight_coverage_technology_stacks` | K | `kind`(63) | 63 | 1 | one bounded registry enum per technology; value is measured stacks present |
 | `gcinsight_coverage_unscored` | K | `component`(8), `reason`(7) | 56 | 1 | bounded component/reason counts; product absence and unavailable evidence are excluded from the score rather than published as failed coverage |
@@ -209,6 +209,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `ai_summary` | I | 1 | 1 |  |
 | `ai_tenant_config` | I | 271 | 1 | one row per tenant skill/rule/automation/MCP integration: name, enabled, scope, createdBy, and `authenticationFailed` for MCPs. Bodies, rule content, MCP URLs and headers are NOT collected |
 | `ai_token_outliers` | I | 1 | 1 |  |
+| `alerting_rule_inventory` | C | 1 | 1 | default-off minimized configured rule/current alert/silence counts; independent unknown routes; zero product series; eight planned provenance series |
 | `cost_adaptive_metric_recommendations` | B | 1 | 1 | bounded top-ten-per-stack Adaptive Metrics action queue; metric names stay out of labels |
 | `cost_cardinality_outliers` | B | 271 | 1 | point-in-time stack and label-name drill-down for cardinality outliers |
 | `coverage_capability_adoption` | K | 10 | 1 | population, used and opportunity counts with the denominator basis and next step |
@@ -238,6 +239,7 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `labelling_label_register` | L | 271 | 1 | S3-only minimized names/class/counts, capped at 256 whole rows per stack/signal; no raw values or PII shape counts |
 | `labelling_stack_summary` | L | 271 | 1 | per-signal score with weighted coverage, severity coverage and catalogue version |
 | `library_panels_inventory` | C | 1 | 1 | default-off configured library panel counts after same-token wildcard folder coverage; zero product series, one input adds eight planned existing provenance series across four tiers; not usage, rendered instances or panel details |
+| `loki_volume_top_services` | C | 1 | 1 | default-off bounded top100 service_name producers over 86400s; total/remainder unknown; private input and S3 view only, zero product series; eight planned provenance series |
 | `maturity_dimensions` | D | 2,439 | 1 | a table shows every dimension's contribution; only the composite needs trending |
 | `public_dashboard_inventory` | E | 271 | 3 | complete configured public-dashboard inventory for comparison with local policy |
 | `risk_admin_share_per_stack` | E | 271 | 1 |  |
@@ -336,9 +338,9 @@ Runtime vocabularies below come from producer/source contracts, not capacity int
 | `gcinsight_estate_test_leftover_stacks` | `kind` | fixed | `idle`, `billing` | 2 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | pillars.estate.build literal leftover sites |
 | `gcinsight_estate_users_by_role` | `role` | fixed | `admin`, `editor`, `viewer` | 3 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | pillars.estate.build role/field loop |
 | `gcinsight_findings` | `kind` | fixed | `cardinality_outlier`, `adaptive_headroom`, `admin_sprawl`, `label_cardinality_high_confidence`, `label_cardinality_possible`, `service_account_risk`, `no_delete_protection`, `fleet_dead_collector`, `fleet_fast_scrape`, `plugin_drift`, `leftover_stack_billing`, `leftover_stack_idle`, `version_drift`, `dormant_stack`, `mcp_auth_failed`, `assistant_no_tenant_config`, `assistant_token_outlier`, `assistant_config_disabled` | 18 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | pillars.findings.SPECS -> derive -> metrics |
-| `gcinsight_input_age_seconds` | `input` | fixed | `access_policies`, `org_members`, `stack_detail`, `service_accounts`, `dataplane`, `assistant`, `insights`, `fleet`, `adaptive_logs`, `adaptive_traces`, `public_dashboards`, `alert_routing`, `dashboard_inventory`, `datasource_query_cost`, `signal_inventory`, `capability_adoption`, `loki_config`, `slo_inventory`, `synthetic_inventory`, `irm_integrations`, `irm_alert_groups`, `faro_apps`, `ml_jobs`, `cloud_accounts`, `pdc_networks`, `reports_inventory`, `playlists_inventory`, `library_panels_inventory`, `label_risk`, `label_inventory` | 30 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | emit.hydrate.INPUT_OWNER -> hydrate -> report_metrics |
+| `gcinsight_input_age_seconds` | `input` | fixed | `access_policies`, `org_members`, `stack_detail`, `service_accounts`, `dataplane`, `assistant`, `insights`, `fleet`, `adaptive_logs`, `adaptive_traces`, `public_dashboards`, `alert_routing`, `dashboard_inventory`, `datasource_query_cost`, `signal_inventory`, `capability_adoption`, `loki_config`, `slo_inventory`, `synthetic_inventory`, `irm_integrations`, `irm_alert_groups`, `faro_apps`, `ml_jobs`, `cloud_accounts`, `pdc_networks`, `reports_inventory`, `playlists_inventory`, `library_panels_inventory`, `label_risk`, `label_inventory`, `loki_volume`, `rule_inventory` | 32 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | emit.hydrate.INPUT_OWNER -> hydrate -> report_metrics |
 | `gcinsight_input_age_seconds` | `tier` | fixed | `t1`, `t2`, `t3` | 4 | 1 unnamed slot(s). Unused capacity has no supported runtime label value. | scan.TIERS/run dispatch; run_t4 has only completion/duration; run_t1 alone reports carry; failure accounting is sourced by gcom/dataplane |
-| `gcinsight_input_available` | `input` | fixed | `access_policies`, `org_members`, `stack_detail`, `service_accounts`, `dataplane`, `assistant`, `insights`, `fleet`, `adaptive_logs`, `adaptive_traces`, `public_dashboards`, `alert_routing`, `dashboard_inventory`, `datasource_query_cost`, `signal_inventory`, `capability_adoption`, `loki_config`, `slo_inventory`, `synthetic_inventory`, `irm_integrations`, `irm_alert_groups`, `faro_apps`, `ml_jobs`, `cloud_accounts`, `pdc_networks`, `reports_inventory`, `playlists_inventory`, `library_panels_inventory`, `label_risk`, `label_inventory` | 30 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | emit.hydrate.INPUT_OWNER -> hydrate -> report_metrics |
+| `gcinsight_input_available` | `input` | fixed | `access_policies`, `org_members`, `stack_detail`, `service_accounts`, `dataplane`, `assistant`, `insights`, `fleet`, `adaptive_logs`, `adaptive_traces`, `public_dashboards`, `alert_routing`, `dashboard_inventory`, `datasource_query_cost`, `signal_inventory`, `capability_adoption`, `loki_config`, `slo_inventory`, `synthetic_inventory`, `irm_integrations`, `irm_alert_groups`, `faro_apps`, `ml_jobs`, `cloud_accounts`, `pdc_networks`, `reports_inventory`, `playlists_inventory`, `library_panels_inventory`, `label_risk`, `label_inventory`, `loki_volume`, `rule_inventory` | 32 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | emit.hydrate.INPUT_OWNER -> hydrate -> report_metrics |
 | `gcinsight_input_available` | `tier` | fixed | `t1`, `t2`, `t3` | 4 | 1 unnamed slot(s). Unused capacity has no supported runtime label value. | scan.TIERS/run dispatch; run_t4 has only completion/duration; run_t1 alone reports carry; failure accounting is sourced by gcom/dataplane |
 | `gcinsight_labelling_findings` | `severity` | fixed | `low`, `medium`, `high` | 3 | 0 unnamed slot(s). Unused capacity has no supported runtime label value. | pillars.labelling.SEVERITIES -> build |
 | `gcinsight_labelling_findings` | `stack` | discovered | Not enumerated | 271 | Planning baseline is not a configured or exhaustive estate roster. | sources.gcom.fetch_inventory -> scan.run_t1/t2/t3 -> live inventory slug left joins; carry.carry_forward drops departed stacks |

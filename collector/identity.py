@@ -25,6 +25,12 @@ LABEL_INVENTORY_DEFAULTS = {
     "GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS": "900",
 }
 
+# Independent additive default-off flags. Absence preserves pre-feature manifest digests.
+PRODUCER_RULE_DEFAULTS = {
+    "GCINSIGHT_LOKI_VOLUME_ENABLED": "0",
+    "GCINSIGHT_RULE_INVENTORY_ENABLED": "0",
+}
+
 SCAN_ENV = (
     "GCINSIGHT_ORG_ID", "GCINSIGHT_WRITE_STACK", "GCINSIGHT_MIMIR_URL",
     "GCINSIGHT_MIMIR_TENANT", "GCINSIGHT_LOKI_URL", "GCINSIGHT_LOKI_TENANT",
@@ -37,6 +43,7 @@ SCAN_ENV = (
     "GCINSIGHT_READER_PRODUCT_READS",
     "GCINSIGHT_LABEL_INVENTORY_ENABLED", "GCINSIGHT_LABEL_INVENTORY_TUNABLES",
     "GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES", "GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS",
+    "GCINSIGHT_LOKI_VOLUME_ENABLED", "GCINSIGHT_RULE_INVENTORY_ENABLED",
 )
 PROVISIONER_ENV = (
     "GCINSIGHT_ORG_ID", "GCINSIGHT_SSM_REGION", "GCINSIGHT_STACK_TOKEN_PREFIX",
@@ -163,6 +170,9 @@ def canonical_projection(kind: str, environ: Mapping[str, str] | None = None) ->
     source = os.environ if environ is None else environ
     if kind == "scan" and not any(name in source for name in LABEL_INVENTORY_DEFAULTS):
         names = tuple(name for name in names if name not in LABEL_INVENTORY_DEFAULTS)
+    if kind == "scan":
+        names = tuple(name for name in names
+                      if name not in PRODUCER_RULE_DEFAULTS or name in source)
     out = {name: str(source.get(name, "")).strip() for name in names}
     return {name: canonical_json_text(value) if name in JSON_VALUED_ENV and value else value
             for name, value in out.items()}
@@ -185,6 +195,18 @@ def verify_runtime_projection(kind: str, *, environ: Mapping[str, str] | None = 
         return None
     actual = projection_digest(kind, source)
     if kind == "scan" and actual != expected:
+        # Strip only exact default-off additions. Enabled policy can never use an old digest.
+        legacy_candidates = [dict(source)]
+        for name, default in PRODUCER_RULE_DEFAULTS.items():
+            if str(source.get(name, default)).strip() == default:
+                legacy_candidates += [{key: value for key, value in candidate.items() if key != name}
+                                      for candidate in list(legacy_candidates)]
+        for legacy in legacy_candidates:
+            legacy_digest = projection_digest(kind, legacy)
+            if legacy_digest == expected:
+                actual = legacy_digest
+                break
+    if kind == "scan" and actual != expected:
         # Old immutable consumers can run the default-off additive interface. Never accept an old
         # digest for a changed policy: every new field must render the exact canonical default.
         defaults_match = all(
@@ -193,11 +215,13 @@ def verify_runtime_projection(kind: str, *, environ: Mapping[str, str] | None = 
             for name, default in LABEL_INVENTORY_DEFAULTS.items()
         )
         if defaults_match:
-            legacy = {name: value for name, value in source.items()
-                      if name not in LABEL_INVENTORY_DEFAULTS}
-            legacy_digest = projection_digest(kind, legacy)
-            if legacy_digest == expected:
-                actual = legacy_digest
+            for candidate in legacy_candidates:
+                legacy = {name: value for name, value in candidate.items()
+                          if name not in LABEL_INVENTORY_DEFAULTS}
+                legacy_digest = projection_digest(kind, legacy)
+                if legacy_digest == expected:
+                    actual = legacy_digest
+                    break
     if actual != expected:
         raise InvalidIdentity(
             f"{kind} runtime projection digest mismatch: expected {expected}, resolved {actual}"

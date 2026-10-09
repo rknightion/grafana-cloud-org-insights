@@ -85,7 +85,7 @@ PILLAR_J_EPOCHS = 2  # contaminated unversioned history plus the clean v2 epoch 
 FINDING_KIND = 18
 # Cardinality follows `len(hydrate.INPUT_OWNER)`; the test below the catalogue re-derives it so adding an
 # input cannot silently leave this declaration stale.
-INPUT = 30
+INPUT = 32
 # Planning capacity, NOT upstream enums. Assistant metric projections currently use seven
 # categories and eight surfaces, including other; the category slot left over is unnamed.
 # Estate-wide ONLY; the per-stack cross product is a view.
@@ -506,6 +506,12 @@ CATALOGUE: tuple[MetricSpec, ...] = (
                     "in memory, contents never retained"),
 
     # --- Declared as views, deliberately. Zero series. This half of the table is the decision record. ---
+    MetricSpec("loki_volume_top_services", "C", store="view",
+               note="default-off bounded top100 service_name producers over 86400s; total/remainder unknown; "
+                    "private input and S3 view only, zero product series; eight planned provenance series"),
+    MetricSpec("alerting_rule_inventory", "C", store="view",
+               note="default-off minimized configured rule/current alert/silence counts; independent unknown routes; "
+                    "zero product series; eight planned provenance series"),
     MetricSpec("library_panels_inventory", "C", store="view",
                note="default-off configured library panel counts after same-token wildcard folder coverage; "
                     "zero product series, one input adds eight planned existing provenance series across four tiers; "

@@ -871,6 +871,31 @@ Evidence: /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C4/r
 /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C4/probe.log
 and /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C4-docs.log.
 
+## D-VOL20 / D-RULE20 wiring traps
+
+- Loki GET `/loki/api/v1/index/volume` supplies a bounded `service_name` vector,
+  top100 over 86400 seconds. A successful response, including one below the limit,
+  provides no measured total/completeness marker. `total_bytes` / `other_bytes`
+  remain null; never subtract from query-work stats or sum the vector as estate
+  ingest. Complete means valid bounded response, not exhaustive inventory. Empty
+  rows prove no returned producers for this matcher/window, not zero total bytes.
+- Raw service values belong only to private hydration and S3
+  `loki_volume_top_services`. The scanner strips them from `--out` and excludes
+  that view before deriving Loki findings. They never become metric labels,
+  errors or stdout. Dashboard tables explain unknown total/remainder and bounds.
+- Count-only `rule_inventory` reads exact GETs: Mimir `/api/prom/api/v1/rules`
+  and `/api/prom/api/v1/alerts`; Loki `/prometheus/api/v1/rules`; Alertmanager
+  `/alertmanager/api/v2/alerts` and `/alertmanager/api/v2/silences` with fresh
+  `amInstanceUrl` / `amInstanceId`. No status/config fallback. Names, expressions,
+  labels, annotations, receivers and silence matchers are discarded at parse.
+  Successful peers retain counts when a subroute is unavailable; null is not zero.
+- Both default-off T2 inputs require exact 200 and retain the shared 10% failure
+  ceiling, with each rule subroute checked separately. Only label inventory has
+  D-LBL12's non-blocking floor. Empty fresh inventory is unknown and must fence
+  gather side writes as well as final publication. Limited non-dry-run refusal,
+  own-input non-revival and existing body/deadline bounds are unchanged. No
+  scope/credential or customer consent change follows.
+
 ## Writing about any of this
 
 - **Never put a measured figure in always-on prose** - a banner, a panel description that is really an

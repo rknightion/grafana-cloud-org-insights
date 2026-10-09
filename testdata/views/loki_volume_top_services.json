@@ -1,0 +1,618 @@
+{
+  "meta": {
+    "generated_at": "2026-10-09T15:35:26.019642+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_traces": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "slo_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "synthetic_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_integrations": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_alert_groups": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "faro_apps": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "ml_jobs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "cloud_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "pdc_networks": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "reports_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "playlists_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "library_panels_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_risk": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_volume": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "rule_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      "Stack": "stack158",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack145",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack177",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack125",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack001",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack001b",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack001c",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack001a",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack019",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack049",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack110",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack020",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "obs-hub",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "obs-hub-dev",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack035",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack036",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack111",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack070",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack037",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack071",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack050",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack112",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack051",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack146",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack147",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack038",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack052",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack053",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack054",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack148",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack126",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack002",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack113",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack097",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack072",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack055",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack193",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack170",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack201",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    },
+    {
+      "Stack": "stack149",
+      "Service": "private-service-canary",
+      "Bytes": 23,
+      "Window seconds": 86400,
+      "Limit": 100,
+      "Returned producers": 1,
+      "At limit": false,
+      "Total bytes": null,
+      "Other bytes": null,
+      "Response state": "complete"
+    }
+  ]
+}

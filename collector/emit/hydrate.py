@@ -142,6 +142,8 @@ INPUT_OWNER: dict[str, str] = {
     # Private minimized names/counts, default-off. Labelling consumes only strict envelopes;
     # diagnostics still exclude the input and register. Each signal records head or 24h.
     "label_inventory": "t2",
+    "loki_volume": "t2",
+    "rule_inventory": "t2",
 }
 
 # Per-input writer version and highest version this consumer understands. Version 1 introduces the
@@ -158,6 +160,9 @@ INPUT_SCHEMA_VERSION: dict[str, int] = {name: 1 for name in INPUT_OWNER}
 # alternate inputs. `tests/test_hydrate.py::ViewInputsAreDerivedNotAssumed` caps that proof before
 # composing any subsets, so adding inputs cannot turn the gate into an exponential resource failure.
 VIEW_INPUTS: dict[str, frozenset[str]] = {
+    # Re-derived through the existing fixture/subset composition harness, including every singleton.
+    "loki_volume_top_services": frozenset({"loki_volume"}),
+    "alerting_rule_inventory": frozenset({"rule_inventory"}),
     # Re-derived from all subsets through size two against the synthetic private envelope fixture.
     "labelling_findings": frozenset({"label_inventory"}),
     "labelling_stack_summary": frozenset({"label_inventory"}),

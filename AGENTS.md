@@ -234,6 +234,30 @@ The approved source is doc-0008 Part 1 (Labelling best-practice research and rul
 Not amended: `MAX_PER_STACK_FANOUT`, the one-extra-label rule, gap-is-absent, the limited-run
 guard, own-input hydration and derived `VIEW_INPUTS`.
 
+## D-VOL20 / D-RULE20: default-off producer and alerting inventory
+
+- `loki_volume` is T2-owned and default-off (`GCINSIGHT_LOKI_VOLUME_ENABLED`,
+  `loki_volume_enabled = false`). Its only GET is `/loki/api/v1/index/volume` on live
+  `hlInstanceUrl` with `hlInstanceId`, `service_name` selection, top100 and 86400 seconds.
+  Raw service values may persist only in the private hydration input and S3
+  `loki_volume_top_services` view, never `--out`, stdout, errors, Loki findings or metric labels.
+  Complete means a valid bounded response, not exhaustive inventory. This route proves no
+  measured total or completeness: `total_bytes` and `other_bytes` remain null even below
+  the limit. Never sum top100 as a whole-stack or estate total.
+- `rule_inventory` is T2-owned and default-off (`GCINSIGHT_RULE_INVENTORY_ENABLED`,
+  `rule_inventory_enabled = false`). Exact GETs only: Mimir `/api/prom/api/v1/rules`
+  and `/api/prom/api/v1/alerts`, Loki `/prometheus/api/v1/rules`, Alertmanager
+  `/alertmanager/api/v2/alerts` and `/alertmanager/api/v2/silences` using live
+  `amInstanceUrl` and `amInstanceId`. No `/status` or configuration read. Persist bounded
+  counts only; expressions, labels, annotations, names, receivers and silence matchers
+  are transient. Known peer counts survive individual failed routes; unknown fields stay null.
+- Both require exact 200 and obey the existing 10% source/publication failure ceiling;
+  D-LBL12 remains label-inventory-only. Empty fresh estate is unknown and refuses all
+  publication, including gather-time side writes. Limited non-dry-run guards stay intact.
+  Each input adds eight planned existing provenance-series combinations across four tiers,
+  with no product metric. No route siblings, scope changes, credential changes or customer
+  enablement grant follow from this wiring.
+
 ## Hydration: every tier composes from the FULL input set
 
 `collector/emit/hydrate.py`. A tier hydrates the inputs it lacks from `scans/<tier>/latest.json`, so

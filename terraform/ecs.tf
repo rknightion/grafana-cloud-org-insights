@@ -148,6 +148,8 @@ resource "aws_ecs_task_definition" "scan" {
         { name = "GCINSIGHT_COVERAGE_SCORE_WEIGHTS", value = jsonencode(local.inputs.coverage_score_weights) },
         { name = "GCINSIGHT_DASHBOARD_DETAIL_ENABLED", value = local.inputs.dashboard_detail_enabled ? "1" : "0" },
         { name = "GCINSIGHT_LABEL_INVENTORY_ENABLED", value = local.inputs.label_inventory_enabled ? "1" : "0" },
+        { name = "GCINSIGHT_LOKI_VOLUME_ENABLED", value = local.inputs.loki_volume_enabled ? "1" : "0" },
+        { name = "GCINSIGHT_RULE_INVENTORY_ENABLED", value = local.inputs.rule_inventory_enabled ? "1" : "0" },
         { name = "GCINSIGHT_LABEL_INVENTORY_TUNABLES", value = jsonencode(jsondecode(local.inputs.label_inventory_tunables)) },
         { name = "GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES", value = jsonencode(local.inputs.label_inventory_static_names) },
         { name = "GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS", value = tostring(local.inputs.label_inventory_budget_seconds) },
