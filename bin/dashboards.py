@@ -5184,6 +5184,17 @@ def d_labelling(ds: str):
                                               "gcinsight_labelling_catalogue_version",
                                               description="Estate numeric version, not a metric label. Every row carries its own version."),
     }
+    # Keep the distinct risk and cost findings; link to their existing assembled panel ids.
+    el["register"]["spec"]["links"] = [
+        {"title": "Mimir top-20 label-name findings (Risk)",
+         "url": f"/d/{DASHBOARD_UID_PREFIX}-risk?viewPanel=1793197138"
+                "&${__url_time_range}&${stack:queryparam}",
+         "targetBlank": False},
+        {"title": "Cardinality outliers (Cost)",
+         "url": f"/d/{DASHBOARD_UID_PREFIX}-cost?viewPanel=1102776439"
+                "&${__url_time_range}&${stack:queryparam}",
+         "targetBlank": False},
+    ]
     for signal in labelling_pillar.SIGNALS:
         el[f"rules_{signal}"] = table(f"{signal.title()} rule results", "labelling_findings",
                                      predicate=f'Signal == "{signal}"',

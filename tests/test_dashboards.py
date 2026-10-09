@@ -18,6 +18,43 @@ from collector.dashboards import build
 from collector.pillars.maturity import RUBRIC_VERSION
 
 
+class LabellingCardinalityLinksTest(unittest.TestCase):
+    def test_links_resolve_to_retained_cardinality_panels(self):
+        from bin import dashboards
+
+        for prefix in ("gcinsight", "consumer"):
+            with self.subTest(prefix=prefix), mock.patch.object(dashboards, "DASHBOARD_UID_PREFIX", prefix):
+                self._assert_links_resolve()
+
+    def _assert_links_resolve(self):
+        from pathlib import Path
+        from urllib.parse import parse_qs, urlsplit
+        from bin import dashboards
+
+        views = Path(__file__).resolve().parent.parent / "testdata" / "views"
+        with (mock.patch.object(build, "VIEWS_DIR", str(views)),
+              mock.patch.object(build, "BUCKET", "synthetic")):
+            assembled = {name: dashboards.assemble(name, "infinity-uid")
+                         for name in ("labelling", "risk", "cost")}
+            documents = {name: result[1] for name, result in assembled.items()}
+        links = documents["labelling"]["spec"]["elements"]["register"]["spec"]["links"]
+        self.assertEqual(len(links), 2)
+        for link, name, key, view in zip(links,
+                ("risk", "cost"), ("label_cardinality", "cardinality"),
+                ("risk_label_cardinality", "cost_cardinality_outliers")):
+            target = documents[name]["spec"]["elements"][key]["spec"]
+            url = urlsplit(link["url"])
+            self.assertEqual(url.path, f"/d/{dashboards.DASHBOARD_UID_PREFIX}-{name}")
+            self.assertEqual(url.path, f"/d/{assembled[name][0]}")
+            self.assertEqual(parse_qs(url.query)["viewPanel"], [str(target["id"])])
+            self.assertIn("${__url_time_range}", link["url"])
+            self.assertIn("${stack:queryparam}", link["url"])
+            self.assertTrue(link["title"])
+            self.assertFalse(link["targetBlank"])
+            query = target["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+            self.assertIn(f"/views/{view}.json", query["url"])
+
+
 class CollectorIntegrityTest(unittest.TestCase):
     """Integrity must be read from endpoint evidence and actual sampled trends."""
 
