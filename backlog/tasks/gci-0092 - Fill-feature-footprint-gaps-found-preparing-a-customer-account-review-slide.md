@@ -4,7 +4,7 @@ title: Fill feature-footprint gaps found preparing a customer account-review sli
 status: In Progress
 assignee: []
 created_date: '2026-10-05 09:18'
-updated_date: '2026-10-09 13:44'
+updated_date: '2026-10-09 15:40'
 labels:
   - feature-usage
   - follow-on
@@ -59,4 +59,6 @@ loop20: implement only gaps 2,3,4,6 in frozen owned files; qualifying existing o
 
 <!-- SECTION:NOTES:BEGIN -->
 Loop12 children .01-.05 accepted with qualified zero-product-series views and explicit unavailable gaps in the matrix. Parent remains partial: named robk Agent positive-generation control not observed, exact cumulative generation volume and host-hour contracts unresolved; DB reporting markers do not establish units/adoption, Assistant org source empty and default lookback unknown. Do not mark parent AC2 complete or infer zero activity. Library source/publication accepted default-off with no customer grant. Follow-up scope/attempt authorization belongs to a later owner-graded packet.
+
+loop20 bounded gaps2,3,4,6 accepted b5f703ed1f1e126677e833fe9ca8a2cd9b940fa1: dbo11y/App marker populations and separate org App/Infra host-hour-named observations state 24h query observation, unverified units and producer window; no database-instance/adoption or billable-hour claim. Missing families absent/unknown. Existing Adaptive rows/applied-rule subset and org Assistant beside sum preserved. Independent review PASS exact patch621ff623; CodeRabbit minor numeric precision fixed. Composed just check exit0 2587 passed,2 existing skips,tofu32; exact CI37951780833 all jobs success. Zero product series; VIEW_INPUTS re-derived unchanged. Parent stays In Progress: excluded gaps1,5,7 and live R-dev10 evidence not claimed; do not mark whole parent criteria done. loop20:1 implementation attempt,0 review-repair rounds; bounded code accepted.
 <!-- SECTION:NOTES:END -->
