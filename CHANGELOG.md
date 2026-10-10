@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.11.0...v0.11.1) (2026-10-10)
+
+
+### Documentation
+
+* **backlog:** close the qualified feature-footprint parent after dev proof ([239a08c](https://github.com/rknightion/grafana-cloud-org-insights/commit/239a08c56e15f56af988e41efa8ebecc22e094e8))
+* close natural consumer verification and record rollout blockers ([0f9c1ee](https://github.com/rknightion/grafana-cloud-org-insights/commit/0f9c1ee8a9382525e12fe7c082f224dca71a7e9e))
+* publish canonical agent documents ([7347630](https://github.com/rknightion/grafana-cloud-org-insights/commit/7347630f8f9584d861c69dde592cbf95d57cfc48))
+
+
+### Miscellaneous
+
+* **backlog:** retain natural convergence evidence blocker ([b42fc96](https://github.com/rknightion/grafana-cloud-org-insights/commit/b42fc9684bbef5c6bb09aa6381f4522c199cfd07))
+
 ## [0.11.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.10.0...v0.11.0) (2026-10-09)
 
 
