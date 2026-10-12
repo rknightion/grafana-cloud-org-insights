@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop23'
 created_date: '2026-10-06 10:47'
-updated_date: '2026-10-12 15:32'
+updated_date: '2026-10-12 16:04'
 labels:
   - dashboards
   - owner-decision
@@ -47,4 +47,6 @@ D-DOC23 schema-free build from existing supported view metadata only. Apply reco
 
 <!-- SECTION:NOTES:BEGIN -->
 D-DOC23 bounded display contract proposed by loop23 root: failed inventory means current membership unknown, never zero or a historical label union called fresh discovery; retain last-good view and expose its own timestamp. A removed-stack row is excluded only when existing reliable current inventory proves departure, otherwise label membership historical/unknown, never manufacture a configured roster. Missing per-view metadata yields unknown age/completeness, not inferred current from run time. Last-good publication time and input-observation time are distinct, with advancing staleness from existing supported metadata; measured-empty requires an available measured input, absent input is unavailable. Schema/source needed to prove membership or completeness becomes a named follow-up packet, not part of this dashboard-only build.
+
+D-DOC23 source/schema gap recorded as GCI-0134 (approve current-estate and exact view-provenance evidence), parked for owner scope/compatibility approval. Existing snapshots and historical label_values cannot prove current identity/departure; generated_at is an envelope marker, not exact S3 upload or source observation, and generic completeness is unknown. Schema-free candidate uses runtime queries to exact existing view URLs, no roster or source field added. Actual four-state CLI artifacts and408JSONata selectors evaluated2.2.2, knownavailable ages advance while missing/unavailable ages stay unknown; independent review found no correctness blocker. No browser/deployed-plugin proof. Exactbase CodeRabbit complete0/all6files and final just check0; candidate not yet integrated.
 <!-- SECTION:NOTES:END -->
