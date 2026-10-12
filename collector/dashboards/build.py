@@ -407,10 +407,36 @@ STACK_COLUMN = "Stack"
 # `percentunit` on a 0-100 column renders 94.4 as "9440%". Both have shipped elsewhere on this project.
 COLUMN_UNITS: dict[str, str] = {
     "Stickiness": "percentunit",
+    "Machine share of categorised": "percentunit",  # Legacy name for the 0-1 non-web ratio.
     "Admin share %": "percent",
     "Share of org series %": "percent",
     "Share of estate %": "percent",
     "Change %": "percent",
+}
+
+
+# Presentation-only aliases for legacy attribution fields, including reused Findings tables.
+# Selectors, types and values stay unchanged; a surface proxy never becomes actor evidence.
+AI_ACTOR_DISPLAY_NAMES = {
+    "Machine share of categorised": "Non-web share of categorised (actor identity unproven)",
+}
+VIEW_DISPLAY_NAMES = {
+    **{view: AI_ACTOR_DISPLAY_NAMES for view in
+       ("ai_assistant", "ai_enablement_gap", "ai_token_outliers")},
+    "ai_category_surface": {
+        "Human driven": "Web surface proxy (human identity unproven)",
+    },
+    "insights_surface_usage": {
+        "Distinct identified users": "Distinct userIds (human identity unproven)",
+        "User identity": "userId field coverage (not actor identity)",
+    },
+    "insights_surface_usage_estate": {
+        "Sum of per-stack users": "Sum of per-stack userIds (human identity unproven)",
+        "Stacks with user identity": "Stacks with userId field observed",
+    },
+    "insights_dashboard_usage": {
+        "Distinct viewers": "Distinct viewer userIds (human identity unproven)",
+    },
 }
 
 
@@ -462,12 +488,17 @@ def table_panel(title: str, view_name: str, ds_uid: str, *, description: str = "
     resolved_units = {c: u for c, u in COLUMN_UNITS.items() if c in order}
     resolved_units.update(units or {})
 
+    rename = {column: display for column, display in VIEW_DISPLAY_NAMES.get(view_name, {}).items()
+              if column in order}
+    if rename:
+        description += " Display aliases qualify legacy fields only; source values are unchanged. " \
+                       "Human versus machine identity is unproven from surfaces or userId presence."
     overrides = []
     for column, unit in resolved_units.items():
-        overrides.append({"matcher": {"id": "byName", "options": column},
+        overrides.append({"matcher": {"id": "byName", "options": rename.get(column, column)},
                           "properties": [{"id": "unit", "value": unit}]})
     for column, width in (widths or {}).items():
-        overrides.append({"matcher": {"id": "byName", "options": column},
+        overrides.append({"matcher": {"id": "byName", "options": rename.get(column, column)},
                           "properties": [{"id": "custom.width", "value": width}]})
 
     panel = _panel(
@@ -479,7 +510,7 @@ def table_panel(title: str, view_name: str, ds_uid: str, *, description: str = "
             "fieldConfig": {"defaults": {"custom": {"filterable": True, "align": "auto"}},
                             "overrides": overrides},
         }))
-    panel["spec"]["data"]["spec"]["transformations"] = [_organize(order, exclude=exclude)]
+    panel["spec"]["data"]["spec"]["transformations"] = [_organize(order, exclude=exclude, rename=rename)]
     return panel
 
 
@@ -1036,8 +1067,13 @@ MIXED_BANNER_MD: dict[str, str] = {
   **rolling 30-day plugin window**, refreshed daily. Never quote one source as a check on the other.
 - **Every Assistant inventory count is TENANT-scoped.** A user-scoped skill or rule is invisible to any
   credential, including a full Admin, so these are not stack totals and cannot be made into them.
+- **Human vs machine and People and identities are legacy navigation labels.** Human versus machine
+  identity is **unproven** from web/non-web surfaces, user-token/service-token series or userId presence.
+  These are recorded categories and identity proxies, not independently verified actors.
 - **Category breakdowns are shares of the CATEGORISED subset**, which is a minority of messages on most
-  stacks. The uncategorised share is on the page for exactly that reason.
+  stacks. Categories do not prove incident work, onboarding, authoring or business value.
+- **Agent positive rates are observations, not cumulative generations or automatic remediation.**
+  Those outcomes and saved operator time remain **unproven**.
 """,
     "coverage": """
 - **The question this surface must answer:** "How can we expand this to show our customers which apps / infra etc are currently observed by us and how can we capture the value that we bring to the table? This could move the conversation from gaps and cost to upside potential and top line revenue growth."
@@ -1045,6 +1081,9 @@ MIXED_BANNER_MD: dict[str, str] = {
   technology classification and the named registers follow the input ages shown below. Hosts, pods,
   containers, log streams, integrations and the OnCall ownership catalogue are live datasource panels;
   the Stack selector does not filter them.
+- **Outcome value is a legacy navigation label, not proved business value.** Recorded seven-day
+  acknowledgement/resolution medians are delays: **saved operator time unproven**. Generic app/Scenes
+  observations do not establish per-app value; automated remediation remains unproven.
 - **Unit economics is a navigation/model label only.** Product inputs are raw, not normalised;
   currency, period, population matching and overlap are unknown. Retained diagnostic ratios are not
   measured unit prices or rates. Known denominator windows do not qualify an overage numerator.
@@ -1080,7 +1119,8 @@ LIVE_BANNER_MD = """\
   match group cohorts or windows; acknowledgement-share ratios are withheld, not zero, until matched
   cohort and window evidence is available. Read the separately qualified counts and seven-day bands.
 - A stack missing from a metric or top-N ranking is **unknown, not zero**. Configuration and reported
-  telemetry do not establish human use.
+  telemetry do not establish human use. Seven-day response/resolution medians are recorded delays;
+  **saved operator time is unproven**, not calculated from those medians.
 """
 
 

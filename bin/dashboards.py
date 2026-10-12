@@ -3514,7 +3514,8 @@ def d_dashboards(ds: str):
                         "provisioned count in the per-stack table this is the "
                         "provisioned-but-never-opened figure, which is the governance point."),
         "n_viewers": build.stat_panel(
-            "Distinct authenticated viewers", 'sum(gcinsight_dashboards_estate_viewers{version="2"})',
+            "Distinct viewer userIds (human identity unproven)",
+            'sum(gcinsight_dashboards_estate_viewers{version="2"})',
             description="Distinct authenticated `userId`s per stack, SUMMED; the anonymous `-1` "
                         "sentinel is excluded and reported separately. **Not an org-wide distinct count** - "
                         "somebody using four stacks counts four times. Treat it as reach per stack "
@@ -3533,9 +3534,9 @@ def d_dashboards(ds: str):
             unit="percentunit", decimals=1,
             description="**The headline governance figure of this pillar.** Numerator and denominator "
                         "both cover the measured stacks only, so it is a real share rather than two "
-                        "populations divided. Read it beside the coverage tab: a low share means most "
-                        "of what has been built is never opened, which is a maintenance and a licence "
-                        "conversation rather than a fault."),
+                        "populations divided. Read it beside the coverage tab: a low share means few "
+                        "configured dashboards had a recorded open in the 24h window, not that nobody "
+                        "uses them or that licences are wasted."),
         "n_measured": build.stat_panel(
             "Stacks measured",
             'sum(gcinsight_dashboards_estate_stacks{kind="measured",version="2"})',
@@ -3545,7 +3546,8 @@ def d_dashboards(ds: str):
             "Stacks with any dashboard opened",
             'sum(gcinsight_dashboards_estate_stacks{kind="with_views",version="2"})',
             description="Measured stacks where at least one dashboard was opened. The gap to the "
-                        "measured count is stacks nobody visited at all in the window."),
+                        "measured count is stacks with no recorded dashboard-open event in the window, "
+                        "not proof of no visitors or no use through other surfaces."),
         "n_with_public": build.stat_panel(
             "Stacks with public-dashboard activity",
             'sum(gcinsight_dashboards_estate_stacks{kind="with_public_dashboards",version="2"})',
@@ -3557,17 +3559,16 @@ def d_dashboards(ds: str):
             "insights_dashboard_usage", ds,
             schema=insights_pillar.VIEW_SCHEMAS["insights_dashboard_usage"],
             description="Ordered by opens. `Viewed share %` is dashboards opened against dashboards "
-                        "provisioned - the lower it is, the more of that stack nobody uses. "
+                        "provisioned - a low share means few recorded opens in the 24h window, "
+                        "not proof that nobody uses those dashboards. "
                         "`Cache hit %` is blank where the stack ran too few queries for a ratio to mean "
                         "anything, rather than showing a swing between 0 and 100."),
         "t_viewers": build.timeseries_panel(
-            "Distinct authenticated viewers over time, by stack",
+            "Distinct viewer userIds over time (human identity unproven)",
             [('topk(10, gcinsight_dashboards_viewers{version="2",stack=~"$stack"})', "{{stack}}")],
             description="Distinct authenticated `userId`s per stack; anonymous `-1` is excluded. Opens "
-                        "and viewers move independently and the "
-                        "gap is the point: rising opens on flat viewers is the same few people "
-                        "refreshing, which is a different story from the platform reaching more of "
-                        "the organisation."),
+                        "and IDs move independently. Rising opens on flat IDs does not establish "
+                        "repeated human refreshes or broader human adoption; actor identity is unproven."),
         "t_viewed": build.timeseries_panel(
             "Distinct dashboards opened over time, by stack",
             [('topk(10, gcinsight_dashboards_viewed{version="2",stack=~"$stack"})', "{{stack}}")],
@@ -3697,13 +3698,14 @@ def d_dashboards(ds: str):
             "How to read Grafana surfaces",
             "`source` is recorded on `data-request` events, so these panels count data requests, not page "
             "visits. A page visit that emits no data request is absent.\n\n"
-            "The `scenes` value means **Scenes-based app plugins (Drilldown and others)**. Usage Insights "
-            "does not provide a plugin or URL field to split that bucket per app, so no per-app attribution "
-            "is claimed.\n\n"
+            "Generic `app` and `scenes` observations do not independently identify a Drilldown app. "
+            "Known frontend controls can report generic `app`; datasource types identify backends, not "
+            "apps. **Per-app attribution and business value are unproven.**\n\n"
             "Upstream does not populate `error` for Explore or correlations, so there is no per-surface "
             "error rate here. Panel-editor data requests are suppressed upstream, so editing activity is "
             "under-counted or absent.\n\n"
-            "Distinct users count non-anonymous `userId`s only where at least one data request from that "
+            "**Human versus machine identity is unproven** from surface or `userId` presence. "
+            "Distinct IDs count non-anonymous `userId`s only where at least one data request from that "
             "surface exposed the field. A blank user count means that surface's events did not expose a "
             "userId. Estate user totals sum per stack and are not deduplicated across stacks. Unmapped "
             "sources are grouped as `other` in metrics; the bounded table below retains their raw values "
@@ -3725,11 +3727,12 @@ def d_dashboards(ds: str):
                         "the 24-hour window. A missing surface series means no request was observed, not "
                         "that Grafana has no such capability."),
         "tbl_surface_estate": build.table_panel(
-            "Estate data-request volume, reach and identified users by surface",
+            "Estate data-request volume and userId observations (human identity unproven)",
             "insights_surface_usage_estate", ds,
             schema=insights_pillar.VIEW_SCHEMAS["insights_surface_usage_estate"],
-            description="Estate totals cover measured stacks. `Sum of per-stack users` counts a person "
-                        "again when they query from another stack. `Stacks with user identity` shows how "
+            description="Estate totals cover measured stacks. `Sum of per-stack users` counts an ID "
+                        "again when it occurs in another stack, not independently verified humans. "
+                        "`Stacks with user identity` shows how "
                         "many queried stacks had a non-empty userId field, so the user total is not read "
                         "as complete when identity data is missing."),
         "t_surface_requests": build.timeseries_panel(
@@ -3755,6 +3758,12 @@ def d_dashboards(ds: str):
                         "surface mapping; raw values never become metric labels."),
 
         # --- What people open -------------------------------------------------------------------------
+        "opening_scope": build.text_panel(
+            "What people open: human identity unproven (legacy navigation)",
+            "**What people open is a legacy navigation label.** These are recorded dashboard-open "
+            "events, not independently verified human visits or outcomes. Bounded leaders use 24h; "
+            "the complete configured-dashboard opening inventory uses 31d. Unopened means no recorded "
+            "open in that window, not lifetime disuse or an instruction to retire a dashboard."),
         "tbl_top": build.table_panel(
             "Most-opened candidates (up to 10 retained per stack)",
             "insights_top_dashboards", ds,
@@ -3854,7 +3863,8 @@ def d_dashboards(ds: str):
     query_rows.append(build.row("Trend", ["t_panel_queries", "t_cache", "t_errors"],
                                 max_columns=1))
 
-    opening_rows = []
+    opening_rows = [build.row("Recorded opens, not proved human visits", ["opening_scope"],
+                              max_columns=1, row_height="short")]
     if opening_inventory_live:
         opening_rows.append(build.row(
             "Complete 31-day ownership queue", ["tbl_opening_inventory"],
@@ -3896,7 +3906,9 @@ def d_dashboards(ds: str):
         build.tab("Coverage", ["tbl_coverage"], max_columns=1),
     ]
     return "gcinsight-dashboards", "Grafana Cloud Org Insights - Dashboard usage", \
-        ("Pillar J: what people actually OPEN, from each stack's own usage-insights datasource. Every "
+        ("Pillar J: recorded dashboard-open and query events, not independently verified human activity. "
+         "What people open is a legacy navigation label: actor identity and per-app value are unproven. "
+         "From each stack's own usage-insights datasource. Every "
          "other pillar measures what exists; this measures what is used. Public-dashboard figures are "
          "observed activity, not configured inventory; the complete inventory is on Risk. "
          "Figures cover a rolling window and are summed over the stacks that could be measured - the "
@@ -4237,6 +4249,12 @@ def d_coverage(ds: str):
 
         # Group gauges and recorded responses have separately qualified populations and windows.
         # Matching stacks alone cannot support an acknowledgement-share ratio.
+        "outcome_scope": build.text_panel(
+            "Outcome value: saved operator time unproven (legacy navigation)",
+            "**Outcome value is a legacy navigation label, not proved business value.** These are "
+            "recorded counts and seven-day response/resolution delays. **Saved operator time unproven**: "
+            "medians provide neither a counterfactual baseline nor operator effort. Generic app/Scenes "
+            "observations do not establish per-app value; automatic remediation is also unproven."),
         "n_value_groups": build.stat_panel(
             "Alert-group gauge on timing-reporting stacks", f"sum{GROUPS_ON_TIMING_STACKS}",
             ds_uid=build.USAGE_UID,
@@ -4414,6 +4432,8 @@ def d_coverage(ds: str):
                       row_height="tall"),
         ]),
         build.rows_tab("Outcome value", [
+            build.row("Recorded observations, not saved operator time", ["outcome_scope"],
+                      max_columns=1, row_height="short"),
             build.row("Recorded response", ["n_value_groups", "n_value_acknowledged",
                                               "n_value_engagement"],
                       max_columns=3, row_height="short"),
@@ -4449,8 +4469,9 @@ def d_coverage(ds: str):
     ]
     return "gcinsight-coverage", "Grafana Cloud Org Insights - Coverage", \
         ("Pillar K: the affirmative observed-estate asset register, how deeply each named service is "
-         "covered, the explicit ownership and response relationships attached to it, and the adjacent "
-         "surface where observation can carry more value. Unit economics retains raw observations and "
+         "covered, and the explicit ownership and response relationships attached to it. "
+         "Outcome value is a legacy navigation label: saved operator time, per-app business value "
+         "and automatic remediation are unproven. Unit economics retains raw observations and "
          "diagnostic ratios, not normalised: currency, period, population matching and overlap are "
          "unknown. These are not measured unit prices or rates."), el, tabs
 
@@ -4646,9 +4667,8 @@ def d_ai(ds: str):
     ai_combo_series = "gcinsight_ai_estate_messages"
     ai_by_category = "sum by(category) (gcinsight_ai_estate_messages)"
     ai_by_surface = "sum by(surface) (gcinsight_ai_estate_messages)"
-    # The estate machine share, from the same series both ways round so numerator and denominator cover
-    # one population. `surface!="web"` rather than a list of machine surfaces: a surface Assistant adds
-    # later is machine-driven until somebody says otherwise, and the combo count makes it visible.
+    # Recorded non-web share of categorised messages, with one population on both sides.
+    # Legacy metric names do not establish human/machine actors, including for new surfaces.
     ai_machine_share_estate = ('sum(gcinsight_ai_estate_messages{surface!="web"}) / '
                                "sum(gcinsight_ai_estate_messages)")
     ai_tenant_objects = "gcinsight_ai_estate_tenant_objects"
@@ -4674,10 +4694,10 @@ def d_ai(ds: str):
                         "period, after collapsing by stack_id. This is reach across the estate, not a "
                         "unique-person count; the table on Adoption by stack names the stacks."),
         "n_token_users": build.stat_panel(
-            "People consuming AI tokens", token_users, ds_uid=build.USAGE_UID,
-            description="Unique org-level user identities with AI-token activity in the current billing "
-                        "period. Explicitly selects user_type=user, so a service identity cannot inflate "
-                        "the people count."),
+            "AI-token user-category identities (human identity unproven)", token_users, ds_uid=build.USAGE_UID,
+            description="Org-level identities on user_type=user series with AI-token activity in the "
+                        "current billing period. The category excludes user_type=service series, but "
+                        "does not independently verify a human actor. Identity attribution is unproven."),
         "n_tokens": build.stat_panel(
             "AI tokens this billing period", tokens, ds_uid=build.USAGE_UID,
             description="Current billing-period AI tokens across every stack. The aggregate RESETS "
@@ -4752,14 +4772,16 @@ def d_ai(ds: str):
 
         # --- People and identities ------------------------------------------------------------------
         "tbl_people": build.prometheus_table_panel(
-            "Top 100 people by lifetime cumulative AI tokens", people, legend="{{email}}",
+            "Top 100 identities on user-token series - lifetime cumulative (human identity unproven)",
+            people, legend="{{email}}",
             ds_uid=build.USAGE_UID, label_column="User", value_column="Lifetime AI tokens",
-            description="Per-user LIFETIME CUMULATIVE token totals, deduplicated by email across stacks "
-                        "and ranked by the most recent value seen within the look-back window. This is "
-                        "deliberately not labelled current spend: its counter does not share the monthly "
-                        "reset contract of the aggregate token panels."),
+            description="LIFETIME CUMULATIVE token totals on user_type=user series, grouped by email "
+                        "across stacks and ranked by the maximum seen within the 120d look-back window. "
+                        "This series category is not independently verified human identity. It is not "
+                        "current spend: its counter does not share the monthly reset contract of the "
+                        "aggregate token panels."),
         "tbl_services": build.prometheus_table_panel(
-            "Top 100 identities on service-token series - lifetime cumulative", services,
+            "Top 100 identities on service-token series - lifetime cumulative (actor identity unproven)", services,
             legend="{{email}}", ds_uid=build.USAGE_UID,
             label_column="Identity on service-token series",
             value_column="Lifetime AI tokens",
@@ -4810,8 +4832,8 @@ def d_ai(ds: str):
         "n_ai_with_usage": build.stat_panel(
             "Stacks with any Assistant activity", ai_with_usage,
             description="Of the stacks collected, how many had at least one Assistant message in the "
-                        "30-day window. A measured zero is a real answer here - it means Assistant is "
-                        "provisioned and nobody has used it - so this is reach, not licensing."),
+                        "30-day window. A measured zero means no messages were reported in this "
+                        "window, not lifetime disuse. Message counts do not prove human reach or value."),
         "n_ai_with_config": build.stat_panel(
             "Stacks with any tenant Assistant configuration", ai_with_config,
             description="Stacks carrying at least one TENANT-scoped skill, rule, automation or MCP "
@@ -4851,9 +4873,10 @@ def d_ai(ds: str):
                         "added to its own taxonomy, which explains a step in our series count before "
                         "somebody has to go looking for the cause."),
         "b_ai_investigations": build.barchart_panel(
-            "Investigations created, by originator", ai_investigations, legend="{{kind}}",
-            description="Investigations created in the window, split by whether Assistant or a person "
-                        "started them. The investigation INVENTORY is not collectable - a service "
+            "Investigations created (30d), by reported originator category", ai_investigations, legend="{{kind}}",
+            description="Investigations created in the 30d window, split by the reported Assistant/user "
+                        "originator category, not verified actors, automatic remediation or business value. "
+                        "The investigation INVENTORY is not collectable - a service "
                         "account owns none and belongs to no Grafana team - so these counts come from the "
                         "usage endpoint and there is deliberately no drill-down list."),
         "tbl_ai_stack_messages": build.prometheus_table_panel(
@@ -4892,10 +4915,10 @@ def d_ai(ds: str):
         # --- Human vs machine ------------------------------------------------------------------------
         "b_ai_category": build.barchart_panel(
             "Categorised messages by task category", ai_by_category, legend="{{category}}",
-            description="What people and pipelines ask Assistant to do, across the estate. "
-                        "Investigate-dominated is incident work, Learn-dominated is onboarding, "
-                        "Dashboard-dominated is authoring. Shares of the CATEGORISED subset only - see "
-                        "the uncategorised stat on the previous tab before quoting a percentage."),
+            description="Reported task-category counts across collected stacks in the rolling 30d "
+                        "window. Categories do not prove incident work, onboarding, authoring, actor "
+                        "identity or business value. Shares use the CATEGORISED subset only; the "
+                        "uncategorised stat on this tab supplies the excluded remainder."),
         "b_ai_surface": build.barchart_panel(
             "Categorised messages by surface", ai_by_surface, legend="{{surface}}",
             description="Recorded surface categories, not proven human versus machine actors. "
@@ -4922,7 +4945,7 @@ def d_ai(ds: str):
                         "estate-wide because the per-stack cross product is a table, not a time series."),
         "tbl_ai_stack_machine": build.prometheus_table_panel(
             "Top 50 stacks by recorded non-web surface share", ai_top_machine, legend="{{stack}}",
-            label_column="Stack", value_column="Machine share", unit="percentunit",
+            label_column="Stack", value_column="Non-web share (actor identity unproven)", unit="percentunit",
             description="Ranked recorded non-web surface share, not actor attribution. Missing or "
                         "uncategorised messages leave the share unknown; top-50 absence is not zero."),
 
@@ -4954,10 +4977,10 @@ def d_ai(ds: str):
         "tbl_ai_stack_tpu": build.prometheus_table_panel(
             "Top 50 stacks by tokens per Assistant user", ai_top_tpu, legend="{{stack}}",
             label_column="Stack", value_column="Tokens per user",
-            description="The outlier detector. Read it with the machine-driven share: a very high "
-                        "per-user figure is usually a pipeline attributed to a service identity, not a "
-                        "person burning tokens. ABSENT where a stack has no active Assistant user, "
-                        "because the ratio is undefined and a zero would rank a dormant stack first."),
+            description="Rolling 30d tokens per reported Assistant user. A high ratio and non-web "
+                        "surface share do not independently identify a pipeline, bot or human: actor "
+                        "attribution is unproven. ABSENT where a stack has no active Assistant user "
+                        "because the ratio is undefined, not a measured zero."),
         "tbl_ai_outliers": build.table_panel(
             "Token outliers - the stacks and their context", "ai_token_outliers", ds,
             schema=ai_pillar.VIEW_SCHEMAS["ai_token_outliers"],
@@ -4977,7 +5000,8 @@ def d_ai(ds: str):
         "tbl_ai_disabled": build.table_panel(
             "Tenant objects that exist but are switched off", "ai_config_disabled", ds,
             schema=ai_pillar.VIEW_SCHEMAS["ai_config_disabled"],
-            description="Configured effort producing nothing. Only an explicit `enabled: false` appears "
+            description="Configured objects explicitly switched off, not a measured absence of value. "
+                        "Only an explicit `enabled: false` appears "
                         "here - skills carry no `enabled` field at all, and treating absent as false "
                         "would invent findings on every skill in the estate."),
 
@@ -5007,16 +5031,34 @@ def d_ai(ds: str):
                         "is refused, or on the opt-out list the organisation asked for. Only actionable rows can "
                         "raise the alert. An empty table means every stack in the estate is covered."),
         "tbl_ai_agent": build.table_panel(
-            "Agent Observability - positive rate reporting within 30d", "ai_agent_observability", ds,
+            "Agent Observability - positive rate reporting within 30d (cumulative generations unproven)",
+            "ai_agent_observability", ds,
             schema=ai_pillar.VIEW_SCHEMAS["ai_agent_observability"],
             description="Live-inventory stacks, with measured availability independent of Assistant. "
                         "Maximum generation items/s is a rate, not cumulative volume or entitlement. "
-                        "Positive reporting within 30d is not sustained/current use. Missing is unknown."),
+                        "Positive reporting within 30d is not sustained/current use. Cumulative "
+                        "generations, automatic remediation and saved operator time are unproven. "
+                        "Missing is unknown, not zero."),
         "tbl_ai_summary": build.table_panel(
             "What is collected, what is not, and why", "ai_summary", ds,
             description="The headline figures with their denominators, followed by the four things this "
                         "platform deliberately does not or cannot collect. Read the NOT MEASURABLE rows "
                         "as product boundaries: no wider credential changes any of them."),
+
+        "actor_scope": build.text_panel(
+            "Human vs machine: actor identity unproven (legacy navigation)",
+            "**Human vs machine is a legacy navigation label, not a proved actor split.** Web/non-web "
+            "are recorded surface categories; a human can use CLI or Slack and automation can use web. "
+            "The legacy `Human driven` boolean is a web-surface proxy and `Machine share` fields are "
+            "non-web shares. **Human versus machine identity and per-app business value are unproven.** "
+            "Counts and shares cover the rolling 30d plugin window and the categorised subset only; "
+            "uncategorised messages are shown separately on this tab."),
+        "identity_scope": build.text_panel(
+            "People and identities: actor identity unproven (legacy navigation)",
+            "**People and identities is a legacy navigation label.** user_type=user and "
+            "user_type=service are token-series categories, not independently verified humans or bots. "
+            "The lifetime cumulative token contract remains separate from the monthly aggregate; "
+            "rankings select maximum observations within 120d, not saved time or business value."),
 
         # Per-stack readers make tenant-scoped feature activity collectable. State the remaining product
         # boundaries narrowly rather than retaining a blanket disclaimer that all activity is unavailable.
@@ -5065,7 +5107,11 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
                       max_columns=1, row_height="tall"),
         ]),
         build.rows_tab("Human vs machine", [
-            build.row("Estate mix", ["b_ai_category", "b_ai_surface"], max_columns=2,
+            build.row("Actor identity unproven: recorded surfaces only", ["actor_scope"], max_columns=1,
+                      row_height="short"),
+            build.row("Uncategorised remainder (30d)", ["n_ai_uncategorised"], max_columns=1,
+                      row_height="short"),
+            build.row("Recorded category and surface mix (30d)", ["b_ai_category", "b_ai_surface"], max_columns=2,
                       row_height="standard"),
             build.row("Trend and cross-tabulation", ["t_ai_machine", "tbl_ai_combo"],
                       max_columns=2, row_height="tall"),
@@ -5075,7 +5121,7 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
         build.rows_tab("Enablement and configuration", [
             build.row("Tenant configuration across the estate",
                       ["b_ai_tenant_objects", "tbl_ai_tenant"], max_columns=2, row_height="tall"),
-            build.row("Where enablement would pay", ["tbl_ai_gap"], max_columns=1,
+            build.row("Tenant configuration review (value unproven)", ["tbl_ai_gap"], max_columns=1,
                       row_height="tall"),
             build.row("Token outliers", ["tbl_ai_stack_tpu", "tbl_ai_outliers"], max_columns=2,
                       row_height="tall"),
@@ -5099,8 +5145,12 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
                       max_columns=2, row_height="short"),
             build.row("History", ["t_users", "t_tokens"], max_columns=2, row_height="tall"),
         ]),
-        build.tab("People and identities", ["tbl_people", "tbl_services"],
-                  max_columns=2, row_height="tall"),
+        build.rows_tab("People and identities", [
+            build.row("Token-series categories, not verified actors", ["identity_scope"],
+                      max_columns=1, row_height="short"),
+            build.row("Lifetime token observations", ["tbl_people", "tbl_services"],
+                      max_columns=2, row_height="tall"),
+        ]),
         build.rows_tab("Commercial", [
             build.row("Assistant overage by stack (raw, not normalised)", ["tbl_stack_assistant_cost"],
                       max_columns=1, row_height="tall"),
@@ -5114,7 +5164,10 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
 
     _qualify_derived_money(el, ("n_assistant_overage", "n_token_overage", "tbl_stack_assistant_cost"))
     return "gcinsight-ai", "Grafana Cloud Org Insights - Grafana Assistant & AI usage", \
-        ("Pillar I: org-wide Assistant adoption, current billing-period token consumption, lifetime "
+        ("Pillar I: Assistant usage observations; human versus machine identity, per-app value, "
+         "cumulative Agent generations, automatic remediation and saved operator time are unproven. "
+         "Human vs machine and People and identities are legacy navigation labels. "
+         "Current billing-period token consumption, lifetime "
          "identity totals and raw AI overage observations, not normalised. Overage currency, billing "
          "period, population matching and overlap are unknown; token windows do not qualify overage. "
          "Org-wide panels are live from grafanacloud-usage. "
