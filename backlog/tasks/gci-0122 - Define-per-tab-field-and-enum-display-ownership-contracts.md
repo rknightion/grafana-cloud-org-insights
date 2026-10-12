@@ -1,9 +1,11 @@
 ---
 id: GCI-0122
 title: Define per-tab field and enum display ownership contracts
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop23'
 created_date: '2026-10-06 17:50'
+updated_date: '2026-10-12 20:06'
 labels:
   - dashboards
   - coverage-debt
@@ -32,3 +34,9 @@ Current hardened per-tab checks prove placed query-bearing elements and field se
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Build frozen D-LAY23 section2 independent field/enum ownership contract on accepted layout source. Owner tabs display each required field and enum value distinctly; seed meaningful per-value counterexamples across assembled JSONata/Prometheus/Grafana transformations rather than structural query-name or selector existence alone. Explicit explanatory-only and titled-aggregate exemptions; existing source/lineage/optional-state/privacy/OnCall/raw-unit guards unchanged. Dashboard files only, no source/schema/new-series/identity/reader expansion; root landing after full gate/review then exact composed gate and CI.
+<!-- SECTION:PLAN:END -->
