@@ -93,8 +93,13 @@ class AttributionPresentationTest(unittest.TestCase):
         self.assertIs(rows[0][rename["Human driven"]], False)
         self.assertIs(rows[1][rename["Human driven"]], True)
         self.assertEqual(self.query("ai", "tbl_ai_combo_stack")["root_selector"], "rows")
-        for key in ("tbl_ai_per_stack", "tbl_ai_gap", "tbl_ai_outliers",
-                    "_fd_ai_gap", "_fd_ai_tokens"):
+        # D-LAY23 leaves the gap's non-evidence attribution field on its widened canonical owner.
+        gap = self.panel("ai", "_fd_ai_gap")
+        organize = next(t["spec"]["options"] for t in gap["data"]["spec"]["transformations"]
+                        if t["kind"] == "organize")
+        self.assertTrue(organize["excludeByName"]["Machine share of categorised"])
+        self.assertIn(str(self.panel("ai", "tbl_ai_gap")["id"]), gap["links"][0]["url"])
+        for key in ("tbl_ai_per_stack", "tbl_ai_gap", "tbl_ai_outliers", "_fd_ai_tokens"):
             display = "Non-web share of categorised (actor identity unproven)"
             self.assertEqual(self.renames("ai", key)["Machine share of categorised"], display)
             overrides = self.panel("ai", key)["vizConfig"]["spec"]["fieldConfig"]["overrides"]

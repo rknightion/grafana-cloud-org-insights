@@ -58,6 +58,20 @@ SNAPSHOT_PRESENTATION_FIELDS = frozenset({
 
 
 def presentation_root(root):
+    # Order-by alone retains the entire row and every source selector. Admit only the closed
+    # presentation sort grammar, not arbitrary JSONata projections, filters or merged values.
+    sorted_rows = re.fullmatch(
+        r'rows\^\((?:>\(Result = "fail" \? 1 : 0\), )?>\$lookup\((\{[^{}]*\}), '
+        r'(Severity|`Worst severity`)\)(?:, <Score)?\)', root)
+    if sorted_rows:
+        try:
+            weights = json.loads(sorted_rows[1])
+        except ValueError:
+            weights = None
+        if (isinstance(weights, dict) and weights
+                and all(isinstance(key, str) and type(value) in (int, float)
+                        for key, value in weights.items())):
+            return "rows"
     keys = re.findall(r'"([A-Za-z_]+)"\s*:', root)
     if root.startswith("(\n") and set(keys) == SNAPSHOT_PRESENTATION_FIELDS:
         return "presentation"

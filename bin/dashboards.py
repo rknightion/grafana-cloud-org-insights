@@ -31,7 +31,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
 from collector import identity, observability_score
 from collector import ratecard as ratecard_model
-from collector.dashboards import build, view_metadata
+from collector.dashboards import build, layout, view_metadata
 from collector.dashboards.retention_panels import retention_panels
 from collector.pillars import adaptive_traces as adaptive_traces_pillar
 from collector.pillars import library_panels as library_panels_pillar
@@ -897,7 +897,11 @@ def _cost_context(dpm: dict[str, str] | None):
         keys = [raw(f"context_allow_{key}_{role}", f"{title}: vendor {role} (raw)",
                     f"grafanacloud_org_{suffix}", note)
                 for role, suffix in (("usage", usage), ("included", included))]
-        allowances.append(build.row(f"{title}: usage vs included (unqualified)", keys, max_columns=2))
+        pair_key = f"context_allow_{key}"
+        el[pair_key] = build.raw_quantity_pair_table(
+            f"{title}: vendor usage and included (raw, not normalised)",
+            el.pop(keys[0]), el.pop(keys[1]))
+        allowances.append(build.row(f"{title}: usage vs included (unqualified)", [pair_key], max_columns=1))
     # No matching org query-usage series is established by the roster. Show the parameters, not a
     # fabricated query budget or a ratio of ingest to query usage.
     allowances.append(build.row("Logs query parameters, not a computed quota", [
@@ -5280,17 +5284,7 @@ def d_labelling(ds: str):
                                               "gcinsight_labelling_catalogue_version",
                                               description="Estate numeric version, not a metric label. Every row carries its own version."),
     }
-    # Keep the distinct risk and cost findings; link to their existing assembled panel ids.
-    el["register"]["spec"]["links"] = [
-        {"title": "Mimir top-20 label-name findings (Risk)",
-         "url": f"/d/{DASHBOARD_UID_PREFIX}-risk?viewPanel=1793197138"
-                "&${__url_time_range}&${stack:queryparam}",
-         "targetBlank": False},
-        {"title": "Cardinality outliers (Cost)",
-         "url": f"/d/{DASHBOARD_UID_PREFIX}-cost?viewPanel=1102776439"
-                "&${__url_time_range}&${stack:queryparam}",
-         "targetBlank": False},
-    ]
+    # The assembled-layout seam resolves the distinct Risk/Cost canonical links from target IDs.
     for signal in labelling_pillar.SIGNALS:
         el[f"rules_{signal}"] = table(f"{signal.title()} rule results", "labelling_findings",
                                      predicate=f'Signal == "{signal}"',
@@ -5397,6 +5391,7 @@ BUILDERS = {
 
 def assemble(
     name: str, ds: str, *, rate_card: ratecard_model.RateCard | None = None,
+    _resolve_canonical_links: bool = True,
 ) -> tuple[str, dict[str, Any]]:
     """Build one dashboard's full spec: the pillar's own panels plus the shared furniture.
 
@@ -5480,6 +5475,7 @@ def assemble(
     # Method and freshness are always available but never steal the default landing page. Append after
     # the optional Findings tab so guidance has one stable location on every dashboard.
     tabs = list(tabs) + [banner_tab]
+    tabs, canonical = layout.apply(name, elements, tabs, detail)
 
     spec = build.dashboard(
         title, desc, elements, tabs,
@@ -5492,6 +5488,12 @@ def assemble(
         time_from=("now-30d" if name == "ai" else
                    "now-7d" if name == "dashboards" else "now-6h"),
     )
+    if _resolve_canonical_links and canonical:
+        targets = {name: (uid, spec)}
+        for target in {target for destinations in canonical.values() for target, _owner, _title in destinations}:
+            if target != name:
+                targets[target] = assemble(target, ds, rate_card=rate_card, _resolve_canonical_links=False)
+        layout.resolve_links(spec, canonical, targets)
     return uid, identity.map_tree(spec)
 
 

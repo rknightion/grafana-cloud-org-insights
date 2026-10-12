@@ -60,7 +60,12 @@ class RawProductUnitsTest(unittest.TestCase):
                 self.assertNotIn("current accounting period", self.panel("usage", key)["description"])
 
     def test_overlapping_service_and_host_generations_remain_separate_raw_observations(self):
-        for name, keys in {"usage": ("n_hosts", "n_pods", "b_app_hosts", "b_asset_counts",
+        # Identical pod/host headlines now live on Coverage; Usage retains static canonical links.
+        for key in ("n_hosts", "n_pods"):
+            self.assertNotIn(key, self.artifacts["usage"]["spec"]["elements"])
+            self.assertTrue(any(f"viewPanel={self.panel('coverage', key)['id']}" in link["url"]
+                                for link in self.panel("usage", "_canonical_workload")["links"]))
+        for name, keys in {"usage": ("b_app_hosts", "b_asset_counts",
                                      "b_observed_objects", "b_integration_hosts"),
                            "coverage": ("n_hosts", "n_pods", "n_containers", "t_live_assets")}.items():
             for key in keys:
@@ -101,13 +106,18 @@ class RawProductUnitsTest(unittest.TestCase):
             "frontend": ("fe_o11y_billable_sessions", "fe_o11y_included_sessions"),
         }
         for family, suffixes in pairs.items():
-            for role, suffix in zip(("usage", "included"), suffixes):
-                key = f"context_allow_{family}_{role}"
-                with self.subTest(panel=key):
-                    self.assert_raw("cost", key)
-                    query = self.queries("cost", key)[0]
-                    self.assertEqual(query["expr"], f"grafanacloud_org_{suffix}")
-                    self.assertIn("no subtraction or utilisation ratio", self.panel("cost", key)["description"])
+            key = f"context_allow_{family}"
+            with self.subTest(panel=key):
+                self.assert_raw("cost", key)
+                queries = self.queries("cost", key)
+                self.assertEqual([query["expr"] for query in queries],
+                                 [f"grafanacloud_org_{suffix}" for suffix in suffixes])
+                self.assertEqual([query["legendFormat"] for query in queries], ["Raw usage", "Raw included"])
+                self.assertIn("no subtraction or utilisation ratio", self.panel("cost", key)["description"])
+                transforms = self.panel("cost", key)["data"]["spec"]["transformations"]
+                self.assertEqual(transforms[0]["spec"]["options"],
+                                 {"mode": "reduceFields", "reducers": ["lastNotNull"]})
+                self.assertEqual(transforms[1]["spec"]["id"], "labelsToFields")
 
     def test_unknown_currency_is_not_rendered_as_money_or_a_known_period(self):
         observed = []

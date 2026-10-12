@@ -608,6 +608,47 @@ def stat_panel(title: str, expr: str, *, description: str = "", unit: str = "sho
     }))
 
 
+def raw_quantity_pair_table(title: str, usage: dict, included: dict) -> dict:
+    """Two unchanged live vendor queries, reduced as before and displayed as separate raw columns.
+
+    Keep every source label: labelsToFields exposes the dimensions instead of aggregating them.
+    The native merge co-locates equal label fields; unmatched observations keep a blank peer, never
+    a zero. Co-location does not establish matched cohorts or producer windows.
+    Co-location is not a common unit, window or population claim and no arithmetic is introduced.
+    """
+    import copy
+
+    queries = []
+    for index, (panel, caption) in enumerate(((usage, "Raw usage"), (included, "Raw included"))):
+        query = copy.deepcopy(panel["spec"]["data"]["spec"]["queries"][0])
+        query["spec"]["refId"] = chr(ord("A") + index)
+        query["spec"]["query"]["spec"]["legendFormat"] = caption
+        queries.append(query)
+    description = (usage["spec"]["description"] + "\n\n" + included["spec"]["description"] +
+                   " Source dimensions are retained as table fields. Raw usage and raw included are "
+                   "independent observations; a blank peer is unavailable, not zero. No subtraction, "
+                   "matched-cohort utilisation ratio or quota inference.")
+    panel = _panel(title, description, queries, viz("table", {
+        "options": {"showHeader": True, "footer": {"show": False, "fields": []}, "cellHeight": "sm"},
+        "fieldConfig": {"defaults": {"unit": "short", "custom": {"filterable": True}}, "overrides": []},
+    }))
+    panel["spec"]["data"]["spec"]["transformations"] = [
+        {"kind": "reduce", "spec": {"id": "reduce", "options": {
+            "mode": "reduceFields", "reducers": ["lastNotNull"]}}},
+        # Bare vendor selectors retain __name__. Use it to keep the two quantities separate before
+        # merging frames, then rename for display only. Legend aliases alone cannot name columns:
+        # labelsToFields clears displayNameFromDS and both would otherwise become a field named Value.
+        {"kind": "labelsToFields", "spec": {"id": "labelsToFields", "options": {
+            "mode": "columns", "valueLabel": "__name__"}}},
+        {"kind": "merge", "spec": {"id": "merge", "options": {}}},
+        _organize([], rename={
+            queries[0]["spec"]["query"]["spec"]["expr"]: "Raw usage",
+            queries[1]["spec"]["query"]["spec"]["expr"]: "Raw included",
+        }),
+    ]
+    return panel
+
+
 def cross_source_ratio_stat_panel(
     title: str,
     numerator: tuple[str, str],
@@ -1408,15 +1449,18 @@ def findings_elements(pillar: str, kinds: Sequence[str],
             "Detail tables marked Selected stacks narrow only their own rows, not the counts above. "
             "A source table with no stack dimension remains unfiltered."
             + POPULATION_HELP + "\n\n"
-            "The **detail** is in Loki, not here: query "
+            "FindingSpec evidence is shown below; static links open the canonical full registers. "
+            "These links carry only the selected Stack and time context, never row identities. "
+            "The separate capped finding-event record is in Loki: query "
             "`{job=\"gcinsight\", event=\"finding\", pillar=\"" + pillar + "\"} | json` to get the "
             "stack, the rank, and the fields that make each one actionable - the worst cardinality label, "
             "the service-account name, the admin count.\n\n"
             "Lines are capped at the worst 25 per kind to keep log volume sane. **The count above is the "
             "true total**, so a capped kind still reports honestly.\n\n"
-            "The tables on this tab name the stacks for the kinds that have a published table. Loki is "
-            "only needed for the per-finding FIELDS that are banned from a metric label - label names, "
-            "service-account names, plugin version strings.",
+            "The tables on this tab name the stacks and evidence for the kinds that have a published "
+            "table, using the finding predicate. Full register columns remain on the linked owner tabs. "
+            "Label names, service-account names and plugin version strings never become metric labels; "
+            "existing view and Loki privacy/retention fences remain unchanged.",
         ),
     }
     if detail and not ds_uid:

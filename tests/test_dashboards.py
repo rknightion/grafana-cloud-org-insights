@@ -254,7 +254,14 @@ class DashboardNameAndGenericTextTest(unittest.TestCase):
         }.items():
             for key in keys:
                 with self.subTest(dashboard=name, panel=key):
-                    panel = artifacts[name]["elements"][key]["spec"]
+                    if name == "coverage":
+                        # The duplicate is a canonical Operations link, not a second withheld-share panel.
+                        self.assertNotIn(key, artifacts[name]["elements"])
+                        panel = artifacts["operations"]["elements"]["n_engagement"]["spec"]
+                        links = artifacts[name]["elements"]["_canonical_operations_outcome"]["spec"]["links"]
+                        self.assertTrue(any(f"viewPanel={panel['id']}" in link["url"] for link in links))
+                    else:
+                        panel = artifacts[name]["elements"][key]["spec"]
                     self.assertIn("withheld", panel["title"].lower())
                     self.assertEqual(panel["data"]["spec"]["queries"], [])
                     content = panel["vizConfig"]["spec"]["options"]["content"].lower()
@@ -489,13 +496,13 @@ class CostContextPublicationTest(unittest.TestCase):
 
     def test_allowance_zero_is_unfiltered_and_not_a_quota_ratio(self):
         spec = self.artifact()
-        for key, metric in {
-            "context_allow_metrics_included": "grafanacloud_org_metrics_included_series",
-            "context_allow_logs_included": "grafanacloud_org_logs_included_usage",
-            "context_allow_grafana_included": "grafanacloud_org_grafana_included_users",
-        }.items():
+        for key, usage, included in (
+            ("context_allow_metrics", "metrics_billable_series", "metrics_included_series"),
+            ("context_allow_logs", "logs_usage", "logs_included_usage"),
+            ("context_allow_grafana", "grafana_billable_users", "grafana_included_users"),
+        ):
             panel = spec["elements"][key]
-            self.assertEqual(self.expressions(panel), [metric])
+            self.assertEqual(self.expressions(panel), [f"grafanacloud_org_{usage}", f"grafanacloud_org_{included}"])
             self.assertIn("Zero included is valid", panel["spec"]["description"])
             self.assertIn("not quota headroom", panel["spec"]["description"])
 

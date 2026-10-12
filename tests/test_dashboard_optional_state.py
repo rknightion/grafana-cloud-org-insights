@@ -86,6 +86,28 @@ class OptionalViewStateTest(unittest.TestCase):
                 self.assertNotIn(f"_meta_{view}", artifact["spec"]["elements"])
                 self.assertNotIn(f"{view}.json", json.dumps(artifact))
 
+    def test_merged_inventory_keeps_retained_rows_and_never_queries_absent_objects(self):
+        # D-LAY23 merges navigation only. Old/partial/unavailable/disabled/empty observations must
+        # not remove the reader's row or age, and all-absent still has an honest footprint disclosure.
+        from tests.test_dashboard_coverage import placed
+        for state, artifact in self.states.items():
+            tabs = {tab["spec"]["title"]: tab for tab in artifact["spec"]["layout"]["spec"]["tabs"]}
+            with self.subTest(state=state):
+                self.assertIn("Configured inventory", tabs)
+                self.assertNotIn("Configured library panels", tabs)
+                rows = tabs["Configured inventory"]["spec"]["layout"]["spec"]["rows"]
+                self.assertEqual(rows[0]["spec"]["title"], "Configured footprint summary")
+                matching = [row for row in rows if VIEW in list(placed(row))]
+                if state in ("absent", "absent-all"):
+                    self.assertEqual(matching, [])
+                    self.assertNotIn(f"{VIEW}.json", json.dumps(artifact))
+                else:
+                    self.assertEqual(len(matching), 1)
+                    self.assertIn(f"_age_{VIEW}", list(placed(matching[0])))
+                    self.assertIn(f"_meta_{VIEW}", list(placed(tabs["How to read this"])))
+                self.assertIn("_optional_view_state", list(placed(rows[0])))
+                self.assertIn("_optional_view_state", list(placed(tabs["How to read this"])))
+
     def test_state_is_runtime_and_retained_marker_never_replaced(self):
         for state, artifact in self.states.items():
             if state in ("absent", "absent-all"):

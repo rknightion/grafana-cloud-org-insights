@@ -18,6 +18,14 @@ class OnCallEngagementContractTest(unittest.TestCase):
                              for name in ("operations", "coverage")}
 
     def panel(self, name, key):
+        # D-LAY23 consolidates exact copies; inspect the reachable canonical panel, not a vanished copy.
+        canonical = {"n_value_engagement": "n_engagement", "n_value_acknowledged": "n_engaged"}
+        if name == "coverage" and key in canonical:
+            self.assertNotIn(key, self.artifacts[name]["spec"]["elements"])
+            target = self.artifacts["operations"]["spec"]["elements"][canonical[key]]["spec"]
+            links = self.artifacts[name]["spec"]["elements"]["_canonical_operations_outcome"]["spec"]["links"]
+            self.assertTrue(any(f"viewPanel={target['id']}" in link["url"] for link in links))
+            return target
         return self.artifacts[name]["spec"]["elements"][key]["spec"]
 
     def expressions(self, name, key):
