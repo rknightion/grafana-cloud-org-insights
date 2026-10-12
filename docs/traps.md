@@ -121,6 +121,70 @@ is already a datasource on the target stack, a panel beats a pipeline.**
  cannot provide honest org-wide attribution. Pillar J uses one reader per measured stack and filters the
  regional tenant to that stack; one-stack-per-region would use stack A's identity to read stack B.
 
+### Public showback contracts (2026-10-12)
+
+Bounded public-only research for GCI-0118 (public monetary contracts for showback) narrows one
+org metric's interpretation, not the whole Commercial roster. No customer data, private source,
+rate card or pricing model is evidence here.
+
+- **Exact-name monetary evidence, not just a formatter.** Grafana's
+ [invoice reconciliation documentation](https://grafana.com/docs/grafana-cloud/platform/cost-management-and-billing/manage-invoices/understand-your-invoice/reconcile-invoices/)
+ says: "the metrics used to render dollar amount panels on the dashboard (for example,
+ `grafanacloud_org_metrics_overage`) are written from the results of the billing script."
+ This establishes dollar-amount intent and billing-script origin for that exact example. It does
+ not specify an ISO currency code, tax/credit treatment or a universally applicable rate. In contrast,
+ a frontend `currencyUSD` formatter, stacked chart or panel title alone proves only display intent.
+- **Invoice window is known; exact-series reset is not.** The same vendor page says:
+ "The bill itself is calculated with data taken from exactly midnight at month start to midnight
+ at month end (UTC)." It instructs users to set the time picker to "a few hours after midnight UTC
+ at month end" because the final billing script runs after month end. This proves the invoice input
+ window and delayed reconciliation, not a precise reset/cadence contract for every overage gauge.
+ The page's pictured Logs amount reset has no exact metric name; do not generalize it to attributed
+ series, commitment balances, or all org lines. Dashboard range and last non-null sample are not
+ a producer billing window.
+- **Official query evidence for metrics quantities.** Grafana's
+ [usage-alert instructions](https://grafana.com/docs/grafana-cloud/platform/cost-management-and-billing/set-up/set-up-usage-alerts/)
+ label `sum(grafanacloud_org_metrics_overage) / sum(grafanacloud_org_metrics_billable_series)`
+ "Current price per billable-series (calculated from current usage levels and your contract)".
+ They also label division by `sum(grafanacloud_org_metrics_included_dpm_per_series)`
+ "Divide by \"Included DPM\" to approximate billable-series". These are official diagnostic
+ queries: evidence for billable-series quantity and an included-DPM parameter, not a marginal
+ tariff, fixed rate, per-stack allocation or wire-type/refresh specification. The instructions say
+ "your month-to-date billable usage has exceeded $10,000" for a cost-panel threshold of `10000`;
+ that panel-level description does not identify all underlying exact metric names.
+
+**Remaining exact-name contracts.** In the roster below, unproved means money-vs-quantity (and
+currency if monetary), producer window/reset, independent-charge/additivity and org-line/per-stack
+mapping remain unknown unless explicitly narrowed above. A suffix, org prefix or successful
+arithmetic is not a substitute for any of those contracts.
+
+| Exact roster (brace notation enumerates names, not a discovery selector) | Public result / missing contract |
+| --- | --- |
+| `grafanacloud_org_metrics_overage` | Dollar-amount and billing-script evidence above; invoice window known. ISO currency, exact gauge reset/cadence, independent-charge status, inclusion in `total_overage` and per-stack mapping unproved. |
+| `grafanacloud_org_total_overage` | All contracts unproved, including completeness and equality to the 24 Commercial components. |
+| `grafanacloud_org_{grafana,grafana_plugin_users,irm_users,infra_o11y_host,infra_o11y_container,app_o11y,db_o11y,fe_o11y,sm,sm_browser,k6_virtual_user_hours,k6_ip,assistant,ai_tokens}_overage` | All contracts unproved for each of these 14 component names. |
+| `grafanacloud_org_{logs,traces,profiles}_overage`, `grafanacloud_org_{logs,traces,profiles}_process_overage`, `grafanacloud_org_{logs,traces,profiles}_retention_overage` | All contracts unproved for each of these nine names; public evidence does not establish nine independent charges rather than overlapping rollups. |
+| `grafanacloud_org_spend_commit_{credit,balance}_total`, `grafanacloud_org_forecast_months_remaining`, `grafanacloud_org_contract_{start,end}_date` | Currency/quantity or timestamp encoding, period/reset, matching populations and relation to overage unproved for each. A contract term does not identify a charge window. |
+| `grafanacloud_instance_attributed_{active_series,samples_per_second,billable_usage,overage}` | Each exact producer contract unproved, including attributed dimension population, overlap, and mapping to org metrics charges. |
+| `grafanacloud_logs_instance_attributed_{bytes_received_per_second,usage,overage,retention_usage,retention_overage}`, `grafanacloud_traces_instance_attributed_bytes_received_per_second` | Each exact producer contract unproved; no additive stack allocation or ingest/retention charge mapping established. |
+| `grafanacloud_org_metrics_billable_series`, `grafanacloud_org_metrics_included_dpm_per_series` | Quantity/parameter evidence in the official queries above; exact measurement window/cadence, aggregation population and stack mapping unproved. |
+| `grafanacloud_instance_billable_usage`, `grafanacloud_ai_tokens_total_tokens`, `grafanacloud_assistant_overage` | No exact public contract found in this search; local observations elsewhere do not constitute public producer documentation. |
+
+**Search boundary.** Each of the 45 expanded names above was searched with GitHub's public code
+API using `<exact-name> org:grafana is:public` and `per_page=20`; all returned `total_count: 0`.
+No immutable official dashboard source was found. Firecrawl web searches (five-result limit) scoped
+to `site:grafana.com` covered exact total, attributed metrics/logs overage, org logs overage,
+commitment credit, metrics billable/attributed usage and metrics overage; broader billing,
+process-overage and spend-commit searches supplemented them. The exact metrics-overage search
+found the two official pages quoted above. Other hits were contextual product documentation or
+community discussion, not exact producer contracts. The public
+[usage-limits table](https://grafana.com/docs/grafana-cloud/platform/pricing-and-usage/usage-limits/)
+describes the *different* name `grafanacloud_traces_instance_usage` as "Billable trace usage over the last month
+for stacks in the organization"; that cannot qualify its attributed sibling. Search is bounded,
+not proof that documentation cannot exist. Query/output logs and retrieved public passages are
+retained at /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/showback-docs/lane.md.
+No money conversion, complete-total claim or showback implementation follows from this research.
+
 ## Per-stack reader and usage insights
 
 - **Role drift is action plus scope, not action name.** The same action can be granted at multiple
