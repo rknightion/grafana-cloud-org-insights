@@ -1,9 +1,11 @@
 ---
 id: GCI-0113
 title: Grade unresolved product host and billing normalization claims
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop23'
 created_date: '2026-10-06 10:47'
+updated_date: '2026-10-12 13:44'
 labels:
   - dashboards
   - owner-decision
@@ -34,3 +36,9 @@ N2: later usage-matrix corrections leave host-hour, service overlap and money/pe
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+D-DOC23 dashboard-only build: audit unresolved product host/billing units and periods, label retained observations raw, not normalised with unknown units/overlap/population preserved. No added conversions or new sources/series. Preserve accepted existing independently proven normalized models. Real assembled artifact regression, just check, independent review and CodeRabbit before root-only land.
+<!-- SECTION:PLAN:END -->
