@@ -267,6 +267,15 @@ is already a datasource on the target stack, a panel beats a pipeline.**
  candidate separating the observed groups, not an accepted known-app discriminator until the
  human session's exact frontend requests are correlated independently. Do not identify apps by
  datasource type alone or promote this observation into collector classification.
+- **Terminal step-0 research disposition (2026-10-12).** For GCI-0032.01 (Pillar J
+ surface-breakdown discovery), the recorded probes above answer source presence and sample mix,
+ confirm `userId` field presence, and show that the known Logs frontend can emit generic `app`.
+ The five-stack refresh and the 211-event known-human sample support these bounded observations;
+ neither turns datasource inference into per-app or human attribution. The 205 non-dashboard UID
+ negatives in that human sample do not overturn the older stale-UID positive below. Discovery
+ documentation is complete at this scope, using existing evidence only: exact human
+ request-to-app correlation remains unproven, and no working per-app discriminator is accepted.
+ This disposition adds no live probe, collector classification or distinct-human adoption claim.
 - **Distinct people require a filtered `userId`, not request volume.** Nonempty, non-anonymous IDs
  occurred on four of five development and 41 of 50 sampled customer stacks. Aggregate distinct IDs
  inside Loki; do not put an identity or raw plugin-chosen `source` into a metric label.
