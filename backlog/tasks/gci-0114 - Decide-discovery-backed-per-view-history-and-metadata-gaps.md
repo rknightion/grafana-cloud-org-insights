@@ -4,6 +4,7 @@ title: Decide discovery-backed per-view history and metadata gaps
 status: To Do
 assignee: []
 created_date: '2026-10-06 10:47'
+updated_date: '2026-10-12 11:49'
 labels:
   - dashboards
   - owner-decision
@@ -34,3 +35,9 @@ N3: exact current-estate membership and per-view completeness may need schema or
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+D-DOC23 bounded display contract proposed by loop23 root: failed inventory means current membership unknown, never zero or a historical label union called fresh discovery; retain last-good view and expose its own timestamp. A removed-stack row is excluded only when existing reliable current inventory proves departure, otherwise label membership historical/unknown, never manufacture a configured roster. Missing per-view metadata yields unknown age/completeness, not inferred current from run time. Last-good publication time and input-observation time are distinct, with advancing staleness from existing supported metadata; measured-empty requires an available measured input, absent input is unavailable. Schema/source needed to prove membership or completeness becomes a named follow-up packet, not part of this dashboard-only build.
+<!-- SECTION:NOTES:END -->
