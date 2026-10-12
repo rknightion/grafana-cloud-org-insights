@@ -6,7 +6,7 @@ title: >-
 status: Parked
 assignee: []
 created_date: '2026-10-12 09:48'
-updated_date: '2026-10-12 11:47'
+updated_date: '2026-10-12 13:52'
 labels:
   - customer
   - rollout
@@ -46,4 +46,6 @@ D-CUST23 implementable packet: after GCI-0119.15 (prove labelling live on dev) i
 
 <!-- SECTION:NOTES:BEGIN -->
 loop23: zero implementation/live mutation attempts; dependency parked on GCI-0119.15 (prove labelling live on dev), whose historical natural task/memory artifact proof failed. Dev library inventory and policy-status views each publish six rows; policy statuses unreadable, not compliance. Customer untouched. Resume at fresh STS and required dev/live inventory witnesses after prerequisite accepted.
+
+loop23 evidence-boundary clarification: the retained dev view reads show six rows against the latest captured T2 scan population at 2026-10-12T04:37:44Z, not an independent fresh Grafana.com inventory witness at read time. AC #1 remains unchecked. After GCI-0119.15 (prove labelling live on dev) is accepted, resume with fresh inventory and both view readbacks before any customer mutation; current policy statuses are unreadable, never compliance.
 <!-- SECTION:NOTES:END -->
