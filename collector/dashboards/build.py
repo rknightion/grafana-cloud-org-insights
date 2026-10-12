@@ -1023,11 +1023,13 @@ FRESHNESS_LOOKBACK = "7d"
 # true on its own there and a reader comparing two panels needs to know which is which.
 MIXED_BANNER_MD: dict[str, str] = {
     "ai": """
-- **This dashboard MIXES two sources and they have different windows.** The Overview, Adoption by stack,
-  Token consumption, People and Commercial tabs are live from `grafanacloud-usage` on the **monthly
-  billing period**. Assistant use per stack, Human vs machine (recorded surface categories, not proven actors), Enablement and Collection coverage come
-  from our own per-stack collection on a **rolling 30-day plugin window**, refreshed daily. The two
-  disagree by design - never quote a figure from one as a check on the other.
+- **This dashboard MIXES two sources and different windows.** Org-wide usage and commercial observations are live
+  from `grafanacloud-usage`. Token aggregates use the monthly billing period; People and identities
+  retains lifetime counters. Neither window qualifies overage or contract gauges: those are **raw,
+  not normalised**, with currency, billing period, population matching and overlap unknown. They are
+  not a measured rate. Assistant use per stack, Human vs machine (recorded surface categories, not
+  proven actors), Enablement and Collection coverage come from our own per-stack collection on a
+  **rolling 30-day plugin window**, refreshed daily. Never quote one source as a check on the other.
 - **Every Assistant inventory count is TENANT-scoped.** A user-scoped skill or rule is invisible to any
   credential, including a full Admin, so these are not stack totals and cannot be made into them.
 - **Category breakdowns are shares of the CATEGORISED subset**, which is a minority of messages on most
@@ -1039,6 +1041,9 @@ MIXED_BANNER_MD: dict[str, str] = {
   technology classification and the named registers follow the input ages shown below. Hosts, pods,
   containers, log streams, integrations and the OnCall ownership catalogue are live datasource panels;
   the Stack selector does not filter them.
+- **Unit economics is a navigation/model label only.** Product inputs are raw, not normalised;
+  currency, period, population matching and overlap are unknown. Retained diagnostic ratios are not
+  measured unit prices or rates. Known denominator windows do not qualify an overage numerator.
 - **Canonical service identity is exact after trim and case-folding.** The generic Mimir `service` label
   stays in the legacy register and is never silently promoted into canonical coverage.
 """,
@@ -1084,7 +1089,20 @@ def banner_elements(dashboard: str = "estate") -> dict[str, Any]:
     figures were computed FROM rather than of the run that published them.
     """
     if dashboard in LIVE_DATASOURCE_ONLY:
-        return {"_banner": text_panel("How to read this", LIVE_BANNER_MD)}
+        banner = LIVE_BANNER_MD
+        if dashboard == "commercial":
+            banner = """\
+**Live from `grafanacloud-usage`: no scan, collector or S3 view; coverage and input age do not apply.**
+
+- **Estate scope:** the Stack selector is carried through links but does not filter these panels because
+  this datasource has no stack-slug label. Missing reporting is unknown, not zero.
+- **Run rate is a frozen navigation/model label only, not a measured normalised rate.** Billing
+  observations and retained diagnostics are raw, not normalised: currency, billing period, population
+  matching and overlap are unknown. A ratio does not qualify its inputs; a source field named
+  forecast_months_remaining does not establish affordable months. Contract timing is separately
+  timestamp-derived. The dashboard range does not supply a missing billing period.
+"""
+        return {"_banner": text_panel("How to read this", banner)}
 
     out: dict[str, Any] = {
         "_banner": text_panel("How to read this",

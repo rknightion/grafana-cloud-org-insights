@@ -272,8 +272,8 @@ ADAPTIVE_TRACES_POLICY_RATE = (
 )
 
 # --- Workload composition (Tier 2) ------------------------------------------------------------------
-# `*_info` series are one-per-object, so their SUM is an object count: how many pods and hosts the organisation
-# actually monitor. The most concrete "what is in there" number the platform can produce.
+# Preserve reported quantities, not inferred billable objects: metric spelling does not establish
+# one-per-object fidelity, producer period or overlap between reporting populations.
 PODS_MONITORED = "sum(grafanacloud_instance_active_kube_pod_info_series)"
 HOSTS_MONITORED = "sum(grafanacloud_instance_active_node_uname_info_series)"
 INTEGRATION_SERIES = "sum(grafanacloud_instance_active_integration_series)"
@@ -324,15 +324,14 @@ FE_SESSION_RATE = (
 
 # --- Pillar H: commercial (Tier 3) ------------------------------------------------------------------
 # Commercial presentation constraints, enforced by tests:
-# * Money is labelled **USD per month, marked as DERIVED** - the datasource states no currency.
+# * Raw billing observations have no currency/period formatter: the datasource declares neither.
 # * The burn chart shows the two lines and **states no conclusion**. Do not add a projection, a
 # forecast of underspend, or a "you will leave N unconsumed" note to any panel description here.
 # Any deployment-specific commercial analysis belongs in presentation notes, not in an always-on dashboard.
 # * Its own dashboard, so commercial data is one link that can stay closed in a room.
 #
-# The datasource does not declare currency or period. The existing USD/month presentation is derived,
-# not a universal contract: confirm currency and billing period against the deployment's contract.
-# Compare balance / total_overage with forecast_months_remaining before quoting the derived run rate.
+# Existing diagnostic formulas remain, but they do not establish a price or billing window.
+# Confirm currency and billing period against the deployment's contract before quoting money.
 # If included volumes are zero under a spend-commit contract with no bundled allowance, "overage" can
 # represent the whole period charge, not spend above a plan. Do not assume that contract for every org.
 COMMIT_TOTAL = "sum(grafanacloud_org_spend_commit_credit_total)"
@@ -822,17 +821,19 @@ def _cost_context(dpm: dict[str, str] | None):
     """
     el: dict[str, Any] = {}
     caveat = (
-        "Raw vendor quantity; unit and window unverified in the corrected feature matrix. "
+        "Raw vendor quantity, not normalised; unit and window unverified in the corrected feature matrix. "
+        "Exact producer/billing period, population and overlap remain unknown. "
         "Last non-null observation in the dashboard range, which is not a billing window. "
         "Dimensions remain separate vendor series, not additive or a complete estate total. "
         "No money conversion; billable/overage names do not establish dollars. "
-        "Absent data is unavailable, never zero. Reads grafanacloud-usage directly; "
+        "Absent data is unavailable, not zero. Reads grafanacloud-usage directly; "
         "attribution values are not copied into collector labels or stores."
     )
 
     def raw(key, title, metric, extra=""):
         el[key] = build.barchart_panel(
-            title, metric, ds_uid=build.USAGE_UID, sort=None,
+            title.replace("(raw)", "(raw, not normalised)"), metric,
+            ds_uid=build.USAGE_UID, sort=None,
             description=f"`{metric}`. {caveat} {extra}".strip())
         return key
 
@@ -1374,6 +1375,49 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
         "says why it is that size and which lever moves it.", el, tabs
 
 
+RAW_PRODUCT_NOTE = (
+    "Raw reported observations, not normalised. Exact unit, producer/billing period, population and "
+    "overlap/deduplication are unknown; metric spelling and roster occurrence do not establish them. "
+    "Separate source series are not additive or comparable billable units. A sum preserves the "
+    "existing reporting aggregation, not a deduplicated object total. The dashboard range and "
+    "last non-null sample do not establish a billing period. No host-hour, service or money "
+    "conversion is supported. Missing data is unknown, not zero."
+)
+DERIVED_MONEY_NOTE = (
+    "Raw billing observations under the existing derived presentation, not normalised. Currency, "
+    "exact billing period, population and overlap remain unknown without the deployment contract; "
+    "no currency or period formatter is applied. Metric spelling does not prove "
+    "a price or a complete total. Missing reporting is unknown, not zero."
+)
+
+
+def _qualify_derived_money(elements: dict, keys) -> None:
+    """Qualify raw-derived observations without changing their existing arithmetic."""
+    for key in keys:
+        panel = elements[key]["spec"]
+        panel["title"] += " (raw-derived, not normalised)"
+        panel["description"] += " " + DERIVED_MONEY_NOTE
+        fields = panel["vizConfig"]["spec"]["fieldConfig"]
+        if fields["defaults"].get("unit", "").startswith("currency"):
+            fields["defaults"]["unit"] = "short"
+        for override in fields.get("overrides", []):
+            for prop in override["properties"]:
+                if prop["id"] == "unit" and prop["value"].startswith("currency"):
+                    prop["value"] = "short"
+
+
+def _raw_product_stat(title: str, expr: str, *, note: str = "") -> dict:
+    return build.stat_panel(
+        f"{title} (raw, not normalised)", expr, ds_uid=build.USAGE_UID,
+        description=f"{RAW_PRODUCT_NOTE} {note}".strip())
+
+
+def _raw_product_series(title: str, exprs, *, note: str = "", sort: str | None = None) -> dict:
+    return build.barchart_series_panel(
+        f"{title} (raw, not normalised)", exprs, ds_uid=build.USAGE_UID, sort=sort,
+        description=f"{RAW_PRODUCT_NOTE} {note}".strip())
+
+
 def d_usage(ds: str):
     producer_panels = {}
     for view, title, description in (
@@ -1620,16 +1664,9 @@ def d_usage(ds: str):
                         "it means the remediation is a single conversation rather than an estate "
                         "programme. Unit is bytes/sec: multiply by 86,400 for a per-day figure."),
         # --- Workload composition (Tier 2), live from `grafanacloud-usage` ----------------------------
-        # The only place the platform says what is actually being MONITORED rather than how much of it
-        # there is. `*_info` series are one per object, so their sum is an object count.
-        "n_pods": build.stat_panel(
-            "Kubernetes pods monitored", PODS_MONITORED, ds_uid=build.USAGE_UID,
-            description="Derived from `kube_pod_info`, which emits one series per pod. The most concrete 'what is in "
-                        "there' figure the platform can produce, and it needs no per-stack credential."),
-        "n_hosts": build.stat_panel(
-            "Hosts monitored", HOSTS_MONITORED, ds_uid=build.USAGE_UID,
-            description="Derived from `node_uname_info`, one series per host. Compare the live value with "
-                        "pods to understand whether the monitored estate is container-first."),
+        # Reporting quantities do not establish billable hosts, pods or accumulated hours.
+        "n_pods": _raw_product_stat("Kubernetes pod-info quantity", PODS_MONITORED),
+        "n_hosts": _raw_product_stat("Node uname-info quantity", HOSTS_MONITORED),
         "n_intseries": build.stat_panel(
             "Series from Grafana Cloud Integrations", INTEGRATION_SERIES, ds_uid=build.USAGE_UID,
             description="Active series attributed to Grafana Cloud Integrations. This is an identifiable "
@@ -1641,61 +1678,45 @@ def d_usage(ds: str):
                         "live ratio over a moving estate. Worth both readings: a real "
                         "adoption success, and also where a quarter of the metrics bill sits, which makes "
                         "it the first place to point Adaptive Metrics."),
-        "b_asset_counts": build.barchart_series_panel(
-            "Observed objects across the estate", OBSERVED_OBJECT_COUNTS,
-            ds_uid=build.USAGE_UID, sort="desc",
-            description="Affirmative inventory from counters already present on the write stack. Each "
-                        "bar keeps its source metric's population intact; service, entity and target "
-                        "counts are not added together into a synthetic total."),
+        "b_asset_counts": _raw_product_series(
+            "Reported service, entity and target quantities", OBSERVED_OBJECT_COUNTS, sort="desc",
+            note="Service-entity observations do not establish hosts or host hours. Each source "
+                 "population stays separate; no cross-product service total is formed."),
         "b_observed_objects": build.barchart_panel(
-            "App Observability services by stack", APP_SERVICES_BY_STACK,
+            "App O11y service-entity quantity by stack (raw, not normalised)", APP_SERVICES_BY_STACK,
             legend="{{slug}}", ds_uid=build.USAGE_UID, limit=15,
-            description="Named with the datasource's stack_id-to-slug lookup. The join multiplies by "
-                        "the one-series-per-stack info metric so the observed-service count is unchanged."),
+            description=RAW_PRODUCT_NOTE + " Named with the datasource's stack_id-to-slug lookup; "
+                        "the multiplicative join retains the reporting quantity, not a host count."),
         "b_integrations": build.barchart_panel(
             "Observed technologies from Grafana Integrations", INTEGRATIONS_BY_SERIES,
             legend="{{integration}}", ds_uid=build.USAGE_UID, limit=20,
             description="Active series grouped by Grafana Cloud's live `integration` label. There is no "
                         "maintained technology list: a newly observed integration appears on its own."),
         "b_integration_hosts": build.barchart_panel(
-            "Integration host series by technology", INTEGRATIONS_BY_HOST_SERIES,
+            "Integration host-series quantity (raw, not normalised)", INTEGRATIONS_BY_HOST_SERIES,
             legend="{{integration}}", ds_uid=build.USAGE_UID, limit=20,
-            description="The host-shaped half of the same discovered integration catalogue, kept "
-                        "separate from all active integration series so the two meanings stay legible."),
+            description=RAW_PRODUCT_NOTE + " The integration label is discovered; its host-shaped "
+                        "series do not establish hosts or billable hours."),
         "b_profiles": build.barchart_panel(
             "Profile ingestion by usage group (24h peak)", PROFILE_USAGE_GROUPS,
             legend="{{usage_group}}", ds_uid=build.USAGE_UID, unit="Bps", limit=15,
             description="Profile bytes received per second, grouped by the live usage_group label and "
                         "windowed over the dashboard's operational day. An empty chart is unknown: "
                         "missing or sparse reporting does not establish zero ingestion."),
-        "b_app_hosts": build.barchart_series_panel(
-            "App Observability hosts by reporting metric", APP_HOST_COUNTS,
-            ds_uid=build.USAGE_UID, sort="desc",
-            description="The three reporting generations stay separate because their populations may "
-                        "overlap. Adding them would manufacture a host total the datasource does not "
-                        "declare."),
-        "n_infra_host_hours": build.stat_panel(
-            "Infrastructure host-hours observed",
-            "sum(grafanacloud_org_infra_o11y_billable_host_hours)",
-            ds_uid=build.USAGE_UID, unit="h",
-            description="Billing-side host-hours attributed to Infrastructure Observability in the "
-                        "datasource's current accounting period."),
-        "n_infra_container_hours": build.stat_panel(
-            "Infrastructure container-hours observed",
-            "sum(grafanacloud_org_infra_o11y_billable_container_hours)",
-            ds_uid=build.USAGE_UID, unit="h",
-            description="Billing-side container-hours attributed to Infrastructure Observability in "
-                        "the datasource's current accounting period."),
-        "n_db_host_hours": build.stat_panel(
-            "Database host-hours observed", "sum(grafanacloud_org_db_o11y_billable_host_hours)",
-            ds_uid=build.USAGE_UID, unit="h",
-            description="Billing-side database host-hours observed in the datasource's current "
-                        "accounting period."),
-        "n_fe_sessions": build.stat_panel(
-            "Frontend sessions observed", "sum(grafanacloud_org_fe_o11y_billable_sessions)",
-            ds_uid=build.USAGE_UID,
-            description="Billing-side frontend sessions observed in the datasource's current "
-                        "accounting period."),
+        "b_app_hosts": _raw_product_series(
+            "App O11y host-named reporting generations", APP_HOST_COUNTS, sort="desc",
+            note="All three generations remain separate; overlap is not established."),
+        "n_infra_host_hours": _raw_product_stat(
+            "Infrastructure billable_host_hours quantity",
+            "sum(grafanacloud_org_infra_o11y_billable_host_hours)"),
+        "n_infra_container_hours": _raw_product_stat(
+            "Infrastructure billable_container_hours quantity",
+            "sum(grafanacloud_org_infra_o11y_billable_container_hours)"),
+        "n_db_host_hours": _raw_product_stat(
+            "Database billable_host_hours quantity", "sum(grafanacloud_org_db_o11y_billable_host_hours)"),
+        "n_fe_sessions": _raw_product_stat(
+            "Frontend billable_sessions quantity", "sum(grafanacloud_org_fe_o11y_billable_sessions)",
+            note="This aggregate is not a mobile-session or mobile-user population."),
         "n_fe_session_rate": build.stat_panel(
             "Frontend session rate (24h peak)", FE_SESSION_RATE,
             ds_uid=build.USAGE_UID, unit="ops",
@@ -3907,20 +3928,16 @@ def d_coverage(ds: str):
             "Observed clusters", f"sum(gcinsight_coverage_stack_clusters{stack})",
             description="Distinct, explicitly-windowed Mimir cluster identities across the selected "
                         "stacks. Cluster names stay in S3 and never become metric labels."),
-        "n_hosts": build.stat_panel(
-            "Hosts monitored", HOSTS_MONITORED, ds_uid=build.USAGE_UID,
-            description="Live from the usage datasource and derived from the one-series-per-host "
-                        "inventory metric. This panel remains estate-wide when Stack is selected."),
-        "n_pods": build.stat_panel(
-            "Kubernetes pods monitored", PODS_MONITORED, ds_uid=build.USAGE_UID,
-            description="Live from the usage datasource and derived from the one-series-per-pod "
-                        "inventory metric. This panel remains estate-wide when Stack is selected."),
-        "n_containers": build.stat_panel(
-            "Containers monitored",
+        "n_hosts": _raw_product_stat(
+            "Node uname-info quantity", HOSTS_MONITORED,
+            note="Estate-wide usage datasource; Stack selection does not filter this panel."),
+        "n_pods": _raw_product_stat(
+            "Kubernetes pod-info quantity", PODS_MONITORED,
+            note="Estate-wide usage datasource; Stack selection does not filter this panel."),
+        "n_containers": _raw_product_stat(
+            "Kubernetes pod-container-info quantity",
             "sum(grafanacloud_instance_active_kube_pod_container_info_series)",
-            ds_uid=build.USAGE_UID,
-            description="Live container inventory already present in grafanacloud-usage. It is not "
-                        "copied through the collector and remains estate-wide under Stack selection."),
+            note="Estate-wide usage datasource; this is not a billable-container or container-hour count."),
         "n_log_streams": build.stat_panel(
             "Active log streams", "sum(grafanacloud_logs_instance_active_streams)",
             ds_uid=build.USAGE_UID,
@@ -3941,13 +3958,13 @@ def d_coverage(ds: str):
             description="Distinct live integration label values with active series. The vocabulary is "
                         "discovered from the datasource rather than maintained in this dashboard."),
         "t_live_assets": build.timeseries_panel(
-            "Live infrastructure footprint over time",
+            "Infrastructure reporting quantities over time (raw, not normalised)",
             [(HOSTS_MONITORED, "hosts"), (PODS_MONITORED, "pods"),
              ("sum(grafanacloud_instance_active_kube_pod_container_info_series)", "containers"),
              ("sum(grafanacloud_logs_instance_active_streams)", "log streams")],
             ds_uid=build.USAGE_UID,
-            description="Live datasource-native infrastructure counters. Populations stay separate; "
-                        "the lines are not added into a synthetic estate total."),
+            description=RAW_PRODUCT_NOTE + " Live datasource-native reporting quantities. "
+                        "Populations stay separate; the lines are not added into a synthetic total."),
 
         # Coverage depth is the reframe: the same distribution reads as both protected surface and room
         # to deepen observation. Keep it full-width and ahead of every classification detail.
@@ -4256,56 +4273,53 @@ def d_coverage(ds: str):
             description="Share labelled `service_name=\"No service\"` within the same timing-reporting "
                         "stack population as the team share."),
 
-        # Unit economics use Grafana's own published currency series. No custom rate card participates
-        # in these panels; the card remains only for currency derived from a non-currency quantity.
-        "n_spend_app_service": build.stat_panel(
-            "Application Observability run rate per observed App O11y service",
-            "sum(grafanacloud_org_app_o11y_overage) / "
-            "sum(grafanacloud_app_observability_service_entity_count)",
-            unit="currencyUSD", decimals=2, ds_uid=build.USAGE_UID,
-            description="Application Observability's published monthly overage divided by its own "
-                        "published observed-service population. This is product-specific, not total spend."),
-        "n_spend_infra_host_hour": build.stat_panel(
-            "Infrastructure Observability run rate per billable host-hour",
-            "sum(grafanacloud_org_infra_o11y_host_overage) / "
-            "sum(grafanacloud_org_infra_o11y_billable_host_hours)",
-            unit="currencyUSD", decimals=4, ds_uid=build.USAGE_UID,
-            description="Infrastructure host overage divided by the matching published billable "
-                        "host-hours. Both numerator and denominator are Grafana billing metrics."),
-        "n_spend_infra_container_hour": build.stat_panel(
-            "Infrastructure Observability run rate per billable container-hour",
-            "sum(grafanacloud_org_infra_o11y_container_overage) / "
-            "sum(grafanacloud_org_infra_o11y_billable_container_hours)",
-            unit="currencyUSD", decimals=4, ds_uid=build.USAGE_UID,
-            description="Infrastructure container overage divided by the matching published billable "
-                        "container-hours. This is not a recomputed rate card."),
+        # Without matched unit/period/population contracts, keep the two raw inputs, not a unit price.
+        # Existing independent collector populations and derived diagnostics remain below.
+        "n_spend_app_service": _raw_product_series(
+            "App O11y overage and service-entity observations",
+            [("sum(grafanacloud_org_app_o11y_overage)", "overage (raw)"),
+             ("sum(grafanacloud_app_observability_service_entity_count)", "service entities (raw)")],
+            note="Unit price withheld: service observations are not billable hosts, and matching "
+                 "product names do not establish matching periods or populations. Currency unknown."),
+        "n_spend_infra_host_hour": _raw_product_series(
+            "Infrastructure host overage and host_hours observations",
+            [("sum(grafanacloud_org_infra_o11y_host_overage)", "host overage (raw)"),
+             ("sum(grafanacloud_org_infra_o11y_billable_host_hours)", "host_hours quantity (raw)")],
+            note="Unit price withheld: hour and currency contracts are unverified, not inferred "
+                 "from the names or from equal reporting values."),
+        "n_spend_infra_container_hour": _raw_product_series(
+            "Infrastructure container overage and container_hours observations",
+            [("sum(grafanacloud_org_infra_o11y_container_overage)", "container overage (raw)"),
+             ("sum(grafanacloud_org_infra_o11y_billable_container_hours)", "container_hours quantity (raw)")],
+            note="Unit price withheld: hour and currency contracts are unverified, not inferred "
+                 "from the names or from equal reporting values."),
         "n_spend_ack": build.stat_panel(
-            "Unqualified run-rate / seven-day response diagnostic ratio", f"{RUN_RATE} / {ENGAGED}",
+            "Overage / seven-day response diagnostic ratio", f"{RUN_RATE} / {ENGAGED}",
             unit="currencyUSD", decimals=2, ds_uid=build.USAGE_UID,
-            description="Derived monthly run rate divided by last-seven-day response observations. "
+            description="Existing raw overage observation divided by last-seven-day response observations. "
                         "Unmatched periods and populations: not a unit price, operational ROI or "
                         "proof that charges exist to handle OnCall pages."),
         "n_spend_service": build.cross_source_ratio_stat_panel(
-            "Current monthly run rate per named observed service",
+            "Overage per named observed service",
             (RUN_RATE, build.USAGE_UID),
             ("sum(gcinsight_coverage_stack_services)", build.PROM_UID),
             unit="currencyUSD", decimals=2,
-            description="Grafana-published total monthly run rate divided by the atomic four-signal "
+            description="Existing raw overage observation divided by the atomic four-signal "
                         "canonical service population. Grafana server-side expressions combine the two "
                         "datasources; neither series is copied. No value is shown when the denominator "
                         "is unavailable."),
         "n_spend_billed_user": build.cross_source_ratio_stat_panel(
-            "Current monthly run rate per billed user",
+            "Overage per billed user",
             (RUN_RATE, build.USAGE_UID), ("gcinsight_cost_billed_users", build.PROM_UID),
             unit="currencyUSD", decimals=2,
-            description="Total published monthly run rate divided by billingActiveUsers. Active users "
-                        "are an adoption figure and are deliberately excluded from this money panel."),
+            description="Existing raw overage observation divided by billingActiveUsers. Active users "
+                        "are an adoption figure and are deliberately excluded from this diagnostic."),
         "n_spend_viewer": build.cross_source_ratio_stat_panel(
-            "Current monthly run rate per distinct dashboard viewer observed in 24h",
+            "Overage per distinct dashboard viewer observed in 24h",
             (RUN_RATE, build.USAGE_UID),
             ("sum(gcinsight_dashboards_viewers)", build.PROM_UID),
             unit="currencyUSD", decimals=2,
-            description="Total published monthly run rate divided by Pillar J's distinct-viewer counts "
+            description="Existing raw overage observation divided by Pillar J's distinct-viewer counts "
                         "summed per stack over its explicit 24-hour window. A person using several stacks "
                         "can appear several times, so this is not an org-wide unique-human count."),
         "tbl_technologies": build.table_panel(
@@ -4334,6 +4348,8 @@ def d_coverage(ds: str):
             description="Per-stack denominators, retained-row count, unmatched-name backlog and the "
                         "exact technology registry version used for this publication."),
     }
+    _qualify_derived_money(el, ("n_spend_ack", "n_spend_service", "n_spend_billed_user",
+                               "n_spend_viewer"))
     tabs = [
         build.rows_tab("Observed estate", [
             build.row("Measured register", ["n_measured", "n_services", "n_technologies", "n_clusters"],
@@ -4408,10 +4424,10 @@ def d_coverage(ds: str):
                       max_columns=2, row_height="short"),
         ]),
         build.rows_tab("Unit economics", [
-            build.row("Observation products", ["n_spend_app_service", "n_spend_infra_host_hour",
+            build.row("Raw product inputs; unit prices withheld", ["n_spend_app_service", "n_spend_infra_host_hour",
                                                  "n_spend_infra_container_hour"],
                       max_columns=3, row_height="short"),
-            build.row("Value denominators", ["n_spend_service", "n_spend_ack",
+            build.row("Raw-derived diagnostic ratios, not normalised", ["n_spend_service", "n_spend_ack",
                                                "n_spend_billed_user", "n_spend_viewer"],
                       max_columns=4, row_height="short"),
         ]),
@@ -4434,7 +4450,9 @@ def d_coverage(ds: str):
     return "gcinsight-coverage", "Grafana Cloud Org Insights - Coverage", \
         ("Pillar K: the affirmative observed-estate asset register, how deeply each named service is "
          "covered, the explicit ownership and response relationships attached to it, and the adjacent "
-         "surface where observation can carry more value."), el, tabs
+         "surface where observation can carry more value. Unit economics retains raw observations and "
+         "diagnostic ratios, not normalised: currency, period, population matching and overlap are "
+         "unknown. These are not measured unit prices or rates."), el, tabs
 
 
 def d_commercial(ds: str):
@@ -4442,9 +4460,8 @@ def d_commercial(ds: str):
 
     Separate dashboard on purpose: commercial figures are one link that can stay closed.
 
-    **Every money panel is labelled USD/month and says the unit is DERIVED**, because the datasource
-    declares no currency. Compare balance / total_overage with forecast_months_remaining and confirm
-    the currency and billing period against the deployment's contract before quoting money.
+    Raw billing observations carry no currency formatter or inferred billing period. Existing
+    arithmetic is retained as unqualified diagnostics, not a declared price contract.
 
     **The burn tab states no conclusion, deliberately.** Do not add a projection or an underspend note to
     a panel description - that analysis belongs in a deployment-specific review, not in the dashboard.
@@ -4452,62 +4469,59 @@ def d_commercial(ds: str):
     el = {
         # --- Commitment -------------------------------------------------------------------------------
         "n_commit": build.stat_panel(
-            "Spend commitment (USD, total term)", COMMIT_TOTAL, unit="currencyUSD", decimals=2,
+            "Reported commitment credit", COMMIT_TOTAL, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
-            description="`grafanacloud_org_spend_commit_credit_total` - the whole-term commitment, "
-                        "not a monthly figure. Two decimals keep the total and remaining balance "
-                        "distinguishable without coarse abbreviation. CURRENCY IS DERIVED, NOT DECLARED: "
-                        "the datasource states no unit. Confirm currency against the deployment's "
-                        "contract before quoting externally."),
+            description="`grafanacloud_org_spend_commit_credit_total`, the reported credit observation. "
+                        "Confirm its interpretation against the deployment contract before quoting."),
         "n_consumed": build.stat_panel(
-            "Commitment consumed (USD)", COMMIT_CONSUMED, unit="currencyUSD", decimals=2,
+            "Commitment credit minus balance", COMMIT_CONSUMED, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
-            description="Credit minus balance - drawn down since the term began, not a monthly figure. "
-                        "Same derived-currency caveat as the panel beside it."),
+            description="Reported credit minus reported balance; the subtraction retains the existing "
+                        "diagnostic, not a qualified monetary drawdown."),
         "n_consumed_share": build.stat_panel(
-            "Share of commitment consumed", COMMIT_CONSUMED_SHARE, unit="percentunit", decimals=1,
-            ds_uid=build.USAGE_UID,
-            description="Credit drawn down as a share of the total commitment. Currency-independent, so "
-                        "this is the safest figure on the dashboard to quote - a ratio needs no unit, and "
-                        "so needs none of the derived-currency caveat the money panels carry."),
+            "Credit-minus-balance / credit diagnostic (raw-derived, not normalised)",
+            COMMIT_CONSUMED_SHARE, unit="percentunit", decimals=1, ds_uid=build.USAGE_UID,
+            description="Existing 1 - balance/credit arithmetic on raw observations, not normalised. "
+                        "Currency, period, population matching and overlap remain unknown; a percent "
+                        "formatter does not establish comparable inputs or measured monetary drawdown."),
         "n_balance": build.stat_panel(
-            "Commitment remaining (USD)", COMMIT_BALANCE, unit="currencyUSD", decimals=2,
+            "Reported commitment balance", COMMIT_BALANCE, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
-            description="Credit not yet drawn down, over the whole term. Two decimals distinguish the "
-                        "balance from the total without coarse abbreviation. Derived currency, as above."),
+            description="Reported balance observation; no currency or billing window is inferred."),
         "n_term_elapsed": build.stat_panel(
             "Share of contract term elapsed", TERM_ELAPSED_SHARE, unit="percentunit", decimals=1,
             ds_uid=build.USAGE_UID,
             description="Computed from live `grafanacloud_org_contract_start_date` and "
-                        "`grafanacloud_org_contract_end_date` queries. Currency-independent. Read "
-                        "against the consumed share beside it - the two together are the burn picture, "
-                        "and the chart on the Consumption vs term tab plots both over time."),
+                        "`grafanacloud_org_contract_end_date` queries. This timestamp-derived term "
+                        "ratio does not establish the billing period of the raw credit observations. "
+                        "Consumption vs term retains both model lines, not a qualified burn comparison."),
         "n_months_metric": build.stat_panel(
-            "Months the commitment lasts at current run rate", FORECAST_MONTHS, decimals=1,
+            "Platform forecast observation (raw, not normalised)", FORECAST_MONTHS, decimals=1,
             ds_uid=build.USAGE_UID,
-            description="`grafanacloud_org_forecast_months_remaining`, read straight from the platform "
-                        "rather than computed here. This is NOT months left "
-                        "on the contract - that is the panel beside it - it is how long the remaining "
-                        "balance lasts at the present rate of spend. The two answer different questions "
-                        "and confusing them is the easiest mistake on this page."),
+            description="`grafanacloud_org_forecast_months_remaining`, read straight from the platform. "
+                        "Raw observation, not normalised: its unit, currency, period, population, "
+                        "overlap and forecasting assumptions remain unknown. The metric spelling does "
+                        "not establish months of affordable spend. This is NOT months left on the "
+                        "contract; the separate timestamp-derived panel measures the term."),
         "n_months_contract": build.stat_panel(
             "Months remaining on the contract", MONTHS_TO_END, decimals=1, ds_uid=build.USAGE_UID,
             description="Computed from the live `grafanacloud_org_contract_end_date` query - how long "
                         "the TERM runs. "
-                        "The panel beside it measures the commitment rather than the term: how long the "
-                        "remaining balance lasts at the present rate of spend. The two answer different "
-                        "questions and confusing them is the easiest mistake on this page."),
+                        "The platform field beside it concerns the commitment rather than the term, "
+                        "but its unit and model are unverified. It is not a comparable duration or "
+                        "evidence of how long the balance will last."),
 
         # --- Run rate ---------------------------------------------------------------------------------
         "n_runrate": build.stat_panel(
-            "Current run rate (USD/month)", RUN_RATE, unit="currencyUSD", decimals=2,
+            "Reported total overage", RUN_RATE, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
-            description="`grafanacloud_org_total_overage`, per MONTH. BOTH THE CURRENCY AND THE PERIOD "
-                        "ARE DERIVED, not declared by the datasource - the period is in the title because a "
-                        "bare currency figure with no period is unquotable. "
-                        "If `_included_*` volumes are ZERO under a spend-commit contract with no bundled "
-                        "allowance, 'overage' is the whole charge for the period, not spend above a plan. "
-                        "Check the live included-volume queries and contract before interpreting it as excess."),
+            description="The frozen Run rate tab name is a navigation/model label only, "
+                        "not a measured normalised rate. `grafanacloud_org_total_overage` retains "
+                        "the raw source aggregation. "
+                        "The name does not establish a charge, price or complete estate total. "
+                        "If included volumes are ZERO under a spend-commit contract without a bundled "
+                        "allowance, overage may mean the whole charge, not spend above a plan; "
+                        "confirm that interpretation against the deployment contract."),
         "b_runrate": build.barchart_panel(
             "Run rate by product",
             f"sort_desc(label_replace(sum({PRODUCT_OVERAGES[0][0]}), \"product\", \"metrics\", \"\", \"\"))",
@@ -4516,69 +4530,62 @@ def d_commercial(ds: str):
         # The guard that keeps the breakdown honest. A component chart the reader cannot reconcile to the
         # total is an invitation to trust it without noticing missing billing lines.
         "n_reconcile": build.stat_panel(
-            "Unaccounted run rate (USD/month)", RECONCILIATION_GAP, unit="currencyUSD", decimals=2,
+            "Total-minus-components overage diagnostic", RECONCILIATION_GAP, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
             description="`total_overage` minus the sum of every component in the breakdown beside this. "
-                        "Same DERIVED currency and period as every money panel here. "
-                        f"MUST BE ZERO across all {len(PRODUCT_OVERAGES)} enumerated components. "
-                        "Anything else means Grafana Cloud has introduced a billing line the "
-                        "breakdown does not carry, so the product chart is understating the run rate and "
-                        "the new metric needs adding to PRODUCT_OVERAGES. This panel exists because a "
-                        "plausible component chart has previously omitted live billing lines."),
+                        "No matched currency or period is established. "
+                        f"Diagnostic across {len(PRODUCT_OVERAGES)} enumerated components, not proof of "
+                        "complete billing coverage. A gap can reflect missing lines, unavailable "
+                        "reporting or unmatched periods/populations; even zero does not qualify the "
+                        "currency, period or completeness contract."),
         "t_runrate": build.timeseries_panel(
-            "Run rate by product over time",
+            "Product overage observations over time",
             [(f"sum({metric})", label) for metric, label in PRODUCT_OVERAGES],
             unit="currencyUSD", stacked=True, ds_uid=build.USAGE_UID,
-            description="Stacked over the enumerated billing lines. Compare the top edge with the total "
-                        "run rate and check the live reconciliation remainder for missing components. "
-                        "Use the current product split to decide which Cost dashboard opportunities to "
-                        "review. USD/month, DERIVED unit."),
+            description="Stacked observations for the enumerated billing lines, retaining the existing "
+                        "display arithmetic. The stack height does not establish an additive monetary "
+                        "total; use the remainder only as an unqualified diagnostic."),
         "t_metrics_share": build.timeseries_panel(
-            "Metrics share of run rate",
+            "Metrics / total overage diagnostic (raw-derived, not normalised)",
             [(f"sum(grafanacloud_org_metrics_overage) / {RUN_RATE}", "metrics share")],
             unit="percentunit", ds_uid=build.USAGE_UID,
-            description="Metrics overage as a share of total overage. Currency-independent, so this is "
-                        "safe to quote without the derived-unit caveat. If Adaptive Metrics adoption "
-                        "moves, this is the line it shows up on - and it is the single most direct measure "
-                        "of whether the cost work is landing."),
+            description="Raw metrics overage divided by raw total overage under the existing model, "
+                        "not normalised. Currency, period, population matching and overlap remain "
+                        "unknown. A percent formatter does not qualify the inputs or completeness; "
+                        "not a measured spend share or proof of realised savings."),
 
         # --- Consumption vs term ----------------------------------------------------------------------
         "t_burn": build.timeseries_panel(
-            "Commitment consumed vs contract term elapsed",
+            "Raw credit-ratio diagnostic vs contract term elapsed",
             [(COMMIT_CONSUMED_SHARE, "commitment consumed"),
              (TERM_ELAPSED_SHARE, "contract term elapsed")],
             unit="percentunit", ds_uid=build.USAGE_UID,
-            description="Two ratios on one axis, both currency-independent. `commitment consumed` is "
-                        "1 - balance/credit; `contract term elapsed` is derived from live "
+            description="Two existing model ratios on one axis, not normalised. The legacy legend "
+                        "`commitment consumed` denotes raw 1 - balance/credit arithmetic, not measured "
+                        "monetary drawdown: currency, period, population matching and overlap are "
+                        "unknown. `contract term elapsed` is derived separately from live "
                         "`grafanacloud_org_contract_start_date` and `grafanacloud_org_contract_end_date` "
-                        "queries. "
-                        "The two lines are the data. Reading a trajectory off them is a commercial "
-                        "conversation and is deliberately left to the person in the room, not asserted "
-                        "here."),
+                        "queries. Their coexistence does not qualify a burn comparison."),
         "t_balance": build.timeseries_panel(
             "Commitment remaining", [(COMMIT_BALANCE, "balance")],
             unit="currencyUSD", ds_uid=build.USAGE_UID,
-            description="The absolute drawdown against the commitment. Derived currency, as above."),
+            description="Reported commitment balance observations over time, not qualified money."),
     }
     # The bar chart needs one series per product with a readable label, which `sum()` alone cannot carry -
     # each overage metric is a separate name, so relabel each and union them.
     el["b_runrate"] = build.barchart_panel(
-        "Run rate by product (USD/month)",
+        "Product overage observations",
         " or ".join(
             f'label_replace(sum({metric}), "product", "{label}", "", "")'
             for metric, label in PRODUCT_OVERAGES),
         legend="{{product}}", ds_uid=build.USAGE_UID, unit="currencyUSD",
-        description="The enumerated decomposition of the run rate - "
-                    f"{len(PRODUCT_OVERAGES)} billing lines, biggest first. Compare their sum with "
-                    "`grafanacloud_org_total_overage` using the live remainder. The panel beside this one "
-                    "shows that remainder live, so if Grafana Cloud adds a billing line the gap appears "
-                    "here rather than being absorbed silently. "
-                    "The chart previously omitted billing lines while still looking complete; the live "
-                    "reconciliation remainder is what prevents that recurring. A reported zero is a "
-                    "sample carrying no charge; an absent reporting series is not a measured zero. "
-                    "USD/month, DERIVED unit. Each product is a separately-named metric rather than one "
-                    "metric with a `product` label, so each is relabelled and unioned with `or` - that is "
-                    "why this expression is shaped the way it is.")
+        description=f"Observations for {len(PRODUCT_OVERAGES)} enumerated billing lines, biggest first. "
+                    "The total-minus-components remainder is diagnostic, not proof of complete billing "
+                    "coverage or additive populations. A reported zero is a sample, not proof of no "
+                    "charge. Each product metric is relabelled and unioned with `or`; no conversion occurs.")
+    _qualify_derived_money(el, (key for key, panel in el.items()
+                               if panel["spec"]["vizConfig"]["spec"].get("fieldConfig", {})
+                               .get("defaults", {}).get("unit") == "currencyUSD"))
     tabs = [
         build.tab("Commitment", ["n_commit", "n_consumed", "n_consumed_share", "n_balance",
                                  "n_term_elapsed", "n_months_metric", "n_months_contract"]),
@@ -4587,9 +4594,10 @@ def d_commercial(ds: str):
         build.tab("Consumption vs term", ["t_burn", "t_balance"]),
     ]
     return "gcinsight-commercial", "Grafana Cloud Org Insights - Commercial", \
-        ("Pillar H: the spend commitment and the run rate behind it. Live from grafanacloud-usage. "
-         "CURRENCY AND PERIOD ARE DERIVED, not declared by the datasource - every money panel says so, "
-         "and the ratio panels are unit-free and safer to quote. Contract timing comes from live "
+        ("Pillar H: raw billing observations and existing diagnostics, not normalised. Live from "
+         "grafanacloud-usage. Currency, billing period, population matching and overlap are unknown. "
+         "The frozen Run rate tab name is a navigation/model label only, not a measured normalised rate. "
+         "Ratios do not qualify their inputs. Contract timing is separately derived from live "
          "grafanacloud_org_contract_start_date and grafanacloud_org_contract_end_date queries."), \
         el, tabs
 
@@ -4681,19 +4689,15 @@ def d_ai(ds: str):
                         "user_type series by stack_id. The Adoption by stack table names up to the top "
                         "hundred rather than hiding the long tail behind a headline."),
         "n_assistant_overage": build.stat_panel(
-            "Assistant run rate (USD/month)", assistant_cost, unit="currencyUSD", decimals=2,
+            "Assistant overage observation", assistant_cost, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
-            description="`grafanacloud_org_assistant_overage`. USD/month is DERIVED, not declared by "
-                        "the datasource, using the same commitment reconciliation as the Commercial "
-                        "dashboard. Under a spend-commit contract with no bundled allowance, overage can "
-                        "be the whole period charge, not spend above a plan; confirm the contract."),
+            description="`grafanacloud_org_assistant_overage`, preserving the reported observation. "
+                        "The metric name does not establish a price or charge."),
         "n_token_overage": build.stat_panel(
-            "AI-token run rate (USD/month)", token_cost, unit="currencyUSD", decimals=2,
+            "AI-token overage observation", token_cost, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
-            description="`grafanacloud_org_ai_tokens_overage`. USD/month is DERIVED under the same "
-                        "contract identity as the Commercial dashboard. A reported zero is a real gauge "
-                        "sample, not a missing series; it does not make token consumption free or prove "
-                        "what entitlement the organisation bought."),
+            description="`grafanacloud_org_ai_tokens_overage`. A reported zero is a gauge sample, "
+                        "not a missing series; it does not establish free consumption or entitlement."),
 
         # --- Adoption by stack ----------------------------------------------------------------------
         "tbl_stack_users": build.prometheus_table_panel(
@@ -4766,12 +4770,11 @@ def d_ai(ds: str):
 
         # --- Commercial -----------------------------------------------------------------------------
         "tbl_stack_assistant_cost": build.prometheus_table_panel(
-            "Top 100 stacks by Assistant run rate (USD/month)", stack_assistant_cost,
+            "Top 100 stacks by Assistant overage observation", stack_assistant_cost,
             legend="{{slug}}", ds_uid=build.USAGE_UID, label_column="Stack",
-            value_column="USD/month", unit="currencyUSD",
-            description="Per-stack Assistant charge, largest first. USD/month is DERIVED and `overage` "
-                        "can be the whole charge under a spend-commit contract without a bundled "
-                        "allowance. Confirm the contract; this drills down from the Assistant run-rate stat."),
+            value_column="Raw overage", unit="currencyUSD",
+            description="Per-stack Assistant overage observations, largest first. This drills down "
+                        "from the Assistant overage stat without assigning a price or billing window."),
         "n_included_users": build.stat_panel(
             "Contract-reported included Assistant users",
             "sum(grafanacloud_org_assistant_included_users)", ds_uid=build.USAGE_UID,
@@ -5099,7 +5102,7 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
         build.tab("People and identities", ["tbl_people", "tbl_services"],
                   max_columns=2, row_height="tall"),
         build.rows_tab("Commercial", [
-            build.row("Assistant run rate by stack", ["tbl_stack_assistant_cost"],
+            build.row("Assistant overage by stack (raw, not normalised)", ["tbl_stack_assistant_cost"],
                       max_columns=1, row_height="tall"),
             build.row("Raw contract gauges - do not use as denominators",
                       ["n_included_users", "n_additional_tokens", "n_included_additional_tokens"],
@@ -5109,9 +5112,12 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
                   max_columns=1, row_height="short"),
     ]
 
+    _qualify_derived_money(el, ("n_assistant_overage", "n_token_overage", "tbl_stack_assistant_cost"))
     return "gcinsight-ai", "Grafana Cloud Org Insights - Grafana Assistant & AI usage", \
         ("Pillar I: org-wide Assistant adoption, current billing-period token consumption, lifetime "
-         "identity totals and AI-related run rate. Org-wide panels are live from grafanacloud-usage. "
+         "identity totals and raw AI overage observations, not normalised. Overage currency, billing "
+         "period, population matching and overlap are unknown; token windows do not qualify overage. "
+         "Org-wide panels are live from grafanacloud-usage. "
          "Feature-level Assistant inventory is collectable per stack and is TENANT-SCOPED - see the "
          "Feature activity tab for the three boundaries that no credential can widen."), el, tabs
 

@@ -1550,20 +1550,15 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
                                  f"commercial.{key} description asserts a projection ({word!r})  -  that "
                                  f"was explicitly excluded from the dashboard")
 
-    def test_every_money_panel_declares_the_currency_as_derived(self):
-        """The datasource declares no currency. Any absolute-money panel must say the unit is inferred."""
+    def test_unknown_currency_panels_do_not_format_as_money(self):
+        """An inferred-currency caveat cannot justify a visible currency formatter."""
         panels = self._panels("commercial")
-        currency_panels = {
-            key: panel for key, panel in panels.items()
-            if "currency" in (panel["spec"]["vizConfig"]["spec"].get("fieldConfig", {})
-                              .get("defaults", {}).get("unit", ""))
-        }
-        self.assertGreater(len(currency_panels), 0, "commercial dashboard has no currency panels")
-        for key, panel in currency_panels.items():
-            desc = panel["spec"]["description"].lower()
-            self.assertTrue(
-                "derived" in desc or "caveat as the panel" in desc,
-                f"commercial.{key} renders currency without saying the unit is derived: {desc[:120]!r}")
+        for key in ("n_commit", "n_consumed", "n_balance", "n_runrate", "n_reconcile",
+                    "t_runrate", "t_balance", "b_runrate"):
+            panel = panels[key]["spec"]
+            self.assertIn("unknown", panel["description"])
+            self.assertEqual(panel["vizConfig"]["spec"]["fieldConfig"]["defaults"]["unit"], "short")
+            self.assertNotIn("USD", panel["title"])
 
     def test_the_ratio_panels_are_unit_free(self):
         """Ratios need no currency, which makes them the safe figures to quote. Keep them percentunit."""
@@ -2809,9 +2804,12 @@ class CoverageOutcomeValueTest(unittest.TestCase):
         self.assertIn("grafanacloud_org_total_overage", billed)
         self.assertIn("gcinsight_cost_billed_users", billed)
         self.assertNotIn("gcinsight_estate_active_users", billed)
-        app = self._exprs("n_spend_app_service")[0]
-        self.assertIn("grafanacloud_org_app_o11y_overage", app)
-        self.assertIn("grafanacloud_app_observability_service_entity_count", app)
+        # Product quantities no longer form an unsupported USD/service unit price. Keep both raw
+        # inputs visible independently; the billed-user diagnostic above is a separate existing model.
+        self.assertEqual(self._exprs("n_spend_app_service"), [
+            "sum(grafanacloud_org_app_o11y_overage)",
+            "sum(grafanacloud_app_observability_service_entity_count)",
+        ])
 
     def test_service_register_names_completeness_without_claiming_protection(self):
         spec = self.elements["tbl_services"]["spec"]
