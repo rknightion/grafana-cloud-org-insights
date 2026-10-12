@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop23'
 created_date: '2026-10-06 11:19'
-updated_date: '2026-10-12 11:40'
+updated_date: '2026-10-12 11:56'
 labels:
   - release
   - owner-decision
@@ -39,3 +39,9 @@ The v0.7.0 readback established exact release manifest/tag/source SHA and source
 <!-- SECTION:PLAN:BEGIN -->
 D-OCI23: isolated shared publisher candidate, semantic stable version label preserving immutable source/revision/signing. Root security review, land and shared release, then caller-pin integration. Final two-platform readback only after project stable release.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+loop23: shared publisher implementation attempt1 security PASS and CodeRabbit complete0 findings on exact patch7662bfb2; local just check0 and pinned actionlint1.7.12/zizmor1.29.0 lint0 (only existing unchanged secret-action findings). Root landed shared source361f19e703843ef04b5db97e11cfd673b3eaa6ef. Integrated shared gate and exact required CI pending; shared release/caller pin and future project two-platform stable artifact readback remain unaccepted.
+<!-- SECTION:NOTES:END -->
