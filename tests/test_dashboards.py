@@ -2712,7 +2712,7 @@ class RecentDashboardPresentationContractsTest(unittest.TestCase):
         self.assertEqual(elements["n_public_events"]["spec"]["title"],
                          "Public dashboard opens")
         self.assertEqual(elements["t_public"]["spec"]["title"],
-                         "Public dashboard opens over time, by stack")
+                         "Public dashboard opens over time, by stack - changing top-N membership")
         prose = " ".join([
             dashboard_description,
             *(f"{elements[key]['spec']['title']} {elements[key]['spec']['description']}"

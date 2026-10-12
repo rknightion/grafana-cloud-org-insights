@@ -50,6 +50,7 @@ from collector.pillars import (
     risk as risk_pillar,
     label_risk as label_risk_pillar,
     labelling as labelling_pillar,
+    maturity as maturity_pillar,
     usage as usage_pillar,
 )
 from collector.sources import assistant as assistant_src
@@ -1144,9 +1145,10 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
                 "and on(stack_id) topk(15, sum by(stack_id)("
                 "grafanacloud_instance_recommendations_estimated_savings_series @ end()))"
             ),
-            legend="{{slug}}", ds_uid=build.USAGE_UID, limit=15,
-            description="Membership is frozen to the top 15 at the range endpoint, then the range-safe "
-                        "values are reduced, sorted and display-limited. Compare it with the union panel: "
+            legend="{{slug}}", ds_uid=build.USAGE_UID, limit=15, endpoint=True,
+            description="Membership AND values are evaluated at the selected range endpoint, then "
+                        "sorted and display-limited. This reports endpoint observations, not current "
+                        "inventory. Missing observations remain absent, not zero. Compare it with the union panel: "
                         "union-minus-endpoint names stacks that spiked during the window and recovered "
                         "before its endpoint."),
         # --- Adaptive LOGS (Pillar B, PLAN 18.16) -----------------------------------------------------
@@ -1218,7 +1220,8 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
             "Biggest pending log savings, by stack",
             "topk(15, gcinsight_cost_adaptivelogs_pending_bytes)",
             legend="{{stack}}", unit="bytes",
-            description="A work queue, largest first. Concentration is the point: start at the top "
+            description="Historical review candidates, largest last-observed value first. Concentration "
+                        "is the point: review the top candidates against the published detail "
                         "because a handful of owner conversations move the estate total more than the "
                         "long tail combined. Bytes are over the API's own unstated window - use them to "
                         "RANK stacks, not as a monthly figure."),
@@ -1831,6 +1834,23 @@ def d_usage(ds: str):
 
 
 def d_maturity(ds: str):
+    def score_bar(title, expr, **kwargs):
+        # Reuse the published rubric boundaries, never per-frame extrema or an invented cutoff.
+        colours = {"dormant": "red", "lagging": "orange", "solid": "yellow", "leading": "green"}
+        thresholds = [(None if floor == 0 else floor, colours[tier])
+                      for tier, floor in reversed(maturity_pillar.TIERS)]
+        panel = build.barchart_panel(title, expr, thresholds=thresholds, **kwargs)
+        panel["spec"]["vizConfig"]["spec"]["fieldConfig"]["defaults"].update({
+            "min": 0, "max": 100, "noValue": "Not scored",
+            "mappings": [{"type": "special", "options": {"match": "null+nan",
+                         "result": {"text": "Not scored", "color": "gray"}}}],
+        })
+        panel["spec"]["description"] += (
+            " Absolute 0-100 score colours use the rubric tiers: below 25 red, 25-<50 orange, "
+            "50-<75 yellow, 75+ green. Missing scores are not zero or good; see Not scored.")
+        return panel
+
+    observed_score = 'last_over_time(gcinsight_maturity_score{stack=~"$stack",version="2"}[$__range] @ end())'
     el = {
         "n_median": build.stat_panel(
             "Median score", 'gcinsight_maturity_percentile{kind="median",version="2"}', decimals=1,
@@ -1866,21 +1886,23 @@ def d_maturity(ds: str):
         "t_tiers": build.timeseries_panel(
             "Stacks per tier", [('gcinsight_maturity_stacks_by_tier{version="2"}', "{{kind}}")], stacked=True,
             description="leading >=75, solid >=50, lagging >=25, dormant below."),
-        "b_top": build.barchart_panel(
-            "Top 15 by score", 'topk(15, gcinsight_maturity_score{stack=~"$stack",version="2"})',
-            legend="{{stack}}",
-            description="The most mature stacks - the internal reference implementations, and the most "
+        "b_top": score_bar(
+            "Highest 15 latest scores in selected window - historical candidates", f'topk(15, {observed_score})',
+            legend="{{stack}}", limit=15,
+            description="Ranked by each stack's last score observed in the selected window, not current membership. "
+                        "Departed or now-unscored stacks can retain a historical score here; the published "
+                        "Leaderboard and Not scored tables show their own snapshot state. "
+                        "The most mature observed stacks are candidate reference implementations, and the most "
                         "useful thing to point another team at. A small stack can score well on breadth "
                         "with very little in it, so check a leader's size on the Estate dashboard before "
                         "holding it up as an example."),
-        "b_bottom": build.barchart_panel("Bottom 15 by score",
-                                          'bottomk(15, gcinsight_maturity_score{stack=~"$stack",version="2"})',
-                                          legend="{{stack}}", sort="asc",
-                                          # Amber below 25 (the `lagging` tier boundary), red below 10, so
-                                          # the bottom chart cannot be mistaken for the top chart at a
-                                          # glance - they rendered in identical green.
-                                          thresholds=[(None, "orange"), (10, "red"), (25, "yellow")],
-                                          description="The lowest-scoring stacks, WORST FIRST, and where enablement effort pays back most - each is a "
+        "b_bottom": score_bar(
+            "Lowest 15 latest scores in selected window - historical candidates",
+            f'bottomk(15, {observed_score})', legend="{{stack}}", sort="asc", limit=15,
+            description="Ranked by each stack's last score observed in the selected window, not current membership. "
+                        "Departed or now-unscored stacks can retain a historical score here; the published "
+                        "Leaderboard and Not scored tables show their own snapshot state. "
+                        "The lowest-scoring observed stacks, WORST FIRST - each was a "
                         "real stack with real users, since dormant and test-leftover stacks are excluded "
                         "from scoring entirely. Cross-read with the Estate dashboard for size: a low score "
                         "on a stack carrying 3M series is a different conversation from a low score on one "
@@ -1888,7 +1910,7 @@ def d_maturity(ds: str):
         # PLAN 9.1. Before this there was NO trend for "which dimension is the estate weakest on": the
         # per-stack view scales with the live estate and would be costly as series. Sorted
         # ascending so the weakest dimension is the first bar a reader's eye lands on.
-        "b_dims": build.barchart_panel(
+        "b_dims": score_bar(
             "Estate mean by dimension - weakest first",
             # `sort()` is applied by the DATASOURCE and then discarded: the `reduce` transformation
             # rebuilds the frame in series order, so the PromQL sort never reached the chart and the bars
@@ -2434,7 +2456,7 @@ def d_risk(ds: str):
                         "otlp_parse_error, label_invalid. LIMIT BREACHES (fix the config): "
                         "aggregator-too-many-*-series. `requested-by-configuration` is excluded because "
                         "it is Adaptive Metrics deliberately dropping configured data, not data loss."),
-        "b_discard": build.barchart_panel(
+        "b_discard": build.endpoint_barchart_panel(
             "Worst stacks by samples discarded/sec (24h peak)",
             build.usage_by_slug(
                 f"topk(15, sum by(stack_id)(max_over_time("
@@ -2476,7 +2498,7 @@ def d_risk(ds: str):
             description="Stacks whose hosted Metrics tenant discarded metadata. Samples may still ingest, "
                         "so this is not the same population as sample discards; lost HELP/TYPE metadata "
                         "reduces discoverability and can break tooling that depends on metric metadata."),
-        "b_spans_late": build.barchart_panel(
+        "b_spans_late": build.endpoint_barchart_panel(
             "Worst stacks by spans arriving over 5 minutes late (24h peak)",
             build.usage_by_slug(
                 f"topk(15, max_over_time("
@@ -2493,9 +2515,9 @@ def d_risk(ds: str):
                         "COVERAGE: this metric is reported by only a small subset of stacks and was never "
                         "observed at exactly zero - it appears to be emitted only while lateness is "
                         "actually happening. So read this as 'worst among the stacks reporting a problem', "
-                        "NOT as a compliance percentage over the estate. Absent stacks are unmeasured, "
-                        "not certified clean."),
-        "b_trace": build.barchart_panel(
+                        "NOT as a compliance percentage over the estate. Absent stacks may be unmeasured "
+                        "or outside the displayed ranking, not certified clean."),
+        "b_trace": build.endpoint_barchart_panel(
             "Worst stacks by trace completeness (24h low)",
             build.usage_by_slug(
                 f"bottomk(15, min_over_time("
@@ -2506,13 +2528,13 @@ def d_risk(ds: str):
             thresholds=[(None, "red"), (0.9, "green")],
             description="Share of traces flushed complete, as a percentage, over the 24h LOW - lowest "
                         "first, so short bars are the broken ones. That is the opposite of every other "
-                        "chart on this dashboard, which is why it is stated here. Below 90% is amber by "
+                        "chart on this dashboard, which is why it is stated here. Below 90% is red by "
                         "threshold: a trace arriving in pieces cannot be read, so a stack here is running "
                         "instrumentation that produces nothing usable. Values can go SLIGHTLY NEGATIVE "
                         "(the source can report a small negative): the series is a computed "
                         "difference, so a small negative means a stack flushing essentially nothing, not "
                         "a broken panel."),
-        "b_trace_discard": build.barchart_panel(
+        "b_trace_discard": build.endpoint_barchart_panel(
             "Worst stacks by discarded trace-span rate (24h peak)",
             build.usage_by_slug(
                 f"topk(15, sum by(stack_id)(max_over_time("
@@ -2521,7 +2543,7 @@ def d_risk(ds: str):
             description="Named trace-loss work queue, ranked by each stack's peak discarded-span rate in "
                         "the window. Fix the highest-volume sender first; the count above says how broad "
                         "the issue is, while this chart says where the loss is concentrated."),
-        "b_metadata_discard": build.barchart_panel(
+        "b_metadata_discard": build.endpoint_barchart_panel(
             "Worst stacks by discarded metric-metadata rate (24h peak)",
             build.usage_by_slug(
                 f"topk(15, sum by(stack_id)(max_over_time("
@@ -2541,7 +2563,7 @@ def d_risk(ds: str):
                         "no failures is absent rather than zero. Values are failures per SECOND at the "
                         "24h peak, so they are small numbers - the ranking is what matters, not the "
                         "magnitude."),
-        "b_notif_by_stack_integration": build.barchart_panel(
+        "b_notif_by_stack_integration": build.endpoint_barchart_panel(
             "Worst stack + integration pairs by notification failure rate (24h peak)",
             build.usage_by_slug(
                 f"topk(15, sum by(stack_id, integration)(max_over_time({NOTIF_METRIC}[{WINDOW}])))"),
@@ -2566,7 +2588,7 @@ def d_risk(ds: str):
             description="Windowed because a momentary failure rate answers only whether an evaluation "
                         "is failing in the current scrape. Distinct from Error-state blips that come from "
                         "shared-fleet noise: these are evaluations that failed outright."),
-        "b_deadrules": build.barchart_panel(
+        "b_deadrules": build.endpoint_barchart_panel(
             "Worst stacks by zero-series rule-query rate (24h peak)",
             build.usage_by_slug(
                 f"topk(15, sum by(stack_id)(max_over_time("
@@ -2575,7 +2597,7 @@ def d_risk(ds: str):
             description="Peak rate of zero-series rule evaluations. Review queries and metric lifecycle "
                         "with the owner, including deliberate absence and low-frequency inputs. "
                         "Not an instruction to delete rules."),
-        "b_notif": build.barchart_panel(
+        "b_notif": build.endpoint_barchart_panel(
             "Worst stacks by notification failure rate (24h peak)",
             build.usage_by_slug(
                 f"topk(15, sum by(stack_id)(max_over_time("
@@ -4721,19 +4743,26 @@ def d_ai(ds: str):
 
         # --- Adoption by stack ----------------------------------------------------------------------
         "tbl_stack_users": build.prometheus_table_panel(
-            "Top 100 stacks by Assistant active users", stack_users, legend="{{slug}}",
+            "Top 100 stacks by Assistant active users at range endpoint", stack_users, legend="{{slug}}",
+            endpoint=True, limit=100,
             ds_uid=build.USAGE_UID, label_column="Stack", value_column="Active users",
             description="The hundred stacks with the largest current-period Assistant active-user "
                         "counts, named through the stack_id-to-slug join and sorted largest first. These "
                         "are stack memberships, not unique org users: one person can appear in several "
-                        "stacks. The table scrolls and filters so the long tail remains actionable."),
+                        "stacks. Membership and values are reported at the selected range endpoint, "
+                        "not a union of historical entrants or a current inventory. Missing source or "
+                        "slug observations remain absent, not zero. The table scrolls and filters so "
+                        "the long tail remains actionable."),
         "tbl_stack_tokens": build.prometheus_table_panel(
-            "Top 100 stacks by current-period AI tokens", stack_tokens, legend="{{slug}}",
+            "Top 100 stacks by current-period AI tokens at range endpoint", stack_tokens, legend="{{slug}}",
+            endpoint=True, limit=100,
             ds_uid=build.USAGE_UID, label_column="Stack", value_column="AI tokens",
             description="The hundred largest stack totals in the CURRENT billing period, largest first. "
                         "This uses the monthly-reset aggregate, not the lifetime identity counter. The "
                         "stack selector cannot filter it because grafanacloud-usage has no slug label; "
-                        "slug is added only for display by joining on stack_id."),
+                        "slug is added only for display by joining on stack_id. Membership and values "
+                        "are reported at the selected range endpoint, not a union of historical entrants "
+                        "or a current inventory. Missing source or slug observations remain absent, not zero."),
 
         # --- Token consumption ----------------------------------------------------------------------
         "t_users": build.timeseries_panel(
@@ -4772,31 +4801,36 @@ def d_ai(ds: str):
 
         # --- People and identities ------------------------------------------------------------------
         "tbl_people": build.prometheus_table_panel(
-            "Top 100 identities on user-token series - lifetime cumulative (human identity unproven)",
-            people, legend="{{email}}",
+            "Top 100 identities on user-token series - lifetime cumulative (human identity unproven) at range endpoint",
+            people, legend="{{email}}", endpoint=True, limit=100,
             ds_uid=build.USAGE_UID, label_column="User", value_column="Lifetime AI tokens",
             description="LIFETIME CUMULATIVE token totals on user_type=user series, grouped by email "
                         "across stacks and ranked by the maximum seen within the 120d look-back window. "
                         "This series category is not independently verified human identity. It is not "
                         "current spend: its counter does not share the monthly reset contract of the "
-                        "aggregate token panels."),
+                        "aggregate token panels. The 120d look-back ends at the selected range endpoint; "
+                        "these are historical observations, not currently active identities."),
         "tbl_services": build.prometheus_table_panel(
-            "Top 100 identities on service-token series - lifetime cumulative (actor identity unproven)", services,
-            legend="{{email}}", ds_uid=build.USAGE_UID,
+            "Top 100 identities on service-token series - lifetime cumulative (actor identity unproven) at range endpoint", services,
+            legend="{{email}}", ds_uid=build.USAGE_UID, endpoint=True, limit=100,
             label_column="Identity on service-token series",
             value_column="Lifetime AI tokens",
             description="Identities on series labelled user_type=service, ranked by their LIFETIME "
                         "CUMULATIVE AI-token counter. This is a billing-series category, NOT proof that "
                         "the email belongs to a bot or service account: live rows include human-shaped "
-                        "addresses alongside sa-* identities. Never quote it as service-account usage."),
+                        "addresses alongside sa-* identities. Never quote it as service-account usage. "
+                        "The maximum is observed within the 120d look-back ending at the selected "
+                        "range endpoint, not a union of earlier top-N windows or currently active identities."),
 
         # --- Commercial -----------------------------------------------------------------------------
         "tbl_stack_assistant_cost": build.prometheus_table_panel(
-            "Top 100 stacks by Assistant overage observation", stack_assistant_cost,
-            legend="{{slug}}", ds_uid=build.USAGE_UID, label_column="Stack",
+            "Top 100 stacks by Assistant overage observation at range endpoint", stack_assistant_cost,
+            legend="{{slug}}", ds_uid=build.USAGE_UID, label_column="Stack", endpoint=True, limit=100,
             value_column="Raw overage", unit="currencyUSD",
             description="Per-stack Assistant overage observations, largest first. This drills down "
-                        "from the Assistant overage stat without assigning a price or billing window."),
+                        "from the Assistant overage stat without assigning a price or billing window. "
+                        "Membership and values are reported at the selected range endpoint, not a "
+                        "union of historical entrants or a current inventory. Missing observations stay absent."),
         "n_included_users": build.stat_panel(
             "Contract-reported included Assistant users",
             "sum(grafanacloud_org_assistant_included_users)", ds_uid=build.USAGE_UID,

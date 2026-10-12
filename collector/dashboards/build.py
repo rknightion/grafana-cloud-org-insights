@@ -664,6 +664,10 @@ def timeseries_panel(title: str, exprs: Sequence[tuple[str, str]], *, descriptio
         prom_query(expr, ds_uid, ref_id=chr(ord("A") + i), legend=legend)
         for i, (expr, legend) in enumerate(exprs)
     ]
+    if any(re.search(r"\b(?:topk|bottomk)\s*\(", expr) for expr, _legend in exprs):
+        title += " - changing top-N membership"
+        description += (" Membership is recomputed at each step in the selected dashboard range; "
+                        "historical entrants remain history, not a current work queue or inventory.")
     return _panel(title, description, queries, viz("timeseries", {
         "options": {
             "legend": {"calcs": [], "displayMode": "list", "placement": "bottom",
@@ -725,6 +729,12 @@ def barchart_panel(title: str, expr: str, *, description: str = "", legend: str 
     range with lastNotNull instead would resurrect expired health evidence. Other bars keep their
     established range/reduction behavior.
     """
+    if not endpoint and "@ end()" not in expr and re.search(r"\b(?:topk|bottomk)\s*\(", expr):
+        if "entered" not in title.lower() and "historical" not in title.lower():
+            title += " - historical top-N entrants"
+        description += (" Range top-N membership is a union of entrants in the selected dashboard "
+                        "window, reduced to each entrant's last observed value, not current membership. "
+                        "A display limit only caps historical candidates; it does not select endpoint members.")
     defaults: dict[str, Any] = {"unit": unit, "custom": {"axisPlacement": "auto"}}
     if thresholds:
         defaults["thresholds"] = {
@@ -732,6 +742,7 @@ def barchart_panel(title: str, expr: str, *, description: str = "", legend: str 
             "steps": [{"value": value, "color": color} for value, color in thresholds],
         }
         defaults["custom"]["gradientMode"] = "none"
+        defaults["color"] = {"mode": "thresholds"}
     query = prom_query(expr, ds_uid, legend=legend, instant=endpoint)
     panel = _panel(title, description, [query], viz("barchart", {
         "options": {"orientation": "horizontal", "showValue": "auto", "xTickLabelRotation": 0,
@@ -760,6 +771,20 @@ def barchart_panel(title: str, expr: str, *, description: str = "", legend: str 
         }})
     panel["spec"]["data"]["spec"]["transformations"] = transformations
     return panel
+
+
+def endpoint_barchart_panel(title: str, expr: str, *, description: str = "", **kwargs) -> dict[str, Any]:
+    """Live-source queue using the caller's existing observation window at the selected end.
+
+    Not for bare periodic collector selectors: their endpoint may fall between publications.
+    Windowed observations are not a discovered current estate or a latest raw scrape.
+    """
+    return barchart_panel(
+        title + " at range endpoint", expr, endpoint=True, limit=15,
+        description=description + " Ranked over the stated observation window ending at the selected "
+        "range endpoint, not over historical top-N entrants. These are endpoint-window observations, "
+        "not current inventory. An absent member may be unmeasured or outside the displayed ranking; "
+        "absence does not establish zero or healthy.", **kwargs)
 
 
 def barchart_series_panel(title: str, exprs: Sequence[tuple[str, str]], *, description: str = "",
@@ -800,8 +825,13 @@ def barchart_series_panel(title: str, exprs: Sequence[tuple[str, str]], *, descr
 def prometheus_table_panel(title: str, expr: str, *, description: str = "",
                            legend: str = "__auto", ds_uid: str = PROM_UID,
                            label_column: str = "Series", value_column: str = "Value",
-                           unit: str = "short", sort: str = "desc") -> dict[str, Any]:
-    """A scrollable ranked table backed by Prometheus, reduced to one current row per series.
+                           unit: str = "short", sort: str = "desc",
+                           endpoint: bool = False, limit: int | None = None) -> dict[str, Any]:
+    """A scrollable ranked table backed by Prometheus, reduced to one row per series.
+
+    Range reduction retains historical members. For live-source endpoint rankings use
+    ``endpoint=True`` and name the observation window; never use it on bare periodic collectors.
+    ``limit`` caps display rows AFTER sorting, and does not itself qualify membership.
 
     Use this for long action lists where a bar chart stops being legible. A hundred horizontal bars do
     technically contain the top 100, but only a small fraction fit on screen and the labels collapse;
@@ -811,7 +841,7 @@ def prometheus_table_panel(title: str, expr: str, *, description: str = "",
     ``Last *``; `sortBy` must target ``Last *`` before `organize` renames it. Sorting the requested
     output name matches nothing and silently leaves the datasource order in place.
     """
-    panel = _panel(title, description, [prom_query(expr, ds_uid, legend=legend)], viz("table", {
+    panel = _panel(title, description, [prom_query(expr, ds_uid, legend=legend, instant=endpoint)], viz("table", {
         "options": {"showHeader": True, "footer": {"show": False, "fields": []},
                     "cellHeight": "sm"},
         "fieldConfig": {
@@ -836,6 +866,12 @@ def prometheus_table_panel(title: str, expr: str, *, description: str = "",
             REDUCED_VALUE_FIELD: value_column,
         }),
     ]
+    if limit is not None:
+        if limit <= 0:
+            raise ValueError("prometheus_table_panel limit must be above zero")
+        panel["spec"]["data"]["spec"]["transformations"].append({"kind": "limit", "spec": {
+            "id": "limit", "options": {"limitField": limit},
+        }})
     return panel
 
 
