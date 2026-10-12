@@ -48,7 +48,13 @@ grafana-stack: none
   full `run-task` response and ARN before watching; capture the stopped-task descriptor within two
   minutes of watcher exit. On a timeout or watcher exit 3, adopt the recorded ARN; never start a
   second task.
-- A changed immutable module ref needs `tofu init` before the pre-push validation hook.
+- A changed immutable module ref, or a fresh deployment-repo checkout, needs `tofu init` in the
+  deployment repo's main module before its `just check` or the pre-push validation hook; a stale module
+  cache fails a healthy gate.
+- `gcx config view` redacts the token; a redacted value gives a 401. Use `--raw`, in memory only,
+  with no login, mint or persistence.
+- A multipart S3 object's ETag is not its MD5; a single-part checksum assertion fails on it. Verify
+  with a part-aware linkage, never a bare exit 0.
 - Use a real `.venv` directory from `just setup`, never a symlink; the gate must run on a clean tree.
   Run consumer publication with a supported `python3`, with deployment pins committed first.
 - Audit grants use exact ref membership. Ungranted `refs/pull/*` are foreign, not violations; grant the

@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@loop5-root'
 created_date: '2026-09-23 18:35'
-updated_date: '2026-10-01 07:50'
+updated_date: '2026-10-12 09:49'
 labels:
   - feature-usage
   - follow-on
@@ -57,4 +57,6 @@ Admitted under owner loop5 goal, 2026-10-01. Root owns tracker writes; isolated 
 loop5 L-drill-a1 known-human sample documented in candidate90fef5891dff8ef74e6d20ead5f412d731c28d90. source separates observed app/scenes groups but independent exact Logs/Metrics request correlation absent; backend type never used as app attribution. AC1 remains open: known-app before observed, no validated discriminator. No implementation of collector classification admitted. Observation/documentation attempt1, review-repair0, shared infrastructure retry1 (missing venv, setup repaired). Resume only from correlated frontend requests or new authoritative enrichment evidence.
 
 loop5 bounded sample documentation landed35a273338b03a0a041301d8f2d04910ea97ffff8, CI36832540029 success. No validated app discriminator; AC1open, AC2/3 preserved. Resume from a genuinely independent request-to-app correlation or authoritative enrichment change. Observation/docs attempt1/review-repair0/sharedinfra1, no collector implementation.
+
+2026-10-12 owner decision (Rob): closed won't-do. No validated per-app discriminator after loop3 and loop5; one needs an upstream enrichDataRequest change or a correlated frontend request, neither available. Reopen if upstream adds a plugin/app field.
 <!-- SECTION:NOTES:END -->
