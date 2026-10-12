@@ -31,7 +31,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
 from collector import identity, observability_score
 from collector import ratecard as ratecard_model
-from collector.dashboards import build
+from collector.dashboards import build, view_metadata
 from collector.dashboards.retention_panels import retention_panels
 from collector.pillars import adaptive_traces as adaptive_traces_pillar
 from collector.pillars import library_panels as library_panels_pillar
@@ -5347,7 +5347,6 @@ def assemble(
     if freshness:
         banner_rows.append(build.row("Coverage and freshness", freshness, max_columns=3,
                                      row_height="short"))
-    banner_tab = build.rows_tab("How to read this", banner_rows)
     # The headline tab is the default landing page. Guidance remains always available, but making it the
     # first tab buried the actual decision on all ten dashboards and forced every reader through method
     # prose before seeing whether anything needed attention.
@@ -5367,6 +5366,15 @@ def assemble(
         finding_rows += [build.row(entry[1], [entry[0]], max_columns=1)
                          for entry in detail]
         tabs = list(tabs) + [build.rows_tab("Findings", finding_rows)]
+
+    # Object-specific metadata must include Findings views as well as domain tables. It is read
+    # at query time from the very same URL, never baked from build-time fixture timestamps.
+    metadata = view_metadata.elements_for(elements, ds)
+    elements.update(metadata)
+    if metadata:
+        banner_rows.append(build.row(
+            "Published view metadata (historical snapshots)", list(metadata), max_columns=1))
+    banner_tab = build.rows_tab("How to read this", banner_rows)
 
     if name in {"cost", "maturity", "value", "risk", "dashboards", "coverage"}:
         build.qualify_population(elements)

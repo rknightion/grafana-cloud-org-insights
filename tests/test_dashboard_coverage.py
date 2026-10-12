@@ -49,6 +49,21 @@ def placed(value):
             yield from placed(child)
 
 
+# These are derived display columns, NOT new published schema fields. Keep the
+# closed projection separate from row/metadata lineage, and reject an unknown output.
+SNAPSHOT_PRESENTATION_FIELDS = frozenset({
+    "view", "generated_at", "publication_age", "input", "availability",
+    "age_at_publication", "age_now", "membership", "completeness",
+})
+
+
+def presentation_root(root):
+    keys = re.findall(r'"([A-Za-z_]+)"\s*:', root)
+    if root.startswith("(\n") and set(keys) == SNAPSHOT_PRESENTATION_FIELDS:
+        return "presentation"
+    return root
+
+
 def consumers(documents):
     """Only query-bearing, placed panels; organize/treemap exclusions are real."""
     fields, expressions, tabs = {}, [], {}
@@ -82,6 +97,7 @@ def consumers(documents):
                     optional = re.fullmatch(r"\$exists\(([^()]+)\) \? \[\1\] : \[\]", root)
                     if optional:
                         root = optional[1]
+                    root = presentation_root(root)
                     viz = panel["vizConfig"]
                     options = viz["spec"].get("options", {})
                     for column in q.get("columns", []):
@@ -479,6 +495,10 @@ class DashboardCoverageTest(unittest.TestCase):
         # Metadata roots are independently checked against publication envelopes.
         requirements.update((view, path) for view, payload in self.payloads.items()
                             for path in metadata_leaves(payload["meta"]))
+        # JSONata presentation outputs have a separate closed contract. They earn
+        # no credit as rendering source fields, but still require placement and columns.
+        requirements.update((view, f"presentation.{field}")
+                            for view in self.payloads for field in SNAPSHOT_PRESENTATION_FIELDS)
         self.assertTrue(tabs)
         for key, tab_ids in fields.items():
             with self.subTest(field=key, tabs=tab_ids):
@@ -495,6 +515,18 @@ class DashboardCoverageTest(unittest.TestCase):
         actual = {tab for tab in tabs if not any(tab == t for t, _name, _expr in expressions)
                   and not any(tab in locations for locations in fields.values())}
         self.assertEqual(actual, explanatory)
+
+    def test_derived_projection_does_not_exempt_unknown_columns(self):
+        documents = copy.deepcopy(self.documents)
+        panel = documents["cost"]["spec"]["elements"]["_meta_cost_cardinality_outliers"]
+        query = panel["spec"]["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+        query["columns"].append({"selector": "fabricated", "text": "Fabricated", "type": "string"})
+        fields, _, _ = consumers(documents)
+        self.assertIn(("cost_cardinality_outliers", "presentation.fabricated"), fields)
+        self.assertNotIn("fabricated", SNAPSHOT_PRESENTATION_FIELDS)
+        query["root_selector"] = query["root_selector"].replace('"completeness":', '"made_up":')
+        fields, _, _ = consumers(documents)
+        self.assertNotIn(("cost_cardinality_outliers", "presentation.generated_at"), fields)
 
     def test_metadata_gaps_have_exact_supported_state_debts(self):
         rendered, _expressions, _tabs = consumers(self.documents)

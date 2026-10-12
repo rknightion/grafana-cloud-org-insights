@@ -961,8 +961,12 @@ BANNER_MD = """\
 - **The Stack selector does not filter live `grafanacloud-usage` panels.** That datasource identifies
   stacks by numeric `stack_id`, not by the slug carried by this selector, so those panels remain
   estate-wide even while a stack is selected. Their descriptions state that scope explicitly.
-- **An input that goes stale WITHHOLDS its panels rather than zeroing them**, so a table that has
-  stopped advancing is the signal - never a table that has dropped to zero.
+- **Stale or unavailable inputs withhold NEW view publication, not the last-good table.** Retained
+  views keep their own older timestamp; a recent scan does not make them fresh. Per-view publication
+  and input provenance below qualify each snapshot separately; missing metadata is unknown.
+- **Current estate membership is unknown without reliable current inventory evidence.** A failed
+  inventory is not an estate of zero. Retained rows and Mimir label values are historical/unknown,
+  not fresh discovery; no configured roster is substituted. Scan coverage is not per-view completeness.
 """
 
 
@@ -1115,16 +1119,18 @@ def banner_elements(dashboard: str = "estate") -> dict[str, Any]:
             unit="percentunit", decimals=1,
             description="Share of the SCANNABLE estate the hourly inventory sweep covered - paused "
                         "stacks are excluded from the denominator, so 100% is achievable. Below 100% "
-                        "means stacks failed. This is inventory coverage; the panels below say how old "
-                        "each INPUT was."),
+                        "means stacks failed in that sampled sweep. This is historical scan coverage, "
+                        "not current membership or completeness of each retained view. A failed "
+                        "inventory does not turn the estate into zero; a missing sample is unknown."),
         "_freshness": stat_panel(
             "Inventory age",
             "time() - max_over_time("
             f'gcinsight_scan_completed_timestamp_seconds{{tier="t1"}}[{FRESHNESS_LOOKBACK}])',
             unit="s", decimals=0,
-            description="Seconds since the last successful hourly inventory sweep. This is the "
-                        "dead-man's switch series - alert on this, not on exit code. It covers the "
-                        "inventory only; data-plane and per-stack figures have their own age below."),
+            description="Seconds since the latest hourly completion timestamp observed in Mimir "
+                        "within the lookback. This is the dead-man's switch series, not proof of "
+                        "current membership or successful S3 publication. A missing sample is "
+                        "unknown. Last-good views have their own publication and input ages below."),
     }
     for name in DASHBOARD_INPUTS.get(dashboard, ()):
         # `input_age_seconds` is the age AT EMISSION. A range query plus lastNotNull otherwise freezes
@@ -1137,7 +1143,9 @@ def banner_elements(dashboard: str = "estate") -> dict[str, Any]:
             f"time() - max_over_time(timestamp({selector})[{FRESHNESS_LOOKBACK}:]) + "
             f"last_over_time({selector}[{FRESHNESS_LOOKBACK}])",
             unit="s", decimals=0,
-            description=INPUT_DESCRIPTIONS[name])
+            description=INPUT_DESCRIPTIONS[name] + " This sampled T1 input-age metric describes "
+                        "that emission, not necessarily this dashboard's last-good S3 objects. "
+                        "Read per-view metadata below for those snapshots; missing is unknown.")
     return out
 
 
@@ -1609,7 +1617,7 @@ def qualify_population(elements: dict[str, Any]) -> None:
 
 
 def stack_variable(ds_uid: str = PROM_UID) -> dict[str, Any]:
-    """A `stack` template variable listing all 271 stacks, from Mimir label values.
+    """A `stack` template variable listing retained stack labels, not fresh inventory.
 
     Deliberately PromQL-backed rather than Infinity-backed: forcing a prometheus `query.kind` onto an
     Infinity variable renders a 500, and `gcinsight_stack_active_series` carries every stack anyway.
@@ -1620,6 +1628,8 @@ def stack_variable(ds_uid: str = PROM_UID) -> dict[str, Any]:
         "spec": {
             "name": "stack",
             "label": "Stack",
+            "description": "Retained Mimir labels, not current estate discovery. All selects retained "
+                           "rows; current membership is unknown without reliable inventory evidence.",
             # Scalar `current` on a single-select var; a list here has crashed renders.
             "current": {"text": "All", "value": "$__all"},
             "hide": "dontHide",

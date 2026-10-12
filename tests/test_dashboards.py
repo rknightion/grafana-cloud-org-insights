@@ -977,8 +977,11 @@ class SharedFurnitureTest(unittest.TestCase):
         self.assertIn("not measurable, not zero", content)
         self.assertIn("denominator", content)
         self.assertIn("billed", content.lower())
-        # The withholding contract, which is what makes "blank is not zero" true rather than aspirational.
-        self.assertIn("WITHHOLDS", content)
+        # Withholding means no NEW publication: the last-good object must not disappear or be
+        # falsely refreshed by another scan. This replaces the old 'WITHHOLDS its panels' claim.
+        self.assertIn("withhold NEW view publication", content)
+        self.assertIn("not the last-good table", content)
+        self.assertIn("missing metadata is unknown", content)
 
     def test_the_banner_states_no_hardcoded_measurement(self):
         """A number written into always-on text goes stale silently and is then quoted at a customer.
