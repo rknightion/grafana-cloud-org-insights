@@ -93,8 +93,10 @@ def test_legacy_complete_transport_body_read_has_wall_time_bound(mode):
     script = textwrap.dedent("""
         import threading
         import time
+        import urllib.request
+        from contextlib import ExitStack
         from unittest import mock
-        from collector.sources.dataplane import _connect_rpc
+        from collector.sources.dataplane import _connect_rpc, _ConnectRpcNoRedirect
         from collector.sources.usage_insights import _query
         from collector.netbound import bounded_call
 
@@ -108,10 +110,19 @@ def test_legacy_complete_transport_body_read_has_wall_time_bound(mode):
             def read(self):
                 entered.set()
                 threading.Event().wait()  # body read never returns after open succeeds
-        started = time.monotonic()
+        # RPC constructs an opener inside its bounded worker. Isolate that setup
+        # from this body-phase proof, without replacing the helper or its fence.
+        # A separate process-edge probe below proves blocked setup is also bounded.
+        opener = (urllib.request.build_opener(_ConnectRpcNoRedirect())
+                  if MODE == 'rpc' else None)
         open_boundary = ('urllib.request.OpenerDirector.open'
                          if MODE == 'rpc' else 'urllib.request.urlopen')
-        with mock.patch(open_boundary, return_value=Response()):
+        with ExitStack() as patches:
+            patches.enter_context(mock.patch(open_boundary, return_value=Response()))
+            if MODE == 'rpc':
+                patches.enter_context(mock.patch('urllib.request.build_opener',
+                                                 return_value=opener))
+            started = time.monotonic()
             try:
                 if MODE == 'rpc':
                     _connect_rpc('https://example.test/collector.v1.CollectorService/ListCollectors',
@@ -122,11 +133,43 @@ def test_legacy_complete_transport_body_read_has_wall_time_bound(mode):
                            expected_instance_id='1', timeout=0.1)
             except TimeoutError:
                 assert entered.is_set(), 'did not exercise body read'
-                assert time.monotonic() - started < 1
+                elapsed = time.monotonic() - started
+                assert elapsed < 1
+                print(f'{MODE}: body_entered={entered.is_set()}, elapsed={elapsed:.3f}s')
             else:
                 raise AssertionError('blocked body read returned successfully')
     """)
     run_probe("MODE = " + repr(mode) + "\n" + script)
+
+
+def test_legacy_rpc_opener_setup_has_wall_time_bound():
+    run_probe("""
+        import threading
+        import time
+        from unittest import mock
+        from collector.sources.dataplane import _connect_rpc
+        from collector.netbound import bounded_call
+
+        bounded_call(lambda: None, timeout=1)  # startup is outside the setup clock
+        entered = threading.Event()
+        def build_opener(*args, **kwargs):
+            entered.set()
+            threading.Event().wait()  # setup never returns, even after caller timeout
+        with mock.patch('urllib.request.build_opener', side_effect=build_opener), \\
+             mock.patch('urllib.request.OpenerDirector.open') as open_transport:
+            started = time.monotonic()
+            try:
+                _connect_rpc('https://example.test/collector.v1.CollectorService/ListCollectors',
+                             '1', 'synthetic-cap', timeout=0.1)
+            except TimeoutError:
+                assert entered.is_set(), 'did not exercise opener setup'
+                open_transport.assert_not_called()
+                elapsed = time.monotonic() - started
+                assert elapsed < 1
+                print(f'rpc: setup_entered={entered.is_set()}, elapsed={elapsed:.3f}s')
+            else:
+                raise AssertionError('blocked opener setup returned successfully')
+    """)
 
 
 def test_surviving_dns_work_is_bounded_and_admission_fails_closed():
