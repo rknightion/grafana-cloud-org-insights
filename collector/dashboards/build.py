@@ -1068,7 +1068,8 @@ LIVE_BANNER_MD = """\
 - **Rate-shaped series use a 24h window**, never an instantaneous comparison.
 - **OnCall groups are a gauge with unspecified horizon.** Response and resolution histograms cover
   the producer's **last seven days** at each sample, not the dashboard range. Stack matching does not
-  match group cohorts or windows; acknowledgement diagnostic ratios are unqualified, not verified shares.
+  match group cohorts or windows; acknowledgement-share ratios are withheld, not zero, until matched
+  cohort and window evidence is available. Read the separately qualified counts and seven-day bands.
 - A stack missing from a metric or top-N ranking is **unknown, not zero**. Configuration and reported
   telemetry do not establish human use.
 """

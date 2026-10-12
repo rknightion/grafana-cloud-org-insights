@@ -162,8 +162,9 @@ SM_ACTIVE_STACKS = _any_in_window("grafanacloud_sm_billable_check_executions_per
 #
 # THREE measurement traps here, all found by cross-checking two metrics that disagreed.
 #
-# 1. **The two OnCall metrics cover DIFFERENT populations.** Any ratio MUST restrict
-# `alert_groups_total` to the stacks that report timing - the `and on(stack_id)` in ENGAGED_DENOM.
+# 1. **The two OnCall metrics cover DIFFERENT populations AND windows.** Restricting group
+# gauges to timing-reporting stacks does not establish matched group cohorts or producer windows.
+# D-DOC23 withholds acknowledgement-share ratios; present the two qualified counts separately.
 #
 # 2. **A missing histogram observation is a missing ACKNOWLEDGEMENT.** Say "no acknowledgement was
 # recorded", never "nobody looked" - the metric cannot prove intent, only what was logged.
@@ -177,12 +178,18 @@ RES = "grafanacloud_oncall_instance_alert_groups_resolution_time_seconds"
 GROUPS = "grafanacloud_oncall_instance_alert_groups_total"
 TOP_BUCKET = "3600.0"
 
-# Alert groups belonging ONLY to stacks that report response timing - the honest denominator for any
-# engagement ratio. Without `and on(stack_id)` the numerator and denominator cover different stacks.
+# A timing-stack gauge count is useful context, not a matched acknowledgement denominator.
 ENGAGED = f"sum({ACK}_count)"
-ENGAGED_DENOM = (f"sum({GROUPS} and on(stack_id) "
+TIMING_GROUPS = (f"sum({GROUPS} and on(stack_id) "
                  f"(sum by(stack_id)({ACK}_count) > 0))")
-ENGAGEMENT_RATE = f"{ENGAGED} / {ENGAGED_DENOM}"
+ONCALL_SHARE_WITHHELD = (
+    "**Acknowledgement share withheld - not zero.** Response observations cover the producer's "
+    "last seven days; the alert-group gauge has an unspecified horizon. Matching stacks does not "
+    "establish matched group cohorts or windows. No estate, per-team or trend acknowledgement-share "
+    "ratio is supported without that evidence. Read the separately qualified gauge counts and "
+    "seven-day recorded response observations instead. Missing timing data is unknown, not proof "
+    "of no human attention."
+)
 
 MTTA_MEDIAN = f"histogram_quantile(0.5, sum by(le)({ACK}_bucket))"
 MTTR_MEDIAN = f"histogram_quantile(0.5, sum by(le)({RES}_bucket))"
@@ -192,16 +199,10 @@ ACK_WITHIN_HOUR = f'sum({ACK}_bucket{{le="{TOP_BUCKET}"}})'
 ACK_TAIL = f"{ACK_TOTAL} - {ACK_WITHIN_HOUR}"
 ACK_TAIL_SHARE = f"1 - ({ACK_WITHIN_HOUR} / {ACK_TOTAL})"
 
-# Per-team floors are the same signal-to-noise discipline as the delete-protection threshold: a team with
-# 2 alert groups scores 0% or 100% and neither means anything.
-TEAM_MIN_GROUPS = 50
-
-# Restrict the per-team denominator to response-timing stacks too: dividing a team's acknowledgement
-# count by its total groups otherwise mixes populations and can understate the acknowledged share.
+# Attribution shares stay within a single gauge or response histogram population. They do not
+# compare acknowledgements with the group gauge, and cannot diagnose engagement.
 TIMING_STACKS = f"(sum by(stack_id)({ACK}_count) > 0)"
 GROUPS_ON_TIMING_STACKS = f"({GROUPS} and on(stack_id) {TIMING_STACKS})"
-TEAM_ENGAGEMENT = (f"topk(12, (sum by(team)({ACK}_count) / sum by(team){GROUPS_ON_TIMING_STACKS}) "
-                   f"and (sum by(team){GROUPS_ON_TIMING_STACKS} >= {TEAM_MIN_GROUPS}))")
 TEAM_TAIL_SHARE = (
     f'topk(12, (1 - (sum by(team)({ACK}_bucket{{le="{TOP_BUCKET}"}}) '
     f'/ sum by(team)({ACK}_bucket{{le="+Inf"}}))) '
@@ -494,7 +495,7 @@ def d_estate(ds: str):
              ("gcinsight_estate_alert_rules", "alert rules")],
             description="Content growth. Both lines only ever rising is the normal and slightly worrying "
                         "case: growth is visible while deletion is not. Cross-read with the Operations "
-                        "dashboard's live engagement ratio before treating rule growth as maturity."),
+                        "dashboard's separately qualified OnCall counts before treating rule growth as maturity."),
         "t_users": build.timeseries_panel(
             "Users - adoption vs billed",
             [("gcinsight_estate_active_users", "active (adoption)"),
@@ -3229,42 +3230,26 @@ def operations_health_panels() -> dict:
 def d_operations(ds: str):
     """Pillar G - are they actually operating? Reads `grafanacloud-usage` only: no collector, no series.
 
-    Every other dashboard here counts what EXISTS: stacks, dashboards, rules, users, series. This one
-    counts what somebody DID - acknowledged an alert, resolved it, or never touched it. It is the only
-    behavioural signal the platform has, and the only one that measures outcomes rather than inventory.
-
-    Scope is stated on the page: engagement figures cover stacks reporting response timing, not the
-    broader OnCall population.
+    Group gauges and rolling seven-day recorded response observations are separately qualified.
+    Acknowledgement shares are withheld: stack matching cannot establish matched windows or cohorts.
+    Missing observations do not establish human attention or its absence.
     """
     el = {
         # --- Engagement: the headline -----------------------------------------------------------------
-        "n_engagement": build.stat_panel(
-            "Unqualified acknowledgement diagnostic ratio", ENGAGEMENT_RATE, unit="percentunit", decimals=1,
-            ds_uid=build.USAGE_UID,
-            description="Acknowledgement observations over the last seven days divided by an alert-group "
-                        "gauge with unspecified horizon. Stack matching leaves unmatched producer windows "
-                        "and group cohorts. This unqualified diagnostic ratio is not a verified "
-                        "acknowledgement share or evidence of unanswered alerts."),
+        "n_engagement": build.text_panel(
+            "Acknowledgement share withheld", ONCALL_SHARE_WITHHELD),
         "n_engaged": build.stat_panel(
             "Acknowledgement observations (7d)", ENGAGED, ds_uid=build.USAGE_UID,
             description="Response-time observations in the producer's last seven days, not the dashboard "
                         "range. Missing data is unknown; this is not the resolution histogram population."),
         "n_engaged_denom": build.stat_panel(
-            "Alert-group gauge (timing stacks)", ENGAGED_DENOM, ds_uid=build.USAGE_UID,
-            description="Alert-group gauge on timing-reporting stacks. Its horizon is unspecified; "
+            "Alert-group gauge (timing stacks)", TIMING_GROUPS, ds_uid=build.USAGE_UID,
+            description="Alert-group gauge on timing-reporting stacks, with unspecified horizon; "
                         "matching stacks does not match the seven-day histogram group cohort."),
-        "b_teamengage": build.barchart_panel(
-            "Team acknowledgement diagnostic ratio (unqualified)", TEAM_ENGAGEMENT,
-            legend="{{team}}", ds_uid=build.USAGE_UID, unit="percentunit",
-            description="Seven-day response observations divided by the group gauge, per team on "
-                        "timing stacks. Unmatched producer windows and cohorts prevent a verified "
-                        f"acknowledgement share. Teams under {TEAM_MIN_GROUPS} gauge groups are excluded."),
-        "t_engagement": build.timeseries_panel(
-            "Acknowledgement diagnostic ratio over time (unqualified)", [(ENGAGEMENT_RATE, "acknowledged share")],
-            unit="percentunit", ds_uid=build.USAGE_UID,
-            description="Trend of seven-day response observations divided by an unspecified-horizon "
-                        "group gauge. Unmatched windows and cohorts make this an unqualified diagnostic "
-                        "ratio, not a lifetime average, arrival rate or verified acknowledgement share."),
+        "b_teamengage": build.text_panel(
+            "Team acknowledgement shares withheld", ONCALL_SHARE_WITHHELD),
+        "t_engagement": build.text_panel(
+            "Acknowledgement-share trend withheld", ONCALL_SHARE_WITHHELD),
 
         # --- Response time, for groups with recorded acknowledgement ----------------------------------
         "n_mtta": build.stat_panel(
@@ -3310,8 +3295,10 @@ def d_operations(ds: str):
              (f'sum({ACK}_bucket{{le="+Inf"}}) - sum({ACK}_bucket{{le="3600.0"}})',
               "over 1 hour")],
             ds_uid=build.USAGE_UID,
-            description="Last seven days: disjoint bands derived by subtracting adjacent cumulative histogram buckets, "
-                        "so every acknowledgement appears in exactly one bar. Boundaries are fixed "
+            description="Counts of recorded response observations in the producer's last seven days, "
+                        "not the dashboard range or a share of the alert-group gauge. Disjoint bands "
+                        "subtract adjacent cumulative histogram buckets, so every recorded observation "
+                        "appears in exactly one bar. Boundaries are fixed "
                         "by Grafana Cloud at 1m/5m/10m/1h, so this is the full resolution available - "
                         "there is no finer breakdown to build, and it is also why no p90 or p99 is shown "
                         "anywhere on this dashboard: both saturate at the top bucket and would report "
@@ -3468,7 +3455,7 @@ def d_operations(ds: str):
         ("Pillar G: reported OnCall group gauges and rolling seven-day response observations. "
          "Live from grafanacloud-usage, no collector and no series. Group-gauge horizon is "
          "unspecified; matching timing stacks does not match group cohorts or producer windows. "
-         "Acknowledgement diagnostic ratios are unqualified, not verified response shares. "
+         "Acknowledgement shares are withheld, not zero, without matched cohort and window evidence. "
          "Backend health adds raw per-stack "
          "diagnostic observations with explicit unverified units, not health or human activity claims."), el, tabs
 
@@ -4231,10 +4218,8 @@ def d_coverage(ds: str):
                         "become failed coverage. Active direct routing stays separate because it must "
                         "not double-weight alerting. Rows are bounded per stack for legibility."),
 
-        # What observation has done. Every ratio over the alert-group counter is restricted to stacks
-        # that report the response-time histogram; otherwise its numerator and denominator are different
-        # populations. A missing timing observation means no acknowledgement was recorded, not that no
-        # human looked.
+        # Group gauges and recorded responses have separately qualified populations and windows.
+        # Matching stacks alone cannot support an acknowledgement-share ratio.
         "n_value_groups": build.stat_panel(
             "Alert-group gauge on timing-reporting stacks", f"sum{GROUPS_ON_TIMING_STACKS}",
             ds_uid=build.USAGE_UID,
@@ -4244,12 +4229,8 @@ def d_coverage(ds: str):
             "Acknowledgement observations (7d)", ENGAGED, ds_uid=build.USAGE_UID,
             description="Response-time observations in OnCall's last seven days. Missing series is "
                         "unknown, not proof of no acknowledgement or no human attention."),
-        "n_value_engagement": build.stat_panel(
-            "Unqualified acknowledgement diagnostic ratio", ENGAGEMENT_RATE,
-            unit="percentunit", decimals=1, ds_uid=build.USAGE_UID,
-            description="Seven-day response observations divided by an unspecified-horizon group gauge "
-                        "on timing stacks. Unmatched windows and cohorts make this an unqualified "
-                        "diagnostic ratio, not a verified acknowledgement share."),
+        "n_value_engagement": build.text_panel(
+            "Acknowledgement share withheld", ONCALL_SHARE_WITHHELD),
         "n_value_mtta": build.stat_panel(
             "Median recorded acknowledgement time (7d)", MTTA_MEDIAN, unit="s", decimals=1,
             ds_uid=build.USAGE_UID,

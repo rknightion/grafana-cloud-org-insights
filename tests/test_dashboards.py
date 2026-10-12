@@ -255,8 +255,11 @@ class DashboardNameAndGenericTextTest(unittest.TestCase):
             for key in keys:
                 with self.subTest(dashboard=name, panel=key):
                     panel = artifacts[name]["elements"][key]["spec"]
-                    self.assertIn("diagnostic ratio", panel["title"].lower())
-                    self.assertIn("unmatched", panel["description"].lower())
+                    self.assertIn("withheld", panel["title"].lower())
+                    self.assertEqual(panel["data"]["spec"]["queries"], [])
+                    content = panel["vizConfig"]["spec"]["options"]["content"].lower()
+                    self.assertIn("group cohorts or windows", content)
+                    self.assertIn("not zero", content)
         ops = artifacts["operations"]["elements"]
         for key in ("n_groups", "b_teamvol", "b_integration", "b_service", "t_state"):
             panel = ops[key]["spec"]
@@ -1118,7 +1121,8 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
         "value": ("n_oncall", "b_oncall", "n_activated", "b_activation", "n_nativehist",
                   "n_exemplars", "t_capability", "n_k6_active", "b_k6_active",
                   "n_sm_active", "b_sm_active"),
-        "operations": ("n_engagement", "n_engaged", "n_engaged_denom", "b_teamengage", "t_engagement",
+        # Withheld shares are query-free text, validated by OnCallEngagementContractTest.
+        "operations": ("n_engaged", "n_engaged_denom",
                        "n_mtta", "n_mttr", "n_mtta_mean", "n_tail", "n_tail_share", "b_ackdist",
                        "t_response", "n_unowned_all", "n_unowned_acked", "n_unowned_svc",
                        "b_teamtail", "b_teamvol", "b_service_owner", "n_groups", "n_notified",
@@ -1412,28 +1416,29 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
             self.assertIn(" - ", expr)
         self.assertIn("exactly one", panel["description"])
 
-    def test_the_engagement_ratio_restricts_its_denominator_to_timing_stacks(self):
-        """The 15x error this nearly shipped: the numerator exists on 8 stacks, `alert_groups_total` on
-        58. Dividing one by the other silently understates engagement by roughly an order of magnitude."""
-        self.assertIn("and on(stack_id)", self.dash.ENGAGED_DENOM,
-                      "the engagement denominator is not restricted to stacks that report timing")
-        for expr in self._exprs("operations", "n_engagement"):
-            self.assertIn("and on(stack_id)", expr)
+    def test_separate_group_count_identifies_timing_stacks_without_forming_a_share(self):
+        """D-DOC23: stack matching is useful context, not matched cohort/window evidence."""
+        self.assertEqual(self._exprs("operations", "n_engagement"), [])
+        exprs = self._exprs("operations", "n_engaged_denom")
+        self.assertEqual(exprs, [self.dash.TIMING_GROUPS])
+        self.assertIn("and on(stack_id)", exprs[0])
+        self.assertNotIn(" / ", exprs[0])
 
-    def test_per_team_panels_carry_a_minimum_volume_floor(self):
-        """A team with 2 alert groups scores 0% or 100% and neither means anything  -  the same
-        signal-to-noise discipline as the delete-protection series floor."""
-        for key in ("b_teamengage", "b_teamtail"):
-            for expr in self._exprs("operations", key):
-                self.assertRegex(expr, r">=\s*\d+",
-                                 f"operations.{key} has no minimum-volume floor")
+    def test_per_team_tail_share_carries_a_minimum_volume_floor(self):
+        """The retained tail share has one recorded-response cohort, with a volume floor."""
+        exprs = self._exprs("operations", "b_teamtail")
+        self.assertTrue(exprs)
+        for expr in exprs:
+            self.assertRegex(expr, r">=\s*\d+",
+                             "operations.b_teamtail has no minimum-volume floor")
+        self.assertEqual(self._exprs("operations", "b_teamengage"), [])
 
-    def test_per_team_share_charts_render_ratios_as_percentages(self):
-        """Both team charts return 0-1 ratios. `short` renders 0.76 instead of 76%."""
+    def test_per_team_tail_share_chart_renders_ratios_as_percentages(self):
+        """The retained tail share returns a 0-1 ratio. `short` renders 0.76 instead of 76%."""
         panels = self._panels("operations")
-        for key in ("b_teamengage", "b_teamtail"):
-            unit = panels[key]["spec"]["vizConfig"]["spec"]["fieldConfig"]["defaults"]["unit"]
-            self.assertEqual(unit, "percentunit", f"operations.{key} renders a ratio as {unit!r}")
+        unit = panels["b_teamtail"]["spec"]["vizConfig"]["spec"]["fieldConfig"]["defaults"]["unit"]
+        self.assertEqual(unit, "percentunit", f"operations.b_teamtail renders a ratio as {unit!r}")
+        self.assertEqual(panels["b_teamengage"]["spec"]["vizConfig"]["group"], "text")
 
     def test_rate_breakdowns_render_as_rates_and_say_so(self):
         """Peak `*_per_second`/`:rate5m` values must not look like event counts."""
@@ -2365,7 +2370,7 @@ class EveryPanelExplainsItselfTest(unittest.TestCase):
             "maturity.n_ranked": ("denominator",),        # why it is not the estate total
             "estate.n_users": ("billing", "adoption"),    # billed vs active users
             "cost.n_ratio": ("billed",),                  # which user count the ratio uses
-            "operations.n_engagement": ("acknowledge",),  # what engagement counts
+            "operations.n_engaged": ("response", "seven days"),  # separately qualified count
         }
         found = dict(self._panels())
         for label, terms in wanted.items():
@@ -2791,8 +2796,10 @@ class CoverageOutcomeValueTest(unittest.TestCase):
         self.assertIn('le="+Inf"', tail)
         self.assertIn(f'le="{self.dash.TOP_BUCKET}"', tail)
 
-    def test_oncall_ratios_use_only_the_timing_reporting_population(self):
-        for key in ("n_value_engagement", "n_value_unowned_team", "n_value_unowned_service"):
+    def test_oncall_attribution_shares_use_only_the_timing_reporting_population(self):
+        # Attribution is within the gauge population; acknowledgement share is withheld.
+        self.assertEqual(self._exprs("n_value_engagement"), [])
+        for key in ("n_value_unowned_team", "n_value_unowned_service"):
             expr = self._exprs(key)[0]
             self.assertIn("on(stack_id)", expr, f"{key} mixes OnCall populations")
             self.assertIn(self.dash.ACK, expr, f"{key} does not identify timing-reporting stacks")
