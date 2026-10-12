@@ -1,9 +1,11 @@
 ---
 id: GCI-0112
 title: Decide the OnCall matched-window engagement contract
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop23'
 created_date: '2026-10-06 10:47'
+updated_date: '2026-10-12 11:40'
 labels:
   - dashboards
   - owner-decision
@@ -34,3 +36,9 @@ N1: gauge group populations and seven-day histogram observations do not establis
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+D-DOC23 build: retain separately qualified OnCall group counts and 7d response bands, withhold unmatched acknowledgement ratios with reason. Implement rendered dashboard contract, gate just check, independent review and root-only land.
+<!-- SECTION:PLAN:END -->

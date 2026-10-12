@@ -1,9 +1,11 @@
 ---
 id: GCI-0117
 title: Correct stable-release OCI image version metadata
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop23'
 created_date: '2026-10-06 11:19'
+updated_date: '2026-10-12 11:40'
 labels:
   - release
   - owner-decision
@@ -31,3 +33,9 @@ The v0.7.0 readback established exact release manifest/tag/source SHA and source
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+D-OCI23: isolated shared publisher candidate, semantic stable version label preserving immutable source/revision/signing. Root security review, land and shared release, then caller-pin integration. Final two-platform readback only after project stable release.
+<!-- SECTION:PLAN:END -->
