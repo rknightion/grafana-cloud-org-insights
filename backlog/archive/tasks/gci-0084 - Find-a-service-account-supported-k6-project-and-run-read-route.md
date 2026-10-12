@@ -1,11 +1,11 @@
 ---
 id: GCI-0084
 title: Find a service-account-supported k6 project and run read route
-status: In Progress
+status: Parked
 assignee:
   - '@loop24-root'
 created_date: '2026-10-02 09:25'
-updated_date: '2026-10-12 22:20'
+updated_date: '2026-10-12 22:21'
 labels:
   - feature-usage
   - scope-decision
@@ -36,3 +36,9 @@ Approved settings pairs are not supported-SA project/run proof. Historical Admin
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Loop24 D-DEAD23 final witness: source-derived robk GET /api/plugins/k6-app/resources/cloud/cloud/v6/projects returned HTTP400/curl22, closed validation_failed signal at 2026-10-12T22:19:40Z. Service-account backend identity blocker persists; no count or supported reader project/run pair. No email workaround, user credential or scope change. Wont-do, archive prerequisite and GCI-0038 (k6 inventory). Attempts: 0 implementation; one final witness consumed. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/root/k6.json.
+<!-- SECTION:NOTES:END -->

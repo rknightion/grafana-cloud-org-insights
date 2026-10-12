@@ -4,7 +4,7 @@ title: Inventory k6 projects and run types without reading test scripts
 status: Parked
 assignee: []
 created_date: '2026-09-23 18:35'
-updated_date: '2026-09-23 19:52'
+updated_date: '2026-10-12 22:21'
 labels:
   - feature-usage
   - follow-on
@@ -40,4 +40,6 @@ Rank 5 - medium value, moderate access cost. VUh is already visible as a billing
 
 <!-- SECTION:NOTES:BEGIN -->
 Parked at Wave 1 boundary pending GCI-0041 reader scope decision and exact safe read-route verification. No new scope, policy or credential was granted during research.
+
+Loop24 D-DEAD23: follows GCI-0084 (service-account k6 project/run route). Final projects witness returned HTTP400 validation failure, no supported-SA count route. Wont-do under frozen owner ruling; archive without claiming AC. Attempts: 0 implementation this loop. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/root/k6.json.
 <!-- SECTION:NOTES:END -->

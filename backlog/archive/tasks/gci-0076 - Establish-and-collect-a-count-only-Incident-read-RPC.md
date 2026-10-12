@@ -1,11 +1,11 @@
 ---
 id: GCI-0076
 title: Establish and collect a count-only Incident read RPC
-status: In Progress
+status: Parked
 assignee:
   - '@loop24-root'
 created_date: '2026-10-02 09:25'
-updated_date: '2026-10-12 22:20'
+updated_date: '2026-10-12 22:21'
 labels:
   - feature-usage
   - scope-decision
@@ -36,3 +36,9 @@ Owner approves one exact-path POST in principle; exact safe method, read privile
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Loop24 D-DEAD23 final witness: robk POST read-confirmation StatusService.GetAffectedIncidentsBeforeStatusMutate at granted /api/plugins/grafana-irm-app/resources/api/v1/ path, body {}, returned HTTP404/curl22 at 2026-10-12T22:19:40Z. Historical source lacks v1: this is failure within the granted exact witness, not universal route absence. No readable complete all-incident count or reader-compatible action/scope established. No fallback, scope change, content previews or implementation. Wont-do under frozen owner ruling; archive. Attempts: 0 implementation this loop; one final witness consumed. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/root/incident.json.
+<!-- SECTION:NOTES:END -->
