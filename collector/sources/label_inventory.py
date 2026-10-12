@@ -10,7 +10,9 @@ Loki additionally reads the witnessed 24h service_name-selected /series GET. Str
 sizes can prove a positive L1 violation, never a whole-tenant pass or empty signal.
 Register distinct/stream counts from this read are paired selected lower bounds,
 not a ratio: L3 still lacks a whole-label population and cannot be evaluated. No
-index totals, ratio policy, OTLP config or overrides activate. Tempo reserves one
+index totals, ratio policy or overrides activate. Loki reserves one existing
+value-read slot for tenant limits: explicit OTLP index-label risks are positive
+lower bounds only, and undisclosed Drilldown prerequisites stay missing. Tempo reserves one
 existing value-read slot for C4 intrinsic name counts and the already-verified
 shape consumer. Counts are at_least even below the witnessed limit; unverified
 span-cardinality policy and override rules remain excluded from scoring.
@@ -37,7 +39,7 @@ import urllib.request
 
 from collector import label_rules, pii
 from collector.httpclient import DeadlineExceeded, ReadOnlyClient, Response
-from collector.sources import label_risk
+from collector.sources import label_risk, loki_config
 
 SIGNALS = label_risk.SIGNALS
 MAX_SECONDS = 900.0
@@ -466,6 +468,58 @@ def _loki_inputs(client, stack, cap, start, end, bounds, payload):
                        count_semantics="at_least")
 
 
+def _loki_config_inputs(client, stack, cap, bounds, payload):
+    """D-LOKI23: explicit first-match promotions only, never an effective-set census.
+
+    Regex rules are never executed: a preceding regex makes a target unknown.
+    Defaults are unknown even when the explicit list looks safe. Only the two
+    published discouraged names enter a numeric lower bound; no names/config
+    persist. The three-field grant cannot establish all four L9 prerequisites.
+    """
+    inputs = payload["inputs"]
+    inputs["otlp_churn_labels"] = _input("unavailable", "missing_input")
+    inputs["drilldown_missing"] = _input("unavailable", "missing_input")
+    try:
+        if client.remaining() <= 0:
+            raise TimeoutError("deadline")
+        base = stack.get("hlInstanceUrl")
+        parts = urllib.parse.urlsplit(base if isinstance(base, str) else "")
+        if (parts.scheme != "https" or not parts.hostname or parts.username or parts.password
+                or parts.path not in ("", "/") or parts.query or parts.fragment or not stack.get("hlInstanceId")):
+            raise ValueError("missing_endpoint")
+        response = client.get(base.rstrip("/") + "/" + loki_config.LIMITS_PATH,
+                              basic=(str(stack["hlInstanceId"]), cap))
+        if client.remaining() <= 0:
+            raise TimeoutError("deadline")
+        if response.status != 200:
+            raise ValueError("http_error")
+        if len(response.body) > bounds.response_bytes:
+            raise ValueError("response_byte_cap")
+        fields = loki_config.labelling_limits(response)
+    except Exception as exc:
+        reason = "deadline" if client.remaining() <= 0 else _reason(exc)
+        # Configuration overflow is missing coverage, not a values-overflow finding.
+        reason = "missing_input" if reason == "overflow" else reason
+        for key in ("otlp_churn_labels", "drilldown_missing"):
+            inputs[key] = _input("partial" if reason == "deadline" else "unavailable", reason)
+        return
+    resource = fields.get("otlp_config", {}).get("resource_attributes", {})
+    configs = resource.get("attributes_config", [])
+    risks = 0
+    for name in ("k8s.pod.name", "service.instance.id"):
+        for config in configs:
+            if "regex" in config:
+                break  # Cannot prove whether a Go regex matches; no guessed precedence.
+            if name in config.get("attributes", []):
+                risks += config["action"] == "index_label"
+                break  # Published first-match semantics, including explicit demotions.
+    if risks:
+        inputs["otlp_churn_labels"] = _input("partial", "truncated",
+                                              samples=[_sample(risks, "at_least")])
+    # volume_enabled/allow_structured_metadata are deliberately not parsed. L9 is
+    # evaluated as missing_input, not parked, even when both discovery fields exist.
+
+
 def _tempo_inputs(client, stack, cap, start, end, bounds, transport, payload):
     """C4 intrinsic values, one reserved read; no raw span name or new shape policy.
 
@@ -538,6 +592,7 @@ def _signal(client, stack, cap, signal, start, end, bounds, transport, static_na
     if not names:
         if signal == "logs":
             _loki_inputs(client, stack, cap, start, end, bounds, payload)
+            _loki_config_inputs(client, stack, cap, bounds, payload)
         elif signal == "traces":
             _tempo_inputs(client, stack, cap, start, end, bounds, transport, payload)
         return payload
@@ -560,8 +615,8 @@ def _signal(client, stack, cap, signal, start, end, bounds, transport, static_na
         row = _row(scope, name, count)
         payload["register"].append(row)
         semantics = "exact"
-        # C4 consumes one of the existing trace value-read slots, not extra fanout.
-        value_keys = bounds.keys - int(signal == "traces")
+        # C4 and D-LOKI23 each reserve an existing value-read slot, not extra fanout.
+        value_keys = bounds.keys - int(signal in {"logs", "traces"})
         if signal != "metrics" and index < value_keys and row["name_class"] != "oversize":
             try:
                 values, values_partial = _read(client, stack, cap, signal, start, end, bounds,
@@ -612,6 +667,7 @@ def _signal(client, stack, cap, signal, start, end, bounds, transport, static_na
         _metric_inputs(client, stack, cap, start, end, bounds, transport, kept, payload, static_names)
     elif signal == "logs":
         _loki_inputs(client, stack, cap, start, end, bounds, payload)
+        _loki_config_inputs(client, stack, cap, bounds, payload)
     elif signal == "traces":
         _tempo_inputs(client, stack, cap, start, end, bounds, transport, payload)
     # Coalesce suppressed names by class/scope; their measurements remain null/empty.

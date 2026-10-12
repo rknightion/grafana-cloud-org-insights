@@ -184,7 +184,13 @@ The approved source is doc-0008 Part 1 (Labelling best-practice research and rul
   `/loki/api/v1/config/limits/applied` is NOT approved for the collector: reader 401
   invalid_scope on all five and official docs require logs WRITE, outside D-LBL11.
   Choose legacy tenant limits (reader 200 all five); absent fields remain unknown.
-  Shipping YAML parsing supports retention only, not OTLP subtrees or new YAML features.
+  D-LOKI23 extends bounded tenant-limits YAML parsing beyond retention only for
+  `otlp_config` (the witnessed `resource_attributes` block), `discover_service_name` and
+  `discover_log_levels`. Retention and labelling projections are independent: unsupported
+  labelling syntax cannot invalidate readable retention, and unparsed nonempty retention
+  never becomes a measured empty list. New configuration names remain transient and reduce
+  only to numeric private label-inventory evidence. Missing defaults or Drilldown prerequisites
+  stay unknown; no other subtree, YAML feature, route or scope is approved.
   Tempo overrides remain parked: robk `/tempo/api/overrides?scope=merged` and
   `/tempo/status/overrides/{staff_tenant}` returned 404; infer no field absence and exclude
   override-dependent rules. No overrides implementation is granted until a readable exact

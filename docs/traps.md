@@ -841,12 +841,62 @@ Tenant YAML exposes `otlp_config` as a mapping (one `resource_attributes` key),
 `volume_enabled` as booleans (true in this witness). Applied exposed an OTLP mapping
 with one key on robknight and empty mappings on the other four. Missing
 `allow_structured_metadata` and `max_label_names_per_series` are **unknown**, never
-inferred defaults. The shipping YAML parser supports retention only: local witness
-PyYAML analysis is not product OTLP-subtree support or permission to add YAML features.
+inferred defaults. The original witness's local PyYAML analysis was not product
+OTLP-subtree support or permission to add YAML features. D-LOKI23 below grants the
+bounded three-field extension separately.
 Reference: https://grafana.com/docs/grafana-cloud/send-data/logs/config-self-serve-api/.
 Evidence: /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C3/root-status-scope.json,
 /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C3/tenant-reader-status.json
 and /Users/rob/repos/grafana-cloud-org-insights/codex/loop14-evidence/C3-docs.log.
+
+### D-LOKI23: bounded OTLP promotions, unknown Drilldown prerequisites
+
+GCI-0119.11 (Loki OTLP index labels and Drilldown prerequisites) uses the root's
+2026-10-12 **robk** exact-200 GET `/config/tenant/v1/limits` witness. The reduced
+YAML contains `otlp_config.resource_attributes.attributes_config`, with an
+`action: index_label` mapping and an indentless list of 21 attribute names,
+including `k8s.pod.name` and `service.instance.id`; `discover_service_name` is an
+indentless 13-name list and `discover_log_levels` is boolean true. Evidence:
+/Users/rob/repos/grafana-cloud-org-insights/codex/loop23-evidence/telemetry/loki-approved-fields.yaml
+and /Users/rob/repos/grafana-cloud-org-insights/codex/loop23-evidence/telemetry/loki-witness.json.
+The names are configuration keys, not observed log values or traffic evidence.
+
+The stdlib parser now accepts only bounded block mappings/sequences, empty `{}`
+and `[]`, quoted/bare scalars and exact boolean literals for these three fields,
+beside existing retention parsing. It rejects duplicate keys, anchors, aliases,
+tags, multiline/flow constructs, unsupported OTLP subtrees and malformed shapes.
+The ceiling is 2 MiB, 4096 YAML lines, depth 6, 256 items per collection and 4096
+UTF-8 bytes per configuration name/regex; tighter caller response limits still
+apply. A limits read reserves an existing Loki value-read slot. Only the exact
+legacy route with live Loki coordinates and exact HTTP 200 is admitted; no applied
+route, scope/role/policy/credential change or new default/version assumption.
+
+Catalogue version 5 verifies the existing L7/L9 policies from the current official
+OTLP and Drilldown docs, without extending the frozen numeric input schema. L7
+reduces only explicit first-match `index_label` promotion of the two discouraged
+OTLP names to a numeric positive lower bound. A preceding regex makes that target
+unknown; regexes are never executed, subsequent demotions do not override a known
+first match, and missing/default-only/safe mappings never manufacture a zero or
+an exhaustive effective index-label set. Config names, discovery names, regexes
+and raw bodies remain transient, absent from retention output, private input
+registers, findings, metric labels, diagnostics and exporter output.
+
+L9 needs all four prerequisites to pass: nonempty `discover_service_name`, true
+`discover_log_levels`, true `volume_enabled` and true `allow_structured_metadata`.
+The last two are deliberately outside this three-field parser grant. Therefore
+the source emits unavailable `drilldown_missing`, and evaluation reports
+`not_evaluated/missing_input`, not `route_parked`, zero or pass. It does not certify
+Drilldown readiness. Both rules are now applicable to coverage; unknown inputs
+can withhold scores through the existing floor. Other parked policies stay parked.
+
+Sources: https://grafana.com/docs/loki/latest/send-data/otel/ and
+https://grafana.com/docs/grafana/latest/explore/simplified-exploration/logs/troubleshooting/.
+Retained source passages:
+/Users/rob/repos/grafana-cloud-org-insights/codex/loop23-evidence/telemetry/otlp-docs.md
+and /Users/rob/repos/grafana-cloud-org-insights/codex/loop23-evidence/telemetry/drilldown-docs.md.
+The rulebook's L7/L9 meaning is unchanged; qualitative published guidance retains
+its existing policy threshold provenance. No ratios, overrides, measured totals,
+customer enablement or live collector/deployment proof follow from this extension.
 
 ### Tempo: names readable, overrides parked
 

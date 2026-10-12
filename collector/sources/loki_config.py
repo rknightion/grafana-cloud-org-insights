@@ -32,6 +32,11 @@ INVALID_RESPONSE = "invalid_response"
 
 _YAML_KEY = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _YAML_INTEGER = re.compile(r"^-?[0-9]+$")
+# Same source response ceiling as label_inventory; no dependency or general YAML loader.
+MAX_LIMITS_BYTES = 2 * 1024 * 1024
+MAX_CONFIG_LINES = 4096
+MAX_CONFIG_ITEMS = 256
+LABELLING_FIELDS = frozenset({"otlp_config", "discover_service_name", "discover_log_levels"})
 
 
 def _balanced_yaml_line(line: str) -> bool:
@@ -77,13 +82,18 @@ def _yaml_scalar(raw: str) -> Any:
     return value
 
 
-def _yaml_limits(body: bytes) -> dict[str, Any]:
-    """Parse only Loki's flat retention_stream YAML without accepting arbitrary YAML features."""
+def _yaml_limits(body: bytes, *, labelling: bool = False) -> dict[str, Any]:
+    """Validate the envelope, then parse only the caller's independent field domain."""
+    if len(body) > MAX_LIMITS_BYTES:
+        raise ValueError("limits byte cap")
     text = body.decode("utf-8")
     if text.lstrip().startswith(("{", "[")):
         raise ValueError("malformed JSON is not YAML")
     lines = text.splitlines()
-    top_level = [line for line in lines if line and not line[0].isspace() and not line.startswith("#")]
+    if len(lines) > MAX_CONFIG_LINES:
+        raise ValueError("limits line cap")
+    top_level = [line for line in lines if line and not line[0].isspace()
+                 and not line.startswith(("#", "- "))]
     if (
         not top_level
         or "\t" in text
@@ -92,6 +102,8 @@ def _yaml_limits(body: bytes) -> dict[str, Any]:
         or any(not _balanced_yaml_line(line) for line in lines)
     ):
         raise ValueError("response is not a YAML mapping")
+    if labelling:
+        return _labelling_yaml(lines)
 
     start: int | None = None
     inline = ""
@@ -113,6 +125,10 @@ def _yaml_limits(body: bytes) -> dict[str, Any]:
         if not line.strip() or line.lstrip().startswith("#"):
             continue
         if not line[0].isspace():
+            # Indentless lists are approved only for the separate labelling domain.
+            # Never turn an unparsed nonempty retention list into measured absence.
+            if line.startswith("- "):
+                raise ValueError("unsupported indentless retention_stream")
             break
         stripped = line.strip()
         if stripped.startswith("- "):
@@ -130,6 +146,169 @@ def _yaml_limits(body: bytes) -> dict[str, Any]:
     if current is not None:
         items.append(current)
     return {"retention_stream": items}
+
+
+def _config_scalar(raw: str) -> Any:
+    """A closed scalar grammar, not YAML constructors, aliases, tags or flow collections."""
+    value = raw.strip()
+    if value in {"{}", "[]"}:
+        return {} if value == "{}" else []
+    if value in {"true", "false"}:
+        return value == "true"
+    if (not value or len(value.encode("utf-8")) > 4096
+            or (value[0] not in "'\"" and
+                (value[0] in "&*!>|%[{" or any(c in value for c in ":#{}[]")))):
+        raise ValueError("unsupported config scalar")
+    if value.startswith('"'):
+        parsed = json.loads(value)
+        if not isinstance(parsed, str):
+            raise ValueError("invalid quoted config scalar")
+        return parsed
+    if value.startswith("'"):
+        if not value.endswith("'") or "'" in value[1:-1].replace("''", ""):
+            raise ValueError("invalid quoted config scalar")
+        return value[1:-1].replace("''", "'")
+    return _yaml_scalar(value)
+
+
+def _config_block(tokens: list[tuple[int, str]], depth: int = 0) -> Any:
+    """Only block maps/lists, including Go YAML's indentless sequences.
+
+    Recursion, lines and collection sizes are bounded. Unknown OTLP structures
+    are rejected later, never executed or interpreted as effective defaults.
+    """
+    if not tokens or depth > 6:
+        raise ValueError("invalid config block")
+    indent = tokens[0][0]
+    if tokens[0][1].startswith("- "):
+        chunks: list[list[tuple[int, str]]] = []
+        for level, text in tokens:
+            if level < indent:
+                raise ValueError("invalid list indentation")
+            if level == indent:
+                if not text.startswith("- "):
+                    raise ValueError("invalid list item")
+                chunks.append([(level + 2, text[2:].strip())])
+            else:
+                if not chunks:
+                    raise ValueError("invalid list continuation")
+                chunks[-1].append((level, text))
+        if len(chunks) > MAX_CONFIG_ITEMS:
+            raise ValueError("config item cap")
+        result = []
+        for chunk in chunks:
+            if ":" in chunk[0][1] and not chunk[0][1].startswith(("'", '"')):
+                result.append(_config_block(chunk, depth + 1))
+            elif len(chunk) == 1:
+                result.append(_config_scalar(chunk[0][1]))
+            else:
+                raise ValueError("invalid scalar continuation")
+        return result
+    result = {}
+    index = 0
+    while index < len(tokens):
+        level, text = tokens[index]
+        if level != indent or ":" not in text:
+            raise ValueError("invalid mapping indentation")
+        key, _, raw = text.partition(":")
+        if not _YAML_KEY.fullmatch(key) or key in result:
+            raise ValueError("invalid or duplicate config key")
+        end = index + 1
+        while end < len(tokens) and (tokens[end][0] > indent or
+              (tokens[end][0] == indent and tokens[end][1].startswith("- "))):
+            end += 1
+        if raw.strip():
+            if end != index + 1:
+                raise ValueError("invalid scalar continuation")
+            value = _config_scalar(raw)
+        else:
+            value = _config_block(tokens[index + 1:end], depth + 1)
+        result[key] = value
+        if len(result) > MAX_CONFIG_ITEMS:
+            raise ValueError("config item cap")
+        index = end
+    return result
+
+
+def _labelling_yaml(lines: list[str]) -> dict[str, Any]:
+    selected = {}
+    seen = set()
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        if not line or line[0].isspace() or line.startswith(("#", "- ")):
+            index += 1
+            continue
+        key = line.partition(":")[0]
+        if key in seen:
+            raise ValueError("duplicate limits key")
+        seen.add(key)
+        end = index + 1
+        while end < len(lines) and (not lines[end] or lines[end][0].isspace()
+              or lines[end].startswith(("#", "- "))):
+            end += 1
+        if key in LABELLING_FIELDS:
+            tokens = [(len(s) - len(s.lstrip(" ")), s.strip()) for s in lines[index:end]
+                      if s.strip() and not s.lstrip().startswith("#")]
+            selected.update(_config_block(tokens))
+        index = end
+    return selected
+
+
+def labelling_limits(response: Any) -> dict[str, Any]:
+    """Transient three-field projection. Callers must reduce names before persistence.
+
+    Missing fields stay absent. No volume/structured-metadata/default inference.
+    JSON and the witnessed block YAML undergo the same closed shape checks.
+    """
+    if len(response.body) > MAX_LIMITS_BYTES:
+        raise ValueError("limits byte cap")
+    def unique_mapping(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate limits key")
+            result[key] = value
+        return result
+    try:
+        body = json.loads(response.body, object_pairs_hook=unique_mapping)
+    except json.JSONDecodeError:
+        body = _yaml_limits(response.body, labelling=True)
+    if not isinstance(body, dict):
+        raise ValueError("limits is not a mapping")
+    selected = {key: body[key] for key in LABELLING_FIELDS if key in body}
+    def names(value):
+        if (not isinstance(value, list) or len(value) > MAX_CONFIG_ITEMS or
+                any(not isinstance(v, str) or not v or len(v.encode("utf-8")) > 4096 for v in value)):
+            raise ValueError("invalid config names")
+    if "discover_service_name" in selected:
+        names(selected["discover_service_name"])
+    if "discover_log_levels" in selected and type(selected["discover_log_levels"]) is not bool:
+        raise ValueError("invalid discovery flag")
+    if "otlp_config" in selected:
+        otlp = selected["otlp_config"]
+        if not isinstance(otlp, dict) or set(otlp) - {"resource_attributes"}:
+            raise ValueError("unsupported OTLP structure")
+        resource = otlp.get("resource_attributes", {})
+        if not isinstance(resource, dict) or set(resource) - {"ignore_defaults", "attributes_config"}:
+            raise ValueError("unsupported resource structure")
+        if "ignore_defaults" in resource and type(resource["ignore_defaults"]) is not bool:
+            raise ValueError("invalid defaults flag")
+        configs = resource.get("attributes_config", [])
+        if not isinstance(configs, list) or len(configs) > MAX_CONFIG_ITEMS:
+            raise ValueError("invalid attribute configs")
+        for config in configs:
+            if (not isinstance(config, dict) or set(config) - {"action", "attributes", "regex"}
+                    or not isinstance(config.get("action"), str)
+                    or config["action"] not in {"index_label", "structured_metadata", "drop"}
+                    or not ({"attributes", "regex"} & set(config))):
+                raise ValueError("invalid attribute config")
+            if "attributes" in config:
+                names(config["attributes"])
+            if "regex" in config and (not isinstance(config["regex"], str) or not config["regex"]
+                    or len(config["regex"].encode("utf-8")) > 4096):
+                raise ValueError("invalid attribute regex")
+    return selected
 
 
 def _limits_body(response: Any) -> Mapping[str, Any]:

@@ -47,6 +47,8 @@ class SourceContracts(unittest.TestCase):
             body = C4["values"]
         elif urllib.parse.urlsplit(req.full_url).path == "/loki/api/v1/series":
             body = C2["series"]
+        elif urllib.parse.urlsplit(req.full_url).path == "/config/tenant/v1/limits":
+            body = {"retention_period": "744h"}  # No approved labelling fields disclosed.
         elif signal == "metrics" and not names:
             query = urllib.parse.parse_qs(urllib.parse.urlsplit(req.full_url).query)
             name = query["label_names[]"][0]
@@ -74,11 +76,12 @@ class SourceContracts(unittest.TestCase):
         self.assertEqual(samples[1]["label_kind"], "static")
         self.assertEqual(metrics["inputs"]["shape_count"]["samples"][0]["value"], 0)
         self.assertEqual(metrics["inputs"]["metric_series"]["state"], "unavailable", "__name__ was not observed")
-        # E2/C4 ship their witnessed consumers; policy and overrides stay excluded.
+        # E2/C4 and D-LOKI23 ship witnessed consumers; unknown prerequisites stay missing.
         self.assertIn("labels_per_stream", record["signals"]["logs"]["inputs"])
         self.assertIn("span_names", record["signals"]["traces"]["inputs"])
         self.assertFalse(any(k in p["inputs"] for p in record["signals"].values()
-                             for k in ("service_gap", "drilldown_missing", "span_dimensions")))
+                             for k in ("service_gap", "span_dimensions")))
+        self.assertEqual(record["signals"]["logs"]["inputs"]["drilldown_missing"]["state"], "unavailable")
         trace = record["signals"]["traces"]
         self.assertEqual({r["scope"] for r in trace["register"]}, {"resource", "span", "intrinsic"})
         for signal in ("logs", "traces", "profiles"):
@@ -108,6 +111,9 @@ class SourceContracts(unittest.TestCase):
                 self.assertIn("allow-utf8-labelnames=true", req.get_header("Accept"))
                 body = json.loads(req.data)
                 self.assertEqual(body["end"] - body["start"], 86_400_000)
+            elif parts.path == "/config/tenant/v1/limits":
+                self.assertEqual(req.get_method(), "GET")
+                self.assertEqual(query, {})
             else:
                 self.assertEqual(req.get_method(), "GET")
                 factor = 1_000_000_000 if signal == "logs" else 1
@@ -260,7 +266,7 @@ class SourceContracts(unittest.TestCase):
             serialized = run.stdout + run.stderr + "".join(p.read_text() for p in out.glob("*.json"))
             self.assertNotIn("canary", serialized)
             output = json.loads((out / "labelling_findings.json").read_text())
-            self.assertTrue(any(r["Rule"] == "M5" and r["Result"] == "fail" and r["Catalogue version"] == 4
+            self.assertTrue(any(r["Rule"] == "M5" and r["Result"] == "fail" and r["Catalogue version"] == 5
                                 for r in output["rows"]))
 
     def c2_probe(self, transform=None, **kw):
@@ -300,7 +306,7 @@ class SourceContracts(unittest.TestCase):
         self.assertEqual((results["L1"]["result"], results["L1"]["evidence"]["offending_labels"]), ("fail", 1))
         self.assertEqual(results["L1"]["evidence"]["at_least"], 1)
         self.assertEqual((results["L3"]["result"], results["L3"]["reason"]), ("not_evaluated", "missing_input"))
-        self.assertEqual(label_rules.CATALOGUE.version, 4)
+        self.assertEqual(label_rules.CATALOGUE.version, 5)
         self.assertNotIn("STREAM_VALUE_canary", json.dumps(record))
         self.assertEqual(sum("/loki/api/v1/series" in r.full_url for r in self.requests), 1)
         self.assertFalse(any("ratio" in k for k in label_rules.CATALOGUE.inputs))
@@ -424,7 +430,7 @@ class SourceContracts(unittest.TestCase):
             self.assertNotIn("STREAM_VALUE_canary", serialized)
             rows = json.loads((out / "labelling_findings.json").read_text())["rows"]
             l1 = next(r for r in rows if r["Rule"] == "L1")
-            self.assertEqual((l1["Result"], l1["Offending objects"], l1["Catalogue version"]), ("fail", 1, 4))
+            self.assertEqual((l1["Result"], l1["Offending objects"], l1["Catalogue version"]), ("fail", 1, 5))
             l3 = next(r for r in rows if r["Rule"] == "L3")
             self.assertEqual((l3["Result"], l3["Reason"]), ("not_evaluated", "missing_input"))
 
@@ -590,7 +596,7 @@ class SourceContracts(unittest.TestCase):
             self.assertEqual(run.returncode, 0, run.stderr)
             rows = json.loads((out / "labelling_findings.json").read_text())["rows"]
             shape = next(r for r in rows if r["Rule"] == "T_shape")
-            self.assertEqual((shape["Result"], shape["Offending objects"], shape["Catalogue version"]), ("fail", 5, 4))
+            self.assertEqual((shape["Result"], shape["Offending objects"], shape["Catalogue version"]), ("fail", 5, 5))
             for rule in ("T3", "T9", "T_semconv"):
                 self.assertEqual(next(r for r in rows if r["Rule"] == rule)["Reason"], "route_parked")
             serialized = run.stdout + run.stderr + "".join(p.read_text() for p in out.glob("*.json"))
