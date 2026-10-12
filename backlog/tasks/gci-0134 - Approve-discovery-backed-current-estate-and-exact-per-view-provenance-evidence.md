@@ -1,11 +1,11 @@
 ---
 id: GCI-0134
 title: Approve discovery-backed current-estate and exact per-view provenance evidence
-status: In Progress
+status: Parked
 assignee:
   - '@loop24-root'
 created_date: '2026-10-12 16:03'
-updated_date: '2026-10-12 22:20'
+updated_date: '2026-10-12 22:28'
 labels:
   - dashboards
   - owner-decision
@@ -41,8 +41,16 @@ The bounded dashboard-only metadata build in GCI-0114 (per-view history and meta
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Loop24 reviewed decision draft /Users/rob/repos/grafana-cloud-org-insights/codex/scratch/loop24-gci0134-contract.md: additive optional per-view evidence plus separate minimized outcome projection;0newseries/13827capacity unchanged. Current membership requires witnessed complete nonempty fresh inventory and dated stable identity, not label history; newer failure makes current unknown and preserves historical rows. Exact source observation intervals, composition marker and S3 object time/receipt are separate and digest/version-bound. Source-specific semantic completeness registry, compatibility/hydration carry and floor/future-skew fences retained. Whole-write refusal prevents collector-side failure projection: recommend separately approved typed outcome observer with its own bounded IAM/retention, or explicitly choose reduced success-only metadata and defer failure criterion. Before build Rob must grade exact source/visibility, identity privacy/audience/freshness, observer, schema/caps/strict consumers, clock/storage fidelity, targeted retention and0series scope; no approval follows from review.
+<!-- SECTION:PLAN:END -->
+
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 loop23: zero implementation attempts; named follow-up packet captured under D-DOC23, owner-parked. Current loop builds only conservative schema-free display; resume after owner-approved evidence/source/schema/reader/privacy/compatibility contract, preserving failed-inventory publication refusal and last-good behavior.
+
+Loop24 contract-draft row completed and independent reviewer PASS at SHA2568e20a4e7c6990a18ec4d7a1e82795937b9887266a766186b42bacf0bf004dd1d; reviewed source base6bc17e11e4199983955779c0860832a248bb9cc9 and main da40892016c603714c42b6546bf4d3b12c72316d. Root reconciled output destination/self-review wording before independent review; no substantive blockers. Original approved-contract AC1-5 remain unchecked: Rob has not approved any source/schema/privacy/observer/access/retention/budget choice. No implementation attempt (cumulative0), no source/schema/customer/live changes or CodeRabbit/runtime gates. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/provenance-contract/review.md and retained loop23 counterexamples incorporated into draft.
 <!-- SECTION:NOTES:END -->
