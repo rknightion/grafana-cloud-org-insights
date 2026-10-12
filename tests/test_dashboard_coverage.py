@@ -53,7 +53,7 @@ def placed(value):
 # closed projection separate from row/metadata lineage, and reject an unknown output.
 SNAPSHOT_PRESENTATION_FIELDS = frozenset({
     "view", "generated_at", "publication_age", "input", "availability",
-    "age_at_publication", "age_now", "membership", "completeness",
+    "age_at_publication", "age_now", "membership", "completeness", "measurement", "scan_coverage",
 })
 
 
@@ -562,7 +562,13 @@ class DashboardCoverageTest(unittest.TestCase):
             with mock.patch.object(build, "VIEWS_DIR", directory), mock.patch.object(build, "BUCKET", "offline"):
                 absent = dashboards.assemble("usage", "infinity-offline")[1]
             fields, _expr, _tabs = consumers({"usage": absent})
+            # Known build-read absence is static guidance, never an object query or numeric lineage.
             self.assertFalse(any(name == view for name, _field in fields))
+            self.assertNotIn(f"{view}.json", json.dumps(absent))
+            guide = absent["spec"]["elements"]["_optional_view_state"]["spec"]["vizConfig"]\
+                ["spec"]["options"]["content"]
+            self.assertIn(f"**{view}**: No object at build read", guide)
+            self.assertIn("current state unknown", guide)
         loader = lambda _tier, _bucket: None
         fixture = json.loads((ROOT / "tests" / "fixtures" / "compose_inputs.json").read_text())
         stack = next(stack for stack in fixture["stacks"] if stack.get("status") != "paused")

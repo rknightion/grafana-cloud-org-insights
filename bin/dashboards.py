@@ -5456,7 +5456,16 @@ def assemble(
 
     # Object-specific metadata must include Findings views as well as domain tables. It is read
     # at query time from the very same URL, never baked from build-time fixture timestamps.
+    expected_views = view_metadata.USAGE_OPTIONAL_VIEWS if name == "usage" else frozenset()
     metadata = view_metadata.elements_for(elements, ds)
+    if expected_views:
+        # Usage attempts each optional table and omits it only on FileNotFoundError. No extra
+        # reads or missing-object queries: disclose those build observations, not current health.
+        absent_views = frozenset(view for view in expected_views if f"_meta_{view}" not in metadata)
+        elements["_optional_view_state"] = build.text_panel(
+            "Optional view state and coverage", view_metadata.optional_help(absent_views))
+        banner_rows.append(build.row("Optional view state and coverage", ["_optional_view_state"],
+                                     max_columns=1))
     elements.update(metadata)
     if metadata:
         banner_rows.append(build.row(
