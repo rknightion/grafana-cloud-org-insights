@@ -1,9 +1,11 @@
 ---
 id: GCI-0110
 title: Expose supported optional-view publication age and completeness
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop23'
 created_date: '2026-10-06 10:47'
+updated_date: '2026-10-12 17:39'
 labels:
   - dashboards
   - owner-decision
@@ -34,3 +36,9 @@ P6: hourly composition does not make daily product observations fresh. Existing 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Dashboard-only existing-metadata optional-view state contract: absent/unavailable, genuinely measured-empty, old retained last-good, bounded partial and permission/transport/parse errors honestly distinct. Build on accepted per-view runtime metadata companions without source/schema change. Envelope publication marker and available-input observation/provenance age remain distinct; no exact upload/observation/completeness invention. Any missing evidence seam ties to named GCI-0134 (approve current-estate and exact view-provenance evidence) or separately named packet. Public runtime/CLI cases fail first then pass, full gate, exactbase CodeRabbit/independent review, root land.
+<!-- SECTION:PLAN:END -->
