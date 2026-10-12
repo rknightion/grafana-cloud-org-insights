@@ -59,6 +59,13 @@ grafana-stack: none
   Run consumer publication with a supported `python3`, with deployment pins committed first.
 - Audit grants use exact ref membership. Ungranted `refs/pull/*` are foreign, not violations; grant the
   release-please branch and permitted tag refs.
+- Audit grants also name actors. Any goal touching shared `rknightion/.github` release work must grant
+  `github-actions[bot]` (merges) and `rknightion-token-broker[bot]` (release and tag authors) with
+  repo, branch and tag refs, or closeout audit fails exit 1 on the commit, tags and releases.
+- `ci-success` is the only required gate. Red release-please, auto-rc or publish runs do not override
+  it; report image-publish failure or skip separately, never as one verdict.
+- Lanes write check scripts and evidence under `codex/` or the scratchpad, never `/tmp`, so the root
+  can re-run the exact check.
 - Bare `backlog task edit --notes` / `--plan` replace the whole section; use `--append-notes` /
   `--append-plan`.
 
