@@ -3,9 +3,10 @@ id: GCI-0119
 title: >-
   Labelling best-practice pillar: score every stack's metrics, logs, traces and
   profiles labelling
-status: To Do
+status: Parked
 assignee: []
 created_date: '2026-10-06 14:43'
+updated_date: '2026-10-12 21:43'
 labels:
   - labelling
 dependencies: []
@@ -34,3 +35,9 @@ Estate-wide, deterministic assessment of each live stack's labelling and OTel at
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Loop23 parent tracker-only, zero implementation attempts: conditional completion blocked on GCI-0119.15 (natural labelling dev proof). Required historical exact ECS task descriptors are now MISSING and per-task memory windows were not captured; verifier remains red. Parent AC and DoD unchecked rather than inventing every-current-stack or stability proof. Resume when the child acceptance is genuinely satisfied under its recorded artifact contract, then re-query all subtask dispositions and exact dev view evidence before parent completion.
+<!-- SECTION:NOTES:END -->
