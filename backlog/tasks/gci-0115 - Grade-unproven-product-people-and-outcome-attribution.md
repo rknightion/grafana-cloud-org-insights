@@ -1,9 +1,11 @@
 ---
 id: GCI-0115
 title: Grade unproven product people and outcome attribution
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop23'
 created_date: '2026-10-06 10:47'
+updated_date: '2026-10-12 16:19'
 labels:
   - dashboards
   - owner-decision
@@ -34,3 +36,9 @@ N4: app/scenes, non-web surfaces, positive rates and medians do not prove human 
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+D-DOC23 dashboard-only interpretation build: label human-vs-machine/per-app outcome/cumulative-generation/saved-time claims unproven or remove the claims without dropping required metric/view coverage. Preserve observed counts/rates/windows and source field names; no new identities/readers/sources. Frozen tab names remain but visible context qualifies any legacy labels. Public CLI-built discriminating fixtures, one final gate, independent review/exact-base CodeRabbit and root land.
+<!-- SECTION:PLAN:END -->
