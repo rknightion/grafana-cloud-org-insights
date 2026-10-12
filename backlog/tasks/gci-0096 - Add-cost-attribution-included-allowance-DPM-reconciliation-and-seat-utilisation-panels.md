@@ -3,11 +3,11 @@ id: GCI-0096
 title: >-
   Add cost attribution, included-allowance, DPM reconciliation and seat
   utilisation panels
-status: Parked
+status: In Progress
 assignee:
-  - '@loop13-root'
+  - '@loop24-root'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-06 12:52'
+updated_date: '2026-10-12 22:20'
 labels:
   - dashboards
   - cost

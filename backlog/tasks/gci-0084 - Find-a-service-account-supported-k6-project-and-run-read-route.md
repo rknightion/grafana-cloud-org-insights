@@ -1,9 +1,11 @@
 ---
 id: GCI-0084
 title: Find a service-account-supported k6 project and run read route
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop24-root'
 created_date: '2026-10-02 09:25'
+updated_date: '2026-10-12 22:20'
 labels:
   - feature-usage
   - scope-decision

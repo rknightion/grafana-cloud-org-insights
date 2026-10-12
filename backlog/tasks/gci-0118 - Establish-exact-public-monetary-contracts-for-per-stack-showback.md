@@ -1,11 +1,11 @@
 ---
 id: GCI-0118
 title: Establish exact public monetary contracts for per-stack showback
-status: Parked
+status: In Progress
 assignee:
-  - '@loop13-root'
+  - '@loop24-root'
 created_date: '2026-10-06 12:00'
-updated_date: '2026-10-06 12:06'
+updated_date: '2026-10-12 22:20'
 labels:
   - dashboards
   - loop13

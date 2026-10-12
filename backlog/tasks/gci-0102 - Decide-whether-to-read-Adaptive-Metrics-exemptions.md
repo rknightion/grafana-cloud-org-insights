@@ -1,9 +1,11 @@
 ---
 id: GCI-0102
 title: Decide whether to read Adaptive Metrics exemptions
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop24-root'
 created_date: '2026-10-06 10:23'
+updated_date: '2026-10-12 22:20'
 labels:
   - owner-decision
   - cost

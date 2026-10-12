@@ -1,9 +1,11 @@
 ---
 id: GCI-0076
 title: Establish and collect a count-only Incident read RPC
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop24-root'
 created_date: '2026-10-02 09:25'
+updated_date: '2026-10-12 22:20'
 labels:
   - feature-usage
   - scope-decision

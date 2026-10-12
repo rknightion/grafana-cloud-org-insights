@@ -1,10 +1,11 @@
 ---
 id: GCI-0134
 title: Approve discovery-backed current-estate and exact per-view provenance evidence
-status: Parked
-assignee: []
+status: In Progress
+assignee:
+  - '@loop24-root'
 created_date: '2026-10-12 16:03'
-updated_date: '2026-10-12 16:04'
+updated_date: '2026-10-12 22:20'
 labels:
   - dashboards
   - owner-decision

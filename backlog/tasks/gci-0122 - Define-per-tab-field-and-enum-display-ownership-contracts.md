@@ -1,11 +1,11 @@
 ---
 id: GCI-0122
 title: Define per-tab field and enum display ownership contracts
-status: Parked
+status: In Progress
 assignee:
-  - '@loop23'
+  - '@loop24-root'
 created_date: '2026-10-06 17:50'
-updated_date: '2026-10-12 21:43'
+updated_date: '2026-10-12 22:20'
 labels:
   - dashboards
   - coverage-debt

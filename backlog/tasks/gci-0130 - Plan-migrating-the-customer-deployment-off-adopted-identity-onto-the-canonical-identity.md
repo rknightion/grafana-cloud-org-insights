@@ -3,9 +3,11 @@ id: GCI-0130
 title: >-
   Plan migrating the customer deployment off adopted identity onto the canonical
   identity
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@loop24-root'
 created_date: '2026-10-08 18:57'
+updated_date: '2026-10-12 22:20'
 labels:
   - consumer
   - handover

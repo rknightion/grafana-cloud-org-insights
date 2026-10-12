@@ -3,11 +3,11 @@ id: GCI-0097
 title: >-
   Add Tempo metrics-generator, ruler and Cloud Logs Export health panels to
   Operations
-status: Parked
+status: In Progress
 assignee:
-  - '@loop13-root'
+  - '@loop24-root'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-06 13:33'
+updated_date: '2026-10-12 22:20'
 labels:
   - dashboards
   - operations
