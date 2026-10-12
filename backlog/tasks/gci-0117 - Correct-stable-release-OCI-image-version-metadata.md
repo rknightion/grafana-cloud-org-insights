@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop23'
 created_date: '2026-10-06 11:19'
-updated_date: '2026-10-12 11:56'
+updated_date: '2026-10-12 13:55'
 labels:
   - release
   - owner-decision
@@ -44,4 +44,6 @@ D-OCI23: isolated shared publisher candidate, semantic stable version label pres
 
 <!-- SECTION:NOTES:BEGIN -->
 loop23: shared publisher implementation attempt1 security PASS and CodeRabbit complete0 findings on exact patch7662bfb2; local just check0 and pinned actionlint1.7.12/zizmor1.29.0 lint0 (only existing unchanged secret-action findings). Root landed shared source361f19e703843ef04b5db97e11cfd673b3eaa6ef. Integrated shared gate and exact required CI pending; shared release/caller pin and future project two-platform stable artifact readback remain unaccepted.
+
+loop23: shared fix361f19e passed local gate/security/CodeRabbit0 and exact CI38245685269; stable sharedv1.25.7 at1a8cf1f published by one root recovery dispatch38246126077 after existing bot auto-merge suppressed push automation. Twelve caller pins landedb704880; required integrated CI38254439412 and composed gate at4310826 green. Separate edge publisher38254440160 failed both platform Trivy gates:44HIGH results/eight unique CVEs, exceptions expired2026-10-11, fixed versions absent in captured SARIF. Not a demonstrated label-code regression; no ignore extension or blind retry. Fresh Debian/base availability research active; stable two-platform OCI artifact acceptance still open. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop23-evidence/oci/.
 <!-- SECTION:NOTES:END -->
