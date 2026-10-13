@@ -461,7 +461,9 @@ class Aws:
 
 
 # Match exact AWS service error codes, never classify arbitrary error prose.
-ERROR_CODE = re.compile(rb"An error occurred \(([^()\r\n]{1,80})\) when calling the (GetObject|PutObject) operation:")
+# AWS_MAX_ATTEMPTS=1 can add the CLI's exact retry annotation even on the
+# first response. Accept that bounded grammar, not arbitrary provider prose.
+ERROR_CODE = re.compile(rb"An error occurred \(([^()\r\n]{1,80})\) when calling the (GetObject|PutObject) operation(?: \(reached max retries: [0-9]{1,10}\))?:")
 
 
 def _code(result, operation):

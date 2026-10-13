@@ -2,6 +2,8 @@
 import json
 from datetime import datetime, timezone
 
+import pytest
+
 
 def event(name, seq, payload, *, tier="t1", attempt="11111111-1111-4111-8111-111111111111", start="2026-10-13T12:00:00Z", at=None):
     return dict(kind="gcinsight_outcome", version=1, event=name, attempt_id=attempt,
@@ -134,7 +136,9 @@ def finish(code=0, output=None, err=None):
  if err is not None: print(err,file=sys.stderr)
  sys.exit(code)
 def arg(name): return a[a.index(name)+1]
-def error(code,op): finish(255,err=f'An error occurred ({code}) when calling the {op} operation: deliberately private provider prose')
+def error(code,op):
+ annotation=s.get('retry_annotation','')
+ finish(254,err=f'aws: [ERROR]: An error occurred ({code}) when calling the {op} operation{annotation}: deliberately private provider prose')
 if 'filter-log-events' in a:
  request=json.loads(arg('--cli-input-json'))
  s.setdefault('requests',[]).append(request)
@@ -182,9 +186,10 @@ def production(tmp_path, monkeypatch, *, records=None, plan=None):
     return rc, json.loads(path.read_text())
 
 
-def test_production_cli_bootstrap403_conditional_create_and_readback(tmp_path, monkeypatch, capsys):
+@pytest.mark.parametrize("retry_annotation", ["", " (reached max retries: 0)"])
+def test_production_cli_bootstrap403_conditional_create_and_readback(tmp_path, monkeypatch, capsys, retry_annotation):
     key = "views/outcomes/t1.json"
-    rc, state = production(tmp_path, monkeypatch, plan={"gets": {key: ["AccessDenied", "present"]}})
+    rc, state = production(tmp_path, monkeypatch, plan={"gets": {key: ["AccessDenied", "present"]}, "retry_annotation": retry_annotation})
     assert rc == 0
     writes = [a for a in state["calls"] if "put-object" in a]
     assert len(writes) == 4 and all("--if-none-match" in a for a in writes)
@@ -193,6 +198,24 @@ def test_production_cli_bootstrap403_conditional_create_and_readback(tmp_path, m
     assert obj["meta"]["observation_state"] == "partial"
     assert obj["meta"]["current_membership"] == "unknown"
     assert all("--no-paginate" in a for a in state["calls"] if "filter-log-events" in a)
+
+
+@pytest.mark.parametrize("annotation, operation, expected", [
+    ("", "GetObject", "NoSuchKey"),
+    (" (reached max retries: 0)", "GetObject", "NoSuchKey"),
+    (" (reached max retries: 2)", "PutObject", "NoSuchKey"),
+    (" (reached max retries: x)", "GetObject", None),
+    (" (reached max retries: 12345678901)", "GetObject", None),
+    (" (arbitrary provider text)", "GetObject", None),
+    (" (reached max retries: 0)", "DeleteObject", None),
+])
+def test_service_error_code_accepts_only_exact_retry_annotation(annotation, operation, expected):
+    from collector.observer import CommandResult, _code
+    stderr = f"aws: [ERROR]: An error occurred (NoSuchKey) when calling the {operation} operation{annotation}: private prose".encode()
+    result = CommandResult(254, b"", stderr)
+    assert _code(result, operation) == expected
+    assert _code(result, "PutObject" if operation == "GetObject" else "GetObject") is None
+    assert _code(CommandResult(254, b"", stderr, "deadline"), operation) is None
 
 
 def test_production_cli_existing_denied_bytes_preserved_and_denied_readback_nonzero(tmp_path, monkeypatch, capsys):
