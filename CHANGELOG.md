@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.13.2](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.1...v0.13.2) (2026-10-13)
+
+
+### Bug Fixes
+
+* exclude private observer records before log forwarding ([dbfff48](https://github.com/rknightion/grafana-cloud-org-insights/commit/dbfff4847ac9605fb8c01ba59dc6939d6c5a3c7b))
+
+
+### Documentation
+
+* **backlog:** close verified Container Insights preservation ([1405951](https://github.com/rknightion/grafana-cloud-org-insights/commit/1405951e32e32383c9fa4fa88a64a06f2c8bffd2))
+* **backlog:** record verified Adaptive rollout and preserved prerequisite ([c8e554b](https://github.com/rknightion/grafana-cloud-org-insights/commit/c8e554b962d7b32594357b593a87682dd807ad31))
+
 ## [0.13.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.0...v0.13.1) (2026-10-13)
 
 
