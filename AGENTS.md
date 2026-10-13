@@ -151,6 +151,12 @@ off anything but the live inventory.
   explicitly excludes DPM, or `dpm_aware`, which applies the contracted included-DPM divisor per
   stack.
 
+Billing research distinguishes retained producer contracts from deployed datasource evidence.
+Per-user AI token totals must not be assumed to be lifetime counters: the retained producer describes
+current-month gauges, while deployed period/reset semantics remain unverified. A shared billing `id`
+field does not establish a common stack identity across product families. Do not implement monthly
+deltas, per-stack currency totals or seat-utilisation ratios until their exact contracts are proved.
+
 ## Labelling inventory (D-LBL1..12)
 
 The approved source is doc-0008 Part 1 (Labelling best-practice research and rulebook).

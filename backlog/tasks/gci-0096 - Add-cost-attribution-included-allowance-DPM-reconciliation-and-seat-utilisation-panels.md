@@ -7,7 +7,7 @@ status: Parked
 assignee:
   - '@loop24-root'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-12 22:24'
+updated_date: '2026-10-13 17:11'
 labels:
   - dashboards
   - cost
@@ -52,4 +52,6 @@ Loop24 resume packet: preserve accepted panels. Billing-only candidate in bin/da
 Loop13: 2 change-and-verify cycles (initial implementation plus final source-name qualification narrowing), 0 review-repair rounds, CR connection outage charged0. Safe partial candidatea92258eb8157736a85865740179c4902a594c247 accepted/landed with independent exact archive/artifact/promtool PASS, final completed CodeRabbit0findings. Composed just check2192passed2skipped13364subtests; CI37465449908 exactSHA required leaves success. AC2/3 satisfied; fullAC1 remains unchecked because plugin billable-vs-active exact metric/unit/window/cohort unavailable. Explicit unavailable plugin comparison is not completion. Resume source witness; preserve landed panels and ceilings. Customer names/readback/browser/performance unverified.
 
 Loop24 research accepted, no implementation attempt or AC completion. Pinned vendor producer and public user-pricing evidence establish billing-side current-month rated quantity, not matched plugin-active people. Root robk HTTP200/no-warning 35d roster and count_over_time reads plus calendar-month range returned no plugin samples; Loki reload control was present. Zero seats not inferred. Remaining blocker: positive deployed plugin source and matched active/cohort contract. Attempts: 0 implementation this loop; retain prior2. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/seats/lane.md and /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/root/usage-probe.json.
+
+2026-10-13 reconciliation: the plugin billing-side contract is no longer wholly unknown. It is a current rated-month, subscription-qualified quantity that can be prorated and fractional, with separate included quantity and monetary overage. It is not a generic distinct-person count. Full AC1 remains open because the approved probe has no positive plugin samples and no matched active-user cohort with the same eligibility, subscription weighting, period and deduplication. Preserve landed panels, prior two implementation cycles and the explicit unavailable comparison. Updating the research record does not authorize an unsupported utilization ratio.
 <!-- SECTION:NOTES:END -->

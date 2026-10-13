@@ -1,8 +1,8 @@
 # Traps
 
-Behaviour that has cost real time. Every item here is a live-verified fact about Grafana Cloud, the
-gcom API, Mimir, Loki, Infinity or the v2 dashboard schema. Read the relevant section before writing a
-panel, a PromQL expression, an Infinity query or a collector source.
+Behaviour that has cost real time. Items record live observations or explicitly qualified source
+evidence about Grafana Cloud, the gcom API, Mimir, Loki, Infinity or the v2 dashboard schema. Read the
+relevant section before writing a panel, a PromQL expression, an Infinity query or a collector source.
 
 A recurring shape: **a 200 proves nothing.** Several endpoints here answer 200 and return an empty or
 wrong-shaped body. Where that is the case it says so.
@@ -583,8 +583,12 @@ shape. Read the schema at `/openapi/v3/apis/dashboard.grafana.app/v2` rather tha
 - **The plugin API's window and the billing metrics' window are different**, a rolling 30 days against
  the current billing period. On the same stack and the same day they disagree by a wide margin. Never
  let a panel compare them, and never present one as the other.
-- **The per-identity token counter is cumulative; the aggregate resets monthly.** Never call the
- aggregate a lifetime figure.
+- **Do not assume per-user AI tokens are lifetime counters.** Retained versioned producer evidence
+ reviewed on 2026-10-13 describes `grafanacloud_ai_tokens_user_total_tokens` and stack token totals as
+ current-month gauges. This contradicts the earlier unconditional cumulative-counter note; it does
+ not establish the deployed producer version or month-boundary behaviour. Keep monthly cost modelling
+ unavailable until that contract is witnessed. Neither counter deltas nor a range maximum alone
+ proves a complete calendar-month total. AI-active users are not automatically licensed seats.
 - **`user_type="service"` is not proof of a service-account identity.** Live rows include human-shaped
  addresses. Present it as the service-token series category.
 - **Self-managed usage folds into its connected Cloud stack.** The metrics carry no

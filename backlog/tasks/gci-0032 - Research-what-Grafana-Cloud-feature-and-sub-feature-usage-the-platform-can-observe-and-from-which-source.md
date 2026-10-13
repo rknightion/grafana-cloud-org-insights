@@ -5,9 +5,9 @@ title: >-
   observe, and from which source
 status: Parked
 assignee:
-  - '@loop3-root'
+  - '@codex'
 created_date: '2026-09-23 17:50'
-updated_date: '2026-09-30 22:51'
+updated_date: '2026-10-13 17:12'
 labels:
   - research
   - adoption
@@ -115,6 +115,8 @@ The first concrete strand is already scoped as subtask GCI-0032.01: the `source`
 
 <!-- SECTION:PLAN:BEGIN -->
 loop3 D1a/c: family-route and minimal-pair packets plus cited billing/window semantics matrix; root CLI matrix update, keep unknown semantics explicit, no evidence-free completion.
+
+2026-10-13 direct-main continuation: reconcile the durable observability matrix against accepted reader dispositions and retained producer contracts. Correct stale AI counter and generic commercial identity assumptions, distinguish source evidence from absent deployed proof, and preserve unresolved acceptance criteria. No new live tenant queries, source code, reader grants or pricing claims.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -137,4 +139,8 @@ Loop3 matrix updated via CLI:327 discovered metric names,26 partial contracts,30
 loop4 M-0032 admitted read-only with new premise: live grafanacloud-usage metadata HELP/TYPE endpoint, followed by named official sources if needed. No guessed normalization, grants, or acceptance yet.
 
 loop4 metadata premise exhausted with complete5/5 direct discovered usage datasource metadata GETs across fresh staff inventory: every HTTP200 success has empty data, zero HELP/TYPE contracts. Four existing official partial pricing contracts revalidated, zero net-new contracts. Unsupported proxy404s from pass1 corrected with explicitly authorised stored per-stack SA direct reads. AC1/AC2 remain parked pending vendor recording/window/reset catalogue, no repeated unchanged search planned.
+
+2026-10-13 evidence reconciliation identifies exact source-level corrections for plugin billing quantities, AI current-month gauges and overage attribution. Update the durable matrix with their qualified contracts while preserving original live observation dates. Do not replace the historical unresolved-normalization count with a guessed new total: reclassify individual rows first and mechanically recount only under an explicit counting definition. Source review is not deployed verification, so live contract acceptance remains open. Reconcile historical scope-decision paragraphs with subsequently accepted product dispositions without implying a fresh role or route grant. No repeated empty metadata probe is justified by this documentation work.
+
+2026-10-13 matrix reconciliation completed: added qualified retained-source contracts for plugin rating quantities, AI current-month gauges and per-family monetary identity mappings, plus current IRM/optional-reader dispositions while preserving dated historical probes. Corrected the unconditional lifetime-counter claim in operator traps. No new metric/source/permission, positive deployed witness or acceptance completion claimed; remaining live semantics and route gaps keep this parent Parked.
 <!-- SECTION:NOTES:END -->

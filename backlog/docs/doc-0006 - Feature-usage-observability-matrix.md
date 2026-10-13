@@ -3,7 +3,7 @@ id: doc-0006
 title: Feature usage observability matrix
 type: specification
 created_date: '2026-09-23 18:33'
-updated_date: '2026-10-05 21:50'
+updated_date: '2026-10-13 17:12'
 ---
 # Feature usage observability matrix - wave 1 evidence, 2026-09-23
 
@@ -747,3 +747,26 @@ The preceding Agent section records the remaining exact cumulative-generation-vo
 Application service-entity observations are not a host count or host hours. Kubernetes/Infra producing telemetry, Fleet registrations and installed plugins likewise do not establish billable or active host hours. The historical `grafanacloud_app_observability_*` and `grafanacloud_infra_observability_*` names remain discovery evidence; an exact host-count/host-hour family with verified units, accumulation/window semantics and per-stack population was not established by the accepted sibling work. This part of the footprint request remains unobservable at the required fidelity, not zero. The current read boundary is the existing write-stack `grafanacloud-usage` query/metadata GET with `datasources:query@datasources:uid:grafanacloud-usage`; further semantic qualification and an authorised control are required before converting any reporting observation into host hours. Application/Kubernetes plugin resource paths and their exact reader pairs remain unverified and are not granted as an alternative.
 
 The named robk Agent positive-generation control was not observed. Other positive 30-day generation-family rows matched fresh authorised staff inventory IDs, establishing observed reporting but not that named control or activity on robk. No zero-activity or complete-absence assertion follows; the exact-volume and named-control limitations remain open.
+
+## Billing-source contract reconciliation (2026-10-13)
+
+The following updates reflect versioned source review retained in local evidence. They do not establish the deployed producer version, positive data availability, final datasource label schema or customer-specific pricing. Historical unknown entries remain a record of their original observation date; these qualified conclusions supersede the corresponding source-contract unknowns only.
+
+| Public metric family | Source-level contract established | Remaining boundary |
+| --- | --- | --- |
+| grafanacloud_org_grafana_plugin_users | Current rated-month plugin quantity; subscription eligibility, deduplication and proration can make this fractional and different from a unique-person total. | No positive deployed sample or matched active-user cohort; no utilization ratio. |
+| grafanacloud_org_grafana_plugin_included_users | Included subscription quantity, separate from rated usage. | Do not assume the inclusion and rated quantity share identical proration. |
+| grafanacloud_org_grafana_plugin_users_overage | Monetary overage observation for the current rated month. | Currency and exact deployed rating-period alignment require confirmation; not an excess-seat count. |
+| grafanacloud_org_ai_tokens_active_users | Current-month AI-active user gauge; source contract describes org deduplication across stacks. | Not automatically licensed or billable seats; deployed population and dimensions unverified. |
+| grafanacloud_ai_tokens_total_tokens | Current-month token gauge with a joint source breakdown. | Exposed schema, complete breakdown and period boundary need a positive deployed witness. |
+| grafanacloud_ai_tokens_user_total_tokens | Source revision describes a current-month per-user gauge, not a lifetime non-resetting counter. | Do not implement counter-delta arithmetic until the deployed contract is resolved. Identity values remain transient and are never persisted. |
+| grafanacloud_org_ai_tokens_overage and grafanacloud_ai_tokens_overage | Current-month monetary observations at org and attributed-instance scope. | Currency, rating period, attribution coverage and reconciliation remain unverified. |
+| grafanacloud_org_total_overage | Current-month monetary total across rated dimensions in the reviewed producer. | Not proof of a complete per-stack breakdown or an invoice total. |
+
+Per-instance overage families can use different identifier domains before datasource processing. A field with a common name does not prove a common stack identity. Every showback line needs a witnessed mapping before a stack join. Missing attribution stays unavailable; only an explicit source zero is zero. Retained source research reduces semantic unknowns but does not complete live-enumeration acceptance or authorize any new scope, query surface or customer enablement.
+
+### Scope decisions after the historical route probes
+
+The loop3 IRM paragraph above records its 2026-09-30 decision, not the current disposition. GCI-0041 (product read-scope decisions) subsequently approved the narrowly count-only IRM integration-counter route while accepting its documented permission breadth; GCI-0074 (configured IRM integration counters) and GCI-0087 (exact-200 IRM counter acceptance) are complete. This does not approve integration configuration lists, schedules, alert-group lists or an Incident POST route. The default-off IRM alert-group stats source has its separate bounded count contract; API-default-window and lower-bound counts must not be described as lifetime activity.
+
+Default-off optional readers now include accepted configured-object sources for Faro apps, ML jobs, cloud accounts, PDC networks, reports, playlists and library panels. Their precise routes, reader pairs, exact-response conditions and privacy limits remain those in the repository instructions and capability document. Implementation or release is not customer enablement. GCI-0132 (customer library-panel and retention-policy rollout) still depends on accepted dev proof. These dispositions update the historical decision status only; they are not a fresh live visibility witness or a wider grant.
