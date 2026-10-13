@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop25-root'
 created_date: '2026-10-12 16:03'
-updated_date: '2026-10-13 09:21'
+updated_date: '2026-10-13 11:33'
 labels:
   - dashboards
   - owner-decision
@@ -61,4 +61,6 @@ loop25 root amended owned seam for inventory evidence transport in runner callsi
 loop25 provenance focused cycle1:83tests/7442subtests passed on partial tree, full just check not run. Root repaired second owned-file gap for copied non-S3 privacy projections: strip ONLY new optional evidence from Loki summary and diagnostic --out, preserve S3 and old semantics. Retained partial unsafe until correction, public CLI/assembled selector proof and final gate/security/CodeRabbit. Final gate must use real .venv not symlink.
 
 loop25 cumulative implementation cycles3 observed (transport focused, privacy/fullgate, helper-stamp/fullgate). Final gate901 failures are new private evidence metadata display debts, not baseline-red. Root authorizes exact finite unrendered/audit declarations in the two existing coverage-test registries, no wildcard/exemption hiding or rendering credit; unknown seeded gap must still fail. Safety incident separately recorded: three attempted synthetic-bucket S3 locks returned2, provider outcome unknown; corrected tests refuse subprocess. Final rescue cycle4 only, no ceiling reset.
+
+loop25 surface1 exact7file manifest6e78f67e accepted for rootlanding: independent guardedsecurityPASS/CodeRabbitcomplete0 coveringall7; final justcheck0/1114.892s Python2727pass/2skip/27626subtests +ToFu37pass and remaininggatesclean. PriorDNSred retained; newbaseproviderred diagnosed113-byteTMPDIR Unixsocketlimit, same6.68plugin passedshortpath then authorizedinfraretry1of2 fullgate0, no source/pin/testweakening. Cumulativeimplementation4 exhausted, infraretry1, no cycle5. PublicCLI+408metadata/12historical JSONata and privacy/nativeLoki/diagnostic failfirstproofs retained; 1051finite metadata debts explicitly unrendered audit, unknownseed stillfails. Root fresh actualapproved inventory payload6+selflink acceptedexactvalidator; visibility/authorityunknown. All privateS3/no-series/sourcefloor/refusal/hydration/timeguard contracts intact. Historicalthree syntheticbucket lockattempt exits2 stillunknown provideroutcome/currentHeadBucket+HeadObject404; correctedtestsrefuse subprocess. AC1-2 observer/current-estate status outsidethissurface remainopen underGCI-0134.01 (outcome observer).
 <!-- SECTION:NOTES:END -->
