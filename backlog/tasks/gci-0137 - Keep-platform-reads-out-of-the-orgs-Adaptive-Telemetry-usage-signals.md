@@ -1,10 +1,10 @@
 ---
 id: GCI-0137
 title: Keep platform reads out of the org's Adaptive Telemetry usage signals
-status: In Progress
+status: Parked
 assignee: []
 created_date: '2026-10-13 17:19'
-updated_date: '2026-10-13 19:37'
+updated_date: '2026-10-13 22:23'
 labels:
   - adaptive
   - cost
@@ -37,18 +37,18 @@ Logs: research recommendation tracking and any supported read opt-out. Traces: e
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Every PromQL selector the collectors send to an org stack carries __ignore_usage__="", with a test that fails if a new data-plane metrics read omits it
+- [x] #1 Every PromQL selector the collectors send to an org stack carries __ignore_usage__="", with a test that fails if a new data-plane metrics read omits it
 - [ ] #2 The metadata endpoints in use (label values with match[], series, cardinality API) are classified as counted or not counted toward Adaptive Metrics usage, with the evidence cited, and covered where the matcher is accepted
 - [ ] #3 Adaptive Logs: the docs research outcome is recorded; either an opt-out exists and every Loki read uses it, or none exists and the affected reads are listed
-- [ ] #4 Adaptive Traces: whether any opt-out exists is recorded; if none, the Tempo reads that could register usage are listed as a known gap
-- [ ] #5 CAPABILITIES.md states what the platform does and does not do to an org's Adaptive Telemetry usage signals
+- [x] #4 Adaptive Traces: whether any opt-out exists is recorded; if none, the Tempo reads that could register usage are listed as a known gap
+- [x] #5 CAPABILITIES.md states what the platform does and does not do to an org's Adaptive Telemetry usage signals
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -65,4 +65,8 @@ Leads from ~/repos/adaptive-telemetry-pm/knowledge/adaptive-logs/README.md: Adap
 All 27 expressions differ only by the empty ignore matcher. Fail-first boundary guard then 26 focused tests/351subtests pass; full final gate exit0,2747tests/27920subtests/2skips,37Tofu. Independent review PASS, CodeRabbitcomplete0/allfourfiles. Live marked staff query exact200/vector/fourpositive rows. Metadata usage tracking unknown; Logs opt-out unestablished; current official Traces model does not use query usage. Source hashes unchanged through full gate. Two donor commits newly fetched AFTER history-ref snapshot contain private identifiers; narrow exact-commit history check proves a release blocker. Current task sanitized; no source push or live rollout until published-history correction is authorized and verified.
 
 Final integrated source candidate includes all27markedPromQL expressions plus default-off observer. Final semantic checks2783tests/27921subtests/2skips/41Tofupass, formatting/lint clean, CodeRabbitcomplete0. Root history repair revision2 prepared and verified: only incident-bearing task text/duplicateID differ; original research notes and all non-task bytes preserved. Await explicit atomicforcewithlease approval on originmain and releaseplease branch before publishing source/release/consumer rollouts. No ECRpush/apply or customer mutation occurred. Fresh existing ECR policy witness isMUTABLE for both consumers; publisher now uses unique128bitnonce tags and immutable verified runtime digests without changing ECR policy. Metadata/Logs tracking ACs remain unproven, never treated as absent.
+
+Source 778dcd4794802cf63763ae07d6d31d8694069207 shipped v0.13.0: all27PromQL selectors carry empty ignore-usage matcher with fail-first real HTTP boundary guard. CAPABILITIES documents exact supported/unsupported tracking, current official Adaptive Traces model does not use query usage. Approved history correction completed and required current/origin history gate clean. Metadata and Logs tracking/suppression remain unproved; AC2/3 stay open. Dev/customer rollout continues on fix-forward Container Insights preserving release.
+
+Adaptive Metrics PromQL suppression deployed to dev and customer at release0.13.1 source b5c2590f5c7db79e9ddb9fe2f09cd164f373249d. Both exact saved plans independently classified as image/default-off env only, applied, all5definitions/schedules and effective scheduler IAM read back equal, targeted no-change plans verified. Dev Container Insights preserved enabled. Customer first apply refused before mutation due natural task active; fresh zero-active witness and fresh reviewed plan preceded successful retry, original refusal retained. Exact merge CI38474744391 all4requiredsuccess, stable publisher38474745277/publicOCI twoarches/Cosign sourcebinding verified. AC1/4/5 done; metadata tracking and Logs opt-out AC2/3 remain externally unproved, now explicitly Parked after completing deployable work. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261013/adaptive/release131/.
 <!-- SECTION:NOTES:END -->
