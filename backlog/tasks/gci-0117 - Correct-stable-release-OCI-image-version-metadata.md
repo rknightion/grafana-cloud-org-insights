@@ -1,11 +1,11 @@
 ---
 id: GCI-0117
 title: Correct stable-release OCI image version metadata
-status: Parked
+status: In Progress
 assignee:
-  - '@loop23'
+  - '@loop25-root'
 created_date: '2026-10-06 11:19'
-updated_date: '2026-10-12 14:00'
+updated_date: '2026-10-13 08:47'
 labels:
   - release
   - owner-decision
@@ -40,6 +40,8 @@ The v0.7.0 readback established exact release manifest/tag/source SHA and source
 D-OCI23: isolated shared publisher candidate, semantic stable version label preserving immutable source/revision/signing. Root security review, land and shared release, then caller-pin integration. Final two-platform readback only after project stable release.
 
 Implementable remainder after completed guarded source/caller work: obtain primary patched stable Debian package/base evidence for all eight gated CVEs and both architectures, preserving actual Python3.14/AWS runtime, or owner-approved explicit security/runtime policy re-grade. Then fresh source-bound stable release CI with unchanged agreed HIGH/CRITICAL gate; capture exact OCI index/child digests, both semantic version/source/revision configs and matching signing/attestation identities. No historical tag moves/deletions or inferred green. Current exceptions are expired; no authorized renewal or blind retry.
+
+loop25 D-IMG25: isolated new minimal-base candidate, unchanged both-platform runtime/Trivy proof; root security review then CodeRabbit, serial composed gate and exact hosted CI, accepted-set stable release and artifact readback. No exception renewal; cumulative prior implementation2 retained.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes

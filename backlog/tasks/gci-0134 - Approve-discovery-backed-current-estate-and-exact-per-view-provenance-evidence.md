@@ -1,11 +1,11 @@
 ---
 id: GCI-0134
 title: Approve discovery-backed current-estate and exact per-view provenance evidence
-status: Parked
+status: In Progress
 assignee:
-  - '@loop24-root'
+  - '@loop25-root'
 created_date: '2026-10-12 16:03'
-updated_date: '2026-10-12 22:28'
+updated_date: '2026-10-13 08:49'
 labels:
   - dashboards
   - owner-decision
@@ -45,6 +45,8 @@ The bounded dashboard-only metadata build in GCI-0114 (per-view history and meta
 
 <!-- SECTION:PLAN:BEGIN -->
 Loop24 reviewed decision draft /Users/rob/repos/grafana-cloud-org-insights/codex/scratch/loop24-gci0134-contract.md: additive optional per-view evidence plus separate minimized outcome projection;0newseries/13827capacity unchanged. Current membership requires witnessed complete nonempty fresh inventory and dated stable identity, not label history; newer failure makes current unknown and preserves historical rows. Exact source observation intervals, composition marker and S3 object time/receipt are separate and digest/version-bound. Source-specific semantic completeness registry, compatibility/hydration carry and floor/future-skew fences retained. Whole-write refusal prevents collector-side failure projection: recommend separately approved typed outcome observer with its own bounded IAM/retention, or explicitly choose reduced success-only metadata and defer failure criterion. Before build Rob must grade exact source/visibility, identity privacy/audience/freshness, observer, schema/caps/strict consumers, clock/storage fidelity, targeted retention and0series scope; no approval follows from review.
+
+loop25 D-PROV25: additive accepted-success evidence only in owned envelope/S3/inventory-validation seam and fail-first real-artifact tests; root frozen inventory-shape witness; root security review then CodeRabbit, local and composed just check, no new series. Outcome observer separately recorded and not admitted.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -53,4 +55,6 @@ Loop24 reviewed decision draft /Users/rob/repos/grafana-cloud-org-insights/codex
 loop23: zero implementation attempts; named follow-up packet captured under D-DOC23, owner-parked. Current loop builds only conservative schema-free display; resume after owner-approved evidence/source/schema/reader/privacy/compatibility contract, preserving failed-inventory publication refusal and last-good behavior.
 
 Loop24 contract-draft row completed and independent reviewer PASS at SHA2568e20a4e7c6990a18ec4d7a1e82795937b9887266a766186b42bacf0bf004dd1d; reviewed source base6bc17e11e4199983955779c0860832a248bb9cc9 and main da40892016c603714c42b6546bf4d3b12c72316d. Root reconciled output destination/self-review wording before independent review; no substantive blockers. Original approved-contract AC1-5 remain unchecked: Rob has not approved any source/schema/privacy/observer/access/retention/budget choice. No implementation attempt (cumulative0), no source/schema/customer/live changes or CodeRabbit/runtime gates. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/provenance-contract/review.md and retained loop23 counterexamples incorporated into draft.
+
+loop25 root amended owned seam for inventory evidence transport in runner callsites and optional original-evidence hydration preservation, after read-only lane verified necessary gap. No implementation attempt consumed by inspection; sanitized existing-route shape witness captured exact200. No route, source floor, INPUT_OWNER, payload schema or metric grant widened.
 <!-- SECTION:NOTES:END -->
