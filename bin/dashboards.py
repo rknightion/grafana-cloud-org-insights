@@ -33,6 +33,7 @@ from collector import identity, observability_score
 from collector import ratecard as ratecard_model
 from collector.dashboards import build, layout, view_metadata
 from collector.dashboards.retention_panels import retention_panels
+from collector.dashboards import outcomes
 from collector.pillars import adaptive_traces as adaptive_traces_pillar
 from collector.pillars import library_panels as library_panels_pillar
 from collector.pillars import producer_inventory
@@ -5420,6 +5421,7 @@ BUILDERS = {
 def assemble(
     name: str, ds: str, *, rate_card: ratecard_model.RateCard | None = None,
     _resolve_canonical_links: bool = True,
+    outcome_observer: bool = False,
 ) -> tuple[str, dict[str, Any]]:
     """Build one dashboard's full spec: the pillar's own panels plus the shared furniture.
 
@@ -5506,6 +5508,15 @@ def assemble(
     # the optional Findings tab so guidance has one stable location on every dashboard.
     tabs = list(tabs) + [banner_tab]
     tabs, canonical, row_links = layout.apply(name, elements, tabs, detail)
+
+    if outcome_observer and name == "operations":
+        elements.update(outcomes.elements(ds))
+        elements["_banner"]["spec"]["vizConfig"]["spec"]["options"]["content"] += (
+            "\n\nCollector outcomes separately reads private S3 observer evidence; "
+            "the product panels retain their grafanacloud-usage source contract."
+        )
+        tabs = list(tabs) + [outcomes.tab()]
+        desc += " Includes separate private collector-outcome evidence when explicitly enabled."
 
     spec = build.dashboard(
         title, desc, elements, tabs,
@@ -5749,6 +5760,8 @@ def main() -> int:
     ap.add_argument("--out", help="write built JSON to this directory")
     ap.add_argument("--ds-uid", help="datasource uid; resolved by name if omitted")
     ap.add_argument("--list", action="store_true")
+    ap.add_argument("--outcome-observer", action="store_true",
+                    help="include private observer evidence in Operations (default off)")
     args = ap.parse_args()
 
     try:
@@ -5810,6 +5823,7 @@ def main() -> int:
         # applied inside `assemble` so the layout test can exercise the same code path.
         uid, spec = assemble(
             name, ds, rate_card=deployed_rate_card if name == "cost" else None,
+            outcome_observer=args.outcome_observer,
         )
         if args.out:
             path = pathlib.Path(args.out)

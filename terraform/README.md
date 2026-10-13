@@ -137,6 +137,7 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 | `create_ecr_repository`, `image`, `task_architecture` | `true`, empty, `ARM64`; empty image uses created ECR `:latest`, unsuitable for reviewed runtime rollout |
 | `security_group_ids`, `assign_public_ip` | `[]`, `false`; empty creates HTTPS-egress group |
 | `schedules_enabled`, `schedule_timezone`, `tiers` | `true`, `UTC`, four default tiers; disable schedules explicitly for first deployment. A tier's `schedule_expression` is optional: t1-t4 fall back to `local.default_tier_schedules` |
+| `outcome_observer_enabled` | `false`; isolated latest-observed outcome writer and typed collector recording; requires managed bucket configuration |
 | `schedule_retry_attempts`, `log_retention_days` | `2`, `30`; invocation retry count and CloudWatch retention |
 | `firehose_logs_enabled`, `firehose_log_subscription_enabled` | both `false`; staged stream creation then subscription |
 | `firehose_access_key_secret_arn`, `firehose_access_key_secret_kms_key_arn` | both empty; dedicated adopted secret ARN required when enabled, KMS ARN only for a CMK |
@@ -154,6 +155,7 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 
 | Outputs | Use / availability |
 |---|---|
+| `outcome_observer` | Optional task ARN, task role, schedule name/state; null while disabled. Configuration only, not a live outcome witness. |
 | `bucket_name`, `cluster_arn`, `cluster_name`, `log_group_name` | resolved storage, compute and task-log targets |
 | `task_definition_arns`, `task_definition_families` | per-scan-tier revision ARNs and moving families; use reviewed revisions for controlled runs |
 | `schedule_names`, `schedule_states` | per-scan-tier names and effective enabled/disabled states, not provisioner outputs |
@@ -447,3 +449,28 @@ removes the lifecycle rules and policy.
 The Firehose access-key secret is different: it is **always adopted** and supplied by ARN. There is no
 create switch and no secret data source because even reading the value would put the credential on the
 wrong side of the Terraform state boundary.
+
+### Optional collector outcome observer
+
+`outcome_observer_enabled` defaults to false and is represented by the scan runtime flag
+`GCINSIGHT_OUTCOME_OBSERVER_ENABLED`. Absent or explicit `0` preserves the established consumer
+projection digest; enabling it requires the enabled projection. Existing full/pruned manifest
+goldens are unchanged. With it disabled, no observer task, role, schedule or retention rule exists.
+
+The enabled module installs a separate task writer for exactly `views/outcomes/t1.json` through
+`t4.json`, reads only this deployment's CloudWatch log group, and has no Grafana credential, SSM
+permission, bucket listing or secret selectors. Its execution role is separate from the collector's
+secret-bearing execution role. The collector is denied writes/deletes under the outcome prefix.
+Status objects use `scan_retention_days` and seven-day noncurrent expiry. Enabling it on an adopted
+bucket requires the existing explicit managed-configuration choice; it grants no automatic bucket
+policy/lifecycle replacement or customer activation. Review the actual plan before enablement.
+
+The schedule polls every 15 minutes and follows the global schedule kill switch. It reports latest
+observed attempts and dated summary acknowledgements, not authoritative current membership, whole-org
+visibility, storage-service receipt time or the actual latest execution. Observation freshness is one
+hour; historical evidence retains its original timestamp for at most three days. Conditional object
+writes protect existing bytes, including the absent-object/403 bootstrap case without ListBucket.
+
+Outcome recording cannot be enabled with the module-managed Firehose task-log subscription: it would
+forward private digest events to another audience. Before live enablement, verify the log group has
+no external forwarding subscription either. A broader destination needs a separate audience decision.

@@ -742,3 +742,48 @@ Report any material deletion and whether the source object or state record allow
 - Per-stack sweep empty: simulate SSM access on the bare token-prefix ARN.
 - Provisioner performs widespread writes on a healthy estate: stop and inspect drift/mint classification.
 - T4 movement after a coverage change: compare measured populations before calling it estate movement.
+
+## Optional outcome observer
+
+This feature is default-off. Source installation and local fixtures are not live AWS proof.
+Enable only after reviewing the separate writer IAM, existing log-reader audience and targeted
+retention in a saved deployment plan. It needs managed bucket configuration and creates a separate
+scheduled task. Existing customer image/read grants do not enable it.
+
+The module's `outcome_observer` output identifies configured task/schedule fields. The production
+entrypoint is `python3 -m collector.observer --bucket <deployment-bucket> --region <region>
+--log-group <deployment-log-group>` and has no Grafana credentials. Its four exact objects are
+`views/outcomes/t1.json`, `t2.json`, `t3.json` and `t4.json`. Verify each object's own observation
+interval/state; a recent upload does not make an old collector event recent. An initial poll may
+remain partial until all four previous projections are readable. There is no atomic four-object
+snapshot. Failed/unknown inventory still refuses collector publication and preserves last-good views.
+
+After enabling recording and observing real outcomes, add `--outcome-observer` to the usual
+`bin/dashboards.py operations --publish` command, including when running through `bin/consumer-exec`
+with the dashboards projection. The Operations tab displays minimized rows only. Default dashboard
+builds do not read outcome objects. The explicit presentation flag does not enable collection.
+
+A denied prior read is unknown existence. Safe bootstrap uses only If-None-Match `*`; 412 protects
+existing bytes. A successful create still needs validated readback. Other updates require a readable
+valid prior plus If-Match, with bounded conflicts. Authentication failure, malformed/future state and
+unknown write completion are not successes. Do not grant ListBucket, fall back to unconditional
+writes or delete an unreadable object to make the observer green.
+
+Local operator proof uses fixture mode without AWS:
+
+```bash
+python3 -m collector.observer --fixture /absolute/path/events.json --output-dir /absolute/path/new-output
+```
+
+The output directory must be new. Fixture mode cannot be combined with production arguments and
+proves parser/reducer/serialization behavior only. The observer never establishes current estate
+membership; successful inventory counts are dated recorded discoveries.
+
+Outcome recording cannot be enabled with the module-managed Firehose task-log subscription: it would
+forward private digest events to another audience. Before live enablement, verify the log group has
+no external forwarding subscription either. A broader destination needs a separate audience decision.
+
+A valid prior writer may be up to five minutes ahead. A slower-clock merge preserves that writer's
+original generation label until its clock catches up, keeping the carried interval readable. This
+label is neither a new upload time nor a storage-service receipt. Event/acknowledgement times stay
+unchanged. Beyond the admitted skew the prior remains unavailable and its bytes are preserved.

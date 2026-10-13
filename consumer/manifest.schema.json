@@ -39,7 +39,7 @@
     "runtime": {
       "type": "object",
       "additionalProperties": false,
-      "$comment": "Each projection holds exactly collector.identity.PROJECTION_ENVS once omitted keys are filled. Only scan and provisioner keys the module renders from a variable default may be omitted; dashboards and alerts are always complete.",
+      "$comment": "Each projection holds exactly collector.identity.PROJECTION_ENVS once omitted keys are filled. The independent scan GCINSIGHT_OUTCOME_OBSERVER_ENABLED flag is additive default-off: omission retains old digests, enabled requires regenerated digests. Only scan and provisioner keys the module renders from a variable default may be omitted; dashboards and alerts are always complete.",
       "required": ["scan", "provisioner", "dashboards", "alerts"],
       "properties": {
         "scan": {"$ref": "#/$defs/stringMap"},

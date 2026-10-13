@@ -33,7 +33,7 @@ import urllib.parse
 import urllib.request
 from typing import Any, Iterable
 
-from collector import config, ratecard
+from collector import config, ratecard, outcome_events, runtime_identity
 from collector.coverage import FAILURE_ABORT_RATIO, Coverage
 from collector.emit import (carry, diff, gapstate, guard, hydrate, lock as scanlock, loki, mimir,
                             s3 as s3emit)
@@ -166,37 +166,7 @@ def scan_completion_record(meta: dict[str, Any]) -> dict[str, Any]:
 
 
 def _verified_ecs_runtime() -> bool:
-    """Prove this process can read its link-local ECS container metadata.
-
-    An environment variable name alone is trivial to copy into a local shell and therefore cannot be
-    the boundary protecting customer-facing publication. Fargate injects a link-local URI whose JSON
-    names the running ECS container; require both the authoritative host and that live response.
-    """
-    uri = (os.environ.get("ECS_CONTAINER_METADATA_URI_V4")
-           or os.environ.get("ECS_CONTAINER_METADATA_URI") or "")
-    try:
-        parsed = urllib.parse.urlsplit(uri)
-        if (
-            parsed.scheme != "http"
-            or parsed.hostname not in {"169.254.170.2", "fd00:ec2::23"}
-            or parsed.username is not None
-            or parsed.password is not None
-            or parsed.port is not None
-            or not parsed.path
-            or parsed.query
-            or parsed.fragment
-        ):
-            return False
-        with urllib.request.urlopen(uri, timeout=1.0) as response:  # noqa: S310 - fixed link-local host
-            payload = json.load(response)
-    except Exception:  # noqa: BLE001 - any metadata ambiguity must fail closed
-        return False
-    if not isinstance(payload, dict):
-        return False
-    arn = payload.get("ContainerARN")
-    parts = arn.split(":", 5) if isinstance(arn, str) else []
-    return len(parts) == 6 and parts[0] == "arn" and parts[2] == "ecs" \
-        and parts[5].startswith("container/")
+    return runtime_identity.verified_ecs_runtime()
 
 
 def load_ratecard(
@@ -1277,8 +1247,26 @@ def assistant_gaps(
     return state
 
 
+def _fetch_inventory(client: ReadOnlyClient, cfg: config.Config):
+    """Observe the owned fresh read without changing its return or exception contract."""
+    recorder = outcome_events.current()
+    started = recorder.now() if recorder else None
+    try:
+        stacks = gcom.fetch_inventory(client, cfg)
+    except Exception:
+        if recorder:
+            recorder.inventory("failed", reason="read_failed", read_started_at=started,
+                               read_completed_at=recorder.now())
+        raise
+    if recorder:
+        recorder.inventory("success" if stacks else "failed", reason="none" if stacks else "empty",
+                           count=len(stacks) if stacks else None, read_started_at=started,
+                           read_completed_at=recorder.now())
+    return stacks
+
+
 def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
-    stacks = gcom.fetch_inventory(client, cfg)
+    stacks = _fetch_inventory(client, cfg)
     inventory_evidence = getattr(stacks, "evidence", None)
     coverage = Coverage(tier=cfg.tier, total=len(stacks))
     for s in stacks:
@@ -1436,7 +1424,7 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
 
 
 def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
-    stacks = gcom.fetch_inventory(client, cfg)
+    stacks = _fetch_inventory(client, cfg)
     inventory_evidence = getattr(stacks, "evidence", None)
     slugs = [str(s["slug"]) for s in stacks]
     if cfg.stack:
@@ -1760,7 +1748,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
 
 def run_t3(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     """Six-hourly: cardinality, Adaptive Metrics recommendations, Fleet Management inventory."""
-    stacks = gcom.fetch_inventory(client, cfg)
+    stacks = _fetch_inventory(client, cfg)
     inventory_evidence = getattr(stacks, "evidence", None)
     if cfg.stack:
         stacks = [s for s in stacks if str(s["slug"]) == cfg.stack]
@@ -1883,6 +1871,28 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
         console_log("error", f"error: tier {cfg.tier} not implemented yet")
         return 2
 
+    recorder = None
+    if (os.environ.get("GCINSIGHT_OUTCOME_OBSERVER_ENABLED", "0") == "1"
+            and not cfg.dry_run and not getattr(cfg, "limit", None) and not getattr(cfg, "stack", None)):
+        recorder = outcome_events.Recorder.start(
+            cfg.tier, cfg.deadline_seconds,
+            source_revision=os.environ.get("GCINSIGHT_SOURCE_REVISION"))
+    with outcome_events.recording(recorder):
+        if recorder and cfg.tier == "t4":
+            recorder.inventory("unknown", reason="not_observed")
+        try:
+            result = _run_admitted(client, cfg, args)
+        except BaseException:
+            if recorder:
+                recorder.finish(exception=True)
+            raise
+        if recorder:
+            recorder.finish(result)
+        return result
+
+
+def _run_admitted(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) -> int:
+    runners = {"t1": run_t1, "t2": run_t2, "t3": run_t3, "t4": run_t4}
     started = dt.datetime.now(dt.timezone.utc)
     try:
         scan = runners[cfg.tier](client, cfg)

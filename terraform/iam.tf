@@ -69,6 +69,16 @@ resource "aws_iam_role" "task" {
 }
 
 data "aws_iam_policy_document" "task" {
+  dynamic "statement" {
+    for_each = local.inputs.outcome_observer_enabled ? [1] : []
+    content {
+      sid       = "ReserveOutcomeObserverWrites"
+      effect    = "Deny"
+      actions   = ["s3:PutObject", "s3:DeleteObject"]
+      resources = ["${local.bucket_arn}/views/outcomes/*"]
+    }
+  }
+
   statement {
     sid    = "ReadWriteScanStorage"
     effect = "Allow"

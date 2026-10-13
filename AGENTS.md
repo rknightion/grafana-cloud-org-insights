@@ -144,6 +144,10 @@ off anything but the live inventory.
   marginal counts do not establish disjointness or fallback additivity; no combined saving is emitted.
 - A repair must not re-mint a working credential. Token names are organisation-wide unique, so an
   unnecessary mint can leave an untracked credential while SSM points at the replacement.
+- Collector PromQL sample reads carry the empty `__ignore_usage__=""` matcher in every vector
+  selector to avoid influencing Adaptive Metrics recommendation compatibility. This is not a URL
+  parameter. Metadata-route tracking and Adaptive Logs read opt-outs remain unproved; do not
+  infer suppression from accepting a filter or apply this matcher to another signal.
 - Adaptive savings require verbose recommendation counts. Sum positive marginal reductions for `add`
   and `update`; never use the whole active-series count as the saving.
 - Currency is absent when it cannot be priced. A missing or partially priced rate card must not
@@ -429,3 +433,19 @@ existing lifecycle policy before raw publication; root must verify effective ret
 encryption and reader access. This includes a fresh effective bucket-policy witness denying
 non-TLS access. A missing policy blocks raw publication. Outside that module flag, a lifecycle grant does not
 authorize adding a bucket policy, and never add a competing lifecycle configuration resource.
+
+## Optional outcome observer
+
+Outcome recording and the separate scheduled writer are default-off. Typed events are bound to exact
+collector task streams; only five reviewed summary views receive content-derived private digests.
+Protected raw-risk/labelling views never emit receipts. Observer state never hydrates a collector
+input and never relaxes failed-inventory or publication refusal. Latest observed is not actual latest
+or authoritative membership. Keep original event/receipt times, bounded sticky conflicts and derived
+success caches; later contradictory evidence revokes a cached success. Missing prior objects without
+ListBucket can return403: only conditional creation is permitted, followed by validated readback.
+Default-off legacy consumer digests remain unchanged; enabled recording never accepts an old digest.
+Live enablement requires its own reviewed IAM/audience/retention deployment boundary.
+
+Outcome recording cannot be enabled with the module-managed Firehose task-log subscription: it would
+forward private digest events to another audience. Before live enablement, verify the log group has
+no external forwarding subscription either. A broader destination needs a separate audience decision.

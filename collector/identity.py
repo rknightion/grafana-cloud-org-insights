@@ -31,6 +31,9 @@ PRODUCER_RULE_DEFAULTS = {
     "GCINSIGHT_RULE_INVENTORY_ENABLED": "0",
 }
 
+OUTCOME_OBSERVER_DEFAULTS = {"GCINSIGHT_OUTCOME_OBSERVER_ENABLED": "0"}
+ADDITIVE_SCAN_DEFAULTS = {**PRODUCER_RULE_DEFAULTS, **OUTCOME_OBSERVER_DEFAULTS}
+
 SCAN_ENV = (
     "GCINSIGHT_ORG_ID", "GCINSIGHT_WRITE_STACK", "GCINSIGHT_MIMIR_URL",
     "GCINSIGHT_MIMIR_TENANT", "GCINSIGHT_LOKI_URL", "GCINSIGHT_LOKI_TENANT",
@@ -44,6 +47,7 @@ SCAN_ENV = (
     "GCINSIGHT_LABEL_INVENTORY_ENABLED", "GCINSIGHT_LABEL_INVENTORY_TUNABLES",
     "GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES", "GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS",
     "GCINSIGHT_LOKI_VOLUME_ENABLED", "GCINSIGHT_RULE_INVENTORY_ENABLED",
+    "GCINSIGHT_OUTCOME_OBSERVER_ENABLED",
 )
 PROVISIONER_ENV = (
     "GCINSIGHT_ORG_ID", "GCINSIGHT_SSM_REGION", "GCINSIGHT_STACK_TOKEN_PREFIX",
@@ -172,7 +176,7 @@ def canonical_projection(kind: str, environ: Mapping[str, str] | None = None) ->
         names = tuple(name for name in names if name not in LABEL_INVENTORY_DEFAULTS)
     if kind == "scan":
         names = tuple(name for name in names
-                      if name not in PRODUCER_RULE_DEFAULTS or name in source)
+                      if name not in ADDITIVE_SCAN_DEFAULTS or name in source)
     out = {name: str(source.get(name, "")).strip() for name in names}
     return {name: canonical_json_text(value) if name in JSON_VALUED_ENV and value else value
             for name, value in out.items()}
@@ -197,7 +201,7 @@ def verify_runtime_projection(kind: str, *, environ: Mapping[str, str] | None = 
     if kind == "scan" and actual != expected:
         # Strip only exact default-off additions. Enabled policy can never use an old digest.
         legacy_candidates = [dict(source)]
-        for name, default in PRODUCER_RULE_DEFAULTS.items():
+        for name, default in ADDITIVE_SCAN_DEFAULTS.items():
             if str(source.get(name, default)).strip() == default:
                 legacy_candidates += [{key: value for key, value in candidate.items() if key != name}
                                       for candidate in list(legacy_candidates)]

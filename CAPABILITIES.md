@@ -255,11 +255,43 @@ application identity. Two active dev stacks returned nonzero request counts but 
 The direct `/aggregations/recommendations?verbose=true` response is required for series counts.
 The default response is structurally complete-looking but insufficient for savings arithmetic.
 
+#### Keep collector reads out of recommendation usage
+
+The collector's PromQL sample queries carry `__ignore_usage__=""` in every vector selector.
+This is a label matcher inside the `query` expression, not a standalone HTTP query parameter.
+The [official recommendation contract](https://grafana.com/docs/grafana-cloud/observe-and-act/adaptive-telemetry/adaptive-metrics/manage-recommendations/understand-recommended-rules/)
+says, "Adding this label selector has no effect on the query results", and requires the matcher on
+all selectors in a multi-selector expression. The merged
+[mimirtool change](https://github.com/grafana/mimir/pull/14474) applies the same directive to tool-generated
+PromQL queries. This suppresses their contribution to recommendation compatibility analysis;
+it does not erase historical query usage or establish an incident cause.
+
+Metadata reads have a separate, unresolved usage-tracking boundary. The
+[Mimir HTTP API](https://grafana.com/docs/mimir/latest/references/http-api/) exposes label-name/value
+and series reads, and a `selector` filter on cardinality reads, but does not establish whether
+these Cloud routes contribute to recommendation usage or support this suppression directive.
+The collector calls `/api/prom/api/v1/labels`, `/api/prom/api/v1/label/<name>/values`,
+`/api/prom/api/v1/cardinality/label_names` and `/api/prom/api/v1/cardinality/label_values`.
+It currently makes no Mimir `/api/prom/api/v1/series` call. Adding `match[]` or `selector` just because
+the API accepts a filter would not prove suppression; these metadata requests remain unchanged
+pending an exact Cloud tracking contract. No blanket recommendation-neutrality claim follows.
+
 ### Adaptive Logs
 
 The working read route is the Adaptive Logs plugin proxy. Frontend app resource paths can return 500
 and datasource-proxy calls can report authentication failure even when the reader role is correct.
 Recommendation volume has no declared or settable time window.
+
+The [Adaptive Logs introduction](https://grafana.com/docs/grafana-cloud/observe-and-act/adaptive-telemetry/adaptive-logs/introduction/)
+says it evaluates datasource queries "regardless of where they originate" and uses queried log-line
+patterns. Collector data reads are `/loki/api/v1/labels`, `/loki/api/v1/label/<name>/values`,
+`/loki/api/v1/series` and `/loki/api/v1/index/volume`; these return
+metadata or counts, not log lines. The collector does not call Loki `/query`, `/query_range` or
+`/tail`, and the witnessed `/index/stats` route has no current collector caller.
+Public documentation reviewed on 2026-10-13 did not establish whether these exact metadata
+routes enter pattern usage or a supported per-request opt-out. Their classification therefore
+remains unknown. No invented header, parameter or Metrics matcher is applied to Loki.
+Exemptions protect logs from dropping; they are not evidence of a read-usage opt-out.
 
 ### SLO and Adaptive Traces
 
@@ -270,6 +302,14 @@ recommendation counts through the routes above with the existing reader; this is
 sufficiency of the full role, not proof of isolated minimum permissions. Config availability does not
 prove enablement, and recommendation counts do not measure achieved saving. Both readers discard
 raw objects and use the [guarded transport/schema fences](docs/source-resource-fences.md).
+
+The current [Adaptive Traces introduction](https://grafana.com/docs/grafana-cloud/observe-and-act/adaptive-telemetry/adaptive-traces/introduction/)
+states that Adaptive Traces "does not currently use query usage as an input in recommendations".
+Under that documented model, the collector's `/tempo/api/v2/search/tags` and
+`/tempo/api/v2/search/tag/<scoped-name>/values` reads, including intrinsic `name` and
+`resource.service.name`, do not require a recommendation-usage opt-out. No such directive is
+added. This dated product contract is not a deployed backend witness or a guarantee that future
+recommendation models will retain it; it changes no route grant or read-scope boundary.
 
 ### Optional count-only product inputs
 

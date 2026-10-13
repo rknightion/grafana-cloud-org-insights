@@ -655,3 +655,9 @@ variable "provisioner_memory" {
   type        = string
   default     = "512"
 }
+
+variable "outcome_observer_enabled" {
+  type        = bool
+  default     = false
+  description = "Record minimized scan outcomes and create a separate bounded observer task. Requires module-managed bucket retention; no Grafana credentials are granted to the observer."
+}

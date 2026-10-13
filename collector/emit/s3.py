@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from collector.emit.carry import MAX_FUTURE_SKEW
+from collector import outcome_events
 
 # Required, with NO default. A hardcoded bucket name means the task writes somewhere its own IAM role
 # has no permission for, which surfaces as an AccessDenied that reads like a broken policy and is
@@ -305,5 +306,27 @@ def write_views(views: dict[str, list[dict[str, Any]] | dict[str, Any]], meta: d
             payload = view_payload(rows, view_meta)
             path = Path(tmp) / f"{name}.json"
             path.write_text(json.dumps(payload, default=str))
-            written.append(_put(path, f"views/{name}.json", bucket, dry_run))
+            recorder = outcome_events.current() if not dry_run else None
+            # Exact on-disk bytes, only the reviewed five summaries. Other views continue unchanged.
+            receipt = recorder is not None and name in outcome_events.RECEIPT_VIEWS
+            digest = started = None
+            if receipt:
+                try:
+                    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+                    started = recorder.now()
+                except Exception:
+                    # Still attempt the typed record with unknown digest/interval: validator
+                    # refuses it and consumes its sequence, making the loss visible as a gap.
+                    pass
+            try:
+                written.append(_put(path, f"views/{name}.json", bucket, dry_run))
+            except Exception:
+                if receipt:
+                    recorder.view_write(name, "failed", digest, request_started_at=started,
+                                        request_completed_at=recorder.now())
+                raise
+            else:
+                if receipt:
+                    recorder.view_write(name, "acknowledged", digest, request_started_at=started,
+                                        request_completed_at=recorder.now())
     return written

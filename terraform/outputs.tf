@@ -137,3 +137,13 @@ output "created_resources" {
     ecr_repository        = length(aws_ecr_repository.collector) > 0
   }
 }
+
+output "outcome_observer" {
+  description = "Optional observer task definition and schedule configuration; null while the default-off observer is disabled. These are configured identities, not observed outcome evidence."
+  value = local.inputs.outcome_observer_enabled ? {
+    task_definition_arn = aws_ecs_task_definition.outcome_observer[0].arn
+    task_role_arn       = aws_iam_role.outcome_observer[0].arn
+    schedule_name       = aws_scheduler_schedule.outcome_observer[0].name
+    schedule_state      = aws_scheduler_schedule.outcome_observer[0].state
+  } : null
+}

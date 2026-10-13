@@ -126,6 +126,7 @@ DASHBOARD_DETAIL_ENV = "GCINSIGHT_DASHBOARD_DETAIL_ENABLED"
 LABEL_INVENTORY_ENV = "GCINSIGHT_LABEL_INVENTORY_ENABLED"
 LOKI_VOLUME_ENV = "GCINSIGHT_LOKI_VOLUME_ENABLED"
 RULE_INVENTORY_ENV = "GCINSIGHT_RULE_INVENTORY_ENABLED"
+OUTCOME_OBSERVER_ENV = "GCINSIGHT_OUTCOME_OBSERVER_ENABLED"
 RETENTION_POLICY_ENV = "GCINSIGHT_EXPECTED_RETENTION_POLICY"
 # The organisation's expected scrape cadence. A Fleet Management pipeline scraping faster than this raises
 # DPM and is published as a finding (GCI-0046). Policy, not inventory, so it is a tunable.
@@ -251,6 +252,7 @@ class Config:
     label_inventory_enabled: bool = False
     loki_volume_enabled: bool = False
     rule_inventory_enabled: bool = False
+    outcome_observer_enabled: bool = False
     label_inventory_tunables: dict = field(default_factory=lambda: label_inventory_tunables(""))
     label_inventory_static_names: tuple[str, ...] = tuple(sorted(STATIC_NAMES))
     label_inventory_budget_seconds: float = 900.0
@@ -281,6 +283,7 @@ class Config:
             "label_inventory_enabled": self.label_inventory_enabled,
             "loki_volume_enabled": self.loki_volume_enabled,
             "rule_inventory_enabled": self.rule_inventory_enabled,
+            "outcome_observer_enabled": self.outcome_observer_enabled,
             "label_inventory_budget_seconds": self.label_inventory_budget_seconds,
             "label_inventory_static_name_count": len(self.label_inventory_static_names),
             # Selectors can contain customer label names and values. Count the policy, never log it.
@@ -338,6 +341,7 @@ def load(
         label_inventory_enabled=_optional_bool(LABEL_INVENTORY_ENV),
         loki_volume_enabled=_optional_bool(LOKI_VOLUME_ENV),
         rule_inventory_enabled=_optional_bool(RULE_INVENTORY_ENV),
+        outcome_observer_enabled=_optional_bool(OUTCOME_OBSERVER_ENV),
         label_inventory_tunables=label_inventory_tunables(os.environ.get("GCINSIGHT_LABEL_INVENTORY_TUNABLES", "")),
         label_inventory_static_names=label_inventory_static_names(os.environ.get("GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES", "")),
         label_inventory_budget_seconds=label_inventory_budget(os.environ.get("GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS", "")),

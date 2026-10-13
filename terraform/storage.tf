@@ -94,6 +94,17 @@ resource "aws_s3_bucket_lifecycle_configuration" "data" {
     }
   }
 
+  # Only minimized observer projections expire; other last-good views retain their policy.
+  dynamic "rule" {
+    for_each = local.inputs.outcome_observer_enabled ? [1] : []
+    content {
+      id     = "expire-outcome-observer"
+      status = "Enabled"
+      filter { prefix = "views/outcomes/" }
+      expiration { days = var.scan_retention_days }
+    }
+  }
+
   # Applies to every prefix including views/: the point is that yesterday's overwritten view is
   # recoverable for a week, not that it is kept forever.
   rule {

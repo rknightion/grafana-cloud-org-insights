@@ -10,6 +10,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import pathlib
+import re
 import unittest
 from unittest import mock
 from urllib.parse import parse_qs, urlsplit
@@ -111,12 +112,12 @@ class SourceContractTest(unittest.TestCase):
 # Frozen consumer contract: literals intentionally independent of the implementation's query table.
 FOOTPRINT_EXPRESSIONS = {
     "adaptive_traces": "max_over_time(sum by(stack_id)("
-        "grafanacloud_traces_instance_adaptivetraces_bytes_received_per_second)[24h:5m])",
+        "grafanacloud_traces_instance_adaptivetraces_bytes_received_per_second{__ignore_usage__=\"\"})[24h:5m])",
     "app_observability": "max_over_time(sum by(stack_id)("
-        "grafanacloud_app_observability_service_entity_count)[24h:5m])",
+        "grafanacloud_app_observability_service_entity_count{__ignore_usage__=\"\"})[24h:5m])",
     "agent_observability": "max_over_time(sum by(stack_id)("
-        "grafanacloud_agent_observability_instance_generation_items_per_second)[30d:5m])",
-    "assistant_org_users": "sum(grafanacloud_org_assistant_users)",
+        "grafanacloud_agent_observability_instance_generation_items_per_second{__ignore_usage__=\"\"})[30d:5m])",
+    "assistant_org_users": "sum(grafanacloud_org_assistant_users{__ignore_usage__=\"\"})",
 }
 
 
@@ -156,6 +157,35 @@ class FootprintBoundaryTest(unittest.TestCase):
             {"hub": {"token": "write-reader"}} if credentials is None else credentials,
             write_stack="hub", now=NOW,
         )
+
+    def test_every_outgoing_metrics_selector_ignores_adaptive_usage(self):
+        # Closed query grammar: adding a new function needs an explicit test review,
+        # while adding any unmarked metric must fail at the actual HTTP boundary.
+        def require_ignored(expression):
+            expression = expression.replace('{__ignore_usage__=""}', '{}')
+            for function in ("max_over_time(", "sum by(stack_id)(", "count by(stack_id)(", "sum("):
+                expression = expression.replace(function, "(")
+            expression = re.sub(r"\[\d+[hdm](?::\d+[hdm])?\]", "[]", expression)
+            selectors = list(re.finditer(r"[A-Za-z_][A-Za-z_0-9]*", expression))
+            self.assertTrue(selectors, expression)
+            for match in selectors:
+                self.assertTrue(expression[match.end():].startswith("{}"), expression)
+
+        self.probe()
+        for request in self.requests:
+            params = parse_qs(urlsplit(request.full_url).query)
+            require_ignored(params["query"][0])
+            self.assertEqual(params["time"], [str(int(NOW.timestamp()))])
+            self.assertEqual(request.get_method(), "GET")
+            self.assertEqual(request.get_header("Authorization"), "Bearer write-reader")
+        for expression in (
+            'sum(new_metric)',
+            'sum(sum)',
+            'sum(first{__ignore_usage__=""}) / sum(second)',
+            'sum(first{__ignore_usage__="not-empty"})',
+        ):
+            with self.subTest(omission=expression), self.assertRaises(AssertionError):
+                require_ignored(expression)
 
     def test_real_source_to_compose_preserves_positive_mapping_and_unknown_controls(self):
         # The HTTP transport boundary supplies a per-stack rate and an empty org vector.
@@ -355,13 +385,13 @@ class FootprintBoundaryTest(unittest.TestCase):
 # Frozen observation contract, independent of the implementation's registry and query helper.
 NEW_OBSERVATIONS = {
     "synthetic_monitoring": ("Synthetic Monitoring", "billable-check execution",
-        "max_over_time(sum by(stack_id)(grafanacloud_sm_billable_check_executions_per_second)[24h:5m])"),
+        "max_over_time(sum by(stack_id)(grafanacloud_sm_billable_check_executions_per_second{__ignore_usage__=\"\"})[24h:5m])"),
     "kubernetes": ("Kubernetes", "pod-info series",
-        "max_over_time(sum by(stack_id)(grafanacloud_instance_active_kube_pod_info_series)[24h:5m])"),
+        "max_over_time(sum by(stack_id)(grafanacloud_instance_active_kube_pod_info_series{__ignore_usage__=\"\"})[24h:5m])"),
     "knowledge_graph": ("Knowledge Graph", "active-entity",
-        "max_over_time(sum by(stack_id)(grafanacloud_asserts_instance_active_entities)[24h:5m])"),
+        "max_over_time(sum by(stack_id)(grafanacloud_asserts_instance_active_entities{__ignore_usage__=\"\"})[24h:5m])"),
     "pdc": ("Private Datasource Connect", "connected-agent",
-        "max_over_time(sum by(stack_id)(grafanacloud_grafana_pdc_connected_agents)[24h:5m])"),
+        "max_over_time(sum by(stack_id)(grafanacloud_grafana_pdc_connected_agents{__ignore_usage__=\"\"})[24h:5m])"),
 }
 
 
@@ -492,21 +522,21 @@ class NewObservationBoundaryTest(unittest.TestCase):
 # Reporting-only queries: count label-bearing markers, never interpret their values as units.
 REPORTING_EXPRESSIONS = {
     "db_observability": "max_over_time(count by(stack_id)("
-        "grafanacloud_instance_active_dbo11y_instance_count)[24h:5m])",
+        "grafanacloud_instance_active_dbo11y_instance_count{__ignore_usage__=\"\"})[24h:5m])",
     "db_observability_series": "max_over_time(count by(stack_id)("
-        "grafanacloud_instance_active_dbo11y_series)[24h:5m])",
+        "grafanacloud_instance_active_dbo11y_series{__ignore_usage__=\"\"})[24h:5m])",
     "db_observability_stats": "max_over_time(count by(stack_id)("
-        "grafanacloud_instance_active_dbo11y_stats)[24h:5m])",
+        "grafanacloud_instance_active_dbo11y_stats{__ignore_usage__=\"\"})[24h:5m])",
     "app_host_count": "max_over_time(count by(stack_id)("
-        "grafanacloud_instance_app_o11y_host_count)[24h:5m])",
+        "grafanacloud_instance_app_o11y_host_count{__ignore_usage__=\"\"})[24h:5m])",
     "app_host_v2_count": "max_over_time(count by(stack_id)("
-        "grafanacloud_instance_app_o11y_host_v2_count)[24h:5m])",
+        "grafanacloud_instance_app_o11y_host_v2_count{__ignore_usage__=\"\"})[24h:5m])",
     "app_host_v3_count": "max_over_time(count by(stack_id)("
-        "grafanacloud_instance_app_o11y_host_v3_count)[24h:5m])",
-    "app_billable_host_hours": "max_over_time(grafanacloud_org_app_o11y_billable_host_hours[24h])",
-    "app_included_host_hours": "max_over_time(grafanacloud_org_app_o11y_included_host_hours[24h])",
-    "infra_billable_host_hours": "max_over_time(grafanacloud_org_infra_o11y_billable_host_hours[24h])",
-    "infra_included_host_hours": "max_over_time(grafanacloud_org_infra_o11y_included_host_hours[24h])",
+        "grafanacloud_instance_app_o11y_host_v3_count{__ignore_usage__=\"\"})[24h:5m])",
+    "app_billable_host_hours": "max_over_time(grafanacloud_org_app_o11y_billable_host_hours{__ignore_usage__=\"\"}[24h])",
+    "app_included_host_hours": "max_over_time(grafanacloud_org_app_o11y_included_host_hours{__ignore_usage__=\"\"}[24h])",
+    "infra_billable_host_hours": "max_over_time(grafanacloud_org_infra_o11y_billable_host_hours{__ignore_usage__=\"\"}[24h])",
+    "infra_included_host_hours": "max_over_time(grafanacloud_org_infra_o11y_included_host_hours{__ignore_usage__=\"\"}[24h])",
 }
 REPORTING_ORG = frozenset({"app_billable_host_hours", "app_included_host_hours",
                            "infra_billable_host_hours", "infra_included_host_hours"})

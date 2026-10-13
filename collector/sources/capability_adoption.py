@@ -32,8 +32,17 @@ TRANSPORT_ERROR = "transport_error"
 EMPTY_RESPONSE = "empty_response"
 
 
+def metric_selector(metric: str) -> str:
+    """Inspection must not preserve labels in Adaptive Metrics recommendations.
+
+    Construct only our literal metric names; never rewrite arbitrary PromQL.
+    Grafana documents this empty matcher as result-preserving usage suppression.
+    """
+    return f'{metric}{{__ignore_usage__=""}}'
+
+
 def _windowed(metric: str) -> str:
-    return f"max_over_time(sum by(stack_id)({metric})[{WINDOW}:5m])"
+    return f"max_over_time(sum by(stack_id)({metric_selector(metric)})[{WINDOW}:5m])"
 
 
 QUERIES: Mapping[str, str] = {
@@ -45,9 +54,9 @@ QUERIES: Mapping[str, str] = {
     "exemplars": _windowed("grafanacloud_instance_exemplars_per_second"),
     # A vendor-documented gauge of alert groups by state, not a cumulative event counter.
     # Presence identifies the reporting population; a positive level is not current-period activity.
-    "irm_oncall": "sum by(stack_id)(grafanacloud_oncall_instance_alert_groups_total)",
+    "irm_oncall": f"sum by(stack_id)({metric_selector('grafanacloud_oncall_instance_alert_groups_total')})",
     # Current billing-period cumulative usage, not a momentary rate.
-    "k6": "sum by(stack_id)(grafanacloud_k6_stack_virtual_user_hours_usage)",
+    "k6": f"sum by(stack_id)({metric_selector('grafanacloud_k6_stack_virtual_user_hours_usage')})",
     "frontend_observability": _windowed(
         "grafanacloud_frontend_observability_instance_sessions_per_second"
     ),
@@ -90,12 +99,12 @@ FOOTPRINT_QUERIES: Mapping[str, str] = {
     ),
     "app_observability": _windowed("grafanacloud_app_observability_service_entity_count"),
     "agent_observability": "max_over_time(sum by(stack_id)("
-        "grafanacloud_agent_observability_instance_generation_items_per_second)[30d:5m])",
-    "assistant_org_users": "sum(grafanacloud_org_assistant_users)",
-    **{key: f"max_over_time(count by(stack_id)({metric})[{WINDOW}:5m])"
+        f"{metric_selector('grafanacloud_agent_observability_instance_generation_items_per_second')})[30d:5m])",
+    "assistant_org_users": f"sum({metric_selector('grafanacloud_org_assistant_users')})",
+    **{key: f"max_over_time(count by(stack_id)({metric_selector(metric)})[{WINDOW}:5m])"
        for key, metric in REPORTING_STACK_METRICS.items()},
     # No sum, no integration and no per-stack attribution. Ambiguous org vectors are refused.
-    **{key: f"max_over_time({metric}[{WINDOW}])"
+    **{key: f"max_over_time({metric_selector(metric)}[{WINDOW}])"
        for key, metric in REPORTING_ORG_METRICS.items()},
 }
 

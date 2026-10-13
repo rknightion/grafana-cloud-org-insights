@@ -46,7 +46,7 @@ def fixture(revision: str | None = None) -> dict:
     runtime["provisioner"]["GCINSIGHT_READER_PRODUCT_READS"] = ""
     runtime["scan"]["GCINSIGHT_READER_PRODUCT_READS"] = ""
     runtime["scan"].update(identity.LABEL_INVENTORY_DEFAULTS)
-    runtime["scan"].update(identity.PRODUCER_RULE_DEFAULTS)
+    runtime["scan"].update(identity.ADDITIVE_SCAN_DEFAULTS)
     runtime["scan"]["GCINSIGHT_DASHBOARD_DETAIL_ENABLED"] = "0"
     runtime["scan"]["GCINSIGHT_EXPECTED_RETENTION_POLICY"] = "[]"
     runtime["scan"]["GCINSIGHT_COVERAGE_SCORE_WEIGHTS"] = json.dumps({
@@ -1128,6 +1128,30 @@ class ConsumerShellTest(unittest.TestCase):
             self.assertEqual(rejected.returncode, 2, rejected.stderr)
             self.assertIn("module input loki_job comes from the manifest", rejected.stderr)
             self.assertNotIn("private-job-value", rejected.stderr)
+
+
+class OutcomeManifestCompatibilityTest(unittest.TestCase):
+    def test_legacy_full_and_pruned_keep_recorded_digests(self):
+        for name in ("full", "pruned"):
+            body = committed(name)
+            consumer_manifest.validate(body)
+            self.assertEqual(consumer_manifest.calculated_digests(body),
+                             (body["overlay_digest"], body["runtime_projection_digests"]))
+            self.assertNotIn("GCINSIGHT_OUTCOME_OBSERVER_ENABLED", consumer_manifest.effective(body)["runtime"]["scan"])
+
+    def test_enabled_manifest_requires_new_digest_and_renders_flag(self):
+        body = committed("full")
+        body["runtime"]["scan"]["GCINSIGHT_OUTCOME_OBSERVER_ENABLED"] = "1"
+        with self.assertRaises(consumer_manifest.ManifestError):
+            consumer_manifest.validate(body)
+        updated = consumer_manifest.regenerate(body)
+        consumer_manifest.validate(updated)
+        self.assertNotEqual(updated["runtime_projection_digests"]["scan"], body["runtime_projection_digests"]["scan"])
+        env = updated["runtime"]["scan"]
+        self.assertEqual(env["GCINSIGHT_OUTCOME_OBSERVER_ENABLED"], "1")
+        self.assertEqual(identity.verify_runtime_projection("scan", environ=dict(
+            env, GCINSIGHT_RUNTIME_CONFIG_DIGEST=updated["runtime_projection_digests"]["scan"])),
+            updated["runtime_projection_digests"]["scan"])
 
 
 if __name__ == "__main__":
