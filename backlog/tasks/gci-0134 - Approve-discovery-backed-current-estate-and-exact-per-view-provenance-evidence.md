@@ -1,11 +1,11 @@
 ---
 id: GCI-0134
-title: Approve discovery-backed current-estate and exact per-view provenance evidence
-status: Parked
+title: Approve bounded accepted-view provenance and collector outcome evidence
+status: Done
 assignee:
   - '@loop25-root'
 created_date: '2026-10-12 16:03'
-updated_date: '2026-10-13 12:17'
+updated_date: '2026-10-13 22:39'
 labels:
   - dashboards
   - schema
@@ -26,11 +26,10 @@ The bounded dashboard-only metadata build in GCI-0114 (per-view history and meta
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 An approved bounded evidence contract distinguishes successful fresh current-inventory identity/status observation from failed/ambiguous unknown inventory and historical snapshot membership, while preserving existing all-publication refusal and last-good objects.
-- [ ] #2 A dated successful nonempty authoritative inventory observation can establish departure only at its own identity/time; failed or ambiguous evidence retains historical rows and never publishes estate zero or label-history union as current.
-- [x] #3 Source-specific measured-empty, unavailable, bounded-partial and complete semantics are explicit; partial reads and missing legacy metadata never manufacture exhaustiveness or zero.
-- [x] #4 Exact source observation time, envelope composition/publication marker and S3 upload time have separate meaning; missing or older metadata stays unknown and own-input hydration, future-skew, privacy and source-floor fences remain intact.
-- [x] #5 Before implementation, owner approves exact source/schema/reader-access/retention/metric-budget scope and compatibility for accepted consumers; public artifact counterexamples cover failed inventory, removed stack, missing metadata and retained last-good without configured rosters.
+- [x] #1 Approved bounded outcome contract distinguishes dated successful inventory observations from failed or ambiguous unknown inventory, preserving collector publication refusal and last-good views; it claims no authoritative membership or departure guarantee.
+- [x] #2 Source-specific measured-empty, unavailable, bounded-partial and complete semantics remain explicit; partial reads and missing legacy metadata never manufacture exhaustiveness or zero.
+- [x] #3 Source observation time, envelope composition/publication marker and S3 upload time retain separate meanings; missing metadata stays unknown and hydration, future-skew, privacy and source floors remain intact.
+- [x] #4 Owner-approved source/schema/reader-access/retention/budget scope and compatibility remain bounded; accepted private view evidence and separate minimized outcome observation add no product series.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -64,10 +63,14 @@ loop25 cumulative implementation cycles3 observed (transport focused, privacy/fu
 loop25 surface1 exact7file manifest6e78f67e accepted for rootlanding: independent guardedsecurityPASS/CodeRabbitcomplete0 coveringall7; final justcheck0/1114.892s Python2727pass/2skip/27626subtests +ToFu37pass and remaininggatesclean. PriorDNSred retained; newbaseproviderred diagnosed113-byteTMPDIR Unixsocketlimit, same6.68plugin passedshortpath then authorizedinfraretry1of2 fullgate0, no source/pin/testweakening. Cumulativeimplementation4 exhausted, infraretry1, no cycle5. PublicCLI+408metadata/12historical JSONata and privacy/nativeLoki/diagnostic failfirstproofs retained; 1051finite metadata debts explicitly unrendered audit, unknownseed stillfails. Root fresh actualapproved inventory payload6+selflink acceptedexactvalidator; visibility/authorityunknown. All privateS3/no-series/sourcefloor/refusal/hydration/timeguard contracts intact. Historicalthree syntheticbucket lockattempt exits2 stillunknown provideroutcome/currentHeadBucket+HeadObject404; correctedtestsrefuse subprocess. AC1-2 observer/current-estate status outsidethissurface remainopen underGCI-0134.01 (outcome observer).
 
 loop25 final disposition: admitted surface1 COMPLETE, landed4d203b8 and shippedv0.12.0 source5e215a9 with exactCI+composedgatesgreen, independentsecurityPASS/CodeRabbitcomplete0 all7files. Implementationcycles4 cumulative, infraretry1 dueprovenUnixsocketTMPDIRprefix, no ceilingreset. AC3-5 checked only for approvedaccepted-success schema/time/compatibility/budget surface; AC1-2 remainOPEN because separatelyscoped outcomeobserver/current-membership authority notimplemented. Parentparkdependency GCI-0134.01 (outcome observer), no failureprojection or customer rollout claimed. Fieldsunrenderedprivate audit debts exact1051paths preserveseedednew-gap failure; newevidence neverLoki/diagnostic,0newseries/13827capacity unchanged. Historical3attempted syntheticAWSlocks exits2 stillprovideroutcomeUNKNOWN; currentrootHeadBucket+HeadObject404, no cleanup/sourcegrant excuse. Resume observerunderitsownfrozenwriter/IAM/storage/retention design, notanothermetadataimplementationcycle.
+
+Explicit 2026-10-13 owner scope withdrawal: deploy the observer and just close the broader membership requirement because it is not needed. Former AC2 (dated authoritative nonempty identity establishing departure) is RETIRED, not proved. Former AC1 identity-authority portion is likewise withdrawn; bounded successful/failed/unknown run observations and dated counts remain accepted. Historical snapshots, inventory discovery, zero refusal, row preservation, privacy and all other hard rules remain. Source/schema contract accepted; observer live deployment continues separately in GCI-0134.01 (outcome observer). No configured roster, new membership store or authoritative departure claim is implemented.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Surface1 accepted-success privateS3 evidence shippedin v0.12.0; nativeinventory validation/observation, actualviewdependencies and conservative source-specific completeness supported, unsupportedtimes/visibility/storage unknown. Legacyfields/rows/hydration/refusal/lastgood/future/sourcefloors preserved, no newseries. Genuine fail-first artifact/privacy/CLI/JSONata/seededcoverage proofs and exactgreenintegrated/hostedgates. ParentnotDone: AC1-2 require separateoutcomeobserver.
+
+Closed after explicit owner withdrawal of authoritative current-membership/departure proof, with remaining bounded provenance/outcome contract accepted. Existing accepted-success metadata shipped; separately authorized observer deployment remains its own active task. Current-membership authority stays unknown rather than being relabelled as verified.
 <!-- SECTION:FINAL_SUMMARY:END -->
