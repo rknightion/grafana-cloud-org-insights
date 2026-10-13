@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.13.3](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.2...v0.13.3) (2026-10-13)
+
+
+### Bug Fixes
+
+* parse bounded AWS CLI retry annotations in observer errors ([2019bdc](https://github.com/rknightion/grafana-cloud-org-insights/commit/2019bdc8e4bbfaee05ce029855262bc351649c63))
+
+
+### Documentation
+
+* **backlog:** align outcome acceptance with owner scope withdrawal ([637ecb0](https://github.com/rknightion/grafana-cloud-org-insights/commit/637ecb04d962f1f91aa352244e8f427c0699eebd))
+* **backlog:** describe final bounded provenance scope ([a60b8ff](https://github.com/rknightion/grafana-cloud-org-insights/commit/a60b8ffac3f074d128867f5fcd439b9d1e64b403))
+* **backlog:** record observer release and authentication resume point ([38b9758](https://github.com/rknightion/grafana-cloud-org-insights/commit/38b97582ec161ced293b3fa1f96d59ccf61c7307))
+* **backlog:** retire owner-withdrawn membership proof requirement ([0f2ad3e](https://github.com/rknightion/grafana-cloud-org-insights/commit/0f2ad3ed903dd421776b6cc17312dd8827f3cda5))
+* record owner scope for bounded outcome observation ([21d1b6f](https://github.com/rknightion/grafana-cloud-org-insights/commit/21d1b6f83598a87bddc983f2bf5f03105149f1e9))
+
 ## [0.13.2](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.1...v0.13.2) (2026-10-13)
 
 
