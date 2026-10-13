@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.0...v0.13.1) (2026-10-13)
+
+
+### Bug Fixes
+
+* **terraform:** preserve explicit Container Insights capture policy ([6394c19](https://github.com/rknightion/grafana-cloud-org-insights/commit/6394c19f5cb69bf82b9362284f69398b19cbaaa6))
+
 ## [0.13.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.12.1...v0.13.0) (2026-10-13)
 
 
