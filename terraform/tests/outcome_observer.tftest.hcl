@@ -112,7 +112,7 @@ run "unmanaged_adopted_bucket_refuses_enablement" {
   expect_failures = [aws_ecs_task_definition.outcome_observer]
 }
 
-run "forwarded_task_logs_refuse_unapproved_receipt_audience" {
+run "forwarded_task_logs_exclude_private_outcome_records" {
   command = plan
   variables {
     outcome_observer_enabled          = true
@@ -120,5 +120,21 @@ run "forwarded_task_logs_refuse_unapproved_receipt_audience" {
     firehose_log_subscription_enabled = true
     firehose_access_key_secret_arn    = "arn:aws:secretsmanager:us-east-1:123456789012:secret:synthetic-firehose-abcdef"
   }
-  expect_failures = [aws_ecs_task_definition.outcome_observer]
+  assert {
+    condition     = aws_cloudwatch_log_subscription_filter.ecs_logs[0].filter_pattern == "-\"gcinsight_outcome\"" && length(aws_ecs_task_definition.outcome_observer) == 1
+    error_message = "Forwarding must remain installed while excluding private outcome records."
+  }
+}
+
+run "default_off_forwarding_preserves_all_records" {
+  command = plan
+  variables {
+    firehose_logs_enabled             = true
+    firehose_log_subscription_enabled = true
+    firehose_access_key_secret_arn    = "arn:aws:secretsmanager:us-east-1:123456789012:secret:synthetic-firehose-abcdef"
+  }
+  assert {
+    condition     = aws_cloudwatch_log_subscription_filter.ecs_logs[0].filter_pattern == ""
+    error_message = "Default-off observer must preserve the existing forwarding filter."
+  }
 }

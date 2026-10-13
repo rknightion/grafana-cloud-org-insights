@@ -329,6 +329,12 @@ resource "aws_iam_role_policy" "firehose_subscription" {
   policy = data.aws_iam_policy_document.firehose_subscription[0].json
 }
 
+# Exclude typed private outcome events before ordinary task logs leave CloudWatch. The negative
+# literal term is conservative: any record containing this discriminator stays in the private group.
+locals {
+  firehose_task_log_filter_pattern = local.inputs.outcome_observer_enabled ? "-\"gcinsight_outcome\"" : ""
+}
+
 # The only resource controlled by the second-stage switch. Keeping this separate is the safety seam:
 # the stream can accept a deliberate DirectPut test before any customer task log is wired to it.
 resource "aws_cloudwatch_log_subscription_filter" "ecs_logs" {
@@ -336,7 +342,7 @@ resource "aws_cloudwatch_log_subscription_filter" "ecs_logs" {
 
   name            = "${local.inputs.name_prefix}-ecs-logs"
   log_group_name  = aws_cloudwatch_log_group.tasks.name
-  filter_pattern  = ""
+  filter_pattern  = local.firehose_task_log_filter_pattern
   destination_arn = local.inputs.firehose_logs_enabled ? aws_kinesis_firehose_delivery_stream.ecs_logs[0].arn : ""
   role_arn        = local.inputs.firehose_logs_enabled ? aws_iam_role.firehose_subscription[0].arn : ""
 

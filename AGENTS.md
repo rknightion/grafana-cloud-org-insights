@@ -446,12 +446,20 @@ ListBucket can return403: only conditional creation is permitted, followed by va
 Default-off legacy consumer digests remain unchanged; enabled recording never accepts an old digest.
 Live enablement requires its own reviewed IAM/audience/retention deployment boundary.
 
-Outcome recording cannot be enabled with the module-managed Firehose task-log subscription: it would
-forward private digest events to another audience. Before live enablement, verify the log group has
-no external forwarding subscription either. A broader destination needs a separate audience decision.
+Outcome recording with task-log forwarding requires the witnessed private-outcome exclusion on
+every forwarding subscription before recording task definitions become runnable. Read back all
+subscriptions before enablement; an unfiltered external path blocks recording. A broader destination
+for private outcome records needs a separate audience decision.
 
 Container Insights is default-off in the module and an additive AWS-only manifest policy. Preserve
 an owner-held capture window explicitly with `aws.container_insights_enabled = true` during image
 updates; never accept a planned disable as an incidental image change. False/absent retains legacy
 manifest digests, while true changes the overlay digest and therefore requires a rebuilt consumer
 image. This switch does not turn a memory reservation or pytest RSS into a collector measurement.
+
+When enabling outcome recording with module-managed task-log forwarding, the subscription excludes
+the private `gcinsight_outcome` discriminator before collector/observer definitions become runnable.
+Default-off forwarding remains all-records. Freshly read back every forwarding subscription before
+enablement; any external path lacking the witnessed exclusion blocks recording. AWS
+TestMetricFilter was witnessed against actual recorder JSON and prefixed JSON on 2026-10-13;
+ordinary text/JSON matched and outcome records did not. This proves filter semantics, not delivery.

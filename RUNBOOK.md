@@ -759,7 +759,7 @@ remain partial until all four previous projections are readable. There is no ato
 snapshot. Failed/unknown inventory still refuses collector publication and preserves last-good views.
 
 After enabling recording and observing real outcomes, add `--outcome-observer` to the usual
-`bin/dashboards.py operations --publish` command, including when running through `bin/consumer-exec`
+`bin/dashboards.py --publish operations` command, including when running through `bin/consumer-exec`
 with the dashboards projection. The Operations tab displays minimized rows only. Default dashboard
 builds do not read outcome objects. The explicit presentation flag does not enable collection.
 
@@ -779,9 +779,14 @@ The output directory must be new. Fixture mode cannot be combined with productio
 proves parser/reducer/serialization behavior only. The observer never establishes current estate
 membership; successful inventory counts are dated recorded discoveries.
 
-Outcome recording cannot be enabled with the module-managed Firehose task-log subscription: it would
-forward private digest events to another audience. Before live enablement, verify the log group has
-no external forwarding subscription either. A broader destination needs a separate audience decision.
+When outcome recording is enabled, the module-managed Firehose subscription uses the negative literal
+term `-"gcinsight_outcome"`. Ordinary task logs continue forwarding; records containing the private
+outcome discriminator remain in CloudWatch. Collector and observer task definitions depend on this
+subscription update, so a saved apply installs the exclusion before making recording tasks runnable.
+Default-off deployments retain their existing all-records filter. Before live enablement, read back
+all log-group subscriptions and verify every forwarding path excludes private outcome records. An
+external forwarding subscription without the witnessed exclusion blocks enablement; sending these
+records to a broader destination needs a separate audience decision.
 
 A valid prior writer may be up to five minutes ahead. A slower-clock merge preserves that writer's
 original generation label until its clock catches up, keeping the carried interval readable. This

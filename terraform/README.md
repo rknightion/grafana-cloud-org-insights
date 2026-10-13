@@ -472,6 +472,7 @@ visibility, storage-service receipt time or the actual latest execution. Observa
 hour; historical evidence retains its original timestamp for at most three days. Conditional object
 writes protect existing bytes, including the absent-object/403 bootstrap case without ListBucket.
 
-Outcome recording cannot be enabled with the module-managed Firehose task-log subscription: it would
-forward private digest events to another audience. Before live enablement, verify the log group has
-no external forwarding subscription either. A broader destination needs a separate audience decision.
+Outcome recording with task-log forwarding requires the witnessed private-outcome exclusion on
+every forwarding subscription before recording task definitions become runnable. Read back all
+subscriptions before enablement; an unfiltered external path blocks recording. A broader destination
+for private outcome records needs a separate audience decision.

@@ -57,14 +57,19 @@ resource "aws_ecs_task_definition" "outcome_observer" {
       error_message = "Outcome observer requires managed bucket retention: create the bucket or explicitly opt into manage_adopted_bucket_config before enabling it."
     }
     precondition {
-      condition     = !local.inputs.firehose_log_subscription_enabled
-      error_message = "Outcome digests are approved for the private CloudWatch audience only; forwarded task logs require a separate audience decision before enabling recording."
+      condition = !local.inputs.firehose_log_subscription_enabled || try(
+        aws_cloudwatch_log_subscription_filter.ecs_logs[0].filter_pattern == "-\"gcinsight_outcome\"", false,
+      )
+      error_message = "Forwarded task logs must exclude the private gcinsight_outcome discriminator before enabling outcome recording."
     }
     precondition {
       condition     = local.image != ""
       error_message = "Outcome observer requires a collector image."
     }
   }
+  # The observer and collector definitions become runnable only after private events are excluded.
+  depends_on = [aws_cloudwatch_log_subscription_filter.ecs_logs]
+
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = local.inputs.task_architecture

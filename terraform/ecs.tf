@@ -75,6 +75,9 @@ data "aws_subnet" "first" {
 # be varied per schedule and must be baked into the definition's `command`.
 
 resource "aws_ecs_task_definition" "scan" {
+  # Apply the private-outcome exclusion before any recording task can become schedulable.
+  depends_on = [aws_cloudwatch_log_subscription_filter.ecs_logs]
+
   for_each = local.tiers
 
   family                   = "${local.inputs.name_prefix}-${each.key}"
