@@ -1,5 +1,78 @@
 # Changelog
 
+## [0.12.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.11.0...v0.12.0) (2026-10-13)
+
+
+### Features
+
+* **dashboards:** consolidate approved registers without losing fields or context ([ef164dd](https://github.com/rknightion/grafana-cloud-org-insights/commit/ef164dd157f682e752dab17b7153caf6ab41ee55))
+* **dashboards:** disclose optional view states without querying known absence ([4494661](https://github.com/rknightion/grafana-cloud-org-insights/commit/44946614bc186755e37697d3a6ba2ba6f9ada254))
+* **dashboards:** expose retained view metadata without inventing current inventory ([b395420](https://github.com/rknightion/grafana-cloud-org-insights/commit/b39542087618ae83078f82cc2d0ca2ffb2acdcd4))
+* **labelling:** evaluate witnessed Loki OTLP promotion with isolated retention parsing ([7804fd9](https://github.com/rknightion/grafana-cloud-org-insights/commit/7804fd9a92db91b9b1f0070ae7d40771e96cc062))
+* **provenance:** retain private accepted-view evidence without weakening publication ([4d203b8](https://github.com/rknightion/grafana-cloud-org-insights/commit/4d203b8d79e1f5334cd80894239fccfd0861e9b7))
+
+
+### Bug Fixes
+
+* **ci:** consume stable OCI version labels from shared workflows v1.25.7 ([b704880](https://github.com/rknightion/grafana-cloud-org-insights/commit/b7048803759e634b52547c60252b21528ca021cb))
+* **dashboards:** preserve unknown product units in raw billing observations ([58aebb9](https://github.com/rknightion/grafana-cloud-org-insights/commit/58aebb9a7ff28853a21b24922b6d9967ef2fd264))
+* **dashboards:** qualify unsupported actor and outcome attribution ([f95d03f](https://github.com/rknightion/grafana-cloud-org-insights/commit/f95d03f88fbb8852354831531f721d2d6c60b3eb))
+* **dashboards:** separate endpoint rankings and absolute maturity colours ([5fddabd](https://github.com/rknightion/grafana-cloud-org-insights/commit/5fddabdf7224219ba348d64248bf9be384b45baf))
+* **dashboards:** withhold unmatched OnCall acknowledgement shares ([4310826](https://github.com/rknightion/grafana-cloud-org-insights/commit/4310826aabb10f4c78e56f58e73611aa2fc0ea25))
+* **image:** use pinned minimal glibc Python runtime for clean security gate ([c8ce783](https://github.com/rknightion/grafana-cloud-org-insights/commit/c8ce7834200a09fef30c0b95767748ca4eae2a81))
+
+
+### Documentation
+
+* **backlog:** accept attribution fidelity and admit endpoint-ranking contract ([58b4d80](https://github.com/rknightion/grafana-cloud-org-insights/commit/58b4d8074c953f2559902111abb6ccffda363337))
+* **backlog:** accept bounded Loki label-policy parsing and retention proof ([03bafbc](https://github.com/rknightion/grafana-cloud-org-insights/commit/03bafbcfc3143e08d5833dd9cc12e670814a796b))
+* **backlog:** accept conservative view metadata and admit attribution qualifiers ([f4f6130](https://github.com/rknightion/grafana-cloud-org-insights/commit/f4f6130d5b4568b7a7b2f4d239488c575b7b8e2b))
+* **backlog:** accept endpoint and colour proof and admit optional-view states ([eaaa18e](https://github.com/rknightion/grafana-cloud-org-insights/commit/eaaa18e3b91f6776db73fa113b3aa2c31db48bea))
+* **backlog:** accept layout and deadline proof repair and admit field ownership ([caf0431](https://github.com/rknightion/grafana-cloud-org-insights/commit/caf04314cf1da919f520ef9941f615daf9e39c4c))
+* **backlog:** accept optional states and admit approved layout consolidation ([14a06fd](https://github.com/rknightion/grafana-cloud-org-insights/commit/14a06fd98f8ed14c32976981748737c973fb4083))
+* **backlog:** accept qualified OnCall counts and admit raw-unit dashboard build ([fda0180](https://github.com/rknightion/grafana-cloud-org-insights/commit/fda0180a8d67a73593fa58c2dc342af20ad4b534))
+* **backlog:** accept raw-unit display contract and admit metadata-only build ([c4c2e9c](https://github.com/rknightion/grafana-cloud-org-insights/commit/c4c2e9cabbb9e43e4040f451bdebb84da9b8d994))
+* **backlog:** bind OCI progress and failed image-security publication evidence ([82040b1](https://github.com/rknightion/grafana-cloud-org-insights/commit/82040b169a0a2e5a9de1f412fcf47f3641bb1f7f))
+* **backlog:** bound preliminary dev view evidence to its scan population ([3854927](https://github.com/rknightion/grafana-cloud-org-insights/commit/3854927f168845f2bb53d0ae79f7011cb20cc4dc))
+* **backlog:** capture owner-scoped current-estate and view-provenance gap ([2f5695c](https://github.com/rknightion/grafana-cloud-org-insights/commit/2f5695c54162294f76f86e247a6b396d9a45309d))
+* **backlog:** close the qualified feature-footprint parent after dev proof ([239a08c](https://github.com/rknightion/grafana-cloud-org-insights/commit/239a08c56e15f56af988e41efa8ebecc22e094e8))
+* **backlog:** own composed RPC body-phase proof repair without relaxing bounds ([4b51736](https://github.com/rknightion/grafana-cloud-org-insights/commit/4b517360662a9e72d44ffae805694915f79b2473))
+* **backlog:** park monthly AI model on missing source witnesses with bounded design ([7a831b4](https://github.com/rknightion/grafana-cloud-org-insights/commit/7a831b4b7e49151c85b226eed668d3d1fcb1631e))
+* **backlog:** park stable artifact proof on expired image-security exceptions ([10710c1](https://github.com/rknightion/grafana-cloud-org-insights/commit/10710c10003fab504a7a4f7171963ef03d8fedfb))
+* **backlog:** preserve rejected ownership candidate and name serial proof blockers ([3d0be51](https://github.com/rknightion/grafana-cloud-org-insights/commit/3d0be51fc2d253f63c17ed757f71077ccd245ef4))
+* **backlog:** qualify historical stability proof and view contract ([c03e0e3](https://github.com/rknightion/grafana-cloud-org-insights/commit/c03e0e37f184329c1c95096e546b46251653950c))
+* **backlog:** record bounded loop23 builds and live evidence blockers ([ee6a289](https://github.com/rknightion/grafana-cloud-org-insights/commit/ee6a289e526310bc94a1f221af75212a4dd92b01))
+* **backlog:** retain final raw-unit candidate and exact attempt accounting ([7c09990](https://github.com/rknightion/grafana-cloud-org-insights/commit/7c099907393e368244b9744c8efc8a6037e97dd0))
+* **backlog:** retain reviewed shared image-label candidate identity ([4fc0bcf](https://github.com/rknightion/grafana-cloud-org-insights/commit/4fc0bcf6b3aeba5811e74d435d511d48c62531e7))
+* close natural consumer verification and record rollout blockers ([0f9c1ee](https://github.com/rknightion/grafana-cloud-org-insights/commit/0f9c1ee8a9382525e12fe7c082f224dca71a7e9e))
+* close the bounded Pillar J discovery documentation outcome ([1addf94](https://github.com/rknightion/grafana-cloud-org-insights/commit/1addf94c54aea8e6d1b80cfc992289a302a0a55a))
+* **loop:** add shared-release actor, required-gate and lane-evidence traps ([1fc2f2d](https://github.com/rknightion/grafana-cloud-org-insights/commit/1fc2f2d556ecae9afb99058f878c8d55b785a153))
+* **loop:** give every watcher the 1500 s deadline and resolve landed SHAs with git ([6cce6a6](https://github.com/rknightion/grafana-cloud-org-insights/commit/6cce6a68a8ce0899e4fbdd61e0e78718da9d234d))
+* **loop:** record loop22 infra traps; close owner-ruled tracker tasks ([a3c5e1d](https://github.com/rknightion/grafana-cloud-org-insights/commit/a3c5e1d7510ba62d850b4f108662924c6e86352d))
+* publish canonical agent documents ([7347630](https://github.com/rknightion/grafana-cloud-org-insights/commit/7347630f8f9584d861c69dde592cbf95d57cfc48))
+* record exact public showback contracts and their remaining gaps ([562c264](https://github.com/rknightion/grafana-cloud-org-insights/commit/562c264b52a5d132aeba4e4a34750e087aaf787a))
+
+
+### Miscellaneous
+
+* **backlog:** admit bounded loop24 research work ([080c32d](https://github.com/rknightion/grafana-cloud-org-insights/commit/080c32dbb1459a01832415ece1d78d03bb1d9faf))
+* **backlog:** admit loop25 scoped work and record required follow-ups ([3d31536](https://github.com/rknightion/grafana-cloud-org-insights/commit/3d315362ec85e05836967a006bafad9150eaf4d1))
+* **backlog:** apply the owner-selected Pillar J documentation criterion ([580ca11](https://github.com/rknightion/grafana-cloud-org-insights/commit/580ca1181794f4b7f625895e522a1f4ed14ac663))
+* **backlog:** archive Incident and k6 under final witness ruling ([6bc17e1](https://github.com/rknightion/grafana-cloud-org-insights/commit/6bc17e11e4199983955779c0860832a248bb9cc9))
+* **backlog:** finish the public monetary contract research ([4893e06](https://github.com/rknightion/grafana-cloud-org-insights/commit/4893e0625316b1087ce9facd16bb6cbd56185143))
+* **backlog:** finish the reviewed discovery documentation and identity plan ([253bba3](https://github.com/rknightion/grafana-cloud-org-insights/commit/253bba37a34290e8a42fb8d0b659d6cdf7119776))
+* **backlog:** record bounded seat health and display resume packets ([d4662f3](https://github.com/rknightion/grafana-cloud-org-insights/commit/d4662f3ecda538f5830fd754b1f934e24e9101e2))
+* **backlog:** record Loki ratio and reachable exemptions decision packets ([da40892](https://github.com/rknightion/grafana-cloud-org-insights/commit/da40892016c603714c42b6546bf4d3b12c72316d))
+* **backlog:** record loop25 witnesses, review and provenance blocker ([32b24de](https://github.com/rknightion/grafana-cloud-org-insights/commit/32b24deacfe47ac1e8b4bb63d9e956cb4df85deb))
+* **backlog:** record reviewed customer identity migration plan ([7c6cd5a](https://github.com/rknightion/grafana-cloud-org-insights/commit/7c6cd5af9957a80b628001d569e911a3177e7fef))
+* **backlog:** record reviewed provenance evidence decision draft ([e3c5c52](https://github.com/rknightion/grafana-cloud-org-insights/commit/e3c5c529cb05a287b69c1b83ff1376d380c86882))
+* **backlog:** record stopped capture, baseline and accepted provenance proof ([04f8c17](https://github.com/rknightion/grafana-cloud-org-insights/commit/04f8c17cedb6a63f289da09f8095a693920328ef))
+* **backlog:** retain natural convergence evidence blocker ([b42fc96](https://github.com/rknightion/grafana-cloud-org-insights/commit/b42fc9684bbef5c6bb09aa6381f4522c199cfd07))
+* **backlog:** retire the Loki labels-per-stream ratio extension ([9557c4f](https://github.com/rknightion/grafana-cloud-org-insights/commit/9557c4f5ea91428c51542be728a305922643f508))
+* **backlog:** track the org-wide AI token cost model ([b41e774](https://github.com/rknightion/grafana-cloud-org-insights/commit/b41e77455000f86755cdc537c88941fc0ae7411c))
+* **deps:** update dependency python to 3.15 ([#64](https://github.com/rknightion/grafana-cloud-org-insights/issues/64)) ([3d092d1](https://github.com/rknightion/grafana-cloud-org-insights/commit/3d092d157b19d2be7c5e7cc6c8e61614c45b8132))
+* **deps:** update python docker tag to v3.15 ([#65](https://github.com/rknightion/grafana-cloud-org-insights/issues/65)) ([ca06366](https://github.com/rknightion/grafana-cloud-org-insights/commit/ca06366bb9ee03ad1d5cd4fdebc21a866a280e11))
+
 ## [0.11.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.10.0...v0.11.0) (2026-10-09)
 
 
