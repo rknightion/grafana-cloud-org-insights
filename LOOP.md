@@ -21,6 +21,8 @@ grafana-stack: none
 ## Traps
 - `just check` takes 413-696 s and `just test` self-limits at 540 s. Give a gate run at least
   900 s; a 600 s or 700 s outer watchdog fails a healthy run, and a null exit is not a pass.
+- Every watcher (gate, CI, research), not only the gate run, gets the 1500 s deadline; say so in
+  each watcher brief.
 - Two estate tiers, never mixed: a write-capable internal deployment tier, and a customer estate
   reached read-only (GET or existing read-only RPC routes) unless a goal names an exact write fence.
   Reader, image and publication grants never imply bucket lifecycle or policy writes.
@@ -72,5 +74,6 @@ grafana-stack: none
 ## Mutexes
 - The live deployment account, its infra-state lock and its write-capable Grafana stack are one serial
   resource, touched by the root only, never by a lane in parallel.
+- A land or push event records a SHA resolved with `git rev-parse`; never type or expand one by hand.
 - Publishing, tags and releases are root-only unless the goal grants a lane bounded push authority; a
   lane with that grant owns its landed-SHA CI, and the root never pushes across an in-flight landing.
