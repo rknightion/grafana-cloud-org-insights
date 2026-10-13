@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.12.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.12.0...v0.12.1) (2026-10-13)
+
+
+### Bug Fixes
+
+* **dashboards:** add identity-safe finding drilldowns ([70c1c43](https://github.com/rknightion/grafana-cloud-org-insights/commit/70c1c439537cc63754ec2d34337f610637e22aa7))
+* **dashboards:** complete field ownership and preserve retention identities ([7b282d0](https://github.com/rknightion/grafana-cloud-org-insights/commit/7b282d089eb8bb9c2551b430a18537579c532cd7))
+
+
+### Miscellaneous
+
+* **backlog:** finalize loop25 release and bounded evidence dispositions ([c6783e3](https://github.com/rknightion/grafana-cloud-org-insights/commit/c6783e3409d673649cfa21cd0508cf2a2c124604))
+
 ## [0.12.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.11.0...v0.12.0) (2026-10-13)
 
 
