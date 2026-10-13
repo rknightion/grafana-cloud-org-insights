@@ -320,6 +320,15 @@ stack's logs.
   regenerate it only when the projection contract itself changes.
 - The module floor is OpenTofu 1.8 / Terraform 1.9.
 
+## Container runtime
+
+The collector image uses a digest-pinned Chainguard Python/Wolfi glibc runtime and a separate
+Wolfi installer stage for the checksum-pinned official AWS CLI v2. The final runtime has no
+shell or package manager. Collector subprocesses must invoke `aws` with argv, not shell
+pipelines. Python and AWS startup are proved on both amd64 and arm64; that is not a live
+AWS-service, full-estate workload, vendor-support or memory-bound witness. Keep package
+metadata visible to Trivy and preserve the HIGH/CRITICAL gate and ignore policy.
+
 ## Task interface
 
 `just check` is the gate and is exactly what CI enforces. The suite runs with no AWS credentials, no

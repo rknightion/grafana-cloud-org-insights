@@ -21,14 +21,33 @@
 #
 #   docker run --rm -e GCINSIGHT_READ_TOKEN -e AWS_* gcinsight:dev --tier t1 --dry-run
 
-FROM python:3.15-slim@sha256:ea4f1f290e071bf7d28199cfb3e09f5dbad31b50e9c32fd58f2f2d7be915f3ae
+# Wolfi is glibc-based, unlike Alpine: the existing AWS CLI v2 distribution needs no libc shim.
+# Keep download/install tools in a separate stage. The final Chainguard Python image has neither
+# a shell nor a package manager, and both multi-platform bases are pinned by index digest.
+FROM cgr.dev/chainguard/wolfi-base@sha256:256c88bb066424045021090932d50be93c8e3f2ce3586707702a401b146f3e43 AS awscli
 
-# The collector is stdlib-only and the image never installs Python packages. Remove pip and the
-# ensurepip bootstrap from the runtime image so their bundled build tooling and vendored libraries
-# do not become an unused vulnerability surface.
-RUN python3 -m pip uninstall --yes pip && \
-    rm -rf /usr/local/lib/python3.14/ensurepip && \
-    ! python3 -m pip --version
+# The AWS CLI v2 zip is arch-specific and there is no `latest` alias that resolves per-arch, so the
+# URL is selected from the build platform rather than hardcoded - a hardcoded x86 zip installs
+# cleanly on ARM and then dies with `exec format error` on the first `aws` call.
+ARG TARGETARCH
+ARG AWSCLI_VERSION=2.36.28
+ARG AWSCLI_SHA256_AARCH64=5e5013af7d1996d78a842ee8f8e5010bfd2ca663e5f5f9487d1f1cb2c290f327
+ARG AWSCLI_SHA256_X86_64=1e050540227bc4dca8c2e9d503e358758dc4edd647f68e7f1a3899be6fc74bf6
+RUN set -eux; \
+    apk add --no-cache curl unzip; \
+    case "${TARGETARCH}" in \
+      arm64) awscli_arch=aarch64; awscli_sha256="${AWSCLI_SHA256_AARCH64}" ;; \
+      amd64) awscli_arch=x86_64; awscli_sha256="${AWSCLI_SHA256_X86_64}" ;; \
+      *) echo "unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-${awscli_arch}-${AWSCLI_VERSION}.zip" -o /tmp/awscli.zip; \
+    echo "${awscli_sha256}  /tmp/awscli.zip" | sha256sum -c -; \
+    unzip -q /tmp/awscli.zip -d /tmp; \
+    /tmp/aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli; \
+    rm -rf /tmp/awscli.zip /tmp/aws
+
+FROM cgr.dev/chainguard/python@sha256:1c4deeea85db49ab5f6bcd9e7fc0bf3fd8439e99f7bde45330f40400685eb394
+USER root
 
 ARG GCINSIGHT_SOURCE_URL=https://github.com/rknightion/grafana-cloud-org-insights
 ARG GCINSIGHT_SOURCE_REVISION=unknown
@@ -39,36 +58,12 @@ LABEL org.opencontainers.image.source="${GCINSIGHT_SOURCE_URL}" \
       io.grafana.gcinsight.overlay.digest="${GCINSIGHT_OVERLAY_DIGEST}" \
       io.grafana.gcinsight.consumer.revision="${GCINSIGHT_CONSUMER_REVISION}"
 
-# The AWS CLI v2 zip is arch-specific and there is no `latest` alias that resolves per-arch, so the
-# URL is selected from the build platform rather than hardcoded - a hardcoded x86 zip installs
-# cleanly on ARM and then dies with `exec format error` on the first `aws` call.
-ARG TARGETARCH
-ARG AWSCLI_VERSION=2.36.28
-ARG AWSCLI_SHA256_AARCH64=5e5013af7d1996d78a842ee8f8e5010bfd2ca663e5f5f9487d1f1cb2c290f327
-ARG AWSCLI_SHA256_X86_64=1e050540227bc4dca8c2e9d503e358758dc4edd647f68e7f1a3899be6fc74bf6
-# The pinned base predates the PCRE2 and OpenSSL security fixes. Pin the matching binary
-# packages so both platforms take the fixed versions and a missing version fails closed.
-RUN set -eux; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends \
-      libpcre2-8-0=10.46-1~deb13u3 \
-      openssl=3.5.7-1~deb13u3 \
-      openssl-provider-legacy=3.5.7-1~deb13u3 \
-      libssl3t64=3.5.7-1~deb13u3 \
-      ca-certificates curl unzip; \
-    case "${TARGETARCH:-arm64}" in \
-      arm64) awscli_arch=aarch64; awscli_sha256="${AWSCLI_SHA256_AARCH64}" ;; \
-      amd64) awscli_arch=x86_64; awscli_sha256="${AWSCLI_SHA256_X86_64}" ;; \
-      *) echo "unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
-    esac; \
-    curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-${awscli_arch}-${AWSCLI_VERSION}.zip" -o /tmp/awscli.zip; \
-    echo "${awscli_sha256}  /tmp/awscli.zip" | sha256sum -c -; \
-    unzip -q /tmp/awscli.zip -d /tmp; \
-    /tmp/aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli; \
-    rm -rf /tmp/awscli.zip /tmp/aws; \
-    apt-get purge -y --auto-remove curl unzip; \
-    rm -rf /var/lib/apt/lists/*; \
-    aws --version
+COPY --from=awscli /usr/local/aws-cli/ /usr/local/aws-cli/
+COPY --from=awscli /usr/local/bin/ /usr/local/bin/
+
+# The stdlib-only runtime needs neither ensurepip nor its bootstrap wheel. Derive the stdlib
+# path from Python rather than assuming a minor version. No third-party collector packages.
+RUN ["python3", "-c", "import importlib.util, pathlib, shutil, sysconfig; shutil.rmtree(pathlib.Path(sysconfig.get_path('stdlib')) / 'ensurepip'); shutil.rmtree('/usr/share/python-wheels'); assert importlib.util.find_spec('pip') is None; assert importlib.util.find_spec('ensurepip') is None"]
 
 WORKDIR /app
 
@@ -85,8 +80,13 @@ ENV PYTHONUNBUFFERED=1 \
 
 # Non-root. The collector reads the network and writes to S3; it needs nothing on the local
 # filesystem beyond the temp dirs the emitters create, so there is no reason to run as uid 0.
-RUN useradd --create-home --uid 10001 collector && chown -R collector:collector /app
-USER collector
+# Use Python for image preparation because this runtime deliberately has no shell/useradd.
+RUN ["python3", "-c", "import os, pathlib; p = pathlib.Path('/etc/passwd'); p.write_text(p.read_text() + 'collector:x:10001:10001:collector:/home/collector:/sbin/nologin\\n'); p = pathlib.Path('/etc/group'); p.write_text(p.read_text() + 'collector:x:10001:\\n'); pathlib.Path('/home/collector').mkdir(); os.chown('/home/collector', 10001, 10001); os.chown('/app', 10001, 10001)"]
+ENV HOME=/home/collector
+USER collector:collector
+
+# Verify the official AWS distribution against the actual final-image libc, as the runtime user.
+RUN ["aws", "--version"]
 
 # The tier is an ARGUMENT, not an env var, because EventBridge Scheduler's ECS target has no
 # container-override support - each tier gets its own task definition with its own `command`, and
