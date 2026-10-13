@@ -57,7 +57,35 @@ SNAPSHOT_PRESENTATION_FIELDS = frozenset({
 })
 
 
+FINDING_PRESENTATION_ROOTS = frozenset({
+    'rows[(($type($lookup($, "Worst label values")) = "number" or $type($lookup($, "Worst label values")) = "boolean") and $number($lookup($, "Worst label values")) >= 5000.0)]',
+    'rows[($type($lookup($, "Flag")) = "array" ? $count($lookup($, "Flag")) > 0 : $type($lookup($, "Flag")) = "object" ? $count($keys($lookup($, "Flag"))) > 0 : $boolean($lookup($, "Flag")))]',
+    'rows[($type($lookup($, "Faster than default")) = "array" ? $count($lookup($, "Faster than default")) > 0 : $type($lookup($, "Faster than default")) = "object" ? $count($keys($lookup($, "Faster than default"))) > 0 : $boolean($lookup($, "Faster than default")))]',
+    'rows[$lookup($, "Confidence") = "high"]',
+    'rows[$lookup($, "Confidence") = "possible"]',
+})
+
+
+STACK_PRESENTATION_PROJECTIONS = tuple(
+    ' ~> |$|{' + json.dumps(key) + ': $type($lookup($, ' + json.dumps(key) + ')) = "string" ? '
+    '$lookup($, ' + json.dumps(key) + ') : null}|'
+    for key in (" Stack", "Stack", "stack")
+)
+
+
+def strip_stack_projection(root):
+    # Exact one-field type-preserving transform. All other keys remain untouched.
+    for suffix in STACK_PRESENTATION_PROJECTIONS:
+        if root.endswith(suffix):
+            return root[:-len(suffix)]
+    return root
+
+
 def presentation_root(root):
+    root = strip_stack_projection(root)
+    # These exact finding filters retain complete source rows; arbitrary projections do not.
+    if root in FINDING_PRESENTATION_ROOTS:
+        return "rows"
     # Exact, two-field presentation-only type projection: all other source keys survive unchanged.
     # Do not admit arbitrary transforms/merges or relax unknown-field/schema lineage guards.
     if root == ('rows ~> |$|{"enabled": $type(enabled) = "boolean" ? enabled : null, '

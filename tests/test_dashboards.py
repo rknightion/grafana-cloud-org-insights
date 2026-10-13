@@ -2874,6 +2874,8 @@ def dashboard_coverage_inventory():
                     continue
                 view = match.group(1)
                 root = spec.get("root_selector", "")
+                from tests.test_dashboard_coverage import strip_stack_projection
+                root = strip_stack_projection(root)
                 # Only this exact type-preserving tenant projection retains source lineage.
                 if root == ('rows ~> |$|{"enabled": $type(enabled) = "boolean" ? enabled : null, '
                             '"authenticationFailed": $type(authenticationFailed) = "boolean" ? authenticationFailed : null}|'):
@@ -3030,6 +3032,13 @@ class EveryPublishedViewIsRenderedSomewhereTest(unittest.TestCase):
                 self.assertTrue(all(not row["panels"] for row in inventory(mutation)))
         unknown = inventory(selector, unknown_column=True)
         self.assertEqual(next(row for row in unknown if row["field"] == "rows.enabled")["panels"], [])
+        from tests.test_dashboard_coverage import STACK_PRESENTATION_PROJECTIONS
+        suffix = STACK_PRESENTATION_PROJECTIONS[0]
+        self.assertTrue(all(row["panels"] for row in inventory(selector + suffix)))
+        for mutation in (suffix.replace(': null', ': "invented"'),
+                         suffix.replace(': $type', ', "forged": true, "x": $type'),
+                         suffix + '[enabled = true]', suffix + '.Stack'):
+            self.assertTrue(all(not row["panels"] for row in inventory(selector + mutation)))
         # Keep the pre-existing optional-object recognizer independently usable.
         optional = inventory('$exists(rows) ? [rows] : []')
         self.assertTrue(all(row["panels"] for row in optional))

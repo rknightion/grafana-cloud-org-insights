@@ -5382,7 +5382,15 @@ FINDING_DETAIL: dict[str, tuple[tuple[object, ...], ...]] = {
              ("_fd_fleet", "Fleet Management dead - which stacks", "risk_fleet_dead",
               risk_pillar.VIEW_SCHEMAS["risk_fleet_dead"]),
              ("_fd_plugins", "Plugin drift - which stacks", "risk_plugin_drift",
-              risk_pillar.VIEW_SCHEMAS["risk_plugin_drift"])),
+              risk_pillar.VIEW_SCHEMAS["risk_plugin_drift"]),
+             ("_fd_label_high", "High-confidence cardinality findings", "risk_label_cardinality",
+              risk_pillar.VIEW_SCHEMAS["risk_label_cardinality"]),
+             ("_fd_label_possible", "Possible cardinality findings", "risk_label_cardinality",
+              risk_pillar.VIEW_SCHEMAS["risk_label_cardinality"]),
+             ("_fd_sa", "Service-account risks", "risk_service_accounts",
+              risk_pillar.VIEW_SCHEMAS["risk_service_accounts"]),
+             ("_fd_fast", "Faster-than-default scrape findings", "risk_fleet_scrape_intervals",
+              risk_pillar.VIEW_SCHEMAS["risk_fleet_scrape_intervals"])),
     # Every finding detail carries a schema because finding nothing is a legitimate healthy outcome.
     # Without the fourth item, an empty condition-matched view fails the whole dashboard build.
     "ai": (("_fd_ai_gap", "Assistant used with no tenant configuration - which stacks",
@@ -5457,7 +5465,9 @@ def assemble(
     # Findings tab, only where this pillar actually has finding kinds. Two pillars have none of their
     # own, and an empty tab reads as a broken dashboard rather than as "nothing to report".
     pillar, kinds = findings_for(name)
-    detail = FINDING_DETAIL.get(name, ())
+    detail = tuple(entry for entry in FINDING_DETAIL.get(name, ())
+                   if (name, entry[0]) not in layout.OPTIONAL_REGISTER_DETAILS
+                   or layout.OPTIONAL_REGISTER_DETAILS[(name, entry[0])] in elements)
     found_el = build.findings_elements(pillar, kinds, detail=detail, ds_uid=ds)
     if found_el:
         elements = {**elements, **found_el}
@@ -5495,7 +5505,7 @@ def assemble(
     # Method and freshness are always available but never steal the default landing page. Append after
     # the optional Findings tab so guidance has one stable location on every dashboard.
     tabs = list(tabs) + [banner_tab]
-    tabs, canonical = layout.apply(name, elements, tabs, detail)
+    tabs, canonical, row_links = layout.apply(name, elements, tabs, detail)
 
     spec = build.dashboard(
         title, desc, elements, tabs,
@@ -5513,7 +5523,7 @@ def assemble(
         for target in {target for destinations in canonical.values() for target, _owner, _title in destinations}:
             if target != name:
                 targets[target] = assemble(target, ds, rate_card=rate_card, _resolve_canonical_links=False)
-        layout.resolve_links(spec, canonical, targets)
+        layout.resolve_links(spec, canonical, targets, row_links)
     return uid, identity.map_tree(spec)
 
 

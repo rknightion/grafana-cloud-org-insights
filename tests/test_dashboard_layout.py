@@ -175,9 +175,13 @@ class DashboardLayoutContractTest(unittest.TestCase):
         cardinality = documents["cost"]["spec"]["elements"]["_fd_cardinality"]["spec"]
         data = cardinality["data"]["spec"]
         self.assertEqual(data["queries"][0]["spec"]["query"]["spec"]["filterExpression"], build.STACK_FILTER)
-        self.assertEqual(data["transformations"][0]["spec"]["options"], {
-            "type": "include", "match": "all", "filters": [{"fieldName": "Worst label values",
-            "config": {"id": "greaterOrEqual", "options": {"value": 5000.0}}}]})
+        # Predicate now runs before Infinity's number conversion, so string "5000" cannot
+        # become a finding that the producer's numeric-type guard would reject.
+        from tests.test_dashboard_coverage import strip_stack_projection
+        self.assertEqual(strip_stack_projection(data["queries"][0]["spec"]["query"]["spec"]["root_selector"]),
+                         'rows[(($type($lookup($, "Worst label values")) = "number" or '
+                         '$type($lookup($, "Worst label values")) = "boolean") and '
+                         '$number($lookup($, "Worst label values")) >= 5000.0)]')
         maturity = documents["maturity"]["spec"]["elements"]["unscored_detail"]["spec"]
         self.assertEqual(maturity["data"]["spec"]["transformations"][0]["spec"]["options"]["filters"], [
             {"fieldName": "Unscored reason", "config": {"id": "isNotNull", "options": {}}},

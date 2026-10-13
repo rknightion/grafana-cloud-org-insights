@@ -93,8 +93,15 @@ class RankingContractTest(unittest.TestCase):
                 self.assertTrue(query["instant"])
                 self.assertFalse(query["range"])
                 self.assertIn("range endpoint", panel["title"])
-                self.assertEqual(panel["data"]["spec"]["transformations"][-1]["spec"]["options"],
-                                 {"limitField": 100})
+                transforms = [t["spec"] for t in panel["data"]["spec"]["transformations"]]
+                limits = [i for i, t in enumerate(transforms) if t["id"] == "limit"]
+                self.assertEqual(len(limits), 1)
+                self.assertEqual(transforms[limits[0]]["options"], {"limitField": 100})
+                # Bound the combined population, not each independently selected dataset.
+                # A post-partition limit could admit 100 linked plus 100 unlinked rows.
+                partitions = [i for i, t in enumerate(transforms) if t["id"] == "partitionByValues"]
+                self.assertTrue(all(limits[0] < i for i in partitions))
+                self.assertTrue(any(t["id"] == "sortBy" for t in transforms[:limits[0]]))
 
     def test_cost_retains_history_but_endpoint_does_not_reduce_old_values(self):
         history = self.panel("cost", "b_savings")

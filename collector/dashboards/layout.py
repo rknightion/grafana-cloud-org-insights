@@ -33,7 +33,9 @@ REGISTER_OWNERS = {
     "cost": {"_fd_headroom": "headroom", "_fd_cardinality": "cardinality"},
     "usage": {"_fd_dormant": "dormant"},
     "risk": {"_fd_admins": "admins", "_fd_noprot": "noprot", "_fd_fleet": "fleet",
-             "_fd_plugins": "plugindrift"},
+             "_fd_plugins": "plugindrift", "_fd_label_high": "label_cardinality",
+             "_fd_label_possible": "label_cardinality", "_fd_sa": "sa_inventory",
+             "_fd_fast": "fleet_scrape_intervals"},
     "ai": {"_fd_ai_gap": "tbl_ai_gap", "_fd_ai_tokens": "tbl_ai_outliers",
            "_fd_ai_mcp": "tbl_ai_mcp_failed", "_fd_ai_off": "tbl_ai_disabled"},
 }
@@ -51,6 +53,93 @@ CONFIGURED_READERS = (
     ("Configured IRM integrations", "irm_integrations"),
     ("IRM alert groups", "irm_alert_groups"),
 )
+
+
+
+# These endpoints are conditional on publication in d_risk. Missing required endpoints still fail.
+OPTIONAL_PANELS = frozenset({
+    ("risk", "label_cardinality"), ("risk", "fleet_scrape_intervals"),
+    ("risk", "public_dashboards"), ("risk", "retention_policy_status"),
+})
+OPTIONAL_REGISTER_DETAILS = {
+    ("risk", "_fd_label_high"): "label_cardinality",
+    ("risk", "_fd_label_possible"): "label_cardinality",
+    ("risk", "_fd_fast"): "fleet_scrape_intervals",
+}
+
+
+DETAIL_KINDS = {"_fd_label_high": "label_cardinality_high_confidence",
+                "_fd_label_possible": "label_cardinality_possible", "_fd_sa": "service_account_risk",
+                "_fd_fast": "fleet_fast_scrape"}
+ROW_LINKS = {
+    "maturity": {"board": ("Stack", [("maturity", "dims", "Explain this score"),
+                                      ("maturity", "owners", "Ownership candidates")])},
+    "estate": {"estate": ("Stack", [("risk", "risk", "Stack risks"),
+                                    ("maturity", "dims", "Explain this score"),
+                                    ("cost", "cost", "Largest series stacks")])},
+    "operations": {"_ret_candidate_table": ("Stack", [("risk", "retention_policy_status", "Retention policy observation")])},
+    "ai": {"tbl_stack_users": ("Stack", [("ai", "tbl_ai_per_stack", "Assistant observations")]),
+           "tbl_stack_tokens": ("Stack", [("ai", "tbl_ai_per_stack", "Assistant observations")])},
+    "risk": {"public_dashboards": ("Stack", [("dashboards", "tbl_public", "Observed public opens")])},
+    "dashboards": {"tbl_public": ("Stack", [("risk", "public_dashboards", "Configured public dashboards")])},
+}
+
+
+def _split_identity(panel, field):
+    """Keep linked and unlinked rows in native separate datasets, never drop unknown identity."""
+    for query in _data(panel)["queries"]:
+        inner = query["spec"]["query"]
+        if inner["group"] != build.INFINITY_TYPE:
+            continue
+        spec = inner["spec"]
+        identity = next(c["selector"] for c in spec["columns"] if c["text"] == field)
+        if identity not in {" Stack", "Stack", "stack"}:
+            raise ValueError("Row links require an existing stack identity column")
+        key = json.dumps(identity)
+        value = f'$lookup($, {key})'
+        spec["root_selector"] += (
+            f' ~> |$|{{{key}: $type({value}) = "string" ? {value} : null}}|')
+    aliases = {}
+    for transform in _data(panel)["transformations"]:
+        if transform["spec"]["id"] == "organize":
+            aliases.update(transform["spec"]["options"].get("renameByName", {}))
+    raw_field = next((raw for raw, display in aliases.items() if display == field), field)
+    config = panel["spec"]["vizConfig"]["spec"]["fieldConfig"]
+    for override in config["overrides"]:
+        matcher = override["matcher"]
+        if matcher["id"] == "byName":
+            matcher["options"] = next((raw for raw, display in aliases.items()
+                                       if display == matcher["options"]), matcher["options"])
+    # Partition names label datasets, not table columns. Restore original display aliases and
+    # match original field names so existing day/ratio units survive partition's cache naming.
+    displays = {c["text"]: c["text"] for q in _data(panel)["queries"]
+                for c in q["spec"]["query"]["spec"].get("columns", [])}
+    displays.update(aliases)
+    config["overrides"].extend({"matcher": {"id": "byName", "options": raw},
+                               "properties": [{"id": "displayName", "value": display}]}
+                              for raw, display in displays.items())
+    # All panels reach one table frame before this seam. Copy the raw identity with a
+    # row reducer, convert only that temporary copy to presence, then partition once.
+    # Fetching the source twice could observe different snapshots and lose/duplicate rows.
+    _data(panel)["transformations"].extend([
+        {"kind": "calculateField", "spec": {"id": "calculateField", "options": {
+            "mode": "reduceRow", "timeSeries": False, "alias": "Stack links available",
+            "reduce": {"reducer": "first", "include": [field]},
+        }}},
+        {"kind": "convertFieldType", "spec": {"id": "convertFieldType", "options": {
+            "conversions": [{"targetField": "Stack links available", "destinationType": "boolean"}],
+        }}},
+        {"kind": "partitionByValues", "spec": {"id": "partitionByValues", "options": {
+            "fields": ["Stack links available"], "keepFields": False,
+            "naming": {"asLabels": True},
+        }}},
+    ])
+    panel["spec"]["description"] += (
+        " The table dataset selector uses the Stack links available=true/false presentation label: "
+        "true rows have a stack identity (linked); false rows are without "
+        "one (unlinked); both datasets retain their rows. Row links use only the existing stack slug "
+        "and selected time, replacing the current Stack selection.")
+    return raw_field
 
 
 def _data(panel):
@@ -108,24 +197,34 @@ def _filter(panel, filters):
 def apply(name, elements, tabs, detail):
     """Change only approved placements/copies, returning pending static canonical destinations."""
     links = {}
-    for evidence, owner in REGISTER_OWNERS.get(name, {}).items():
+    active_registers = {evidence: owner for evidence, owner in REGISTER_OWNERS.get(name, {}).items()
+                        if owner in elements or (name, owner) not in OPTIONAL_PANELS}
+    for evidence, owner in active_registers.items():
         _widen(elements[owner], elements[evidence])
         entry = next(entry for entry in detail if entry[0] == evidence)
-        spec = next(spec for spec in findings.SPECS if spec.view == entry[2])
+        spec = next(spec for spec in findings.SPECS if spec.kind == DETAIL_KINDS.get(evidence)
+                    or (evidence not in DETAIL_KINDS and spec.view == entry[2]))
         panel = elements[evidence]
         order = [c["text"] for c in _columns(panel)]
         if spec.fields:
             order = ["Stack", *spec.fields]
         _show(panel, order)
-        filters = []
+        # Filter source JSON before typed frame conversion can coerce a malformed value.
+        # Python truthiness treats nonempty containers as true even if their members are false.
+        predicates = []
+        for field in spec.require:
+            value = f'$lookup($, {json.dumps(field)})'
+            predicates.append(f'($type({value}) = "array" ? $count({value}) > 0 : '
+                              f'$type({value}) = "object" ? $count($keys({value})) > 0 : $boolean({value}))')
         for field, floor in spec.at_least:
-            filters.append({"fieldName": field, "config": {"id": "greaterOrEqual", "options": {"value": floor}}})
+            value = f'$lookup($, {json.dumps(field)})'
+            predicates.append(f'(($type({value}) = "number" or $type({value}) = "boolean") '
+                              f'and $number({value}) >= {floor})')
         for field, value in spec.equals:
-            filters.append({"fieldName": field, "config": {"id": "equal", "options": {"value": value}}})
-        if spec.require:
-            raise ValueError("Finding detail requires a truthiness predicate not covered by this layout seam")
-        if filters:
-            _filter(panel, filters)
+            predicates.append(f'$lookup($, {json.dumps(field)}) = {json.dumps(value)}')
+        if predicates:
+            _data(panel)["queries"][0]["spec"]["query"]["spec"]["root_selector"] = (
+                'rows[' + ' and '.join(predicates) + ']')
         panel["spec"]["description"] += (
             " FindingSpec evidence only; canonical full detail is linked below. "
             "The source is already condition-matched unless a field predicate is declared here.")
@@ -197,6 +296,23 @@ def apply(name, elements, tabs, detail):
         for key in ("n_pods", "n_hosts", "n_assistant", "n_aitokens"):
             del elements[key]
     elif name == "ai":
+        # Legends are presentation, not identity: a missing slug can fall back to stack_id.
+        # These queries are instant. Native label extraction retains typed missing cells;
+        # reducing labels per series can create ragged columns when some labels are absent.
+        for key, value_name in (("tbl_stack_users", "Active users"), ("tbl_stack_tokens", "AI tokens")):
+            _data(elements[key])["transformations"] = [
+                {"kind": "labelsToFields", "spec": {"id": "labelsToFields", "options": {"mode": "columns"}}},
+                {"kind": "merge", "spec": {"id": "merge", "options": {}}},
+                {"kind": "sortBy", "spec": {"id": "sortBy", "options": {
+                    "sort": [{"field": "Value", "desc": True}],
+                }}},
+                {"kind": "organize", "spec": {"id": "organize", "options": {
+                    "indexByName": {"slug": 0, "stack_id": 1, "Value": 2},
+                    "excludeByName": {"Time": True, "__name__": True},
+                    "renameByName": {"slug": "Stack", "stack_id": "Stack ID", "Value": value_name},
+                }}},
+                {"kind": "limit", "spec": {"id": "limit", "options": {"limitField": 100}}},
+            ]
         # Presentation only: Grafana's boolean formatter coerces numbers to True/False and can
         # display arrays as blank. Check the source JSON type in JSONata, before frame conversion.
         # Preserve real booleans; missing/null/malformed values stay unknown, never disabled.
@@ -305,18 +421,61 @@ def apply(name, elements, tabs, detail):
     unknown = set(by_title) - set(expected)
     if unknown:
         raise ValueError(f"Unapproved tab deletion: {sorted(unknown)}")
-    return [by_title[title] for title in expected if title in by_title], links
+    row_links = {key: ("Stack", destinations) for key, destinations in links.items()
+                 if key in active_registers}
+    row_links.update({key: value for key, value in ROW_LINKS.get(name, {}).items()
+                      if key in elements or (name, key) not in OPTIONAL_PANELS})
+    for key, (field, destinations) in row_links.items():
+        # Target discovery also resolves row destinations, independently of static panel links.
+        links.setdefault(key, []).extend(d for d in destinations if d not in links.get(key, []))
+        if key not in elements:
+            raise KeyError(key)
+    if "_findings_now" in elements:
+        destinations = []
+        for key, owner in active_registers.items():
+            view = next(entry[2] for entry in detail if entry[0] == key)
+            spec = next(spec for spec in findings.SPECS if spec.kind == DETAIL_KINDS.get(key)
+                        or (key not in DETAIL_KINDS and spec.view == view))
+            destinations.append((name, key, spec.kind))
+        links["_findings_now"] = destinations
+    return [by_title[title] for title in expected if title in by_title], links, row_links
 
 
-def resolve_links(document, pending, targets):
+def resolve_links(document, pending, targets, row_links):
     """Read IDs from assembled targets, never a literal or a guessed numeric identity."""
     elements = document["spec"]["elements"]
     for key, destinations in pending.items():
         panel = elements[key]["spec"]
         for name, owner, title in destinations:
             uid, target = targets[name]
+            if owner not in target["spec"]["elements"] and (name, owner) in OPTIONAL_PANELS:
+                continue
             panel_id = target["spec"]["elements"][owner]["spec"]["id"]
             url = f"/d/{uid}?viewPanel={panel_id}&${{__url_time_range}}&${{stack:queryparam}}"
             panel["links"].append({"title": title, "url": url, "targetBlank": False})
             if panel["vizConfig"]["group"] == "text":
                 panel["vizConfig"]["spec"]["options"]["content"] += f"\n\n[{title}]({url})"
+
+    for key, (field, destinations) in row_links.items():
+        panel = elements[key]["spec"]
+        links = []
+        for name, owner, title in destinations:
+            uid, target = targets[name]
+            if owner not in target["spec"]["elements"] and (name, owner) in OPTIONAL_PANELS:
+                continue
+            panel_id = target["spec"]["elements"][owner]["spec"]["id"]
+            links.append({"title": title, "url": f"/d/{uid}?viewPanel={panel_id}&${{__url_time_range}}"
+                          "&var-stack=${__value.raw:percentencode}", "targetBlank": False})
+        if not links:
+            # No published destination: keep the unsplit source table, with no invented link.
+            continue
+        field = _split_identity({"spec": panel}, field)
+        # Every frame is homogeneous in identity availability. No link property is attached to
+        # an all-null/empty frame, even though Grafana can construct a link with an empty href.
+        panel["vizConfig"]["spec"]["fieldConfig"]["overrides"].insert(0, {
+            "matcher": {"id": "allMatch", "options": [
+                {"id": "byName", "options": field},
+                {"id": "byType", "options": "string"},
+                {"id": "byRegexp", "options": "/ true$/"},
+            ]}, "properties": [{"id": "links", "value": links}],
+        })

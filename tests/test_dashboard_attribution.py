@@ -103,11 +103,29 @@ class AttributionPresentationTest(unittest.TestCase):
             display = "Non-web share of categorised (actor identity unproven)"
             self.assertEqual(self.renames("ai", key)["Machine share of categorised"], display)
             overrides = self.panel("ai", key)["vizConfig"]["spec"]["fieldConfig"]["overrides"]
-            self.assertIn({"matcher": {"id": "byName", "options": display},
-                           "properties": [{"id": "unit", "value": "percentunit"}]}, overrides)
+            # Partition restores display aliases after matching the original field name.
+            # Resolve the artifact's override target back through its displayName property;
+            # the percentunit requirement and qualified actor label remain unchanged.
+            displayed_as = {o["matcher"]["options"]: prop["value"]
+                            for o in overrides if o["matcher"]["id"] == "byName"
+                            for prop in o["properties"] if prop["id"] == "displayName"}
+            unit_targets = {displayed_as.get(o["matcher"]["options"], o["matcher"]["options"])
+                            for o in overrides if o["matcher"]["id"] == "byName"
+                            for prop in o["properties"]
+                            if prop == {"id": "unit", "value": "percentunit"}}
+            self.assertIn(display, unit_targets)
             # Neither renaming nor formatting changes the 0-1 source ratio to an invented zero.
             transforms = self.panel("ai", key)["data"]["spec"]["transformations"]
-            self.assertEqual([t["kind"] for t in transforms], ["organize"])
+            kinds = [t["kind"] for t in transforms]
+            if "partitionByValues" in kinds:
+                self.assertEqual(kinds, ["organize", "calculateField", "convertFieldType", "partitionByValues"])
+                self.assertEqual(transforms[1]["spec"]["options"]["reduce"],
+                                 {"reducer": "first", "include": ["Stack"]})
+                self.assertEqual(transforms[2]["spec"]["options"]["conversions"],
+                                 [{"targetField": "Stack links available", "destinationType": "boolean"}])
+                self.assertEqual(transforms[3]["spec"]["options"]["fields"], ["Stack links available"])
+            else:
+                self.assertEqual(kinds, ["organize"])
         self.assertIn("unproven", self.content("ai", "actor_scope").lower())
         human_tab = next(t["spec"] for t in self.artifacts["ai"]["spec"]["layout"]["spec"]["tabs"]
                          if t["spec"]["title"] == "Human vs machine")

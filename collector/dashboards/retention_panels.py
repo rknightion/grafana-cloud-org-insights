@@ -84,8 +84,17 @@ def _candidate_table() -> dict:
         "Latest returned retention and lookback values per stack within the selected range. Only samples "
         "whose reported lookback differs from reported retention contribute; a past divergence may remain "
         "visible after the values converge. This is a candidate "
-        "signal of a likely per-stream retention override, not confirmation. " + _SCOPE,
-        [_table_query(retention, "A"), _table_query(lookback, "B")],
+        "signal of a likely per-stream retention override, not confirmation. Slugs come only from a "
+        "unique unit-valued range-end info observation, not historical identity reconstruction. " + _SCOPE,
+        [_table_query(retention, "A"), _table_query(lookback, "B"),
+         build.data_query("prometheus", build.USAGE_UID, {
+             # Only an unambiguous unit-valued info series provides a slug. Do not multiply
+             # durations by this mapping: unmatched or ambiguous identities keep their rows.
+             "expr": '(grafanacloud_grafana_instance_info{slug!=""} == 1) and on(stack_id) '
+                     '(count by(stack_id) (grafanacloud_grafana_instance_info) == 1)',
+             "legendFormat": "__auto", "range": False, "instant": True,
+             "editorMode": "code", "interval": "", "format": "table",
+         }, "C")],
         build.viz(
             "table",
             {
@@ -121,6 +130,7 @@ def _candidate_table() -> dict:
                     "stack_id": {"operation": "groupby", "aggregations": []},
                     "Value #A": {"operation": "aggregate", "aggregations": ["last"]},
                     "Value #B": {"operation": "aggregate", "aggregations": ["last"]},
+                    "slug": {"operation": "aggregate", "aggregations": ["last"]},
                 }},
             },
         },
@@ -134,15 +144,23 @@ def _candidate_table() -> dict:
                 },
             },
         },
+        # Info-only stacks are not retention candidates. Keep any A or B observation.
+        {"kind": "filterByValue", "spec": {"id": "filterByValue", "options": {
+            "type": "include", "match": "any", "filters": [
+                {"fieldName": "Value #A (last)", "config": {"id": "isNotNull", "options": {}}},
+                {"fieldName": "Value #B (last)", "config": {"id": "isNotNull", "options": {}}},
+            ],
+        }}},
         {
             "kind": "organize",
             "spec": {
                 "id": "organize",
                 "options": {
-                    "indexByName": {"stack_id": 0, "Value #A (last)": 1, "Value #B (last)": 2},
+                    "indexByName": {"stack_id": 0, "slug (last)": 3, "Value #A (last)": 1, "Value #B (last)": 2},
                     "excludeByName": {"Time": True},
                     "renameByName": {
                         "stack_id": "Stack ID",
+                        "slug (last)": "Stack",
                         "Value #A (last)": "Retention days",
                         "Value #B (last)": "Lookback days",
                     },

@@ -319,6 +319,11 @@ joining raw range frames multiplies rows. These are the latest returned divergen
 selected range, not necessarily current divergence. The pinned Grafana 12.2.0 local converter and
 transformation witness is a synthetic runtime proof, not a deployed-browser observation.
 
+Row drilldowns use an existing string stack slug, never a rendered legend: Prometheus legends may
+fall back to numeric `stack_id` when the slug is missing. Linked and unlinked table datasets are
+partitioned after a single fetch; retain unknown-identity rows and apply global row limits before
+partitioning. Verify link macros with Grafana's actual template service, not a replacement formatter.
+
 ## Consumer manifest mode
 
 - `terraform/consumer_manifest.tf`'s `local.inputs` is the one table of which manifest key feeds which
