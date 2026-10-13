@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop25-root'
 created_date: '2026-10-12 16:03'
-updated_date: '2026-10-13 08:49'
+updated_date: '2026-10-13 09:21'
 labels:
   - dashboards
   - owner-decision
@@ -57,4 +57,8 @@ loop23: zero implementation attempts; named follow-up packet captured under D-DO
 Loop24 contract-draft row completed and independent reviewer PASS at SHA2568e20a4e7c6990a18ec4d7a1e82795937b9887266a766186b42bacf0bf004dd1d; reviewed source base6bc17e11e4199983955779c0860832a248bb9cc9 and main da40892016c603714c42b6546bf4d3b12c72316d. Root reconciled output destination/self-review wording before independent review; no substantive blockers. Original approved-contract AC1-5 remain unchecked: Rob has not approved any source/schema/privacy/observer/access/retention/budget choice. No implementation attempt (cumulative0), no source/schema/customer/live changes or CodeRabbit/runtime gates. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/provenance-contract/review.md and retained loop23 counterexamples incorporated into draft.
 
 loop25 root amended owned seam for inventory evidence transport in runner callsites and optional original-evidence hydration preservation, after read-only lane verified necessary gap. No implementation attempt consumed by inspection; sanitized existing-route shape witness captured exact200. No route, source floor, INPUT_OWNER, payload schema or metric grant widened.
+
+loop25 provenance focused cycle1:83tests/7442subtests passed on partial tree, full just check not run. Root repaired second owned-file gap for copied non-S3 privacy projections: strip ONLY new optional evidence from Loki summary and diagnostic --out, preserve S3 and old semantics. Retained partial unsafe until correction, public CLI/assembled selector proof and final gate/security/CodeRabbit. Final gate must use real .venv not symlink.
+
+loop25 cumulative implementation cycles3 observed (transport focused, privacy/fullgate, helper-stamp/fullgate). Final gate901 failures are new private evidence metadata display debts, not baseline-red. Root authorizes exact finite unrendered/audit declarations in the two existing coverage-test registries, no wildcard/exemption hiding or rendering credit; unknown seeded gap must still fail. Safety incident separately recorded: three attempted synthetic-bucket S3 locks returned2, provider outcome unknown; corrected tests refuse subprocess. Final rescue cycle4 only, no ceiling reset.
 <!-- SECTION:NOTES:END -->

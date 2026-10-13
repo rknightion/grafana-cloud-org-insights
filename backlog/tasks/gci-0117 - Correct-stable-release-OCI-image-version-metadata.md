@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop25-root'
 created_date: '2026-10-06 11:19'
-updated_date: '2026-10-13 08:47'
+updated_date: '2026-10-13 09:14'
 labels:
   - release
   - owner-decision
@@ -52,4 +52,6 @@ loop23: shared publisher implementation attempt1 security PASS and CodeRabbit co
 loop23: shared fix361f19e passed local gate/security/CodeRabbit0 and exact CI38245685269; stable sharedv1.25.7 at1a8cf1f published by one root recovery dispatch38246126077 after existing bot auto-merge suppressed push automation. Twelve caller pins landedb704880; required integrated CI38254439412 and composed gate at4310826 green. Separate edge publisher38254440160 failed both platform Trivy gates:44HIGH results/eight unique CVEs, exceptions expired2026-10-11, fixed versions absent in captured SARIF. Not a demonstrated label-code regression; no ignore extension or blind retry. Fresh Debian/base availability research active; stable two-platform OCI artifact acceptance still open. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop23-evidence/oci/.
 
 loop23 terminal disposition for this row: implementation cycles2 (shared core, root caller integration), no source review-repair rounds; local/required integrated source proof green, artifact acceptance open. Eight HIGH CVEs remain vulnerable in stable trixie/bookworm; testing/unstable fixed source packages are not compatible stable binary proof, Alpine/AWS runtime unverified. Park owner security/runtime policy re-grade; recommend unchanged baseline and verified stable patch rather than exception renewal. Actual Dockerfile runtime is Python3.14, not the separate CI Python3.15. Full fresh citations /Users/rob/repos/grafana-cloud-org-insights/codex/loop23-evidence/oci/image-security/findings.md.
+
+loop25 candidate implementation3 cumulative, security review PASS on exact Dockerfile d051e769bd72afbf8deae7640e2ae59cf0c8796aa12f19c6ae34192bf0951501; independent both-platform actual-image checks verified copied source/no-network startup. No critical/major. Nonblocking builder package trust, overridable trusted version/checksum args and writable /app parent retained, not hermetic/read-only-rootfs proof. CodeRabbit active before root landing. Stable release proof remains open.
 <!-- SECTION:NOTES:END -->

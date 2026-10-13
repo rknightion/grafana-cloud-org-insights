@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@loop25-root'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-13 08:50'
+updated_date: '2026-10-13 08:56'
 labels:
   - owner-decision
   - cost
@@ -46,4 +46,8 @@ Loop24 decision packet: source-backed GET /api/plugin-proxy/grafana-adaptive-met
 Loop24 root robk witness: installed Adaptive Metrics1.20.0, resources health/control bothHTTP500; source-backed plugin-proxy exemptionsHTTP200 valid result array empty (13bytes), same-family nonexistent control404. This distinguishes route reachability from broken resource proxy, not complete empty inventory or reader-compatible minimum pairs. Existing staff Admin token; two exact read/plugin pair scopes literally observed, exact plugins.app scope not literally in response (held field in evidence means literal scope equality ONLY; wildcard/Admin authorization is not evaluated, absence does not establish denial). No reader credential use, permission/token change or grant. AC1 remains owner decision and AC2 exact-pair witness absent. Attempts0 implementation, re-witness only. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/exemptions/lane.md and /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/root/exemptions-probe.json.
 
 loop25 D-EXM25 bounded robk witness: staff Adaptive Metrics1.20.0, source-backed exemptions exact200/application-json/13bytes/result array empty; same-family nonexistent404, resource health/control both500. Isolated basicNone SA, custom role exact exemptions:read@empty plus plugin:access@empty read back; temporary token requested900s, same-token effective permissions captured, exemptions GET403/application-json/168bytes. Immediate pair sufficiency NOT established; no retry, third pair, reader-role change, implementation or customer grant. Token/assignment/role/SA teardown by recorded IDs, all three absence readbacks pass, no open mutation. Raw body/configuration/credentials not persisted. Protected metadata /Users/rob/repos/grafana-cloud-org-insights/codex/loop25-evidence/exemptions/isolated-ledger.json. Existing-reader comparison pending named credential availability.
+
+Existing deployed robk reader comparator now captured through root serial dev read prerequisite (fresh identity, live task-definition selected SSM record in memory, no credential persistence). Six GET statuses200/200/500/500/200/404; installed1.20.0, exemptions exact200/json/13bytes/result0. Same-token effective permissions include all THREE candidate pairs, including plugins.app:access@plugins:id:grafana-adaptive-metrics-app, unlike isolated two-pair effective permission witness. This supports the third-pair hypothesis, not necessity/minimum or complete empty inventory. No role change, new reader grant, implementation or customer enablement. Full count-only evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop25-evidence/exemptions/existing-reader.json.
+
+loop25 root probe complete, implementation attempts0 and no implementation review-repair. BasicNone/defined role for existing reader independently verified. Count-only decision packet /Users/rob/repos/grafana-cloud-org-insights/codex/loop25-evidence/exemptions/decision.md: recommend future isolated three-pair witness; immediate two-pair403 is not necessity/minimum proof. Requested900s TTL recorded; actual expiration metadata readback not captured before deletion, not claimed. Exact teardown all absent. Task finalization waits summary publication/composed gate.
 <!-- SECTION:NOTES:END -->
