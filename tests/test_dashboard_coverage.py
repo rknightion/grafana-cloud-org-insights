@@ -52,12 +52,17 @@ def placed(value):
 # These are derived display columns, NOT new published schema fields. Keep the
 # closed projection separate from row/metadata lineage, and reject an unknown output.
 SNAPSHOT_PRESENTATION_FIELDS = frozenset({
-    "view", "generated_at", "publication_age", "input", "availability",
+    "view", "generated_at", "publication_age", "input", "availability", "input_state",
     "age_at_publication", "age_now", "membership", "completeness", "measurement", "scan_coverage",
 })
 
 
 def presentation_root(root):
+    # Exact, two-field presentation-only type projection: all other source keys survive unchanged.
+    # Do not admit arbitrary transforms/merges or relax unknown-field/schema lineage guards.
+    if root == ('rows ~> |$|{"enabled": $type(enabled) = "boolean" ? enabled : null, '
+                '"authenticationFailed": $type(authenticationFailed) = "boolean" ? authenticationFailed : null}|'):
+        return "rows"
     # Order-by alone retains the entire row and every source selector. Admit only the closed
     # presentation sort grammar, not arbitrary JSONata projections, filters or merged values.
     sorted_rows = re.fullmatch(

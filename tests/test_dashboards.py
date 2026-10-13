@@ -2874,6 +2874,10 @@ def dashboard_coverage_inventory():
                     continue
                 view = match.group(1)
                 root = spec.get("root_selector", "")
+                # Only this exact type-preserving tenant projection retains source lineage.
+                if root == ('rows ~> |$|{"enabled": $type(enabled) = "boolean" ? enabled : null, '
+                            '"authenticationFailed": $type(authenticationFailed) = "boolean" ? authenticationFailed : null}|'):
+                    root = "rows"
                 # This exact optional-object expression selects the same observed field lineage;
                 # arbitrary expressions are not credited as displaying a guessed metadata path.
                 optional_root = re.fullmatch(r"\$exists\(([^()]+)\) \? \[\1\] : \[\]", root)
@@ -2992,6 +2996,43 @@ class EveryPublishedViewIsRenderedSomewhereTest(unittest.TestCase):
         kw = {k: self.data[k] for k in sorted(hydrate.INPUT_OWNER)}
         _metrics, views, _ = compose.build_all(stacks, cov, **kw)
         return set(views)
+
+    def test_tenant_lineage_only_credits_exact_projection_on_assembled_inventory(self):
+        from bin import dashboards
+        original = dashboards.assemble
+        selector = ('rows ~> |$|{"enabled": $type(enabled) = "boolean" ? enabled : null, '
+                    '"authenticationFailed": $type(authenticationFailed) = "boolean" ? authenticationFailed : null}|')
+
+        def inventory(root, unknown_column=False):
+            def assemble(name, *args, **kwargs):
+                result = original(name, *args, **kwargs)
+                if name == "ai":
+                    panel = result[1]["spec"]["elements"]["tbl_ai_tenant"]["spec"]
+                    query = panel["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
+                    query["root_selector"] = root
+                    if unknown_column:
+                        for column in query["columns"]:
+                            if column["selector"] == "enabled":
+                                column["selector"] = "fabricated"
+                return result
+            with mock.patch.object(dashboards, "assemble", side_effect=assemble):
+                return [row for row in dashboard_coverage_inventory()["fields"]
+                        if row["view"] == "ai_tenant_config" and row["field"].startswith("rows.")]
+
+        baseline = inventory(selector)
+        self.assertTrue(baseline)
+        self.assertTrue(all(row["panels"] for row in baseline))
+        for mutation in (selector.replace('"enabled":', '"fabricated":'),
+                         selector.replace('enabled : null', 'true : false'),
+                         selector + '[enabled = true]', 'rows.{"enabled": enabled}',
+                         'rows.enabled', 'rows[enabled = true]'):
+            with self.subTest(root=mutation):
+                self.assertTrue(all(not row["panels"] for row in inventory(mutation)))
+        unknown = inventory(selector, unknown_column=True)
+        self.assertEqual(next(row for row in unknown if row["field"] == "rows.enabled")["panels"], [])
+        # Keep the pre-existing optional-object recognizer independently usable.
+        optional = inventory('$exists(rows) ? [rows] : []')
+        self.assertTrue(all(row["panels"] for row in optional))
 
     def test_every_published_field_is_rendered_or_deliberate(self):
         inventory = dashboard_coverage_inventory()

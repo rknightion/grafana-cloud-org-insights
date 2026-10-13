@@ -1,7 +1,8 @@
 """Approved assembled-layout and register-survival seam (D-LAY23).
 
-Only presentation changes live here. Sources, values, units, labels and schema contracts stay in
-existing builders; canonical links are resolved from final assembled documents by the caller.
+Only presentation changes live here. Sources, units, labels and schema contracts stay in existing
+builders; canonical links are resolved from final assembled documents by the caller. The tenant
+boolean projection below prevents malformed source JSON from becoming a boolean display claim.
 """
 from __future__ import annotations
 
@@ -130,6 +131,27 @@ def apply(name, elements, tabs, detail):
             "The source is already condition-matched unless a field predicate is declared here.")
         links[evidence] = [(name, owner, "Canonical full register")]
 
+    if "_findings_now" in elements:
+        # The metric intentionally has no severity label. Use only the fixed producer kind
+        # contract, never a view->severity guess (the cardinality view has two severities).
+        severities = {}
+        for spec in findings.SPECS:
+            if spec.kind in severities and severities[spec.kind] != spec.severity:
+                raise ValueError("Finding kind has ambiguous severity; cannot present a fixed severity")
+            severities[spec.kind] = spec.severity
+        panel = elements["_findings_now"]["spec"]
+        panel["vizConfig"]["spec"]["fieldConfig"]["overrides"].append({
+            "matcher": {"id": "byName", "options": "Field"},
+            "properties": [{"id": "mappings", "value": [{"type": "value", "options": {
+                kind: {"text": f"{kind} [severity: {severity}]"}
+                for kind, severity in severities.items()
+            }}]}],
+        })
+        panel["title"] += " and fixed severity"
+        panel["description"] += (
+            " Severity is the deterministic FindingSpec classification of each kind, not a new "
+            "metric label or a per-row judgement. Unknown kinds remain verbatim; no severity is guessed.")
+
     by_title = {tab["spec"]["title"]: tab for tab in tabs}
 
     def grid(title, keys):
@@ -156,6 +178,11 @@ def apply(name, elements, tabs, detail):
                 row = original["spec"]["layout"]["spec"]["rows"][0]
                 row["spec"]["layout"] = build.auto_grid([view, f"_age_{view}"], max_columns=2)
                 rows.append(row)
+                # Reader availability belongs beside its configured inventory, not solely in HtR.
+                # Reuse the runtime metadata element: no new source, build-time state or missing URL.
+                if f"_meta_{view}" in elements:
+                    rows.append(build.row(f"{title}: publication and input state",
+                                          [f"_meta_{view}"], max_columns=1, row_height="tall"))
         by_title["Configured inventory"] = build.rows_tab("Configured inventory", rows)
         workload = by_title["Workload"]["spec"]["layout"]["spec"]["rows"]
         workload[0]["spec"]["layout"] = build.auto_grid(["n_intseries", "n_intshare"], max_columns=2,
@@ -169,6 +196,25 @@ def apply(name, elements, tabs, detail):
         workload[-1]["spec"]["layout"] = build.auto_grid(["_canonical_ai"], max_columns=1, row_height="short")
         for key in ("n_pods", "n_hosts", "n_assistant", "n_aitokens"):
             del elements[key]
+    elif name == "ai":
+        # Presentation only: Grafana's boolean formatter coerces numbers to True/False and can
+        # display arrays as blank. Check the source JSON type in JSONata, before frame conversion.
+        # Preserve real booleans; missing/null/malformed values stay unknown, never disabled.
+        panel = elements["tbl_ai_tenant"]
+        query = _data(panel)["queries"][0]["spec"]["query"]["spec"]
+        query["root_selector"] = (
+            'rows ~> |$|{"enabled": $type(enabled) = "boolean" ? enabled : null, '
+            '"authenticationFailed": $type(authenticationFailed) = "boolean" ? authenticationFailed : null}|')
+        for column in _columns(panel):
+            if column["selector"] in ("enabled", "authenticationFailed"):
+                column["type"] = "boolean"
+                panel["spec"]["vizConfig"]["spec"]["fieldConfig"]["overrides"].append({
+                    "matcher": {"id": "byName", "options": column["text"]},
+                    "properties": [{"id": "noValue", "value": "Unknown"}],
+                })
+        panel["spec"]["description"] += (
+            " Boolean cells show Unknown for missing, null or non-boolean source JSON. "
+            "This is a display projection, not producer validation or a claim that the source is healthy.")
     elif name == "maturity":
         grid("Leaderboard", ["b_bottom", "b_top", "board"])
         _widen(elements["board"], elements["unscored_detail"])
@@ -238,6 +284,23 @@ def apply(name, elements, tabs, detail):
                 query["root_selector"] = f'rows^(>$lookup({weights}, `Worst severity`), <Score)'
             else:
                 query["root_selector"] = f'rows^(>(Result = "fail" ? 1 : 0), >$lookup({weights}, Severity))'
+    # These named headlines deliberately collapse dimensions. Declare the aggregation honestly;
+    # context copies and explanatory tabs do not thereby acquire field/enum ownership.
+    aggregate_keys = {"_findings_now", "b_leftover", "b_recency", "t_state"}
+    if "Overview" in by_title:
+        def overview_elements(value):
+            if isinstance(value, dict):
+                if value.get("kind") == "ElementReference":
+                    yield value["name"]
+                for child in value.values():
+                    yield from overview_elements(child)
+            elif isinstance(value, list):
+                for child in value:
+                    yield from overview_elements(child)
+        aggregate_keys.update(key for key in overview_elements(by_title["Overview"])
+                              if elements[key]["spec"]["vizConfig"]["group"] == "stat")
+    for key in aggregate_keys & elements.keys():
+        elements[key]["spec"]["title"] += " - aggregate"
     expected = TAB_ORDER[name].split("|")
     unknown = set(by_title) - set(expected)
     if unknown:

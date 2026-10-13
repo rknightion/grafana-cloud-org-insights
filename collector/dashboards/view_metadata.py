@@ -77,6 +77,7 @@ COLUMNS = (
     ("publication_age", "Publication age (s)", "number"),
     ("input", "Input", "string"),
     ("availability", "Availability at publication", "string"),
+    ("input_state", "Recorded input state (publication)", "string"),
     ("measurement", "Measurement interpretation", "string"),
     ("scan_coverage", "Publishing scan coverage (not view completeness)", "number"),
     ("age_at_publication", "Input age at publication (s)", "number"),
@@ -132,6 +133,7 @@ def _selector(view: str) -> str:
           ($p.available = false ? "Unavailable at publication" :
             ($p.stale = true ? "Stale at publication" :
               ($usable ? "Available at publication" : "Unknown availability")))),
+      "input_state": $type($p.state) = "string" ? $p.state : null,
       "measurement": $measurement,
       "scan_coverage": $type($coverage) = "number" and $coverage >= 0 and $coverage <= 1 ? $coverage : null,
       "age_at_publication": $usable ? $age : null,
@@ -165,7 +167,10 @@ def metadata_panel(view: str, ds: str) -> dict[str, Any]:
         "No generic complete/empty claim is inferred from row count. Unavailable input ages are "
         "withheld; malformed timestamps and HTTP/access errors remain explicit query errors. "
         "Metadata is object-wide and does not narrow with the Stack selector. State at publication is "
-        "not current source health. Explicit disabled/partial states are displayed only when recorded; "
+        "not current source health. Recorded input state preserves the exact existing provenance "
+        "state, including incompatible_schema and future_timestamp; it is blank/Unknown when no state "
+        "was recorded, even for available input. It is not a new source-health observation. "
+        "Explicit disabled/partial states are displayed only when recorded; "
         "absence of state never infers disabled. Measured zero is limited to returned configured-count "
         "rows with all required inputs known usable; no estate completeness follows. Empty rows alone "
         "remain unknown. HTTP 404 is missing object, not zero; 401/403, transport and parse failures "

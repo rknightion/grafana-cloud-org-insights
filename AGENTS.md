@@ -313,6 +313,12 @@ datasource with that stack's reader token and the mandatory `instance_id` guard 
 `collector/sources/usage_insights.py`; a selector without that filter silently attributes another
 stack's logs.
 
+The Operations retention candidate table keeps range queries. Grafana's Prometheus table converter
+returns every sample, so reduce each A/B frame to its last value per `stack_id` before joining;
+joining raw range frames multiplies rows. These are the latest returned divergent values within the
+selected range, not necessarily current divergence. The pinned Grafana 12.2.0 local converter and
+transformation witness is a synthetic runtime proof, not a deployed-browser observation.
+
 ## Consumer manifest mode
 
 - `terraform/consumer_manifest.tf`'s `local.inputs` is the one table of which manifest key feeds which

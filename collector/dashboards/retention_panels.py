@@ -58,7 +58,7 @@ def _stat(title: str, queries: list[tuple[str, str]], description: str) -> dict:
 
 
 def _table_query(expression: str, ref_id: str) -> dict:
-    """A range Prometheus table query exposing numeric `stack_id` for a table join."""
+    """A range Prometheus table query exposing string `stack_id` for a table join."""
     return build.data_query(
         "prometheus",
         build.USAGE_UID,
@@ -81,7 +81,9 @@ def _candidate_table() -> dict:
     lookback = f"({_LOOKBACK} != on(stack_id) group_left() {_RETENTION}){_DAYS}"
     panel = build._panel(  # noqa: SLF001 - this table needs two Prometheus result frames.
         "Candidate stacks: retention and lookback days",
-        "Only stacks whose reported lookback differs from reported retention appear. This is a candidate "
+        "Latest returned retention and lookback values per stack within the selected range. Only samples "
+        "whose reported lookback differs from reported retention contribute; a past divergence may remain "
+        "visible after the values converge. This is a candidate "
         "signal of a likely per-stream retention override, not confirmation. " + _SCOPE,
         [_table_query(retention, "A"), _table_query(lookback, "B")],
         build.viz(
@@ -109,6 +111,19 @@ def _candidate_table() -> dict:
         ),
     )
     panel["spec"]["data"]["spec"]["transformations"] = [
+        # Range-table conversion returns every timestamp per stack in each A/B frame.
+        # Reduce within each identity first; joining raw samples multiplies matching rows.
+        {
+            "kind": "groupBy",
+            "spec": {
+                "id": "groupBy",
+                "options": {"fields": {
+                    "stack_id": {"operation": "groupby", "aggregations": []},
+                    "Value #A": {"operation": "aggregate", "aggregations": ["last"]},
+                    "Value #B": {"operation": "aggregate", "aggregations": ["last"]},
+                }},
+            },
+        },
         {
             "kind": "joinByField",
             "spec": {
@@ -124,12 +139,12 @@ def _candidate_table() -> dict:
             "spec": {
                 "id": "organize",
                 "options": {
-                    "indexByName": {"stack_id": 0, "Value #A": 1, "Value #B": 2},
+                    "indexByName": {"stack_id": 0, "Value #A (last)": 1, "Value #B (last)": 2},
                     "excludeByName": {"Time": True},
                     "renameByName": {
                         "stack_id": "Stack ID",
-                        "Value #A": "Retention days",
-                        "Value #B": "Lookback days",
+                        "Value #A (last)": "Retention days",
+                        "Value #B (last)": "Lookback days",
                     },
                 },
             },

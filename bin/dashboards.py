@@ -3350,6 +3350,25 @@ def d_operations(ds: str):
                         "there is no finer breakdown to build, and it is also why no p90 or p99 is shown "
                         "anywhere on this dashboard: both saturate at the top bucket and would report "
                         "exactly one hour regardless of the real figure."),
+        "b_resdist": build.barchart_series_panel(
+            "Resolution observations by elapsed-time band (7d)",
+            [(f'sum({RES}_bucket{{le="60.0"}})', "within 1 min"),
+             (f'sum({RES}_bucket{{le="300.0"}}) - sum({RES}_bucket{{le="60.0"}})',
+              "1 to 5 min"),
+             (f'sum({RES}_bucket{{le="600.0"}}) - sum({RES}_bucket{{le="300.0"}})',
+              "5 to 10 min"),
+             (f'sum({RES}_bucket{{le="3600.0"}}) - sum({RES}_bucket{{le="600.0"}})',
+              "10 min to 1 hour"),
+             (f'sum({RES}_bucket{{le="+Inf"}}) - sum({RES}_bucket{{le="3600.0"}})',
+              "over 1 hour")],
+            ds_uid=build.USAGE_UID,
+            description="Counts of recorded resolution observations in the producer's rolling last "
+                        "seven days, not the dashboard range and not a matched acknowledgement cohort. "
+                        "Raw adjacent cumulative bucket differences partition recorded elapsed times; "
+                        "this rolling histogram is not a lifetime counter and must not use increase. "
+                        "Absent buckets remain unknown, not zero. Available buckets do not prove a "
+                        "complete estate population. The over-one-hour tail is a count, not a finer "
+                        "quantile: the largest finite boundary is 3600 seconds."),
         "t_response": build.timeseries_panel(
             "Recorded response medians over time (rolling 7d)",
             [(MTTA_MEDIAN, "median acknowledge (s)"), (MTTR_MEDIAN, "median resolve (s)")],
@@ -3470,7 +3489,8 @@ def d_operations(ds: str):
             build.row("Typical response", ["n_mtta", "n_mttr", "n_mtta_mean"],
                       max_columns=3, row_height="short"),
             build.row("Long tail", ["n_tail", "n_tail_share"], max_columns=2, row_height="short"),
-            build.row("Distribution and trend", ["b_ackdist", "t_response"], max_columns=2),
+            build.row("Separate recorded timing populations", ["b_ackdist", "b_resdist"], max_columns=2),
+            build.row("Recorded median trends", ["t_response"], max_columns=1),
         ]),
         build.rows_tab("Ownership", [
             build.row("Headline", ["n_unowned_all", "n_unowned_acked", "n_unowned_svc"],
