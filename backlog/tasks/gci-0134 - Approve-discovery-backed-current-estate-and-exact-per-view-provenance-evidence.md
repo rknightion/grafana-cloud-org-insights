@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@loop25-root'
 created_date: '2026-10-12 16:03'
-updated_date: '2026-10-13 22:39'
+updated_date: '2026-10-13 22:56'
 labels:
   - dashboards
   - schema
@@ -21,7 +21,7 @@ ordinal: 171000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-The bounded dashboard-only metadata build in GCI-0114 (per-view history and metadata gaps) cannot prove present estate membership, departure or universal view completeness from existing last-good objects or historical Mimir label values. Current generated_at is an envelope composition/publication marker, not exact S3 upload or source observation time; input provenance ages are estimates. A failed inventory call withholds publication, so old snapshots alone cannot establish a newer failure/current identity set. This packet requires a separately approved source/schema/privacy and dashboard-readable evidence contract, not implementation authority in loop23. No configured estate roster, scan-reader access, extra series or source-route/scope widening is implied.
+Accepted bounded private evidence annotates accepted-view provenance and separates dated collector run/inventory outcomes from historical snapshots. The owner explicitly withdrew authoritative current-membership and departure proof on 2026-10-13. No configured roster, new membership store, additional source route/scope or product series follows. Discovery every run, failed-inventory publication refusal, historical rows, privacy, clocks and source floors remain intact.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
