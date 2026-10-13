@@ -449,3 +449,9 @@ Live enablement requires its own reviewed IAM/audience/retention deployment boun
 Outcome recording cannot be enabled with the module-managed Firehose task-log subscription: it would
 forward private digest events to another audience. Before live enablement, verify the log group has
 no external forwarding subscription either. A broader destination needs a separate audience decision.
+
+Container Insights is default-off in the module and an additive AWS-only manifest policy. Preserve
+an owner-held capture window explicitly with `aws.container_insights_enabled = true` during image
+updates; never accept a planned disable as an incidental image change. False/absent retains legacy
+manifest digests, while true changes the overlay digest and therefore requires a rebuilt consumer
+image. This switch does not turn a memory reservation or pytest RSS into a collector measurement.

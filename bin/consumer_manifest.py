@@ -43,7 +43,7 @@ DEFAULT_CORE_PATHS = ("collector", "scan.py", "bin/dashboards.py", "bin/alerts.p
 OVERLAY_KEYS = ("schema_version", "runtime", "aws", "policy")
 # aws keys added after manifests already existed. Absent means this default, which never enters the
 # overlay digest, so a manifest written before the key existed keeps its digest; prune removes it.
-ADDITIVE_AWS_DEFAULTS = {"manage_adopted_bucket_config": False}
+ADDITIVE_AWS_DEFAULTS = {"manage_adopted_bucket_config": False, "container_insights_enabled": False}
 MODULE_SOURCE = re.compile(
     r'(source\s*=\s*"git::https://github\.com/'
     r'rknightion/grafana-cloud-org-insights\.git//terraform\?ref=)'

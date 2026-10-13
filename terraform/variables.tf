@@ -661,3 +661,9 @@ variable "outcome_observer_enabled" {
   default     = false
   description = "Record minimized scan outcomes and create a separate bounded observer task. Requires module-managed bucket retention; no Grafana credentials are granted to the observer."
 }
+
+variable "container_insights_enabled" {
+  description = "Enable billed ECS Container Insights metrics. Default off; an explicit true can preserve a temporary owner-approved capture window during an image upgrade."
+  type        = bool
+  default     = false
+}

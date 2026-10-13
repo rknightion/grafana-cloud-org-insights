@@ -74,6 +74,7 @@
         "create_secret": {"type": "boolean"},
         "create_views_reader_user": {"type": "boolean"},
         "create_provisioner": {"type": "boolean"},
+        "container_insights_enabled": {"type": "boolean"},
         "firehose_logs_enabled": {"type": "boolean"},
         "firehose_log_subscription_enabled": {"type": "boolean"},
         "assign_public_ip": {"type": "boolean"},

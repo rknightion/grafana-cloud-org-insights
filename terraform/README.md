@@ -137,6 +137,7 @@ purpose; omitted defaults in the required row mean Terraform requires an explici
 | `create_ecr_repository`, `image`, `task_architecture` | `true`, empty, `ARM64`; empty image uses created ECR `:latest`, unsuitable for reviewed runtime rollout |
 | `security_group_ids`, `assign_public_ip` | `[]`, `false`; empty creates HTTPS-egress group |
 | `schedules_enabled`, `schedule_timezone`, `tiers` | `true`, `UTC`, four default tiers; disable schedules explicitly for first deployment. A tier's `schedule_expression` is optional: t1-t4 fall back to `local.default_tier_schedules` |
+| `container_insights_enabled` | `false`; explicit AWS policy can preserve an already-enabled temporary capture window; billed ECS metrics, separate from runtime projections |
 | `outcome_observer_enabled` | `false`; isolated latest-observed outcome writer and typed collector recording; requires managed bucket configuration |
 | `schedule_retry_attempts`, `log_retention_days` | `2`, `30`; invocation retry count and CloudWatch retention |
 | `firehose_logs_enabled`, `firehose_log_subscription_enabled` | both `false`; staged stream creation then subscription |

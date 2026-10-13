@@ -27,10 +27,10 @@ resource "aws_ecs_cluster" "this" {
   }
 
   setting {
-    # Container Insights is off: the useful signal for a scheduled batch job is its own emitted metrics
+    # Container Insights is default-off: the useful signal for a scheduled batch job is its own emitted metrics
     # and the dead-man's switch, not per-task CPU curves, and Insights is billed per metric.
     name  = "containerInsights"
-    value = "disabled"
+    value = local.inputs.container_insights_enabled ? "enabled" : "disabled"
   }
 }
 

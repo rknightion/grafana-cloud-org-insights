@@ -185,6 +185,7 @@ locals {
     create_secret                     = contains(local.manifest_keys.aws, "create_secret") ? tobool(local.manifest.aws.create_secret) : var.create_secret
     create_views_reader_user          = contains(local.manifest_keys.aws, "create_views_reader_user") ? tobool(local.manifest.aws.create_views_reader_user) : var.create_views_reader_user
     create_provisioner                = contains(local.manifest_keys.aws, "create_provisioner") ? tobool(local.manifest.aws.create_provisioner) : var.create_provisioner
+    container_insights_enabled        = contains(local.manifest_keys.aws, "container_insights_enabled") ? tobool(local.manifest.aws.container_insights_enabled) : var.container_insights_enabled
     firehose_logs_enabled             = contains(local.manifest_keys.aws, "firehose_logs_enabled") ? tobool(local.manifest.aws.firehose_logs_enabled) : var.firehose_logs_enabled
     firehose_log_subscription_enabled = contains(local.manifest_keys.aws, "firehose_log_subscription_enabled") ? tobool(local.manifest.aws.firehose_log_subscription_enabled) : var.firehose_log_subscription_enabled
     assign_public_ip                  = contains(local.manifest_keys.aws, "assign_public_ip") ? tobool(local.manifest.aws.assign_public_ip) : var.assign_public_ip
@@ -258,6 +259,7 @@ locals {
     create_secret                     = var.create_secret
     create_views_reader_user          = var.create_views_reader_user
     create_provisioner                = var.create_provisioner
+    container_insights_enabled        = var.container_insights_enabled
     firehose_logs_enabled             = var.firehose_logs_enabled
     firehose_log_subscription_enabled = var.firehose_log_subscription_enabled
     assign_public_ip                  = var.assign_public_ip
@@ -309,6 +311,7 @@ locals {
     create_secret                     = true
     create_views_reader_user          = true
     create_provisioner                = false
+    container_insights_enabled        = false
     firehose_logs_enabled             = false
     firehose_log_subscription_enabled = false
     assign_public_ip                  = false

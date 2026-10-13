@@ -503,6 +503,19 @@ class DefaultOmissionTest(unittest.TestCase):
         adopted = consumer_manifest.regenerate(adopted)
         self.assertIn("secret_name", consumer_manifest.regenerate(adopted, prune_defaults=True)["aws"])
 
+    def test_container_insights_policy_preserves_legacy_and_binds_enabled(self):
+        for name in ("full", "pruned"):
+            old = committed(name)
+            explicit = consumer_manifest.regenerate(dict(old, aws=dict(old["aws"], container_insights_enabled=False)))
+            self.assertEqual(explicit["overlay_digest"], old["overlay_digest"])
+            self.assertEqual(explicit["runtime_projection_digests"], old["runtime_projection_digests"])
+            enabled = consumer_manifest.regenerate(dict(old, aws=dict(old["aws"], container_insights_enabled=True)))
+            self.assertNotEqual(enabled["overlay_digest"], old["overlay_digest"])
+            self.assertEqual(enabled["runtime_projection_digests"], old["runtime_projection_digests"])
+            bad = dict(old, aws=dict(old["aws"], container_insights_enabled="true"))
+            with self.assertRaises(consumer_manifest.ManifestError):
+                consumer_manifest.regenerate(bad)
+
     def test_omitting_a_key_without_a_default_still_fails(self):
         body = committed("pruned")
         body["runtime"]["scan"].pop("GCINSIGHT_MIMIR_TENANT")
