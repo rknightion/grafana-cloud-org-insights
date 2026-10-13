@@ -493,6 +493,17 @@ def hydrate(
             "age_seconds": age.total_seconds(), "stale": False,
             "schema_version": version,
         }
+        # Optional display evidence travels only with an accepted input, never changes eligibility,
+        # and never rebases original collection times to this tier's composition/envelope marker.
+        # Old producers and unsupported display versions remain usable with unknown exact evidence.
+        evidence = meta.get("evidence")
+        if (isinstance(evidence, Mapping) and type(evidence.get("version")) is int
+                and evidence["version"] == s3emit.EVIDENCE_VERSION):
+            original = evidence.get("inputs")
+            detail = s3emit.accepted_input_evidence(
+                name, original.get(name) if isinstance(original, Mapping) else None)
+            if detail is not None and detail["owner_tier"] == owner and detail["available"] is True:
+                prov[name]["evidence"] = detail
 
     for name, entry in prov.items():
         entry.setdefault("schema_version", INPUT_SCHEMA_VERSION[name]

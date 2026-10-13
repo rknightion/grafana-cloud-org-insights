@@ -286,7 +286,48 @@ def metadata_leaves(value, prefix="meta"):
 # Exact provenance debts, not a blanket metadata exemption. GCI-0110
 # (expose optional publication age/completeness) owns supported metadata display;
 # GCI-0114 (decide discovery-backed history/metadata) owns missing state contracts.
+# GCI-0134 (accepted-success provenance): surface 1 retains private audit evidence;
+# the observer/UI consumer is deferred to surface 2. These exact schema leaves are
+# display debts, NEVER selector/rendering credit. Null objects and populated leaves
+# are listed separately; unknown children and unregistered input names remain gaps.
+PRIVATE_EVIDENCE_REASON = (
+    "GCI-0134 (accepted-success provenance): surface 1 private/audit schema retained "
+    "in the object; observer/UI display deferred to surface 2, not rendered evidence."
+)
+PRIVATE_EVIDENCE_PATHS = {
+    "meta.evidence.version", "meta.evidence.inventory_ref", "meta.evidence.composition_at",
+    "meta.evidence.view_scope.inventory", "meta.evidence.view_scope.row_selection",
+    "meta.evidence.completeness", "meta.evidence.storage",
+    "meta.evidence.dependencies.inventory.observation",
+    "meta.evidence.dependencies.inventory.completeness",
+    *{f"meta.evidence.inventory_ref.{field}" for field in (
+        "source", "org_id", "identity_sha256", "members", "remote_snapshot_at",
+        "response_completeness", "visibility", "authority",
+        "observation.started_at", "observation.completed_at", "observation.clock",
+    )},
+    *{f"meta.evidence.dependencies.inventory.observation.{field}"
+      for field in ("started_at", "completed_at", "clock")},
+    *{f"{prefix}.{field}"
+      for name in hydrate.INPUT_OWNER
+      for prefix in (f"meta.inputs.{name}.evidence", f"meta.evidence.dependencies.{name}")
+      for field in (
+          "owner_tier", "available", "inventory_ref", "observation", "source_revision",
+          "observation.started_at", "observation.completed_at", "observation.clock",
+          "completeness.route_response", "completeness.visibility", "completeness.semantic",
+          "completeness.population.eligible", "completeness.population.measured",
+          "completeness.population.excluded", "completeness.population.unit",
+      )},
+    *{f"{prefix}.{field}"
+      for name in hydrate.INPUT_OWNER
+      for prefix in (f"meta.inputs.{name}.evidence", f"meta.evidence.dependencies.{name}")
+      for field in (("query_window.seconds", "query_window.start", "query_window.end")
+                    if name == "loki_volume" else ("query_window",))},
+}
+PRIVATE_EVIDENCE_DEBTS = {
+    path: (PRIVATE_EVIDENCE_REASON, "GCI-0134") for path in PRIVATE_EVIDENCE_PATHS
+}
 METADATA_DEBTS = {
+    **PRIVATE_EVIDENCE_DEBTS,
     "meta.generated_at": ("Object publication age is not input age.", "GCI-0110"),
     "meta.tier": ("Publisher tier is not input ownership tier.", "GCI-0110"),
     "meta.stacks_total": ("Snapshot estate denominator is not current scan inventory.", "GCI-0110"),

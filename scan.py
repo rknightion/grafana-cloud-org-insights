@@ -241,8 +241,9 @@ def load_ratecard(
         raise ratecard.InvalidRateCard(f"{uri}: {exc}") from exc
 
 
-def envelope(cfg: config.Config, coverage: Coverage, data: dict[str, Any], extra: dict[str, Any] | None = None) -> dict[str, Any]:
-    return {
+def envelope(cfg: config.Config, coverage: Coverage, data: dict[str, Any], extra: dict[str, Any] | None = None,
+             *, inventory_evidence: dict[str, Any] | None = None) -> dict[str, Any]:
+    scan = {
         "meta": {
             "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
             "tier": cfg.tier,
@@ -252,6 +253,28 @@ def envelope(cfg: config.Config, coverage: Coverage, data: dict[str, Any], extra
         },
         "data": data,
     }
+    # Inventory is never hydrated. T2 has no inventory payload, so its runner explicitly transports
+    # the same fresh observation used for composition. Plain legacy lists supply no exact evidence.
+    if inventory_evidence is None:
+        inventory_evidence = getattr(data.get("stacks"), "evidence", None)
+    scan["meta"]["evidence"] = s3emit.envelope_evidence(scan["meta"], data, inventory_evidence)
+    return scan
+
+
+def public_metadata(meta: dict[str, Any]) -> dict[str, Any]:
+    """Copy old public fields; additive evidence belongs only in private S3 artifacts.
+
+    Neither the owner envelope nor accepted hydrated evidence is mutated: views and scans retain
+    their original metadata. Only the two new optional evidence locations are removed.
+    """
+    safe = {key: value for key, value in meta.items() if key != "evidence"}
+    if isinstance(safe.get("inputs"), dict):
+        safe["inputs"] = {
+            name: ({key: value for key, value in entry.items() if key != "evidence"}
+                   if isinstance(entry, dict) else entry)
+            for name, entry in safe["inputs"].items()
+        }
+    return safe
 
 
 def source_report(
@@ -1256,6 +1279,7 @@ def assistant_gaps(
 
 def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     stacks = gcom.fetch_inventory(client, cfg)
+    inventory_evidence = getattr(stacks, "evidence", None)
     coverage = Coverage(tier=cfg.tier, total=len(stacks))
     for s in stacks:
         if s.get("status") == "paused":
@@ -1393,6 +1417,7 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         # `hydrate` reads inputs out of `scans/<tier>/latest.json`, and the symptom is not an error but
         # panels carrying at most one sample in the dashboards' default window.
         {"stacks": stacks, "access_policies": policies, **publishable},
+        inventory_evidence=inventory_evidence,
         extra={
             "cross_stack_id_collisions": len(collisions),
             "requests": client.attempts.requests,
@@ -1412,6 +1437,7 @@ def run_t1(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
 
 def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     stacks = gcom.fetch_inventory(client, cfg)
+    inventory_evidence = getattr(stacks, "evidence", None)
     slugs = [str(s["slug"]) for s in stacks]
     if cfg.stack:
         slugs = [s for s in slugs if s == cfg.stack] or [cfg.stack]
@@ -1715,6 +1741,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         # gathered but not persisted cannot be hydrated and every Pillar J panel would carry at most one
         # sample in the dashboards' default window.
         publishable_inputs,
+        inventory_evidence=inventory_evidence,
         extra={
             "requests": client.attempts.requests,
             "retries": client.attempts.retries,
@@ -1734,6 +1761,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
 def run_t3(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
     """Six-hourly: cardinality, Adaptive Metrics recommendations, Fleet Management inventory."""
     stacks = gcom.fetch_inventory(client, cfg)
+    inventory_evidence = getattr(stacks, "evidence", None)
     if cfg.stack:
         stacks = [s for s in stacks if str(s["slug"]) == cfg.stack]
     elif cfg.limit:
@@ -1768,6 +1796,7 @@ def run_t3(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         # `stacks` too, so the Loki detail events can pair inventory with the cardinality and Adaptive
         # findings  -  which is the whole point of the T3 sweep.
         cfg, coverage, {"dataplane": data, "stacks": stacks},
+        inventory_evidence=inventory_evidence,
         extra={"requests": client.attempts.requests, "retries": client.attempts.retries,
                "by_status": client.attempts.by_status, "error_samples": errors[:10],
                "series_emitted": len(metrics)},
@@ -2024,7 +2053,7 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
 
     # Loki carries the detail the cardinality guard bans from a metric label  -  label NAMES,
     # version strings, datasource ids, SA names. `stack` rides in the line body, never a stream.
-    events = [loki.summary_event(cfg.tier, scan["meta"])]
+    events = [loki.summary_event(cfg.tier, public_metadata(scan["meta"]))]
     if derived:
         events += loki.finding_events(cfg.tier, derived)
     stacks_for_events = scan["data"].get("stacks") or []
@@ -2058,8 +2087,9 @@ def run(client: ReadOnlyClient, cfg: config.Config, args: argparse.Namespace) ->
         console_log("info", f"  {uri}")
 
     if args.out:
+        diagnostic = {**scan, "meta": public_metadata(scan["meta"])}
         payload = json.dumps(producer_diagnostic_scan(label_inventory_src.diagnostic_scan(
-            label_risk_pillar.diagnostic_scan(scan))), indent=2, default=str)
+            label_risk_pillar.diagnostic_scan(diagnostic))), indent=2, default=str)
         with open(args.out, "w") as fh:
             fh.write(payload)
         console_log("info", f"wrote {args.out} ({len(payload):,} bytes)")

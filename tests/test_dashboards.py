@@ -2909,7 +2909,10 @@ def dashboard_coverage_inventory():
             reason = ""
             # Exact envelope semantics, not a blanket metadata exemption. Snapshot provenance is
             # deliberately not credited to scan/input-age metrics: those describe another publication.
+            # Shared finite private/audit debts, not rendered-field credit.
+            from tests.test_dashboard_coverage import PRIVATE_EVIDENCE_DEBTS
             envelope_omissions = {
+                **{path: debt[0] for path, debt in PRIVATE_EVIDENCE_DEBTS.items()},
                 "meta.generated_at": "Snapshot publication timestamp retained for audit; dashboard banners show scan/input freshness, not this object's timestamp.",
                 "meta.tier": "Publisher tier is operational provenance, not the ownership tier of each hydrated input.",
                 "meta.stacks_total": "Snapshot inventory denominator retained for audit; the estate panel renders the current inventory metric.",

@@ -289,6 +289,17 @@ every run publishes a complete view set rather than flattening views only a slow
   dashboards read the age of the INPUT, not of the run: they differ by hours, and the input age is
   what governs how current a figure is.
 
+## Accepted-view evidence
+
+Optional `meta.evidence.version = 1` is private S3 audit metadata, not a new series or a current-estate
+visibility guarantee. It binds the accepted composition's inventory response and mechanically derived
+view dependencies. Unwitnessed visibility, non-inventory exact observation times, remote snapshot time
+and storage/upload receipts remain unknown. Existing `generated_at`, input ages, rows and rules coverage
+keep their meanings. Native and hydrated evidence is stripped from Loki summary and diagnostic `--out`
+projections, never from private S3 originals. Hydration preserves accepted original evidence without
+rebasing its times or changing input eligibility. Surface-2 outcome observation remains separate; a
+newer failed attempt is not inferred from stale views, and publication refusal is never relaxed.
+
 ## Dashboards
 
 `collector/dashboards/build.py` is the panel library and holds the `DASHBOARDS` registry;

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import datetime as dt
+import hashlib
+import json
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Mapping, Sequence
@@ -35,13 +38,96 @@ STACK_FIELDS = (
 )
 
 
+class Inventory(list):
+    """List-compatible inventory with explicit, per-read evidence (never a global side channel).
+
+    JSON serialization and legacy list consumers are unchanged. Slicing intentionally loses the
+    attached observation: runners retain it explicitly before selecting diagnostic subsets.
+    """
+
+    def __init__(self, stacks: list[dict[str, Any]], evidence: dict[str, Any] | None):
+        super().__init__(stacks)
+        self.evidence = evidence
+
+
 def fetch_inventory(client: ReadOnlyClient, cfg: Config) -> list[dict[str, Any]]:
-    """T1  -  one call for the whole estate."""
+    """One existing-route read. Validate witnessed controls; never follow supplied links.
+
+    Legacy list responses without pagination/identity evidence remain usable but cannot establish
+    response completeness or an identity binding. Explicit inconsistent controls/identities fail
+    closed. Even a witnessed single complete response does not prove whole-org token visibility.
+    """
+    started = dt.datetime.now(dt.timezone.utc).isoformat()
     resp = client.get(f"{GCOM}/instances", params={"orgId": cfg.org_id}, bearer=cfg.cap)
-    if not resp.ok:
+    completed = dt.datetime.now(dt.timezone.utc).isoformat()
+    if resp.status != 200:
         raise RuntimeError(f"inventory failed: HTTP {resp.status}")
-    items = resp.json().get("items", [])
-    return [{k: s.get(k) for k in STACK_FIELDS} for s in items]
+    try:
+        body = resp.json()
+    except (ValueError, TypeError) as exc:
+        raise RuntimeError("inventory failed: invalid JSON") from exc
+    if not isinstance(body, Mapping) or not isinstance(body.get("items"), list):
+        raise RuntimeError("inventory failed: invalid items")
+    items = body["items"]
+    if any(not isinstance(item, Mapping) for item in items):
+        raise RuntimeError("inventory failed: invalid item")
+    controls = ("total", "pages", "page", "pageSize")
+    paginated = any(key in body for key in controls)
+    if paginated and (
+        any(type(body.get(key)) is not int for key in controls)
+        or body["total"] != len(items) or body["pages"] != 1 or body["page"] != 1
+        or body["pageSize"] < max(1, len(items))
+    ):
+        raise RuntimeError("inventory failed: incomplete pagination")
+    # No continuation URL is trusted or fetched. Unknown link shapes cannot certify completeness.
+    links = body.get("links", [])
+    if not isinstance(links, list) or any(
+        not isinstance(link, Mapping) or link.get("rel") != "self" for link in links
+    ):
+        raise RuntimeError("inventory failed: unresolved links")
+    ids: set[int] = set()
+    slugs: set[str] = set()
+    identity_complete = True
+    members = []
+    for item in items:
+        identity = item.get("id")
+        slug = item.get("slug")
+        org = item.get("orgId")
+        if not isinstance(slug, str) or not slug.strip() or len(slug.encode()) > 512:
+            raise RuntimeError("inventory failed: invalid slug")
+        if slug in slugs:
+            raise RuntimeError("inventory failed: duplicate slug")
+        slugs.add(slug)
+        if identity is None and not paginated:
+            identity_complete = False
+        elif type(identity) is not int or identity <= 0 or identity in ids:
+            raise RuntimeError("inventory failed: invalid or duplicate identity")
+        else:
+            ids.add(identity)
+        if org is None and not paginated:
+            identity_complete = False
+        elif type(org) is not int or str(org) != str(cfg.org_id):
+            raise RuntimeError("inventory failed: org binding mismatch")
+        members.append({"id": identity, "slug": slug,
+                        "status": item.get("status") if item.get("status") in
+                        ("active", "paused") else "unknown"})
+    evidence = None
+    # Bound only the additive evidence, not the estate/source population. An oversized observation
+    # remains usable under existing publication policy but its identity metadata stays unknown.
+    if items and identity_complete and len(members) <= 10000:
+        members.sort(key=lambda item: item["id"])
+        digest = hashlib.sha256(json.dumps(members, sort_keys=True,
+                                          separators=(",", ":")).encode()).hexdigest()
+        evidence = {
+            "source": "gcom_instances", "org_id": str(cfg.org_id),
+            "identity_sha256": digest, "members": members,
+            "observation": {"started_at": started, "completed_at": completed,
+                            "clock": "collector_utc"},
+            "remote_snapshot_at": None,
+            "response_completeness": "complete_for_response" if paginated else "unknown",
+            "visibility": "unknown", "authority": "unknown",
+        }
+    return Inventory([{k: item.get(k) for k in STACK_FIELDS} for item in items], evidence)
 
 
 def fetch_org_members(client: ReadOnlyClient, cfg: Config) -> dict[str, Any]:
