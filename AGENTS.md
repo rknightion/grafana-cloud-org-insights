@@ -463,3 +463,10 @@ Default-off forwarding remains all-records. Freshly read back every forwarding s
 enablement; any external path lacking the witnessed exclusion blocks recording. AWS
 TestMetricFilter was witnessed against actual recorder JSON and prefixed JSON on 2026-10-13;
 ordinary text/JSON matched and outcome records did not. This proves filter semantics, not delivery.
+
+Owner scope decision (2026-10-13): authoritative current-membership and departure proof is no
+longer a product requirement. Keep discovery every run, historical rows, failed-inventory publication
+refusal and all privacy/time/source-floor rules. The bounded observer reports dated outcomes and
+counts; its current-membership authority remains unknown. The owner separately authorized enabling
+it in the current dev and customer deployments while retaining ordinary forwarding with the
+private-outcome exclusion. This is not a blanket grant for other deployments or reader scopes.
