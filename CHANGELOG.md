@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.13.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.12.1...v0.13.0) (2026-10-13)
+
+
+### Features
+
+* add default-off outcome evidence and suppress Adaptive query usage ([778dcd4](https://github.com/rknightion/grafana-cloud-org-insights/commit/778dcd4794802cf63763ae07d6d31d8694069207))
+
+
+### Documentation
+
+* reconcile billing evidence and remaining backlog contracts ([d4f2e0e](https://github.com/rknightion/grafana-cloud-org-insights/commit/d4f2e0ef0f20f4dcf31c93fa7889a16f96728931))
+
+
+### Miscellaneous
+
+* **backlog:** record reviewed outcome observer design boundary ([f81a0bc](https://github.com/rknightion/grafana-cloud-org-insights/commit/f81a0bc940a700b3190944744b881cb5f950b77f))
+* **backlog:** retain Adaptive Telemetry source leads ([f8ca54f](https://github.com/rknightion/grafana-cloud-org-insights/commit/f8ca54f44ee3b7a33188719fec0b01e547839d31))
+* **backlog:** track Adaptive Telemetry read suppression ([9ab0246](https://github.com/rknightion/grafana-cloud-org-insights/commit/9ab024620227016697b351b8b396ff9f8b8ddda8))
+
 ## [0.12.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.12.0...v0.12.1) (2026-10-13)
 
 
