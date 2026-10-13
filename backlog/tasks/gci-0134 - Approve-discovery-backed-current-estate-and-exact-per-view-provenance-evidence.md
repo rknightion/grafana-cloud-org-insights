@@ -1,14 +1,13 @@
 ---
 id: GCI-0134
 title: Approve discovery-backed current-estate and exact per-view provenance evidence
-status: In Progress
+status: Parked
 assignee:
   - '@loop25-root'
 created_date: '2026-10-12 16:03'
-updated_date: '2026-10-13 11:33'
+updated_date: '2026-10-13 12:17'
 labels:
   - dashboards
-  - owner-decision
   - schema
 dependencies: []
 references:
@@ -29,16 +28,16 @@ The bounded dashboard-only metadata build in GCI-0114 (per-view history and meta
 <!-- AC:BEGIN -->
 - [ ] #1 An approved bounded evidence contract distinguishes successful fresh current-inventory identity/status observation from failed/ambiguous unknown inventory and historical snapshot membership, while preserving existing all-publication refusal and last-good objects.
 - [ ] #2 A dated successful nonempty authoritative inventory observation can establish departure only at its own identity/time; failed or ambiguous evidence retains historical rows and never publishes estate zero or label-history union as current.
-- [ ] #3 Source-specific measured-empty, unavailable, bounded-partial and complete semantics are explicit; partial reads and missing legacy metadata never manufacture exhaustiveness or zero.
-- [ ] #4 Exact source observation time, envelope composition/publication marker and S3 upload time have separate meaning; missing or older metadata stays unknown and own-input hydration, future-skew, privacy and source-floor fences remain intact.
-- [ ] #5 Before implementation, owner approves exact source/schema/reader-access/retention/metric-budget scope and compatibility for accepted consumers; public artifact counterexamples cover failed inventory, removed stack, missing metadata and retained last-good without configured rosters.
+- [x] #3 Source-specific measured-empty, unavailable, bounded-partial and complete semantics are explicit; partial reads and missing legacy metadata never manufacture exhaustiveness or zero.
+- [x] #4 Exact source observation time, envelope composition/publication marker and S3 upload time have separate meaning; missing or older metadata stays unknown and own-input hydration, future-skew, privacy and source-floor fences remain intact.
+- [x] #5 Before implementation, owner approves exact source/schema/reader-access/retention/metric-budget scope and compatibility for accepted consumers; public artifact counterexamples cover failed inventory, removed stack, missing metadata and retained last-good without configured rosters.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -63,4 +62,12 @@ loop25 provenance focused cycle1:83tests/7442subtests passed on partial tree, fu
 loop25 cumulative implementation cycles3 observed (transport focused, privacy/fullgate, helper-stamp/fullgate). Final gate901 failures are new private evidence metadata display debts, not baseline-red. Root authorizes exact finite unrendered/audit declarations in the two existing coverage-test registries, no wildcard/exemption hiding or rendering credit; unknown seeded gap must still fail. Safety incident separately recorded: three attempted synthetic-bucket S3 locks returned2, provider outcome unknown; corrected tests refuse subprocess. Final rescue cycle4 only, no ceiling reset.
 
 loop25 surface1 exact7file manifest6e78f67e accepted for rootlanding: independent guardedsecurityPASS/CodeRabbitcomplete0 coveringall7; final justcheck0/1114.892s Python2727pass/2skip/27626subtests +ToFu37pass and remaininggatesclean. PriorDNSred retained; newbaseproviderred diagnosed113-byteTMPDIR Unixsocketlimit, same6.68plugin passedshortpath then authorizedinfraretry1of2 fullgate0, no source/pin/testweakening. Cumulativeimplementation4 exhausted, infraretry1, no cycle5. PublicCLI+408metadata/12historical JSONata and privacy/nativeLoki/diagnostic failfirstproofs retained; 1051finite metadata debts explicitly unrendered audit, unknownseed stillfails. Root fresh actualapproved inventory payload6+selflink acceptedexactvalidator; visibility/authorityunknown. All privateS3/no-series/sourcefloor/refusal/hydration/timeguard contracts intact. Historicalthree syntheticbucket lockattempt exits2 stillunknown provideroutcome/currentHeadBucket+HeadObject404; correctedtestsrefuse subprocess. AC1-2 observer/current-estate status outsidethissurface remainopen underGCI-0134.01 (outcome observer).
+
+loop25 final disposition: admitted surface1 COMPLETE, landed4d203b8 and shippedv0.12.0 source5e215a9 with exactCI+composedgatesgreen, independentsecurityPASS/CodeRabbitcomplete0 all7files. Implementationcycles4 cumulative, infraretry1 dueprovenUnixsocketTMPDIRprefix, no ceilingreset. AC3-5 checked only for approvedaccepted-success schema/time/compatibility/budget surface; AC1-2 remainOPEN because separatelyscoped outcomeobserver/current-membership authority notimplemented. Parentparkdependency GCI-0134.01 (outcome observer), no failureprojection or customer rollout claimed. Fieldsunrenderedprivate audit debts exact1051paths preserveseedednew-gap failure; newevidence neverLoki/diagnostic,0newseries/13827capacity unchanged. Historical3attempted syntheticAWSlocks exits2 stillprovideroutcomeUNKNOWN; currentrootHeadBucket+HeadObject404, no cleanup/sourcegrant excuse. Resume observerunderitsownfrozenwriter/IAM/storage/retention design, notanothermetadataimplementationcycle.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Surface1 accepted-success privateS3 evidence shippedin v0.12.0; nativeinventory validation/observation, actualviewdependencies and conservative source-specific completeness supported, unsupportedtimes/visibility/storage unknown. Legacyfields/rows/hydration/refusal/lastgood/future/sourcefloors preserved, no newseries. Genuine fail-first artifact/privacy/CLI/JSONata/seededcoverage proofs and exactgreenintegrated/hostedgates. ParentnotDone: AC1-2 require separateoutcomeobserver.
+<!-- SECTION:FINAL_SUMMARY:END -->

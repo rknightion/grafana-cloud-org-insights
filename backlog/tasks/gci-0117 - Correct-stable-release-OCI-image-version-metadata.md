@@ -1,11 +1,11 @@
 ---
 id: GCI-0117
 title: Correct stable-release OCI image version metadata
-status: In Progress
+status: Done
 assignee:
   - '@loop25-root'
 created_date: '2026-10-06 11:19'
-updated_date: '2026-10-13 09:14'
+updated_date: '2026-10-13 12:17'
 labels:
   - release
   - owner-decision
@@ -23,15 +23,15 @@ The v0.7.0 readback established exact release manifest/tag/source SHA and source
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Owner grants the bounded publisher/caller change; future stable image platform configs have the exact semantic release version while source/revision and signing SHA remain pinned.
-- [ ] #2 Real published artifact readback verifies both platforms; no historical tag deletion, movement or source-witness relaxation is used to get green.
+- [x] #1 Owner grants the bounded publisher/caller change; future stable image platform configs have the exact semantic release version while source/revision and signing SHA remain pinned.
+- [x] #2 Real published artifact readback verifies both platforms; no historical tag deletion, movement or source-witness relaxation is used to get green.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -54,4 +54,12 @@ loop23: shared fix361f19e passed local gate/security/CodeRabbit0 and exact CI382
 loop23 terminal disposition for this row: implementation cycles2 (shared core, root caller integration), no source review-repair rounds; local/required integrated source proof green, artifact acceptance open. Eight HIGH CVEs remain vulnerable in stable trixie/bookworm; testing/unstable fixed source packages are not compatible stable binary proof, Alpine/AWS runtime unverified. Park owner security/runtime policy re-grade; recommend unchanged baseline and verified stable patch rather than exception renewal. Actual Dockerfile runtime is Python3.14, not the separate CI Python3.15. Full fresh citations /Users/rob/repos/grafana-cloud-org-insights/codex/loop23-evidence/oci/image-security/findings.md.
 
 loop25 candidate implementation3 cumulative, security review PASS on exact Dockerfile d051e769bd72afbf8deae7640e2ae59cf0c8796aa12f19c6ae34192bf0951501; independent both-platform actual-image checks verified copied source/no-network startup. No critical/major. Nonblocking builder package trust, overridable trusted version/checksum args and writable /app parent retained, not hermetic/read-only-rootfs proof. CodeRabbit active before root landing. Stable release proof remains open.
+
+loop25 final: cumulative image implementation3 (prior2+newminimalbase1), no code repair; reviewed local exact bothplatform builds/unchanged HIGHCRITICAL Trivy0/runtimeAWS+collectorhelp and justcheck0. Root landedc8ce783, then accepted provenance4d203b8; composedgatesgreen, exactCI38376341598/38391090549green and bothautoRCpublishgreen. RefreshedPR63head62459a86 exactCI38391177994green; literalrootmerge produced5e215a9878a325045e0fe168bc8f91180d49a810 with authenticpublicationreceipt. Stablev0.12.0 source5e exactCI38393137342green/publish38393137855 botharch+merge/sign/SBOMgreen. Actualindexsha256:7e26af2db34d11d4dd19f35d05a57bd2230143f72e12f9966415b1bdacfd4685 and bothchild/configbytehashes verified; bothversionlabels0.12.0, source/revisionexact5e. Cosignexactpinnedreusable@1a8cf1f+Actionsissuer+repo+sourceSHA verifiedsignedINDEX binds bothplatforms; no independentchildsignatureclaim. Final5ecomposedjustcheck0/1100.462s Python2727pass/27626subtests/2skip; ToFu37pass+remaininggatesclean. No ignoreextension/gateweakening/historicaltagmove/livecustomerchange. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop25-evidence/image/stable-oci/verified.json and /Users/rob/repos/grafana-cloud-org-insights/codex/loop25-evidence/image/release-composed-gate.md.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Completed stable OCI metadata/security acceptance in v0.12.0 at exactsource5e215a9878a325045e0fe168bc8f91180d49a810. Pinned minimal glibc Python runtime with official AWSCLI2 retains nonroot stdlib collector; unchanged both-platform HIGHCRITICAL gate and actualpublished semversion/source/byte-hash/signing binding verified. Signer coversmergedindex cryptographically binding bothplatform descriptors/configs. Local integrated and exacthostedgatesgreen;2 existingpytest skips remain separate. No historicaltagmovement or vulnerabilityexception renewal.
+<!-- SECTION:FINAL_SUMMARY:END -->

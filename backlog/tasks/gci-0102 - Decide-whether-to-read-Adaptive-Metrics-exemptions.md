@@ -1,11 +1,11 @@
 ---
 id: GCI-0102
 title: Decide whether to read Adaptive Metrics exemptions
-status: In Progress
+status: Parked
 assignee:
   - '@loop25-root'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-13 08:56'
+updated_date: '2026-10-13 12:17'
 labels:
   - owner-decision
   - cost
@@ -24,7 +24,7 @@ Loop13 assessment gap 10: savings that ignore exemptions overstate the achievabl
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 Owner decision recorded on the pairs
-- [ ] #2 If approved, an exact-pair staff witness precedes implementation
+- [x] #2 If approved, an exact-pair staff witness precedes implementation
 <!-- AC:END -->
 
 ## Definition of Done
@@ -50,4 +50,6 @@ loop25 D-EXM25 bounded robk witness: staff Adaptive Metrics1.20.0, source-backed
 Existing deployed robk reader comparator now captured through root serial dev read prerequisite (fresh identity, live task-definition selected SSM record in memory, no credential persistence). Six GET statuses200/200/500/500/200/404; installed1.20.0, exemptions exact200/json/13bytes/result0. Same-token effective permissions include all THREE candidate pairs, including plugins.app:access@plugins:id:grafana-adaptive-metrics-app, unlike isolated two-pair effective permission witness. This supports the third-pair hypothesis, not necessity/minimum or complete empty inventory. No role change, new reader grant, implementation or customer enablement. Full count-only evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop25-evidence/exemptions/existing-reader.json.
 
 loop25 root probe complete, implementation attempts0 and no implementation review-repair. BasicNone/defined role for existing reader independently verified. Count-only decision packet /Users/rob/repos/grafana-cloud-org-insights/codex/loop25-evidence/exemptions/decision.md: recommend future isolated three-pair witness; immediate two-pair403 is not necessity/minimum proof. Requested900s TTL recorded; actual expiration metadata readback not captured before deletion, not claimed. Exact teardown all absent. Task finalization waits summary publication/composed gate.
+
+loop25 final boundedwitness COMPLETE but ongoingreader/implementation approval AC1 remainsOPEN. Productcodeimplementation0; oneguarded livecreate/probe/IDteardown change-and-verify attempt1, no repair. Testedexact2pair basicNone customrole gives403 vsstaff and existingSSMreader200/json13bytes/emptyresult; existingtokenholds3candidatepairs, notisolated minimumproof or completeemptyinventory. Allnewtoken/assignment/role/SA deletedbyrecordedIDs withabsencewitness, no openmutation. RecordedexistingSA basicNone/role and tokeneffectivepermissions are independentfacts; /api/user sentinelforSAauth cannotbindprincipal, no credentialmismatch inferred. ParentparkOWNER for futureisolated3pairgrant/semanticcompleteness decision; no readerrole/policy/collector/customergrant follows. Rootcount-onlypacket /Users/rob/repos/grafana-cloud-org-insights/codex/loop25-evidence/exemptions/decision.md publishednotes through32b24de/c8; composedandexactCIgreen.
 <!-- SECTION:NOTES:END -->
