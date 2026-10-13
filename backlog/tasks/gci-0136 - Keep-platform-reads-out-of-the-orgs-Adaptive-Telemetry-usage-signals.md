@@ -4,7 +4,7 @@ title: Keep platform reads out of the org's Adaptive Telemetry usage signals
 status: To Do
 assignee: []
 created_date: '2026-10-13 17:19'
-updated_date: '2026-10-13 18:58'
+updated_date: '2026-10-13 18:59'
 labels:
   - adaptive
   - cost
@@ -48,3 +48,9 @@ Metrics: Grafana documents an empty __ignore_usage__="" matcher that preserves q
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Leads from ~/repos/adaptive-telemetry-pm/knowledge/adaptive-logs/README.md: Adaptive Logs counts queries per pattern by query hash over 15 days (sampled), and already excludes broad bytes_over_time/bytes_rate queries from the recommendation algorithm (grafana/log-template-service pkg/recommendations/recommendations.go). No ignore-usage opt-out is documented there; check that source for one before concluding none exists. Per-metric Adaptive Metrics usage detail, including dashboard_uids, is at GET <prom url>/adaptive-metrics/api/v2/segments/default/metrics/<metric> (basic auth <prom instance id>:<CAP>); use it to verify the matcher works by watching usages_in_queries on a test metric.
+<!-- SECTION:NOTES:END -->
