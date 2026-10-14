@@ -489,3 +489,13 @@ A customer gcx OAuth context can require its configured proxy. Its raw configure
 a Grafana-instance service-account bearer for the direct dashboard publisher. Use the existing
 explicit gcx context to push the same assembled v2 resource, preserving the folder/namespace,
 then read back and verify the authored contract. This adds no credential or permission grant.
+
+The authorized dev and customer observer rollout was validated at v0.13.5: immutable
+ARM64 task definitions and schedules, original role identities and recording birth dates,
+exact effective IAM, private-record forwarding exclusion, targeted retention and no-change plans.
+Scheduled observers produced four schema-valid complete-window objects. Operations saved-resource
+verification and real backend query execution both passed; counts and acknowledgements remain
+dated observations, with current membership and actual-latest authority unknown. This witness
+grants no additional environment, reader or scope. The separate natural labelling acceptance
+still requires three comparable daily runs spanning at least 48 hours with a 10-point tolerance.
+Preserve dev Container Insights and the dependent customer library/auditing hold until that proof.

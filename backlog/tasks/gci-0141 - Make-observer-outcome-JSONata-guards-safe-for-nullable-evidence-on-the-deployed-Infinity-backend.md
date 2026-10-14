@@ -3,10 +3,10 @@ id: GCI-0141
 title: >-
   Make Infinity evidence guards and UTC ages safe for outcome and view metadata
   panels
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-10-14 01:54'
-updated_date: '2026-10-14 02:26'
+updated_date: '2026-10-14 03:00'
 labels: []
 dependencies: []
 priority: high
@@ -24,7 +24,7 @@ Actual saved-model requests on customer14 returnHTTP400/fourInfinitybackend500er
 <!-- AC:BEGIN -->
 - [x] #1 Actual deployed Infinity backend fails first on current nullable outcome rows; corrected age and count guards return Unknown rather than errors or fabricated zero, preserving future skew and stale-evidence semantics.
 - [x] #2 Source presentation change passes focused regression checks, CodeRabbit and required release gates without any reader, credential, privacy, observer or collector source-contract expansion.
-- [ ] #3 Both deployed Operations dashboards execute all four saved query models successfully with seven minimized rows and twelve fields, original evidence times and unknown membership; persisted contracts remain verified.
+- [x] #3 Both deployed Operations dashboards execute all four saved query models successfully with seven minimized rows and twelve fields, original evidence times and unknown membership; persisted contracts remain verified.
 - [ ] #4 Actual backend outcome and view metadata expressions handle nullable ages, counts and coverage without errors or fabricated zero; canonical UTC normalization preserves timestamps, freshness, stale evidence and future-skew semantics.
 - [ ] #5 Source presentation change passes focused regression checks, CodeRabbit and required release gates without any reader, credential, privacy, observer or collector source-contract expansion.
 - [ ] #6 Both deployed Operations dashboards execute four saved outcome query models successfully with seven minimized rows and twelve fields, accurate ages, original evidence times and unknown membership; saved contracts remain verified.
@@ -46,3 +46,9 @@ Source-generated outcome7case actualbackend proof now passes null/current/stale/
 
 Final4filecandidate unchangedfulljustcheckPASS2800tests/27922subtests/2existingskips/45Tofu/currentandpublishedhistoryclean. CodeRabbit COMPLETE2minor/all4files/no majorcritical; bothcommentsquoteoldandguardbefore-imagealreadyremovedbyreviewedcandidate. Exactrecommendedconditionalguards present and12actualbackendedgecasesPASS; no extraunchangedreviewrerun. ActualFullUTC+00 suffix normalizationretainsdate/time/fractionanddisplaySourceTimes; sourceonlypresentation/docs. Release13.5andbothdeployedrealbackendqueriesstillpending.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+ActualInfinitybackendfail-first identified eagerlogicaland nullablecomparisons andISO+00:00date-onlyparsing. Conditionalguards andcanonicalUTCZnormalization preserveoriginaldisplaytimes/freshness1h/evidence3days/skew5min/privacy/countabsence. Source7outcome+5metadataboundarycasesactualbackendPASS; focused7tests8subtests/full2800test27922subtest2existing-skip45TofugatePASS. CodeRabbitcomplete2minor oldbefore-imagecommentsalreadyfixed/all4files/nocriticalmajor. ExactsourceCI38501108296/PR72headc12e51CI38501167532/mergedd5f559CI38501575541fourleavesPASS; signedv13.5index/Cosign/twoarchesverified. Bothsourcepairs/builds/ECRnonces/immutablepins a2a3209 committedpushed; image-only16resourceplans applied/full6defs/schedules/3roleIAMexactequal14/originalbirth/filter/lifecycle/CI/nochangeverified. BothsavedOperationscontractsverified; realfourS3URLquerymodels eachHTTP200/sevenrows/twelvefields/accuratefreshages/unknownmembership/no privateattempt-digest columns. CustomerusesexistinggcxOAuthproxy,noauthmint/change. Actual15scheduledobserversboth exit0/fourstrictcompleteobjects/originalbirthwindow; privacy/sourcecapsunchanged.
+<!-- SECTION:FINAL_SUMMARY:END -->
