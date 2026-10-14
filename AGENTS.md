@@ -178,8 +178,9 @@ deltas, per-stack currency totals or seat-utilisation ratios until their exact c
   documented Cloud Logs Export succeeded-label presence remain separately qualified, never job counts,
   inferred sync age or undocumented rate/percentage conversions.
 - The AI cost dashboard requires exact historical monthly totals before shipping. Internal-only BI
-  sections are omitted. Generic seat-price default is USD20; the named customer deployment uses USD14.
-  Token rate USD2 per million, personal allowance40M and system allowance500M remain configurable.
+  sections are omitted. Required generic seat-price default is USD20, with a USD14 customer override.
+  Token rate USD2 per million, personal allowance40M and system allowance500M must be configurable;
+  the new cost model remains unshipped until exact historical source requirements pass.
   Monthly gauges, first-hour preview carry and possible inactive identity series are not lifetime
   counters or exact calendar totals. No snapshot-only fallback satisfies this owner requirement.
 - Role-only repair batching requires a healthy stored credential bound to the live basic-None reader
@@ -552,3 +553,23 @@ Both consumer plans subsequently had no resource or output changes. Dev Containe
 was disabled after the accepted capture; customer remained disabled. Observer role identity,
 recording birth, effective IAM, private-record forwarding exclusion and targeted retention
 were preserved. These proofs grant no additional reader family, route, scope or deployment.
+
+## Dated release continuation (2026-10-14)
+
+Both consumers run the configured v0.14.0 image pair from immutable generic source
+`b272803adfcf057b4b919213ee7c56d2c5fe9cfe`. All six task definitions and schedules, effective IAM,
+private-outcome log exclusion, targeted retention, original observer identity/birth and disabled
+Container Insights were read back; follow-up targeted plans contain no resource or output changes.
+Fresh T1 runs observed seven dev stacks and 316 customer stacks, zero failed stacks and healthy scan
+and source reports. Those are dated run observations, not authoritative membership or memory bounds.
+No new reader scopes or durable token rotation followed. Reader batching has local real-CLI boundary
+proof; no new live mass-repair latency measurement is claimed.
+
+The Operations additions are saved on both consumers. The customer export-presence query returns five
+source series, and saved transform kinds/options survive server normalization. Dev ruler rendering
+passed. Customer visual rendering is unproved: its renderer returned a login page and the browser
+requires interactive customer SSO. A valid gcx API session successfully published the checked source
+spec while preserving current folder metadata/resourceVersion; a raw saved builder key failed before
+writing. Do not infer browser access or a valid literal API key from successful gcx API calls.
+The exact receipt is machine-local at
+`/Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261014/backlog-zero/release140/completion-receipt.json`.

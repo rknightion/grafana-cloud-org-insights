@@ -4,7 +4,7 @@ title: Keep platform reads out of the org's Adaptive Telemetry usage signals
 status: Parked
 assignee: []
 created_date: '2026-10-13 17:19'
-updated_date: '2026-10-13 22:23'
+updated_date: '2026-10-14 21:41'
 labels:
   - adaptive
   - cost
@@ -69,4 +69,6 @@ Final integrated source candidate includes all27markedPromQL expressions plus de
 Source 778dcd4794802cf63763ae07d6d31d8694069207 shipped v0.13.0: all27PromQL selectors carry empty ignore-usage matcher with fail-first real HTTP boundary guard. CAPABILITIES documents exact supported/unsupported tracking, current official Adaptive Traces model does not use query usage. Approved history correction completed and required current/origin history gate clean. Metadata and Logs tracking/suppression remain unproved; AC2/3 stay open. Dev/customer rollout continues on fix-forward Container Insights preserving release.
 
 Adaptive Metrics PromQL suppression deployed to dev and customer at release0.13.1 source b5c2590f5c7db79e9ddb9fe2f09cd164f373249d. Both exact saved plans independently classified as image/default-off env only, applied, all5definitions/schedules and effective scheduler IAM read back equal, targeted no-change plans verified. Dev Container Insights preserved enabled. Customer first apply refused before mutation due natural task active; fresh zero-active witness and fresh reviewed plan preceded successful retry, original refusal retained. Exact merge CI38474744391 all4requiredsuccess, stable publisher38474745277/publicOCI twoarches/Cosign sourcebinding verified. AC1/4/5 done; metadata tracking and Logs opt-out AC2/3 remain externally unproved, now explicitly Parked after completing deployable work. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261013/adaptive/release131/.
+
+2026-10-14 bounded primary-source followup: pinned Mimir request logger emits param_<actual request key>, configured usage-service ingestion selects/extracts param_query and excludes ignore marker. Currentcollector metadata requests use match[]/selector rather than query, so the reviewed source pipeline does not interpret them as PromQL query usage; appliedcustomer pipeline/version remains unwitnessed, no global deployed-suppression claim. Exactcollector route census finds only UsageInsights proxy LogQL query, on its dedicated datasource, with instance_id guard; no nativecustomer Loki log-line query is implemented. Reviewed log-template recommendation code excludes bytes_over_time/bytes_rate and overlybroad queries from recommendations, which is NOT a per-request optout or proof of no tracking. No supportedLogs optout established; no invented flag or source change. Retain originalmetadata/Logs acceptance open pending authoritative applied contract. Qualified privateproof paths /Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261014/backlog-zero/adaptive137/. PromQL shield remains in deployed v0.14.0.
 <!-- SECTION:NOTES:END -->

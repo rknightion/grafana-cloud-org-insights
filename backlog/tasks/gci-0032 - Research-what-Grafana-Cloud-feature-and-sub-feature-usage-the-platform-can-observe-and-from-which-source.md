@@ -7,7 +7,7 @@ status: Done
 assignee:
   - '@codex'
 created_date: '2026-09-23 17:50'
-updated_date: '2026-10-14 20:05'
+updated_date: '2026-10-14 21:41'
 labels:
   - research
   - adoption
@@ -103,7 +103,7 @@ The first concrete strand is already scoped as subtask GCI-0032.01: the `source`
 <!-- DOD:BEGIN -->
 - [x] #1 just test
 - [x] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan

@@ -3,11 +3,11 @@ id: GCI-0133
 title: >-
   Publish an org-wide AI token cost model: monthly collector view plus dashboard
   tab
-status: In Progress
+status: Parked
 assignee:
   - '@codex'
 created_date: '2026-10-12 10:04'
-updated_date: '2026-10-14 20:05'
+updated_date: '2026-10-14 21:41'
 labels:
   - ai
   - dashboards
@@ -58,4 +58,6 @@ Root engineering dispositions: mutable allowance must use upstream live aggregat
 Owner 2026-10-14 names BI dashboard mitn6pr in bi-ops as the build inspiration, authorizes read-only inspection and customer billing discovery, requests configurable customer pricing inputs. Use the dashboard data scope; no broader AI analysis required. Internal-only sections require a supported customer source or explicit unavailable handling.
 
 Owner2026-10-14: omit internal-only BI sections entirely; generic seatprice20USD with customer override14USD, remainingdefaults2USD/million,40Muserallowance,500Msystemallowance all configurable. Exact historical monthly totals REQUIRED before shipping; snapshot-only currentmonth fallback is not accepted. Fresh customer positive data and pinned producer contracts captured; midnight/first-hour historical reads remain unchanged into02UTC and do not bind exact closing totals. No partial AI feature deployment authorized by this fallback proposal.
+
+2026-10-14 bounded authorized read-only BI/customer investigation complete. Original BI dashboard available through explicitbi-ops; positivecustomer172identityseries/77categoryseries/currentmonthlyuser167+service1/systemallowance500M. ExactBI hourlySQL calendar aggregates July/Aug/Sepclosed+OctMTD returned7count-only rows without identity values, privatecomparison under /Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261014/backlog-zero/ai133/exact-monthly-comparison.json. Current pinned producer source describes monthly gauges; observedcustomerhistory dropsOct1 07UTC, notmidnight. Historicalper-user billing excludes some investigation/agent usage beforeOct1 unlike rawBI hourly category data, so exactBI model cannot safely reconstruct from nativebillinggauges alone. A reliablecustomer-accessible exacthistorical feed/producer-period contract remainsrequired before shipping; no snapshotfallback or newBI credential/source route grant. ExistingAI identity panels retain legacy lifetime wording/high-water queries; correct that within this task using witnessed monthly-window semantics. Genericseat20USD/customer14USD,2USD/million,40Mpersonal/500Mgeneric-system configurable requirements retained; internal-only BI sections omitted. No implementation/featuredeployment claimed.
 <!-- SECTION:NOTES:END -->

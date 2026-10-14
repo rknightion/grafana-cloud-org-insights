@@ -3,11 +3,11 @@ id: GCI-0097
 title: >-
   Add Tempo metrics-generator, ruler and Cloud Logs Export health panels to
   Operations
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-14 20:00'
+updated_date: '2026-10-14 21:42'
 labels:
   - dashboards
   - operations
@@ -26,9 +26,9 @@ Loop13 assessment gaps 5, 6 and 14: grafanacloud_traces_instance_metrics_generat
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Operations preserves accepted Tempo/backend observations, includes exact Grafana-managed ruler observations and Cloud Logs Export24h source/succeeded-presence panels; omitted Loki ruler additions are owner-withdrawn.
-- [ ] #2 Units remain qualified; no undocumented percent scaling, failed-job counts, sync age or byte rate is inferred.
-- [ ] #3 just check green; zero new collector metric; changed Operations dashboard published and read back on dev and customer.
+- [x] #1 Operations preserves accepted Tempo/backend observations, includes exact Grafana-managed ruler observations and Cloud Logs Export24h source/succeeded-presence panels; omitted Loki ruler additions are owner-withdrawn.
+- [x] #2 Units remain qualified; no undocumented percent scaling, failed-job counts, sync age or byte rate is inferred.
+- [x] #3 just check green; zero new collector metric; changed Operations dashboard published and read back on dev and customer.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -57,3 +57,9 @@ Owner 2026-10-14 withdraws missing Loki ruler iteration/evaluation/failure requi
 
 Owner scope2026-10-14: missing Loki ruler iteration/evaluation/failure requirement withdrawn; preserve accepted existing observations and add Grafana-managed ruler signals. Fresh customer witness126/129/130 live stacks for exact Grafana-managed failure/evaluation/group metrics, five live stacks with exact Cloud Logs Export succeeded status samples in24h; IDs join fresh316 inventory. Added three raw ruler panels and two24h source-presence tables, never jobs/counts/sync age. Fail-first KeyError proves missing panels; corrected focused3tests/16subtests and assembled layout visibility pass. Source metadata empty, units/rate normalization/epoch remain explicitly unknown. Original AC1 missing Loki remainder is a withdrawal, not a passing witness.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Owner withdrew missing Loki ruler additions. Shipped v0.14.0 exactb272803adfcf057b4b919213ee7c56d2c5fe9cfe with3Grafana-managed raw panels and2CloudExport24h presence tables, zero new collector series. Both consumers applied exact16image/schedule/deferredIAM-only plans, all6definitions/schedules/effectivepolicies/filter/retention/CIoff/originalobserverbirth read back, bothno-change; freshT1dev7/customer316 zero failed stacks and allsourcehealthtrue, nativeS3version checksums bound. BothsavedOperations contain all5newpanels; exactcustomerexportquery5rows/values1/no warnings; transform kinds/options preserved under server-removal of redundant spec.id. Dev panel rendered/viewed. CUSTOMER VISUAL remains unproved: renderer returnslogin, browserGrafana.comdenied andcustomer SSO requiresusername. No false screenshot pass. Existingcustomerbuilderkey401 occurredbeforewrite; successfulgcxauthenticatedupdate preservesfolder/currentresourceversion. Receipt /Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261014/backlog-zero/release140/completion-receipt.json.
+<!-- SECTION:FINAL_SUMMARY:END -->
