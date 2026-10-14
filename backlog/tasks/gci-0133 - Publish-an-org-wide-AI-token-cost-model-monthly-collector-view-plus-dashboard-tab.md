@@ -3,11 +3,11 @@ id: GCI-0133
 title: >-
   Publish an org-wide AI token cost model: monthly collector view plus dashboard
   tab
-status: Parked
+status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-10-12 10:04'
-updated_date: '2026-10-14 21:41'
+updated_date: '2026-10-14 22:08'
 labels:
   - ai
   - dashboards
@@ -29,10 +29,10 @@ Owner decision D-TOK23 (Rob, 2026-10-12). Rebuild the internal BI token-pricing 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Collector view with an empty-view schema, declared in VIEW_INPUTS by re-derivation, holding org and per-stack monthly aggregates only; no email, user name or identity in any stored field, label or log
-- [ ] #2 AI dashboard tab renders the view plus live per-user tables, with variables for seat price, overage rate and allowance; coverage gates pass
-- [ ] #3 Contract tests prove a cumulative per-user series that does not reset gives correct calendar-month deltas, one seat definition is used throughout, and a missing input stays absent rather than zero
-- [ ] #4 Reconciliation panel compares modelled overage with the billed overage metrics and labels the period semantics of each
+- [ ] #1 Collector current/monthly org and per-stack aggregate views have empty schemas and mechanically derived VIEW_INPUTS; no email, user name or identity in any stored field, metric label or log.
+- [ ] #2 AI dashboard renders aggregate views plus transient live per-user tables, configurable seat price, overage rate, personal allowance and system pool; historical rows show their captured allowance basis, and coverage gates pass.
+- [ ] #3 Contract tests prove monthly-gauge dated MTD capture, org-wide identity deduplication and allowance deduction, rollover quarantine, separately dated customer-only BI backfill and native observations without double counting, and missing input remains absent rather than zero. Prospective history is accepted; no pre-existing exact closed-month feed is required.
+- [ ] #4 Reconciliation panel compares modelled org overage with separately qualified native billed-overage preview at a common capture time; absent billing data stays unavailable and period semantics are labelled.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -46,6 +46,8 @@ Owner decision D-TOK23 (Rob, 2026-10-12). Rebuild the internal BI token-pricing 
 
 <!-- SECTION:PLAN:BEGIN -->
 Loop23 root accepts read-only bounded design packet, not implementation. Full build parks on B-TOK-LABEL/TIME/POPULATION/ATTRIBUTION/BILLING: approved robk four-metric 120-day reads returned zero series with 12-series control, so no live labels or producer/calendar/seat/billing/per-stack attribution witness. No synthetic labels or scaffold substitute. Resume R-TOK23 only after positive same-authority schema and bounded producer semantics witness plus serial field/link prerequisites. A different tenant/evidence surface requires an explicit grant.
+
+Reviewed prospective implementation: separate default-off T2 ai_billing aggregate-only write-stack GET source, separate ai_cost view pillar, conditional bounded aggregate state history after publication admission, separate source-keyed BI bootstrap/native snapshots with no cross-source merging. Captured-month/source-period status distinguishes observed MTD from final invoices. Add configurable live dashboard model and separately labelled captured-allowance history; per-stack token/membership/excess observations carry no allocated seat currency. Native billed-overage comparison required. Correct legacy lifetime/high-water identity panels. Root corrections to independent review are in /Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261014/backlog-zero/ai133/prospective-plan.md. Root owns shared wiring, tracker, integration and live writes; workers own bounded files only.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -60,4 +62,6 @@ Owner 2026-10-14 names BI dashboard mitn6pr in bi-ops as the build inspiration, 
 Owner2026-10-14: omit internal-only BI sections entirely; generic seatprice20USD with customer override14USD, remainingdefaults2USD/million,40Muserallowance,500Msystemallowance all configurable. Exact historical monthly totals REQUIRED before shipping; snapshot-only currentmonth fallback is not accepted. Fresh customer positive data and pinned producer contracts captured; midnight/first-hour historical reads remain unchanged into02UTC and do not bind exact closing totals. No partial AI feature deployment authorized by this fallback proposal.
 
 2026-10-14 bounded authorized read-only BI/customer investigation complete. Original BI dashboard available through explicitbi-ops; positivecustomer172identityseries/77categoryseries/currentmonthlyuser167+service1/systemallowance500M. ExactBI hourlySQL calendar aggregates July/Aug/Sepclosed+OctMTD returned7count-only rows without identity values, privatecomparison under /Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261014/backlog-zero/ai133/exact-monthly-comparison.json. Current pinned producer source describes monthly gauges; observedcustomerhistory dropsOct1 07UTC, notmidnight. Historicalper-user billing excludes some investigation/agent usage beforeOct1 unlike rawBI hourly category data, so exactBI model cannot safely reconstruct from nativebillinggauges alone. A reliablecustomer-accessible exacthistorical feed/producer-period contract remainsrequired before shipping; no snapshotfallback or newBI credential/source route grant. ExistingAI identity panels retain legacy lifetime wording/high-water queries; correct that within this task using witnessed monthly-window semantics. Genericseat20USD/customer14USD,2USD/million,40Mpersonal/500Mgeneric-system configurable requirements retained; internal-only BI sections omitted. No implementation/featuredeployment claimed.
+
+Owner2026-10-14 22UTC supersedes exact pre-existing historical feed shipping prerequisite: prospective aggregate history from now is accepted, and customer-only one-time BI aggregate backfill into S3 is authorized. Billing start October1 is an owner hypothesis, not a verified source fact. Preserve all aggregate privacy/source/role fences, configurable defaults20USD generic/14USD customer,2USDperM,40Mpersonal/500Msystem; omit internal-only sections. Reconcile monthly gauge period/cutover contract and historical default-basis versus live-variable model before code. No BI runtime credential or collector POST grant follows.
 <!-- SECTION:NOTES:END -->

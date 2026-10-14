@@ -7,7 +7,7 @@ status: Done
 assignee:
   - '@codex'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-14 21:42'
+updated_date: '2026-10-14 22:07'
 labels:
   - dashboards
   - operations
@@ -56,6 +56,8 @@ Loop24 research accepted, AC1 remains partial. Root robk HTTP200/no-warning35d r
 Owner 2026-10-14 withdraws missing Loki ruler iteration/evaluation/failure requirement; retain supported ruler health. Authorizes customer Cloud Logs Export positive witness and resulting panel work; do not infer job count or failure from source observations.
 
 Owner scope2026-10-14: missing Loki ruler iteration/evaluation/failure requirement withdrawn; preserve accepted existing observations and add Grafana-managed ruler signals. Fresh customer witness126/129/130 live stacks for exact Grafana-managed failure/evaluation/group metrics, five live stacks with exact Cloud Logs Export succeeded status samples in24h; IDs join fresh316 inventory. Added three raw ruler panels and two24h source-presence tables, never jobs/counts/sync age. Fail-first KeyError proves missing panels; corrected focused3tests/16subtests and assembled layout visibility pass. Source metadata empty, units/rate normalization/epoch remain explicitly unknown. Original AC1 missing Loki remainder is a withdrawal, not a passing witness.
+
+2026-10-14 fresh customer visual followup passes for all five Operations additions: three ruler charts render source observations; both24h Cloud Logs Export tables show5rows/value1. All five actual renderer PNGs inspected and hashbound. Browser Sign in with Grafana.com succeeds via existing grafana.com Chrome profile, no credentials/auth changes; prior personal-profile failure is historical. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261014/backlog-zero/visual-followup/visual-receipt.json. Boundary is these Operations additions only, not all dashboards or AI model.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

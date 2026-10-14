@@ -177,12 +177,15 @@ deltas, per-stack currency totals or seat-utilisation ratios until their exact c
   iteration/evaluation/failure panels are withdrawn. Grafana-managed ruler source observations and
   documented Cloud Logs Export succeeded-label presence remain separately qualified, never job counts,
   inferred sync age or undocumented rate/percentage conversions.
-- The AI cost dashboard requires exact historical monthly totals before shipping. Internal-only BI
-  sections are omitted. Required generic seat-price default is USD20, with a USD14 customer override.
-  Token rate USD2 per million, personal allowance40M and system allowance500M must be configurable;
-  the new cost model remains unshipped until exact historical source requirements pass.
-  Monthly gauges, first-hour preview carry and possible inactive identity series are not lifetime
-  counters or exact calendar totals. No snapshot-only fallback satisfies this owner requirement.
+- The owner accepts prospective AI aggregate history from now and a one-time customer-only BI
+  aggregate backfill starting October 1, with an explicit source/cutover timestamp. October 1 is
+  not a verified billing start. This supersedes the earlier pre-existing exact history prerequisite.
+  Internal-only BI sections are omitted. Generic seat price is USD20, customer override USD14;
+  token rate USD2 per million, personal allowance40M and system allowance500M are configurable.
+  Stored history records its allowance basis; live allowance changes require upstream aggregate
+  recomputation, never reconstruction from a single stored excess total. Monthly gauges and
+  preview carry remain distinct from final invoices. No BI runtime credential or collector POST
+  exception follows. The new cost model remains unshipped pending implementation and proof.
 - Role-only repair batching requires a healthy stored credential bound to the live basic-None reader
   and a pre-existing exact role UID. A pending outcome is not success. Delete the recorded transient
   Admin before entering the shared propagation wait; failed cleanup refuses repair success. At least
@@ -567,9 +570,11 @@ proof; no new live mass-repair latency measurement is claimed.
 
 The Operations additions are saved on both consumers. The customer export-presence query returns five
 source series, and saved transform kinds/options survive server normalization. Dev ruler rendering
-passed. Customer visual rendering is unproved: its renderer returned a login page and the browser
-requires interactive customer SSO. A valid gcx API session successfully published the checked source
-spec while preserving current folder metadata/resourceVersion; a raw saved builder key failed before
-writing. Do not infer browser access or a valid literal API key from successful gcx API calls.
+passed. A fresh customer-context render and browser witness verified all five customer additions:
+three ruler charts and two export tables with five rows each. Existing Grafana sign-in succeeded
+using the grafana.com Chrome profile; the earlier personal-profile login failure remains historical.
+No credentials were entered or changed. A valid gcx API session published the checked source spec
+while preserving current folder metadata/resourceVersion; a raw saved builder key failed before
+writing. CLI authentication and browser authentication are separately witnessed.
 The exact receipt is machine-local at
 `/Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261014/backlog-zero/release140/completion-receipt.json`.
