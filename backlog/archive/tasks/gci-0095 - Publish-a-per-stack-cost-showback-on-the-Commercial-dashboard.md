@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@loop13-root'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-13 17:11'
+updated_date: '2026-10-14 19:50'
 labels:
   - dashboards
   - cost
@@ -49,4 +49,12 @@ D-SHOW13 after accepted spelling/text prerequisite: implement zero-series vendor
 Loop13: 0 implementation attempts, 0 review-repair rounds; no source changed. Scope D-SHOW13 accepted but exact per-stack USD/unit/period/overlap and complete-total/org-line semantics unresolved in corrected matrix and partial public-source research. Resume exact vendor contract or separately owner-approved semantic witness. No invented conversions, partial sum named total or no-data-as-zero.
 
 2026-10-13 retained source review narrows the blocker: per-instance overage is attributed monetary cost and omitted when attribution is unavailable; org total overage aggregates rated dimension amounts. Identity domains differ across source families before datasource processing, so a common identifier field cannot be joined blindly to stacks. Still required: exact final datasource identity mapping, currency, rating-period alignment, nonoverlapping complete billing-line coverage and residual reconciliation semantics. No implementation attempt consumed, no partial sum may be called the complete total, and missing attribution remains unavailable.
+
+2026-10-14 owner decision: per-stack cost showback will not be built. Requirement withdrawn, not implemented or proved. Existing commercial panels remain unchanged.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Owner withdrew this optional requirement; archived without claiming implementation acceptance.
+<!-- SECTION:FINAL_SUMMARY:END -->

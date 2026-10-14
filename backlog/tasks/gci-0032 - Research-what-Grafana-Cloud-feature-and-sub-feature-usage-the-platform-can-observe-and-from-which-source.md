@@ -7,7 +7,7 @@ status: Parked
 assignee:
   - '@codex'
 created_date: '2026-09-23 17:50'
-updated_date: '2026-10-13 17:12'
+updated_date: '2026-10-14 19:55'
 labels:
   - research
   - adoption
@@ -143,4 +143,8 @@ loop4 metadata premise exhausted with complete5/5 direct discovered usage dataso
 2026-10-13 evidence reconciliation identifies exact source-level corrections for plugin billing quantities, AI current-month gauges and overage attribution. Update the durable matrix with their qualified contracts while preserving original live observation dates. Do not replace the historical unresolved-normalization count with a guessed new total: reclassify individual rows first and mechanically recount only under an explicit counting definition. Source review is not deployed verification, so live contract acceptance remains open. Reconcile historical scope-decision paragraphs with subsequently accepted product dispositions without implying a fresh role or route grant. No repeated empty metadata probe is justified by this documentation work.
 
 2026-10-13 matrix reconciliation completed: added qualified retained-source contracts for plugin rating quantities, AI current-month gauges and per-family monetary identity mappings, plus current IRM/optional-reader dispositions while preserving dated historical probes. Corrected the unconditional lifetime-counter claim in operator traps. No new metric/source/permission, positive deployed witness or acceptance completion claimed; remaining live semantics and route gaps keep this parent Parked.
+
+Owner 2026-10-14 authorizes additional read-only dev/customer stack queries across as many discovered stacks as needed. Prioritize customer-realistic evidence and retain unknown metric semantics, no permission changes.
+
+2026-10-14 owner-authorized customer refresh completed: 325 currently discovered names, 12 new to historical tables (11 entirely new to document), 12 signal probes left-joined to fresh316 inventory; all observed IDs matched. Matrix updated with counts and exact names. Customer metadata still success/empty: no HELP/TYPE/reset/window proof. No role/permission/token writes. Original exhaustive AC1/2/4 remain unproved; bounded attempt complete, no unchanged probes planned. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261014/backlog-zero/features032/completion-receipt.json.
 <!-- SECTION:NOTES:END -->

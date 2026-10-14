@@ -5,7 +5,7 @@ status: Parked
 assignee:
   - '@loop25-root'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-13 12:17'
+updated_date: '2026-10-14 19:50'
 labels:
   - owner-decision
   - cost
@@ -52,4 +52,12 @@ Existing deployed robk reader comparator now captured through root serial dev re
 loop25 root probe complete, implementation attempts0 and no implementation review-repair. BasicNone/defined role for existing reader independently verified. Count-only decision packet /Users/rob/repos/grafana-cloud-org-insights/codex/loop25-evidence/exemptions/decision.md: recommend future isolated three-pair witness; immediate two-pair403 is not necessity/minimum proof. Requested900s TTL recorded; actual expiration metadata readback not captured before deletion, not claimed. Exact teardown all absent. Task finalization waits summary publication/composed gate.
 
 loop25 final boundedwitness COMPLETE but ongoingreader/implementation approval AC1 remainsOPEN. Productcodeimplementation0; oneguarded livecreate/probe/IDteardown change-and-verify attempt1, no repair. Testedexact2pair basicNone customrole gives403 vsstaff and existingSSMreader200/json13bytes/emptyresult; existingtokenholds3candidatepairs, notisolated minimumproof or completeemptyinventory. Allnewtoken/assignment/role/SA deletedbyrecordedIDs withabsencewitness, no openmutation. RecordedexistingSA basicNone/role and tokeneffectivepermissions are independentfacts; /api/user sentinelforSAauth cannotbindprincipal, no credentialmismatch inferred. ParentparkOWNER for futureisolated3pairgrant/semanticcompleteness decision; no readerrole/policy/collector/customergrant follows. Rootcount-onlypacket /Users/rob/repos/grafana-cloud-org-insights/codex/loop25-evidence/exemptions/decision.md publishednotes through32b24de/c8; composedandexactCIgreen.
+
+2026-10-14 owner decision: discontinue exemptions-reader work. No reader grant or implementation follows. Retain documented savings/exemption limitations and all historical exact-pair witness evidence.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Owner withdrew this optional requirement; archived without claiming implementation acceptance.
+<!-- SECTION:FINAL_SUMMARY:END -->

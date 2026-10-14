@@ -3,11 +3,11 @@ id: GCI-0096
 title: >-
   Add cost attribution, included-allowance, DPM reconciliation and seat
   utilisation panels
-status: Parked
+status: Done
 assignee:
   - '@loop24-root'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-13 17:11'
+updated_date: '2026-10-14 19:55'
 labels:
   - dashboards
   - cost
@@ -26,7 +26,7 @@ Loop13 assessment gaps 2, 3, 4 and 7: *_attributed_* families (attribution label
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Panels exist for each of the four families with metric names from the roster and descriptions stating window/unit as unverified where doc-0006 says so
+- [x] #1 Existing attribution, included-allowance, DPM reconciliation and supported seat-context panels are preserved; the unproved plugin billable-versus-active comparison is intentionally unavailable under owner withdrawal.
 - [x] #2 The DPM reconciliation shows modelled against vendor figures side by side and never substitutes one for the other
 - [x] #3 just check green; zero new metric
 <!-- AC:END -->
@@ -54,4 +54,12 @@ Loop13: 2 change-and-verify cycles (initial implementation plus final source-nam
 Loop24 research accepted, no implementation attempt or AC completion. Pinned vendor producer and public user-pricing evidence establish billing-side current-month rated quantity, not matched plugin-active people. Root robk HTTP200/no-warning 35d roster and count_over_time reads plus calendar-month range returned no plugin samples; Loki reload control was present. Zero seats not inferred. Remaining blocker: positive deployed plugin source and matched active/cohort contract. Attempts: 0 implementation this loop; retain prior2. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/seats/lane.md and /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/root/usage-probe.json.
 
 2026-10-13 reconciliation: the plugin billing-side contract is no longer wholly unknown. It is a current rated-month, subscription-qualified quantity that can be prorated and fractional, with separate included quantity and monetary overage. It is not a generic distinct-person count. Full AC1 remains open because the approved probe has no positive plugin samples and no matched active-user cohort with the same eligibility, subscription weighting, period and deduplication. Preserve landed panels, prior two implementation cycles and the explicit unavailable comparison. Updating the research record does not authorize an unsupported utilization ratio.
+
+2026-10-14 owner explicitly withdrew the missing plugin billable-versus-active-user comparison. Accepted cost attribution, included allowance, DPM reconciliation and existing seat panels are preserved. Original AC1 required all four families including that comparison; revised scope retains its explicit unavailable notice and does not treat billing quantities as distinct people.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Owner withdrew the unmatched plugin active-seat comparison on2026-10-14. Preserved accepted raw attribution/allowances/DPM/seats panels and unavailable notice; focused assembled-dashboard seat-contract test passed1,2801deselected. Prior full gate/CI evidence retained; no implementation change or new deployment needed.
+<!-- SECTION:FINAL_SUMMARY:END -->

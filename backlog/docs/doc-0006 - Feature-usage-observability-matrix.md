@@ -3,7 +3,7 @@ id: doc-0006
 title: Feature usage observability matrix
 type: specification
 created_date: '2026-09-23 18:33'
-updated_date: '2026-10-13 17:12'
+updated_date: '2026-10-14 19:55'
 ---
 # Feature usage observability matrix - wave 1 evidence, 2026-09-23
 
@@ -770,3 +770,44 @@ Per-instance overage families can use different identifier domains before dataso
 The loop3 IRM paragraph above records its 2026-09-30 decision, not the current disposition. GCI-0041 (product read-scope decisions) subsequently approved the narrowly count-only IRM integration-counter route while accepting its documented permission breadth; GCI-0074 (configured IRM integration counters) and GCI-0087 (exact-200 IRM counter acceptance) are complete. This does not approve integration configuration lists, schedules, alert-group lists or an Incident POST route. The default-off IRM alert-group stats source has its separate bounded count contract; API-default-window and lower-bound counts must not be described as lifetime activity.
 
 Default-off optional readers now include accepted configured-object sources for Faro apps, ML jobs, cloud accounts, PDC networks, reports, playlists and library panels. Their precise routes, reader pairs, exact-response conditions and privacy limits remain those in the repository instructions and capability document. Implementation or release is not customer enablement. GCI-0132 (customer library-panel and retention-policy rollout) still depends on accepted dev proof. These dispositions update the historical decision status only; they are not a fresh live visibility witness or a wider grant.
+
+
+## Customer feature-signal refresh (2026-10-14 UTC)
+
+Read-only reads of the customer write stack's existing shared usage datasource returned 325 `grafanacloud_*` names. Compared mechanically with the 327 distinct exact names in this document's historical tables, 12 were new to those tables and 14 historical names were not rediscovered. The Agent Observability generation-rate name was already described in this document's narrative, so 11 names are new to the document as a whole. These are dated roster differences across a customer lookup and a historical two-org union, not proof that a metric was created or removed. Empty or absent observations remain unknown.
+
+Customer `/api/v1/metadata` returned `status=success` with empty `data`. No new HELP, TYPE, unit, reset or producer-window contract was obtained. The new Agent Observability `generations_instance_usage` and monetary-looking `overage` names do not by themselves prove cumulative generation volume, billing units, current-month semantics, additivity or currency. Do not integrate rates, use counter deltas or price these quantities without that contract.
+
+Twelve separate metric queries took the maximum returned per-stack observation in a 24-hour lookback and were left-joined to a freshly fetched 316-stack control-plane inventory. All observed stack IDs matched that inventory. The maxima establish a positive reporting observation somewhere in the stated window, not continuous activity, a configured-object census, current-time use, human adoption or a producer-defined billing window. No customer identifiers or metric values were persisted from the per-stack query responses; only counts and response hashes were retained.
+
+| Exact metric | Live stacks reporting in 24h | Live stacks with positive maximum | Defensible result |
+|---|---:|---:|---|
+| `grafanacloud_agent_observability_generations_instance_usage` | 2 | 2 | New reported quantity, unit/window unproved; exact generation volume remains unknown. |
+| `grafanacloud_agent_observability_instance_generation_items_per_second` | 2 | 2 | Refresh of the existing reporting signal; no stronger fidelity or new permission grant. |
+| `grafanacloud_app_observability_service_entity_count` | 10 | 10 | Refresh of the existing reporting signal; no stronger fidelity or new permission grant. |
+| `grafanacloud_asserts_instance_active_entities` | 22 | 22 | Refresh of the existing reporting signal; no stronger fidelity or new permission grant. |
+| `grafanacloud_frontend_observability_instance_sessions_per_second` | 14 | 13 | Refresh of the existing reporting signal; no stronger fidelity or new permission grant. |
+| `grafanacloud_grafana_pdc_connected_agents` | 24 | 24 | Refresh of the existing reporting signal; no stronger fidelity or new permission grant. |
+| `grafanacloud_grafana_pdc_datasource_request_duration_seconds_rate5m_p90` | 3 | 0 | New latency reporting marker; three measured zeros, no positive latency witness. |
+| `grafanacloud_instance_active_dbo11y_instance_count` | 0 | 0 | No customer observation in this window; does not establish product absence. |
+| `grafanacloud_instance_query_equivalent_samples_read_per_second` | 118 | 82 | New query-work reporting marker; exact equivalent-sample definition and smoothing unproved. |
+| `grafanacloud_k6_stack_virtual_user_hours_usage` | 4 | 4 | Refresh of the existing reporting signal; no stronger fidelity or new permission grant. |
+| `grafanacloud_sm_billable_check_executions_per_second` | 50 | 50 | Refresh of the existing reporting signal; no stronger fidelity or new permission grant. |
+| `grafanacloud_traces_instance_spans_more_than_5m_in_future_percent` | 4 | 4 | New future-span reporting marker; no independent denominator/window/unit contract obtained. |
+
+New-to-table names, each retaining unverified producer semantics:
+
+- `grafanacloud_agent_observability_generations_instance_overage`
+- `grafanacloud_agent_observability_generations_instance_usage`
+- `grafanacloud_agent_observability_instance_generation_items_per_second`
+- `grafanacloud_grafana_pdc_datasource_request_duration_seconds_rate5m_p90`
+- `grafanacloud_instance_query_equivalent_samples_read_per_second`
+- `grafanacloud_org_agent_o11y_generations_overage`
+- `grafanacloud_org_agent_o11y_generations_usage`
+- `grafanacloud_org_agent_observability_generations_included_usage`
+- `grafanacloud_org_ai_tokens_included_system_account_tokens`
+- `grafanacloud_traces_instance_spans_more_than_30m_in_future_percent`
+- `grafanacloud_traces_instance_spans_more_than_5m_in_future_percent`
+- `grafanacloud_traces_instance_spans_more_than_60m_in_future_percent`
+
+The research changed no reader, scope, policy, datasource, credential or product object. PromQL sample selectors all carried `__ignore_usage__=""`; metadata-route tracking remains unproved. The current customer query paths are the already-established shared usage metadata/name/query GET surfaces. No new collector series, read-route family or customer enablement follows. The original exhaustive metric-normalization and exact plugin route/pair criteria remain unproved; this bounded refresh improves discovery and deployed availability evidence without claiming those criteria complete.
