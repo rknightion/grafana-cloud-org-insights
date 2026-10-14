@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-10-12 09:48'
-updated_date: '2026-10-14 11:47'
+updated_date: '2026-10-14 15:20'
 labels:
   - customer
   - rollout
@@ -55,4 +55,6 @@ loop23 evidence-boundary clarification: the retained dev view reads show six row
 2026-10-13 owner explicitly preserved the existing 48-hour natural labelling prerequisite while authorizing other deployments now. Library reader/auditing retention rollout remains dependent, no scope expansion or customer reader/policy mutation from the observer/query-image updates.
 
 2026-10-14 single fresh manual dev prerequisite accepted under owner regrade, preserving explicit execution-sampled memory boundary and original 3-day verifier unproved. Fresh independent dev visible inventory/library/retention row sets match6scannable stacks, AC1proved; unknown retention statuses are not compliance. Customer before-reader snapshot is read-only in progress; no customer apply or reader repair yet.
+
+2026-10-14 customer v0.13.6 library/auditing consumer deployed: exact image a45bbb954e7e7fe5796ba8ce490cba9525950e114287272b8d8fdb7ceaba6dfc; exact saved plan1093219b82e7754edbea7b7ad69cd1ece3fbc183033d25b52c5e8297627c5cb9 applied0 and physical six-definition/schedule/effective IAM/filter/retention/observer-birth/customer-CI-off readback passed. Scoped overlay adds only two library opt-ins and expected auditing120d assessment plus derived digests. Original provisioner task53e004b27159430a9b1e3af6cb786d23 started12:18UTC with no-prune remains running; latest fully paginated15:12 logs show256/316 patch starts and no cleanup warnings, not completion. Before snapshot complete316/316 existing durable readers/basicNone, folders read already held; expected only library.panels:read@folders:* addition. AC2 awaits after snapshot/token/SSM preservation and independent full transient Admin absence; AC3 awaits final no-change plan; AC4 awaits one original-ARN customer T2/versioned scan and views. Root-local proof helper review caught and fixed false retention compliance acceptance by re-deriving output from immutable Loki config through exact released compositor; no actual Loki retention changed.
 <!-- SECTION:NOTES:END -->
