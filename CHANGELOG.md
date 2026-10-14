@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.13.6](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.5...v0.13.6) (2026-10-14)
+
+
+### Bug Fixes
+
+* accept omitted empty-string Tempo service names ([b8a2f95](https://github.com/rknightion/grafana-cloud-org-insights/commit/b8a2f95a0a3f2e3f4cca1369c931ff0a39005f58))
+
+
+### Documentation
+
+* record verified observer rollouts and natural capture hold ([23f7e22](https://github.com/rknightion/grafana-cloud-org-insights/commit/23f7e220ac31cb0f3e74f905f9fbb3f071b2aa2b))
+* replace labelling stability wait with one fresh dev proof ([7dcf9ac](https://github.com/rknightion/grafana-cloud-org-insights/commit/7dcf9ac9c688e877b4545fd5f4caf7c42d25e6f9))
+
+
+### Miscellaneous
+
+* **deps:** update rknightion/.github action to v1.25.8 ([#74](https://github.com/rknightion/grafana-cloud-org-insights/issues/74)) ([bd44bff](https://github.com/rknightion/grafana-cloud-org-insights/commit/bd44bff26ba364e7ffb53e4cb4d4b22da5ed143e))
+
 ## [0.13.5](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.4...v0.13.5) (2026-10-14)
 
 
