@@ -508,4 +508,25 @@ scan passed the revised source, publication and sampled privacy proof. Its measu
 witness covers the execution window using one-minute Container Insights samples; it is not a
 strict full-lifecycle or cgroup peak. The original three-day verifier remains unproved. This
 acceptance releases the customer library/auditing prerequisite and permits disabling dev
-Container Insights after capture; neither action is complete until its own live readback passes.
+Container Insights after capture. The revised acceptance does not attest a full-lifecycle memory peak.
+
+
+The v0.13.6 dev and customer rollouts completed on 2026-10-14. Customer reader audits
+covered all 316 discovered stacks, preserving every durable SA/role/token identity, token set
+and SSM version/date, with no transient Admin left behind. The first standard repair returned
+nine HTTP 500 failures; bounded targeted fix-forward repaired only those missed stacks. One
+already-enabled Synthetic query opt-in also reconciled to its uniquely discovered, regex-valid
+live datasource UID under standing S-SM/D-CUST11 authority. That separately witnessed effect
+is not a new family or wildcard grant, and the role delta must not be described as only library.
+
+The original customer T2 finished with exit 0, 316 scannable stacks, zero failures and healthy
+primary/owner sources. Its version-specific 30 MB native scan was linked to four authoritative
+part lengths and the matching SSE-S3 multipart ETag; changing one byte failed the check.
+This is a unique timestamped publication in the original task window, not direct scan-to-ARN
+attestation. Library counts covered all 316 stacks. Auditing assessment reported 80 compliant
+and 236 unreadable; expected 120-day policy was assessed, no Loki retention was changed.
+The existing T2 stale alert became healthy/inactive without changing its pause state or routing.
+Both consumer plans subsequently had no resource or output changes. Dev Container Insights
+was disabled after the accepted capture; customer remained disabled. Observer role identity,
+recording birth, effective IAM, private-record forwarding exclusion and targeted retention
+were preserved. These proofs grant no additional reader family, route, scope or deployment.
