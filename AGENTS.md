@@ -477,3 +477,15 @@ on that role; query metadata states the actual interval read. This is producer-c
 not a shorter claimed 72-hour proof. Keep role identity stable: recreation after earlier recording
 invalidates the birth witness and requires reconciliation. No IAM/API/manifest grant follows, and
 all page/byte/event/deadline bounds, partial-on-cap and 72-hour conflict retention stay unchanged.
+
+Infinity evidence presentation uses conditional type guards before nullable numeric comparisons.
+The deployed backend evaluates both operands of logical `and` and parses ISO timestamps ending
+in `+00:00` as date-only. Normalize only the canonical UTC suffix to `Z` before `$toMillis`;
+keep displayed source timestamps, existing freshness/skew limits and unknown/absent semantics.
+Saved dashboard JSON verification does not prove query execution; exercise the exact saved models
+on the deployed backend with nullable and UTC-time boundary cases.
+
+A customer gcx OAuth context can require its configured proxy. Its raw configured token is not
+a Grafana-instance service-account bearer for the direct dashboard publisher. Use the existing
+explicit gcx context to push the same assembled v2 resource, preserving the folder/namespace,
+then read back and verify the authored contract. This adds no credential or permission grant.

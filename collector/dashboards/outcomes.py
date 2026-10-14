@@ -37,16 +37,20 @@ HELP = (
 
 def selector(tier: str) -> str:
     """Return JSONata over one exact observer projection, excluding private replay material."""
+    # Infinity's backend evaluates both sides of logical and; nullable comparisons
+    # must be selected by a conditional rather than preceded by a type guard.
+    # Its ISO parser truncates +00:00 timestamps to midnight; canonical UTC Z
+    # retains the time and fractional seconds without changing the instant.
     if tier not in ("t1", "t2", "t3", "t4"):
         raise ValueError("unsupported outcome tier")
     return f'''(
   $age := function($stamp) {{ (
-    $n := $type($stamp) = "string" ? ($millis() - $toMillis($stamp)) / 1000 : null;
-    $type($n) = "number" and $n >= -300 ? $max([0, $n]) : null
+    $n := $type($stamp) = "string" ? ($millis() - $toMillis($replace($stamp, /\\+00:00$/, "Z"))) / 1000 : null;
+    $type($n) = "number" ? ($n >= -300 ? $max([0, $n]) : null) : null
   ) }};
   $valid := meta.version = 1 and meta.tier = {json.dumps(tier)};
   $elapsed := $valid ? $age(meta.observation_completed_at) : null;
-  $fresh := $type($elapsed) = "number" and $elapsed <= 3600;
+  $fresh := $type($elapsed) = "number" ? $elapsed <= 3600 : false;
   $rows := $valid and $type(rows) = "array" ? rows : [];
   $items := {json.dumps([{"kind": "attempt", "view": None}, {"kind": "inventory", "view": None}] + [{"kind": "view", "view": name} for name in RECEIPT_VIEWS])};
   $map($items, function($item) {{ (
@@ -55,8 +59,8 @@ def selector(tier: str) -> str:
     $r := $count($matches) = 1 ? $matches[0] : $item;
     $observedAge := $age($r.observed_at);
     $successAge := $age($r.last_success_at);
-    $dated := $type($observedAge) = "number" and $observedAge <= 259200;
-    $historical := $type($successAge) = "number" and $successAge <= 259200;
+    $dated := $type($observedAge) = "number" ? $observedAge <= 259200 : false;
+    $historical := $type($successAge) = "number" ? $successAge <= 259200 : false;
     {{
       "tier": {json.dumps(tier.upper())},
       "evidence": $r.kind = "attempt" ? "Latest observed attempt" :
@@ -71,10 +75,9 @@ def selector(tier: str) -> str:
       "reason": $r.reason in ["none", "not_observed", "expired", "gap", "conflict", "read_failed", "empty", "scan_failed", "exception", "cap"] ?
         $r.reason : "unknown",
       "observed_at": $dated ? $r.observed_at : null,
-      "count": $dated and $r.kind = "inventory" and $type($r.count) = "number" and $r.count > 0 ? $r.count : null,
+      "count": $dated and $r.kind = "inventory" ? ($type($r.count) = "number" ? ($r.count > 0 ? $r.count : null) : null) : null,
       "last_success_at": $historical ? $r.last_success_at : null,
-      "last_success_count": $historical and $r.kind = "inventory" and $type($r.last_success_count) = "number" and $r.last_success_count > 0 ?
-        $r.last_success_count : null,
+      "last_success_count": $historical and $r.kind = "inventory" ? ($type($r.last_success_count) = "number" ? ($r.last_success_count > 0 ? $r.last_success_count : null) : null) : null,
       "membership": "Unknown"
     }}
   ) }})[]

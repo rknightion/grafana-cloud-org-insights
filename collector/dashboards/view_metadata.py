@@ -102,8 +102,8 @@ def _selector(view: str) -> str:
             if count_field else 'false')
     return f'''(
   $stamp := meta.generated_at;
-  $elapsed := $type($stamp) = "string" ? ($millis() - $toMillis($stamp)) / 1000 : null;
-  $elapsed := $type($elapsed) = "number" and $elapsed >= -{skew:g} ? $max([0, $elapsed]) : null;
+  $elapsed := $type($stamp) = "string" ? ($millis() - $toMillis($replace($stamp, /\\+00:00$/, "Z"))) / 1000 : null;
+  $elapsed := $type($elapsed) = "number" ? ($elapsed >= -{skew:g} ? $max([0, $elapsed]) : null) : null;
   $provenance := $type(meta.inputs) = "object" ? meta.inputs : {{}};
   $rows := $type(rows) = "array" ? rows : [];
   $allUsable := $count($filter({json.dumps(inputs)}, function($n) {{ (
@@ -122,7 +122,7 @@ def _selector(view: str) -> str:
     $p := $lookup($provenance, $name);
     $usable := $p.available = true and $p.stale = false and
       $not($p.state in ["disabled", "partial", "unavailable", "incompatible_schema", "future_timestamp"]);
-    $age := $type($p.age_seconds) = "number" and $p.age_seconds >= 0 ? $p.age_seconds : null;
+    $age := $type($p.age_seconds) = "number" ? ($p.age_seconds >= 0 ? $p.age_seconds : null) : null;
     {{
       "view": {json.dumps(view)},
       "generated_at": $type($stamp) = "string" ? $stamp : null,
@@ -135,7 +135,7 @@ def _selector(view: str) -> str:
               ($usable ? "Available at publication" : "Unknown availability")))),
       "input_state": $type($p.state) = "string" ? $p.state : null,
       "measurement": $measurement,
-      "scan_coverage": $type($coverage) = "number" and $coverage >= 0 and $coverage <= 1 ? $coverage : null,
+      "scan_coverage": $type($coverage) = "number" ? ($coverage >= 0 and $coverage <= 1 ? $coverage : null) : null,
       "age_at_publication": $usable ? $age : null,
       "age_now": $usable and $type($age) = "number" and $type($elapsed) = "number" ? $age + $elapsed : null,
       "membership": "Historical snapshot; current membership unknown",

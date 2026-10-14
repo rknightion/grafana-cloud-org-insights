@@ -1,10 +1,10 @@
 ---
 id: GCI-0140
 title: Bound observer bootstrap queries to witnessed recording capability lifetime
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-10-13 23:49'
-updated_date: '2026-10-14 00:10'
+updated_date: '2026-10-14 02:24'
 labels: []
 dependencies: []
 priority: high
@@ -22,7 +22,7 @@ Live dev observer safely bootstraps4objects but 72-hour FilterLogEvents scans ex
 <!-- AC:BEGIN -->
 - [x] #1 Fail-first CLI/service-shape and mockplan proofs cover recentrolebirth/legacy72hours/futureorinvalidfloor rejection; published metadata uses actual window, caps remain fail-closed.
 - [x] #2 Rendered observer receives own AWS role create_date, scan definitions depend on that role, without new IAM/API/manifest configuration or permissions.
-- [ ] #3 Both immutable released deployments produce validated dated native outcomes under the bounded observer, with full live IAM/filter/retention/schedule readback and nochange.
+- [x] #3 Both immutable released deployments produce validated dated native outcomes under the bounded observer, with full live IAM/filter/retention/schedule readback and nochange.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -47,3 +47,9 @@ Recording lifetime contract independently PASS; source implementation now option
 
 Final unchanged candidate passes required just check:2800tests/27922subtests/2existing skips,45Tofu,fmt/lint/currentandpublishedhistoryidentifier/em-dash checks. Firstgate environmentalTMPDIRinsiderepocaused2Gitfallbacktests failures; reproducedsameenv, externalshort/tmp5focusedPASS thenfullgatePASS without source/test changes. CodeRabbit COMPLETE0/all8; independent finalboundary reviewPASS exactdiff3743cc2920c1480a411c09bb997860220a85e1bb9f7b68971672575904cfb45e. Actual clipped AWSquery8native records complete; immutable release andbothlive proofs stillpending.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Optional productionrecording-since boundtoownoriginalAWSrolecreate_date; query=max(now72h,birthminus300), actualintervalpublished. Legacy72h/defaultprivacy/caps/deadline/futureinvalidrefusal/72hconflictretention unchanged. Fail-firstCLIandmockplan proofs/requiredgate/CodeRabbit/exactCI/signed13.4releasepass. Bothdeployed14observers showfourstrictcompletequeryprojections withactualnativecounts/5originalacktime-digests; devoldernative8supportunchanged. All6TDs/schedules/effective3roleIAM/filter/target90global7/nochangeverified, rolebirth precedesfourrecordingregistrations. No currentmembershipauthorityclaim. Separate141presentationbackendrepair remainsopen.
+<!-- SECTION:FINAL_SUMMARY:END -->

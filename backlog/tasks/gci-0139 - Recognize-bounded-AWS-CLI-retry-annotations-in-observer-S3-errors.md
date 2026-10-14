@@ -1,10 +1,10 @@
 ---
 id: GCI-0139
 title: Recognize bounded AWS CLI retry annotations in observer S3 errors
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-10-13 23:12'
-updated_date: '2026-10-14 00:03'
+updated_date: '2026-10-14 02:24'
 labels: []
 dependencies: []
 priority: high
@@ -22,7 +22,7 @@ Live dev observer v0.13.2 fails safe bootstrap: shipped AWS CLI reports GetObjec
 <!-- AC:BEGIN -->
 - [x] #1 Fail-first reproduction uses actual witnessed CLI stderr grammar, then missing/denied/conflict codes classify only for matching operation; arbitrary/malformed annotations stay unclassified.
 - [x] #2 Actual release-image AWS boundary and dev observer produce validated conditional bootstrap/readback without broadening role or unconditional writes.
-- [ ] #3 Fixed source passes required gate/review/release and both deployments use immutable fixed images with live observer proof.
+- [x] #3 Fixed source passes required gate/review/release and both deployments use immutable fixed images with live observer proof.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -43,3 +43,9 @@ Final unchanged required just check passed, including published-history identifi
 
 Released13.3 real ARM64 image parses actual AWS NoSuchKey annotation; dev natural observer stops exit0 and conditionally bootstraps/readbacks all4schema-valid objects, later poll uses conditional CAS. No IAM or unconditional-write broadening. Dev full6definition/schedule/effectiveIAM/filter/retention/nochange verified. Query completes only after separate recording-lifetime repair140; customer AC3 remains pending.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Bounded AWS CLI retry annotations recognized with fail-first grammar proof; malformed/arbitrary/wrongoperation/deadline errors remain refused. Released13.3/13.4immutableimages usefixedparser. Both14deployments livefull6definition/schedule/role/IAM/filter/retention/nochange verified; originaldevandcustomerscheduled14T1 complete8typedrecords/fiveexactversionedS3bytebindings. Bothactual14observer tasks stop exit0, safeconditionalbootstrap/CAS/readback publishfourstrictcompleteprojections preservingnativecounts/acktimes/digests andunknownmembership. Separate141presentationbackendrepairremains open.
+<!-- SECTION:FINAL_SUMMARY:END -->

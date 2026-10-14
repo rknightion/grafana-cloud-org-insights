@@ -547,6 +547,12 @@ shape. Read the schema at `/openapi/v3/apis/dashboard.grafana.app/v2` rather tha
 
 ## Infinity
 
+- **The deployed backend evaluates both sides of `and`.** Select nullable numeric
+  comparisons with a conditional after the type check; an `and` guard can still raise an error.
+- **Normalize UTC `+00:00` timestamps to `Z` before `$toMillis`.** The witnessed backend
+  parses the offset form as date-only, but `Z` retains the time and fractional milliseconds.
+  Keep the original displayed timestamp and existing age/skew limits.
+
 - **A query needs `parser: "backend"` AND an explicit `columns` array AND a `root_selector`. All
  three.** Measured against a real view: all three gives rows; no `parser` key or
  `parser: "simple"` gives 200 with zero rows; no `root_selector` produces one malformed root row.
