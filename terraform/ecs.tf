@@ -75,8 +75,8 @@ data "aws_subnet" "first" {
 # be varied per schedule and must be baked into the definition's `command`.
 
 resource "aws_ecs_task_definition" "scan" {
-  # Apply the private-outcome exclusion before any recording task can become schedulable.
-  depends_on = [aws_cloudwatch_log_subscription_filter.ecs_logs]
+  # Apply the exclusion and create the observer identity before recording can become schedulable.
+  depends_on = [aws_cloudwatch_log_subscription_filter.ecs_logs, aws_iam_role.outcome_observer]
 
   for_each = local.tiers
 

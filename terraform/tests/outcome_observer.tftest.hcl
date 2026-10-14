@@ -9,7 +9,7 @@ mock_provider "aws" {
     defaults = { arn = "arn:aws:logs:us-east-1:123456789012:log-group:/aws/ecs/synthetic-insights" }
   }
   mock_resource "aws_iam_role" {
-    defaults = { arn = "arn:aws:iam::123456789012:role/synthetic" }
+    defaults = { arn = "arn:aws:iam::123456789012:role/synthetic", create_date = "2026-10-13T00:00:00Z" }
   }
   mock_resource "aws_ecs_cluster" {
     defaults = { arn = "arn:aws:ecs:us-east-1:123456789012:cluster/synthetic" }
@@ -66,7 +66,7 @@ run "enabled_observer_is_isolated_and_installable" {
     schedules_enabled        = false
   }
   assert {
-    condition     = jsondecode(aws_ecs_task_definition.outcome_observer[0].container_definitions)[0].entryPoint == ["python3", "-m", "collector.observer"] && jsondecode(aws_ecs_task_definition.outcome_observer[0].container_definitions)[0].command == ["--bucket", "synthetic-insights-data", "--region", "us-east-1", "--log-group", "/aws/ecs/synthetic-insights"]
+    condition     = jsondecode(aws_ecs_task_definition.outcome_observer[0].container_definitions)[0].entryPoint == ["python3", "-m", "collector.observer"] && jsondecode(aws_ecs_task_definition.outcome_observer[0].container_definitions)[0].command == ["--bucket", "synthetic-insights-data", "--region", "us-east-1", "--log-group", "/aws/ecs/synthetic-insights", "--recording-since", "2026-10-13T00:00:00Z"]
     error_message = "Rendered entrypoint must override scanner and invoke installed observer with explicit resources."
   }
   assert {

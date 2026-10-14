@@ -4,7 +4,7 @@ title: Recognize bounded AWS CLI retry annotations in observer S3 errors
 status: In Progress
 assignee: []
 created_date: '2026-10-13 23:12'
-updated_date: '2026-10-13 23:25'
+updated_date: '2026-10-14 00:03'
 labels: []
 dependencies: []
 priority: high
@@ -21,15 +21,15 @@ Live dev observer v0.13.2 fails safe bootstrap: shipped AWS CLI reports GetObjec
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 Fail-first reproduction uses actual witnessed CLI stderr grammar, then missing/denied/conflict codes classify only for matching operation; arbitrary/malformed annotations stay unclassified.
-- [ ] #2 Actual release-image AWS boundary and dev observer produce validated conditional bootstrap/readback without broadening role or unconditional writes.
+- [x] #2 Actual release-image AWS boundary and dev observer produce validated conditional bootstrap/readback without broadening role or unconditional writes.
 - [ ] #3 Fixed source passes required gate/review/release and both deployments use immutable fixed images with live observer proof.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Notes
@@ -40,4 +40,6 @@ Live release-image AWS boundary reproduced254/no process failure/parsedCodeNone 
 CodeRabbit COMPLETE0/all2sourcefiles. Natural devcollector already produced actual8typedrecords and5exactS3digestbindings; fixed observer will consume these dated records, never rebase their source/ack times. Fullgate still requiredhistorycheck running; no fixedsourcepush/deploy or customerobserverenablement claimed.
 
 Final unchanged required just check passed, including published-history identifier gate. Source hashes bind tested2filecandidate. Actual ARM64 releaseimage+fixedsource mount interprets realAWSCLIGetObjectNoSuchKey error correctly; no IAM or conditional-write change. Release13.3fix-forward proceeds, thenactualdevbootstrap/secondpoll andcustomer fullplan/liveproof.
+
+Released13.3 real ARM64 image parses actual AWS NoSuchKey annotation; dev natural observer stops exit0 and conditionally bootstraps/readbacks all4schema-valid objects, later poll uses conditional CAS. No IAM or unconditional-write broadening. Dev full6definition/schedule/effectiveIAM/filter/retention/nochange verified. Query completes only after separate recording-lifetime repair140; customer AC3 remains pending.
 <!-- SECTION:NOTES:END -->

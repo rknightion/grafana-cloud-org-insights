@@ -476,3 +476,12 @@ Outcome recording with task-log forwarding requires the witnessed private-outcom
 every forwarding subscription before recording task definitions become runnable. Read back all
 subscriptions before enablement; an unfiltered external path blocks recording. A broader destination
 for private outcome records needs a separate audience decision.
+
+The module passes the observer role's AWS creation date as `--recording-since`. Recording task
+definitions depend on that role, so the producer cannot predate this witnessed boundary. Initial
+queries start at the later of the normal 72-hour limit and that date minus five minutes of clock
+skew; private metadata reports the exact interval queried. Keep the observer role identity stable.
+Recreation after earlier recording invalidates the birth witness and requires separate reconciliation,
+not a silent history reset. Legacy direct CLI calls without the argument retain the 72-hour window.
+Caps and incomplete-read semantics remain unchanged; a successful write can still contain partial
+coverage. Replay/conflict retention remains 72 hours independently of the initial query window.

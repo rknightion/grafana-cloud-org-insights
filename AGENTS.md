@@ -470,3 +470,10 @@ refusal and all privacy/time/source-floor rules. The bounded observer reports da
 counts; its current-membership authority remains unknown. The owner separately authorized enabling
 it in the current dev and customer deployments while retaining ordinary forwarding with the
 private-outcome exclusion. This is not a blanket grant for other deployments or reader scopes.
+
+Observer bootstrap queries use the own observer role's witnessed AWS creation date, minus the
+existing five-minute skew, within the unchanged 72-hour maximum. Recording scan definitions depend
+on that role; query metadata states the actual interval read. This is producer-capability lifetime,
+not a shorter claimed 72-hour proof. Keep role identity stable: recreation after earlier recording
+invalidates the birth witness and requires reconciliation. No IAM/API/manifest grant follows, and
+all page/byte/event/deadline bounds, partial-on-cap and 72-hour conflict retention stay unchanged.

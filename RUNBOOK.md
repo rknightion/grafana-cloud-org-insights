@@ -792,3 +792,12 @@ A valid prior writer may be up to five minutes ahead. A slower-clock merge prese
 original generation label until its clock catches up, keeping the carried interval readable. This
 label is neither a new upload time nor a storage-service receipt. Event/acknowledgement times stay
 unchanged. Beyond the admitted skew the prior remains unavailable and its bytes are preserved.
+
+The module passes the observer role's AWS creation date as `--recording-since`. Recording task
+definitions depend on that role, so the producer cannot predate this witnessed boundary. Initial
+queries start at the later of the normal 72-hour limit and that date minus five minutes of clock
+skew; private metadata reports the exact interval queried. Keep the observer role identity stable.
+Recreation after earlier recording invalidates the birth witness and requires separate reconciliation,
+not a silent history reset. Legacy direct CLI calls without the argument retain the 72-hour window.
+Caps and incomplete-read semantics remain unchanged; a successful write can still contain partial
+coverage. Replay/conflict retention remains 72 hours independently of the initial query window.

@@ -79,7 +79,7 @@ resource "aws_ecs_task_definition" "outcome_observer" {
     image      = local.image
     essential  = true
     entryPoint = ["python3", "-m", "collector.observer"]
-    command    = ["--bucket", local.bucket_name, "--region", data.aws_region.current.region, "--log-group", aws_cloudwatch_log_group.tasks.name]
+    command    = ["--bucket", local.bucket_name, "--region", data.aws_region.current.region, "--log-group", aws_cloudwatch_log_group.tasks.name, "--recording-since", aws_iam_role.outcome_observer[0].create_date]
     environment = [
       { name = "AWS_REGION", value = data.aws_region.current.region },
       { name = "AWS_DEFAULT_REGION", value = data.aws_region.current.region },

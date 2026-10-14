@@ -508,8 +508,9 @@ def read_prior(aws, bucket, tier, now, directory):
         return Prior("failed")
 
 
-def query(aws, log_group, now):
-    request = dict(logGroupName=log_group, startTime=int((now - timedelta(seconds=LOOKBACK_SECONDS)).timestamp() * 1000),
+def query(aws, log_group, now, *, observation_started_at=None):
+    start = observation_started_at if observation_started_at is not None else now - timedelta(seconds=LOOKBACK_SECONDS)
+    request = dict(logGroupName=log_group, startTime=int(start.timestamp() * 1000),
                    endTime=int(now.timestamp() * 1000), filterPattern='{ $.kind = "' + EVENT_KIND + '" }', limit=10000)
     records, tokens, event_ids = [], set(), set()
     total_bytes = 0
@@ -634,6 +635,7 @@ def _main(argv=None):
     parser.add_argument("--bucket")
     parser.add_argument("--region")
     parser.add_argument("--log-group")
+    parser.add_argument("--recording-since", help="Witnessed original recording capability birth in UTC")
     parser.add_argument("--deadline-seconds", type=int, default=180)
     parser.add_argument("--fixture")
     parser.add_argument("--output-dir")
@@ -641,19 +643,29 @@ def _main(argv=None):
     if not 1 <= args.deadline_seconds <= 180:
         parser.error("deadline must be between 1 and 180 seconds")
     if args.fixture or args.output_dir:
-        if not (args.fixture and args.output_dir) or any((args.bucket, args.region, args.log_group)):
+        if not (args.fixture and args.output_dir) or any((args.bucket, args.region, args.log_group)) or args.recording_since is not None:
             parser.error("fixture mode requires fixture/output-dir and excludes production arguments")
         return _fixture(args)
     if not all((args.bucket, args.region, args.log_group)):
         parser.error("production requires bucket, region and log-group")
+    now = datetime.now(timezone.utc)
+    start = now - timedelta(seconds=LOOKBACK_SECONDS)
+    if args.recording_since is not None:
+        birth = parse_timestamp(args.recording_since)
+        if birth is None or birth > now:
+            print("recording_since_invalid")
+            return 1
+        start = max(start, birth - timedelta(seconds=300))
+        # CloudWatch accepts milliseconds. Round forward so metadata never
+        # claims coverage before the actual request's selected start.
+        start += timedelta(microseconds=(-start.microsecond) % 1000)
     if not verified_ecs_runtime():
         print("runtime_identity_unverified")
         return 1
-    now = datetime.now(timezone.utc)
     aws = Aws(args.region, time.monotonic() + args.deadline_seconds)
-    records, state, reason = query(aws, args.log_group, now)
+    records, state, reason = query(aws, args.log_group, now, observation_started_at=start)
     end = now if state != "unavailable" else None
-    observation = dict(observation_started_at=now - timedelta(seconds=LOOKBACK_SECONDS), observation_completed_at=end, observation_state=state, reason=reason)
+    observation = dict(observation_started_at=start, observation_completed_at=end, observation_state=state, reason=reason)
     with tempfile.TemporaryDirectory(prefix="gcinsight-observer-") as directory:
         current = {tier: read_prior(aws, args.bucket, tier, now, directory) for tier in TIERS}
         priors = {tier: value.projection for tier, value in current.items() if value.state == "present"}

@@ -170,8 +170,14 @@ finish(2)
 '''
 
 
-def production(tmp_path, monkeypatch, *, records=None, plan=None):
+def production(tmp_path, monkeypatch, *, records=None, plan=None, arguments=(), clock=None):
     from collector import observer
+    if clock is not None:
+        class FixedDatetime(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return clock.astimezone(tz) if tz else clock.replace(tzinfo=None)
+        monkeypatch.setattr(observer, "datetime", FixedDatetime)
     now = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     executable = tmp_path / "aws"
     executable.write_text(FAKE_AWS)
@@ -182,8 +188,61 @@ def production(tmp_path, monkeypatch, *, records=None, plan=None):
     monkeypatch.setenv("OBSERVER_FAKE_STATE", str(path))
     monkeypatch.setenv("PATH", str(tmp_path) + ":" + __import__("os").environ["PATH"])
     monkeypatch.setattr(observer, "verified_ecs_runtime", lambda: True)
-    rc = observer.main(["--bucket", "synthetic-bucket", "--region", "eu-west-1", "--log-group", "/synthetic/logs"])
+    rc = observer.main(["--bucket", "synthetic-bucket", "--region", "eu-west-1", "--log-group", "/synthetic/logs", *arguments])
     return rc, json.loads(path.read_text())
+
+
+@pytest.mark.parametrize("birth, expected_start", [
+    (None, "2026-10-11T12:00:00Z"),
+    ("2026-10-14T11:00:00.123456Z", "2026-10-14T10:55:00.124000Z"),
+    ("2026-10-10T12:00:00Z", "2026-10-11T12:00:00Z"),
+])
+def test_production_recording_lifetime_binds_query_and_projection_start(tmp_path, monkeypatch, birth, expected_start):
+    from collector.observer import parse_timestamp
+    clock = datetime(2026, 10, 14, 12, tzinfo=timezone.utc)
+    arguments = [] if birth is None else ["--recording-since", birth]
+    rc, state = production(tmp_path, monkeypatch, clock=clock, records=trace(start="2026-10-14T11:30:00Z"), arguments=arguments)
+    assert rc == 0
+    request = state["requests"][0]
+    assert request["startTime"] == int(parse_timestamp(expected_start).timestamp() * 1000)
+    assert request["endTime"] == int(clock.timestamp() * 1000)
+    for obj in state["objects"].values():
+        projection = json.loads(obj["raw"])
+        assert parse_timestamp(projection["meta"]["observation_started_at"]) == parse_timestamp(expected_start)
+
+
+@pytest.mark.parametrize("birth", ["malformed", "2026-10-14T13:00:00Z", "2026-10-14T11:00:00+01:00"])
+def test_production_invalid_recording_lifetime_refuses_before_aws(tmp_path, monkeypatch, birth):
+    clock = datetime(2026, 10, 14, 12, tzinfo=timezone.utc)
+    rc, state = production(tmp_path, monkeypatch, clock=clock, arguments=["--recording-since", birth])
+    assert rc == 1
+    assert state.get("calls", []) == []
+    assert state.get("objects", {}) == {}
+
+
+@pytest.mark.parametrize("with_conflict", [False, True])
+def test_production_clipped_window_keeps_prior_conflict_and_partial_cap(tmp_path, monkeypatch, with_conflict):
+    older = trace(start="2026-10-13T11:00:00Z")
+    contradiction = dict(older[1])
+    value = json.loads(contradiction["message"])
+    value["payload"]["count"] = 9
+    contradiction["message"] = json.dumps(value)
+    _, prior = run_fixture(tmp_path, older + [contradiction], name="conflicted-prior")
+    objects = {f"views/outcomes/{tier}.json": {"raw": json.dumps(projection), "etag": '"prior"'} for tier, projection in prior.items()} if with_conflict else {}
+    run = tmp_path / "clipped"
+    run.mkdir()
+    rc, state = production(run, monkeypatch, clock=datetime(2026, 10, 13, 12, 10, tzinfo=timezone.utc),
+                           arguments=["--recording-since", "2026-10-13T12:00:00Z"],
+                           plan={"objects": objects, "pages": [{"events": [], "nextToken": "cycle"}, {"events": [], "nextToken": "cycle"}]})
+    assert rc == 0
+    projection = json.loads(state["objects"]["views/outcomes/t1.json"]["raw"])
+    assert projection["meta"]["observation_state"] == "partial"
+    # A retained conflict intentionally takes diagnostic precedence over a cap.
+    assert projection["meta"]["reason"] == ("conflict" if with_conflict else "cap")
+    if with_conflict:
+        assert projection["_state"]["attempts"][0]["conflict"] is True
+        assert projection["_state"]["attempts"][0]["events"][0]["started_at"] == "2026-10-13T11:00:00Z"
+    assert projection["rows"][1]["last_success_at"] is None
 
 
 @pytest.mark.parametrize("retry_annotation", ["", " (reached max retries: 0)"])
