@@ -229,6 +229,40 @@ class SignalInventoryWindowTest(unittest.TestCase):
             "reason": "invalid_response",
         })
 
+    def test_tempo_omitted_string_default_preserves_named_services(self):
+        supplied = responses()
+        path = "https://traces.example/tempo/api/v2/search/tag/resource.service.name/values"
+        supplied[path] = (200, {"tagValues": [
+            {"type": "string", "value": "checkout"},
+            {"type": "string"},
+            {"type": "string", "value": ""},
+            {"type": "string", "value": "api"},
+            {"type": "string", "value": "checkout"},
+        ]})
+        with mock.patch.object(source.dataplane, "_connect_rpc", return_value={"names": []}):
+            out = source.probe_stack(Client(supplied), STACK, "cap", now=NOW)
+        self.assertTrue(out["available"])
+        self.assertEqual(out["trace_services"], ["api", "checkout"])
+
+    def test_tempo_string_default_does_not_normalize_malformed_responses(self):
+        path = "https://traces.example/tempo/api/v2/search/tag/resource.service.name/values"
+        for body in (
+            {}, [], {"tagValues": None}, {"tagValues": {}},
+            {"tagValues": [{}]}, {"tagValues": [{"type": "int"}]},
+            {"tagValues": [{"type": "string", "unexpected": True}]},
+            {"tagValues": [{"type": "string", "value": None}]},
+            {"tagValues": [{"type": "string", "value": 0}]},
+        ):
+            with self.subTest(body=body):
+                supplied = responses()
+                supplied[path] = (200, body)
+                with mock.patch.object(source.dataplane, "_connect_rpc", return_value={"names": []}):
+                    out = source.probe_stack(Client(supplied), STACK, "cap", now=NOW)
+                self.assertEqual(out, {
+                    "slug": "example", "available": False, "signal": "traces",
+                    "reason": "invalid_response",
+                })
+
     def test_a_200_error_envelope_is_not_a_measured_empty_list(self):
         bad = responses()
         path = "https://metrics.example/api/prom/api/v1/label/__name__/values"

@@ -1,0 +1,41 @@
+---
+id: GCI-0142
+title: >-
+  Accept valid omitted empty-string Tempo tag values without losing signal
+  inventory
+status: In Progress
+assignee:
+  - '@codex'
+created_date: '2026-10-14 10:39'
+labels: []
+dependencies: []
+priority: high
+type: bug
+ordinal: 180000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+Repeated exact-200 live Tempo service-name reads on dev contain 53 typed string entries, one serialized as type:string with the empty value omitted. Proto3/default jsonpb permits this shape. Current parser rejects the full stack signal inventory and dev T2 publication refuses at 5/6 coverage. Customer 1/300 failures already fall within existing 10% tolerance; no floor change is needed.
+<!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 A witnessed type:string record with omitted value is accepted as empty and contributes no named service; explicit null, wrong types and malformed envelopes remain unavailable.
+- [ ] #2 Fail-first source-boundary regression and normal/malformed cases pass, required just check and complete CodeRabbit review pass.
+- [ ] #3 Signed release and dev/customer deployed source identities are verified; one fresh full-estate manual dev T2 succeeds with immutable publication, runtime, memory and bounded privacy evidence.
+<!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 just test
+- [ ] #2 just tf-validate
+- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+<!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+Apply narrowly at Tempo response parser; independently review final candidate, run required source gate, release signed two-architecture image, upgrade existing consumers preserving all policy/runtime settings, run one guarded manual dev T2, then continue previously approved customer library/auditing rollout and disable temporary dev Container Insights after proof.
+<!-- SECTION:PLAN:END -->

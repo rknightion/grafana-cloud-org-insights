@@ -54,6 +54,11 @@ off anything but the live inventory.
 - A gap is an absent series, never a zero. A pillar must not emit a metric it cannot compute: an
   hourly tier writing a structural zero overwrites the real value a slower tier published, and
   carry-forward correctly refuses to rescue a series the live tier claims to own.
+- The daily Tempo service-name response may contain `{"type":"string"}` for an
+  empty proto3 string value. Only that witnessed missing-value shape is accepted;
+  empty strings contribute no named service. Explicit null/non-string values and
+  malformed response shapes remain unavailable. The shared 10% failure ceiling
+  remains unchanged: one failed stack among 300 is tolerated, one among six is not.
 - A view whose inputs are unsatisfied is withheld, never written. The last good copy stays on the
   bucket with its own older timestamp. Visibly stale beats silently wrong.
 - A limited run cannot publish. `--limit` and `--stack` compose estate rollups over a subset, so

@@ -983,6 +983,20 @@ customer enablement or live collector/deployment proof follow from this extensio
 
 ### Tempo: names readable, overrides parked
 
+The daily signal-inventory service-name route
+`/tempo/api/v2/search/tag/resource.service.name/values` can return a typed string
+entry with its empty `value` omitted. Repeated exact-200 dev witnesses on
+2026-10-14 returned 53 entries, including one `{"type":"string"}`. Tempo's
+proto3 `TagValue.value` and default `jsonpb.Marshaler` omit empty string scalars;
+this entry is valid, not a failed response. Accept this narrowly witnessed
+representation without inventing a named service. Explicit null or non-string
+values, missing values without `type:"string"`, and malformed envelopes remain
+unavailable. This changes no route, scope, retry or publication floor. The
+existing 10% failure ceiling already tolerates one unavailable stack among 300;
+one among six exceeds it.
+Upstream contract: https://github.com/grafana/tempo/blob/15157608fc54c5b9c6fa0872d7b9b0d832747941/pkg/tempopb/tempo.proto
+and https://github.com/grafana/tempo/blob/15157608fc54c5b9c6fa0872d7b9b0d832747941/modules/frontend/combiner/common.go.
+
 GET `/tempo/api/v2/search/tag/name/values` returned exact Admin and deployed-reader
 200 on all five, with typed string objects. The 24-hour witness requested limit 500
 and returned respectively 500, 7, 0, 49 and 500; robknight and robk were at limit.

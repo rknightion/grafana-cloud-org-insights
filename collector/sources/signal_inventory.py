@@ -123,9 +123,16 @@ def _tempo_values(response: Response) -> list[str] | None:
         return None
     values: list[str] = []
     for record in body["tagValues"]:
-        if not isinstance(record, Mapping) or not isinstance(record.get("value"), str):
+        if not isinstance(record, Mapping):
             return None
-        values.append(record["value"])
+        if record == {"type": "string"}:
+            # Proto3 JSON may omit the empty-string default.
+            continue
+        value = record.get("value")
+        if not isinstance(value, str):
+            return None
+        if value:
+            values.append(value)
     return sorted(set(values))
 
 

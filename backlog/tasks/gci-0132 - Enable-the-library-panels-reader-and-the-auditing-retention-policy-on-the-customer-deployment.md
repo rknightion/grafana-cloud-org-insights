@@ -6,7 +6,7 @@ title: >-
 status: Parked
 assignee: []
 created_date: '2026-10-12 09:48'
-updated_date: '2026-10-13 22:23'
+updated_date: '2026-10-14 10:44'
 labels:
   - customer
   - rollout
@@ -40,6 +40,8 @@ Owner decision D-CUST23 (Rob, 2026-10-12). The customer consumer stays on v0.11.
 
 <!-- SECTION:PLAN:BEGIN -->
 D-CUST23 implementable packet: after GCI-0119.15 (prove labelling live on dev) is accepted, fresh STS and dev view/live-inventory readback, customer pre-role/token/SSM witness, exactly one provisioner adding only two folder-scope read pairs with zero mint/rotation, post-role readback, isolated overlay changes to two read lists and auditing 120d expected policy, reviewed saved targeted plan exact apply, exactly one T2 after no active/imminent natural run, adopt ARN on timeout, immutable publication/view evidence and no-change plan. Source stays v0.11.0; no schedule/policy/bucket writes; fix forward only.
+
+2026-10-14 owner replaced the natural 48-hour prerequisite with one successful fresh full-estate dev scan and authorized autonomous fix-forward and manual scans. Resume only after that revised dev proof. Use the actual current released source, never downgrade to the historical v0.11 wording. Preserve durable reader SA/role/token IDs and SSM versions; existing recorded transient Admin repair authority is separate and must be cleaned up. Expected auditing policy assesses 120d, it does not change customer Loki retention.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
