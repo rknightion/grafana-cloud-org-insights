@@ -3,10 +3,11 @@ id: GCI-0132
 title: >-
   Enable the library-panels reader and the auditing retention policy on the
   customer deployment
-status: Parked
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-10-12 09:48'
-updated_date: '2026-10-14 10:44'
+updated_date: '2026-10-14 11:47'
 labels:
   - customer
   - rollout
@@ -23,7 +24,7 @@ Owner decision D-CUST23 (Rob, 2026-10-12). The customer consumer stays on v0.11.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Dev readback shows library-panels and retention-policy views published for every live dev stack before any customer change
+- [x] #1 Dev readback shows library-panels and retention-policy views published for every live dev stack before any customer change
 - [ ] #2 Customer reader role readback before and after one provisioner run differs only by the two library-panels pairs; no token minted or rotated
 - [ ] #3 Customer overlay change limited to the two product-read lists and GCINSIGHT_EXPECTED_RETENTION_POLICY; saved targeted plan applied exactly; final targeted plan reports no changes
 - [ ] #4 One customer T2 exits 0 with immutable publication; library-panels and retention-policy views represent every scannable stack or record a reason per stack
@@ -52,4 +53,6 @@ loop23: zero implementation/live mutation attempts; dependency parked on GCI-011
 loop23 evidence-boundary clarification: the retained dev view reads show six rows against the latest captured T2 scan population at 2026-10-12T04:37:44Z, not an independent fresh Grafana.com inventory witness at read time. AC #1 remains unchecked. After GCI-0119.15 (prove labelling live on dev) is accepted, resume with fresh inventory and both view readbacks before any customer mutation; current policy statuses are unreadable, never compliance.
 
 2026-10-13 owner explicitly preserved the existing 48-hour natural labelling prerequisite while authorizing other deployments now. Library reader/auditing retention rollout remains dependent, no scope expansion or customer reader/policy mutation from the observer/query-image updates.
+
+2026-10-14 single fresh manual dev prerequisite accepted under owner regrade, preserving explicit execution-sampled memory boundary and original 3-day verifier unproved. Fresh independent dev visible inventory/library/retention row sets match6scannable stacks, AC1proved; unknown retention statuses are not compliance. Customer before-reader snapshot is read-only in progress; no customer apply or reader repair yet.
 <!-- SECTION:NOTES:END -->
