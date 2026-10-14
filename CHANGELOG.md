@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.5](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.4...v0.13.5) (2026-10-14)
+
+
+### Bug Fixes
+
+* **dashboards:** preserve nullable evidence and UTC ages on Infinity ([9265365](https://github.com/rknightion/grafana-cloud-org-insights/commit/92653650ddf4eed555251bec7e8a7fcdd9f36982))
+
 ## [0.13.4](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.3...v0.13.4) (2026-10-14)
 
 
