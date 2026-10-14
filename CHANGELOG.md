@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.4](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.3...v0.13.4) (2026-10-14)
+
+
+### Bug Fixes
+
+* **observer:** bound acquisition to witnessed recording lifetime ([8e9afa3](https://github.com/rknightion/grafana-cloud-org-insights/commit/8e9afa30d63202ff538c1c4c9b358f68bf3d2e58))
+
 ## [0.13.3](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.2...v0.13.3) (2026-10-13)
 
 
