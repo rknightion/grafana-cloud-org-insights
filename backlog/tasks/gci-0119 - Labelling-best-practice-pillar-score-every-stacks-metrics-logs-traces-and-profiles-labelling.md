@@ -3,10 +3,10 @@ id: GCI-0119
 title: >-
   Labelling best-practice pillar: score every stack's metrics, logs, traces and
   profiles labelling
-status: Parked
+status: Done
 assignee: []
 created_date: '2026-10-06 14:43'
-updated_date: '2026-10-12 21:43'
+updated_date: '2026-10-14 14:58'
 labels:
   - labelling
 dependencies: []
@@ -25,19 +25,23 @@ Estate-wide, deterministic assessment of each live stack's labelling and OTel at
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 All subtasks Done, or Parked with a recorded reason
-- [ ] #2 The labelling dashboard shows every live stack with score, coverage and catalogue_version on the dev deployment
+- [x] #1 All subtasks Done, or Parked with a recorded reason
+- [x] #2 The labelling dashboard shows every live stack with score, coverage and catalogue_version on the dev deployment
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Loop23 parent tracker-only, zero implementation attempts: conditional completion blocked on GCI-0119.15 (natural labelling dev proof). Required historical exact ECS task descriptors are now MISSING and per-task memory windows were not captured; verifier remains red. Parent AC and DoD unchecked rather than inventing every-current-stack or stability proof. Resume when the child acceptance is genuinely satisfied under its recorded artifact contract, then re-query all subtask dispositions and exact dev view evidence before parent completion.
+
+2026-10-14 owner regraded dev acceptance and all19 direct subtasks are Done; nested GCI-0119.15.02 (disable dev Container Insights) remains separately parked pending its prepared rollout. Fresh saved v2 labelling dashboard resource and actual saved scorecard backend query with its saved All-variable interpolation return24 stack-signal rows matching fresh six-stack visible inventory and current private summary byte-for-value, catalogue5, legitimately absent scores preserved below0.8 coverage. Current14:17 T1 summary hydrates accepted v136 T2 label input with same original inventory evidence reference and23/24 measured stack-signals; bounded samples are not complete inventory. Artifact receipt codex/direct-20261014/tempo142/labelling-dashboard-final/verified.json binds saved resource, actual query request/response, private summary/object and fresh inventory hashes. Exact released final gate already passed2802tests/27931subtests/45Tofu/current+published identifier/history and em-dash checks; no unchanged-code full rerun. This backend proof plus retained actual rendering does not claim exhaustive new per-tab visual grading.
+
+Evidence clarification: current hydrated label provenance matches the original dev scan inventory reference, but that reference alone does not attest input source revision or uniquely identify an observation. The private metadata correctly retains source_revision and observation as unknown. Parent acceptance is current saved-dashboard/backend population/score/coverage/catalogue proof, with generic source and actual deployment identities established separately.
 <!-- SECTION:NOTES:END -->

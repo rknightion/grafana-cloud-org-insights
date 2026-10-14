@@ -501,6 +501,11 @@ exact effective IAM, private-record forwarding exclusion, targeted retention and
 Scheduled observers produced four schema-valid complete-window objects. Operations saved-resource
 verification and real backend query execution both passed; counts and acknowledgements remain
 dated observations, with current membership and actual-latest authority unknown. This witness
-grants no additional environment, reader or scope. The separate natural labelling acceptance
-still requires three comparable daily runs spanning at least 48 hours with a 10-point tolerance.
-Preserve dev Container Insights and the dependent customer library/auditing hold until that proof.
+grants no additional environment, reader or scope. On 2026-10-14 the owner replaced the separate
+48-hour labelling acceptance with one fresh
+successful dev scan and authorized manual scans and autonomous fix-forward. The v0.13.6 dev
+scan passed the revised source, publication and sampled privacy proof. Its measured memory
+witness covers the execution window using one-minute Container Insights samples; it is not a
+strict full-lifecycle or cgroup peak. The original three-day verifier remains unproved. This
+acceptance releases the customer library/auditing prerequisite and permits disabling dev
+Container Insights after capture; neither action is complete until its own live readback passes.
