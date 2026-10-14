@@ -166,6 +166,28 @@ current-month gauges, while deployed period/reset semantics remain unverified. A
 field does not establish a common stack identity across product families. Do not implement monthly
 deltas, per-stack currency totals or seat-utilisation ratios until their exact contracts are proved.
 
+## Owner scope and operator changes (2026-10-14)
+
+- The owner withdrew per-stack commercial cost showback and further Adaptive Metrics exemptions-reader
+  work. Preserve existing cost panels and savings limitations; this is no permission revocation or
+  evidence that exemptions are absent.
+- The owner accepted the bounded feature-observability refresh and retired exhaustive normalization
+  research. The matrix preserves dated reporting evidence and unknown units, windows and visibility.
+- The missing plugin billable-versus-active comparison and additional Loki ruler
+  iteration/evaluation/failure panels are withdrawn. Grafana-managed ruler source observations and
+  documented Cloud Logs Export succeeded-label presence remain separately qualified, never job counts,
+  inferred sync age or undocumented rate/percentage conversions.
+- The AI cost dashboard requires exact historical monthly totals before shipping. Internal-only BI
+  sections are omitted. Generic seat-price default is USD20; the named customer deployment uses USD14.
+  Token rate USD2 per million, personal allowance40M and system allowance500M remain configurable.
+  Monthly gauges, first-hour preview carry and possible inactive identity series are not lifetime
+  counters or exact calendar totals. No snapshot-only fallback satisfies this owner requirement.
+- Role-only repair batching requires a healthy stored credential bound to the live basic-None reader
+  and a pre-existing exact role UID. A pending outcome is not success. Delete the recorded transient
+  Admin before entering the shared propagation wait; failed cleanup refuses repair success. At least
+  300 seconds later, a bound stored-token effective-permission probe must pass. Installation, credential
+  repair and other nonqualifying paths retain synchronous verification and existing scoped-write rules.
+
 ## Labelling inventory (D-LBL1..12)
 
 The approved source is doc-0008 Part 1 (Labelling best-practice research and rulebook).

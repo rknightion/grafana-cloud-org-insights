@@ -997,3 +997,149 @@ def test_synthetic_policy_exact_discovery_deselection_and_wrong_stack_usage():
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DeferredRoleVerificationTest(unittest.TestCase):
+    """Role-only repairs release Admin before the shared propagation wait."""
+
+    def _repair(self, cleanup=True, stored_sa=12, basic="None", role_uid="role-1"):
+        events = []
+        class Gcom(_RepairGcom):
+            def delete(self, path):
+                events.append("cleanup")
+                if isinstance(cleanup, Exception):
+                    raise cleanup
+                return (200 if cleanup else 500), {}
+
+        class Stack(_RoleStack):
+            NOT_INSPECTED = cli.Stack.NOT_INSPECTED
+            def __init__(self, *args, **kwargs):
+                super().__init__([dict(p) for p in pr.DESIRED_PERMISSIONS][1:])
+            def put(self, path, body):
+                events.append("role")
+                return super().put(path, body)
+            def post(self, path, body):
+                events.append("assignment")
+                return 200, {}
+
+        p = pr.Presence(sa_exists=True, secret_exists=True, token_status=200,
+                        basic_role=basic, role_exists=True, role_actions={}, assigned=False)
+        with mock.patch.object(cli, "Stack", Stack), \
+             mock.patch.object(cli, "verify_reader", side_effect=lambda *a, **k: (events.append("sync") or True, "verified")):
+            result = cli.repair(Gcom(), cli.Ledger(), "a", "https://a.example",
+                [{"id":12,"name":pr.READER_SA_NAME,"role":basic}], False,
+                presence=p, existing_token="stored-token", existing_sa_id=stored_sa,
+                existing_role_uid=role_uid, defer_role_verification=True)
+        return result, events
+
+    def test_role_only_repairs_clean_admin_before_pending_without_serial_verification(self):
+        result, events = self._repair()
+        self.assertEqual(result.action, "verification_pending")
+        self.assertEqual(events, ["role", "assignment", "cleanup"])
+
+    def test_identity_role_and_cleanup_failures_cannot_be_deferred_success(self):
+        for kwargs in ({"stored_sa":99}, {"basic":None}, {"role_uid":"other-role"}):
+            with self.subTest(kwargs=kwargs):
+                result, events = self._repair(**kwargs)
+                self.assertNotEqual(result.action, "verification_pending")
+                self.assertIn("sync", events)
+        for cleanup in (False, RuntimeError("transient")):
+            with self.subTest(cleanup=type(cleanup).__name__):
+                result, events = self._repair(cleanup=cleanup)
+                self.assertEqual(result.action, "cleanup_failed")
+                self.assertNotIn("sync", events)
+
+    def test_real_main_batches_writes_and_cleanup_before_shared_propagation_wait(self):
+        slugs = ("a", "b", "c")
+        events = []
+        now = [0.0]
+        current = {s: [dict(p) for p in pr.desired_permissions(write_stack=s == "a")][:-1]
+                   for s in slugs}
+        before = {s: [dict(p) for p in ps] for s, ps in current.items()}
+        stored = {s: {"token": f"reader-{s}", "sa_id":12, "role_uid":"role-1"} for s in slugs}
+
+        class Gcom(_RepairGcom):
+            def __init__(self, *args, **kwargs):
+                super().__init__()
+                self.reads = self.writes = 0
+            def get(self, route):
+                self.reads += 1
+                if route.startswith("/instances?"):
+                    return 200, {"items":[{"slug":s,"status":"active","url":f"https://{s}.example"} for s in slugs]}
+                if "serviceaccounts/search" in route:
+                    return 200, {"serviceAccounts":[{"id":12,"name":pr.READER_SA_NAME,"role":"None"}]}
+                raise AssertionError(route)
+            def post(self, route, body):
+                self.writes += 1
+                if route.endswith("/tokens"):
+                    assert "/90/" in route, "durable token must not be minted"
+                else:
+                    assert body["role"] == "Admin", "existing reader must not be recreated"
+                return super().post(route, body)
+            def delete(self, route):
+                self.writes += 1
+                events.append(("cleanup", route.split("/")[2]))
+                return super().delete(route)
+
+        class Stack:
+            NOT_INSPECTED = cli.Stack.NOT_INSPECTED
+            def __init__(self, url, token, **kwargs):
+                self.slug = url.split("//")[1].split(".")[0]
+            def get(self, route):
+                if "roles?" in route:
+                    return 200, [{"name":pr.ROLE_NAME,"uid":"role-1"}]
+                if route.endswith("/roles/role-1"):
+                    return 200, {"permissions":current[self.slug], "version":1}
+                if route.endswith("/user/permissions"):
+                    events.append(("effective", self.slug, now[0]))
+                    pairs = before[self.slug] if now[0] < 300 else current[self.slug]
+                    body = {}
+                    for p in pairs:
+                        body.setdefault(p["action"], []).append(p.get("scope") or "")
+                    return 200, body
+                raise AssertionError(route)
+            def put(self, route, body):
+                events.append(("role", self.slug)); current[self.slug] = body["permissions"]
+                return 200, {}
+            def post(self, route, body):
+                events.append(("assignment", self.slug)); return 200, {}
+
+        actual_verify_reader = cli.verify_reader
+
+        def sleep(seconds):
+            events.append(("wait", seconds)); now[0] += seconds
+        with mock.patch.dict(cli.os.environ, {"GCINSIGHT_PROVISION_TOKEN":"x",
+                "GCINSIGHT_ORG_ID":"900001","GCINSIGHT_WRITE_STACK":"a",
+                "GCINSIGHT_READER_PRODUCT_READS":"","GCINSIGHT_OPT_OUT":""}), \
+             mock.patch.object(cli,"Gcom",Gcom), mock.patch.object(cli,"Stack",Stack), \
+             mock.patch.object(cli,"ssm_load_all",return_value=stored), \
+             mock.patch.object(cli.time,"monotonic",side_effect=lambda:now[0]), \
+             mock.patch.object(cli.time,"sleep",side_effect=sleep), \
+             mock.patch.object(cli,"verify_reader",side_effect=lambda *a, **k: actual_verify_reader(*a, **k, sleep=sleep)), \
+             mock.patch("sys.stdout",io.StringIO()):
+            code = cli.main(["--no-prune"])
+        self.assertEqual(code,0)
+        first_wait = next(i for i,event in enumerate(events) if event[0]=="wait")
+        self.assertEqual({e[1] for e in events[:first_wait] if e[0]=="cleanup"},set(slugs))
+        self.assertEqual([e for e in events if e[0]=="wait"],[("wait",300.0)])
+        self.assertEqual({e[1] for e in events[first_wait:] if e[0]=="effective"},set(slugs))
+        self.assertTrue(all(e[2]>=300 for e in events[first_wait:] if e[0]=="effective"))
+
+    def test_pending_stays_failed_until_bound_final_verification_passes(self):
+        now = [0.0]
+        waits = []
+        def sleep(seconds):
+            waits.append(seconds); now[0] += seconds
+        pending = {s:(f"https://{s}.example", False, 0.0, 12) for s in ("a","b","c")}
+        outcomes = [pr.Outcome(s,pr.PROVISIONABLE,"verification_pending","awaiting propagation") for s in pending]
+        stored = {s:{"token":"stored-token","sa_id":12} for s in pending}
+        with mock.patch.object(cli,"_verify_reader_once",return_value=(True,"verified")) as verify:
+            result = cli.reverify_pending(None,outcomes,pending,stored,clock=lambda:now[0],sleep=sleep)
+        self.assertEqual(waits,[300.0])
+        self.assertTrue(all(x.action==pr.OK for x in result))
+        self.assertTrue(all(x.kwargs["expected_sa_id"]==12 for x in verify.call_args_list))
+        for final in ({}, {"a":{"token":"stored-token","sa_id":99}}):
+            with self.subTest(final=bool(final)), mock.patch.object(cli,"_verify_reader_once") as verify:
+                result=cli.reverify_pending(None,[outcomes[0]],{"a":pending["a"]},final,clock=lambda:now[0],sleep=sleep)
+                self.assertNotEqual(result[0].action,pr.OK)
+                verify.assert_not_called()

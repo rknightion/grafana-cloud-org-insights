@@ -469,6 +469,7 @@ ASSIGN_ROLE = "assign_role"
 RESET_BASIC_ROLE = "reset_basic_role"
 PATCH_ROLE = "patch_role"
 OK = "ok"
+VERIFICATION_PENDING = "verification_pending"
 # A credential that authenticates, against a role that looks correct, and the API still refuses. There is
 # no repair to attempt, so it must NOT report as `ok`  -  a stack 403ing on every read while counted as
 # provisioned is exactly the confidently-healthy failure this platform refuses everywhere else.

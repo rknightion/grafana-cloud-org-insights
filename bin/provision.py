@@ -537,12 +537,14 @@ FAILURE_LINES = 20
 
 def _still_propagating(outcome: pr.Outcome) -> bool:
     """The only verification failure waiting can fix: a readable reader that is missing pairs."""
-    return (outcome.action == "verification_failed"
-            and outcome.detail.startswith("post-repair probe") and "sa=False" not in outcome.detail)
+    return (outcome.action == pr.VERIFICATION_PENDING or
+            (outcome.action == "verification_failed"
+             and outcome.detail.startswith("post-repair probe") and "sa=False" not in outcome.detail))
 
 
 def reverify_pending(g: Gcom, outcomes: list[pr.Outcome],
-                     pending: dict[str, tuple[str, bool, float]], stored: dict[str, dict[str, Any]], *,
+                     pending: dict[str, tuple[str, bool, float] | tuple[str, bool, float, int]],
+                     stored: dict[str, dict[str, Any]], *,
                      product_reads: Iterable[str] = (), synthetic_discoveries=None, clock=None,
                      sleep=None) -> list[pr.Outcome]:
     """Give each still-propagating repair one final read-only probe with its stored credential.
@@ -559,13 +561,24 @@ def reverify_pending(g: Gcom, outcomes: list[pr.Outcome],
         if entry is None or not token or not _still_propagating(outcome):
             result.append(outcome)
             continue
-        stack_url, write_stack, repaired_at = entry
+        stack_url, write_stack, repaired_at = entry[:3]
+        expected_sa_id = entry[3] if len(entry) == 4 else None
+        if outcome.action == pr.VERIFICATION_PENDING and (
+            type(expected_sa_id) is not int or expected_sa_id <= 0
+            or type((stored.get(outcome.slug) or {}).get("sa_id")) is not int
+            or (stored.get(outcome.slug) or {}).get("sa_id") != expected_sa_id
+        ):
+            result.append(pr.Outcome(outcome.slug, outcome.state, outcome.action,
+                                     "durable reader identity unavailable or changed; not verified"))
+            continue
         wait = FINAL_VERIFY_MIN_AGE_SECONDS - (clock() - repaired_at)
         if wait > 0:
             sleep(wait)
+        identity_guard = {"expected_sa_id": expected_sa_id} if expected_sa_id is not None else {}
         verified, detail = _verify_reader_once(g, outcome.slug, stack_url, token,
                                                write_stack=write_stack, product_reads=product_reads,
-                                               synthetic_discovery=(synthetic_discoveries or {}).get(outcome.slug))
+                                               synthetic_discovery=(synthetic_discoveries or {}).get(outcome.slug),
+                                               **identity_guard)
         result.append(pr.Outcome(outcome.slug, outcome.state, pr.OK, "role repaired; verified at end of run")
                       if verified else
                       pr.Outcome(outcome.slug, outcome.state, outcome.action,
@@ -597,12 +610,18 @@ def verify_reader(g: Gcom, slug: str, stack_url: str, token: str, *,
 def _verify_reader_once(g: Gcom, slug: str, stack_url: str, token: str, *,
                         write_stack: bool = False,
                         product_reads: Iterable[str] = (),
-                        synthetic_discovery: tuple[str | None, str] | None = None) -> tuple[bool, str]:
+                        synthetic_discovery: tuple[str | None, str] | None = None,
+                        expected_sa_id: int | None = None) -> tuple[bool, str]:
     """One read-only probe; accepted writes are not proof they took effect."""
     product_reads = frozenset(product_reads)
     status, sas = list_sas(g, slug)
     if status != 200:
         return False, f"service-account verification HTTP {status}"
+    if expected_sa_id is not None:
+        readers = [s for s in sas if s.get("name") == pr.READER_SA_NAME]
+        if (len(readers) != 1 or type(readers[0].get("id")) is not int
+                or readers[0]["id"] != expected_sa_id or readers[0].get("role") != "None"):
+            return False, "reader identity or explicit basic-None role not verified"
     verified = probe(slug, stack_url, sas, {slug: {"token": token}})
     permissions, removable, sm_state = reader_policy(
         Stack(stack_url, token, dry_run=False), verified.role_actions,
@@ -622,7 +641,9 @@ def repair(g: Gcom, ledger: Ledger, slug: str, stack_url: str, sas: list[dict],
            dry_run: bool, *, presence: pr.Presence,
            existing_token: str | None, write_stack: bool = False,
            product_reads: Iterable[str] = (),
-           synthetic_discovery: tuple[str | None, str] | None = None) -> pr.Outcome:
+           synthetic_discovery: tuple[str | None, str] | None = None,
+           defer_role_verification: bool = False, existing_sa_id: int | None = None,
+           existing_role_uid: str | None = None) -> pr.Outcome:
     """Phase 2: the only place that writes. Creates a transient Admin identity, repairs, cleans up.
 
     The Admin service account is deleted in the `finally`, LAST  -  it is the only identity that can undo
@@ -644,115 +665,143 @@ def repair(g: Gcom, ledger: Ledger, slug: str, stack_url: str, sas: list[dict],
     # Recorded BEFORE anything else, so a crash from here on is still cleanable.
     ledger.record_admin(slug, admin["id"])
     try:
-        status, tok = g.post(
-            f"/instances/{slug}/api/serviceaccounts/{admin['id']}/tokens",
-            {"name": f"{pr.ADMIN_SA_NAME}-{slug}", "secondsToLive": pr.ADMIN_TOKEN_TTL})
-        if status not in (200, 201) or not isinstance(tok, dict):
-            return pr.Outcome(slug, pr.PROVISIONABLE, "admin_token_failed", str(tok)[:140])
-        st = Stack(stack_url, tok["key"], dry_run=dry_run)
+        def apply_repair():
+            nonlocal sas
+            status, tok = g.post(
+                f"/instances/{slug}/api/serviceaccounts/{admin['id']}/tokens",
+                {"name": f"{pr.ADMIN_SA_NAME}-{slug}", "secondsToLive": pr.ADMIN_TOKEN_TTL})
+            if status not in (200, 201) or not isinstance(tok, dict):
+                return pr.Outcome(slug, pr.PROVISIONABLE, "admin_token_failed", str(tok)[:140])
+            st = Stack(stack_url, tok["key"], dry_run=dry_run)
 
-        ok, role_uid, note = ensure_role(
-            st, write_stack=write_stack, product_reads=product_reads,
-            synthetic_discovery=synthetic_discovery,
-        )
-        if not ok:
-            # A brand-new stack may not have the Assistant plugin yet, so its actions are unknown to
-            # RBAC. Retry next run rather than failing the sweep.
-            state = pr.NO_ASSISTANT if "assistant" in note.lower() else pr.PROVISIONABLE
-            return pr.Outcome(slug, state, "role_failed", note)
+            readers = [s for s in sas if s.get("name") == pr.READER_SA_NAME]
+            eligible = (defer_role_verification and not dry_run and len(readers) == 1
+                        and type(existing_sa_id) is int and existing_sa_id > 0
+                        and readers[0].get("id") == existing_sa_id
+                        and readers[0].get("role") == "None" and presence.basic_role == "None"
+                        and presence.sa_exists and presence.secret_exists and presence.token_status == 200
+                        and bool(existing_token) and isinstance(existing_role_uid, str)
+                        and bool(existing_role_uid))
+            # A structured live witness excludes first installation and recreated roles from batching.
+            preexisting_role_uid = None
+            if eligible:
+                role_status, roles = st.get("/api/access-control/roles?includeHidden=true")
+                if role_status == 200 and isinstance(roles, list):
+                    matches = [r for r in roles if isinstance(r, dict) and r.get("name") == pr.ROLE_NAME]
+                    if len(matches) == 1 and matches[0].get("uid") == existing_role_uid:
+                        preexisting_role_uid = existing_role_uid
 
-        reader = next((s for s in sas if s.get("name") == pr.READER_SA_NAME), None)
-        if reader is None:
-            status, created = g.post(f"/instances/{slug}/api/serviceaccounts",
-                                     {"name": pr.READER_SA_NAME, "role": "None"})
-            if status == 400 and isinstance(created, dict) and \
-                    created.get("messageId") == "serviceaccounts.ErrAlreadyExists":
-                # Verified behaviour: names cannot duplicate. Re-read rather than treating it as failure.
-                _, sas = list_sas(g, slug)
-                reader = next((s for s in sas if s.get("name") == pr.READER_SA_NAME), None)
-            elif status != 201 or not isinstance(created, dict):
-                return pr.Outcome(slug, pr.PROVISIONABLE, "reader_sa_failed", str(created)[:140])
-            else:
-                reader = created
-                ledger.record_sa(slug, created["id"])
-        if reader is None:
-            return pr.Outcome(slug, pr.PROVISIONABLE, "reader_sa_failed", "not found after create")
-        sa_id = reader["id"]
+            ok, role_uid, note = ensure_role(
+                st, write_stack=write_stack, product_reads=product_reads,
+                synthetic_discovery=synthetic_discovery,
+            )
+            if not ok:
+                # A brand-new stack may not have the Assistant plugin yet, so its actions are unknown to
+                # RBAC. Retry next run rather than failing the sweep.
+                state = pr.NO_ASSISTANT if "assistant" in note.lower() else pr.PROVISIONABLE
+                return pr.Outcome(slug, state, "role_failed", note)
 
-        # The read-only claim depends on this staying `None`.
-        if reader.get("role") not in (None, "None"):
-            status, changed = st.patch(f"/api/serviceaccounts/{sa_id}", {"role": "None"})
+            reader = next((s for s in sas if s.get("name") == pr.READER_SA_NAME), None)
+            if reader is None:
+                status, created = g.post(f"/instances/{slug}/api/serviceaccounts",
+                                         {"name": pr.READER_SA_NAME, "role": "None"})
+                if status == 400 and isinstance(created, dict) and \
+                        created.get("messageId") == "serviceaccounts.ErrAlreadyExists":
+                    # Verified behaviour: names cannot duplicate. Re-read rather than treating it as failure.
+                    _, sas = list_sas(g, slug)
+                    reader = next((s for s in sas if s.get("name") == pr.READER_SA_NAME), None)
+                elif status != 201 or not isinstance(created, dict):
+                    return pr.Outcome(slug, pr.PROVISIONABLE, "reader_sa_failed", str(created)[:140])
+                else:
+                    reader = created
+                    ledger.record_sa(slug, created["id"])
+            if reader is None:
+                return pr.Outcome(slug, pr.PROVISIONABLE, "reader_sa_failed", "not found after create")
+            sa_id = reader["id"]
+
+            # The read-only claim depends on this staying `None`.
+            if reader.get("role") not in (None, "None"):
+                status, changed = st.patch(f"/api/serviceaccounts/{sa_id}", {"role": "None"})
+                if status not in (200, 201):
+                    return pr.Outcome(slug, pr.PROVISIONABLE, "basic_role_failed",
+                                      f"HTTP {status}: {str(changed)[:120]}")
+
+            status, assigned = st.post(
+                f"/api/access-control/users/{sa_id}/roles", {"roleUid": role_uid, "global": False})
             if status not in (200, 201):
-                return pr.Outcome(slug, pr.PROVISIONABLE, "basic_role_failed",
-                                  f"HTTP {status}: {str(changed)[:120]}")
+                return pr.Outcome(slug, pr.PROVISIONABLE, "role_assignment_failed",
+                                  f"HTTP {status}: {str(assigned)[:120]}")
 
-        status, assigned = st.post(
-            f"/api/access-control/users/{sa_id}/roles", {"roleUid": role_uid, "global": False})
-        if status not in (200, 201):
-            return pr.Outcome(slug, pr.PROVISIONABLE, "role_assignment_failed",
-                              f"HTTP {status}: {str(assigned)[:120]}")
+            # A role patch does not invalidate a working credential, so do not mint one. Minting here
+            # unconditionally is what would have left an orphaned token on every stack in the estate.
+            reader_token = existing_token
+            if not pr.needs_token_mint(presence):
+                if not reader_token:
+                    return pr.Outcome(slug, pr.PROVISIONABLE, "verification_failed",
+                                      "existing credential was not supplied for post-repair verification")
+            else:
+                status, minted = g.post(f"/instances/{slug}/api/serviceaccounts/{sa_id}/tokens",
+                                        {"name": pr.token_name(slug)})
+                if status not in (200, 201) or not isinstance(minted, dict):
+                    return pr.Outcome(slug, pr.PROVISIONABLE, "token_failed", str(minted)[:140])
+                reader_token = minted.get("key")
+                if not reader_token:
+                    return pr.Outcome(slug, pr.PROVISIONABLE, "token_failed",
+                                      "mint response did not contain a key")
+                minted_id = minted.get("id")
+                if minted_id is None:
+                    return pr.Outcome(slug, pr.PROVISIONABLE, "token_failed",
+                                      "mint response did not contain a token id")
+                record = {
+                    "slug": slug, "sa_id": sa_id, "token_id": minted_id,
+                    "role_uid": role_uid, "token": reader_token,
+                    "provisioned_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+                }
+                store_error = ""
+                try:
+                    stored = ssm_put(slug, record, dry_run)
+                except Exception as exc:                              # noqa: BLE001
+                    stored = False
+                    store_error = f" ({type(exc).__name__}: {exc})"
+                if not stored:
+                    cleanup_status, cleanup_body = st.delete(
+                        f"/api/serviceaccounts/{sa_id}/tokens/{minted_id}")
+                    if cleanup_status not in (200, 204):
+                        return pr.Outcome(
+                            slug, pr.PROVISIONABLE, "ssm_write_failed",
+                            "token minted but NOT stored; exact-token revocation failed "
+                            f"with HTTP {cleanup_status}: {str(cleanup_body)[:100]}",
+                        )
+                    return pr.Outcome(slug, pr.PROVISIONABLE, "ssm_write_failed",
+                                      f"token minted but NOT stored{store_error}; "
+                                      f"token {minted_id} revoked")
 
-        # A role patch does not invalidate a working credential, so do not mint one. Minting here
-        # unconditionally is what would have left an orphaned token on every stack in the estate.
-        reader_token = existing_token
-        if not pr.needs_token_mint(presence):
-            if not reader_token:
-                return pr.Outcome(slug, pr.PROVISIONABLE, "verification_failed",
-                                  "existing credential was not supplied for post-repair verification")
-        else:
-            status, minted = g.post(f"/instances/{slug}/api/serviceaccounts/{sa_id}/tokens",
-                                    {"name": pr.token_name(slug)})
-            if status not in (200, 201) or not isinstance(minted, dict):
-                return pr.Outcome(slug, pr.PROVISIONABLE, "token_failed", str(minted)[:140])
-            reader_token = minted.get("key")
-            if not reader_token:
-                return pr.Outcome(slug, pr.PROVISIONABLE, "token_failed",
-                                  "mint response did not contain a key")
-            minted_id = minted.get("id")
-            if minted_id is None:
-                return pr.Outcome(slug, pr.PROVISIONABLE, "token_failed",
-                                  "mint response did not contain a token id")
-            record = {
-                "slug": slug, "sa_id": sa_id, "token_id": minted_id,
-                "role_uid": role_uid, "token": reader_token,
-                "provisioned_at": dt.datetime.now(dt.timezone.utc).isoformat(),
-            }
-            store_error = ""
-            try:
-                stored = ssm_put(slug, record, dry_run)
-            except Exception as exc:                              # noqa: BLE001
-                stored = False
-                store_error = f" ({type(exc).__name__}: {exc})"
-            if not stored:
-                cleanup_status, cleanup_body = st.delete(
-                    f"/api/serviceaccounts/{sa_id}/tokens/{minted_id}")
-                if cleanup_status not in (200, 204):
-                    return pr.Outcome(
-                        slug, pr.PROVISIONABLE, "ssm_write_failed",
-                        "token minted but NOT stored; exact-token revocation failed "
-                        f"with HTTP {cleanup_status}: {str(cleanup_body)[:100]}",
-                    )
-                return pr.Outcome(slug, pr.PROVISIONABLE, "ssm_write_failed",
-                                  f"token minted but NOT stored{store_error}; "
-                                  f"token {minted_id} revoked")
-
-        if dry_run:
-            return pr.Outcome(slug, pr.PROVISIONABLE, pr.OK,
-                              f"role {note}; post-repair probe not available in dry-run")
-        verified, detail = verify_reader(
-            g, slug, stack_url, reader_token, write_stack=write_stack,
-            product_reads=product_reads, synthetic_discovery=synthetic_discovery,
-        )
-        if not verified:
-            return pr.Outcome(slug, pr.PROVISIONABLE, "verification_failed", detail)
-        kept = ", existing credential kept" if not pr.needs_token_mint(presence) else ""
-        return pr.Outcome(slug, pr.PROVISIONABLE, pr.OK, f"role {note}{kept}; verified")
+            if dry_run:
+                return pr.Outcome(slug, pr.PROVISIONABLE, pr.OK,
+                                  f"role {note}; post-repair probe not available in dry-run")
+            if eligible and preexisting_role_uid == role_uid:
+                return pr.Outcome(slug, pr.PROVISIONABLE, pr.VERIFICATION_PENDING,
+                                  "existing credential kept; effective permissions await end-of-run verification")
+            verified, detail = verify_reader(
+                g, slug, stack_url, reader_token, write_stack=write_stack,
+                product_reads=product_reads, synthetic_discovery=synthetic_discovery,
+            )
+            if not verified:
+                return pr.Outcome(slug, pr.PROVISIONABLE, "verification_failed", detail)
+            kept = ", existing credential kept" if not pr.needs_token_mint(presence) else ""
+            return pr.Outcome(slug, pr.PROVISIONABLE, pr.OK, f"role {note}{kept}; verified")
+        outcome = apply_repair()
     finally:
         try:
-            _delete_sa(g, ledger, slug, admin["id"])
+            cleaned = _delete_sa(g, ledger, slug, admin["id"])
         except Exception as exc:                                  # noqa: BLE001
+            cleaned = False
             print(f"    WARNING: could not remove the transient Admin identity on {slug}: {exc}",
                   file=sys.stderr)
+    if not cleaned:
+        return pr.Outcome(slug, pr.PROVISIONABLE, "cleanup_failed",
+                          "recorded transient Admin deletion not confirmed; verification refused")
+    return outcome
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -832,7 +881,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"credential store: {len(stored)} stack(s) already hold a token")
 
     outcomes: list[pr.Outcome] = []
-    pending: dict[str, tuple[str, bool, float]] = {}
+    pending: dict[str, tuple[str, bool, float] | tuple[str, bool, float, int]] = {}
     synthetic_discoveries: dict[str, tuple[str | None, str] | None] = {}
     for s in stacks:
         slug = str(s.get("slug"))
@@ -890,9 +939,13 @@ def main(argv: list[str] | None = None) -> int:
             g, ledger, slug, stack_url, sas, args.dry_run,
             presence=presence, existing_token=record.get("token"), write_stack=is_write_stack,
             product_reads=product_reads, synthetic_discovery=synthetic_discoveries[slug],
+            defer_role_verification=True, existing_sa_id=record.get("sa_id"),
+            existing_role_uid=record.get("role_uid"),
         ))
         if _still_propagating(outcomes[-1]):
-            pending[slug] = (stack_url, is_write_stack, time.monotonic())
+            stamp = (stack_url, is_write_stack, time.monotonic())
+            pending[slug] = ((*stamp, record["sa_id"]) if
+                             outcomes[-1].action == pr.VERIFICATION_PENDING else stamp)
 
     if pending and not args.dry_run:
         print(f"re-verifying {len(pending)} repair(s) still propagating")
