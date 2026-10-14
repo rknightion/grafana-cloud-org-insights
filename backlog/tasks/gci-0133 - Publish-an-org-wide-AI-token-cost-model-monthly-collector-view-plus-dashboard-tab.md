@@ -3,10 +3,11 @@ id: GCI-0133
 title: >-
   Publish an org-wide AI token cost model: monthly collector view plus dashboard
   tab
-status: Parked
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-10-12 10:04'
-updated_date: '2026-10-13 17:11'
+updated_date: '2026-10-14 20:05'
 labels:
   - ai
   - dashboards
@@ -53,4 +54,8 @@ Loop23 root accepts read-only bounded design packet, not implementation. Full bu
 Root engineering dispositions: mutable allowance must use upstream live aggregate recomputation while the persisted default-40M snapshot is separately labelled, contingent on witnessed bounded query semantics; never recompute arbitrary excess from a single stored threshold. One proved active-user seat definition, transient-email live tables only. A bounded ownership-omission correction for scan.py and budget/provenance wiring is necessary for the already-approved new T2 input, not new product/source authority; do not implement that correction before source proof. No org-only reduced-scope build accepted as full AC. Attempt count zero; no code or gate claimed.
 
 2026-10-13 source-contract correction: versioned retained source describes the per-user AI token metric as a current-month gauge, contradicting the earlier unconditional non-resetting-counter premise. No deployed producer/version or positive schema witness has been established. Preserve the monthly-model objective, privacy fences and attempt count zero; do not implement delta or range-maximum arithmetic from either unverified assumption. Before implementation, resolve the deployed period/type contract, choose one proved seat population, and prove shared-user allowance attribution and billed-period/currency reconciliation. AC3 requires owner-consistent revision to test the witnessed producer contract; it is not satisfied by changing the test to match a guessed algorithm. Org and stack current-month active-user quantities do not automatically establish licensed seats. No new product scope follows.
+
+Owner 2026-10-14 names BI dashboard mitn6pr in bi-ops as the build inspiration, authorizes read-only inspection and customer billing discovery, requests configurable customer pricing inputs. Use the dashboard data scope; no broader AI analysis required. Internal-only sections require a supported customer source or explicit unavailable handling.
+
+Owner2026-10-14: omit internal-only BI sections entirely; generic seatprice20USD with customer override14USD, remainingdefaults2USD/million,40Muserallowance,500Msystemallowance all configurable. Exact historical monthly totals REQUIRED before shipping; snapshot-only currentmonth fallback is not accepted. Fresh customer positive data and pinned producer contracts captured; midnight/first-hour historical reads remain unchanged into02UTC and do not bind exact closing totals. No partial AI feature deployment authorized by this fallback proposal.
 <!-- SECTION:NOTES:END -->

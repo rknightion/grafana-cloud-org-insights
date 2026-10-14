@@ -388,8 +388,36 @@ class DashboardNameAndGenericTextTest(unittest.TestCase):
         missing = artifact["spec"]["elements"]["health_loki_unverified"]["spec"]
         self.assertEqual(missing["data"]["spec"]["queries"], [])
         prose = missing["vizConfig"]["spec"]["options"]["content"]
-        for text in ("missed iterations", "evaluation failures", "unavailable", "not zero"):
+        for text in ("owner withdrew", "Grafana-managed", "do not substitute"):
             self.assertIn(text, prose)
+
+    def test_export_presence_uses_documented_status_not_job_counts_or_zero_fill(self):
+        from bin import dashboards
+
+        _, artifact = dashboards.assemble("operations", "infinity-uid")
+        panels = artifact["spec"]["elements"]
+        for key, succeeded in (("health_export_observed_24h", False),
+                               ("health_export_succeeded_24h", True)):
+            spec = panels[key]["spec"]
+            query = spec["data"]["spec"]["queries"][0]["spec"]["query"]
+            expr = query["spec"]["expr"]
+            self.assertIn("count_over_time(grafanacloud_logs_instance_cloud_logs_export_status", expr)
+            self.assertIn("[24h]", expr)
+            self.assertEqual('status="succeeded"' in expr, succeeded)
+            self.assertIn('count by(stack_id)', expr)
+            self.assertNotIn('or vector', expr)
+            self.assertNotIn('sum(', expr)
+            self.assertTrue(query["spec"]["instant"])
+            self.assertIn("not export jobs", spec["description"])
+            self.assertIn("unavailable", spec["description"])
+        for key, exact in (("health_grafana_evaluations", "grafanacloud_grafana_instance_alerting_rule_evaluations_total:rate5m"),
+                           ("health_grafana_failures", "grafanacloud_grafana_instance_alerting_rule_evaluation_failures_total:rate5m"),
+                           ("health_grafana_groups", "grafanacloud_grafana_instance_alerting_rule_group_rules")):
+            spec = panels[key]["spec"]
+            expr = spec["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]["expr"]
+            self.assertIn(exact, expr)
+            self.assertNotIn(" / ", expr)
+            self.assertEqual(spec["vizConfig"]["spec"]["fieldConfig"]["defaults"]["unit"], "none")
 
     def test_raw_usage_join_refuses_ambiguous_or_nonunit_info(self):
         expr = build.usage_observation_by_slug('source{stack_id!=""}')

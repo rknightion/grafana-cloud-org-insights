@@ -3204,6 +3204,15 @@ def operations_health_panels() -> dict:
          "Not used as a denominator; source population and normalization are unverified."),
         ("health_generator_sanitized", "Tempo generator sanitized-span source", generator + "spans_sanitized_per_second",
          "Sanitization is not equated to dropped spans; normalization is unverified."),
+        ("health_grafana_evaluations", "Grafana-managed ruler evaluation source",
+         "grafanacloud_grafana_instance_alerting_rule_evaluations_total:rate5m",
+         "Current customer schema witnessed; rate normalization and producer window remain unverified."),
+        ("health_grafana_failures", "Grafana-managed ruler evaluation-failure source",
+         "grafanacloud_grafana_instance_alerting_rule_evaluation_failures_total:rate5m",
+         "Current customer schema witnessed; no failure ratio or event count is derived."),
+        ("health_grafana_groups", "Grafana-managed ruler group-rules source",
+         "grafanacloud_grafana_instance_alerting_rule_group_rules",
+         "Current customer state labels include active and paused; complete enum and count semantics unverified."),
         ("health_mimir_missed", "Mimir ruler missed-iteration source", mimir + "rule_group_iterations_missed_total:rate5m",
          "The rate5m suffix is name evidence only, not verified per-second normalization or a missed-iteration count."),
         ("health_mimir_evaluations", "Mimir ruler evaluation source", mimir + "rule_evaluations_total:rate5m",
@@ -3214,10 +3223,10 @@ def operations_health_panels() -> dict:
         ("health_loki_reload", "Loki ruler reload source", "grafanacloud_logs_instance_rule_config_last_reload_successful", reload_caveat),
         ("health_am_reload", "Alertmanager config reload source", mimir + "alertmanager_config_last_reload_successful", reload_caveat),
         ("health_export_status", "Cloud Logs Export status source", export + "status",
-         "Historical customer-observed name and stack_id only; staff observation absent. "
+         "Live schema witnessed; source population and cadence remain unverified. "
          "Numeric enum mapping is unverified; not export health or enablement."),
         ("health_export_timestamp", "Cloud Logs Export last-synced-file timestamp source", export + "last_synced_file_timestamp",
-         "Historical customer-observed name and stack_id only; staff observation absent. "
+         "Live schema witnessed; source population and cadence remain unverified. "
          "Timestamp unit, epoch and sync meaning are unverified; no sync age is calculated."),
     ]
     scope = (" Raw source observation, not health. Units: unverified. Producer window: unverified "
@@ -3245,7 +3254,7 @@ def operations_health_panels() -> dict:
         description="Units: verified seconds from PromQL time() minus timestamp() of the status sample. "
                     "This measures datasource sample age at each evaluation, not file sync freshness "
                     "and not health. Producer cadence and status semantics remain unverified. "
-                    "Historical customer-only source; no present customer readback. No invented freshness "
+                    "Live source schema witnessed. No invented freshness "
                     "threshold. Each source series stays separate and missing data stays absent, not zero. "
                     "Unique stack-id-to-slug lookup only; the Stack selector does not filter this panel. "
                     "A series older than the datasource lookback becomes absent, not an ever-growing age.",
@@ -3260,17 +3269,33 @@ def operations_health_panels() -> dict:
         "or health thresholds are inferred. Lines retain source labels, with a unique stack slug lookup; "
         "multiple lines can belong to one stack. The dashboard time picker sets the consumer range. "
         "The Stack selector does not filter this datasource. Missing observations or ambiguous lookups "
-        "are absent, not healthy zero. Cloud Logs Export names are historical customer observations "
-        "and still need current customer readback. Only status **sample age** has verified seconds; "
+        "are absent, not healthy zero. Cloud Logs Export schema is witnessed; "
+        "the succeeded label is documented, while numeric status mapping remains unknown. Only status "
+        "**sample age** has verified seconds; "
         "it does not prove export sync freshness. Zero new collector series.",
     )
+    for key, title, selector in (
+        ("health_export_observed_24h", "Cloud Logs Export source series observed (24h)",
+         f'{export}status{{stack_id!="",__ignore_usage__=""}}'),
+        ("health_export_succeeded_24h", "Cloud Logs Export succeeded source series observed (24h)",
+         f'{export}status{{stack_id!="",status="succeeded",__ignore_usage__=""}}'),
+    ):
+        panels[key] = build.prometheus_table_panel(
+            title, build.usage_by_slug(f"count by(stack_id)(count_over_time({selector}[24h]))"),
+            legend="{{slug}}", endpoint=True, limit=1000, ds_uid=build.USAGE_UID,
+            label_column="Stack", value_column="Observed source series",
+            description="Source-series presence during the 24h window ending at the selected endpoint. "
+                        "The succeeded predicate follows "
+                        "the documented export status label; counts are not export jobs, files or events. "
+                        "No observed series means unavailable, not zero jobs or healthy status. "
+                        "An initial export can lag seven days. Unique stack-id-to-slug lookup only; "
+                        "the Stack selector does not filter this usage datasource.",
+        )
     panels["health_loki_unverified"] = build.text_panel(
-        "Loki ruler missed iterations and evaluations: unavailable",
-        "Loki-specific missed iterations, evaluations and evaluation failures are **unavailable** "
-        "under the witnessed name roster, not zero. The Mimir rule metrics are not substituted: "
-        "neither their name nor stack_id establishes a Loki population. Loki reload is shown only "
-        "as a raw source observation; no reload-failure mapping is proven. Exact Loki names and "
-        "population/unit contracts are needed before adding those claims.",
+        "Loki ruler additions out of scope",
+        "The owner withdrew additional Loki ruler iteration/evaluation/failure panels. "
+        "Existing raw reload observations remain. Grafana-managed and Mimir ruler source observations "
+        "are shown separately and do not substitute for Loki metrics.",
     )
     return panels
 
@@ -3510,11 +3535,15 @@ def d_operations(ds: str):
             build.row("Tempo generator drops and processing", ["health_generator_span_drops",
                       "health_generator_series_drops", "health_generator_received",
                       "health_generator_sanitized"], max_columns=2),
+            build.row("Grafana-managed ruler observations", ["health_grafana_evaluations",
+                      "health_grafana_failures", "health_grafana_groups"], max_columns=3),
             build.row("Mimir ruler observations", ["health_mimir_missed", "health_mimir_evaluations",
                       "health_mimir_failures", "health_mimir_reload"], max_columns=2),
             build.row("Loki ruler proof limits and reload", ["health_loki_unverified",
                       "health_loki_reload"], max_columns=2),
             build.row("Alertmanager config reload", ["health_am_reload"], max_columns=1),
+            build.row("Cloud Logs Export status presence (24h)", ["health_export_observed_24h",
+                      "health_export_succeeded_24h"], max_columns=2),
             build.row("Cloud Logs Export source observations", ["health_export_status",
                       "health_export_timestamp", "health_export_sample_age"], max_columns=2),
         ]),

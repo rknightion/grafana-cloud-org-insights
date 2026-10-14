@@ -3,11 +3,11 @@ id: GCI-0032
 title: >-
   Research what Grafana Cloud feature and sub-feature usage the platform can
   observe, and from which source
-status: Parked
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-09-23 17:50'
-updated_date: '2026-10-14 19:55'
+updated_date: '2026-10-14 20:05'
 labels:
   - research
   - adoption
@@ -94,14 +94,9 @@ The first concrete strand is already scoped as subtask GCI-0032.01: the `source`
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Live enumeration of every grafanacloud_* metric on the write stack, each mapped to a product and sub-feature with its windowing semantics
-- [ ] #2 Every product and sub-feature listed in the description has a matrix row naming the best reachable fidelity level (available, configured, producing, used by people), source, exact route or query, credential and scope
-- [x] #3 Each row states live-verified or not, and on how many stacks; negative results (401, 403-by-design, 200-with-wrong-data) are recorded in CAPABILITIES.md
-- [ ] #4 No reader role, scope or access policy was changed; every route that would need a new (action, scope) pair is listed with what it reads and its risk, grouped into one decision task for Rob
-- [x] #5 Per-app attribution inside the Scenes 'scenes' source bucket is resolved or recorded as not obtainable, with the evidence
-- [x] #6 Matrix exists as a backlog doc and its summary answers the field question: trackable today, trackable after follow-ons, not visible to any available source
-- [x] #7 One follow-on task per build-now row or coherent group, created via the backlog CLI and ranked by value vs cost, each stating proposed series cost
-- [x] #8 No customer identifiers, stack slugs, user names or tokens appear in any committed artifact
+- [x] #1 Fresh customer shared billing census is recorded with current/historical metric-name differences, retaining uncertainty about absent names.
+- [x] #2 Bounded feature-signal reads are reconciled to freshly discovered inventory and their observed reporting/positive counts are recorded.
+- [x] #3 Matrix records source metadata gaps and no new grant/permission or unsupported adoption/billing semantics; original exhaustive requirements are explicitly owner-withdrawn.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -147,4 +142,12 @@ loop4 metadata premise exhausted with complete5/5 direct discovered usage dataso
 Owner 2026-10-14 authorizes additional read-only dev/customer stack queries across as many discovered stacks as needed. Prioritize customer-realistic evidence and retain unknown metric semantics, no permission changes.
 
 2026-10-14 owner-authorized customer refresh completed: 325 currently discovered names, 12 new to historical tables (11 entirely new to document), 12 signal probes left-joined to fresh316 inventory; all observed IDs matched. Matrix updated with counts and exact names. Customer metadata still success/empty: no HELP/TYPE/reset/window proof. No role/permission/token writes. Original exhaustive AC1/2/4 remain unproved; bounded attempt complete, no unchanged probes planned. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261014/backlog-zero/features032/completion-receipt.json.
+
+Owner2026-10-14 accepts the bounded customer refresh and retires exhaustive metric normalization/exact universal route research. Original unchecked AC1/2/4 withdrawn, not proved; dated matrix contracts and unknowns remain. Revised acceptance is actual fresh325-name census and twelve inventory-left-joined reporting witnesses with documented missing metadata; no permission/credential writes.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Owner accepted bounded refresh:325currentnames,11newtodocument,12fixed24h probes matched316freshinventory. Sanitized matrix appendix and count/hash receipts retained. Exhaustive remaining contract research withdrawn rather than represented as proved; existing semantic gaps remain documented.
+<!-- SECTION:FINAL_SUMMARY:END -->

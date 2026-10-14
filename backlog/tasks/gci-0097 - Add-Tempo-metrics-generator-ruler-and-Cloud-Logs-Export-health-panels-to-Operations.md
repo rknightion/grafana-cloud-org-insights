@@ -3,11 +3,11 @@ id: GCI-0097
 title: >-
   Add Tempo metrics-generator, ruler and Cloud Logs Export health panels to
   Operations
-status: Parked
+status: In Progress
 assignee:
-  - '@loop24-root'
+  - '@codex'
 created_date: '2026-10-06 10:23'
-updated_date: '2026-10-12 22:24'
+updated_date: '2026-10-14 20:00'
 labels:
   - dashboards
   - operations
@@ -26,9 +26,9 @@ Loop13 assessment gaps 5, 6 and 14: grafanacloud_traces_instance_metrics_generat
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Operations gains per-stack panels for each family with metric names from the roster
-- [x] #2 Units are stated as verified or unverified per doc-0006; no ratio is rendered as a percentage without evidence
-- [x] #3 just check green; zero new metric
+- [ ] #1 Operations preserves accepted Tempo/backend observations, includes exact Grafana-managed ruler observations and Cloud Logs Export24h source/succeeded-presence panels; omitted Loki ruler additions are owner-withdrawn.
+- [ ] #2 Units remain qualified; no undocumented percent scaling, failed-job counts, sync age or byte rate is inferred.
+- [ ] #3 just check green; zero new collector metric; changed Operations dashboard published and read back on dev and customer.
 <!-- AC:END -->
 
 ## Definition of Done
@@ -52,4 +52,8 @@ Loop24 resume packet: preserve all accepted Operations raw panels. Public export
 Loop13: 2 change/verify cycles (worker1 implementation, root1 four-line visible-legend review correction), 1 review-repair round; original CodeRabbit complete0findings and trivial wiring delta not rerun. Safe partial raw-observation panels accepted/landed9a002e8368300310454634555323ed37c612eac2; independent original and exact legend deltaPASS, real17expressions/34cases PromQL source-value and absence proof. Final+composed just check2195passed2skipped13380subtests; exactSHA CI37470747210 required leaves success. AC2/3 satisfied; AC1 remains missing exact Loki iteration/evaluation/failure names/contracts. Unavailable notice is not full completion. Historical export-name customer readback, vendor units/enums and file-sync meaning remain unverified. Resume exact missing Loki witness; preserve landed safe slice/ceilings.
 
 Loop24 research accepted, AC1 remains partial. Root robk HTTP200/no-warning35d roster had only Loki reload family; count control50330 observations, no Loki iteration/evaluation/failure aliases. Export status35d and succeeded24h returned no samples: bounded datasource/window absence, not no jobs or global metric absence. Remaining blockers exact Cloud aliases/contracts and positive current export schema. Attempts: 0 implementation this loop; prior2 cycles/1 review-repair retained. Evidence /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/health-metrics/lane.md and /Users/rob/repos/grafana-cloud-org-insights/codex/loop24-evidence/root/usage-probe.json.
+
+Owner 2026-10-14 withdraws missing Loki ruler iteration/evaluation/failure requirement; retain supported ruler health. Authorizes customer Cloud Logs Export positive witness and resulting panel work; do not infer job count or failure from source observations.
+
+Owner scope2026-10-14: missing Loki ruler iteration/evaluation/failure requirement withdrawn; preserve accepted existing observations and add Grafana-managed ruler signals. Fresh customer witness126/129/130 live stacks for exact Grafana-managed failure/evaluation/group metrics, five live stacks with exact Cloud Logs Export succeeded status samples in24h; IDs join fresh316 inventory. Added three raw ruler panels and two24h source-presence tables, never jobs/counts/sync age. Fail-first KeyError proves missing panels; corrected focused3tests/16subtests and assembled layout visibility pass. Source metadata empty, units/rate normalization/epoch remain explicitly unknown. Original AC1 missing Loki remainder is a withdrawal, not a passing witness.
 <!-- SECTION:NOTES:END -->
