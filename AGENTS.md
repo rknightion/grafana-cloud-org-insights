@@ -192,6 +192,21 @@ deltas, per-stack currency totals or seat-utilisation ratios until their exact c
   300 seconds later, a bound stored-token effective-permission probe must pass. Installation, credential
   repair and other nonqualifying paths retain synchronous verification and existing scoped-write rules.
 
+## Aggregate AI billing input
+
+`ai_billing` is a default-off T2 aggregate source using only the existing write-stack
+`grafanacloud-usage` GET query proxy and reader. All selectors retain the empty
+`__ignore_usage__` matcher. Emails stay upstream; only org/stack numeric aggregates may
+be stored. A valid query result is not an invoice, licensed-seat count or exact closing total.
+The ordinary publication floor and limited-run refusal apply, with no AI-specific exemption.
+
+History at `state/ai-cost-history.json` records separate dated native and one-time BI MTD
+observations, never sums them. Its thirteen-month/2 MiB/20,000-row bounds, conditional writes,
+strict schema and rollover quarantine preserve last good history. Every update rechecks fresh
+inventory and publication eligibility. Stored allowances stay with their observations; live
+allowance changes do not reconstruct historical excess. Prices are configurable at presentation.
+Customer-only backfill authorization is not a generic BI runtime credential or POST grant.
+
 ## Labelling inventory (D-LBL1..12)
 
 The approved source is doc-0008 Part 1 (Labelling best-practice research and rulebook).

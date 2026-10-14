@@ -85,7 +85,7 @@ PILLAR_J_EPOCHS = 2  # contaminated unversioned history plus the clean v2 epoch 
 FINDING_KIND = 18
 # Cardinality follows `len(hydrate.INPUT_OWNER)`; the test below the catalogue re-derives it so adding an
 # input cannot silently leave this declaration stale.
-INPUT = 32
+INPUT = 33
 # Planning capacity, NOT upstream enums. Assistant metric projections currently use seven
 # categories and eight surfaces, including other; the category slot left over is unnamed.
 # Estate-wide ONLY; the per-stack cross product is a view.
@@ -603,6 +603,9 @@ CATALOGUE: tuple[MetricSpec, ...] = (
     MetricSpec("ai_config_disabled", "I", store="view",
                note="rules/automations/integrations that exist but are switched off. `enabled` is absent "
                     "on skills, so only an explicit false counts  -  unknown is not disabled"),
+    MetricSpec("ai_cost_current", "I", store="view", note="Aggregate observed AI MTD, no identities or new product series."),
+    MetricSpec("ai_cost_monthly", "I", store="view", note="Source-separated dated MTD history, not invoices."),
+    MetricSpec("ai_cost_stacks", "I", store="view", note="Live-discovered stack token/membership observations, no seat currency allocation."),
     MetricSpec("ai_summary", "I", store="view"),
     MetricSpec("ai_agent_observability", "I", store="view",
                note="live-stack 30d maximum generation rate reporting, independently available from "

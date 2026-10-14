@@ -73,3 +73,7 @@ Anonymise it the same way, preserve analytical numerics where the distribution m
 identifier deterministically inside the reserved namespaces, and say here what it is for and who reads
 it. A fixture nothing references is dead weight, and a fixture carrying an unscrubbed identifier is a
 leak that ships.
+
+The three `ai_cost_*` views and `ai_billing` compose input are synthetic aggregate-only
+examples for source-separated MTD history, shared allowances and missing stack fields.
+They contain no real users, pricing agreement or measured customer token totals.

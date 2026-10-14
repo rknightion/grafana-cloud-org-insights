@@ -154,7 +154,7 @@ class RawProductUnitsTest(unittest.TestCase):
         self.assertNotIn("Commercial tabs are live", ai_banner)
         # Known token windows remain qualified independently; this is not a blanket ban on periods.
         self.assertIn("monthly", self.panel("ai", "n_tokens")["description"].lower())
-        self.assertIn("lifetime", self.panel("ai", "tbl_people")["title"].lower())
+        self.assertIn("month-to-date", self.panel("ai", "tbl_people")["title"].lower())
 
     def test_frozen_run_rate_tab_is_qualified_not_renamed(self):
         spec = self.artifacts["commercial"]["spec"]

@@ -178,8 +178,9 @@ def test_dependencies_are_derived_rules_coverage_and_old_consumers_unchanged(tmp
     assert payload["meta"]["inputs"] == owner["meta"]["inputs"]
     assert payload["rows"] == []
     assert block["completeness"] == "unknown", "zero findings/rule pass/floor pass is not exhaustiveness"
-    assert sum(spec.series for spec in budget.CATALOGUE) == 13827
-    assert len(hydrate.INPUT_OWNER) == budget.INPUT == 32
+    # Evidence itself adds no series; the separate AI input adds eight provenance combinations.
+    assert sum(spec.series for spec in budget.CATALOGUE) == 13835
+    assert len(hydrate.INPUT_OWNER) == budget.INPUT == 33
 
 
 def test_original_optional_evidence_survives_accepted_hydration_only(tmp_path):

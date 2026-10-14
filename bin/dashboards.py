@@ -31,6 +31,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
 from collector import identity, observability_score
 from collector import ratecard as ratecard_model
+from collector.dashboards import ai_cost as cost_dashboard
 from collector.dashboards import build, layout, view_metadata
 from collector.dashboards.retention_panels import retention_panels
 from collector.dashboards import outcomes
@@ -1753,7 +1754,7 @@ def d_usage(ds: str):
             ds_uid=build.USAGE_UID,
             description="AI tokens consumed across the org in the CURRENT billing period. This "
                         "aggregate resets monthly; it is not a lifetime counter. The dedicated AI "
-                        "dashboard separates this period total from the per-identity lifetime metric."),
+                        "dashboard shows both monthly aggregate and endpoint identity observations."),
         "t_logs_unread": build.timeseries_panel(
             "Log ingest: total vs unread",
             [(LOGS_IN_BYTES, "ingested estate-wide"),
@@ -4706,10 +4707,8 @@ def d_ai(ds: str):
     readers supply tenant Assistant inventory and a category x surface breakdown that billing metrics
     do not carry. The two must never be presented as one measure: plugin and billing windows differ.
 
-    Two superficially similar token metrics have different windows and are kept apart throughout:
-
-    * `ai_tokens_total_tokens` is the current billing-period aggregate and resets monthly.
-    * `ai_tokens_user_total_tokens` is cumulative by identity and does not share that reset contract.
+    Both token metrics are observed month-to-date gauges. Identity rows stay in live Grafana queries;
+    they are not lifetime counters and cannot establish exact closed-month totals.
     """
     assistant_users = "sum(grafanacloud_org_assistant_users)"
     active_stacks = "count(sum by(stack_id)(grafanacloud_assistant_active_users) > 0)"
@@ -4725,10 +4724,10 @@ def d_ai(ds: str):
         "topk(100, sum by(stack_id)(grafanacloud_ai_tokens_total_tokens))")
     stack_assistant_cost = build.usage_by_slug(
         "topk(100, sum by(stack_id)(grafanacloud_assistant_overage))")
-    people = ('topk(100, sum by(email)(max_over_time('
-              'grafanacloud_ai_tokens_user_total_tokens{user_type="user"}[120d])))')
-    services = ('topk(100, sum by(email)(max_over_time('
-                'grafanacloud_ai_tokens_user_total_tokens{user_type="service"}[120d])))')
+    people = ('topk(100, sum by(email)('
+              'grafanacloud_ai_tokens_user_total_tokens{user_type="user",__ignore_usage__=""}))')
+    services = ('topk(100, sum by(email)('
+                'grafanacloud_ai_tokens_user_total_tokens{user_type="service",__ignore_usage__=""}))')
 
     # Collector-sourced expressions - OUR series on the stack's own Prometheus, so no slug join.
     ai_measured = 'gcinsight_ai_estate_stacks{kind="measured"}'
@@ -4778,7 +4777,7 @@ def d_ai(ds: str):
             "AI tokens this billing period", tokens, ds_uid=build.USAGE_UID,
             description="Current billing-period AI tokens across every stack. The aggregate RESETS "
                         "monthly, so a drop at the billing boundary is expected and is not lost usage. "
-                        "Do not compare this with the lifetime identity ranking as if their windows match."),
+                        "Do not compare this with the observed identity ranking as if their windows match."),
         "n_token_stacks": build.stat_panel(
             "Stacks consuming AI tokens", token_stacks, ds_uid=build.USAGE_UID,
             description="Stacks with a positive current-period AI-token total, after summing all "
@@ -4812,7 +4811,7 @@ def d_ai(ds: str):
             endpoint=True, limit=100,
             ds_uid=build.USAGE_UID, label_column="Stack", value_column="AI tokens",
             description="The hundred largest stack totals in the CURRENT billing period, largest first. "
-                        "This uses the monthly-reset aggregate, not the lifetime identity counter. The "
+                        "This uses the monthly-reset aggregate, not the observed identity gauge. The "
                         "stack selector cannot filter it because grafanacloud-usage has no slug label; "
                         "slug is added only for display by joining on stack_id. Membership and values "
                         "are reported at the selected range endpoint, not a union of historical entrants "
@@ -4855,26 +4854,22 @@ def d_ai(ds: str):
 
         # --- People and identities ------------------------------------------------------------------
         "tbl_people": build.prometheus_table_panel(
-            "Top 100 identities on user-token series - lifetime cumulative (human identity unproven) at range endpoint",
+            "Top 100 identities on user-token series: observed month-to-date tokens at range endpoint",
             people, legend="{{email}}", endpoint=True, limit=100,
-            ds_uid=build.USAGE_UID, label_column="User", value_column="Lifetime AI tokens",
-            description="LIFETIME CUMULATIVE token totals on user_type=user series, grouped by email "
-                        "across stacks and ranked by the maximum seen within the 120d look-back window. "
-                        "This series category is not independently verified human identity. It is not "
-                        "current spend: its counter does not share the monthly reset contract of the "
-                        "aggregate token panels. The 120d look-back ends at the selected range endpoint; "
-                        "these are historical observations, not currently active identities."),
+            ds_uid=build.USAGE_UID, label_column="User", value_column="Observed month-to-date tokens",
+            description="Observed month-to-date user-category tokens, grouped by email across stacks "
+                        "at the selected endpoint. Monthly gauges are not lifetime counters or exact "
+                        "closed-month totals. The category does not prove human identity or licensed seats. "
+                        "Addresses remain in this live Grafana table only, never stored by the collector."),
         "tbl_services": build.prometheus_table_panel(
-            "Top 100 identities on service-token series - lifetime cumulative (actor identity unproven) at range endpoint", services,
+            "Top 100 identities on service-token series: observed month-to-date tokens at range endpoint", services,
             legend="{{email}}", ds_uid=build.USAGE_UID, endpoint=True, limit=100,
             label_column="Identity on service-token series",
-            value_column="Lifetime AI tokens",
-            description="Identities on series labelled user_type=service, ranked by their LIFETIME "
-                        "CUMULATIVE AI-token counter. This is a billing-series category, NOT proof that "
-                        "the email belongs to a bot or service account: live rows include human-shaped "
-                        "addresses alongside sa-* identities. Never quote it as service-account usage. "
-                        "The maximum is observed within the 120d look-back ending at the selected "
-                        "range endpoint, not a union of earlier top-N windows or currently active identities."),
+            value_column="Observed month-to-date tokens",
+            description="Observed month-to-date service-category identity tokens at the selected endpoint. "
+                        "The category is not proof of bot or service-account identity; human-shaped addresses "
+                        "may occur. Monthly gauges "
+                        "are not lifetime counters or final invoices. Addresses remain in the live table."),
 
         # --- Commercial -----------------------------------------------------------------------------
         "tbl_stack_assistant_cost": build.prometheus_table_panel(
@@ -5145,8 +5140,8 @@ def d_ai(ds: str):
             "People and identities: actor identity unproven (legacy navigation)",
             "**People and identities is a legacy navigation label.** user_type=user and "
             "user_type=service are token-series categories, not independently verified humans or bots. "
-            "The lifetime cumulative token contract remains separate from the monthly aggregate; "
-            "rankings select maximum observations within 120d, not saved time or business value."),
+            "The month-to-date token observations remain dated billing previews; "
+            "rankings use the selected endpoint, not a lifetime high-water mark or business value."),
 
         # Per-stack readers make tenant-scoped feature activity collectable. State the remaining product
         # boundaries narrowly rather than retaining a blanket disclaimer that all activity is unavailable.
@@ -5236,7 +5231,7 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
         build.rows_tab("People and identities", [
             build.row("Token-series categories, not verified actors", ["identity_scope"],
                       max_columns=1, row_height="short"),
-            build.row("Lifetime token observations", ["tbl_people", "tbl_services"],
+            build.row("Observed month-to-date token identities", ["tbl_people", "tbl_services"],
                       max_columns=2, row_height="tall"),
         ]),
         build.rows_tab("Commercial", [
@@ -5250,12 +5245,14 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
                   max_columns=1, row_height="short"),
     ]
 
+    el.update(cost_dashboard.elements(ds))
+    tabs.append(cost_dashboard.tab())
     _qualify_derived_money(el, ("n_assistant_overage", "n_token_overage", "tbl_stack_assistant_cost"))
     return "gcinsight-ai", "Grafana Cloud Org Insights - Grafana Assistant & AI usage", \
         ("Pillar I: Assistant usage observations; human versus machine identity, per-app value, "
          "cumulative Agent generations, automatic remediation and saved operator time are unproven. "
          "Human vs machine and People and identities are legacy navigation labels. "
-         "Current billing-period token consumption, lifetime "
+         "Observed monthly token consumption and endpoint "
          "identity totals and raw AI overage observations, not normalised. Overage currency, billing "
          "period, population matching and overlap are unknown; token windows do not qualify overage. "
          "Org-wide panels are live from grafanacloud-usage. "
@@ -5451,6 +5448,7 @@ def assemble(
     name: str, ds: str, *, rate_card: ratecard_model.RateCard | None = None,
     _resolve_canonical_links: bool = True,
     outcome_observer: bool = False,
+    ai_seat_price: float = 20,
 ) -> tuple[str, dict[str, Any]]:
     """Build one dashboard's full spec: the pillar's own panels plus the shared furniture.
 
@@ -5550,7 +5548,9 @@ def assemble(
     spec = build.dashboard(
         title, desc, elements, tabs,
         tags=[DASHBOARD_TAG, f"pillar-{name}"],
-        variables=[build.stack_variable()],
+        variables=([build.stack_variable()] +
+                   (cost_dashboard.variables(ai_seat_price)
+                    if name == "ai" else [])),
         links=build.cross_links(uid),
         # Assistant and token measures are monthly billing-period gauges. Six hours makes their history
         # look flat and hides the reset boundary; thirty days shows the period shape by default while the
@@ -5791,7 +5791,13 @@ def main() -> int:
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--outcome-observer", action="store_true",
                     help="include private observer evidence in Operations (default off)")
+    ap.add_argument("--ai-seat-price", type=float, default=20,
+                    help="AI model default USD per token-active user (generic20; deployment override allowed)")
     args = ap.parse_args()
+    try:
+        cost_dashboard.variables(args.ai_seat_price)
+    except ValueError as exc:
+        ap.error(str(exc))
 
     try:
         identity.verify_runtime_projection("dashboards")
@@ -5852,7 +5858,7 @@ def main() -> int:
         # applied inside `assemble` so the layout test can exercise the same code path.
         uid, spec = assemble(
             name, ds, rate_card=deployed_rate_card if name == "cost" else None,
-            outcome_observer=args.outcome_observer,
+            outcome_observer=args.outcome_observer, ai_seat_price=args.ai_seat_price,
         )
         if args.out:
             path = pathlib.Path(args.out)

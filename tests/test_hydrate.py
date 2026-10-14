@@ -298,8 +298,8 @@ class LabelInventoryHydrationContract(unittest.TestCase):
         contract.setUp()
         payload = {STACK["slug"]: contract.probe()}
         # D-VOL20/D-RULE20 add two independent T2 provenance inputs, no product series.
-        self.assertEqual(len(hydrate.INPUT_OWNER), 32)
-        self.assertEqual(budget.INPUT, 32)
+        self.assertEqual(len(hydrate.INPUT_OWNER), 33)
+        self.assertEqual(budget.INPUT, 33)
         self.assertEqual(hydrate.INPUT_OWNER["label_inventory"], "t2")
         self.assertEqual(hydrate.INPUT_SCHEMA_VERSION["label_inventory"], 1)
         owner = _scan("t2", "label_inventory", payload)

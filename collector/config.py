@@ -127,12 +127,23 @@ LABEL_INVENTORY_ENV = "GCINSIGHT_LABEL_INVENTORY_ENABLED"
 LOKI_VOLUME_ENV = "GCINSIGHT_LOKI_VOLUME_ENABLED"
 RULE_INVENTORY_ENV = "GCINSIGHT_RULE_INVENTORY_ENABLED"
 OUTCOME_OBSERVER_ENV = "GCINSIGHT_OUTCOME_OBSERVER_ENABLED"
+AI_BILLING_ENV = "GCINSIGHT_AI_BILLING_ENABLED"
 RETENTION_POLICY_ENV = "GCINSIGHT_EXPECTED_RETENTION_POLICY"
 # The organisation's expected scrape cadence. A Fleet Management pipeline scraping faster than this raises
 # DPM and is published as a finding (GCI-0046). Policy, not inventory, so it is a tunable.
 FLEET_SCRAPE_INTERVAL_ENV = "GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL"
 FLEET_SCRAPE_INTERVAL_DEFAULT_SECONDS = 60.0
 _RETENTION_PERIOD = re.compile(r"^\d+(?:\.\d+)?[dh]$")
+
+
+def ai_allowance(raw: str, name: str) -> int:
+    """Whole tokens only; refuse unsafe floating point, negatives and unbounded policy."""
+    if not re.fullmatch(r"(?:0|[1-9][0-9]{0,15})", raw.strip()):
+        raise MissingConfig(f"{name} must be a nonnegative whole token count")
+    value = int(raw)
+    if value > 2**53 - 1:
+        raise MissingConfig(f"{name} exceeds the exact numeric bound")
+    return value
 
 
 def _optional_bool(name: str, default: bool = False) -> bool:
@@ -253,6 +264,9 @@ class Config:
     loki_volume_enabled: bool = False
     rule_inventory_enabled: bool = False
     outcome_observer_enabled: bool = False
+    ai_billing_enabled: bool = False
+    ai_personal_allowance: int = 40_000_000
+    ai_system_allowance: int = 500_000_000
     label_inventory_tunables: dict = field(default_factory=lambda: label_inventory_tunables(""))
     label_inventory_static_names: tuple[str, ...] = tuple(sorted(STATIC_NAMES))
     label_inventory_budget_seconds: float = 900.0
@@ -284,6 +298,9 @@ class Config:
             "loki_volume_enabled": self.loki_volume_enabled,
             "rule_inventory_enabled": self.rule_inventory_enabled,
             "outcome_observer_enabled": self.outcome_observer_enabled,
+            "ai_billing_enabled": self.ai_billing_enabled,
+            "ai_personal_allowance": self.ai_personal_allowance,
+            "ai_system_allowance": self.ai_system_allowance,
             "label_inventory_budget_seconds": self.label_inventory_budget_seconds,
             "label_inventory_static_name_count": len(self.label_inventory_static_names),
             # Selectors can contain customer label names and values. Count the policy, never log it.
@@ -342,6 +359,11 @@ def load(
         loki_volume_enabled=_optional_bool(LOKI_VOLUME_ENV),
         rule_inventory_enabled=_optional_bool(RULE_INVENTORY_ENV),
         outcome_observer_enabled=_optional_bool(OUTCOME_OBSERVER_ENV),
+        ai_billing_enabled=_optional_bool(AI_BILLING_ENV),
+        ai_personal_allowance=ai_allowance(os.environ.get("GCINSIGHT_AI_PERSONAL_ALLOWANCE", "40000000"),
+                                          "GCINSIGHT_AI_PERSONAL_ALLOWANCE"),
+        ai_system_allowance=ai_allowance(os.environ.get("GCINSIGHT_AI_SYSTEM_ALLOWANCE", "500000000"),
+                                        "GCINSIGHT_AI_SYSTEM_ALLOWANCE"),
         label_inventory_tunables=label_inventory_tunables(os.environ.get("GCINSIGHT_LABEL_INVENTORY_TUNABLES", "")),
         label_inventory_static_names=label_inventory_static_names(os.environ.get("GCINSIGHT_LABEL_INVENTORY_STATIC_NAMES", "")),
         label_inventory_budget_seconds=label_inventory_budget(os.environ.get("GCINSIGHT_LABEL_INVENTORY_BUDGET_SECONDS", "")),

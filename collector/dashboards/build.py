@@ -1110,7 +1110,7 @@ DASHBOARD_INPUTS: dict[str, tuple[str, ...]] = {
     # the DAILY `assistant` input. Leaving it declared input-free would have shown a dashboard with no age
     # panel at all beside figures that can be a day old - the same class of error as the old
     # T1-timestamp-everywhere default, and harder to spot because half the page really is live.
-    "ai": ("assistant",),
+    "ai": ("assistant", "ai_billing"),
     # Pillar K combines the daily signal-label sweep with the existing dashboard and alert inventories.
     # The live usage panels carry datasource-native freshness and are called out separately in the banner.
     "coverage": (
@@ -1136,10 +1136,12 @@ FRESHNESS_LOOKBACK = "7d"
 MIXED_BANNER_MD: dict[str, str] = {
     "ai": """
 - **This dashboard MIXES two sources and different windows.** Org-wide usage and commercial observations are live
-  from `grafanacloud-usage`. Token aggregates use the monthly billing period; People and identities
-  retains lifetime counters. Neither window qualifies overage or contract gauges: those are **raw,
-  not normalised**, with currency, billing period, population matching and overlap unknown. They are
-  not a measured rate. Assistant use per stack, Human vs machine (recorded surface categories, not
+  from `grafanacloud-usage`. Aggregate and identity token series are observed monthly gauges at the
+  selected endpoint, not lifetime counters or final invoices. Legacy overage/contract panels retain
+  their **raw, not normalised** qualifications: currency, period, population and overlap remain
+  unknown for those legacy observations. The AI cost model separately states its configurable prices,
+  captured allowance basis and native USD billing preview. Assistant use per stack, Human vs machine
+  (recorded surface categories, not
   proven actors), Enablement and Collection coverage come from our own per-stack collection on a
   **rolling 30-day plugin window**, refreshed daily. Never quote one source as a check on the other.
 - **Every Assistant inventory count is TENANT-scoped.** A user-scoped skill or rule is invisible to any
@@ -1267,6 +1269,7 @@ def banner_elements(dashboard: str = "estate") -> dict[str, Any]:
 
 
 INPUT_LABELS = {
+    "ai_billing": "Observed AI billing aggregates",
     "loki_volume": "Bounded Loki producers",
     "rule_inventory": "Configured alerting inventory",
     "label_inventory": "Bounded labelling sample",
@@ -1300,6 +1303,7 @@ INPUT_LABELS = {
 }
 
 INPUT_DESCRIPTIONS = {
+    "ai_billing": "Age of the aggregate-only AI month-to-date capture and dated history. Allowances are captured policy; snapshots are not final invoices. Live billing and identity panels query their datasource separately.",
     "loki_volume": "Age of the default-off 86400s top100 service_name volume response. "
                    "Valid bounded responses are not exhaustive; total and remainder stay unknown.",
     "rule_inventory": "Age of the default-off minimized configured rule/current alert/silence counts. "

@@ -213,8 +213,17 @@ def validate(manifest: dict[str, Any], *, allow_legacy_scan_policy: bool = False
                 raise ManifestError(f"runtime.{kind}.{name} is not environment-safe")
 
     for name in identity.ADDITIVE_SCAN_DEFAULTS:
+        if not name.endswith("_ENABLED"):
+            continue
         if name in runtime["scan"] and runtime["scan"][name] not in {"0", "1"}:
             raise ManifestError(f"runtime.scan.{name} must be 1 or 0")
+    from collector import config as runtime_config
+    for name in ("GCINSIGHT_AI_PERSONAL_ALLOWANCE", "GCINSIGHT_AI_SYSTEM_ALLOWANCE"):
+        if name in runtime["scan"]:
+            try:
+                runtime_config.ai_allowance(runtime["scan"][name], name)
+            except runtime_config.MissingConfig as exc:
+                raise ManifestError(str(exc)) from None
     validate_json_runtime_types(runtime)
     for kind in ("scan", "provisioner"):
         for name in ("GCINSIGHT_OPT_OUT", "GCINSIGHT_READER_PRODUCT_READS"):

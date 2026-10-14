@@ -134,7 +134,7 @@ class AttributionPresentationTest(unittest.TestCase):
         self.assertNotIn("usually a pipeline", self.panel("ai", "tbl_ai_stack_tpu")["description"])
         self.assertIn("unproven", self.panel("ai", "n_token_users")["title"].lower())
         self.assertIn("user-token series", self.panel("ai", "tbl_people")["title"].lower())
-        self.assertIn("lifetime", self.panel("ai", "tbl_people")["title"].lower())
+        self.assertIn("month-to-date", self.panel("ai", "tbl_people")["title"].lower())
 
     def test_app_scenes_and_user_ids_do_not_establish_per_app_value_or_people(self):
         # A known Logs frontend and other apps can all emit generic app/scenes.

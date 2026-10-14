@@ -1,0 +1,679 @@
+{
+  "meta": {
+    "generated_at": "2026-10-14T22:22:17.657179+00:00",
+    "tier": "t3",
+    "stacks_total": 44,
+    "stacks_scannable": 40,
+    "stacks_scanned": 40,
+    "coverage_ratio": 1.0,
+    "inputs": {
+      "access_policies": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "org_members": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "stack_detail": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "service_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dataplane": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "assistant": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "insights": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "fleet": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_logs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "adaptive_traces": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "public_dashboards": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "alert_routing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "dashboard_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "signal_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "capability_adoption": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "ai_billing": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_config": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "slo_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "synthetic_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_integrations": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "irm_alert_groups": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "faro_apps": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "ml_jobs": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "cloud_accounts": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "pdc_networks": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "reports_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "playlists_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "library_panels_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_risk": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "label_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "loki_volume": {
+        "source": "local",
+        "age_seconds": 0.0
+      },
+      "rule_inventory": {
+        "source": "local",
+        "age_seconds": 0.0
+      }
+    },
+    "evidence": {
+      "version": 1,
+      "inventory_ref": null,
+      "composition_at": "2026-10-14T22:22:17.657179+00:00",
+      "dependencies": {
+        "inventory": {
+          "observation": null,
+          "completeness": "unknown"
+        }
+      },
+      "view_scope": {
+        "inventory": null,
+        "row_selection": "unknown"
+      },
+      "completeness": "unknown",
+      "storage": null
+    }
+  },
+  "rows": [
+    {
+      " Stack": "stack158",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": 1,
+      "Service user memberships": 1,
+      "User tokens": 30000000,
+      "Service tokens": 600000000,
+      "Allocated user excess tokens": 10000000
+    },
+    {
+      " Stack": "stack145",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": 1,
+      "Service user memberships": null,
+      "User tokens": 30000000,
+      "Service tokens": null,
+      "Allocated user excess tokens": 10000000
+    },
+    {
+      " Stack": "stack177",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack125",
+      "Region": "prod-us-east-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack001",
+      "Region": "prod-us-west-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack001b",
+      "Region": "prod-us-west-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack001c",
+      "Region": "prod-us-west-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack001a",
+      "Region": "prod-us-west-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack019",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack049",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack110",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack020",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "obs-hub",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "obs-hub-dev",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack035",
+      "Region": "prod-us-east-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack036",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack111",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack070",
+      "Region": "prod-us-west-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack037",
+      "Region": "prod-us-west-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack071",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack050",
+      "Region": "prod-us-west-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack112",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack051",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack146",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack147",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack038",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack052",
+      "Region": "prod-us-west-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack053",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack054",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack148",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack126",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack002",
+      "Region": "eu",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack113",
+      "Region": "prod-us-west-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack097",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack072",
+      "Region": "eu",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack055",
+      "Region": "prod-us-west-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack193",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack170",
+      "Region": "prod-us-west-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack201",
+      "Region": "prod-eu-west-2",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    },
+    {
+      " Stack": "stack149",
+      "Region": "prod-eu-central-0",
+      "Month": "2026-08",
+      "Period status": "observed_mtd",
+      "Observed at": "2026-08-19T12:00:00+00:00",
+      "Personal allowance": 40000000,
+      "Token-active user memberships": null,
+      "Service user memberships": null,
+      "User tokens": null,
+      "Service tokens": null,
+      "Allocated user excess tokens": null
+    }
+  ]
+}

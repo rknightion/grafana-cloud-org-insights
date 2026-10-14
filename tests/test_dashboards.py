@@ -1650,7 +1650,7 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
         self.assertIn("ai", self.dash.BUILDERS)
         self.assertEqual(self.dash.PILLAR_OF["ai"], "I")
         self.assertNotIn("ai", build.LIVE_DATASOURCE_ONLY)
-        self.assertEqual(build.DASHBOARD_INPUTS["ai"], ("assistant",))
+        self.assertEqual(build.DASHBOARD_INPUTS["ai"], ("assistant", "ai_billing"))
         self.assertIn("gcinsight-ai", [uid for uid, _ in build.DASHBOARDS])
         banner = build.banner_elements("ai")["_banner"]
         content = banner["spec"]["vizConfig"]["spec"]["options"]["content"]
@@ -1684,8 +1684,11 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
         self.assertIn("reset", current["description"].lower())
         for key in ("tbl_people", "tbl_services"):
             spec = panels[key]["spec"]
-            self.assertIn("lifetime", spec["title"].lower())
-            self.assertIn("cumulative", spec["description"].lower())
+            self.assertIn("month-to-date", spec["title"].lower())
+            expr = self._exprs("ai", key)[0]
+            self.assertNotIn("max_over_time", expr)
+            self.assertNotIn("[120d]", expr)
+            self.assertIn("sum by(email)", expr)
 
     def test_service_token_label_is_not_presented_as_a_service_account_identity(self):
         spec = self._panels("ai")["tbl_services"]["spec"]
@@ -1756,7 +1759,7 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
                          ["Overview", "Adoption by stack", "Assistant use per stack",
                           "Human vs machine", "Enablement and configuration", "Collection coverage",
                           "Token consumption", "People and identities", "Commercial",
-                          "Feature activity"])
+                          "Feature activity", "AI cost model"])
 
     def test_the_unused_capability_tab_was_renamed_not_duplicated(self):
         """It claimed capability was unused; for `incident` that was false. The tab now says what it

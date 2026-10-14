@@ -37809,5 +37809,347 @@
     }
    }
   }
+ },
+ "ai_billing": {
+  "available": true,
+  "source": "billing_observation",
+  "query_time": "2026-08-19T12:00:00+00:00",
+  "captured_month": "2026-08",
+  "period_status": "observed_mtd",
+  "personal_allowance": 40000000,
+  "system_allowance": 500000000,
+  "org": {
+   "users": 1,
+   "service_users": 1,
+   "user_tokens": 60000000,
+   "service_tokens": 600000000,
+   "user_excess": 20000000,
+   "users_over_allowance": 1,
+   "system_excess": 100000000,
+   "billed_overage": 240
+  },
+  "stacks": {
+   "5000001": {
+    "users": 1,
+    "service_users": 1,
+    "user_tokens": 30000000,
+    "service_tokens": 600000000,
+    "user_excess": 10000000,
+    "billed_overage": 220
+   },
+   "5000002": {
+    "users": 1,
+    "service_users": null,
+    "user_tokens": 30000000,
+    "service_tokens": null,
+    "user_excess": 10000000,
+    "billed_overage": 20
+   },
+   "5000003": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000004": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000005": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000006": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000007": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000008": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000009": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000010": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000011": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000012": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000013": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000014": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000015": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000016": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000017": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000018": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000019": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000020": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000021": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000022": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000023": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000024": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000025": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000026": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000027": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000028": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000029": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000030": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000031": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000032": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000033": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000034": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000035": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000036": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000037": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000038": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000801": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   },
+   "5000039": {
+    "users": null,
+    "service_users": null,
+    "user_tokens": null,
+    "service_tokens": null,
+    "user_excess": null,
+    "billed_overage": null
+   }
+  },
+  "history": []
  }
 }

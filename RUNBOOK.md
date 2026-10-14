@@ -1,5 +1,40 @@
 # Runbook - estate insights platform
 
+## Aggregate AI billing observations
+
+`GCINSIGHT_AI_BILLING_ENABLED` defaults to `0`. Enabling it adds fourteen guarded GET
+queries through the existing write-stack `grafanacloud-usage` reader; it adds no scopes.
+`GCINSIGHT_AI_PERSONAL_ALLOWANCE` defaults to `40000000`, and
+`GCINSIGHT_AI_SYSTEM_ALLOWANCE` to `500000000`. Both are canonical nonnegative whole
+counts within the exact numeric bound. Their Terraform counterparts are
+`ai_billing_enabled`, `ai_personal_allowance` and `ai_system_allowance`.
+
+Identity aggregation happens upstream. The scanner receives only numeric org/stack
+aggregates; emails are displayed only in direct live Grafana tables. Active user-category
+identities define model seats, not licensed people. Native monetary token overage is a
+separately observed USD billing preview, not the configurable model or a final invoice.
+Source absence, ambiguous responses or failed reconciliation withhold the input and its
+views under the ordinary T2 publication floor; no new floor exception is introduced.
+
+`state/ai-cost-history.json` retains at most thirteen captured months and separate
+billing/backfill observations. It is bounded to 2 MiB and 20,000 stack rows, with
+conditional S3 writes. A denied/malformed read or concurrent write never becomes empty
+history. History updates require full-estate, healthy-source publication admission;
+limited runs cannot update it. First-day rollover data stays period-unverified and does
+not replace accepted monthly history. Dated MTD snapshots are not exact closing totals.
+
+A one-time owner-authorized BI aggregate import is specific to the deployment being
+backfilled. Record its source, query hash and start/end/cutover timestamps; restrict it
+to fresh inventory and keep it separate from native MTD. Never add overlapping sources
+or infer billing start from the backfill boundary. No BI credential enters the runtime.
+
+AI dashboard prices default to USD20 per model seat and USD2 per million excess tokens.
+Use `bin/dashboards.py --ai-seat-price <deployment-rate>` to set a deployment's seat-price
+widget default. Both prices reprice historical counts/excess. Live personal/system
+allowance widgets recompute upstream; they cannot retrospectively change captured
+allowances. Reference USD20/USD2 columns remain explicitly identified as generic
+comparisons. Per-stack observations contain tokens/memberships, not allocated seat money.
+
 ## Label inventory policy interface (default off)
 
 Frozen handoff for composition: `Config.label_inventory_tunables` is the evaluator-ready

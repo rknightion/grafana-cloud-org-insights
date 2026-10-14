@@ -120,6 +120,7 @@ INPUT_OWNER: dict[str, str] = {
     # One org-usage query through the write-stack reader. It is separate from signal_inventory because
     # either source can fail independently; the opportunity views need both and are withheld on either.
     "capability_adoption": "t2",
+    "ai_billing": "t2",
     # Effective Loki per-stream retention and the self-serve request queue. Both reads are daily:
     # the approval path is measured in business days, and their independent availability is retained
     # inside each per-stack record rather than flattened into a structural zero.
@@ -160,6 +161,9 @@ INPUT_SCHEMA_VERSION: dict[str, int] = {name: 1 for name in INPUT_OWNER}
 # alternate inputs. `tests/test_hydrate.py::ViewInputsAreDerivedNotAssumed` caps that proof before
 # composing any subsets, so adding inputs cannot turn the gate into an exponential resource failure.
 VIEW_INPUTS: dict[str, frozenset[str]] = {
+    "ai_cost_current": frozenset({"ai_billing"}),
+    "ai_cost_monthly": frozenset({"ai_billing"}),
+    "ai_cost_stacks": frozenset({"ai_billing"}),
     # Re-derived through the existing fixture/subset composition harness, including every singleton.
     "loki_volume_top_services": frozenset({"loki_volume"}),
     "alerting_rule_inventory": frozenset({"rule_inventory"}),

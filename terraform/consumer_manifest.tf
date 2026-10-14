@@ -141,6 +141,15 @@ variable "consumer_manifest" {
     )
     error_message = "consumer_manifest GCINSIGHT_LABEL_INVENTORY_TUNABLES breaks the label_inventory_tunables rule."
   }
+  validation {
+    condition = var.consumer_manifest == null ? true : try(
+      contains(["0", "1"], try(var.consumer_manifest.runtime.scan.GCINSIGHT_AI_BILLING_ENABLED, "0")) &&
+      alltrue([for value in [try(var.consumer_manifest.runtime.scan.GCINSIGHT_AI_PERSONAL_ALLOWANCE, "40000000"), try(var.consumer_manifest.runtime.scan.GCINSIGHT_AI_SYSTEM_ALLOWANCE, "500000000")] :
+        can(regex("^(0|[1-9][0-9]{0,15})$", value)) && tonumber(value) <= 9007199254740991
+    ]), false)
+    error_message = "consumer_manifest AI flag must be0/1; allowances must be canonical exact nonnegative whole token counts."
+  }
+
 }
 
 locals {
@@ -210,6 +219,9 @@ locals {
     dashboard_detail_enabled       = contains(local.manifest_keys.scan, "GCINSIGHT_DASHBOARD_DETAIL_ENABLED") ? local.manifest.scan.GCINSIGHT_DASHBOARD_DETAIL_ENABLED == "1" : var.dashboard_detail_enabled
     expected_retention_policy      = contains(local.manifest_keys.scan, "GCINSIGHT_EXPECTED_RETENTION_POLICY") ? [for policy in jsondecode(local.manifest.scan.GCINSIGHT_EXPECTED_RETENTION_POLICY) : { selector = tostring(policy.selector), minimum_period = tostring(policy.minimum_period) }] : var.expected_retention_policy
     fleet_default_scrape_interval  = contains(local.manifest_keys.scan, "GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL") ? tostring(local.manifest.scan.GCINSIGHT_FLEET_DEFAULT_SCRAPE_INTERVAL) : var.fleet_default_scrape_interval
+    ai_billing_enabled             = contains(local.manifest_keys.scan, "GCINSIGHT_AI_BILLING_ENABLED") ? local.manifest.scan.GCINSIGHT_AI_BILLING_ENABLED == "1" : var.ai_billing_enabled
+    ai_personal_allowance          = contains(local.manifest_keys.scan, "GCINSIGHT_AI_PERSONAL_ALLOWANCE") ? tonumber(local.manifest.scan.GCINSIGHT_AI_PERSONAL_ALLOWANCE) : var.ai_personal_allowance
+    ai_system_allowance            = contains(local.manifest_keys.scan, "GCINSIGHT_AI_SYSTEM_ALLOWANCE") ? tonumber(local.manifest.scan.GCINSIGHT_AI_SYSTEM_ALLOWANCE) : var.ai_system_allowance
     label_inventory_enabled        = contains(local.manifest_keys.scan, "GCINSIGHT_LABEL_INVENTORY_ENABLED") ? local.manifest.scan.GCINSIGHT_LABEL_INVENTORY_ENABLED == "1" : var.label_inventory_enabled
     loki_volume_enabled            = contains(local.manifest_keys.scan, "GCINSIGHT_LOKI_VOLUME_ENABLED") ? local.manifest.scan.GCINSIGHT_LOKI_VOLUME_ENABLED == "1" : var.loki_volume_enabled
     outcome_observer_enabled       = contains(local.manifest_keys.scan, "GCINSIGHT_OUTCOME_OBSERVER_ENABLED") ? local.manifest.scan.GCINSIGHT_OUTCOME_OBSERVER_ENABLED == "1" : var.outcome_observer_enabled
@@ -283,6 +295,9 @@ locals {
     dashboard_detail_enabled          = var.dashboard_detail_enabled
     expected_retention_policy         = var.expected_retention_policy
     fleet_default_scrape_interval     = var.fleet_default_scrape_interval
+    ai_billing_enabled                = var.ai_billing_enabled
+    ai_personal_allowance             = var.ai_personal_allowance
+    ai_system_allowance               = var.ai_system_allowance
     label_inventory_enabled           = var.label_inventory_enabled
     loki_volume_enabled               = var.loki_volume_enabled
     rule_inventory_enabled            = var.rule_inventory_enabled
@@ -335,6 +350,9 @@ locals {
     dashboard_detail_enabled          = false
     expected_retention_policy         = []
     fleet_default_scrape_interval     = "60s"
+    ai_billing_enabled                = false
+    ai_personal_allowance             = 40000000
+    ai_system_allowance               = 500000000
     label_inventory_enabled           = false
     loki_volume_enabled               = false
     rule_inventory_enabled            = false

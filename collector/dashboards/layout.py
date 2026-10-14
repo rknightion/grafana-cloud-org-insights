@@ -22,7 +22,7 @@ TAB_ORDER = {
     "value": "Overview|Savings|Capability gaps|Adoption|Test and probe adoption|Capability flags|Benchmarks|How to read this",
     "operations": "Alert flow|Logs retention|Backend health|Response time|Ownership|Engagement|How to read this",
     "commercial": "Commitment|Run rate|Consumption vs term|How to read this",
-    "ai": "Overview|Findings|Enablement and configuration|Assistant use per stack|Adoption by stack|Token consumption|Commercial|Human vs machine|People and identities|Collection coverage|Feature activity|How to read this",
+    "ai": "Overview|Findings|Enablement and configuration|Assistant use per stack|Adoption by stack|Token consumption|AI cost model|Commercial|Human vs machine|People and identities|Collection coverage|Feature activity|How to read this",
     "dashboards": "Adoption|What people open|Query behaviour|Public dashboards|Grafana surfaces|Coverage|How to read this",
     "coverage": "Observed estate|Adoption opportunities|Coverage depth|Named service register|Technology and cluster registers|Adjacent datasource estate|Adaptive Traces|Synthetic inventory|SLO inventory|Outcome value|Unit economics|Summary|Classification evidence|How to read this",
     "labelling": "Estate overview|Per-signal rules|Stack scorecard|Cross-signal consistency|Label register|Not evaluated and coverage|How to read this",

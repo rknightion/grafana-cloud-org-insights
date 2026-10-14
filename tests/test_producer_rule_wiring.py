@@ -223,12 +223,12 @@ def test_real_config_flags_defaultoff_and_validation(enabled):
 
 
 def test_budget_adds_only_sixteen_planned_provenance_series():
-    assert budget.INPUT == len(hydrate.INPUT_OWNER) == 32
+    assert budget.INPUT == len(hydrate.INPUT_OWNER) == 33
     for view in ("loki_volume_top_services", "alerting_rule_inventory"):
         assert next(s for s in budget.CATALOGUE if s.name == view).store == "view"
 
 
-def exercise_cli(tmp_path, *, failed=(), empty_estate=False, enabled=True, dry_run=True, limited=False):
+def exercise_cli(tmp_path, *, failed=(), empty_estate=False, enabled=True, dry_run=True, limited=False, ai=False):
     """Real scanner CLI, gather wrappers, frozen source GETs, composition and final sink fences."""
     import contextlib
     import io
@@ -245,6 +245,7 @@ def exercise_cli(tmp_path, *, failed=(), empty_estate=False, enabled=True, dry_r
     env.update({"GCINSIGHT_READ_TOKEN": "synthetic", "GCINSIGHT_MIMIR_URL": "https://metrics.example.test",
                 "GCINSIGHT_LOKI_URL": "https://logs.example.test"})
     env.update({name: str(int(enabled)) for name in FLAGS})
+    env["GCINSIGHT_AI_BILLING_ENABLED"] = str(int(ai))
     healthy = {STACK["slug"]: {"available": True}}
     records, views, metrics, events, finding_inputs = [], [], [], [], []
     fixture = json.loads((ROOT / "tests/fixtures/compose_inputs.json").read_text())

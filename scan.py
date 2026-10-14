@@ -70,6 +70,8 @@ from collector.pillars import label_risk as label_risk_pillar
 from collector.sources import loki_config as loki_config_src
 from collector.sources import signal_inventory as signal_inventory_src
 from collector.sources import capability_adoption as capability_adoption_src
+from collector.sources import ai_billing as ai_billing_src
+from collector.emit import ai_history
 from collector.sources import usage_insights, dataplane, gcom
 
 TIERS = ("t1", "t2", "t3", "t4")
@@ -862,6 +864,7 @@ def disabled_inputs(cfg: config.Config) -> dict[str, dict[str, str]]:
         "label_inventory": getattr(cfg, "label_inventory_enabled", False),
         "loki_volume": getattr(cfg, "loki_volume_enabled", False),
         "rule_inventory": getattr(cfg, "rule_inventory_enabled", False),
+        "ai_billing": getattr(cfg, "ai_billing_enabled", False),
     }
     return {name: {"state": "disabled", "reason": "disabled by configuration"}
             for name, selected in enabled.items() if not selected}
@@ -1042,6 +1045,24 @@ def gather_signal_inventory(
         + (f", not available: {reasons}" if reasons else ""),
     )
     return data, errors
+
+
+def gather_ai_billing(client: ReadOnlyClient, cfg: config.Config, stacks):
+    """Aggregate upstream; no identity-bearing billing result enters the collector."""
+    if not getattr(cfg, "ai_billing_enabled", False):
+        return {}, []
+    try:
+        creds = credentials.load_all()
+    except credentials.StoreUnavailable:
+        return {}, ["credential_store_unavailable"]
+    record = ai_billing_src.probe(
+        client, stacks, creds, write_stack=cfg.write_stack,
+        personal_allowance=getattr(cfg, "ai_personal_allowance", 40_000_000),
+        system_allowance=getattr(cfg, "ai_system_allowance", 500_000_000),
+    )
+    errors = [] if record.get("available") else [record.get("reason", "unavailable")]
+    console_log("error" if errors else "info", "AI billing: unavailable" if errors else "AI billing: aggregate input available")
+    return record, errors
 
 
 def gather_capability_adoption(
@@ -1512,6 +1533,8 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         client, cfg, stacks,
     )
     errors += capability_adoption_errors
+    ai_billing, ai_billing_errors = gather_ai_billing(client, cfg, stacks)
+    errors += ai_billing_errors
     loki_config, loki_config_errors = gather_loki_config(client, cfg, selected)
     errors += loki_config_errors
 
@@ -1542,6 +1565,7 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         "cloud_accounts": cloud_accounts,
         "signal_inventory": signal_inventory,
         "capability_adoption": capability_adoption,
+        "ai_billing": ai_billing,
         "loki_config": loki_config,
         "label_risk": label_risk,
         "label_inventory": label_inventory,
@@ -1660,6 +1684,12 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
             expected, signal_inventory, available=lambda r: bool(r.get("available")),
             errors=signal_inventory_errors,
         ),
+        "ai_billing": {
+            **source_report(1 if getattr(cfg, "ai_billing_enabled", False) else 0,
+                            {"org": ai_billing}, available=lambda r: bool(r.get("available")),
+                            errors=ai_billing_errors),
+            "unit": "org AI aggregate response",
+        },
         "capability_adoption": {
             **source_report(
                 1, {"org": capability_adoption},
@@ -1687,6 +1717,23 @@ def run_t2(client: ReadOnlyClient, cfg: config.Config) -> dict[str, Any]:
         sources[name].update(state="disabled", reason="not_selected")
     source_failures = sorted(name for name, report in sources.items() if not report["healthy"])
     publication_failures = blocking_source_failures(cfg.tier, source_failures)
+    # History is not an own-input rescue. Write only after every ordinary publication guard.
+    history_admitted = (bool(stacks) and bool(selected) and not publication_failures
+                        and not coverage.should_abort and not (cfg.limit or cfg.stack)
+                        and ai_billing.get("available") is True and bool(s3emit.BUCKET))
+    if history_admitted:
+        try:
+            ai_billing["history"] = ai_history.update(
+                ai_billing, stacks, bucket=s3emit.BUCKET, dry_run=cfg.dry_run)
+        except ai_history.HistoryError:
+            # Closed reason only, withhold latest input/views and preserve the prior state.
+            sources["ai_billing"] = {**source_report(1, {}, available=lambda r: False, errors=["history_unavailable"]),
+                                     "unit": "org AI aggregate response"}
+            gathered_inputs["ai_billing"] = {}
+            ai_billing_errors.append("history_unavailable")
+            errors.append("AI billing history unavailable")
+            source_failures = sorted(name for name, report in sources.items() if not report["healthy"])
+            publication_failures = blocking_source_failures(cfg.tier, source_failures)
     publishable_inputs, unavailable_inputs = publication_inputs(gathered_inputs, sources)
 
     # Pillar C's user recency, Pillar E's service-account and plugin-drift halves, all of Pillar I, and

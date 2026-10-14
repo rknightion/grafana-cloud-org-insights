@@ -23,6 +23,7 @@ from collector.emit import guard
 from collector.pillars import (
     adaptive_traces as adaptive_traces_pillar,
     ai,
+    ai_cost,
     cost,
     coverage as coverage_pillar,
     estate,
@@ -103,6 +104,7 @@ def build_all(
     # Gathered and hydrated in GCI-0008.04; consumed by the single Pillar K wiring pass in .05.
     signal_inventory: dict[str, Any] | None = None,
     capability_adoption: dict[str, Any] | None = None,
+    ai_billing: dict[str, Any] | None = None,
     slo_inventory: dict[str, Any] | None = None,
     synthetic_inventory: dict[str, Any] | None = None,
     irm_integrations: dict[str, Any] | None = None,
@@ -159,6 +161,7 @@ def build_all(
         value.build(stacks, coverage, ranked_dataplane, ratecard=ratecard),
         ai.build(stacks, coverage, assistant, capability_adoption=capability_adoption,
                  gap_first_seen=gap_first_seen, now=now),
+        ai_cost.build(stacks, ai_billing),
         insights_pillar.build(stacks, coverage, insights),
         insights_inventory.build(
             stacks,
