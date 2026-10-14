@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.14.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.6...v0.14.0) (2026-10-14)
+
+
+### Features
+
+* add witnessed Grafana ruler and Cloud Logs Export observations ([cb809db](https://github.com/rknightion/grafana-cloud-org-insights/commit/cb809db122aef9730910416a650770fe82ffd2a8))
+
+
+### Bug Fixes
+
+* batch healthy reader role verification after Admin cleanup ([7dbdf5f](https://github.com/rknightion/grafana-cloud-org-insights/commit/7dbdf5fb1875be6ec3fd4233324c4dc3dd431208))
+
+
+### Documentation
+
+* accept single dev labelling proof and resume customer rollout ([5387649](https://github.com/rknightion/grafana-cloud-org-insights/commit/5387649d9994b00e59cb9921dd742418838e51b1))
+* close deployed Tempo empty-string compatibility repair ([bdfa8b7](https://github.com/rknightion/grafana-cloud-org-insights/commit/bdfa8b76fe7f47bba04164d03b175deec9227538))
+* close validated customer rollout and dev capture shutdown ([ecdf7d0](https://github.com/rknightion/grafana-cloud-org-insights/commit/ecdf7d0819f4e2ca397706d1f2bdc3c42bade6d0))
+* close verified labelling pillar and record revised capture acceptance ([d74292a](https://github.com/rknightion/grafana-cloud-org-insights/commit/d74292a57b5ff55888548a0825a8fcce8729303a))
+* record applied customer library rollout and pending validation ([46c232b](https://github.com/rknightion/grafana-cloud-org-insights/commit/46c232b31723393e532c87352a135af09f4d4aba))
+* record owner withdrawals and fresh feature-source research ([99f14bf](https://github.com/rknightion/grafana-cloud-org-insights/commit/99f14bf5697530aa35015db5045b70996f4f1e9b))
+* record verified reader repairs and paused customer validation ([f286387](https://github.com/rknightion/grafana-cloud-org-insights/commit/f286387cba01afeab4a82489ec67b98dee4d3b6a))
+* track large-estate reader propagation latency ([1c79d20](https://github.com/rknightion/grafana-cloud-org-insights/commit/1c79d2096c45f41ad70769aa886c4849812ec2c7))
+
 ## [0.13.6](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.5...v0.13.6) (2026-10-14)
 
 
