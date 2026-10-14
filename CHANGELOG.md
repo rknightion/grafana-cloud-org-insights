@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.14.0...v0.15.0) (2026-10-14)
+
+
+### Features
+
+* add aggregate AI cost model and observed monthly history ([041c9e7](https://github.com/rknightion/grafana-cloud-org-insights/commit/041c9e74cfece16337e0461e46b62fd57b5d78e7))
+
+
+### Documentation
+
+* close v0.14.0 rollout and retain exact remaining source gaps ([12a7d65](https://github.com/rknightion/grafana-cloud-org-insights/commit/12a7d6575e40661141f1e6f1b5d1a56c1363d71b))
+* verify customer Operations visuals and accept prospective AI history ([c6cd02b](https://github.com/rknightion/grafana-cloud-org-insights/commit/c6cd02bf6b3031ec6221056f1e88cfc87fa81cc6))
+
 ## [0.14.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.13.6...v0.14.0) (2026-10-14)
 
 
