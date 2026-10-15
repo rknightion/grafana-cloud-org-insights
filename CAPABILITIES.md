@@ -293,6 +293,20 @@ routes enter pattern usage or a supported per-request opt-out. Their classificat
 remains unknown. No invented header, parameter or Metrics matcher is applied to Loki.
 Exemptions protect logs from dropping; they are not evidence of a read-usage opt-out.
 
+A 2026-10-15 source follow-up identified an upstream candidate:
+`X-Loki-Disable-Pipeline-Wrappers: true`. The
+[original Loki change](https://github.com/grafana/loki/pull/12327) adds and propagates this header;
+the [cache-key correction](https://github.com/grafana/loki/pull/12903) explicitly states that disabling
+wrappers can change query results. It is therefore not equivalent to a result-preserving ignore-usage
+contract. Cloud gateway propagation, the applied backend version and suitability for the dedicated
+Usage Insights datasource remain unverified. The collector does not set it or impersonate Grafana UI
+query tags. A successful HTTP response alone would not prove either suppression or unchanged results.
+
+The earlier route statement refers to native tenant Loki endpoints. The collector separately issues
+LogQL through each stack's dedicated Usage Insights datasource proxy with the mandatory instance-id
+guard. That query path must be considered separately from native metadata reads when qualifying a
+future opt-out; it is not a native customer log-line inventory permission.
+
 ### SLO and Adaptive Traces
 
 T2's optional SLO list GET is `/api/plugins/grafana-slo-app/resources/v1/slo`. It projects definition
