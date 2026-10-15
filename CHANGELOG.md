@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.0...v0.15.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* build AI dashboards without unpublished optional history ([5ff4fb3](https://github.com/rknightion/grafana-cloud-org-insights/commit/5ff4fb3e124cdf2d4c7a03f3f659db5d7429551d))
+
 ## [0.15.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.14.0...v0.15.0) (2026-10-14)
 
 
