@@ -27,7 +27,7 @@ jobs:
           python-version: '3.15'
       - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
         with:
-          just-version: '1.58.0'
+          just-version: '1.59.0'
       # The collector has no third-party imports: `emit/mimir.py` hand-rolls protobuf and snappy,
       # and the S3 and diff paths shell out to the AWS CLI. Pytest is CI tooling only; a product
       # dependency file appearing here means somebody added a dependency that the Fargate image
@@ -56,7 +56,7 @@ jobs:
           persist-credentials: false
       - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
         with:
-          just-version: '1.58.0'
+          just-version: '1.59.0'
       - name: Scan
         # This repo was forked from a live customer engagement. Four real leaks got through the first
         # manual sweep, three of them defaults that would have made a fresh deployment act on somebody
@@ -87,7 +87,7 @@ jobs:
       - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
       - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
         with:
-          just-version: '1.58.0'
+          just-version: '1.59.0'
       - name: Validate and check formatting
         # `-backend=false`: this is a reusable module with no provider block and no state.
         run: just tf-validate
