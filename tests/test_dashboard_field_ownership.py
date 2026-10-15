@@ -55,12 +55,12 @@ SECTION2_OWNERS = (
     ("Public opens / anonymous (observed)", "dashboards", "Public dashboards"),
     ("OnCall state, integration, service, team", "operations", "Alert flow|Ownership"),
     ("Response/resolution bands (7d)", "operations", "Response time"),
-    ("Run rate by product", "commercial", "Run rate"),
+    ("Run rate by product", "commercial", "Reported billing"),
     ("Assistant users / AI tokens (billing)", "ai", "Overview"),
-    ("Assistant category, surface", "ai", "Human vs machine"),
+    ("Assistant category, surface", "ai", "Recorded surfaces"),
     ("Tenant object kind, enabled, authenticationFailed", "ai", "Enablement and configuration"),
     ("Credential coverage", "ai", "Collection coverage"),
-    ("Opening State (opened/unopened/unknown)", "dashboards", "What people open"),
+    ("Opening State (opened/unopened/unknown)", "dashboards", "Dashboard opening inventory"),
     ("Grafana surface", "dashboards", "Grafana surfaces"),
     ("Datasource types queried", "dashboards", "Query behaviour"),
     ("Plugins provisioned", "usage", "Adoption"),
@@ -127,11 +127,11 @@ FIELD_OWNERS = {
         ("risk", "Public dashboards", "public_dashboards", ("Enabled",))],
     "Observed public opens": [("dashboards", "Public dashboards", "tbl_public", ("Events",))],
     "Assistant category/surface": [
-        ("ai", "Human vs machine", "tbl_ai_combo_stack", ("Category", "Surface"))],
+        ("ai", "Recorded surfaces", "tbl_ai_combo_stack", ("Category", "Surface"))],
     "Tenant object kind/enabled/authenticationFailed": [
         ("ai", "Enablement and configuration", "tbl_ai_tenant", ("kind", "enabled", "authenticationFailed"))],
     "Credential coverage": [("ai", "Collection coverage", "tbl_ai_coverage", ("State", "Actionable"))],
-    "Opening state": [("dashboards", "What people open", "tbl_opening_inventory", ("State",))],
+    "Opening state": [("dashboards", "Dashboard opening inventory", "tbl_opening_inventory", ("State",))],
     "Grafana surface": [
         ("dashboards", "Grafana surfaces", "tbl_surface_usage", ("Surface",))],
     "Datasource types queried": [
@@ -174,7 +174,7 @@ LIVE_OWNERS = {
     "OnCall state/integration/service/team": ("operations", "Alert flow", ("t_state", "b_integration", "b_service")),
     "OnCall ownership": ("operations", "Ownership", ("b_service_owner",)),
     "Response/resolution bands 7d": ("operations", "Response time", ("b_ackdist", "b_resdist")),
-    "Run rate by product": ("commercial", "Run rate", ("b_runrate",)),
+    "Run rate by product": ("commercial", "Reported billing", ("b_runrate",)),
     "Assistant users/AI tokens billing": ("ai", "Overview", ("n_assistant_users", "n_tokens")),
     "Observed anonymous opens": ("dashboards", "Public dashboards", ("n_anon",)),
 }
@@ -219,7 +219,7 @@ OPEN_DOMAINS = {
     "Estate All stacks": "Plan, Provider, Region, Cluster and Status are upstream strings, not a closed schema enum.",
     "Risk Access": "Org Role is passed through from the member API; no closed producer validation.",
     "Risk Credentials": "Flag contains counts and joined descriptions, not a closed enum.",
-    "AI Human vs machine": "Category/Surface in the view preserve unrecognised source strings; bounded metric projections are not the view domain.",
+    "AI Recorded surfaces": "Category/Surface in the view preserve unrecognised source strings; bounded metric projections are not the view domain.",
     "Dashboard usage Grafana surfaces": "Raw source strings remain open in tbl_surface_unmapped; the owned Surface column is the closed SURFACE_VALUES projection.",
     "AI tenant booleans": "strip_object does not validate arbitrary upstream JSON. The owner type-checks these two fields in JSONata before formatting; malformed/missing/null display Unknown. This is presentation only, not producer validation.",
     "Reader state and credential coverage": "Hydration can pass an own-unavailable state string through; credential State may contain missing (<reason>). Known cases are not an exhaustive open domain.",
@@ -286,7 +286,8 @@ class FieldOwnershipPublicationTest(unittest.TestCase):
             keys = {"_findings_now", "b_leftover", "b_recency", "t_state"}
             if "Overview" in tabs(document):
                 keys.update(key for key in placed(tabs(document)["Overview"])
-                            if document["spec"]["elements"][key]["spec"]["vizConfig"]["group"] == "stat")
+                            if document["spec"]["elements"][key]["spec"]["vizConfig"]["group"] == "stat"
+                            and key not in {"_coverage", "_freshness"} and not key.startswith("_age_"))
             for key in keys & document["spec"]["elements"].keys():
                 with self.subTest(dashboard=name, aggregate=key):
                     self.assertIn("aggregate", document["spec"]["elements"][key]["spec"]["title"].lower())

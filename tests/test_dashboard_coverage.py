@@ -361,20 +361,20 @@ PRIVATE_EVIDENCE_DEBTS = {
 }
 METADATA_DEBTS = {
     **PRIVATE_EVIDENCE_DEBTS,
-    "meta.generated_at": ("Object publication age is not input age.", "GCI-0110"),
+    "meta.generated_at": ("Rendered via exact-object metadata projection as Snapshot generated at and Publication age, distinct from input age.", "GCI-0110"),
     "meta.tier": ("Publisher tier is not input ownership tier.", "GCI-0110"),
     "meta.stacks_total": ("Snapshot estate denominator is not current scan inventory.", "GCI-0110"),
     "meta.stacks_scannable": ("Snapshot scannable denominator is not current scan coverage.", "GCI-0110"),
     "meta.stacks_scanned": ("Snapshot scanned denominator is not current scan coverage.", "GCI-0110"),
-    "meta.coverage_ratio": ("Snapshot coverage is not current scan coverage.", "GCI-0110"),
+    "meta.coverage_ratio": ("Rendered as Publishing scan coverage in exact-object metadata, not current scan coverage.", "GCI-0110"),
 }
 INPUT_METADATA_DEBTS = {
     "source": "Input origin remains audit-only, not a rendered product finding.",
-    "age_seconds": "Snapshot input age is not the evolving input-age gauge.",
+    "age_seconds": "Rendered in exact-object metadata as Input age at publication and Input age now; distinct from the sampled gauge.",
     "tier": "Input owning tier is not the publisher tier.",
-    "available": "Unavailable input cannot be inferred from empty rows.",
-    "stale": "Last-good staleness is not exposed by the row table.",
-    "state": "Unavailable/partial state needs its own public selector.",
+    "available": "Rendered as Availability at publication by the exact-object metadata projection.",
+    "stale": "Used by exact-object metadata to withhold usable input age; not inferred from row contents.",
+    "state": "Rendered as Recorded input state (publication) in exact-object metadata.",
     "reason": "Failed observation reason is not empty-product evidence.",
     "schema_version": "Input schema compatibility remains unrendered provenance.",
 }

@@ -128,7 +128,7 @@ class AttributionPresentationTest(unittest.TestCase):
                 self.assertEqual(kinds, ["organize"])
         self.assertIn("unproven", self.content("ai", "actor_scope").lower())
         human_tab = next(t["spec"] for t in self.artifacts["ai"]["spec"]["layout"]["spec"]["tabs"]
-                         if t["spec"]["title"] == "Human vs machine")
+                         if t["spec"]["title"] == "Recorded surfaces")
         self.assertIn("actor_scope", json.dumps(human_tab))
         self.assertIn("n_ai_uncategorised", json.dumps(human_tab))
         self.assertNotIn("usually a pipeline", self.panel("ai", "tbl_ai_stack_tpu")["description"])
@@ -183,7 +183,7 @@ class AttributionPresentationTest(unittest.TestCase):
                     self.assertIn("(7d)", panel["title"])
                     self.assertIn("histogram_quantile(0.5", self.query(dashboard, key)["expr"])
                     self.assertEqual(panel["vizConfig"]["spec"]["fieldConfig"]["defaults"]["unit"], "s")
-        self.assertIn("Outcome value", [t["spec"]["title"] for t in
+        self.assertIn("Response observations", [t["spec"]["title"] for t in
                                         self.artifacts["coverage"]["spec"]["layout"]["spec"]["tabs"]])
         self.assertEqual(len(self.artifacts), 12)
         # Headers and How-to-read content must not contradict the on-tab qualifiers.

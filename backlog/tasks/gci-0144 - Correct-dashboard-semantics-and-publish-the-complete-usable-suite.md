@@ -5,6 +5,7 @@ status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-10-15 09:12'
+updated_date: '2026-10-15 09:27'
 labels: []
 dependencies: []
 priority: high
@@ -38,3 +39,11 @@ The full-suite audit found saved dashboards behind current source, inconsistent 
 <!-- SECTION:PLAN:BEGIN -->
 Implement independently owned AI arithmetic, shared builder behaviour and wording corrections; root integrates layout/freshness improvements. Review integrated candidate, run required gate, commit and push. Rebuild all dashboards from actual published views and existing deployment settings, preserve folders and customer price, publish full suite and verify saved contracts, targeted backend boundaries and visuals. No collector route, scope, storage or metric semantics expansion.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Implementation includes token-active AI seat reconciliation proven with real promtool; both deployed Infinity backends returned declared numeric null then numeric values without coercing null to zero. Source-aware landing context, bounded legends, risk triage, navigation qualification and preserved table/enum contracts integrated. Independent review found zero-versus-missing activity wording; corrected. Full gate first run found one obsolete test requiring a zero-cost claim; updated under approved semantics and focused regressions passed. Final gate and sanitized combined CodeRabbit review are in progress; no dashboards published yet.
+
+Final just check passed:2841tests,29128subtests,2existing skips,45OpenTofu tests; identifiers/history and no-em-dashes clean. CodeRabbit completed all22files including sanitized private operator helpers with one minor residual wording finding, corrected; focused post-review15tests56subtests passed. Independent review correction also resolved. Dashboard-only rollout preserves running collector image/projection; no numerical collector or scope change. Finding summary prose source corrections do not attest changed historical/live Loki records.
+<!-- SECTION:NOTES:END -->

@@ -34,7 +34,7 @@ def _age_days(iso: str | None, now: dt.datetime) -> float | None:
 # Column spec for the per-stack row, and for every view that is a FILTERED SUBSET of it.
 #
 # Needed because a subset can legitimately be empty - an estate with no version drift, or no test
-# leftover that bills, is the GOOD outcome - and `columns_for` on an empty view raises, which takes
+# name with active users, is a possible outcome - and `columns_for` on an empty view raises, which takes
 # down the whole dashboard rather than one panel. Declared here rather than at the panel because the
 # row shape belongs to this pillar; `tests/test_estate_schema.py` re-derives it from the live `estate`
 # view so the two cannot drift.
@@ -80,8 +80,8 @@ def _is_test_leftover(slug: str) -> bool:
     Test-prefixed slugs commonly come from stack-creation automation. The synthetic fixture preserves
     that prefix because it is the classification signal this function evaluates.
 
-    The broad `test` prefix is deliberate. The views separate billed from idle leftovers because one
-    is a cost conversation and the other is governance.
+    The broad `test` prefix is deliberate. The legacy views split only on currentActiveUsers.
+    Neither class proves charges, abandonment or absence of telemetry.
     """
     return slug.startswith("test")
 
@@ -124,6 +124,7 @@ def build(stacks: list[dict[str, Any]], coverage: Coverage, now: dt.datetime | N
             "Admin share %": round(100 * admins / users, 1) if users else None,
             "Active series": s.get("hmInstancePromCurrentActiveSeries") or 0,
             "Age (days)": _age_days(s.get("createdAt"), now),
+            # Legacy column: configuration update age, not last activity.
             "Idle (days)": _age_days(s.get("updatedAt"), now),
             "Version drift": version != modal_version,
             "Delete protection": bool(s.get("deleteProtection")),

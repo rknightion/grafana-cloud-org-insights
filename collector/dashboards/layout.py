@@ -21,10 +21,10 @@ TAB_ORDER = {
     "risk": "Overview|Findings|Data loss|Alerting health|Alert routing|Delete protection|Access|Credentials|Collectors|Public dashboards|Logs retention|Label cardinality|Label privacy risk|Per stack|How to read this",
     "value": "Overview|Savings|Capability gaps|Adoption|Test and probe adoption|Capability flags|Benchmarks|How to read this",
     "operations": "Alert flow|Logs retention|Backend health|Response time|Ownership|Engagement|How to read this",
-    "commercial": "Commitment|Run rate|Consumption vs term|How to read this",
-    "ai": "Overview|Findings|Enablement and configuration|Assistant use per stack|Adoption by stack|Token consumption|AI cost model|Commercial|Human vs machine|People and identities|Collection coverage|Feature activity|How to read this",
-    "dashboards": "Adoption|What people open|Query behaviour|Public dashboards|Grafana surfaces|Coverage|How to read this",
-    "coverage": "Observed estate|Adoption opportunities|Coverage depth|Named service register|Technology and cluster registers|Adjacent datasource estate|Adaptive Traces|Synthetic inventory|SLO inventory|Outcome value|Unit economics|Summary|Classification evidence|How to read this",
+    "commercial": "Commitment|Reported billing|Consumption observations|How to read this",
+    "ai": "Overview|AI cost model|Findings|Enablement and configuration|Assistant use per stack|Adoption by stack|Token consumption|Commercial|Recorded surfaces|Token-series categories|Collection coverage|Feature activity|How to read this",
+    "dashboards": "Adoption|Dashboard opening inventory|Query behaviour|Public dashboards|Grafana surfaces|Coverage|How to read this",
+    "coverage": "Observed estate|Adoption opportunities|Coverage depth|Named service register|Technology and cluster registers|Adjacent datasource estate|Adaptive Traces|Synthetic inventory|SLO inventory|Response observations|Unit economics|Summary|Classification evidence|How to read this",
     "labelling": "Estate overview|Per-signal rules|Stack scorecard|Cross-signal consistency|Label register|Not evaluated and coverage|How to read this",
 }
 
@@ -354,7 +354,7 @@ def apply(name, elements, tabs, detail):
             build.row("Raw commitment quantities", ["n_commit", "n_consumed", "n_balance"], max_columns=3, row_height="short"),
             build.row("Separate months diagnostics", ["n_months_metric", "n_months_contract"], max_columns=2, row_height="short"),
         ])
-        by_title["Run rate"] = build.rows_tab("Run rate", [
+        by_title["Reported billing"] = build.rows_tab("Reported billing", [
             build.row("Raw total and reconciliation diagnostic", ["n_runrate", "n_reconcile"], max_columns=2, row_height="short"),
             build.row("Products and trends", ["b_runrate", "t_runrate", "t_metrics_share"], max_columns=2),
         ])
@@ -370,7 +370,7 @@ def apply(name, elements, tabs, detail):
             ("operations", "n_unowned_all", "No-team gauge share (timing stacks)"),
             ("operations", "n_unowned_svc", "No-service gauge share (timing stacks)"),
         ])
-        by_title["Outcome value"] = build.rows_tab("Outcome value", [
+        by_title["Response observations"] = build.rows_tab("Response observations", [
             build.row("Recorded observations, not saved operator time", ["outcome_scope"], max_columns=1, row_height="short"),
             build.row("Qualified gauge and recorded median delays", ["n_value_groups", "n_value_mtta", "n_value_mttr"], max_columns=3, row_height="short"),
             build.row("Canonical Operations detail", ["_canonical_operations_outcome"], max_columns=1),
@@ -438,7 +438,62 @@ def apply(name, elements, tabs, detail):
                         or (key not in DETAIL_KINDS and spec.view == view))
             destinations.append((name, key, spec.kind))
         links["_findings_now"] = destinations
-    return [by_title[title] for title in expected if title in by_title], links, row_links
+    ordered = [by_title[title] for title in expected if title in by_title]
+    _decision_context(name, elements, ordered, links)
+    return ordered, links, row_links
+
+
+def _decision_context(name, elements, tabs, links):
+    """Place existing health evidence next to decisions without changing its population."""
+    primary_inputs = {
+        "cost": ("dataplane", "adaptive_logs"), "usage": ("stack_detail",),
+        "maturity": ("dataplane", "label_inventory"), "risk": ("dataplane", "stack_detail"),
+        "value": ("dataplane", "label_inventory"), "ai": ("assistant", "ai_billing"),
+        "dashboards": ("insights", "dashboard_inventory"),
+        "coverage": ("signal_inventory", "capability_adoption"),
+        "labelling": ("label_inventory", "signal_inventory"),
+    }
+    context = (
+        "Missing results mean unavailable, not zero. Live datasource panels follow their own producer "
+        "windows; the dashboard range does not turn them into new period totals."
+    )
+    if name not in build.LIVE_DATASOURCE_ONLY:
+        context += (
+            " Collector ages below describe sampled collection evidence, not proof of freshness of every "
+            "retained table. Exact view publication/input ages remain on How to read this."
+        )
+    if name == "labelling":
+        context += (
+            " A blank severity trend means no eligible observations in the selected window. Each severity "
+            "needs its own weighted coverage floor; readable inputs alone do not meet that floor. "
+            "Use the scorecard and Not evaluated and coverage to understand withheld results."
+        )
+    elements["_decision_context"] = build.text_panel("Read these observations with their coverage", context)
+    keys = [] if name in build.LIVE_DATASOURCE_ONLY else (
+        [] if name == "labelling" else ["_coverage", "_freshness"])
+    keys += [f"_age_{input_name}" for input_name in primary_inputs.get(name, ())
+             if f"_age_{input_name}" in elements]
+    first = tabs[0]["spec"]
+    original = first["layout"]
+    rows = original["spec"]["rows"] if original["kind"] == "RowsLayout" else [{
+        "kind": "RowsLayoutRow", "spec": {"title": "Decision summary", "collapse": False,
+        "hideHeader": True, "fillScreen": False, "layout": original}}]
+    prefix = [build.row("Interpretation", ["_decision_context"], max_columns=1, row_height="short")]
+    if keys:
+        prefix.append(build.row("Collection evidence", keys, max_columns=4, row_height="short"))
+    first["layout"] = {"kind": "RowsLayout", "spec": {"rows": prefix + rows}}
+    if name == "risk":
+        elements["_risk_triage"] = build.text_panel("Start with operational failures", (
+            "Review reported data loss and alerting failures, then the named governance findings. "
+            "A missing observation is not evidence of a healthy stack."))
+        links["_risk_triage"] = [("risk", "b_discard", "Metric loss queue"),
+                                 ("risk", "b_trace_discard", "Trace loss queue"),
+                                 ("risk", "_findings_now", "Governance findings")]
+        first["layout"]["spec"]["rows"].insert(len(prefix),
+            build.row("Triage", ["_risk_triage"], max_columns=1, row_height="short"))
+        for key in ("b_discard", "b_trace_discard", "b_metadata_discard"):
+            defaults = elements[key]["spec"]["vizConfig"]["spec"]["fieldConfig"]["defaults"]
+            defaults["color"] = {"mode": "fixed", "fixedColor": "orange"}
 
 
 def resolve_links(document, pending, targets, row_links):

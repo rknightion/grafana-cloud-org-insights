@@ -529,12 +529,13 @@ def d_estate(ds: str):
                         "pinned - but an unexplained one usually means an upgrade that silently did not "
                         "complete."),
         "b_leftover": build.barchart_panel(
-            "Test leftovers by class", "max_over_time(gcinsight_estate_test_leftover_stacks[24h])",
+            "Test-name review candidates by active-user class", "max_over_time(gcinsight_estate_test_leftover_stacks[24h])",
             legend="{{kind}}",
-            description="Stacks that look like abandoned tests, split by whether they COST anything. "
-                        "`idle` ones are clutter and carry no charge; `billing` ones are being paid for "
-                        "and nobody is using them, which makes them the only actionable half. The two "
-                        "tables on the Leakage tab name the stacks in each class."),
+            description="Stack slugs starting with `test`, split only by currentActiveUsers. Legacy "
+                        "class `idle` means zero or unavailable active-user counts; `billing` means nonzero. "
+                        "Neither class proves charges, abandonment or absence of telemetry. Review "
+                        "ownership and usage before acting. `Idle (days)` is time since configuration "
+                        "updatedAt, not time since last use."),
         "b_region": build.barchart_panel(
             "Stacks by region", "gcinsight_estate_stacks_by_region", legend="{{region}}",
             description="Where each stack's data is stored, biggest region first. Data residency is the "
@@ -543,7 +544,9 @@ def d_estate(ds: str):
                         "region can still be collecting from US infrastructure."),
         "estate": build.table_panel(
             "Every stack, by active series", "estate", ds,
-            description="Admin share is blank where a stack has no users - 0% would read as healthy."),
+            description="Admin share is blank where a stack has no users - 0% would read as healthy. "
+                        "`Idle (days)` measures configuration updatedAt age, not last use. `Test leftover` "
+                        "is a test-prefixed name heuristic, not confirmed abandonment."),
         "drift": build.table_panel(
             "Stacks off the standard Grafana build", "estate_drift", ds,
             columns=['Stack', 'Region', 'Cluster', 'Version drift', 'Active series', 'Users (active)', 'Age (days)'],
@@ -552,18 +555,19 @@ def d_estate(ds: str):
                         "wrong - the question each row asks is whether that pin was deliberate and is "
                         "still needed, because a forgotten pin misses security fixes silently."),
         "idle": build.table_panel(
-            "Test leftovers - idle, cost nothing", "estate_leftovers_idle", ds,
+            "Test-name candidates with zero or unavailable active-user counts", "estate_leftovers_idle", ds,
             columns=['Stack', 'Region', 'Idle (days)', 'Age (days)', 'Active series', 'Users (active)', 'Dashboards', 'Delete protection'],
             schema=estate_pillar.VIEW_SCHEMAS["estate_leftovers_idle"],
-            description="Governance and attack surface, NEVER automatically a saving. These rows meet "
-                        "the live idle-test criteria shown in the table; verify current volume before "
-                        "acting."),
+            description="Name-based review candidates with zero or unavailable currentActiveUsers. This "
+                        "does not prove zero billed users, zero telemetry or abandonment. `Idle (days)` "
+                        "is age of configuration updatedAt, not last activity. Confirm owner intent."),
         "billing": build.table_panel(
-            "Test leftovers that DO bill", "estate_leftovers_billing", ds,
+            "Test-name candidates with reported active users", "estate_leftovers_billing", ds,
             columns=['Stack', 'Region', 'Idle (days)', 'Active series', 'Users (billed)', 'Users (active)', 'Dashboards', 'Delete protection'],
             schema=estate_pillar.VIEW_SCHEMAS["estate_leftovers_billing"],
-            description="Rows that still carry billed use. This is the cost conversation; the idle "
-                        "table beside it is governance rather than a saving."),
+            description="Name-based review candidates with nonzero currentActiveUsers. The legacy "
+                        "view name does not establish charges or savings. Compare the separate billed-user "
+                        "and series observations. `Idle (days)` is configuration updatedAt age."),
         # --- T4 estate diff, BOTH windows (PLAN 13.2) -------------------------------------------------
         # These views existed from deployment and nothing rendered them - T4 published a diff nobody could
         # see. Daily first: it is the one that answers "what changed since
@@ -1031,7 +1035,8 @@ def d_cost(ds: str, *, rate_card: ratecard_model.RateCard | None = None):
                         "between them moves, so read both rather than converting one into the other."),
         "t_series": build.timeseries_panel(
             "Active series", [('sum(gcinsight_stack_active_series{stack=~"$stack"})', "total")],
-            description="The metrics cost driver. Growth here is the bill growing."),
+            description="Active-series observations over time. Growth can increase metrics cost, but "
+                        "does not establish a bill increase: pricing, DPM, allowances and billing windows matter."),
         "t_top": build.timeseries_panel(
             "Top 10 stacks by active series",
             [('topk(10, gcinsight_stack_active_series{stack=~"$stack"})', "{{stack}}")],
@@ -1556,19 +1561,20 @@ def d_usage(ds: str):
             unit="percentunit",
             description="Of the people with access, how many showed up. Deliberately not a money figure."),
         "t_signals": build.timeseries_panel(
-            "Stacks using each signal", [("gcinsight_usage_stacks_by_signal", "{{signal}}")],
-            description="Thresholded above the synthetic floor of 2 series, never at >0."),
+            "Stacks above the signal usage floor", [("gcinsight_usage_stacks_by_signal", "{{signal}}")],
+            description="Counts source fields strictly above the shared numeric floor of 1,000. "
+                        "Fields have signal-specific meanings; this is not a common unit. Zero means "
+                        "no stacks exceed that floor, not absence of the signal or its configuration."),
         "b_recency": build.barchart_panel(
             "Users by last-seen bucket", "gcinsight_usage_users_last_seen_bucket",
             # `sort=None` on purpose: these buckets are an ORDERED CATEGORY (recent -> never), so ranking
             # them by size destroys the one reading that matters - the shape of the decay. Every other
             # bar chart here sorts by value; this is the deliberate exception.
             legend="{{kind}}", sort=None,
-            description="Every user who has ever logged in, grouped by how recently. Read it left to "
-                        "right as a decay curve rather than as a ranking - the bars are in recency order, "
-                        "not size order. `never` is the actionable bucket: an account that has never "
-                        "logged in is a licence being paid for and a credential nobody is watching. The "
-                        "per-user table beneath names them."),
+            description="Visible user accounts grouped by reported last-seen recency, including the "
+                        "`never` bucket. Bars are in recency order, not size order. `never` identifies "
+                        "accounts for owner review; it proves neither a paid licence nor unattended "
+                        "credentials. The per-user table names the observed accounts."),
         # --- Protocol adoption (SPEC 7.2 item 10, PLAN 3.3). ------------------------------------------
         # Reads the stack's OWN provisioned `grafanacloud-usage` datasource DIRECTLY. No collector, no
         # credential, no series of ours - the datasource is already on every stack, so there was never a
@@ -1631,13 +1637,13 @@ def d_usage(ds: str):
                         "Enterprise is current public catalogue status, blank if unknown; neither "
                         "installed licence nor activity. Catalogue coverage is per configured plugin."),
         "dormant": build.table_panel(
-            "Provisioned, populated, nobody logs in", "usage_dormant_stacks", ds,
+            "Stacks with active users and no recorded daily activity", "usage_dormant_stacks", ds,
             columns=['Stack', 'Region', 'Users (active)', 'Users (daily)', 'Stickiness', 'Dashboards', 'Alert rules', 'Age (days)'],
             schema=usage_pillar.VIEW_SCHEMAS["usage_dormant_stacks"],
             description="The DRILL-DOWN behind the dormancy figures: the named stacks that have users but "
-                        "zero daily activity, so somebody was onboarded and nobody came back. Distinct "
-                        "from the zero-user test leftovers on the Estate dashboard, which cost nothing and "
-                        "are a governance point rather than an adoption one."),
+                        "zero recorded daily activity. This is a daily observation, not proof of long-term "
+                        "disuse or failed onboarding. Estate test-name candidates use a separate name "
+                        "and active-user heuristic; neither finding establishes charges or savings."),
         "recency": build.table_panel(
             "Every user, by how recently they logged in", "usage_user_recency", ds,
             description="The DRILL-DOWN behind the last-seen buckets above - the individual users, so "
@@ -1869,8 +1875,8 @@ def d_maturity(ds: str):
             "p90 score", 'gcinsight_maturity_percentile{kind="p90",version="2"}', decimals=1,
             description="The score 90% of scored stacks fall below - what GOOD looks like inside the organisation's "
                         "own estate rather than against an industry benchmark. The gap between this and "
-                        "the median is the realistic improvement available: it is already being achieved "
-                        "by their own teams, so it is an argument that needs no external evidence."),
+                        "the median identifies internal reference candidates. Workloads and applicability "
+                        "differ, so the gap is not a promised or directly achievable improvement."),
         "n_worst": build.stat_panel(
             "Worst ranked", 'gcinsight_maturity_percentile{kind="worst",version="2"}', decimals=1,
             description="The lowest score among stacks that COULD be scored - so it is a real stack with "
@@ -1888,7 +1894,9 @@ def d_maturity(ds: str):
             [('gcinsight_maturity_percentile{kind="median",version="2"}', "median"),
              ('gcinsight_maturity_percentile{kind="p90",version="2"}', "p90"),
              ('gcinsight_maturity_percentile{kind="worst",version="2"}', "worst")],
-            description="Is the estate getting better? This is the line to watch quarter on quarter."),
+            description="Score percentiles for the population scored at each observation. Compare "
+                        "coverage, catalogue version and scored-stack counts before interpreting movement "
+                        "as improvement; the population can change."),
         "t_tiers": build.timeseries_panel(
             "Stacks per tier", [('gcinsight_maturity_stacks_by_tier{version="2"}', "{{kind}}")], stacked=True,
             description="leading >=75, solid >=50, lagging >=25, dormant below."),
@@ -1928,8 +1936,9 @@ def d_maturity(ds: str):
         "t_dims": build.timeseries_panel(
             "Dimension means over time",
             [('gcinsight_maturity_dimension_mean{version="2"}', "{{dimension}}")],
-            description="Which dimension is enablement actually moving? A flat line here next to a "
-                        "rising composite means the score improved by stacks dropping out, not improving."),
+            description="Dimension means over their scored populations. Compare scored-stack counts "
+                        "and individual changes before attributing movement to enablement. Flat means "
+                        "beside a rising composite cannot identify the cause; membership and weights may differ."),
         "b_unscored": build.barchart_panel(
             "Not scored, and why", 'gcinsight_maturity_unscored{version="2"}', legend="{{reason}}",
             description="Why each excluded stack was excluded, biggest reason first. An unexplained "
@@ -3334,8 +3343,8 @@ def d_operations(ds: str):
         "n_mttr": build.stat_panel(
             "Median recorded resolution time (7d)", MTTR_MEDIAN, unit="s", decimals=0, ds_uid=build.USAGE_UID,
             description="Last seven days: median elapsed time from alert-group creation to resolution, only for groups "
-                        "with a recorded timing observation. Compare with acknowledgement time to split "
-                        "time-to-notice from time-to-fix."),
+                        "with a recorded timing observation. Acknowledgement and resolution populations are "
+                        "not matched. Subtracting their medians does not measure time-to-fix."),
         "n_mtta_mean": build.stat_panel(
             "Mean recorded acknowledgement time (7d)", MTTA_MEAN, unit="s", decimals=0, ds_uid=build.USAGE_UID,
             description="Last seven days: arithmetic mean over recorded response observations. A large gap from the median is not a "
@@ -3601,19 +3610,17 @@ def d_dashboards(ds: str):
             "Dashboards provisioned (measured stacks)",
             'sum(gcinsight_dashboards_estate_provisioned{version="2"})',
             description="Dashboards that EXIST on the stacks this pillar could measure, from inventory. "
-                        "The denominator for the share beside it. Deliberately not the estate's whole "
-                        "dashboard count, which would divide by stacks with no usage figures and "
-                        "understate adoption."),
+                        "The denominator for the recorded-ID ratio beside it. Both counts cover measured "
+                        "stacks, but recorded IDs are not matched to current inventory objects."),
         "n_viewed_share": build.stat_panel(
-            "Share of provisioned dashboards opened",
+            "Recorded dashboard IDs / current provisioned count",
             'sum(gcinsight_dashboards_estate_dashboards_viewed{version="2"}) / '
             'sum(gcinsight_dashboards_estate_provisioned{version="2"})',
             unit="percentunit", decimals=1,
-            description="**The headline governance figure of this pillar.** Numerator and denominator "
-                        "both cover the measured stacks only, so it is a real share rather than two "
-                        "populations divided. Read it beside the coverage tab: a low share means few "
-                        "configured dashboards had a recorded open in the 24h window, not that nobody "
-                        "uses them or that licences are wasted."),
+            description="Distinct dashboard IDs with recorded opens in 24h divided by current "
+                        "inventory counts on measured stacks. IDs are not reconciled to current objects, "
+                        "so this is an unmatched-count ratio, not a share of configured dashboards used. "
+                        "It can exceed 100%. Read coverage alongside it; no unused-licence claim follows."),
         "n_measured": build.stat_panel(
             "Stacks measured",
             'sum(gcinsight_dashboards_estate_stacks{kind="measured",version="2"})',
@@ -3632,12 +3639,12 @@ def d_dashboards(ds: str):
                         "window. This is the number of owner conversations behind the public-dashboard "
                         "count, not an inventory of every configured public share."),
         "tbl_usage": build.table_panel(
-            "Per stack: what exists, what gets opened, what it costs to serve",
+            "Per stack: inventory, recorded opens and query observations",
             "insights_dashboard_usage", ds,
             schema=insights_pillar.VIEW_SCHEMAS["insights_dashboard_usage"],
-            description="Ordered by opens. `Viewed share %` is dashboards opened against dashboards "
-                        "provisioned - a low share means few recorded opens in the 24h window, "
-                        "not proof that nobody uses those dashboards. "
+            description="Ordered by opens. `Viewed share %` divides 24h recorded dashboard IDs by "
+                        "current inventory counts without reconciling objects; it can exceed 100%. "
+                        "It is not a matched adoption share or proof of disuse. "
                         "`Cache hit %` is blank where the stack ran too few queries for a ratio to mean "
                         "anything, rather than showing a swing between 0 and 100."),
         "t_viewers": build.timeseries_panel(
@@ -3834,10 +3841,10 @@ def d_dashboards(ds: str):
                         "review queue for deciding whether a newly observed source belongs in the closed "
                         "surface mapping; raw values never become metric labels."),
 
-        # --- What people open -------------------------------------------------------------------------
+        # --- Dashboard opening inventory -------------------------------------------------------------------------
         "opening_scope": build.text_panel(
-            "What people open: human identity unproven (legacy navigation)",
-            "**What people open is a legacy navigation label.** These are recorded dashboard-open "
+            "Dashboard opening inventory: human identity unproven (legacy navigation)",
+            "**Dashboard opening inventory is a legacy navigation label.** These are recorded dashboard-open "
             "events, not independently verified human visits or outcomes. Bounded leaders use 24h; "
             "the complete configured-dashboard opening inventory uses 31d. Unopened means no recorded "
             "open in that window, not lifetime disuse or an instruction to retire a dashboard."),
@@ -3979,12 +3986,12 @@ def d_dashboards(ds: str):
             build.row("Unmapped sources", ["tbl_surface_unmapped"], max_columns=1,
                       row_height="tall"),
         ]),
-        build.rows_tab("What people open", opening_rows),
+        build.rows_tab("Dashboard opening inventory", opening_rows),
         build.tab("Coverage", ["tbl_coverage"], max_columns=1),
     ]
     return "gcinsight-dashboards", "Grafana Cloud Org Insights - Dashboard usage", \
         ("Pillar J: recorded dashboard-open and query events, not independently verified human activity. "
-         "What people open is a legacy navigation label: actor identity and per-app value are unproven. "
+         "Dashboard opening inventory is a legacy navigation label: actor identity and per-app value are unproven. "
          "From each stack's own usage-insights datasource. Every "
          "other pillar measures what exists; this measures what is used. Public-dashboard figures are "
          "observed activity, not configured inventory; the complete inventory is on Risk. "
@@ -4327,8 +4334,8 @@ def d_coverage(ds: str):
         # Group gauges and recorded responses have separately qualified populations and windows.
         # Matching stacks alone cannot support an acknowledgement-share ratio.
         "outcome_scope": build.text_panel(
-            "Outcome value: saved operator time unproven (legacy navigation)",
-            "**Outcome value is a legacy navigation label, not proved business value.** These are "
+            "Response observations: saved operator time unproven (legacy navigation)",
+            "**Response observations is a legacy navigation label, not proved business value.** These are "
             "recorded counts and seven-day response/resolution delays. **Saved operator time unproven**: "
             "medians provide neither a counterfactual baseline nor operator effort. Generic app/Scenes "
             "observations do not establish per-app value; automatic remediation is also unproven."),
@@ -4508,7 +4515,7 @@ def d_coverage(ds: str):
             build.row("Policies active in the window", ["tbl_at_policy"], max_columns=1,
                       row_height="tall"),
         ]),
-        build.rows_tab("Outcome value", [
+        build.rows_tab("Response observations", [
             build.row("Recorded observations, not saved operator time", ["outcome_scope"],
                       max_columns=1, row_height="short"),
             build.row("Recorded response", ["n_value_groups", "n_value_acknowledged",
@@ -4547,7 +4554,7 @@ def d_coverage(ds: str):
     return "gcinsight-coverage", "Grafana Cloud Org Insights - Coverage", \
         ("Pillar K: the affirmative observed-estate asset register, how deeply each named service is "
          "covered, and the explicit ownership and response relationships attached to it. "
-         "Outcome value is a legacy navigation label: saved operator time, per-app business value "
+         "Response observations is a legacy navigation label: saved operator time, per-app business value "
          "and automatic remediation are unproven. Unit economics retains raw observations and "
          "diagnostic ratios, not normalised: currency, period, population matching and overlap are "
          "unknown. These are not measured unit prices or rates."), el, tabs
@@ -4592,7 +4599,7 @@ def d_commercial(ds: str):
             description="Computed from live `grafanacloud_org_contract_start_date` and "
                         "`grafanacloud_org_contract_end_date` queries. This timestamp-derived term "
                         "ratio does not establish the billing period of the raw credit observations. "
-                        "Consumption vs term retains both model lines, not a qualified burn comparison."),
+                        "Consumption observations retains both model lines, not a qualified burn comparison."),
         "n_months_metric": build.stat_panel(
             "Platform forecast observation (raw, not normalised)", FORECAST_MONTHS, decimals=1,
             ds_uid=build.USAGE_UID,
@@ -4613,7 +4620,7 @@ def d_commercial(ds: str):
         "n_runrate": build.stat_panel(
             "Reported total overage", RUN_RATE, unit="currencyUSD", decimals=2,
             ds_uid=build.USAGE_UID,
-            description="The frozen Run rate tab name is a navigation/model label only, "
+            description="Reported billing shows raw source observations, "
                         "not a measured normalised rate. `grafanacloud_org_total_overage` retains "
                         "the raw source aggregation. "
                         "The name does not establish a charge, price or complete estate total. "
@@ -4621,7 +4628,7 @@ def d_commercial(ds: str):
                         "allowance, overage may mean the whole charge, not spend above a plan; "
                         "confirm that interpretation against the deployment contract."),
         "b_runrate": build.barchart_panel(
-            "Run rate by product",
+            "Reported overage by product",
             f"sort_desc(label_replace(sum({PRODUCT_OVERAGES[0][0]}), \"product\", \"metrics\", \"\", \"\"))",
             legend="{{product}}", ds_uid=build.USAGE_UID,
             description="placeholder - replaced below"),
@@ -4652,7 +4659,7 @@ def d_commercial(ds: str):
                         "unknown. A percent formatter does not qualify the inputs or completeness; "
                         "not a measured spend share or proof of realised savings."),
 
-        # --- Consumption vs term ----------------------------------------------------------------------
+        # --- Consumption observations ----------------------------------------------------------------------
         "t_burn": build.timeseries_panel(
             "Raw credit-ratio diagnostic vs contract term elapsed",
             [(COMMIT_CONSUMED_SHARE, "commitment consumed"),
@@ -4687,14 +4694,14 @@ def d_commercial(ds: str):
     tabs = [
         build.tab("Commitment", ["n_commit", "n_consumed", "n_consumed_share", "n_balance",
                                  "n_term_elapsed", "n_months_metric", "n_months_contract"]),
-        build.tab("Run rate", ["n_runrate", "n_reconcile", "b_runrate", "t_runrate",
+        build.tab("Reported billing", ["n_runrate", "n_reconcile", "b_runrate", "t_runrate",
                                "t_metrics_share"]),
-        build.tab("Consumption vs term", ["t_burn", "t_balance"]),
+        build.tab("Consumption observations", ["t_burn", "t_balance"]),
     ]
     return "gcinsight-commercial", "Grafana Cloud Org Insights - Commercial", \
         ("Pillar H: raw billing observations and existing diagnostics, not normalised. Live from "
          "grafanacloud-usage. Currency, billing period, population matching and overlap are unknown. "
-         "The frozen Run rate tab name is a navigation/model label only, not a measured normalised rate. "
+         "Reported billing shows raw source observations, not a measured normalised rate. "
          "Ratios do not qualify their inputs. Contract timing is separately derived from live "
          "grafanacloud_org_contract_start_date and grafanacloud_org_contract_end_date queries."), \
         el, tabs
@@ -4942,12 +4949,12 @@ def d_ai(ds: str):
                         "30-day window, summed. **Never read this against the Overview tab's token "
                         "gauge** - that one is the monthly billing period. The plugin figure is what the "
                         "feature reports; "
-                        "the billing figure is what is charged."),
+                        "the billing figure is a separate monthly observation, not an invoice."),
         "n_ai_uncategorised": build.stat_panel(
             "Share of messages carrying no category", ai_uncategorised_share,
             unit="percentunit", decimals=1,
             description="Assistant classifies only some traffic. This live stat shows the uncategorised "
-                        "share. Every category breakdown on the Human vs machine tab is a share of the CATEGORISED "
+                        "share. Every category breakdown on the Recorded surfaces tab is a share of the CATEGORISED "
                         "subset and never of total messages. This stat is what makes that honest."),
         "n_ai_combos": build.stat_panel(
             "Category x surface combinations in use", ai_combos,
@@ -4995,7 +5002,7 @@ def d_ai(ds: str):
                         "the two investigation-origin columns reconcile the total. `Detail` carries the "
                         "collection reason for unreadable rows. Tenant object counts remain tenant-scoped."),
 
-        # --- Human vs machine ------------------------------------------------------------------------
+        # --- Recorded surfaces ------------------------------------------------------------------------
         "b_ai_category": build.barchart_panel(
             "Categorised messages by task category", ai_by_category, legend="{{category}}",
             description="Reported task-category counts across collected stacks in the rolling 30d "
@@ -5129,8 +5136,8 @@ def d_ai(ds: str):
                         "as product boundaries: no wider credential changes any of them."),
 
         "actor_scope": build.text_panel(
-            "Human vs machine: actor identity unproven (legacy navigation)",
-            "**Human vs machine is a legacy navigation label, not a proved actor split.** Web/non-web "
+            "Recorded surfaces: actor identity unproven",
+            "**Recorded surfaces do not prove actor identity.** Web/non-web "
             "are recorded surface categories; a human can use CLI or Slack and automation can use web. "
             "The legacy `Human driven` boolean is a web-surface proxy and `Machine share` fields are "
             "non-web shares. **Human versus machine identity and per-app business value are unproven.** "
@@ -5189,7 +5196,7 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
             build.row("Source reconciliation and workflow split", ["tbl_ai_reconciliation"],
                       max_columns=1, row_height="tall"),
         ]),
-        build.rows_tab("Human vs machine", [
+        build.rows_tab("Recorded surfaces", [
             build.row("Actor identity unproven: recorded surfaces only", ["actor_scope"], max_columns=1,
                       row_height="short"),
             build.row("Uncategorised remainder (30d)", ["n_ai_uncategorised"], max_columns=1,
@@ -5228,7 +5235,7 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
                       max_columns=2, row_height="short"),
             build.row("History", ["t_users", "t_tokens"], max_columns=2, row_height="tall"),
         ]),
-        build.rows_tab("People and identities", [
+        build.rows_tab("Token-series categories", [
             build.row("Token-series categories, not verified actors", ["identity_scope"],
                       max_columns=1, row_height="short"),
             build.row("Observed month-to-date token identities", ["tbl_people", "tbl_services"],
@@ -5251,7 +5258,7 @@ needs a new product dimension or a tenant-wide Assistant API that identifies the
     return "gcinsight-ai", "Grafana Cloud Org Insights - Grafana Assistant & AI usage", \
         ("Pillar I: Assistant usage observations; human versus machine identity, per-app value, "
          "cumulative Agent generations, automatic remediation and saved operator time are unproven. "
-         "Human vs machine and People and identities are legacy navigation labels. "
+         "Surface and token-series categories do not establish actor identity. "
          "Observed monthly token consumption and endpoint "
          "identity totals and raw AI overage observations, not normalised. Overage currency, billing "
          "period, population matching and overlap are unknown; token windows do not qualify overage. "
@@ -5319,7 +5326,9 @@ def d_labelling(ds: str):
              for severity in labelling_pillar.SEVERITIES], integrity=True,
             description="Counts failed rules at observed severity, not all offending objects. "
                         "Only stacks reaching that severity's weighted coverage floor contribute; "
-                        "an absent count is not zero. This is not a complete estate total."),
+                        "an absent count is not zero. A blank chart can mean no severity population met "
+                        "its evidence floor; inspect the scorecard coverage and not-evaluated reasons. "
+                        "This is not a complete estate total."),
         "evaluated": build.barchart_panel("Rules evaluated by stack and signal",
                                          f"gcinsight_labelling_rules_evaluated{stack}",
                                          legend="{{stack}} / {{signal}}",
@@ -5390,9 +5399,9 @@ PILLAR_OF = {"estate": "A", "cost": "B", "usage": "C", "maturity": "D", "risk": 
 #
 # Views are reused rather than duplicated, so a stack appearing in two lists is the same row in both.
 FINDING_DETAIL: dict[str, tuple[tuple[object, ...], ...]] = {
-    "estate": (("_fd_idle", "Idle test leftovers - which stacks", "estate_leftovers_idle",
+    "estate": (("_fd_idle", "Test-name candidates with zero or unavailable active-user counts", "estate_leftovers_idle",
                 estate_pillar.VIEW_SCHEMAS["estate_leftovers_idle"]),
-               ("_fd_billing", "Test leftovers that DO bill - which stacks", "estate_leftovers_billing",
+               ("_fd_billing", "Test-name candidates with reported active users - which stacks", "estate_leftovers_billing",
                 estate_pillar.VIEW_SCHEMAS["estate_leftovers_billing"]),
                ("_fd_drift", "Off the standard build - which stacks", "estate_drift",
                 estate_pillar.VIEW_SCHEMAS["estate_drift"])),

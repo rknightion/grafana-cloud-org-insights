@@ -23,10 +23,10 @@ ORDERS = {
     "risk": "Overview|Findings|Data loss|Alerting health|Alert routing|Delete protection|Access|Credentials|Collectors|Public dashboards|Logs retention|Label cardinality|Label privacy risk|Per stack|How to read this",
     "value": "Overview|Savings|Capability gaps|Adoption|Test and probe adoption|Capability flags|Benchmarks|How to read this",
     "operations": "Alert flow|Logs retention|Backend health|Response time|Ownership|Engagement|How to read this",
-    "commercial": "Commitment|Run rate|Consumption vs term|How to read this",
-    "ai": "Overview|Findings|Enablement and configuration|Assistant use per stack|Adoption by stack|Token consumption|AI cost model|Commercial|Human vs machine|People and identities|Collection coverage|Feature activity|How to read this",
-    "dashboards": "Adoption|What people open|Query behaviour|Public dashboards|Grafana surfaces|Coverage|How to read this",
-    "coverage": "Observed estate|Adoption opportunities|Coverage depth|Named service register|Technology and cluster registers|Adjacent datasource estate|Adaptive Traces|Synthetic inventory|SLO inventory|Outcome value|Unit economics|Summary|Classification evidence|How to read this",
+    "commercial": "Commitment|Reported billing|Consumption observations|How to read this",
+    "ai": "Overview|AI cost model|Findings|Enablement and configuration|Assistant use per stack|Adoption by stack|Token consumption|Commercial|Recorded surfaces|Token-series categories|Collection coverage|Feature activity|How to read this",
+    "dashboards": "Adoption|Dashboard opening inventory|Query behaviour|Public dashboards|Grafana surfaces|Coverage|How to read this",
+    "coverage": "Observed estate|Adoption opportunities|Coverage depth|Named service register|Technology and cluster registers|Adjacent datasource estate|Adaptive Traces|Synthetic inventory|SLO inventory|Response observations|Unit economics|Summary|Classification evidence|How to read this",
     "labelling": "Estate overview|Per-signal rules|Stack scorecard|Cross-signal consistency|Label register|Not evaluated and coverage|How to read this",
 }
 # view, intended owner element, owner tab, finding evidence element (if any).
@@ -92,6 +92,26 @@ class DashboardLayoutContractTest(unittest.TestCase):
             with self.subTest(dashboard=name):
                 self.assertEqual(list(tabs(self.documents["gcinsight"][name])), expected.split("|"))
 
+    def test_landing_context_uses_the_relevant_existing_collection_evidence(self):
+        for name, document in self.documents["gcinsight"].items():
+            landing = document["spec"]["layout"]["spec"]["tabs"][0]
+            keys = list(placed(landing))
+            self.assertIn("_decision_context", keys)
+            if name in {"operations", "commercial"}:
+                self.assertNotIn("_coverage", keys)
+                self.assertFalse(any(key.startswith("_age_") for key in keys))
+            elif name == "labelling":
+                self.assertIn("_age_label_inventory", keys)
+                self.assertNotIn("_coverage", keys)  # Inventory coverage cannot certify labelling.
+                content = document["spec"]["elements"]["_decision_context"]["spec"]["vizConfig"]["spec"]["options"]["content"]
+                self.assertIn("weighted coverage floor", content)
+            else:
+                self.assertIn("_coverage", keys)
+                self.assertIn("_freshness", keys)
+        risk = self.documents["gcinsight"]["risk"]["spec"]["elements"]
+        self.assertEqual(len(risk["_risk_triage"]["spec"]["links"]), 3)
+        self.assertEqual(risk["b_discard"]["spec"]["vizConfig"]["spec"]["fieldConfig"]["defaults"]["color"]["fixedColor"], "orange")
+
     def test_register_source_and_qualified_display_fields_survive_on_the_owner(self):
         schemas = declared_schemas()
         for name, entries in REGISTERS.items():
@@ -139,7 +159,7 @@ class DashboardLayoutContractTest(unittest.TestCase):
             for key in ("n_value_acknowledged", "n_value_engagement", "n_value_tail",
                         "n_value_unowned_team", "n_value_unowned_service", "b_oncall"):
                 self.assertNotIn(key, coverage["spec"]["elements"])
-            outcome = list(placed(tabs(coverage)["Outcome value"]))
+            outcome = list(placed(tabs(coverage)["Response observations"]))
             self.assertEqual(set(outcome), {"outcome_scope", "n_value_groups", "n_value_mtta",
                                            "n_value_mttr", "_canonical_operations_outcome"})
             for name, key, target_name, target_key in (
@@ -214,9 +234,12 @@ class DashboardLayoutContractTest(unittest.TestCase):
         for name, tab, first in (("estate", "Leakage", "billing"), ("estate", "Scan health", "b_failed"),
                                  ("maturity", "Leaderboard", "b_bottom"),
                                  ("operations", "Alert flow", "n_state_history_failures")):
-            self.assertEqual(next(placed(tabs(documents[name])[tab])), first)
+            self.assertEqual(next(key for key in placed(tabs(documents[name])[tab])
+                                  if key != "_decision_context"), first)
         commitment = tabs(documents["commercial"])["Commitment"]["spec"]["layout"]["spec"]["rows"]
-        self.assertEqual(list(placed(commitment[0])), ["n_consumed_share", "n_term_elapsed"])
+        self.assertEqual(list(placed(next(row for row in commitment
+            if row["spec"]["title"] == "Consumed share and term elapsed"))),
+            ["n_consumed_share", "n_term_elapsed"])
         benchmarks = tabs(documents["value"])["Benchmarks"]["spec"]["layout"]["spec"]["rows"]
         trends = [row for row in benchmarks if any(key.startswith("t_bench_") for key in placed(row))]
         self.assertEqual(len(trends), 1)

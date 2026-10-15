@@ -842,3 +842,14 @@ Recreation after earlier recording invalidates the birth witness and requires se
 not a silent history reset. Legacy direct CLI calls without the argument retain the 72-hour window.
 Caps and incomplete-read semantics remain unchanged; a successful write can still contain partial
 coverage. Replay/conflict retention remains 72 hours independently of the initial query window.
+
+### Complete-suite dashboard updates
+
+After a shared builder, layout or view change, rebuild and publish all twelve dashboards, not just
+the newest feature dashboard. Use live views under the validated deployment projection, explicitly
+load the deployment rate card when assembling outside the direct publisher, preserve existing
+resource metadata and repeat the AI seat-price override. Record the dashboard source independently
+of the running collector source when no collector changes are needed. Read back each saved resource
+and verify queries, variables, transformations, layout and folder placement, then render representative
+changed panels in both environments. Optional objects omitted at an earlier build require a fresh
+build to gain their display; a successful collector deployment does not update those saved panels.

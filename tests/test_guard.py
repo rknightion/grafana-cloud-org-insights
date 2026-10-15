@@ -102,7 +102,7 @@ class EstatePillarTest(unittest.TestCase):
         for row in idle + billing:
             self.assertTrue(row[" Stack"].startswith("test"))
         for row in idle:
-            self.assertEqual(row["Active series"], 0, "an idle leftover must cost nothing")
+            self.assertEqual(row["Active series"], 0, "the synthetic no-active-user cohort has zero series; this is not a billing contract")
         self.assertEqual(billing[0][" Stack"], "testlab001")
         self.assertEqual(billing[0]["Active series"], 68825)
 

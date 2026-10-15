@@ -205,8 +205,8 @@ def read_view(name: str) -> dict[str, Any]:
 def _infer_type(values: Sequence[Any]) -> str:
     """Infinity column types: `string`, `number`, `boolean`, `timestamp`.
 
-    A column that is entirely None is typed `string` - `number` would make Grafana render "NaN" where the
-    honest answer is blank, and these views use None to mean "not measurable" on purpose.
+    Without a declared schema, an entirely None column remains `string`: there is no evidence
+    for a numeric type. `columns_for` retains the declared type when one is available.
     """
     seen = [v for v in values if v is not None]
     if not seen:
@@ -226,7 +226,9 @@ def columns_for(view: dict[str, Any],
     adding a column cannot leave a dashboard rendering the old set.
 
     `fallback` is the pillar's declared schema. It supplies the columns of a view that can legitimately
-    be EMPTY, and any declared column a view published before the pillar gained it does not carry yet.
+    be EMPTY, any declared column a view published before the pillar gained it does not carry yet,
+    and the type of a column containing only null/missing observations. Non-null values still drive
+    inference: a malformed string is never coerced to a number by the schema.
 
     It is for a view that can legitimately be EMPTY - a condition-matched list where finding
     nothing is the good outcome, like "MCP integrations whose authentication failed". Without it, a
@@ -248,13 +250,17 @@ def columns_for(view: dict[str, Any],
             "`schema` if an empty result is a legitimate state for it."
         )
     keys = list(rows[0])
+    declared_types = dict(fallback or ())
     out = []
     for key in keys:
+        values = [r.get(key) for r in rows]
+        kind = (_infer_type(values) if any(value is not None for value in values)
+                else declared_types.get(key, "string"))
         out.append({
             "selector": key,
             # Strip the leading space that forces order in Infinity's alphabetising parser.
             "text": key.strip(),
-            "type": _infer_type([r.get(key) for r in rows]),
+            "type": kind,
         })
     # A declared column the live rows lack is a view published before the pillar gained it: an upgrade
     # publishes dashboards before the next scan rewrites the view. The column renders blank until then
@@ -691,11 +697,16 @@ def cross_source_ratio_stat_panel(
 
 def timeseries_panel(title: str, exprs: Sequence[tuple[str, str]], *, description: str = "",
                      unit: str = "short", stacked: bool = False,
-                     ds_uid: str = PROM_UID, integrity: bool = False) -> dict[str, Any]:
+                     ds_uid: str = PROM_UID, integrity: bool = False,
+                     show_legend: bool | None = None) -> dict[str, Any]:
     """A trend from PromQL. `exprs` is a sequence of `(expr, legend)`.
 
     This is what the whole remote_write path exists for: the S3 views are point-in-time snapshots, so
     without these panels nothing on the dashboards shows a direction of travel.
+
+    Legends default on for multiple fixed captions and known bounded category labels, not arbitrary
+    stack/identity series. `show_legend` explicitly overrides this heuristic for an audited panel;
+    the legend template cannot establish the cardinality of an arbitrary vendor query.
 
     Ordinary trends intentionally connect sparse periodic observations to show direction, not
     continuous measurement. Integrity trends use points only: a sparse frame may omit timestamps
@@ -705,6 +716,12 @@ def timeseries_panel(title: str, exprs: Sequence[tuple[str, str]], *, descriptio
         prom_query(expr, ds_uid, ref_id=chr(ord("A") + i), legend=legend)
         for i, (expr, legend) in enumerate(exprs)
     ]
+    if show_legend is None:
+        bounded_labels = {"signal", "kind", "dimension", "tier", "reason", "status", "region"}
+        labels = {label.strip() for _expr, legend in exprs
+                  for label in re.findall(r"\{\{([^{}]+)\}\}", legend)}
+        show_legend = integrity or (bool(labels) and labels <= bounded_labels) or (
+            len(exprs) > 1 and not labels and all(legend != "__auto" for _, legend in exprs))
     if any(re.search(r"\b(?:topk|bottomk)\s*\(", expr) for expr, _legend in exprs):
         title += " - changing top-N membership"
         description += (" Membership is recomputed at each step in the selected dashboard range; "
@@ -712,7 +729,7 @@ def timeseries_panel(title: str, exprs: Sequence[tuple[str, str]], *, descriptio
     return _panel(title, description, queries, viz("timeseries", {
         "options": {
             "legend": {"calcs": [], "displayMode": "list", "placement": "bottom",
-                       "showLegend": integrity or len(exprs) > 1},
+                       "showLegend": show_legend},
             "tooltip": {"mode": "single", "sort": "none"},
         },
         "fieldConfig": {
@@ -1219,7 +1236,7 @@ def banner_elements(dashboard: str = "estate") -> dict[str, Any]:
 
 - **Estate scope:** the Stack selector is carried through links but does not filter these panels because
   this datasource has no stack-slug label. Missing reporting is unknown, not zero.
-- **Run rate is a frozen navigation/model label only, not a measured normalised rate.** Billing
+- **Reported billing contains source observations, not a measured normalised run rate.** Billing
   observations and retained diagnostics are raw, not normalised: currency, billing period, population
   matching and overlap are unknown. A ratio does not qualify its inputs; a source field named
   forecast_months_remaining does not establish affordable months. Contract timing is separately

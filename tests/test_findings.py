@@ -209,12 +209,13 @@ class TestContract(unittest.TestCase):
             with self.subTest(kind=spec.kind):
                 self.assertGreater(len(spec.summary), 40)
 
-    def test_the_idle_leftover_finding_still_says_it_is_worth_nothing(self):
-        """This exact finding was once briefed as a saving. It is a governance finding worth £0 and the
-        correction must travel with the data, not just live in a document."""
+    def test_idle_candidate_does_not_claim_zero_charges_or_measured_activity(self):
+        """The legacy active-user partition also contains unavailable counts and billed telemetry."""
         spec = next(s for s in findings.SPECS if s.kind == "leftover_stack_idle")
-        self.assertIn("£0", spec.summary)
-        self.assertIn("aving", spec.summary)  # "saving" / "Never present it as a saving"
+        self.assertIn("zero or unavailable", spec.summary)
+        self.assertIn("billed users may still exist", spec.summary)
+        self.assertIn("not proof of abandonment or a saving", spec.summary)
+        self.assertNotIn("£0", spec.summary)
 
 
 class TestLokiIntegration(unittest.TestCase):

@@ -162,13 +162,13 @@ SPECS: tuple[FindingSpec, ...] = (
     ),
     FindingSpec(
         "estate_leftovers_billing", "A", "leftover_stack_billing", "medium",
-        "Automated-test leftover that is nonetheless billing - users or series attached.",
+        "Test-prefixed stack with reported active users. Name-based review candidate, not proof of charges.",
         ("Users (billed)", "Active series", "Age (days)", "Idle (days)", "Created by"),
     ),
     FindingSpec(
         "estate_leftovers_idle", "A", "leftover_stack_idle", "info",
-        "Automated-test leftover with no users and no series. A GOVERNANCE finding worth £0 - stack "
-        "creation is leaking. Never present it as a saving.",
+        "Test-prefixed stack with zero or unavailable active-user counts. Telemetry and billed users may still exist. "
+        "Confirm owner intent; this is not proof of abandonment or a saving.",
         ("Users (billed)", "Active series", "Age (days)", "Idle (days)", "Created by"),
     ),
     FindingSpec(
@@ -200,8 +200,8 @@ SPECS: tuple[FindingSpec, ...] = (
     ),
     FindingSpec(
         "ai_token_outliers", "I", "assistant_token_outlier", "medium",
-        "Tokens per Assistant user far above the estate median. Usually machine-driven rather than a "
-        "heavy human - read it beside the machine share, which is what explains it. Threshold: 25M "
+        "Tokens per Assistant user above the fixed review threshold. Recorded non-web surface share "
+        "does not establish bot or human identity, and the source windows differ. Threshold: 25M "
         "tokens per user (pillars/ai.py TOKENS_PER_USER_OUTLIER, the estate p90).",
         ("Tokens per Assistant user", "Assistant users", "Tokens", "Messages",
          "Machine share of categorised"),

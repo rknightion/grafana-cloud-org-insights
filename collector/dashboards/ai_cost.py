@@ -128,12 +128,13 @@ def elements(ds: str) -> dict:
         parameters=("personal_allowance", "system_allowance", "overage_per_million_usd"), currency=True)
     el["ai_cost_live_user_model"] = build.prometheus_table_panel(
         "User-category identities: live model cost (USD)",
-        _guard(f"topk(100, (({_U}) * 0 + (${{seat_price_usd:raw}})) + "
+        _guard(f"topk(100, (({_U}) > bool 0) * (${{seat_price_usd:raw}}) + "
                f"clamp_min(({_U}) - (${{personal_allowance:raw}}), 0) * ({_RATE}))",
                "seat_price_usd", "personal_allowance", "overage_per_million_usd"),
         legend="{{email}}", ds_uid=build.USAGE_UID, endpoint=True, limit=100,
         label_column="Identity", value_column="Model USD", unit="currencyUSD",
         description=_SCOPE + "Token-active user-category model seats; allowances deducted once across stacks. "
+        "Observed zero-token identities have zero model seat cost; missing identities remain unavailable. "
         "Live table only, never identity storage or a licensed-user claim.")
     el["ai_cost_live_categories"] = build.prometheus_table_panel(
         "Monthly token observations by app, feature and category",

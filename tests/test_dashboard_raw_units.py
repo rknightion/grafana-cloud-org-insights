@@ -156,13 +156,13 @@ class RawProductUnitsTest(unittest.TestCase):
         self.assertIn("monthly", self.panel("ai", "n_tokens")["description"].lower())
         self.assertIn("month-to-date", self.panel("ai", "tbl_people")["title"].lower())
 
-    def test_frozen_run_rate_tab_is_qualified_not_renamed(self):
+    def test_reported_billing_navigation_preserves_raw_source_qualification(self):
         spec = self.artifacts["commercial"]["spec"]
         self.assertEqual([tab["spec"]["title"] for tab in spec["layout"]["spec"]["tabs"]],
-                         ["Commitment", "Run rate", "Consumption vs term", "How to read this"])
+                         ["Commitment", "Reported billing", "Consumption observations", "How to read this"])
         # Qualification must be visible on the tab's headline panel as well as in the header.
         for text in (spec["description"], self.panel("commercial", "n_runrate")["description"]):
-            for phrase in ("Run rate", "navigation/model label only", "not a measured normalised rate"):
+            for phrase in ("Reported billing", "raw source observations", "not a measured normalised rate"):
                 self.assertIn(phrase, text)
         ai_commercial = next(tab["spec"] for tab in self.artifacts["ai"]["spec"]["layout"]["spec"]["tabs"]
                              if tab["spec"]["title"] == "Commercial")

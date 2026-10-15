@@ -1754,11 +1754,11 @@ class UsageDatasourcePanelsTest(unittest.TestCase):
                          ["Logs retention", "Engagement", "Response time", "Ownership",
                           "Alert flow", "Backend health"])
         self.assertEqual(self._tabs("commercial"),
-                         ["Commitment", "Run rate", "Consumption vs term"])
+                         ["Commitment", "Reported billing", "Consumption observations"])
         self.assertEqual(self._tabs("ai"),
                          ["Overview", "Adoption by stack", "Assistant use per stack",
-                          "Human vs machine", "Enablement and configuration", "Collection coverage",
-                          "Token consumption", "People and identities", "Commercial",
+                          "Recorded surfaces", "Enablement and configuration", "Collection coverage",
+                          "Token consumption", "Token-series categories", "Commercial",
                           "Feature activity", "AI cost model"])
 
     def test_the_unused_capability_tab_was_renamed_not_duplicated(self):
@@ -1862,7 +1862,7 @@ class Stage19DashboardContractsTest(unittest.TestCase):
                             query_cost["spec"]["description"]).lower()
         self.assertIn("unknown", query_cost_prose)
         tab_elements = {tab["spec"]["title"]: set(_placed_names(tab)) for tab in tabs}
-        self.assertIn("tbl_opening_inventory", tab_elements["What people open"])
+        self.assertIn("tbl_opening_inventory", tab_elements["Dashboard opening inventory"])
         self.assertIn("tbl_datasource_query_cost", tab_elements["Query behaviour"])
 
     def test_dashboard_usage_declares_both_new_input_ages(self):
@@ -2950,12 +2950,12 @@ def dashboard_coverage_inventory():
             from tests.test_dashboard_coverage import PRIVATE_EVIDENCE_DEBTS
             envelope_omissions = {
                 **{path: debt[0] for path, debt in PRIVATE_EVIDENCE_DEBTS.items()},
-                "meta.generated_at": "Snapshot publication timestamp retained for audit; dashboard banners show scan/input freshness, not this object's timestamp.",
+                "meta.generated_at": "Exact-object metadata panels present this timestamp as Snapshot generated at and derived publication age.",
                 "meta.tier": "Publisher tier is operational provenance, not the ownership tier of each hydrated input.",
                 "meta.stacks_total": "Snapshot inventory denominator retained for audit; the estate panel renders the current inventory metric.",
                 "meta.stacks_scannable": "Snapshot scannable denominator retained for audit; dashboard scan coverage uses the current scan metric.",
                 "meta.stacks_scanned": "Snapshot scanned count retained for audit; dashboard scan coverage uses the current scan metric.",
-                "meta.coverage_ratio": "Snapshot scan coverage retained for audit, distinct from rules coverage and the dashboard's current scan coverage.",
+                "meta.coverage_ratio": "Exact-object metadata panels present Publishing scan coverage, distinct from rule coverage and current scan coverage.",
             }
             if not panels:
                 reason = envelope_omissions.get(field, "")

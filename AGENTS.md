@@ -185,7 +185,8 @@ deltas, per-stack currency totals or seat-utilisation ratios until their exact c
   Stored history records its allowance basis; live allowance changes require upstream aggregate
   recomputation, never reconstruction from a single stored excess total. Monthly gauges and
   preview carry remain distinct from final invoices. No BI runtime credential or collector POST
-  exception follows. The new cost model remains unshipped pending implementation and proof.
+  exception follows. The cost model shipped in v0.15.1 with separate dated native and BI observations;
+  its historical calendar-month invoice totals remain unproved.
 - Role-only repair batching requires a healthy stored credential bound to the live basic-None reader
   and a pre-existing exact role UID. A pending outcome is not success. Delete the recorded transient
   Admin before entering the shared propagation wait; failed cleanup refuses repair success. At least
@@ -593,3 +594,10 @@ while preserving current folder metadata/resourceVersion; a raw saved builder ke
 writing. CLI authentication and browser authentication are separately witnessed.
 The exact receipt is machine-local at
 `/Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261014/backlog-zero/release140/completion-receipt.json`.
+
+Dashboard-only releases validate the existing consumer projection against its deployed collector revision,
+then build from the separately recorded dashboard source. Load the deployment rate card explicitly
+when assembling the full suite outside the direct publisher. Preserve existing dashboard identity,
+folder, namespace and customer AI pricing; read back every saved dashboard. Current-source coverage
+does not establish saved-dashboard coverage. Null-only declared numeric columns retain their numeric
+type without filling values; missing measurements remain unavailable.
