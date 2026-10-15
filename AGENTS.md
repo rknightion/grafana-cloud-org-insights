@@ -608,3 +608,11 @@ layout, presentation and target metadata passed readback; representative backend
 renders passed inspection. This is not every-panel execution proof. The collector image remains
 v0.15.1; source changes to finding-summary prose do not rewrite historical or live Loki records.
 Missing Labelling severity observations remain absent under their weighted coverage floor.
+
+Owner decision (2026-10-15): use `X-Loki-Disable-Pipeline-Wrappers: true` on explicit
+collector Loki reads, including the stack-scoped Usage Insights proxy. Result equivalence is no
+longer an acceptance prerequisite; investigate problematic differences during dev/customer rollout.
+Preserve GET-only transport, approved routes/scopes, instance-id guards, source floors and privacy.
+The shared HTTP client and publishers do not add this header; non-Loki requests stay unchanged.
+Sending the header and receiving successful results do not independently prove Cloud forwarding
+or suppression of usage recording. Metadata applied-configuration proof remains a separate gap.

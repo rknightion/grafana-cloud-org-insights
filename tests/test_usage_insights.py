@@ -1079,7 +1079,7 @@ class RuntimeGuardTest(unittest.TestCase):
         class Client:
             url = ""
 
-            def get(self, url, *, bearer):
+            def get(self, url, *, bearer, headers):
                 self.url = url
                 return Response()
 

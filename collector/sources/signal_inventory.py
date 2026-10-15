@@ -18,6 +18,7 @@ from typing import Any, Callable
 from collector import technology_registry
 from collector.httpclient import DeadlineExceeded, ReadOnlyClient, Response
 from collector.sources import dataplane
+from collector.sources.loki_read import LOKI_READ_HEADERS
 
 WINDOW = dt.timedelta(hours=24)
 # The endpoint is required to be bounded even though a normal tenant has far fewer distinct names.
@@ -79,8 +80,9 @@ def _get_list(
     basic: tuple[str, str],
     field: str,
     missing_is_empty: bool = False,
+    headers: Mapping[str, str] | None = None,
 ) -> tuple[list[str] | None, int | None, str | None]:
-    response = client.get(url, params=params, basic=basic)
+    response = client.get(url, params=params, basic=basic, headers=headers)
     if not response.ok:
         return None, response.status, None
     try:
@@ -246,7 +248,7 @@ def probe_stack(
         log_services, status, reason = _get_list(
             client, f"{base}/loki/api/v1/label/service_name/values",
             params={"start": start_seconds * 1_000_000_000, "end": end_seconds * 1_000_000_000},
-            basic=auth, field="data", missing_is_empty=True,
+            basic=auth, field="data", missing_is_empty=True, headers=LOKI_READ_HEADERS,
         )
         if log_services is None:
             return _list_failure(slug, "logs", status, reason)

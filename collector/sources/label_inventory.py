@@ -40,6 +40,7 @@ import urllib.request
 from collector import label_rules, pii
 from collector.httpclient import DeadlineExceeded, ReadOnlyClient, Response
 from collector.sources import label_risk, loki_config
+from collector.sources.loki_read import LOKI_READ_HEADERS
 
 SIGNALS = label_risk.SIGNALS
 MAX_SECONDS = 900.0
@@ -205,7 +206,8 @@ def _read(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str, signal: st
             else:
                 route = "/tags" if key is None else "/tag/" + urllib.parse.quote(".".join(key), safe="") + "/values"
         response = client.get(base.rstrip("/") + prefix + route, params=params,
-            headers={"Accept": "application/json; allow-utf8-labelnames=true"},
+            headers={"Accept": "application/json; allow-utf8-labelnames=true",
+                     **(LOKI_READ_HEADERS if signal == "logs" else {})},
             basic=(str(stack[tenant]), cap))
     if response.status != 200:
         raise ValueError("http_error")
@@ -413,7 +415,7 @@ def _loki_inputs(client, stack, cap, start, end, bounds, payload):
         response = client.get(base.rstrip("/") + prefix + "/series",
             params={"match[]": LOKI_SERIES_SELECTOR, "start": start * 1_000_000_000,
                     "end": end * 1_000_000_000},
-            headers={"Accept": "application/json; allow-utf8-labelnames=true"},
+            headers={"Accept": "application/json; allow-utf8-labelnames=true", **LOKI_READ_HEADERS},
             basic=(str(stack[tenant]), cap))
         if response.status != 200:
             raise ValueError("http_error")
@@ -488,7 +490,7 @@ def _loki_config_inputs(client, stack, cap, bounds, payload):
                 or parts.path not in ("", "/") or parts.query or parts.fragment or not stack.get("hlInstanceId")):
             raise ValueError("missing_endpoint")
         response = client.get(base.rstrip("/") + "/" + loki_config.LIMITS_PATH,
-                              basic=(str(stack["hlInstanceId"]), cap))
+                              basic=(str(stack["hlInstanceId"]), cap), headers=LOKI_READ_HEADERS)
         if client.remaining() <= 0:
             raise TimeoutError("deadline")
         if response.status != 200:

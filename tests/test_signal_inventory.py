@@ -22,7 +22,7 @@ class Client:
         self.responses = responses
         self.calls: list[tuple[str, dict[str, object], tuple[str, str]]] = []
 
-    def get(self, url: str, *, params: dict[str, object], basic: tuple[str, str]) -> Response:
+    def get(self, url: str, *, params: dict[str, object], basic: tuple[str, str], headers=None) -> Response:
         self.calls.append((url, params, basic))
         matcher = params.get("match[]")
         lookup = f"{url}?{matcher}" if matcher else url

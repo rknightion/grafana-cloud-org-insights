@@ -14,6 +14,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from collector.httpclient import DeadlineExceeded, ReadOnlyClient
+from collector.sources.loki_read import LOKI_READ_HEADERS
 
 PATH = "/loki/api/v1/index/volume"
 WINDOW_SECONDS = 86400
@@ -75,6 +76,7 @@ def _probe(client: ReadOnlyClient, stack: dict[str, Any], cap: str) -> dict[str,
     end = time.time_ns()
     try:
         response = client.get(base.rstrip("/") + PATH, basic=(str(tenant), cap), guarded=True,
+                              headers=LOKI_READ_HEADERS,
                               params={"query": '{service_name=~".+"}',
                                       "targetLabels": "service_name", "limit": LIMIT,
                                       "start": end - WINDOW_SECONDS * 1_000_000_000, "end": end})

@@ -15,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Mapping, Sequence
 
 from collector.httpclient import ReadOnlyClient
+from collector.sources.loki_read import LOKI_READ_HEADERS
 
 LIMITS_PATH = "config/tenant/v1/limits"
 RETENTION_REQUESTS_PATH = "api/plugins/grafana-dbcfg-app/resources/v1/lokiconfigretentions"
@@ -339,7 +340,8 @@ def _limits_record(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str) -
     if not cap:
         return unavailable(slug, NO_CREDENTIAL, "no organisation CAP")
     try:
-        response = client.get(f"{base.rstrip('/')}/{LIMITS_PATH}", basic=(str(tenant), cap))
+        response = client.get(f"{base.rstrip('/')}/{LIMITS_PATH}", basic=(str(tenant), cap),
+                              headers=LOKI_READ_HEADERS)
     except Exception as exc:  # noqa: BLE001 - one stack must not fail the estate sweep
         return unavailable(slug, TRANSPORT_ERROR, type(exc).__name__)
     if not response.ok:

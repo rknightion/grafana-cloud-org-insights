@@ -289,8 +289,8 @@ patterns. Collector data reads are `/loki/api/v1/labels`, `/loki/api/v1/label/<n
 metadata or counts, not log lines. The collector does not call Loki `/query`, `/query_range` or
 `/tail`, and the witnessed `/index/stats` route has no current collector caller.
 Public documentation reviewed on 2026-10-13 did not establish whether these exact metadata
-routes enter pattern usage or a supported per-request opt-out. Their classification therefore
-remains unknown. No invented header, parameter or Metrics matcher is applied to Loki.
+routes enter pattern usage or a supported per-request opt-out. Their deployed tracking classification remains unknown. The owner-approved wrapper bypass
+below is applied explicitly at Loki read call sites; the Metrics matcher is not applied to Loki.
 Exemptions protect logs from dropping; they are not evidence of a read-usage opt-out.
 
 A 2026-10-15 source follow-up identified an upstream candidate:
@@ -299,8 +299,12 @@ A 2026-10-15 source follow-up identified an upstream candidate:
 the [cache-key correction](https://github.com/grafana/loki/pull/12903) explicitly states that disabling
 wrappers can change query results. It is therefore not equivalent to a result-preserving ignore-usage
 contract. Cloud gateway propagation, the applied backend version and suitability for the dedicated
-Usage Insights datasource remain unverified. The collector does not set it or impersonate Grafana UI
-query tags. A successful HTTP response alone would not prove either suppression or unchanged results.
+Usage Insights datasource remain unverified. On 2026-10-15 the owner accepted result differences
+and authorized sending this header through dev and customer rollout. The collector now sets it on
+its explicit Loki reads, including the guarded Usage Insights query, metadata/configuration reads,
+volume and Loki rule inventory. Other signals and publishers receive no header; Grafana UI query
+tags are not spoofed. Successful responses establish observed compatibility, not independent proof
+of proxy forwarding or suppressed Cloud usage recording.
 
 The earlier route statement refers to native tenant Loki endpoints. The collector separately issues
 LogQL through each stack's dedicated Usage Insights datasource proxy with the mandatory instance-id

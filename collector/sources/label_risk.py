@@ -20,6 +20,7 @@ from typing import Any, Callable, Mapping
 from collector import pii
 from collector.httpclient import DeadlineExceeded, ReadOnlyClient, Response, _basic_auth
 from collector.netbound import bounded_call
+from collector.sources.loki_read import LOKI_READ_HEADERS
 
 PROFILE_PATHS = frozenset({
     "/querier.v1.QuerierService/LabelNames", "/querier.v1.QuerierService/LabelValues",
@@ -155,7 +156,8 @@ def _read(
         else:
             route = "/labels" if key is None else "/label/" + urllib.parse.quote(key[1], safe="") + "/values"
         response = client.get(base.rstrip("/") + prefix + route, params=params,
-                              basic=(str(stack[tenant_field]), cap))
+                              basic=(str(stack[tenant_field]), cap),
+                              headers=LOKI_READ_HEADERS if signal == "logs" else None)
     if not response.ok:
         raise ValueError("auth" if response.status in (401, 403) else "http_error")
     if len(response.body) > bounds.response_bytes:

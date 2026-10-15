@@ -1,10 +1,11 @@
 ---
 id: GCI-0137
 title: Keep platform reads out of the org's Adaptive Telemetry usage signals
-status: Parked
-assignee: []
+status: In Progress
+assignee:
+  - '@codex'
 created_date: '2026-10-13 17:19'
-updated_date: '2026-10-15 11:36'
+updated_date: '2026-10-15 11:51'
 labels:
   - adaptive
   - cost
@@ -55,6 +56,8 @@ Logs: research recommendation tracking and any supported read opt-out. Traces: e
 
 <!-- SECTION:PLAN:BEGIN -->
 Construct marked PromQL literals with fail-first HTTP-boundary proof; independently research metadata/Logs/Traces contracts and document unknowns. Run independent review, CodeRabbit and just check, then exact-source CI/release. Upgrade dev/customer immutable consumer pairs preserving configuration, review/apply saved targeted plans and verify live readback/no-change. Freshly pulled donor task duplicates provenance ID; backlog doctor safely renamed it to GCI-0137. Interim sanitized GCI-0136 is archived through CLI, preserving its evidence.
+
+2026-10-15 owner explicitly accepts query-result differences and authorizes X-Loki-Disable-Pipeline-Wrappers:true through dev/customer rollout. Add header at all explicit Loki collector request seams, preserve non-Loki/auth/GET/route/privacy boundaries, prove HTTP-boundary regressions, review and run gate. Ship exact source release and immutable consumer images; scoped reviewed plans, dev then customer. Compare safe aggregate/metadata results and fresh full-estate source health. This acceptance changes result-equivalence requirement only; metadata applied-config classification remains separate.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -75,4 +78,8 @@ Adaptive Metrics PromQL suppression deployed to dev and customer at release0.13.
 2026-10-15 research refresh: current official Adaptive Logs docs still state datasource-wide query evaluation regardless of origin and expose no supported per-request opt-out. Fresh log-template-service observation API accepts tenant/streams/query/sampling ratio; recommendation exclusions occur after observation. Fresh Mimir logger and usage-service configuration match retained source evidence: only param_query enters the reviewed PromQL usage pipeline; collector metadata uses other parameters. Exact applied customer configuration/version remains unverified. Do not invent a matcher or flag; authoritative applied-config/service-owner confirmation is the remaining useful evidence. Private source links remain outside this public tracker. Existing PromQL protection stays unchanged.
 
 2026-10-15 deeper upstream followup found a concrete candidate missed by prior searches: LokiDisablePipelineWrappersHeader is X-Loki-Disable-Pipeline-Wrappers. Public Loki PR12327 introduced propagation; PR12903 confirms request-level disabling changes results and separates cache keys. Private pinned enterprise source shows Adaptive counting wired via pipeline/extractor wrappers. It also corrects the previous statement that byte-range query exclusions occur only after counting: wrappers skip bytes_over_time/bytes_rate and omit counting for special UI source tags before recommendations. Those tags are not generic collector identity and will not be spoofed. No header deployed: Cloud propagation/applied version and result-preserving suitability for Usage Insights remain unproved. Private seven-file pinned source/test evidence at /Users/rob/repos/grafana-cloud-org-insights/codex/adaptive137-20261015/receipt.json. Next useful witness is the service-supported contract for this exact header/path, not another search for an unnamed flag. Metadata applied-configuration gap remains. AC2/3 stay open.
+
+Owner decision: query-result differences no longer block adopting the upstream wrapper-disable header; evaluate any problematic differences during dev/customer rollout. No grant to spoof UI query tags, broaden routes/scopes or persist raw logs/identities.
+
+Owner-approved header implementation covers all explicit collector Loki seams, including scoped Usage Insights shared and legacy request paths; mixed-signal boundary tests prove absence from other signals and preserved authorization. Six regressions failed first, focused251tests276subtests passed. Full justcheck2847tests29128subtests2existing skips45Tofu plus identifiers/history/no-em-dashes passed. CodeRabbitcomplete0all14files. Fixed-time baseline/header comparisons for views, requests and request_errors on both deployed write stacks returned equivalent valid aggregate responses. This proves observed compatibility, not proxy forwarding or Cloud counting suppression. Preparing v0.15.2 and exact-source immutable dev/customer rollout.
 <!-- SECTION:NOTES:END -->

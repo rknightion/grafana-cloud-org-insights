@@ -11,6 +11,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from collector.httpclient import DeadlineExceeded, ReadOnlyClient
+from collector.sources.loki_read import LOKI_READ_HEADERS
 
 _ROUTES = {
     "mimir": ("hmInstancePromUrl", "hmInstancePromId", "/api/prom/api/v1/rules", "/api/prom/api/v1/alerts"),
@@ -90,7 +91,8 @@ def _read(client: ReadOnlyClient, stack: dict[str, Any], cap: str,
     try:
         response = client.get(base.rstrip("/") + routes[index],
                               basic=(str(stack[tenant]), cap),
-                              headers={"Accept": "application/json"}, guarded=True)
+                              headers={"Accept": "application/json",
+                                       **(LOKI_READ_HEADERS if family == "loki" else {})}, guarded=True)
     except (DeadlineExceeded, TimeoutError):
         raise _Unavailable("deadline") from None
     except Exception:

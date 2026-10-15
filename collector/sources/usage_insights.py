@@ -42,6 +42,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence
 
 from collector.netbound import bounded_call
+from collector.sources.loki_read import LOKI_READ_HEADERS
 
 if TYPE_CHECKING:
     from collector.httpclient import ReadOnlyClient
@@ -382,11 +383,11 @@ def _query(base: str, token: str, expr: str, *, expected_instance_id: str,
     url = (f"{base}/api/datasources/proxy/uid/{DS_UID}/loki/api/v1/query?"
            + urllib.parse.urlencode({"query": expr, "time": query_time}))
     if client is not None:
-        response = client.get(url, bearer=token)
+        response = client.get(url, bearer=token, headers=LOKI_READ_HEADERS)
         if not response.ok:
             raise urllib.error.HTTPError(url, response.status, f"HTTP {response.status}", None, None)
         return response.json()
-    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
+    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}", **LOKI_READ_HEADERS})
     def read():
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read())

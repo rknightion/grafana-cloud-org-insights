@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.15.2](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.1...v0.15.2) (2026-10-15)
+
+### Bug Fixes
+
+* Send the owner-approved Loki pipeline-wrapper bypass header on explicit collector Loki reads while preserving authentication, instance guards and other signal requests.
+* Reconcile AI model seat populations, retain declared nullable numeric column types, and improve dashboard interpretation, legends, navigation and collection context.
+
+### Documentation
+
+* Distinguish source-level Adaptive query suppression evidence from deployed Cloud forwarding and usage-recording proof.
+
+
 ## [0.15.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.0...v0.15.1) (2026-10-15)
 
 
