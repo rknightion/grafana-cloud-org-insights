@@ -4,7 +4,6 @@ gate: just check
 ci-required: ci-success
 release-on-push: yes
 deploy-on-push: no
-receiver: https://loopwatch.m7kni.com
 grafana-stack: none
 
 ## Credentials
@@ -16,7 +15,7 @@ grafana-stack: none
 - Minting or rotating a service account or reader token is a live write: take a fresh pre-run witness
   (role, token, parameter-store version) immediately before, and read back after. Never re-mint a
   working credential; token names are org-wide unique, so a needless mint leaves an untracked one.
-- A named stack is per goal. This file names none.
+- A named stack is per charter. This file names none.
 
 ## Traps
 - `just check` takes 413-696 s and `just test` self-limits at 540 s. Give a gate run at least
@@ -24,7 +23,7 @@ grafana-stack: none
 - Every watcher (gate, CI, research), not only the gate run, gets the 1500 s deadline; say so in
   each watcher brief.
 - Two estate tiers, never mixed: a write-capable internal deployment tier, and a customer estate
-  reached read-only (GET or existing read-only RPC routes) unless a goal names an exact write fence.
+  reached read-only (GET or existing read-only RPC routes) unless the charter names an exact write fence.
   Reader, image and publication grants never imply bucket lifecycle or policy writes.
 - `just publish-image` is `[confirm]`-gated and pushes a real image. Never pass `--yes` or
   `JUST_YES=1`; a bypass granted once covers that one step and is no precedent.
@@ -59,11 +58,6 @@ grafana-stack: none
   with a part-aware linkage, never a bare exit 0.
 - Use a real `.venv` directory from `just setup`, never a symlink; the gate must run on a clean tree.
   Run consumer publication with a supported `python3`, with deployment pins committed first.
-- Audit grants use exact ref membership. Ungranted `refs/pull/*` are foreign, not violations; grant the
-  release-please branch and permitted tag refs.
-- Audit grants also name actors. Any goal touching shared `rknightion/.github` release work must grant
-  `github-actions[bot]` (merges) and `rknightion-token-broker[bot]` (release and tag authors) with
-  repo, branch and tag refs, or closeout audit fails exit 1 on the commit, tags and releases.
 - `ci-success` is the only required gate. Red release-please, auto-rc or publish runs do not override
   it; report image-publish failure or skip separately, never as one verdict.
 - Lanes write check scripts and evidence under `codex/` or the scratchpad, never `/tmp`, so the root
@@ -75,5 +69,5 @@ grafana-stack: none
 - The live deployment account, its infra-state lock and its write-capable Grafana stack are one serial
   resource, touched by the root only, never by a lane in parallel.
 - A land or push event records a SHA resolved with `git rev-parse`; never type or expand one by hand.
-- Publishing, tags and releases are root-only unless the goal grants a lane bounded push authority; a
+- Publishing, tags and releases are root-only unless the charter grants a lane bounded push authority; a
   lane with that grant owns its landed-SHA CI, and the root never pushes across an in-flight landing.
