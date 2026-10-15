@@ -591,10 +591,16 @@ shape. Read the schema at `/openapi/v3/apis/dashboard.grafana.app/v2` rather tha
  let a panel compare them, and never present one as the other.
 - **Do not assume per-user AI tokens are lifetime counters.** Retained versioned producer evidence
  reviewed on 2026-10-13 describes `grafanacloud_ai_tokens_user_total_tokens` and stack token totals as
- current-month gauges. This contradicts the earlier unconditional cumulative-counter note; it does
- not establish the deployed producer version or month-boundary behaviour. Keep monthly cost modelling
- unavailable until that contract is witnessed. Neither counter deltas nor a range maximum alone
- proves a complete calendar-month total. AI-active users are not automatically licensed seats.
+ current-month gauges. The 2026-10-15 aggregate customer witness supports the qualified, dated MTD
+ model, with separately recorded BI/native observations and unverified rollover data withheld.
+ Neither counter deltas nor a range maximum alone proves a complete calendar-month total. The
+ backfill start does not prove when billing began. AI-active users are not automatically licensed seats.
+- **Missing AI snapshots require a dashboard rebuild after first publication.** The builder renders
+ explicit unavailable text when an optional AI view is absent; it never writes a synthetic empty view.
+ Rebuild after the first accepted T2 publication to replace those text panels with snapshot queries.
+ Access and transport errors remain fatal. With AWS CLI 2.36.28, forcing `AWS_MAX_ATTEMPTS=1` changes
+ the missing-object stderr spelling and prevents its narrow `FileNotFoundError` classification;
+ dashboard builds use the normal retry environment. Do not treat every failed S3 read as absence.
 - **`user_type="service"` is not proof of a service-account identity.** Live rows include human-shaped
  addresses. Present it as the service-token series category.
 - **Self-managed usage folds into its connected Cloud stack.** The metrics carry no

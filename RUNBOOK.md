@@ -30,10 +30,16 @@ or infer billing start from the backfill boundary. No BI credential enters the r
 
 AI dashboard prices default to USD20 per model seat and USD2 per million excess tokens.
 Use `bin/dashboards.py --ai-seat-price <deployment-rate>` to set a deployment's seat-price
-widget default. Both prices reprice historical counts/excess. Live personal/system
+widget default. Repeat that deployment's override on later rebuilds to preserve its rate.
+Both prices reprice historical counts/excess. Live personal/system
 allowance widgets recompute upstream; they cannot retrospectively change captured
 allowances. Reference USD20/USD2 columns remain explicitly identified as generic
 comparisons. Per-stack observations contain tokens/memberships, not allocated seat money.
+
+When AI collection is disabled or its first snapshot has not been published, dashboard
+assembly uses explicit unavailable text for the three snapshot panels. Rebuild the
+dashboard after the first accepted T2 run to activate their S3 queries. A denied or
+failed S3 read still aborts the build; it is not a missing snapshot or a measured zero.
 
 ## Label inventory policy interface (default off)
 
