@@ -1,11 +1,11 @@
 ---
 id: GCI-0137
 title: Keep platform reads out of the org's Adaptive Telemetry usage signals
-status: In Progress
+status: Parked
 assignee:
   - '@codex'
 created_date: '2026-10-13 17:19'
-updated_date: '2026-10-15 11:51'
+updated_date: '2026-10-15 13:34'
 labels:
   - adaptive
   - cost
@@ -40,7 +40,7 @@ Logs: research recommendation tracking and any supported read opt-out. Traces: e
 <!-- AC:BEGIN -->
 - [x] #1 Every PromQL selector the collectors send to an org stack carries __ignore_usage__="", with a test that fails if a new data-plane metrics read omits it
 - [ ] #2 The metadata endpoints in use (label values with match[], series, cardinality API) are classified as counted or not counted toward Adaptive Metrics usage, with the evidence cited, and covered where the matcher is accepted
-- [ ] #3 Adaptive Logs: the docs research outcome is recorded; either an opt-out exists and every Loki read uses it, or none exists and the affected reads are listed
+- [x] #3 Adaptive Logs: the docs research outcome is recorded; either an opt-out exists and every Loki read uses it, or none exists and the affected reads are listed
 - [x] #4 Adaptive Traces: whether any opt-out exists is recorded; if none, the Tempo reads that could register usage are listed as a known gap
 - [x] #5 CAPABILITIES.md states what the platform does and does not do to an org's Adaptive Telemetry usage signals
 <!-- AC:END -->
@@ -82,4 +82,6 @@ Adaptive Metrics PromQL suppression deployed to dev and customer at release0.13.
 Owner decision: query-result differences no longer block adopting the upstream wrapper-disable header; evaluate any problematic differences during dev/customer rollout. No grant to spoof UI query tags, broaden routes/scopes or persist raw logs/identities.
 
 Owner-approved header implementation covers all explicit collector Loki seams, including scoped Usage Insights shared and legacy request paths; mixed-signal boundary tests prove absence from other signals and preserved authorization. Six regressions failed first, focused251tests276subtests passed. Full justcheck2847tests29128subtests2existing skips45Tofu plus identifiers/history/no-em-dashes passed. CodeRabbitcomplete0all14files. Fixed-time baseline/header comparisons for views, requests and request_errors on both deployed write stacks returned equivalent valid aggregate responses. This proves observed compatibility, not proxy forwarding or Cloud counting suppression. Preparing v0.15.2 and exact-source immutable dev/customer rollout.
+
+v0.15.2 sourcea2296b653b8a6e746a2dd76920c71a5f9d617b75 deployed to both approved environments. Source CI38730359010 and public publisher38730893259 passed; both architectures/source/version/eightCosign signatures verified. Infrastructure image-pinb49372a94e7f89e3912e298ac02541d56da240fa CI38731651899 passed. Exact16 image-only plans applied once per environment; all6definitions/schedules, three roles, effective IAM, original observer identity/birth, private-outcome exclusion, retention and disabled Container Insights verified; both no-change plans clean. Dev T2:7scanned,0primaryfailed,insights7/7,healthy. Customer T2:317scanned,0primaryfailed,healthy under existing floors; insights315/317 with no_credential1 and malformed_response1. Versioned scan integrity and byte-mutation controls passed without persisting raw scan bodies. Malformed case was surface request rows exceeding total; fresh-inventory scoped retry at fixed time passed baseline and header modes, not a correction of original coverage. Logs labelling317/317; metrics316/317 and traces296/317 remain explicitly partial. AC3 records owner-approved upstream-header adoption and observed compatibility, not independent Cloud forwarding/counting attestation. AC2 remains Parked for the exact applied Metrics metadata contract. Private receipt /Users/rob/repos/grafana-cloud-org-insights/codex/loki137-rollout-20261015/completion-receipt.json. No source floors, routes, scopes, credentials or privacy grants changed.
 <!-- SECTION:NOTES:END -->

@@ -605,8 +605,8 @@ type without filling values; missing measurements remain unavailable.
 The 2026-10-15 dashboard-only rollout published all twelve dashboards in both approved environments
 from source `3f3e94ef29e118460c92bbec5597fbd35edef5bd`. Saved queries, variables, transformations,
 layout, presentation and target metadata passed readback; representative backend queries and 34
-renders passed inspection. This is not every-panel execution proof. The collector image remains
-v0.15.1; source changes to finding-summary prose do not rewrite historical or live Loki records.
+renders passed inspection. This is not every-panel execution proof. At that dashboard-only rollout the collector image was
+v0.15.1; source changes alone did not rewrite historical or live Loki records.
 Missing Labelling severity observations remain absent under their weighted coverage floor.
 
 Owner decision (2026-10-15): use `X-Loki-Disable-Pipeline-Wrappers: true` on explicit
@@ -616,3 +616,12 @@ Preserve GET-only transport, approved routes/scopes, instance-id guards, source 
 The shared HTTP client and publishers do not add this header; non-Loki requests stay unchanged.
 Sending the header and receiving successful results do not independently prove Cloud forwarding
 or suppression of usage recording. Metadata applied-configuration proof remains a separate gap.
+
+The subsequent v0.15.2 collector rollout from `a2296b653b8a6e746a2dd76920c71a5f9d617b75`
+completed in both approved deployments. All six definitions/schedules per environment, effective
+IAM, original observer identity/birth, log exclusion, retention and disabled Container Insights
+were verified, followed by no-change plans. Fresh full-estate T2 runs exited successfully and
+passed existing source/publication floors. The customer Usage Insights snapshot retained two
+unavailable inputs: one missing credential and one surface-total reconciliation mismatch. A
+bounded retry of the latter succeeded with and without the header; it does not rewrite original
+coverage. Header forwarding and Cloud counting suppression remain independently unmeasured.

@@ -311,6 +311,13 @@ LogQL through each stack's dedicated Usage Insights datasource proxy with the ma
 guard. That query path must be considered separately from native metadata reads when qualifying a
 future opt-out; it is not a native customer log-line inventory permission.
 
+The owner-approved header shipped in v0.15.2 and was rolled out to both deployments. Fixed-time
+aggregate comparisons and fresh full-estate T2 scans established observed request compatibility
+under the existing source floors. One surface-total mismatch in the customer scan did not reproduce
+on a bounded retry with either header mode; its original unavailable observation was retained.
+These checks do not independently measure proxy forwarding or Adaptive counting suppression, and
+the separate Metrics metadata applied-configuration question remains open.
+
 ### SLO and Adaptive Traces
 
 T2's optional SLO list GET is `/api/plugins/grafana-slo-app/resources/v1/slo`. It projects definition
