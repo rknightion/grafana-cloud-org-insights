@@ -1,11 +1,11 @@
 ---
 id: GCI-0144
 title: Correct dashboard semantics and publish the complete usable suite
-status: In Progress
+status: Done
 assignee:
   - '@codex'
 created_date: '2026-10-15 09:12'
-updated_date: '2026-10-15 09:27'
+updated_date: '2026-10-15 09:39'
 labels: []
 dependencies: []
 priority: high
@@ -21,17 +21,17 @@ The full-suite audit found saved dashboards behind current source, inconsistent 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 AI seat detail and headline use the same token-active population; numeric schema survives missing values without fabricated zeroes
-- [ ] #2 All dashboards use qualified claims, actionable navigation, visible relevant freshness and useful legend and unavailable states while retaining approved data coverage
-- [ ] #3 Complete final suite is published to existing dev/customer identities with saved source-contract readback and representative visual and query verification
-- [ ] #4 Required gates and review pass; source and rollout evidence distinguish limitations and retain privacy and withdrawn requirements
+- [x] #1 AI seat detail and headline use the same token-active population; numeric schema survives missing values without fabricated zeroes
+- [x] #2 All dashboards use qualified claims, actionable navigation, visible relevant freshness and useful legend and unavailable states while retaining approved data coverage
+- [x] #3 Complete final suite is published to existing dev/customer identities with saved source-contract readback and representative visual and query verification
+- [x] #4 Required gates and review pass; source and rollout evidence distinguish limitations and retain privacy and withdrawn requirements
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 just test
-- [ ] #2 just tf-validate
-- [ ] #3 just check-identifiers and just no-em-dashes both return clean
+- [x] #1 just test
+- [x] #2 just tf-validate
+- [x] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -47,3 +47,9 @@ Implementation includes token-active AI seat reconciliation proven with real pro
 
 Final just check passed:2841tests,29128subtests,2existing skips,45OpenTofu tests; identifiers/history and no-em-dashes clean. CodeRabbit completed all22files including sanitized private operator helpers with one minor residual wording finding, corrected; focused post-review15tests56subtests passed. Independent review correction also resolved. Dashboard-only rollout preserves running collector image/projection; no numerical collector or scope change. Finding summary prose source corrections do not attest changed historical/live Loki records.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Completed at source3f3e94ef29e118460c92bbec5597fbd35edef5bd. All12 dashboards published to both existing environments with exact saved query/variable/transform/layout/presentation and folder/namespace checks. Source CI38713100894 all4jobs successful and CodeQL38713102009 successful. Live backend probes cover all12 representative models plus populated library inventory; both Infinity null-to-number controls passed and saved scorecard fields remain numeric/null.34 actual renders inspected across the suite, new context and triage. Pricing defaults20/customer14 and observer policy preserved. Full gate2841tests/29128subtests/2existing skips/45Tofu; independent and CodeRabbit findings corrected. Representative proof, not every-panel execution. Collector runtime remains v0.15.1; source-only summary prose does not rewrite Loki. Private receipt /Users/rob/repos/grafana-cloud-org-insights/codex/dashboard-fix-20261015/completion-receipt.json. Adaptive applied-contract research stays separately Parked.
+<!-- SECTION:FINAL_SUMMARY:END -->

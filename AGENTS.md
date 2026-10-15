@@ -601,3 +601,10 @@ when assembling the full suite outside the direct publisher. Preserve existing d
 folder, namespace and customer AI pricing; read back every saved dashboard. Current-source coverage
 does not establish saved-dashboard coverage. Null-only declared numeric columns retain their numeric
 type without filling values; missing measurements remain unavailable.
+
+The 2026-10-15 dashboard-only rollout published all twelve dashboards in both approved environments
+from source `3f3e94ef29e118460c92bbec5597fbd35edef5bd`. Saved queries, variables, transformations,
+layout, presentation and target metadata passed readback; representative backend queries and 34
+renders passed inspection. This is not every-panel execution proof. The collector image remains
+v0.15.1; source changes to finding-summary prose do not rewrite historical or live Loki records.
+Missing Labelling severity observations remain absent under their weighted coverage floor.
