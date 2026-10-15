@@ -73,3 +73,22 @@ class AICostDashboardTest(unittest.TestCase):
         for value in (-1, float("nan"), float("inf"), True):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 ai_cost.variables(seat_price=value)
+
+
+class AbsentAIHistoryTest(unittest.TestCase):
+    def test_unpublished_optional_history_keeps_live_model_and_access_errors_fatal(self):
+        from unittest import mock
+        real = build.read_view
+        def missing(name):
+            if name.startswith("ai_cost_"):
+                raise FileNotFoundError(name)
+            return real(name)
+        with mock.patch.object(build, "read_view", side_effect=missing):
+            elements = ai_cost.elements("synthetic")
+        self.assertIn("ai_cost_model_total", elements)
+        for key in ("ai_cost_captured_current", "ai_cost_history", "ai_cost_stack_history"):
+            self.assertEqual(elements[key]["spec"]["vizConfig"]["group"], "text")
+            self.assertEqual(elements[key]["spec"]["data"]["spec"]["queries"], [])
+        with mock.patch.object(build, "read_view", side_effect=RuntimeError("access denied")):
+            with self.assertRaises(RuntimeError):
+                ai_cost.elements("synthetic")

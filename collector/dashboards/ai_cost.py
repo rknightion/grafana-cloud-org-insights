@@ -155,17 +155,25 @@ def _history_elements(ds: str) -> dict:
     )
     panels = {}
     for key, title, view, filtered in tables:
-        panel = build.table_panel(
-            title, view, ds, schema=VIEW_SCHEMAS[view], stack_filter=filtered,
-            description=("Dated observed month-to-date aggregates; source, capture time and allowance basis are stored. "
-                         "Model price inputs reprice captured counts/excess; live allowances do not change history. "
-                         "USD20/USD2 columns are the generic reference basis, not the customer contract. "
-                         "BI and billing observations overlap and must not be added; no final invoice claim. "
-                         if not filtered else
-                         "Only this table follows Stack. Memberships are not additive people. "
-                         "Personal excess uses one org-wide identity allowance before filtering; no stack currency."),
-            units={name.strip(): "currencyUSD" for name, _kind in VIEW_SCHEMAS[view] if "USD" in name},
-        )
+        try:
+            panel = build.table_panel(
+                title, view, ds, schema=VIEW_SCHEMAS[view], stack_filter=filtered,
+                description=("Dated observed month-to-date aggregates; source, capture time and allowance basis are stored. "
+                             "Model price inputs reprice captured counts/excess; live allowances do not change history. "
+                             "USD20/USD2 columns are the generic reference basis, not the customer contract. "
+                             "BI and billing observations overlap and must not be added; no final invoice claim. "
+                             if not filtered else
+                             "Only this table follows Stack. Memberships are not additive people. "
+                             "Personal excess uses one org-wide identity allowance before filtering; no stack currency."),
+                units={name.strip(): "currencyUSD" for name, _kind in VIEW_SCHEMAS[view] if "USD" in name},
+            )
+        except FileNotFoundError:
+            panels[key] = build.text_panel(
+                title,
+                "**No published snapshot at dashboard build.** Current state is unknown, never measured zero. "
+                "Live billing panels remain available independently. Rebuild after an accepted collector "
+                "capture publishes this optional view. Access and transport errors are not treated as absence.")
+            continue
         if not filtered:
             query = panel["spec"]["data"]["spec"]["queries"][0]["spec"]["query"]["spec"]
             # Backend computed-column contract is witnessed on the deployed Infinity plugin.

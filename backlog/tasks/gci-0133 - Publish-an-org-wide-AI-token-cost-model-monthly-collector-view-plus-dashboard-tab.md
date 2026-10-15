@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@codex'
 created_date: '2026-10-12 10:04'
-updated_date: '2026-10-14 23:15'
+updated_date: '2026-10-15 00:26'
 labels:
   - ai
   - dashboards
@@ -68,4 +68,6 @@ Owner2026-10-14 22UTC supersedes exact pre-existing historical feed shipping pre
 Implementation attempt1: separate default-off T2 ai_billing source/input and three aggregate AI cost views, conditional bounded source-separated history, configurable live and captured-history prices, captured allowances, direct transient identity/category tables, native preview reconciliation and corrected lifetime/high-water captions. Shared wiring,33input budget/8existing provenance combinations and mechanically derived dependencies integrated. Current customer source proved through14actual guarded GETs with existing stored reader; no scope/credential changes. Native and customer-only October BI completed-hour aggregates match; prepared71count-only rows, NO S3 write. Infinity backend validates14/20USD repricing and negative-input absence; original bad scientific filter and reconciliation failures retained. Focused27tests/4subtests and91hydrate/budget/8475subtests pass; limited-side-write guard mutation fails correctly and restored candidate passes. Full final gate, CodeRabbit, source commit/release and deployment remain pending; do not call feature shipped.
 
 Final source validation: corrected justcheck exit0,2834tests/29128subtests/2existingempty-fixture skips and45OpenTofu tests. Test-runner RSS628.7MiB is not collector/ECS memory proof. Initial full gate failed six obsolete lifetime/tab/input-count expectations; changed only for the owner-approved scope/monthly contract/+8provenance budget and reran all. CodeRabbit complete all33initialfiles/1major corrected; delta complete0 on5changedcode/test files. Subsequent remaining corrections were declarative tab/budget expectations and captions, no unreviewed logic. All failed outputs retained. Source staged37ownedpublic paths, no customerdata/SQL/credentials/privateevidence uploaded; no featuredeployment yet.
+
+Both consumers now v0.15.0 exactd5af source, both16scoped applies0, all6live definitions/schedules/effectiveIAM/filter/retention/CIoff/originalobserverbirth verified andbothresource/outputNOOP. DevnaturalT1fresh exactimageexit0/sourcehealthtrue7stacks/0fail. CustomerfullownerT2originaltaskrunning, no duplicate. Customer-onlyBIseedwritten/readback1aggregate record withoriginalcutoff/sourcehash andfreshinventory316. Found build-only default-off optionalAIobject404assembly failure; fail-firstreproduced, nowFileNotFoundonly explicitunknowntext withnoobjectquery, permissions/transportremainfatal. Narrow3tests/4subtests andCodeRabbitcomplete0all2files; fulljustcheck0/45Tofu tests, unchangedruntimecollector/IaC. Patchsourcecommit/CI andfinalAIpublication/customerownerproof remainpending.
 <!-- SECTION:NOTES:END -->
