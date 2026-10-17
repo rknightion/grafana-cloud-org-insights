@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.15.3](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.2...v0.15.3) (2026-10-17)
+
+
+### Documentation
+
+* publish canonical agent documents ([929b257](https://github.com/rknightion/grafana-cloud-org-insights/commit/929b257d1e583d6b1a393b0283c65dc75b8cb63e))
+* record validated Loki header rollout and remaining metadata gap ([789d991](https://github.com/rknightion/grafana-cloud-org-insights/commit/789d991d0b7a31f7377f57d08a4f28852d784b56))
+
+
+### Miscellaneous
+
+* **deps:** update cgr.dev/chainguard/python docker digest to 26a608c ([#81](https://github.com/rknightion/grafana-cloud-org-insights/issues/81)) ([810b766](https://github.com/rknightion/grafana-cloud-org-insights/commit/810b7669304556ab78ef76fe66880f7521b5554b))
+* **deps:** update cgr.dev/chainguard/python docker digest to d0a0ef8 ([#80](https://github.com/rknightion/grafana-cloud-org-insights/issues/80)) ([68a1ce0](https://github.com/rknightion/grafana-cloud-org-insights/commit/68a1ce04c5fb37f05ec1b4f0fc701483ebccd62a))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to c2a4815 ([#82](https://github.com/rknightion/grafana-cloud-org-insights/issues/82)) ([5ec8578](https://github.com/rknightion/grafana-cloud-org-insights/commit/5ec85785e366573a7a6f02495411fc43a191b94f))
+* remove the retired fan-out/wave loop protocol ([50e0f88](https://github.com/rknightion/grafana-cloud-org-insights/commit/50e0f888d5de21fa647b352e5e8999bf683fdf03))
+
 ## [0.15.2](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.1...v0.15.2) (2026-10-15)
 
 ### Bug Fixes
