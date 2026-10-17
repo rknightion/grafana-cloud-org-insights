@@ -24,7 +24,7 @@
 # Wolfi is glibc-based, unlike Alpine: the existing AWS CLI v2 distribution needs no libc shim.
 # Keep download/install tools in a separate stage. The final Chainguard Python image has neither
 # a shell nor a package manager, and both multi-platform bases are pinned by index digest.
-FROM cgr.dev/chainguard/wolfi-base@sha256:256c88bb066424045021090932d50be93c8e3f2ce3586707702a401b146f3e43 AS awscli
+FROM cgr.dev/chainguard/wolfi-base@sha256:c2a4815b6ca49b9bbafd451b4bde690d567a86b2b6b54877faac8082a7bc4296 AS awscli
 
 # The AWS CLI v2 zip is arch-specific and there is no `latest` alias that resolves per-arch, so the
 # URL is selected from the build platform rather than hardcoded - a hardcoded x86 zip installs
