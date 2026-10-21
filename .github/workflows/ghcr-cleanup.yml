@@ -17,7 +17,7 @@ jobs:
     permissions:
       contents: read
       packages: write # delete expired GHCR package versions
-    uses: rknightion/.github/.github/workflows/ghcr-cleanup.yml@ca86dc7c1901c83e64deef48ee2811fa569e8c28 # v1.25.14
+    uses: rknightion/.github/.github/workflows/ghcr-cleanup.yml@2f92fb6f256e55936a3b08ec5e891edc6a2d110e # v1.25.15
     with:
       packages: "grafana-cloud-org-insights"
       dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || false }}
