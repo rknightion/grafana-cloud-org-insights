@@ -48,7 +48,7 @@ jobs:
       id-token: write        # obtain keyless signing credentials
       attestations: write    # publish build provenance
       security-events: write # upload the Trivy SARIF report
-    uses: rknightion/.github/.github/workflows/container-publish.yml@223d9483075f648075df1a806c2ad4db42101a7f # v1.25.25
+    uses: rknightion/.github/.github/workflows/container-publish.yml@42ebc6a7fa65c556994b27956dc176d245cceaba # v1.25.26
     with:
       release-tag: ${{ inputs.release-tag || '' }}
       trivy-ignore-file: .trivyignore.yaml
