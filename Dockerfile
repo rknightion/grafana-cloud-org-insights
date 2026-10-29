@@ -46,7 +46,7 @@ RUN set -eux; \
     /tmp/aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli; \
     rm -rf /tmp/awscli.zip /tmp/aws
 
-FROM cgr.dev/chainguard/python@sha256:54406d24c739b453320625fd90010275b49774bd374397f8fbdc24c3eca6b952
+FROM cgr.dev/chainguard/python@sha256:b21d678dcbec131cb15da75685598924a498a865f07331ff55135b34632822e6
 USER root
 
 ARG GCINSIGHT_SOURCE_URL=https://github.com/rknightion/grafana-cloud-org-insights
