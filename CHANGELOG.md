@@ -1,5 +1,81 @@
 # Changelog
 
+## [0.15.3](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.2...v0.15.3) (2026-10-30)
+
+
+### Build and CI
+
+* **auto-rc:** only cut RCs for pushes from this repository ([cee225b](https://github.com/rknightion/grafana-cloud-org-insights/commit/cee225b92e17fa7931de43bff80afd8a04b4e41a))
+* clear the zizmor findings that fail fork pull requests ([1930ecd](https://github.com/rknightion/grafana-cloud-org-insights/commit/1930ecd0170961c7f9699f159c80469781526ef1))
+
+
+### Documentation
+
+* publish canonical agent documents ([57d5391](https://github.com/rknightion/grafana-cloud-org-insights/commit/57d5391fe2accde8205dfd4af7e65ac34a8412c8))
+* publish canonical agent documents ([929b257](https://github.com/rknightion/grafana-cloud-org-insights/commit/929b257d1e583d6b1a393b0283c65dc75b8cb63e))
+* record validated Loki header rollout and remaining metadata gap ([789d991](https://github.com/rknightion/grafana-cloud-org-insights/commit/789d991d0b7a31f7377f57d08a4f28852d784b56))
+
+
+### Miscellaneous
+
+* **deps:** update actions/setup-python action to v7.1.0 ([#103](https://github.com/rknightion/grafana-cloud-org-insights/issues/103)) ([e08c536](https://github.com/rknightion/grafana-cloud-org-insights/commit/e08c536307e4c8cbc56dd6f4609343f09ecf64c3))
+* **deps:** update cgr.dev/chainguard/python docker digest to 0121063 ([#118](https://github.com/rknightion/grafana-cloud-org-insights/issues/118)) ([54fa51f](https://github.com/rknightion/grafana-cloud-org-insights/commit/54fa51f77eb380b177e74ec191f2441170183b4b))
+* **deps:** update cgr.dev/chainguard/python docker digest to 0f47468 ([#124](https://github.com/rknightion/grafana-cloud-org-insights/issues/124)) ([33f71e7](https://github.com/rknightion/grafana-cloud-org-insights/commit/33f71e74fd238f74b73c6ea86bc6418e065918cc))
+* **deps:** update cgr.dev/chainguard/python docker digest to 165fe44 ([#83](https://github.com/rknightion/grafana-cloud-org-insights/issues/83)) ([307f777](https://github.com/rknightion/grafana-cloud-org-insights/commit/307f7771fa5963a33b8a897f5243cfc9e521bede))
+* **deps:** update cgr.dev/chainguard/python docker digest to 1fa5b8d ([#122](https://github.com/rknightion/grafana-cloud-org-insights/issues/122)) ([14f9278](https://github.com/rknightion/grafana-cloud-org-insights/commit/14f927893871637c3ba2dc3ddd5c81beee4310d9))
+* **deps:** update cgr.dev/chainguard/python docker digest to 26a608c ([#81](https://github.com/rknightion/grafana-cloud-org-insights/issues/81)) ([810b766](https://github.com/rknightion/grafana-cloud-org-insights/commit/810b7669304556ab78ef76fe66880f7521b5554b))
+* **deps:** update cgr.dev/chainguard/python docker digest to 294a4d9 ([#104](https://github.com/rknightion/grafana-cloud-org-insights/issues/104)) ([3098479](https://github.com/rknightion/grafana-cloud-org-insights/commit/30984798b4180caff1f1764cf32f89ac692688e5))
+* **deps:** update cgr.dev/chainguard/python docker digest to 35d6025 ([#135](https://github.com/rknightion/grafana-cloud-org-insights/issues/135)) ([b1eb504](https://github.com/rknightion/grafana-cloud-org-insights/commit/b1eb5044f0583911eec8591aa14290f1e51d9495))
+* **deps:** update cgr.dev/chainguard/python docker digest to 49fd266 ([#116](https://github.com/rknightion/grafana-cloud-org-insights/issues/116)) ([6786d5c](https://github.com/rknightion/grafana-cloud-org-insights/commit/6786d5cbbc58bb9b715adbd4471f3a9d8f644b02))
+* **deps:** update cgr.dev/chainguard/python docker digest to 54406d2 ([#130](https://github.com/rknightion/grafana-cloud-org-insights/issues/130)) ([0fc5b1a](https://github.com/rknightion/grafana-cloud-org-insights/commit/0fc5b1a0fef9483bf0b3811fe4f8e27b215d6d2a))
+* **deps:** update cgr.dev/chainguard/python docker digest to 549f3ba ([#128](https://github.com/rknightion/grafana-cloud-org-insights/issues/128)) ([a3e22e3](https://github.com/rknightion/grafana-cloud-org-insights/commit/a3e22e30f7cc2aa9711444ca47846b5c0f3075d2))
+* **deps:** update cgr.dev/chainguard/python docker digest to 65099df ([#86](https://github.com/rknightion/grafana-cloud-org-insights/issues/86)) ([0fd8b01](https://github.com/rknightion/grafana-cloud-org-insights/commit/0fd8b013815273955e0c0b2d269d99f7c6752d8e))
+* **deps:** update cgr.dev/chainguard/python docker digest to 702c7df ([#85](https://github.com/rknightion/grafana-cloud-org-insights/issues/85)) ([a7f6c2b](https://github.com/rknightion/grafana-cloud-org-insights/commit/a7f6c2b1a9605e8a3fc8c0fad8d843ed52a1544e))
+* **deps:** update cgr.dev/chainguard/python docker digest to 8d518c3 ([#110](https://github.com/rknightion/grafana-cloud-org-insights/issues/110)) ([02d0cc7](https://github.com/rknightion/grafana-cloud-org-insights/commit/02d0cc74114799e9b042f0c37813abf1e3f63fb7))
+* **deps:** update cgr.dev/chainguard/python docker digest to 8ed5fe9 ([#119](https://github.com/rknightion/grafana-cloud-org-insights/issues/119)) ([ab22967](https://github.com/rknightion/grafana-cloud-org-insights/commit/ab22967bf2756b343cfcf76edc3390e4f4854123))
+* **deps:** update cgr.dev/chainguard/python docker digest to 93c92d4 ([#105](https://github.com/rknightion/grafana-cloud-org-insights/issues/105)) ([3c54517](https://github.com/rknightion/grafana-cloud-org-insights/commit/3c54517f9e245fa78cd3a91c0701aa26f255d2c7))
+* **deps:** update cgr.dev/chainguard/python docker digest to b21d678 ([#132](https://github.com/rknightion/grafana-cloud-org-insights/issues/132)) ([e00bcd1](https://github.com/rknightion/grafana-cloud-org-insights/commit/e00bcd1832623c6dbd5e060ea724cef599c18a1e))
+* **deps:** update cgr.dev/chainguard/python docker digest to bf06e09 ([#134](https://github.com/rknightion/grafana-cloud-org-insights/issues/134)) ([5c2e985](https://github.com/rknightion/grafana-cloud-org-insights/commit/5c2e985776283c4ceca311e147c9a486900bf961))
+* **deps:** update cgr.dev/chainguard/python docker digest to d0a0ef8 ([#80](https://github.com/rknightion/grafana-cloud-org-insights/issues/80)) ([68a1ce0](https://github.com/rknightion/grafana-cloud-org-insights/commit/68a1ce04c5fb37f05ec1b4f0fc701483ebccd62a))
+* **deps:** update cgr.dev/chainguard/python docker digest to e2ade44 ([#88](https://github.com/rknightion/grafana-cloud-org-insights/issues/88)) ([17cb875](https://github.com/rknightion/grafana-cloud-org-insights/commit/17cb875a38076775df1d4b073c9a0db4ca0c2861))
+* **deps:** update cgr.dev/chainguard/python docker digest to e503cdb ([#115](https://github.com/rknightion/grafana-cloud-org-insights/issues/115)) ([8625699](https://github.com/rknightion/grafana-cloud-org-insights/commit/8625699086f229d6cb1c37bae457b276d60969b2))
+* **deps:** update cgr.dev/chainguard/python docker digest to f6b8842 ([#108](https://github.com/rknightion/grafana-cloud-org-insights/issues/108)) ([c8812ef](https://github.com/rknightion/grafana-cloud-org-insights/commit/c8812ef09031d65d8f80521b8b757b8ee0743fac))
+* **deps:** update cgr.dev/chainguard/python docker digest to fd6d077 ([#113](https://github.com/rknightion/grafana-cloud-org-insights/issues/113)) ([54316ca](https://github.com/rknightion/grafana-cloud-org-insights/commit/54316ca6034f8cd1ac281c4d9678166ebc4413f7))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to 0b17920 ([#120](https://github.com/rknightion/grafana-cloud-org-insights/issues/120)) ([4bf4bc2](https://github.com/rknightion/grafana-cloud-org-insights/commit/4bf4bc20fa6f6f01848bce3819a8550069e600ff))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to 0feab53 ([#117](https://github.com/rknightion/grafana-cloud-org-insights/issues/117)) ([1567f46](https://github.com/rknightion/grafana-cloud-org-insights/commit/1567f46823090cc956dfb809d3f0e12c8ce85d6c))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to 31cfe08 ([#121](https://github.com/rknightion/grafana-cloud-org-insights/issues/121)) ([7f5f663](https://github.com/rknightion/grafana-cloud-org-insights/commit/7f5f663373f7408ec785dfb9224126c8477a4717))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to 360896e ([#114](https://github.com/rknightion/grafana-cloud-org-insights/issues/114)) ([6028d8a](https://github.com/rknightion/grafana-cloud-org-insights/commit/6028d8a9218d44a7c32bf1aab2c9f568198edd84))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to 6edbe6c ([#129](https://github.com/rknightion/grafana-cloud-org-insights/issues/129)) ([c952739](https://github.com/rknightion/grafana-cloud-org-insights/commit/c952739f68a6934cc6039bd5b277e48533056c3f))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to 81211e1 ([#87](https://github.com/rknightion/grafana-cloud-org-insights/issues/87)) ([e9a48b3](https://github.com/rknightion/grafana-cloud-org-insights/commit/e9a48b348d679ba8a779bd9b5318bb5614d15fe1))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to 88a20e2 ([#131](https://github.com/rknightion/grafana-cloud-org-insights/issues/131)) ([47e9647](https://github.com/rknightion/grafana-cloud-org-insights/commit/47e964779cd5de45b8d375b641cc95c58b3dad7b))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to bc76fa3 ([#100](https://github.com/rknightion/grafana-cloud-org-insights/issues/100)) ([646b8b9](https://github.com/rknightion/grafana-cloud-org-insights/commit/646b8b97d34906f977b206149f51feec6fb520d9))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to c2a4815 ([#82](https://github.com/rknightion/grafana-cloud-org-insights/issues/82)) ([5ec8578](https://github.com/rknightion/grafana-cloud-org-insights/commit/5ec85785e366573a7a6f02495411fc43a191b94f))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to d68b2b1 ([#84](https://github.com/rknightion/grafana-cloud-org-insights/issues/84)) ([e259e88](https://github.com/rknightion/grafana-cloud-org-insights/commit/e259e88bd97f926e1eb4bf599711185d586fa59b))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to d69a74a ([#111](https://github.com/rknightion/grafana-cloud-org-insights/issues/111)) ([52700cd](https://github.com/rknightion/grafana-cloud-org-insights/commit/52700cd360ff1da2cf4b91f95585679f7f0e967e))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to dbcc3a4 ([#125](https://github.com/rknightion/grafana-cloud-org-insights/issues/125)) ([3472a68](https://github.com/rknightion/grafana-cloud-org-insights/commit/3472a6879766fe60abeded1bf39b848c61062671))
+* **deps:** update cgr.dev/chainguard/wolfi-base docker digest to f15fea2 ([#107](https://github.com/rknightion/grafana-cloud-org-insights/issues/107)) ([e075e93](https://github.com/rknightion/grafana-cloud-org-insights/commit/e075e936c74d103a3a2e7dd6ed105050252147f6))
+* **deps:** update rknightion/.github action to v1.25.11 ([#89](https://github.com/rknightion/grafana-cloud-org-insights/issues/89)) ([f2d16f2](https://github.com/rknightion/grafana-cloud-org-insights/commit/f2d16f260c5f7804e76a05a5e498b40a82ed0118))
+* **deps:** update rknightion/.github action to v1.25.12 ([#90](https://github.com/rknightion/grafana-cloud-org-insights/issues/90)) ([191bc17](https://github.com/rknightion/grafana-cloud-org-insights/commit/191bc176e305308a1d8a3a199578a25cc9cc3df5))
+* **deps:** update rknightion/.github action to v1.25.13 ([#91](https://github.com/rknightion/grafana-cloud-org-insights/issues/91)) ([b98f0a5](https://github.com/rknightion/grafana-cloud-org-insights/commit/b98f0a5cb0d8758da2657187f48a0d18c825a056))
+* **deps:** update rknightion/.github action to v1.25.14 ([#92](https://github.com/rknightion/grafana-cloud-org-insights/issues/92)) ([f9c5af7](https://github.com/rknightion/grafana-cloud-org-insights/commit/f9c5af700f823aca9078bb23c0bdc2aed0e64684))
+* **deps:** update rknightion/.github action to v1.25.15 ([#93](https://github.com/rknightion/grafana-cloud-org-insights/issues/93)) ([82eef58](https://github.com/rknightion/grafana-cloud-org-insights/commit/82eef582b92a2b3d1b1417dadff8d1ce7ed7141b))
+* **deps:** update rknightion/.github action to v1.25.16 ([#94](https://github.com/rknightion/grafana-cloud-org-insights/issues/94)) ([2131e28](https://github.com/rknightion/grafana-cloud-org-insights/commit/2131e281095576fda60a2c77412fc144dd4e8181))
+* **deps:** update rknightion/.github action to v1.25.17 ([#95](https://github.com/rknightion/grafana-cloud-org-insights/issues/95)) ([013541c](https://github.com/rknightion/grafana-cloud-org-insights/commit/013541c08dc0bad7600b19a67a281791a6238298))
+* **deps:** update rknightion/.github action to v1.25.18 ([#96](https://github.com/rknightion/grafana-cloud-org-insights/issues/96)) ([781a5f8](https://github.com/rknightion/grafana-cloud-org-insights/commit/781a5f801c0d1205b376be20af733fc257ce947b))
+* **deps:** update rknightion/.github action to v1.25.19 ([#97](https://github.com/rknightion/grafana-cloud-org-insights/issues/97)) ([21c32ff](https://github.com/rknightion/grafana-cloud-org-insights/commit/21c32ff2c91eee7f79b36349c30c519e08296321))
+* **deps:** update rknightion/.github action to v1.25.20 ([#98](https://github.com/rknightion/grafana-cloud-org-insights/issues/98)) ([f4fc791](https://github.com/rknightion/grafana-cloud-org-insights/commit/f4fc791f4d4e3c5a4c1150fc46f6301203d077b5))
+* **deps:** update rknightion/.github action to v1.25.21 ([#99](https://github.com/rknightion/grafana-cloud-org-insights/issues/99)) ([0ee4f7d](https://github.com/rknightion/grafana-cloud-org-insights/commit/0ee4f7d2bd84b2beda8644da65bfe0202d6aee42))
+* **deps:** update rknightion/.github action to v1.25.22 ([#101](https://github.com/rknightion/grafana-cloud-org-insights/issues/101)) ([35cc92a](https://github.com/rknightion/grafana-cloud-org-insights/commit/35cc92a28390b4ec97a61d9dd8c19c6fc49f6352))
+* **deps:** update rknightion/.github action to v1.25.24 ([#102](https://github.com/rknightion/grafana-cloud-org-insights/issues/102)) ([78adcd3](https://github.com/rknightion/grafana-cloud-org-insights/commit/78adcd3f6c6ab637c344e540b714e8029dd0fb3b))
+* **deps:** update rknightion/.github action to v1.25.25 ([#106](https://github.com/rknightion/grafana-cloud-org-insights/issues/106)) ([5ea21c1](https://github.com/rknightion/grafana-cloud-org-insights/commit/5ea21c1d23714b337b4dbcc8aa24c6f088c6f0a7))
+* **deps:** update rknightion/.github action to v1.25.26 ([#109](https://github.com/rknightion/grafana-cloud-org-insights/issues/109)) ([6644376](https://github.com/rknightion/grafana-cloud-org-insights/commit/6644376e1607d5b4de2fed320851a96464f9b352))
+* **deps:** update rknightion/.github action to v1.25.27 ([#112](https://github.com/rknightion/grafana-cloud-org-insights/issues/112)) ([9d57239](https://github.com/rknightion/grafana-cloud-org-insights/commit/9d5723981f9e7dfc8ef296c250c61733aad99f47))
+* **deps:** update rknightion/.github action to v1.25.28 ([#123](https://github.com/rknightion/grafana-cloud-org-insights/issues/123)) ([8b1f19a](https://github.com/rknightion/grafana-cloud-org-insights/commit/8b1f19afe035804e2ba27fcf87a12ff3aae8a0ff))
+* **deps:** update rknightion/.github action to v1.25.29 ([#126](https://github.com/rknightion/grafana-cloud-org-insights/issues/126)) ([ecb217e](https://github.com/rknightion/grafana-cloud-org-insights/commit/ecb217ec6c63fd32aa86928866e29cfd7bba39df))
+* **deps:** update rknightion/.github action to v1.25.30 ([#127](https://github.com/rknightion/grafana-cloud-org-insights/issues/127)) ([fe3bc3a](https://github.com/rknightion/grafana-cloud-org-insights/commit/fe3bc3ac0e9bb69092cb7e1360d6982fbb7547da))
+* **deps:** update rknightion/.github action to v1.25.31 ([#133](https://github.com/rknightion/grafana-cloud-org-insights/issues/133)) ([2aa2afe](https://github.com/rknightion/grafana-cloud-org-insights/commit/2aa2afe942751544d56c93b076eccf67c9f98b0f))
+* remove the retired fan-out/wave loop protocol ([50e0f88](https://github.com/rknightion/grafana-cloud-org-insights/commit/50e0f888d5de21fa647b352e5e8999bf683fdf03))
+
 ## [0.15.2](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.1...v0.15.2) (2026-10-15)
 
 ### Bug Fixes
