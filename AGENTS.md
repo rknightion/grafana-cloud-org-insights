@@ -199,7 +199,20 @@ deltas, per-stack currency totals or seat-utilisation ratios until their exact c
 `grafanacloud-usage` GET query proxy and reader. All selectors retain the empty
 `__ignore_usage__` matcher. Emails stay upstream; only org/stack numeric aggregates may
 be stored. A valid query result is not an invoice, licensed-seat count or exact closing total.
-The ordinary publication floor and limited-run refusal apply, with no AI-specific exemption.
+Limited-run refusal applies. Owner decision (2026-11-03): on T2 `ai_billing` is non-blocking like
+`label_inventory` (`T2_NON_BLOCKING_INPUTS` in `scan.py`). An unavailable aggregate withholds only
+its input, `ai_cost_*` views and history update, records degraded source health, and lets the
+rest of T2 publish and advance its completion timestamp.
+
+Usage gauges are NOT month-to-date series. Each per-identity and per-stack AI gauge keeps last
+month's value until that identity or stack is next used, then restarts in place, often at a value
+above the carried one (witnessed for August, September and November 2026; October's series
+rotated instead). Every per-identity and per-stack token selector is therefore scoped with `@`
+the UTC month start to series that changed since then or did not exist then. Per-stack
+active-user and overage gauges follow their stack's current-month native tokens, because small
+integers often equal last month's value. Org-level native gauges stay unfiltered. Never drop
+this scoping or test it only mid-month: unscoped, the reconciliation fails every day once the
+month turns, and the identity count reports every prior-month user as active.
 
 History at `state/ai-cost-history.json` records separate dated native and one-time BI MTD
 observations, never sums them. Its thirteen-month/2 MiB/20,000-row bounds, conditional writes,
@@ -283,8 +296,9 @@ The approved source is doc-0008 Part 1 (Labelling best-practice research and rul
   owner envelope. Only its dependent labelling, maturity and value-benchmark views and the
   maturity-score metrics are withheld; other healthy T2 inputs publish. Last-good labelling views and historical accepted input envelopes are not overwritten
   with partial payloads. The new latest owner envelope records the failure, not a revived old
-  input; own-input hydration remains forbidden. All other sources and primary coverage retain
-  `FAILURE_ABORT_RATIO = 0.10` and their whole-publication refusal. Source/scan health remains
+  input; own-input hydration remains forbidden. All other sources except T2 `ai_billing` (see
+  Aggregate AI billing input) and primary coverage retain `FAILURE_ABORT_RATIO = 0.10` and their
+  whole-publication refusal. Source/scan health remains
   degraded even when non-blocking publication succeeds. Gather-time side writes must also
   honor primary coverage refusal and non-dry-run `--limit`/`--stack` refusal before their
   update seam; a healthy peer input never overrides those guards. The scan-owned gather wrapper logs

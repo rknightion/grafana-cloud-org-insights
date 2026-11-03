@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import re
 from urllib.parse import parse_qs, urlsplit
 
 import pytest
@@ -12,6 +13,7 @@ from collector.pillars import ai_cost
 from collector.sources import ai_billing
 
 NOW = dt.datetime(2026, 10, 14, 12, tzinfo=dt.timezone.utc)
+MONTH = ai_billing.month_start(NOW)
 STACKS = [
     {"id": 1, "slug": "hub", "regionSlug": "r1", "url": "https://hub.example.test"},
     {"id": 2, "slug": "peer", "regionSlug": "r2", "url": "https://peer.example.test"},
@@ -41,7 +43,7 @@ def fixture_values():
 
 
 def probe(values=None, *, now=NOW, alter=None):
-    queries = ai_billing.queries(40_000_000)
+    queries = ai_billing.queries(40_000_000, month_start=ai_billing.month_start(now))
     values = values if values is not None else fixture_values()
     requests = []
 
@@ -75,8 +77,8 @@ def test_real_get_boundary_dedup_and_shared_allowance_projection():
     assert all(urlsplit(request.full_url).path ==
                "/api/datasources/proxy/uid/grafanacloud-usage/api/v1/query" for request in requests)
     assert all(request.get_header("Authorization") == "Bearer existing-reader" for request in requests)
-    expressions = list(ai_billing.queries(40_000_000).values())
-    allocation = ai_billing.queries(40_000_000)["stack_user_excess"]
+    expressions = list(ai_billing.queries(40_000_000, month_start=MONTH).values())
+    allocation = ai_billing.queries(40_000_000, month_start=MONTH)["stack_user_excess"]
     assert "sum by(email)" in allocation and "on(email) group_left()" in allocation
     assert "sum by(stack_id,email)" in allocation
     import re
@@ -170,3 +172,40 @@ def test_history_preserves_distinct_sources_and_captured_allowance_basis():
     assert native["Model total USD"] == 260
     result["org"]["users"] = 10**1000
     assert ai_cost.build(STACKS, result) == ([], {})
+
+
+def test_month_to_date_excludes_series_still_carrying_last_month():
+    """Live usage gauges keep last month's value until the next use, then restart in place.
+
+    Only a series that changed since the month began, or did not exist then, is this month's.
+    Stack-level native gauges are small integers that can equal last month's value, so they
+    follow their stack's current-month native tokens instead of their own change.
+    """
+    start = int(dt.datetime(2026, 10, 1, tzinfo=dt.timezone.utc).timestamp())
+    assert MONTH == start
+    assert ai_billing.month_start(dt.datetime(2026, 10, 31, 23, 59, 59, tzinfo=dt.timezone.utc)) == start
+    expressions = ai_billing.queries(40_000_000, month_start=MONTH)
+    assert expressions == ai_billing.queries(40_000_000, month_start=ai_billing.month_start(NOW.replace(day=30)))
+    assert expressions != ai_billing.queries(40_000_000, month_start=ai_billing.month_start(NOW.replace(month=11)))
+    def current(selector):
+        return f"(({selector} != {selector} @ {start}) or ({selector} unless {selector} @ {start}))"
+
+    wrapped = []
+    for kind in ("user", "service", None):
+        suffix = f',user_type="{kind}"' if kind else ""
+        tokens = current('grafanacloud_ai_tokens_total_tokens{__ignore_usage__=""' + suffix + "}")
+        wrapped.append(current('grafanacloud_ai_tokens_user_total_tokens{__ignore_usage__=""' + suffix + "}"))
+        wrapped.append(f'(grafanacloud_ai_tokens_active_users{{__ignore_usage__=""{suffix}}} and on(stack_id) {tokens})')
+        wrapped.append(f'(grafanacloud_ai_tokens_overage{{__ignore_usage__=""{suffix},monetary="true"}} and on(stack_id) {tokens})')
+        wrapped.append(tokens)
+    for name, expression in expressions.items():
+        bare = expression
+        for form in sorted(wrapped, key=len, reverse=True):
+            bare = bare.replace(form, "")
+        assert not re.search(r"grafanacloud_ai_tokens_[a-z_]+\{", bare), (name, bare)
+    assert all(start_marker in expressions[name] for name in ("users", "stack_users", "stack_billed_overage")
+               for start_marker in (f"@ {start}",))
+    # Org-level native gauges are restarted by Cloud at the boundary; filtering them would
+    # drop a current count that happens to equal last month's.
+    assert 'sum(grafanacloud_org_ai_tokens_active_users{__ignore_usage__="",user_type="user"})' in expressions["reconciliation"]
+    assert expressions["billed_overage"] == 'sum(grafanacloud_org_ai_tokens_overage{__ignore_usage__="",monetary="true"})'

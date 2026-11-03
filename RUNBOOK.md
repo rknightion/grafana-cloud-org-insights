@@ -13,8 +13,11 @@ Identity aggregation happens upstream. The scanner receives only numeric org/sta
 aggregates; emails are displayed only in direct live Grafana tables. Active user-category
 identities define model seats, not licensed people. Native monetary token overage is a
 separately observed USD billing preview, not the configurable model or a final invoice.
-Source absence, ambiguous responses or failed reconciliation withhold the input and its
-views under the ordinary T2 publication floor; no new floor exception is introduced.
+Source absence, ambiguous responses or failed reconciliation withhold the input, its
+`ai_cost_*` views and its history update. On T2 this is non-blocking: the rest of the scan
+still publishes and advances its completion timestamp, with degraded source health. Queries
+count only series that changed since the UTC month start, because the live gauges carry last
+month's value until next use (see `docs/traps.md`).
 
 `state/ai-cost-history.json` retains at most thirteen captured months and separate
 billing/backfill observations. It is bounded to 2 MiB and 20,000 stack rows, with

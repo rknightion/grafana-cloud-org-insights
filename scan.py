@@ -870,9 +870,15 @@ def disabled_inputs(cfg: config.Config) -> dict[str, dict[str, str]]:
             for name, selected in enabled.items() if not selected}
 
 
+# T2 owner inputs whose failure withholds only their own input, views and history. Every other
+# owner failure still refuses all writes. D-LBL12 for labelling; the aggregate AI billing preview
+# is an optional org-level estimate that must not stop the rest of the estate publishing.
+T2_NON_BLOCKING_INPUTS = frozenset({"label_inventory", "ai_billing"})
+
+
 def blocking_source_failures(tier: str, failures: list[str]) -> list[str]:
-    """D-LBL12 withholds only labelling; every other owner failure still refuses all writes."""
-    return [name for name in failures if not (tier == "t2" and name == "label_inventory")]
+    """Owner failures that refuse every write for this tier."""
+    return [name for name in failures if not (tier == "t2" and name in T2_NON_BLOCKING_INPUTS)]
 
 
 def label_inventory_source_report(

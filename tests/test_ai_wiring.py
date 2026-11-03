@@ -1,5 +1,6 @@
 """Real scanner admission and immutable projection boundaries for aggregate AI history."""
 import copy
+import datetime as dt
 import json
 from unittest import mock
 from urllib.parse import parse_qs, urlsplit
@@ -17,7 +18,7 @@ from tests.test_ai_history import S3, observation, NOW, STACKS
 from tests.test_consumer_manifest import fixture, consumer_manifest
 
 
-@pytest.mark.parametrize("case", ["healthy", "limited", "peer_failed", "empty"])
+@pytest.mark.parametrize("case", ["healthy", "limited", "peer_failed", "empty", "ai_unavailable"])
 def test_actual_cli_ai_history_obeys_every_publication_guard(tmp_path, case):
     stack = dict(scanner.STACK, id=1, url="https://synthetic.example.test")
     original = scanner.client_for
@@ -30,8 +31,12 @@ def test_actual_cli_ai_history_obeys_every_publication_guard(tmp_path, case):
     values.update(stack_user_tokens=[({"stack_id": "1"}, 50000000)],
                   stack_service_users=[({"stack_id": "1"}, 0)],
                   stack_service_tokens=[({"stack_id": "1"}, 0)])
-    factory = ai_billing.queries()
-    names = {expression: name for name, expression in factory.items()}
+    if case == "ai_unavailable":
+        values["reconciliation"] = [({}, 1)]
+    def names_at(instant):
+        moment = dt.datetime.fromtimestamp(int(instant), dt.timezone.utc)
+        factory = ai_billing.queries(month_start=ai_billing.month_start(moment))
+        return {expression: name for name, expression in factory.items()}
     def client_for(**kwargs):
         client, calls = original(**kwargs)
         prior = client._transport
@@ -39,7 +44,7 @@ def test_actual_cli_ai_history_obeys_every_publication_guard(tmp_path, case):
             if "/api/datasources/proxy/" not in request.full_url:
                 return prior(request, timeout)
             params = parse_qs(urlsplit(request.full_url).query)
-            key = names[params["query"][0]]
+            key = names_at(params["time"][0])[params["query"][0]]
             calls.append("ai_" + key)
             body = {"status": "success", "data": {"resultType": "vector", "result": [
                 {"metric": labels, "value": [int(params["time"][0]), str(value)]}
@@ -67,6 +72,15 @@ def test_actual_cli_ai_history_obeys_every_publication_guard(tmp_path, case):
         assert "history" in snapshot
         assert "ai_cost_current" in result["views"][0]
         assert sum(call.startswith("ai_") for call in result["calls"]) == 14
+    elif case == "ai_unavailable":
+        # A failed billing aggregate withholds only its own views and history; the rest of T2
+        # still publishes and advances its completion timestamp.
+        assert result["code"] == 0, result["stderr"]
+        assert not puts
+        assert result["scans"] and result["views"]
+        assert not result["scans"][0]["data"].get("ai_billing")
+        assert not result["scans"][0]["meta"]["scan_healthy"]
+        assert all(not name.startswith("ai_cost") for views in result["views"] for name in views)
     else:
         assert result["code"] != 0
         assert not puts

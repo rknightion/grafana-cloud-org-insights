@@ -117,6 +117,17 @@ is already a datasource on the target stack, a panel beats a pipeline.**
  `logs_instance_active_streams`.
 - **Every one of those counters is a count with no name label.** They answer "how many", never
  "which". Names come from the signal databases' own label APIs, not from here.
+- **AI token and active-user gauges carry last month's value across the boundary.**
+ `grafanacloud_ai_tokens_user_total_tokens`, `grafanacloud_ai_tokens_total_tokens` and the per-stack
+ `grafanacloud_ai_tokens_active_users`/`_overage` series keep emitting the prior month's figure every
+ minute until that identity or stack is next used, then restart in place. A restart whose first value
+ is above the carried one shows no decrease, so `resets()` misses it. A bare `sum` early in a month
+ therefore mixes two months, and `sum(by(email) > bool 0)` counts every prior-month user as active
+ while `grafanacloud_org_ai_tokens_active_users` (which does restart) reports the true count. Scope
+ with `(x != x @ <month start>) or (x unless x @ <month start>)`; join small per-stack integers to
+ their stack's scoped tokens rather than testing their own change. Witnessed for August, September
+ and November 2026, scoped reconciliation exactly zero at 3 Nov, 31 Oct, 20 Oct and 20 Sep. October's
+ series rotated at the boundary instead, so one clean rollover proves nothing.
 - **The per-region usage-insights datasources only see their own region.** A central stack therefore
  cannot provide honest org-wide attribution. Pillar J uses one reader per measured stack and filters the
  regional tenant to that stack; one-stack-per-region would use stack A's identity to read stack B.

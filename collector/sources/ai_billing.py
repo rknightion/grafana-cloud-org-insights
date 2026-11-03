@@ -30,6 +30,34 @@ def _selector(metric: str, user_type: str | None = None, *, monetary: bool = Fal
     return metric + "{" + ",".join(labels) + "}"
 
 
+def month_start(now: dt.datetime) -> int:
+    """Unix second of the UTC calendar month containing `now`."""
+    now = now.replace(tzinfo=dt.timezone.utc) if now.tzinfo is None else now.astimezone(dt.timezone.utc)
+    return int(now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp())
+
+
+def _current(selector: str, start: int) -> str:
+    # Usage gauges keep LAST month's value until the identity or stack is next used, then restart in
+    # place (witnessed for August, September and November 2026; October's series rotated instead).
+    # A series is this month's only if it changed since `start` or did not exist then. A restart
+    # whose first value exceeds the carried one shows no decrease, so resets() would miss it.
+    return f"(({selector} != {selector} @ {start}) or ({selector} unless {selector} @ {start}))"
+
+
+def _metric(metric: str, user_type: str | None = None, *, monetary: bool = False, start: int) -> str:
+    selector = _selector(metric, user_type, monetary=monetary)
+    if metric in {"grafanacloud_ai_tokens_user_total_tokens", "grafanacloud_ai_tokens_total_tokens"}:
+        return _current(selector, start)
+    if metric in {"grafanacloud_ai_tokens_active_users", "grafanacloud_ai_tokens_overage"}:
+        # Small per-stack integers often equal last month's value, so a change test drops current
+        # rows. Follow the stack's current-month native tokens instead.
+        tokens = _current(_selector("grafanacloud_ai_tokens_total_tokens", user_type), start)
+        return f"({selector} and on(stack_id) {tokens})"
+    # Org-level native gauges restart at the boundary; filtering them would drop a current value
+    # that happens to equal last month's.
+    return selector
+
+
 def _distance(left: str, right: str, *, stack: bool = False) -> str:
     if not stack:
         return f"abs(({left}) - ({right}))"
@@ -43,10 +71,19 @@ def _distance(left: str, right: str, *, stack: bool = False) -> str:
             f"or (sum({left}) * 0) or (sum({right}) * 0))")
 
 
-def queries(personal_allowance: int = 40_000_000) -> dict[str, str]:
-    """Every result has either no labels or stack_id; emails never cross the GET boundary."""
+def queries(personal_allowance: int = 40_000_000, *, month_start: int) -> dict[str, str]:
+    """Every result has either no labels or stack_id; emails never cross the GET boundary.
+
+    `month_start` scopes every per-identity and per-stack gauge to the calendar month: see `_current`.
+    """
     if type(personal_allowance) is not int or not 0 <= personal_allowance <= MAX_NUMBER:
         raise ValueError("invalid personal allowance")
+    if type(month_start) is not int or not 0 < month_start <= MAX_NUMBER:
+        raise ValueError("invalid month start")
+
+    def _selector(metric: str, user_type: str | None = None, *, monetary: bool = False) -> str:
+        return _metric(metric, user_type, monetary=monetary, start=month_start)
+
     user = _selector("grafanacloud_ai_tokens_user_total_tokens", "user")
     service = _selector("grafanacloud_ai_tokens_user_total_tokens", "service")
     identities = f"sum by(email)({user})"
@@ -152,9 +189,7 @@ def probe(
 
     if type(system_allowance) is not int or not 0 <= system_allowance <= MAX_NUMBER:
         return unavailable("invalid_allowance")
-    try:
-        expressions = queries(personal_allowance)
-    except ValueError:
+    if type(personal_allowance) is not int or not 0 <= personal_allowance <= MAX_NUMBER:
         return unavailable("invalid_allowance")
     stack = next((item for item in stacks if item.get("slug") == write_stack
                   and item.get("status") != "paused"), None)
@@ -170,6 +205,10 @@ def probe(
     now = now.replace(tzinfo=dt.timezone.utc) if now.tzinfo is None else now.astimezone(dt.timezone.utc)
     instant = int(now.timestamp())
     now = dt.datetime.fromtimestamp(instant, dt.timezone.utc)
+    try:
+        expressions = queries(personal_allowance, month_start=month_start(now))
+    except ValueError:
+        return unavailable("invalid_allowance")
     endpoint = f"{base}/api/datasources/proxy/uid/{DS_UID}/api/v1/query"
     live_ids = {str(item["id"]) for item in stacks if item.get("id") is not None}
     if not live_ids:
