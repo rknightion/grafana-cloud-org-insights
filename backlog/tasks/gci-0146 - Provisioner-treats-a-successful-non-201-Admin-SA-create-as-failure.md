@@ -4,6 +4,7 @@ title: Provisioner treats a successful non-201 Admin SA create as failure
 status: To Do
 assignee: []
 created_date: '2026-11-05T20:42:00Z'
+updated_date: '2026-11-05T22:28:00Z'
 labels:
   - provisioner
   - bug
@@ -31,3 +32,9 @@ On the robknight dev estate, new staff stack pulumireflab2 has failed provisioni
 - [ ] #2 just tf-validate
 - [ ] #3 just check-identifiers and just no-em-dashes both return clean
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-11-05: fixed in v0.15.5 (719a58e). Live: creates now succeed on dev (pulumireflab2 reader id 28 + SSM token) and customer (7 new tokens minted, 3 role-only repairs kept existing tokens). Second defect found: _delete_sa requires exactly HTTP 200; the gcom proxy deletes with another success status, so every repaired stack reports cleanup_failed and skips post-repair verification. Witness on dev: transient Admin absent from pulumireflab2 SA list after the run. Not yet fixed.
+<!-- SECTION:NOTES:END -->
