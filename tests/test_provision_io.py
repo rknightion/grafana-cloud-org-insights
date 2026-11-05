@@ -432,6 +432,77 @@ class RepairVerificationTest(unittest.TestCase):
             )
         g.post.assert_not_called()
 
+    def test_first_install_accepts_a_200_create_carrying_the_named_account(self):
+        # GCI-0146: gcom's proxy answered a successful create with a non-201 2xx; demanding exactly 201
+        # left every new stack without a reader. Shape is the logged live body.
+        class OkGcom(_RepairGcom):
+            def post(self, path, body):
+                if path.endswith("/api/serviceaccounts"):
+                    sa_id = 90 if body["role"] == "Admin" else 12
+                    return 200, {"id": sa_id, "uid": "u", "name": body["name"], "login": "sa-1",
+                                 "orgId": 1, "isDisabled": False, "role": body["role"]}
+                if path.endswith("/serviceaccounts/12/tokens"):
+                    return 200, {"id": 7, "key": "reader-key"}
+                return super().post(path, body)
+
+        presence = self._presence(sa_exists=False, secret_exists=False, token_status=None,
+                                  basic_role=None, role_exists=False, assigned=False)
+        g = OkGcom()
+        with mock.patch.object(cli, "Stack", _RepairStack), \
+             mock.patch.object(cli, "ensure_role", return_value=(True, "role-1", "created")), \
+             mock.patch.object(cli, "ssm_put", return_value=True) as put, \
+             mock.patch.object(cli, "verify_reader", return_value=(True, "verified")):
+            outcome = cli.repair(
+                g, cli.Ledger(), "a", "https://real-a.example", [], False,
+                presence=presence, existing_token=None,
+            )
+
+        self.assertEqual(outcome.action, pr.OK, outcome.detail)
+        self.assertEqual(put.call_args.args[1]["sa_id"], 12)
+        self.assertIn("/instances/a/api/serviceaccounts/90", g.deleted)
+
+    def test_a_2xx_create_without_the_named_account_is_refused_with_its_status(self):
+        class WrongGcom(_RepairGcom):
+            def post(self, path, body):
+                if path.endswith("/api/serviceaccounts"):
+                    return 200, {"id": 90, "name": "someone-else", "role": "Admin"}
+                return super().post(path, body)
+
+        g = WrongGcom()
+        outcome = cli.repair(
+            g, cli.Ledger(), "a", "https://real-a.example", [], False,
+            presence=self._presence(), existing_token="reader-token",
+        )
+        self.assertEqual(outcome.action, "admin_sa_failed")
+        self.assertIn("HTTP 200", outcome.detail)
+        self.assertEqual(g.deleted, [])
+
+    def test_a_dry_run_repair_still_walks_the_plan_past_the_stub_creates(self):
+        presence = self._presence(sa_exists=False, secret_exists=False, token_status=None,
+                                  basic_role=None, role_exists=False, assigned=False)
+        g = cli.Gcom("fake-token", dry_run=True)
+        with mock.patch.object(cli, "ensure_role", return_value=(True, "role-1", "created")), \
+             mock.patch.object(cli, "ssm_put", return_value=True), \
+             mock.patch.object(cli.Ledger, "created_here", return_value=True), \
+             mock.patch("sys.stdout"):
+            outcome = cli.repair(
+                g, cli.Ledger(), "a", "https://real-a.example", [], True,
+                presence=presence, existing_token=None,
+            )
+        self.assertEqual(outcome.action, pr.OK, outcome.detail)
+        self.assertEqual(g.writes, 0)
+
+    def test_created_sa_requires_2xx_a_positive_int_id_and_the_exact_name(self):
+        ok = {"id": 3, "name": "n"}
+        self.assertTrue(cli.created_sa(201, ok, "n"))
+        self.assertTrue(cli.created_sa(200, ok, "n"))
+        self.assertFalse(cli.created_sa(400, ok, "n"))
+        self.assertFalse(cli.created_sa(0, ok, "n"))
+        self.assertFalse(cli.created_sa(201, {"id": 3, "name": "n2"}, "n"))
+        self.assertFalse(cli.created_sa(201, {"id": True, "name": "n"}, "n"))
+        self.assertFalse(cli.created_sa(201, {"id": 0, "name": "n"}, "n"))
+        self.assertFalse(cli.created_sa(201, "n", "n"))
+
     def test_role_repair_keeps_the_working_reader_token(self):
         class CaptureGcom(_RepairGcom):
             def __init__(self):
@@ -791,7 +862,7 @@ def test_synthetic_deselection_discovers_once_across_real_main_repair_and_verify
             if path.endswith("/tokens"):
                 assert "/20001/" not in path, "working reader credential must not be minted"
                 return 200, {"key": "admin"}
-            return 201, {"id": 20002}
+            return 201, {"id": 20002, "name": body["name"]}
         def delete(self, path):
             self.writes += 1
             writes.append(path)

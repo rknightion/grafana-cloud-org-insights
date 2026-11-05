@@ -324,6 +324,24 @@ def _delete_sa(g: Gcom, ledger: Ledger, slug: str, sa_id: int) -> bool:
     return status == 200
 
 
+def created_sa(status: int, body: Any, name: str) -> bool:
+    """A service-account create succeeded: any 2xx carrying the account we named.
+
+    The API documents 201, but gcom's instance proxy has answered a successful create with another
+    2xx and the created account as the body. Requiring exactly 201 left every new stack without a
+    reader (GCI-0146). The body check still refuses an error payload or another account.
+    """
+    return (200 <= status < 300 and isinstance(body, dict) and type(body.get("id")) is int
+            and body["id"] > 0 and body.get("name") == name)
+
+
+def _create_ok(status: int, body: Any, name: str, dry_run: bool) -> bool:
+    """`created_sa`, except a dry run accepts the write stub's canned account (id 0, name `dry-run`)."""
+    if dry_run:
+        return status == 201 and isinstance(body, dict)
+    return created_sa(status, body, name)
+
+
 def sweep_leftover_admin(g: Gcom, ledger: Ledger, slug: str, sas: list[dict]) -> int:
     """Remove an Admin identity a previous crashed run left behind.
 
@@ -657,8 +675,8 @@ def repair(g: Gcom, ledger: Ledger, slug: str, stack_url: str, sas: list[dict],
         raise TypeError("repair requires a probed Presence; refusing writes with unknown token state")
     status, admin = g.post(f"/instances/{slug}/api/serviceaccounts",
                            {"name": pr.ADMIN_SA_NAME, "role": "Admin"})
-    if status != 201 or not isinstance(admin, dict):
-        detail = str(admin)[:140]
+    if not _create_ok(status, admin, pr.ADMIN_SA_NAME, dry_run):
+        detail = f"HTTP {status}: {str(admin)[:140]}"
         if isinstance(admin, dict) and admin.get("messageId") == "serviceaccounts.ErrAlreadyExists":
             detail = "a previous run left an Admin identity behind; swept next run"
         return pr.Outcome(slug, pr.PROVISIONABLE, "admin_sa_failed", detail)
@@ -710,8 +728,9 @@ def repair(g: Gcom, ledger: Ledger, slug: str, stack_url: str, sas: list[dict],
                     # Verified behaviour: names cannot duplicate. Re-read rather than treating it as failure.
                     _, sas = list_sas(g, slug)
                     reader = next((s for s in sas if s.get("name") == pr.READER_SA_NAME), None)
-                elif status != 201 or not isinstance(created, dict):
-                    return pr.Outcome(slug, pr.PROVISIONABLE, "reader_sa_failed", str(created)[:140])
+                elif not _create_ok(status, created, pr.READER_SA_NAME, dry_run):
+                    return pr.Outcome(slug, pr.PROVISIONABLE, "reader_sa_failed",
+                                      f"HTTP {status}: {str(created)[:140]}")
                 else:
                     reader = created
                     ledger.record_sa(slug, created["id"])
