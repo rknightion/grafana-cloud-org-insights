@@ -492,6 +492,34 @@ class RepairVerificationTest(unittest.TestCase):
         self.assertEqual(outcome.action, pr.OK, outcome.detail)
         self.assertEqual(g.writes, 0)
 
+    def _repair_with_delete_status(self, delete_status):
+        class DeleteGcom(_RepairGcom):
+            def delete(self, path):
+                self.deleted.append(path)
+                return delete_status, None
+
+        g = DeleteGcom()
+        sas = [{"id": 12, "name": pr.READER_SA_NAME, "role": "None"}]
+        with mock.patch.object(cli, "Stack", _RepairStack), \
+             mock.patch.object(cli, "ensure_role", return_value=(True, "role-1", "patched")), \
+             mock.patch.object(cli, "verify_reader", return_value=(True, "verified")), \
+             mock.patch("sys.stderr"):
+            outcome = cli.repair(
+                g, cli.Ledger(), "a", "https://real-a.example", sas, False,
+                presence=self._presence(role_actions=frozenset({"serviceaccounts:read"})),
+                existing_token="reader-token",
+            )
+        return g, outcome
+
+    def test_a_204_admin_delete_counts_as_cleaned(self):
+        g, outcome = self._repair_with_delete_status(204)
+        self.assertEqual(outcome.action, pr.OK, outcome.detail)
+        self.assertEqual(g.deleted, ["/instances/a/api/serviceaccounts/90"])
+
+    def test_a_failed_admin_delete_still_refuses_success(self):
+        _, outcome = self._repair_with_delete_status(500)
+        self.assertEqual(outcome.action, "cleanup_failed")
+
     def test_created_sa_requires_2xx_a_positive_int_id_and_the_exact_name(self):
         ok = {"id": 3, "name": "n"}
         self.assertTrue(cli.created_sa(201, ok, "n"))

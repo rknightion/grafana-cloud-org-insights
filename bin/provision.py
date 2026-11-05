@@ -321,7 +321,13 @@ def _delete_sa(g: Gcom, ledger: Ledger, slug: str, sa_id: int) -> bool:
             f"The provisioner is create-only against gcom by design (PLAN 17D-review)."
         )
     status, _ = g.delete(f"/instances/{slug}/api/serviceaccounts/{sa_id}")
-    return status == 200
+    # Any 2xx: gcom's instance proxy confirms a delete with a non-200 success status, and demanding
+    # exactly 200 reported every repaired stack as cleanup_failed after the account was gone (GCI-0146).
+    if not 200 <= status < 300:
+        print(f"    WARNING: transient Admin {sa_id} delete on {slug} answered HTTP {status}",
+              file=sys.stderr)
+        return False
+    return True
 
 
 def created_sa(status: int, body: Any, name: str) -> bool:
