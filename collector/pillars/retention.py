@@ -1,4 +1,4 @@
-"""Pillar E - effective Loki per-stream retention and request-policy gaps."""
+"""Pillar E - effective Loki retention (tenant default and per-stream rules) and policy gaps."""
 
 from __future__ import annotations
 
@@ -24,8 +24,8 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
         ("PR", "number"), ("Limit", "string"), ("Opaque keys", "string"),
     ),
     "risk_retention_stream": (
-        (" Stack", "string"), ("Period days", "number"), ("Priority", "number"),
-        ("Selector", "string"),
+        (" Stack", "string"), ("Scope", "string"), ("Period days", "number"),
+        ("Priority", "number"), ("Selector", "string"),
     ),
     "risk_retention_policy_gaps": (
         (" Stack", "string"), ("Selector", "string"), ("Expected days", "number"),
@@ -37,7 +37,16 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
     ),
 }
 
+SCOPE_STREAM = "stream rule"
+SCOPE_GLOBAL = "tenant default"
+
 _PERIOD = re.compile(r"^(\d+(?:\.\d+)?)([dh])$")
+# Prometheus `model.Duration` notation, which Loki renders: whole weeks and years are folded
+# (`14d` is written `2w`, `365d` `1y`) and a zero duration is `0s`.
+_PROM_DURATION = re.compile(
+    r"^(?:(\d+)y)?(?:(\d+)w)?(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?(?:(\d+)ms)?$"
+)
+_PROM_UNIT_DAYS = (365.0, 7.0, 1.0, 1 / 24, 1 / 1440, 1 / 86400, 1 / 86_400_000)
 _EQUALITY_MATCHER = re.compile(r'\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*("(?:\\.|[^"\\])*")\s*')
 
 
@@ -86,13 +95,17 @@ def period_days(value: Any) -> float | None:
         return amount if math.isfinite(amount) and amount >= 0 else None
     if not isinstance(value, str):
         return None
-    match = _PERIOD.fullmatch(value.strip())
-    if not match:
+    text = value.strip()
+    match = _PERIOD.fullmatch(text)
+    if match:
+        amount = float(match.group(1))
+        if not math.isfinite(amount):
+            return None
+        return amount if match.group(2) == "d" else amount / 24.0
+    compound = _PROM_DURATION.fullmatch(text)
+    if not text or compound is None or not any(compound.groups()):
         return None
-    amount = float(match.group(1))
-    if not math.isfinite(amount):
-        return None
-    return amount if match.group(2) == "d" else amount / 24.0
+    return sum(int(part) * unit for part, unit in zip(compound.groups(), _PROM_UNIT_DAYS) if part)
 
 
 def _policy_rows(expected_policy: Sequence[Mapping[str, Any]]) -> list[tuple[str, float]]:
@@ -107,7 +120,10 @@ def _policy_rows(expected_policy: Sequence[Mapping[str, Any]]) -> list[tuple[str
 
 
 def _display_days(value: float) -> int | float:
-    return int(value) if value.is_integer() else value
+    if value.is_integer():
+        return int(value)
+    # Sub-day units accumulate binary-fraction noise; hours to four places is plenty.
+    return round(value, 4)
 
 
 def _display_raw(value: Any) -> str | None:
@@ -152,6 +168,7 @@ def build(
     compliant_stacks: set[str] = set()
     unreadable_stacks: set[str] = set()
     any_policy_measurement = False
+    global_periods: dict[str, float] = {}
     readable_requests = False
     readable_limits = False
 
@@ -200,15 +217,20 @@ def build(
         if not isinstance(limits, Mapping) or not limits.get("available"):
             unreadable_policy_rows()
             continue
-        # Omitted means the response lacked the field, unlike an explicit [] which is a measurable
-        # absence of per-stream overrides.  Do not promote a missing field into a policy breach.
+        # The tenant default governs every stream no rule selects. Absent or malformed is unknown.
+        global_days = period_days(limits.get("retention_period"))
         if "retention_stream" not in limits:
-            # A readable response can still omit the field entirely. It supplies no selector-level
-            # evidence, so this stack is unreadable rather than a false breach or compliance result.
-            if policy:
-                unreadable_policy_rows()
-            continue
-        raw_streams = limits.get("retention_stream")
+            # Loki omits an empty `retention_stream` from the limits body but always renders
+            # `retention_period`, so a readable default with no list is a measured "no rules".
+            # Without that default the omission is unexplained, and the stack stays unreadable
+            # rather than becoming a false breach or compliance result.
+            if global_days is None:
+                if policy:
+                    unreadable_policy_rows()
+                continue
+            raw_streams: Any = []
+        else:
+            raw_streams = limits.get("retention_stream")
         if not isinstance(raw_streams, list):
             if policy:
                 unreadable_policy_rows()
@@ -241,6 +263,7 @@ def build(
                 continue
             stack_stream_rows.append({
                 " Stack": slug,
+                "Scope": SCOPE_STREAM,
                 "Period days": _display_days(period),
                 "Priority": priority,
                 "Selector": selector,
@@ -253,6 +276,8 @@ def build(
         measured_limits += 1
         readable_limits = True
         stream_rows.extend(stack_stream_rows)
+        if global_days is not None:
+            global_periods[slug] = global_days
 
         if policy:
             stack_compliant = True
@@ -270,11 +295,13 @@ def build(
                     )
                 else:
                     highest_priority = None
-                    effective = None
+                    # No rule selects these streams, so the tenant default governs them.
+                    effective = global_days
                 # An exact-selector winner covers the whole expected stream set. Overlapping
                 # rules at lower priority cannot govern any of it; tied rules can change the
                 # period only when shorter. Unknown overlap remains unreadable if it can win.
-                if any(candidate != selector
+                if effective is None or any(
+                       candidate != selector
                        and (highest_priority is None or priority > highest_priority
                             or (priority == highest_priority and period < effective))
                        and not _provably_disjoint(selector, candidate)
@@ -283,21 +310,21 @@ def build(
                     stack_compliant = False
                     continue
                 any_policy_measurement = True
-                status = "compliant" if effective is not None and effective >= minimum else "below policy"
+                status = "compliant" if effective >= minimum else "below policy"
                 policy_status_rows.append({
                     " Stack": slug, "Selector": selector,
                     "Expected days": _display_days(minimum),
-                    "Effective days": _display_days(effective) if effective is not None else None,
+                    "Effective days": _display_days(effective),
                     "Status": status,
                 })
-                if effective is None or effective < minimum:
+                if effective < minimum:
                     stack_compliant = False
                     gaps.add(slug)
                     gap_rows.append({
                         " Stack": slug,
                         "Selector": selector,
                         "Expected days": _display_days(minimum),
-                        "Effective days": _display_days(effective) if effective is not None else None,
+                        "Effective days": _display_days(effective),
                     })
             if stack_compliant:
                 compliant_stacks.add(slug)
@@ -316,6 +343,19 @@ def build(
     if policy:
         metrics.append(("gcinsight_risk_retention_policy_unreadable_stacks", {},
                         float(len(unreadable_stacks))))
+
+    # A tenant default is listed only where it departs from the estate's most common default,
+    # discovered from this run's readable stacks. With no unique mode, every default is listed.
+    tallies: dict[float, int] = {}
+    for days in global_periods.values():
+        tallies[days] = tallies.get(days, 0) + 1
+    ranked = sorted(tallies.values(), reverse=True)
+    typical = (max(tallies, key=tallies.__getitem__)
+               if ranked and (len(ranked) == 1 or ranked[0] > ranked[1]) else None)
+    stream_rows.extend({
+        " Stack": slug, "Scope": SCOPE_GLOBAL, "Period days": _display_days(days),
+        "Priority": None, "Selector": None,
+    } for slug, days in global_periods.items() if days != typical)
 
     views: Views = {}
     if readable_requests:

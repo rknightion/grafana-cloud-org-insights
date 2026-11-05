@@ -232,7 +232,8 @@ def test_unsupported_labelling_grammar_preserves_public_retention(labelling):
         {"period": "31d", "priority": 4, "selector": '{service="api"}'}]
     metrics, views = retention_output(stack, record)
     assert views["risk_retention_stream"] == [
-        {" Stack": stack["slug"], "Period days": 31, "Priority": 4, "Selector": '{service="api"}'}]
+        {" Stack": stack["slug"], "Scope": "stream rule", "Period days": 31, "Priority": 4,
+         "Selector": '{service="api"}'}]
     assert views["risk_retention_policy_gaps"] == []
     assert views["risk_retention_policy_status"][0]["Status"] == "compliant"
     values = {name: value for name, _, value in metrics}

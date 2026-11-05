@@ -33,7 +33,7 @@ from collector import identity, observability_score
 from collector import ratecard as ratecard_model
 from collector.dashboards import ai_cost as cost_dashboard
 from collector.dashboards import build, layout, view_metadata
-from collector.dashboards.retention_panels import retention_panels
+from collector.dashboards.retention_panels import DAYS_UNIT, retention_panels
 from collector.dashboards import outcomes
 from collector.pillars import adaptive_traces as adaptive_traces_pillar
 from collector.pillars import library_panels as library_panels_pillar
@@ -2346,19 +2346,21 @@ def d_risk(ds: str):
             description="Who requested a change, its status and the approving pull-request number. "
                         "An empty table proves only that no self-serve request was returned."),
         "retention_stream": build.table_panel(
-            "Effective per-stream retention",
+            "Effective retention: non-default tenant defaults and per-stream rules",
             "risk_retention_stream",
             ds,
             schema=retention_pillar.VIEW_SCHEMAS["risk_retention_stream"],
-            units={"Period days": "d"},
-            description="What is actually in force from the Loki dataplane. Selectors can contain "
+            units={"Period days": DAYS_UNIT},
+            description="What is actually in force from the Loki dataplane: every per-stream rule, plus "
+                        "the tenant default wherever it departs from the estate's most common default "
+                        "(a stream no rule selects keeps the tenant default). Selectors can contain "
                         "customer labels and remain view data, never metric labels."),
         "retention_policy_gaps": build.table_panel(
             "Configured retention policy gaps",
             "risk_retention_policy_gaps",
             ds,
             schema=retention_pillar.VIEW_SCHEMAS["risk_retention_policy_gaps"],
-            units={"Expected days": "d", "Effective days": "d"},
+            units={"Expected days": DAYS_UNIT, "Effective days": DAYS_UNIT},
             description="Readable stacks whose effective selector rule falls below a deployment-supplied "
                         "minimum. Unreadable stacks are not classified as compliant or in breach."),
         "routing_scope": build.text_panel(
@@ -2637,7 +2639,7 @@ def d_risk(ds: str):
             "risk_retention_policy_status",
             ds,
             schema=retention_pillar.VIEW_SCHEMAS["risk_retention_policy_status"],
-            units={"Expected days": "d", "Effective days": "d"},
+            units={"Expected days": DAYS_UNIT, "Effective days": DAYS_UNIT},
             description="Every live stack for each deployment-supplied selector expectation. "
                         "Unreadable Loki limits or ambiguous selector overlap stay unclassified; "
                         "the self-serve request route is independent.")

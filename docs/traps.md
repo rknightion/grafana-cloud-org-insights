@@ -460,6 +460,19 @@ No money conversion, complete-total claim or showback implementation follows fro
 - **A reported global period that differs from a documented default is not override evidence.** The
   effective value is the contract. Confirm a per-stream override from `retention_stream`, not by
   comparing `retention_period` with documentation.
+- **`/config/tenant/v1/limits` omits an empty `retention_stream` but always renders
+  `retention_period`.** 2026-11-05 staff witness (robk, robknight, portina): exact 200, `retention_period:
+  31d`, `max_query_lookback: 0s`, no `retention_stream` key. A readable default with no list is a
+  measured "no stream rules"; streams no rule selects keep the tenant default. Without a readable
+  default the omission stays unreadable.
+- **Loki renders durations in Prometheus `model.Duration` notation.** Whole weeks and years fold
+  (`14d` is `2w`, `365d` is `1y`, while `120d` stays `120d`); zero is `0s`.
+  A parser accepting only `Nd`/`Nh` marks every `2w` rule's stack unreadable.
+- **Billing `max_query_lookback` of `0` means unset**, which follows retention. Comparing it raw with
+  `retention_period` flags every default stack as divergent (331 of 335 on a customer estate on
+  2026-11-05, against 85 real candidates).
+- **Grafana's `d` unit rescales**: 31 days renders as "4.43 week". Day-count columns use
+  `suffix: d`.
 - **An empty Databases Configuration request list means no self-serve request was returned.** It does
   not mean no override is in force: an engineering-applied override can exist without an app request.
   Keep the request and effective-limit views independent.

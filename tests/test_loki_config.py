@@ -60,6 +60,7 @@ retention_stream:
         self.assertEqual(limits["retention_stream"], [{
             "period": "31d", "priority": 4, "selector": '{service="api"}',
         }])
+        self.assertEqual(limits["retention_period"], "744h")
 
     def test_live_yaml_without_stream_overrides_is_still_a_readable_limit(self):
         client = Client([
@@ -71,6 +72,28 @@ retention_stream:
 
         self.assertTrue(limits["available"])
         self.assertNotIn("retention_stream", limits)
+        self.assertEqual(limits["retention_period"], "744h")
+
+    def test_witnessed_staff_body_shape_yields_the_tenant_default_and_no_stream_list(self):
+        # Reduced from the 2026-11-05 staff witness: lookback `0s`, default `31d`, no
+        # retention_stream key at all when a tenant has no stream rules.
+        client = Client([
+            Response(200, b"max_query_lookback: 0s\nmax_query_series: 500\n"
+                          b"retention_period: 31d\nvolume_enabled: true\n"),
+            Response(200, {"items": []}),
+        ])
+        limits = loki_config.probe_stack(client, STACK, "cap", "reader")["limits"]
+        self.assertEqual(limits["retention_period"], "31d")
+        self.assertNotIn("retention_stream", limits)
+
+    def test_duplicate_tenant_default_is_an_invalid_response(self):
+        for body in (b"retention_period: 31d\nretention_period: 90d\n",
+                     b"retention_period:\nretention_period: 31d\n"):
+            with self.subTest(body=body):
+                client = Client([Response(200, body), Response(200, {"items": []})])
+                limits = loki_config.probe_stack(client, STACK, "cap", "reader")["limits"]
+                self.assertFalse(limits["available"])
+                self.assertEqual(limits["state"], loki_config.INVALID_RESPONSE)
 
     def test_malformed_limits_text_is_not_promoted_to_an_empty_read(self):
         client = Client([

@@ -116,11 +116,12 @@ class RetentionPillarTest(unittest.TestCase):
     def test_failed_plugin_route_keeps_confirmed_loki_policy_breach(self):
         metrics, views = build({
             "alpha": {
-                "limits": {"available": True, "retention_stream": []},
+                "limits": {"available": True, "retention_period": "7d", "retention_stream": []},
                 "change_requests": {"available": False},
             },
         }, policy=[{"selector": "{service=\"one\"}", "minimum_period": "14d"}])
         self.assertEqual(views["risk_retention_policy_status"][0]["Status"], "below policy")
+        self.assertEqual(views["risk_retention_policy_status"][0]["Effective days"], 7)
         self.assertEqual(len(views["risk_retention_policy_gaps"]), 1)
         self.assertEqual(
             {n: v for n, _, v in metrics}["gcinsight_risk_retention_policy_gap_stacks"], 1.0,
@@ -213,7 +214,8 @@ class RetentionPillarTest(unittest.TestCase):
         })
 
         self.assertEqual(views["risk_retention_stream"], [{
-            " Stack": "alpha", "Period days": 31, "Priority": 2, "Selector": "{team=\"ops\"}",
+            " Stack": "alpha", "Scope": "stream rule", "Period days": 31, "Priority": 2,
+            "Selector": "{team=\"ops\"}",
         }])
 
     def test_missing_retention_stream_makes_no_row_or_policy_gap(self):
@@ -303,7 +305,7 @@ class RetentionPillarTest(unittest.TestCase):
     def test_policy_count_keeps_confirmed_breach_when_another_stack_is_unreadable(self):
         metrics, views = build({
             "alpha": {
-                "limits": {"available": True, "retention_stream": []},
+                "limits": {"available": True, "retention_period": "1w", "retention_stream": []},
                 "change_requests": {"available": True, "items": []},
             },
             "beta": {
@@ -314,7 +316,7 @@ class RetentionPillarTest(unittest.TestCase):
 
         self.assertEqual(views["risk_retention_policy_gaps"], [{
             " Stack": "alpha", "Selector": "{team=\"ops\"}",
-            "Expected days": 14, "Effective days": None,
+            "Expected days": 14, "Effective days": 7,
         }])
         self.assertEqual(
             [(row[" Stack"], row["Status"]) for row in views["risk_retention_policy_status"]],
@@ -394,6 +396,68 @@ class RetentionPillarTest(unittest.TestCase):
         for _name, labels, _value in metrics:
             self.assertFalse(forbidden & set(labels))
             self.assertLessEqual(set(labels), {"status"})
+
+
+    def test_prometheus_duration_notation_parses_folded_weeks_and_years(self):
+        for raw, days in (("2w", 14), ("1y", 365), ("17w1d", 120), ("744h", 31), ("0s", 0),
+                          ("31d", 31), ("1d12h", 1.5), ("90m", 0.0625)):
+            with self.subTest(raw=raw):
+                self.assertEqual(retention.period_days(raw), days)
+        for raw in ("", "d", "2x", "1d2w", "-1d", "1.5w"):
+            with self.subTest(raw=raw):
+                self.assertIsNone(retention.period_days(raw))
+
+    def test_unruled_stack_with_tenant_default_is_measured_and_policy_uses_default(self):
+        # Witnessed: Loki omits an empty retention_stream but always renders retention_period.
+        metrics, views = build({
+            "alpha": {"limits": {"available": True, "retention_period": "25w5d"}},
+            "beta": {"limits": {"available": True, "retention_period": "31d"}},
+        }, policy=[{"selector": '{service="audit"}', "minimum_period": "120d"}])
+        self.assertEqual(
+            [(row[" Stack"], row["Effective days"], row["Status"])
+             for row in views["risk_retention_policy_status"]],
+            [("alpha", 180, "compliant"), ("beta", 31, "below policy")],
+        )
+        values = {name: value for name, _, value in metrics}
+        self.assertEqual(values["gcinsight_risk_retention_stacks_measured"], 2.0)
+        self.assertEqual(values["gcinsight_risk_retention_policy_unreadable_stacks"], 0.0)
+
+    def test_unruled_streams_without_a_readable_default_stay_unreadable(self):
+        for limits in ({"available": True, "retention_stream": []},
+                       {"available": True, "retention_period": "forever", "retention_stream": []}):
+            with self.subTest(limits=limits):
+                _metrics, views = build({"alpha": {"limits": limits}},
+                                        policy=[{"selector": '{team="ops"}', "minimum_period": "14d"}])
+                row = views["risk_retention_policy_status"][0]
+                self.assertEqual((row["Status"], row["Effective days"]), ("unreadable", None))
+                self.assertEqual(views["risk_retention_policy_gaps"], [])
+
+    def test_stream_view_lists_only_tenant_defaults_departing_from_the_estate_mode(self):
+        stacks = [{"slug": slug, "status": "active"} for slug in ("a", "b", "c", "d")]
+        coverage = Coverage(tier="t2", total=len(stacks))
+        _metrics, views = retention.build(stacks, coverage, {
+            "a": {"limits": {"available": True, "retention_period": "31d"}},
+            "b": {"limits": {"available": True, "retention_period": "31d", "retention_stream": [
+                {"selector": '{service="audit"}', "period": "17w1d"}]}},
+            "c": {"limits": {"available": True, "retention_period": "180d"}},
+            "d": {"limits": {"available": False}},
+        })
+        self.assertEqual(views["risk_retention_stream"], [
+            {" Stack": "b", "Scope": "stream rule", "Period days": 120, "Priority": 0,
+             "Selector": '{service="audit"}'},
+            {" Stack": "c", "Scope": "tenant default", "Period days": 180, "Priority": None,
+             "Selector": None},
+        ])
+
+    def test_tied_tenant_defaults_have_no_mode_and_are_all_listed(self):
+        _metrics, views = build({
+            "alpha": {"limits": {"available": True, "retention_period": "31d"}},
+            "beta": {"limits": {"available": True, "retention_period": "90d"}},
+        })
+        self.assertEqual(
+            sorted((row[" Stack"], row["Period days"]) for row in views["risk_retention_stream"]),
+            [("alpha", 31), ("beta", 90)],
+        )
 
 
 if __name__ == "__main__":

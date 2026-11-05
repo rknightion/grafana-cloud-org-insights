@@ -106,6 +106,18 @@ def _yaml_limits(body: bytes, *, labelling: bool = False) -> dict[str, Any]:
     if labelling:
         return _labelling_yaml(lines)
 
+    # The tenant-wide default applies to every stream no `retention_stream` rule selects.
+    # Witnessed on staff stacks: always present (`31d` default), while an empty
+    # `retention_stream` is omitted from the body rather than rendered as `[]`.
+    selected: dict[str, Any] = {}
+    default_lines = [line for line in lines if line.startswith("retention_period:")]
+    if len(default_lines) > 1:
+        raise ValueError("duplicate retention_period")
+    for line in default_lines:
+        raw = line.partition(":")[2].strip()
+        if raw:
+            selected["retention_period"] = _yaml_scalar(raw)
+
     start: int | None = None
     inline = ""
     for index, line in enumerate(lines):
@@ -114,9 +126,9 @@ def _yaml_limits(body: bytes, *, labelling: bool = False) -> dict[str, Any]:
             inline = line.partition(":")[2].strip()
             break
     if start is None:
-        return {}
+        return selected
     if inline == "[]":
-        return {"retention_stream": []}
+        return {**selected, "retention_stream": []}
     if inline:
         raise ValueError("retention_stream is not a block list")
 
@@ -146,7 +158,7 @@ def _yaml_limits(body: bytes, *, labelling: bool = False) -> dict[str, Any]:
         current[key] = _yaml_scalar(raw)
     if current is not None:
         items.append(current)
-    return {"retention_stream": items}
+    return {**selected, "retention_stream": items}
 
 
 def _config_scalar(raw: str) -> Any:
@@ -360,6 +372,9 @@ def _limits_record(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str) -
     # did not disclose the state needed for a policy comparison, so the pillar must withhold that check.
     if streams is not None:
         record["retention_stream"] = [dict(item) for item in streams]
+    period = body.get("retention_period")
+    if isinstance(period, (str, int, float)) and not isinstance(period, bool):
+        record["retention_period"] = period
     return record
 
 

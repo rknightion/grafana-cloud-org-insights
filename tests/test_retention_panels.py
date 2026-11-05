@@ -52,11 +52,35 @@ class RetentionPanelsTest(unittest.TestCase):
     def test_candidate_expression_preserves_the_stack_join_shape(self):
         expression = _expressions(self.panels["_ret_candidates"])[0]
         self.assertIn(
-            'count(grafanacloud_logs_instance_limits{limit_name="max_query_lookback"} '
+            '(grafanacloud_logs_instance_limits{limit_name="max_query_lookback"} > 0) '
             "!= on(stack_id) group_left() "
-            'grafanacloud_logs_instance_limits{limit_name="retention_period"})',
+            'grafanacloud_logs_instance_limits{limit_name="retention_period"}',
             expression,
         )
+
+    def test_unset_zero_lookback_is_never_compared_raw(self):
+        # A zero lookback means unset; comparing it raw flagged every default-retention stack.
+        lookback = 'grafanacloud_logs_instance_limits{limit_name="max_query_lookback"}'
+        for key in ("_ret_candidates", "_ret_candidate_table", "_ret_trend"):
+            for expression in _expressions(self.panels[key]):
+                with self.subTest(panel=key, expression=expression):
+                    for start in range(len(expression)):
+                        if expression.startswith(lookback, start):
+                            self.assertTrue(expression.startswith(" > 0)", start + len(lookback)))
+
+    def test_global_retention_departing_from_the_estate_median_is_a_candidate(self):
+        expression = _expressions(self.panels["_ret_candidates"])[0]
+        self.assertIn(
+            'grafanacloud_logs_instance_limits{limit_name="retention_period"} != scalar(quantile(0.5, ',
+            expression,
+        )
+
+    def test_day_columns_do_not_use_the_rescaling_day_unit(self):
+        overrides = self.panels["_ret_candidate_table"]["spec"]["vizConfig"]["spec"][
+            "fieldConfig"]["overrides"]
+        units = [prop["value"] for override in overrides for prop in override["properties"]
+                 if prop["id"] == "unit"]
+        self.assertEqual(units, ["suffix: d", "suffix: d"])
 
     def test_global_stat_selects_the_modal_retention_value_and_counts_distinct_values(
         self,

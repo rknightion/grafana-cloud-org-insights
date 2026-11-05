@@ -73,7 +73,7 @@ Positive segment marginals do not establish additivity; no combined segment savi
 | `risk_fleet_scrape_intervals` | Parsed faster-than-policy intervals, DPM factors and explicit unparsed evidence; not a view of unmanaged local Alloy configs. |
 | `risk_label_cardinality` | Top-N high-cardinality label evidence and confidence, not an exhaustive label inventory. |
 | `risk_label_hygiene`, `risk_label_hygiene_coverage` | Classified bounded raw matches and per-signal sampling limits/coverage. No-match is not clean; raw matches are restricted to this S3 view/private input, never Loki or metrics. |
-| `risk_retention_stream` | Readable effective Loki selector/period/priority policy. |
+| `risk_retention_stream` | Readable effective Loki retention: every per-stream selector/period/priority rule (`Scope` `stream rule`), plus each tenant default that departs from the estate's most common default (`Scope` `tenant default`). |
 | `risk_retention_change_requests` | Self-serve change requests, not proof of all effective overrides. |
 | `risk_retention_policy_gaps`, `risk_retention_policy_status` | Comparison with owner-declared expectations, preserving unreadable/null outcomes rather than false compliance. |
 

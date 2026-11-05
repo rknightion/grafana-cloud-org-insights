@@ -14,10 +14,24 @@ _RETENTION = f'{_LIMITS}{{limit_name="retention_period"}}'
 _LOOKBACK = f'{_LIMITS}{{limit_name="max_query_lookback"}}'
 _DAYS = " / 1e9 / 86400"
 
-# Keep the comparison form visibly identical wherever it is used. The billing metric has one value per
-# stack and limit name, so `on(stack_id)` is its only join key. A mismatch is a candidate, not proof of
-# a per-stream setting: the collector performs that confirmation stack by stack.
-_DIVERGENCE = f"count({_LOOKBACK} != on(stack_id) group_left() {_RETENTION})"
+# A zero `max_query_lookback` is Loki's "unset" (queries fall back to retention), not a divergent
+# value: comparing it raw flagged every default stack. Only a set lookback can signal a likely
+# longer per-stream rule.
+_SET_LOOKBACK = f"({_LOOKBACK} > 0)"
+_LOOKBACK_DIVERGES = f"({_SET_LOOKBACK} != on(stack_id) group_left() {_RETENTION})"
+# The estate's typical retention is discovered each evaluation, never a literal product default.
+_RETENTION_DIVERGES = f"({_RETENTION} != scalar(quantile(0.5, {_RETENTION})))"
+# Keep the candidate set visibly identical wherever it is used. The billing metric has one value per
+# stack and limit name, so `on(stack_id)` is its only join key. A candidate is not proof of a
+# per-stream setting: the collector performs that confirmation stack by stack.
+_CANDIDATE_STACKS = (
+    f"(count by(stack_id) ({_RETENTION_DIVERGES}) "
+    f"or count by(stack_id) ({_LOOKBACK_DIVERGES}))"
+)
+_DIVERGENCE = f"count({_CANDIDATE_STACKS})"
+# Billing reports nanoseconds; tables show whole days. Grafana's `d` unit rescales 31 days to
+# "4.43 week", so day columns use a plain suffix instead.
+DAYS_UNIT = "suffix: d"
 
 _SCOPE = (
     "Estate-wide: grafanacloud-usage identifies numeric stack_id and does not follow the dashboard "
@@ -77,14 +91,16 @@ def _table_query(expression: str, ref_id: str) -> dict:
 
 def _candidate_table() -> dict:
     """Build the divergent-stack table with retention and lookback as separate numeric columns."""
-    retention = f"({_RETENTION} != on(stack_id) group_left() {_LOOKBACK}){_DAYS}"
-    lookback = f"({_LOOKBACK} != on(stack_id) group_left() {_RETENTION}){_DAYS}"
+    retention = f"(max by(stack_id) ({_RETENTION}) and on(stack_id) {_CANDIDATE_STACKS}){_DAYS}"
+    lookback = f"(max by(stack_id) {_SET_LOOKBACK} and on(stack_id) {_CANDIDATE_STACKS}){_DAYS}"
     panel = build._panel(  # noqa: SLF001 - this table needs two Prometheus result frames.
         "Candidate stacks: retention and lookback days",
-        "Latest returned retention and lookback values per stack within the selected range. Only samples "
-        "whose reported lookback differs from reported retention contribute; a past divergence may remain "
-        "visible after the values converge. This is a candidate "
-        "signal of a likely per-stream retention override, not confirmation. Slugs come only from a "
+        "Latest returned retention and lookback values per stack within the selected range. A stack is "
+        "listed when its global retention differs from the estate median, or when a query lookback is "
+        "set (non-zero) and differs from retention. A blank lookback means unset, which follows "
+        "retention. A past divergence may remain visible after the values converge. A set lookback is a "
+        "candidate signal of a likely per-stream retention override, not confirmation; the Risk "
+        "dashboard's effective retention table lists the rules actually in force. Slugs come only from a "
         "unique unit-valued range-end info observation, not historical identity reconstruction. " + _SCOPE,
         [_table_query(retention, "A"), _table_query(lookback, "B"),
          build.data_query("prometheus", build.USAGE_UID, {
@@ -108,11 +124,11 @@ def _candidate_table() -> dict:
                     "overrides": [
                         {
                             "matcher": {"id": "byName", "options": "Retention days"},
-                            "properties": [{"id": "unit", "value": "d"}],
+                            "properties": [{"id": "unit", "value": DAYS_UNIT}],
                         },
                         {
                             "matcher": {"id": "byName", "options": "Lookback days"},
-                            "properties": [{"id": "unit", "value": "d"}],
+                            "properties": [{"id": "unit", "value": DAYS_UNIT}],
                         },
                     ],
                 },
@@ -241,20 +257,20 @@ def retention_panels() -> dict[str, dict]:
         ),
         "_ret_global": _global_retention_stat(retention_days),
         "_ret_candidates": build.stat_panel(
-            "Candidate stacks with divergent lookback",
+            "Candidate stacks with non-default retention",
             _DIVERGENCE,
             ds_uid=build.USAGE_UID,
-            description="Counts stacks whose reported query lookback differs from reported retention. "
-            "It is a candidate signal of a likely per-stream retention override, not "
-            "confirmation. " + _SCOPE,
+            description="Counts stacks whose global retention differs from the estate median, or whose "
+            "query lookback is set (non-zero) and differs from retention. A set lookback is a candidate "
+            "signal of a likely per-stream retention override, not confirmation. " + _SCOPE,
         ),
         "_ret_candidate_table": _candidate_table(),
         "_ret_trend": build.timeseries_panel(
-            "Candidate stacks with divergent lookback over time",
+            "Candidate stacks with non-default retention over time",
             [(_DIVERGENCE, "candidate stacks")],
             ds_uid=build.USAGE_UID,
-            description="Trend of stacks whose reported query lookback differs from reported retention. "
-            "It is a candidate signal of a likely per-stream retention override, not "
-            "confirmation. " + _SCOPE,
+            description="Trend of stacks whose global retention differs from the estate median, or whose "
+            "query lookback is set (non-zero) and differs from retention. A set lookback is a candidate "
+            "signal of a likely per-stream retention override, not confirmation. " + _SCOPE,
         ),
     }
