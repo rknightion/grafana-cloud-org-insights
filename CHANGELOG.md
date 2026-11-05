@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.15.4](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.3...v0.15.4) (2026-11-05)
+
+
+### Bug Fixes
+
+* **retention:** count tenant defaults and stop flagging default stacks ([40a65bb](https://github.com/rknightion/grafana-cloud-org-insights/commit/40a65bbf3057282325d3a1837110ab13f8863968))
+
+
+### Miscellaneous
+
+* **backlog:** track the setup-trivy install script break ([5b5e59f](https://github.com/rknightion/grafana-cloud-org-insights/commit/5b5e59fc4f30ae144b97f7bfad5ebccd033180ca))
+
 ## [0.15.3](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.2...v0.15.3) (2026-11-03)
 
 
