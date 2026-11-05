@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.15.5](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.4...v0.15.5) (2026-11-05)
+
+
+### Bug Fixes
+
+* **provision:** accept a successful non-201 service-account create ([719a58e](https://github.com/rknightion/grafana-cloud-org-insights/commit/719a58ea3a32816609fbaa05cec29b7258409993))
+
+
+### Miscellaneous
+
+* **backlog:** track the provisioner non-201 Admin create failure ([33eedf9](https://github.com/rknightion/grafana-cloud-org-insights/commit/33eedf9f82f1b93df8d5494a39e70ead273264d4))
+
 ## [0.15.4](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.3...v0.15.4) (2026-11-05)
 
 
