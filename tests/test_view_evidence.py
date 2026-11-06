@@ -179,7 +179,7 @@ def test_dependencies_are_derived_rules_coverage_and_old_consumers_unchanged(tmp
     assert payload["rows"] == []
     assert block["completeness"] == "unknown", "zero findings/rule pass/floor pass is not exhaustiveness"
     # Evidence itself adds no series; the separate AI input adds eight provenance combinations.
-    assert sum(spec.series for spec in budget.CATALOGUE) == 13835
+    assert sum(spec.series for spec in budget.CATALOGUE) == 13836
     assert len(hydrate.INPUT_OWNER) == budget.INPUT == 33
 
 

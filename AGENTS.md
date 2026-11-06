@@ -311,6 +311,16 @@ The approved source is doc-0008 Part 1 (Labelling best-practice research and rul
 Not amended: `MAX_PER_STACK_FANOUT`, the one-extra-label rule, gap-is-absent, the limited-run
 guard, own-input hydration and derived `VIEW_INPUTS`.
 
+## Retention policy stream presence
+
+With `GCINSIGHT_EXPECTED_RETENTION_POLICY` set, T2 `loki_config` makes one GET of the approved Loki
+`/loki/api/v1/series` route per policy selector per live stack (org CAP, `hlInstanceId` basic auth,
+`match[]` = the policy selector, 7-day window, exact 200, 1 MiB cap). Only the distinct-stream count
+persists; label sets are transient. Below the minimum, 0 streams is `no matching streams` (not a gap),
+an unreadable probe is `below policy, streams unknown` (still a gap), and a seen stream is
+`below policy`. Presence never changes a compliant or unreadable result, and its failure is not a
+publication floor. No new route, scope or credential.
+
 ## D-VOL20 / D-RULE20: default-off producer and alerting inventory
 
 - `loki_volume` is T2-owned and default-off (`GCINSIGHT_LOKI_VOLUME_ENABLED`,

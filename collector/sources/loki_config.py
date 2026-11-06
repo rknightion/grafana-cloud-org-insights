@@ -11,6 +11,7 @@ from __future__ import annotations
 import ast
 import json
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Mapping, Sequence
 
@@ -18,6 +19,11 @@ from collector.httpclient import ReadOnlyClient
 from collector.sources.loki_read import LOKI_READ_HEADERS
 
 LIMITS_PATH = "config/tenant/v1/limits"
+SERIES_PATH = "loki/api/v1/series"
+# Stream presence for a configured retention selector: one bounded `/series` GET per selector.
+# Seven days is a window, not a retention claim; a stack quiet for longer reads as no stream.
+PRESENCE_WINDOW_SECONDS = 7 * 86400
+MAX_SERIES_BYTES = 1024 * 1024  # The label_inventory `/series` ceiling; never enlarged.
 RETENTION_REQUESTS_PATH = "api/plugins/grafana-dbcfg-app/resources/v1/lokiconfigretentions"
 SETTINGS_PATH = "api/plugins/grafana-dbcfg-app/resources/v1/settings"
 
@@ -378,6 +384,50 @@ def _limits_record(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str) -
     return record
 
 
+def _presence_record(client: ReadOnlyClient, stack: Mapping[str, Any], cap: str, selector: str,
+                     now: float) -> dict[str, Any]:
+    """Count the streams a retention selector matches over the presence window, never their labels.
+
+    Exact HTTP 200 only. Label sets are transient: only the distinct-stream count leaves this function.
+    """
+    slug = str(stack.get("slug") or "")
+    base = stack.get("hlInstanceUrl")
+    tenant = stack.get("hlInstanceId")
+    if not isinstance(base, str) or not base.strip() or tenant is None or tenant == "":
+        return unavailable(slug, NO_LOKI_INSTANCE, "inventory has no usable Loki endpoint or tenant id")
+    if not cap:
+        return unavailable(slug, NO_CREDENTIAL, "no organisation CAP")
+    end = int(now)
+    try:
+        response = client.get(
+            f"{base.rstrip('/')}/{SERIES_PATH}",
+            params={"match[]": selector, "start": (end - PRESENCE_WINDOW_SECONDS) * 1_000_000_000,
+                    "end": end * 1_000_000_000},
+            basic=(str(tenant), cap),
+            headers={"Accept": "application/json", **LOKI_READ_HEADERS})
+    except Exception as exc:  # noqa: BLE001 - one stack must not fail the estate sweep
+        return unavailable(slug, TRANSPORT_ERROR, type(exc).__name__)
+    if response.status != 200:
+        return unavailable(slug, _state_for(response.status), f"HTTP {response.status}")
+    if len(response.body) > MAX_SERIES_BYTES:
+        return unavailable(slug, INVALID_RESPONSE, "series response over byte cap")
+    try:
+        body = response.json()
+    except Exception as exc:  # noqa: BLE001 - malformed JSON is an explicit state
+        return unavailable(slug, INVALID_RESPONSE, f"invalid JSON ({type(exc).__name__})")
+    if not isinstance(body, Mapping) or body.get("status") != "success" or not isinstance(
+            body.get("data"), list):
+        return unavailable(slug, INVALID_RESPONSE, "expected success status and data list")
+    streams = set()
+    for stream in body["data"]:
+        if (not isinstance(stream, Mapping) or not stream
+                or not all(isinstance(k, str) and isinstance(v, str) for k, v in stream.items())):
+            return unavailable(slug, INVALID_RESPONSE, "series entry is not a label set")
+        streams.add(tuple(sorted(stream.items())))
+    return {"available": True, "slug": slug, "state": OK, "streams": len(streams),
+            "window_seconds": PRESENCE_WINDOW_SECONDS}
+
+
 def _request_item(item: Mapping[str, Any]) -> dict[str, Any]:
     spec = item.get("spec")
     status = item.get("status")
@@ -430,13 +480,22 @@ def probe_stack(
     stack: Mapping[str, Any],
     cap: str,
     token: str,
+    presence_selectors: Sequence[str] = (),
+    now: float | None = None,
 ) -> dict[str, Any]:
     """Read one stack's effective Loki limits and independent request queue using only GET."""
-    return {
+    record = {
         "slug": str(stack.get("slug") or ""),
         "limits": _limits_record(client, stack, cap),
         "change_requests": _requests_record(client, stack, token),
     }
+    if presence_selectors:
+        at = time.time() if now is None else now
+        record["stream_presence"] = {
+            selector: _presence_record(client, stack, cap, selector, at)
+            for selector in dict.fromkeys(presence_selectors)
+        }
+    return record
 
 
 def probe_all(
@@ -447,9 +506,11 @@ def probe_all(
     *,
     concurrency: int = 12,
     on_error: Callable[[str, str], None] | None = None,
+    presence_selectors: Sequence[str] = (),
 ) -> dict[str, Any]:
     """Probe the live inventory only; credential-only departed stacks never enter the output."""
     results: dict[str, Any] = {}
+    now = time.time()
 
     def one(stack: Mapping[str, Any]) -> None:
         slug = str(stack.get("slug") or "")
@@ -457,7 +518,7 @@ def probe_all(
             return
         token = str((credentials.get(slug) or {}).get("token") or "")
         try:
-            results[slug] = probe_stack(client, stack, cap, token)
+            results[slug] = probe_stack(client, stack, cap, token, presence_selectors, now)
         except Exception as exc:  # noqa: BLE001 - defensive boundary around an individual stack
             results[slug] = {
                 "slug": slug,

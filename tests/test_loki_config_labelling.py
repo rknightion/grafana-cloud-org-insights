@@ -272,7 +272,7 @@ def test_indentless_retention_is_unknown_and_preserves_last_good(prefix, monkeyp
     assert "risk_retention_policy_gaps" not in views
     assert views["risk_retention_policy_status"] == [{
         " Stack": stack["slug"], "Selector": '{service="api"}', "Expected days": 30,
-        "Effective days": None, "Status": "unreadable"}]
+        "Effective days": None, "Streams (7d)": None, "Status": "unreadable"}]
     values = {name: value for name, _, value in metrics}
     assert "gcinsight_risk_retention_stacks_measured" not in values
     assert "gcinsight_risk_retention_policy_gap_stacks" not in values

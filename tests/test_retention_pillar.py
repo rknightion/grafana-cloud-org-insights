@@ -11,10 +11,23 @@ from collector.pillars import retention
 STACKS = [{"slug": "alpha", "status": "active"}, {"slug": "beta", "status": "active"}]
 
 
-def build(payload, *, policy=()):
+def build(payload, *, policy=(), presence=1):
+    """Each record observes `presence` streams for every policy selector unless it says otherwise.
+
+    The default keeps a below-minimum stack a real gap; `presence=None` omits the probe entirely.
+    """
     coverage = Coverage(tier="t2", total=len(STACKS))
     for stack in STACKS:
         coverage.record_ok(stack["slug"])
+    if presence is not None:
+        payload = {
+            slug: record if not isinstance(record, dict) or "stream_presence" in record else {
+                **record,
+                "stream_presence": {item["selector"]: {"available": True, "streams": presence}
+                                    for item in policy},
+            }
+            for slug, record in payload.items()
+        }
     return retention.build(STACKS, coverage, payload, expected_policy=policy)
 
 
@@ -254,7 +267,7 @@ class RetentionPillarTest(unittest.TestCase):
                 }, policy=[{"selector": '{service="api"}', "minimum_period": "14d"}])
                 self.assertEqual(views["risk_retention_policy_status"][0], {
                     " Stack": "alpha", "Selector": '{service="api"}',
-                    "Expected days": 14, "Effective days": 31, "Status": "compliant",
+                    "Expected days": 14, "Effective days": 31, "Streams (7d)": 1, "Status": "compliant",
                 })
                 self.assertEqual(views["risk_retention_policy_gaps"], [])
                 values = {name: value for name, _, value in metrics}
@@ -316,7 +329,7 @@ class RetentionPillarTest(unittest.TestCase):
 
         self.assertEqual(views["risk_retention_policy_gaps"], [{
             " Stack": "alpha", "Selector": "{team=\"ops\"}",
-            "Expected days": 14, "Effective days": 7,
+            "Expected days": 14, "Effective days": 7, "Streams (7d)": 1,
         }])
         self.assertEqual(
             [(row[" Stack"], row["Status"]) for row in views["risk_retention_policy_status"]],
@@ -346,7 +359,7 @@ class RetentionPillarTest(unittest.TestCase):
 
         self.assertEqual(views["risk_retention_policy_gaps"], [{
             " Stack": "alpha", "Selector": "{team=\"app\"}",
-            "Expected days": 14, "Effective days": 7,
+            "Expected days": 14, "Effective days": 7, "Streams (7d)": 1,
         }])
         values = {name: value for name, _labels, value in metrics}
         self.assertEqual(values["gcinsight_risk_retention_policy_gap_stacks"], 1.0)
@@ -365,7 +378,7 @@ class RetentionPillarTest(unittest.TestCase):
 
         self.assertEqual(views["risk_retention_policy_gaps"], [{
             " Stack": "alpha", "Selector": "{team=\"ops\"}",
-            "Expected days": 14, "Effective days": 7,
+            "Expected days": 14, "Effective days": 7, "Streams (7d)": 1,
         }])
         values = {name: value for name, _labels, value in metrics}
         self.assertEqual(values["gcinsight_risk_retention_policy_gap_stacks"], 1.0)
@@ -458,6 +471,67 @@ class RetentionPillarTest(unittest.TestCase):
             sorted((row[" Stack"], row["Period days"]) for row in views["risk_retention_stream"]),
             [("alpha", 31), ("beta", 90)],
         )
+
+class RetentionPolicyStreamPresenceTest(unittest.TestCase):
+    """Below the minimum, observed streams separate a real gap from a selector with nothing to keep."""
+
+    POLICY = [{"selector": '{kind="auditing"}', "minimum_period": "120d"}]
+
+    @staticmethod
+    def record(presence):
+        record = {"limits": {"available": True, "retention_period": "31d", "retention_stream": []}}
+        if presence is not None:
+            record["stream_presence"] = {'{kind="auditing"}': presence}
+        return record
+
+    def test_absent_streams_are_reported_apart_from_gaps(self):
+        metrics, views = build({
+            "alpha": self.record({"available": True, "streams": 0}),
+            "beta": self.record({"available": True, "streams": 2}),
+        }, policy=self.POLICY, presence=None)
+        status = {row[" Stack"]: (row["Status"], row["Streams (7d)"])
+                  for row in views["risk_retention_policy_status"]}
+        self.assertEqual(status, {"alpha": ("no matching streams", 0), "beta": ("below policy", 2)})
+        self.assertEqual([row[" Stack"] for row in views["risk_retention_policy_gaps"]], ["beta"])
+        values = {name: value for name, _labels, value in metrics}
+        self.assertEqual(values["gcinsight_risk_retention_policy_gap_stacks"], 1.0)
+        self.assertEqual(values["gcinsight_risk_retention_policy_no_stream_stacks"], 1.0)
+        self.assertEqual(values["gcinsight_risk_retention_policy_compliant_stacks"], 0.0)
+
+    def test_unknown_presence_stays_a_gap_rather_than_hiding_one(self):
+        for presence in (None, {"available": False, "state": "http_error"},
+                         {"available": True, "streams": -1}, {"available": True, "streams": True}):
+            with self.subTest(presence=presence):
+                metrics, views = build({"alpha": self.record(presence)}, policy=self.POLICY,
+                                       presence=None)
+                row = views["risk_retention_policy_status"][0]
+                self.assertEqual((row["Status"], row["Streams (7d)"]),
+                                 ("below policy, streams unknown", None))
+                self.assertEqual(views["risk_retention_policy_gaps"][0]["Streams (7d)"], None)
+                values = {name: value for name, _labels, value in metrics}
+                self.assertEqual(values["gcinsight_risk_retention_policy_gap_stacks"], 1.0)
+                self.assertEqual(values["gcinsight_risk_retention_policy_no_stream_stacks"], 0.0)
+
+    def test_presence_never_changes_a_compliant_or_unreadable_result(self):
+        record = self.record({"available": True, "streams": 0})
+        record["limits"]["retention_period"] = "180d"
+        _metrics, views = build({
+            "alpha": record,
+            "beta": {"limits": {"available": False},
+                     "stream_presence": {'{kind="auditing"}': {"available": True, "streams": 0}}},
+        }, policy=self.POLICY, presence=None)
+        status = {row[" Stack"]: row["Status"] for row in views["risk_retention_policy_status"]}
+        self.assertEqual(status, {"alpha": "compliant", "beta": "unreadable"})
+
+    def test_a_real_gap_on_another_selector_is_not_also_counted_as_no_streams(self):
+        policy = self.POLICY + [{"selector": '{service="api"}', "minimum_period": "60d"}]
+        record = self.record(None)
+        record["stream_presence"] = {'{kind="auditing"}': {"available": True, "streams": 0},
+                                     '{service="api"}': {"available": True, "streams": 3}}
+        metrics, _views = build({"alpha": record}, policy=policy, presence=None)
+        values = {name: value for name, _labels, value in metrics}
+        self.assertEqual(values["gcinsight_risk_retention_policy_gap_stacks"], 1.0)
+        self.assertEqual(values["gcinsight_risk_retention_policy_no_stream_stacks"], 0.0)
 
 
 if __name__ == "__main__":

@@ -29,13 +29,21 @@ VIEW_SCHEMAS: dict[str, tuple[tuple[str, str], ...]] = {
     ),
     "risk_retention_policy_gaps": (
         (" Stack", "string"), ("Selector", "string"), ("Expected days", "number"),
-        ("Effective days", "number"),
+        ("Effective days", "number"), ("Streams (7d)", "number"),
     ),
     "risk_retention_policy_status": (
         (" Stack", "string"), ("Selector", "string"), ("Expected days", "number"),
-        ("Effective days", "number"), ("Status", "string"),
+        ("Effective days", "number"), ("Streams (7d)", "number"), ("Status", "string"),
     ),
 }
+
+# Policy status. Below the minimum, the selector's observed streams decide between a real gap, a
+# selector with nothing to retain, and an unknown presence, which stays a gap rather than hiding one.
+STATUS_COMPLIANT = "compliant"
+STATUS_BELOW = "below policy"
+STATUS_NO_STREAMS = "no matching streams"
+STATUS_BELOW_UNKNOWN = "below policy, streams unknown"
+STATUS_UNREADABLE = "unreadable"
 
 SCOPE_STREAM = "stream rule"
 SCOPE_GLOBAL = "tenant default"
@@ -166,6 +174,7 @@ def build(
     status_counts = {status: 0 for status in REQUEST_STATUSES}
     gaps: set[str] = set()
     compliant_stacks: set[str] = set()
+    no_stream_stacks: set[str] = set()
     unreadable_stacks: set[str] = set()
     any_policy_measurement = False
     global_periods: dict[str, float] = {}
@@ -178,6 +187,13 @@ def build(
         limits = record.get("limits") if isinstance(record, Mapping) else None
         requests = record.get("change_requests") if isinstance(record, Mapping) else None
         requests_readable = isinstance(requests, Mapping) and bool(requests.get("available"))
+        presence = record.get("stream_presence") if isinstance(record, Mapping) else None
+        presence = presence if isinstance(presence, Mapping) else {}
+
+        def observed_streams(selector: str) -> int | None:
+            probe = presence.get(selector)
+            count = probe.get("streams") if isinstance(probe, Mapping) and probe.get("available") else None
+            return count if type(count) is int and count >= 0 else None
 
         def unreadable_policy_rows() -> None:
             if policy:
@@ -190,7 +206,7 @@ def build(
             policy_status_rows.append({
                 " Stack": slug, "Selector": selector,
                 "Expected days": _display_days(minimum), "Effective days": None,
-                "Status": "unreadable",
+                "Streams (7d)": observed_streams(selector), "Status": STATUS_UNREADABLE,
             })
 
         if requests_readable:
@@ -310,21 +326,34 @@ def build(
                     stack_compliant = False
                     continue
                 any_policy_measurement = True
-                status = "compliant" if effective >= minimum else "below policy"
+                streams_seen = observed_streams(selector)
+                if effective >= minimum:
+                    status = STATUS_COMPLIANT
+                elif streams_seen == 0:
+                    status = STATUS_NO_STREAMS
+                elif streams_seen is None:
+                    status = STATUS_BELOW_UNKNOWN
+                else:
+                    status = STATUS_BELOW
                 policy_status_rows.append({
                     " Stack": slug, "Selector": selector,
                     "Expected days": _display_days(minimum),
                     "Effective days": _display_days(effective),
+                    "Streams (7d)": streams_seen,
                     "Status": status,
                 })
                 if effective < minimum:
                     stack_compliant = False
+                    if status == STATUS_NO_STREAMS:
+                        no_stream_stacks.add(slug)
+                        continue
                     gaps.add(slug)
                     gap_rows.append({
                         " Stack": slug,
                         "Selector": selector,
                         "Expected days": _display_days(minimum),
                         "Effective days": _display_days(effective),
+                        "Streams (7d)": streams_seen,
                     })
             if stack_compliant:
                 compliant_stacks.add(slug)
@@ -340,6 +369,9 @@ def build(
     if policy and any_policy_measurement:
         metrics.append(("gcinsight_risk_retention_policy_compliant_stacks", {},
                         float(len(compliant_stacks))))
+        # A stack with a real gap on another selector is counted there, not here.
+        metrics.append(("gcinsight_risk_retention_policy_no_stream_stacks", {},
+                        float(len(no_stream_stacks - gaps))))
     if policy:
         metrics.append(("gcinsight_risk_retention_policy_unreadable_stacks", {},
                         float(len(unreadable_stacks))))

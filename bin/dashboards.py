@@ -2326,8 +2326,17 @@ def d_risk(ds: str):
         "n_retention_policy_gaps": build.stat_panel(
             "Stacks below configured retention policy",
             "gcinsight_risk_retention_policy_gap_stacks",
-            description="Confirmed breaches among stacks with readable policy evidence. Unreadable "
-                        "stacks are counted separately. No repository default is assumed."),
+            description="Stacks whose effective retention for a configured selector is below its "
+                        "minimum and whose matching streams were seen in the last 7 days, or could not "
+                        "be checked. Stacks with no matching stream and unreadable stacks are counted "
+                        "separately. No repository default is assumed."),
+        "n_retention_policy_no_streams": build.stat_panel(
+            "Stacks below policy with no matching streams",
+            "gcinsight_risk_retention_policy_no_stream_stacks",
+            description="Stacks whose retention would fall short for a configured selector, but where "
+                        "the selector matched no Loki stream in the last 7 days, so nothing is "
+                        "currently being lost early. For an audit-log selector this usually means "
+                        "audit logging is not enabled on the stack."),
         "n_retention_policy_compliant": build.stat_panel(
             "Stacks compliant with configured retention policy",
             "gcinsight_risk_retention_policy_compliant_stacks",
@@ -2362,7 +2371,10 @@ def d_risk(ds: str):
             schema=retention_pillar.VIEW_SCHEMAS["risk_retention_policy_gaps"],
             units={"Expected days": DAYS_UNIT, "Effective days": DAYS_UNIT},
             description="Readable stacks whose effective selector rule falls below a deployment-supplied "
-                        "minimum. Unreadable stacks are not classified as compliant or in breach."),
+                        "minimum and whose matching streams were seen in the last 7 days (Streams) or "
+                        "could not be checked (blank). Selectors with no matching stream are listed in "
+                        "the status table instead. Unreadable stacks are not classified as compliant or "
+                        "in breach."),
         "routing_scope": build.text_panel(
             "How to read alert routing",
             "A direct receiver can be checked against the stack's contact-point list. An inherited rule "
@@ -2640,9 +2652,12 @@ def d_risk(ds: str):
             ds,
             schema=retention_pillar.VIEW_SCHEMAS["risk_retention_policy_status"],
             units={"Expected days": DAYS_UNIT, "Effective days": DAYS_UNIT},
-            description="Every live stack for each deployment-supplied selector expectation. "
-                        "Unreadable Loki limits or ambiguous selector overlap stay unclassified; "
-                        "the self-serve request route is independent.")
+            description="Every live stack for each deployment-supplied selector expectation. Streams "
+                        "is the number of Loki streams the selector matched in the last 7 days: below "
+                        "policy with streams is a real gap, no matching streams means nothing is "
+                        "retained under that selector, and a blank count means presence was not "
+                        "readable. Unreadable Loki limits or ambiguous selector overlap stay "
+                        "unclassified; the self-serve request route is independent.")
     if fleet_detail_views_live:
         el.update({
             "fleet_attributes": build.table_panel(
@@ -2856,9 +2871,10 @@ def d_risk(ds: str):
             build.row("Coverage and policy", ["n_retention_measured",
                                                "n_retention_policy_compliant",
                                                "n_retention_policy_gaps",
+                                               "n_retention_policy_no_streams",
                                                "n_retention_policy_unreadable",
                                                "n_retention_requests_measured"],
-                      max_columns=5, row_height="short"),
+                      max_columns=6, row_height="short"),
             build.row("Request status", ["b_retention_requests"], max_columns=1),
             build.row("What is in force", ["retention_stream"], max_columns=1,
                       row_height="tall"),

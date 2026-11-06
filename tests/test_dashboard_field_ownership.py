@@ -187,7 +187,7 @@ ENUMS = {
     ("usage", "irm_alert_groups", "Relation"): ("collector/sources/irm_alert_groups.py", ("exact", "at_least")),
     ("risk", "org_members", "Staff access"): ("collector/pillars/risk.py:ORG_MEMBER_STAFF_ACCESS_STATES", ("active", "expired", "none", "unknown")),
     ("risk", "label_cardinality", "Confidence"): ("collector/label_cardinality.py", ("high", "possible")),
-    ("risk", "retention_policy_status", "Status"): ("collector/pillars/retention.py:build", ("compliant", "below policy", "unreadable")),
+    ("risk", "retention_policy_status", "Status"): ("collector/pillars/retention.py:build", ("compliant", "below policy", "no matching streams", "below policy, streams unknown", "unreadable")),
     ("maturity", "unscored_detail", "Unscored reason"): ("collector/pillars/maturity.py:eligibility/score_stack", ("paused", "too_few_users", "no_signal_above_floor", "insufficient_rubric_coverage")),
     ("dashboards", "tbl_opening_inventory", "State"): ("collector/pillars/insights.py", ("opened", "unopened", "unknown")),
     ("labelling", "scorecard", "Worst severity"): ("collector/label_rules.py:WEIGHTS", ("low", "medium", "high", None)),

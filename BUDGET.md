@@ -7,8 +7,8 @@ Regenerate: `python3 -m collector.emit.budget > BUDGET.md`
 
 | | Series |
 |---|---:|
-| **Declared (all phases)** | **13,835** |
-| Phase 1 only | 13,835 |
+| **Declared (all phases)** | **13,836** |
+| Phase 1 only | 13,836 |
 | Runaway ceiling | 100,000 |
 
 Everything lands on the configured write stack alone. Compare the measured platform footprint with that stack's own series over the same range; the org total is never the denominator. The 100,000 ceiling is a runaway backstop, not a target and not a licence for unbounded labels.
@@ -23,14 +23,14 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | B | 1,101 |
 | C | 14 |
 | D | 582 |
-| E | 1,125 |
+| E | 1,126 |
 | F | 21 |
 | I | 895 |
 | J | 4,400 |
 | K | 973 |
 | L | 4,066 |
 | scan | 362 |
-| **Total** | **13,835** |
+| **Total** | **13,836** |
 
 ## Metrics
 
@@ -177,7 +177,8 @@ Everything lands on the configured write stack alone. Compare the measured platf
 | `gcinsight_risk_public_dashboards_stacks` | E |  -  | 1 | 1 | how many stacks carry at least one - the number of owner conversations |
 | `gcinsight_risk_retention_change_request_stacks` | E |  -  | 1 | 1 | stacks whose Databases Configuration request queue was readable |
 | `gcinsight_risk_retention_policy_compliant_stacks` | E |  -  | 1 | 1 | stacks satisfying every configured selector expectation; absent without a readable policy measurement |
-| `gcinsight_risk_retention_policy_gap_stacks` | E |  -  | 1 | 1 | confirmed breaches among readable stacks; unreadable stacks are counted separately |
+| `gcinsight_risk_retention_policy_gap_stacks` | E |  -  | 1 | 1 | breaches among readable stacks where the selector's streams were seen or are unknown; unreadable stacks are counted separately |
+| `gcinsight_risk_retention_policy_no_stream_stacks` | E |  -  | 1 | 1 | stacks below a configured minimum only where the selector matched no stream in the presence window |
 | `gcinsight_risk_retention_policy_unreadable_stacks` | E |  -  | 1 | 1 | live stacks with unreadable Loki limits or ambiguous selector overlap |
 | `gcinsight_risk_retention_stacks_measured` | E |  -  | 1 | 1 | stacks whose effective Loki limits response was readable |
 | `gcinsight_risk_stacks_pipelines_no_collectors` | E |  -  | 1 | 1 | stacks with provisioned pipelines but no active collectors |
@@ -255,8 +256,8 @@ Each row is a decision: the data is per-stack detail a table panel renders from 
 | `risk_org_members` | E | 1 | 1 | clear-PII named org membership and staff-access-window drill-down |
 | `risk_plugin_version_drift` | E | 271 | 1 |  |
 | `risk_retention_change_requests` | E | 1 | 1 | self-serve request record; author and message never become metric labels |
-| `risk_retention_policy_gaps` | E | 1 | 1 | deployment-supplied selector expectations not met by readable effective limits |
-| `risk_retention_policy_status` | E | 1 | 1 | each live stack and configured selector expectation classified as compliant, below policy or unreadable |
+| `risk_retention_policy_gaps` | E | 1 | 1 | deployment-supplied selector expectations not met by readable effective limits, excluding selectors with no matching stream |
+| `risk_retention_policy_status` | E | 1 | 1 | each live stack and configured selector expectation classified as compliant, below policy, no matching streams, below policy with streams unknown, or unreadable |
 | `risk_retention_stream` | E | 1 | 1 | effective per-stream rules, plus tenant defaults departing from the estate mode |
 | `risk_sa_and_token_inventory` | E | 271 | 1 | named service-account and token inventory stays out of metric labels |
 | `usage_datasource_inventory` | C | 271 | 1 | live-inventory stack, vendor datasource type and instance count; type names stay out of metric labels |

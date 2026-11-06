@@ -2479,7 +2479,7 @@ class RecentDashboardPresentationContractsTest(unittest.TestCase):
         self.assertEqual(query["root_selector"], "rows")
         self.assertEqual([(col["text"], col["type"]) for col in query["columns"]], [
             ("Stack", "string"), ("Selector", "string"), ("Expected days", "number"),
-            ("Effective days", "number"), ("Status", "string"),
+            ("Effective days", "number"), ("Streams (7d)", "number"), ("Status", "string"),
         ])
         for key, metric in {
             "n_retention_measured": "gcinsight_risk_retention_stacks_measured",

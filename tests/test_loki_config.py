@@ -204,5 +204,73 @@ retention_stream:
         self.assertEqual(len(client.calls), 1)
 
 
+class StreamPresenceProbeTest(unittest.TestCase):
+    """One bounded `/series` GET per configured retention selector; only a count leaves the source."""
+
+    SELECTOR = '{kind="auditing"}'
+
+    def probe(self, response, selectors=(SELECTOR,)):
+        client = Client([Response(200, "retention_period: 744h\n".encode()),
+                         Response(200, {"items": []}), response])
+        record = loki_config.probe_stack(client, STACK, "cap-token", "reader-token", selectors,
+                                         now=1_800_000_000)
+        return client, record
+
+    def test_counts_distinct_streams_with_loki_basic_auth_over_the_window(self):
+        client, record = self.probe(Response(200, {"status": "success", "data": [
+            {"kind": "auditing", "service_name": "grafana-audit-log"},
+            {"kind": "auditing", "service_name": "grafana-audit-log", "host": "a"},
+            {"service_name": "grafana-audit-log", "kind": "auditing"},
+        ]}))
+        self.assertEqual(record["stream_presence"][self.SELECTOR],
+                         {"available": True, "slug": "alpha", "state": "ok", "streams": 2,
+                          "window_seconds": 7 * 86400})
+        url, kwargs = client.calls[2]
+        self.assertEqual(url, "https://logs.example/loki/api/v1/series")
+        self.assertEqual(kwargs["basic"], ("101", "cap-token"))
+        self.assertEqual(kwargs["params"], {
+            "match[]": self.SELECTOR, "start": (1_800_000_000 - 7 * 86400) * 1_000_000_000,
+            "end": 1_800_000_000 * 1_000_000_000})
+        self.assertEqual(kwargs["headers"]["X-Loki-Disable-Pipeline-Wrappers"], "true")
+        self.assertNotIn("grafana-audit-log", json.dumps(record))
+
+    def test_an_empty_series_list_is_a_measured_absence(self):
+        _client, record = self.probe(Response(200, {"status": "success", "data": []}))
+        self.assertEqual(record["stream_presence"][self.SELECTOR]["streams"], 0)
+
+    def test_anything_but_a_bounded_exact_200_success_is_unavailable(self):
+        for response in (
+            Response(206, {"status": "success", "data": []}),
+            Response(401, {}),
+            Response(200, {"status": "error", "data": []}),
+            Response(200, {"status": "success", "data": {}}),
+            Response(200, {"status": "success", "data": [{}]}),
+            Response(200, {"status": "success", "data": [{"kind": 1}]}),
+            Response(200, b"not json"),
+            Response(200, b" " * (loki_config.MAX_SERIES_BYTES + 1)),
+        ):
+            with self.subTest(status=response.status, body=response.body[:40]):
+                _client, record = self.probe(response)
+                probe = record["stream_presence"][self.SELECTOR]
+                self.assertFalse(probe["available"])
+                self.assertNotIn("streams", probe)
+
+    def test_no_configured_selector_makes_no_series_call(self):
+        client = Client([Response(200, "retention_period: 744h\n".encode()),
+                         Response(200, {"items": []})])
+        record = loki_config.probe_stack(client, STACK, "cap-token", "reader-token")
+        self.assertNotIn("stream_presence", record)
+        self.assertEqual(len(client.calls), 2)
+
+    def test_missing_loki_endpoint_or_cap_is_unavailable_without_a_call(self):
+        for stack, cap in (({**STACK, "hlInstanceUrl": ""}, "cap-token"), (STACK, "")):
+            with self.subTest(cap=cap):
+                client = Client([Response(200, {"items": []})] * 3)
+                record = loki_config.probe_stack(client, stack, cap, "reader-token",
+                                                 (self.SELECTOR,), now=1_800_000_000)
+                self.assertFalse(record["stream_presence"][self.SELECTOR]["available"])
+                self.assertFalse(any("/series" in url for url, _ in client.calls))
+
+
 if __name__ == "__main__":
     unittest.main()

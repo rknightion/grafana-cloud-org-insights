@@ -1117,6 +1117,10 @@ def gather_loki_config(
         creds,
         concurrency=cfg.concurrency,
         on_error=lambda slug, msg: errors.append(f"{slug}: {msg}"),
+        # Each configured retention selector is probed for matching streams, so a stack below policy
+        # with no such stream is reported apart from one actually losing those logs early.
+        presence_selectors=tuple(
+            policy["selector"] for policy in getattr(cfg, "expected_retention_policy", ())),
     )
     limits = sum(bool((record.get("limits") or {}).get("available")) for record in data.values())
     requests = sum(
@@ -1128,6 +1132,13 @@ def gather_loki_config(
         f"Loki retention: effective limits readable on {limits}/{len(data)} stacks; "
         f"change requests readable on {requests}/{len(data)} stacks",
     )
+    presence = [probe for record in data.values()
+                for probe in (record.get("stream_presence") or {}).values()]
+    if presence:
+        readable = sum(bool(probe.get("available")) for probe in presence)
+        console_log("warn" if readable < len(presence) else "info",
+                    f"Loki retention: policy stream presence readable for {readable}/{len(presence)} "
+                    "stack-selectors")
     return data, errors
 
 
