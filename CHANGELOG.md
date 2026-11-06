@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.16.0...v0.16.1) (2026-11-06)
+
+
+### Miscellaneous
+
+* retire migrated CodeRabbit configuration ([1354443](https://github.com/rknightion/grafana-cloud-org-insights/commit/135444356e2e9013aae30449baad67d76d18ff59))
+
 ## [0.16.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.5...v0.16.0) (2026-11-06)
 
 
