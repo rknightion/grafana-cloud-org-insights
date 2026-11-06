@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.16.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.5...v0.16.0) (2026-11-06)
+
+
+### Features
+
+* **retention:** separate selectors with no matching streams from policy gaps ([1647905](https://github.com/rknightion/grafana-cloud-org-insights/commit/16479056eb3f9b0003e742d6dfe366c51fdfb3e0))
+
+
+### Bug Fixes
+
+* **provision:** accept a 2xx transient Admin delete ([94deebc](https://github.com/rknightion/grafana-cloud-org-insights/commit/94deebc06387d84b2a075aad34eb2b93f53ff8aa))
+
+
+### Miscellaneous
+
+* **backlog:** note GCI-0146 live result and the delete-status follow-up ([6b7a0bc](https://github.com/rknightion/grafana-cloud-org-insights/commit/6b7a0bc10ae927e7eb559ec6707e5c193109382c))
+
 ## [0.15.5](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.4...v0.15.5) (2026-11-05)
 
 
