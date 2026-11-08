@@ -8,22 +8,21 @@ grafana-stack: none
 tracker: github
 landing: pr
 
-Issues are public: no customer identifier, stack name, account id, hostname or home path in any issue,
-pull request or doc. Run `just` with stdin from `/dev/null`.
+Issues are public: no customer identifier, stack name, account id, hostname or home path in them.
 
 The tracker working model is `~/repos/agent-docs/docs/github-tracker.md` (maintainers only).
 
 ## Queue
 
 - The queue is `just tracker queue`: open issues at Project Status Ready on the rknightion Project.
-- A charter selects work by labels (`type:task`, `type:bug`, `type:feature`, `needs-owner`,
+- A charter selects by labels (`type:task`, `type:bug`, `type:feature`, `needs-owner`,
   `needs-triage`) and Project fields (Status, Priority, Effort, Lane). Never queue a `needs-owner` or
   `needs-triage` issue, or the Renovate Dependency Dashboard (#10).
-- Only the root writes issues and the Project, through `just tracker`. A lane returns the status and
-  the AC ticks it wants.
-- A queue row names the issue as `#N`; cite work as `#N (what it is)`. A legacy board id (`GCI-0001`)
-  resolves with `just issue <ID>`; `.github/tracker/id-map.json` is the map. A bare `#N` below 143 is a
-  pull request or the Dependency Dashboard, never an imported task: imported issues start at #143.
+- Only the root writes issues and the Project, through `just tracker`; a lane returns the status and
+  AC ticks it wants.
+- A queue row names `#N`. A legacy id (`GCI-0001`) resolves with `just issue <ID>` (map:
+  `.github/tracker/id-map.json`). A bare `#N` below 143 is a pull request or #10; imported issues
+  start at #143.
 
 ## Credentials
 - `just check` needs no AWS credentials, network or live estate; run it freely.
