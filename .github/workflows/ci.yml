@@ -120,23 +120,62 @@ jobs:
       contents: read
     uses: rknightion/.github/.github/workflows/privacy-sweep.yml@8f00b7fb896191e598f12ed565395697c539add1 # v1.26.9
 
+  # The Backlog.md board is retired: issues are the queue. A pull request may delete files under
+  # backlog/ or move them out, never add or change one there. Reads the file list from the API, so
+  # no pull request code is checked out.
+  backlog-freeze:
+    name: backlog/ is frozen
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Refuse additions and changes under backlog/
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          CHANGED_FILES: ${{ github.event.pull_request.changed_files }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ && "$CHANGED_FILES" =~ ^[0-9]+$ ]]; then
+            echo "::error title=backlog freeze::the pull request number or file count is malformed"
+            exit 1
+          fi
+          # The pull request files API lists at most 3000 files; refuse rather than check part of a change.
+          if (( CHANGED_FILES > 3000 )); then
+            echo "::error title=backlog freeze::${CHANGED_FILES} changed files is more than the API lists; split the pull request"
+            exit 1
+          fi
+          offending="$(gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/files?per_page=100" \
+            --jq '.[] | select(.status != "removed") | select(.filename | startswith("backlog/")) | "\(.status) \(.filename | @json)"')"
+          if [[ -n "$offending" ]]; then
+            echo "::error title=backlog freeze::this pull request adds or changes files under backlog/; the board is retired, so file the work as an issue"
+            printf '  %s\n' "$offending"
+            exit 1
+          fi
+          echo "No file under backlog/ is added or changed."
+
   ci-success:
     name: ci-success
     runs-on: ubuntu-26.04
     if: always()
-    needs: [tests, identifiers, terraform, ac-evidence, privacy-sweep]
+    needs: [tests, identifiers, terraform, ac-evidence, privacy-sweep, backlog-freeze]
     steps:
       - name: Require explicit success from every required job
         # Named results fail closed for skipped or absent leaves; filtering a
         # wildcard result list for failure/cancelled would accept those states.
-        # Accepted skips: identifiers on a fork pull request (no secret), and ac-evidence and
-        # privacy-sweep off a pull request (the reusables run on pull requests only).
+        # Accepted skips: identifiers on a fork pull request (no secret), and ac-evidence,
+        # privacy-sweep and backlog-freeze off a pull request (they run on pull requests only).
         env:
           TESTS_RESULT: ${{ needs.tests.result }}
           IDENTIFIERS_RESULT: ${{ needs.identifiers.result }}
           TERRAFORM_RESULT: ${{ needs.terraform.result }}
           AC_EVIDENCE_RESULT: ${{ needs.ac-evidence.result }}
           PRIVACY_SWEEP_RESULT: ${{ needs.privacy-sweep.result }}
+          BACKLOG_FREEZE_RESULT: ${{ needs.backlog-freeze.result }}
           EVENT_NAME: ${{ github.event_name }}
           HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           THIS_REPO: ${{ github.repository }}
@@ -149,13 +188,14 @@ jobs:
             [[ "$IDENTIFIERS_RESULT" == success ]] || bad=1
           fi
           if [[ "$EVENT_NAME" == pull_request ]]; then
-            [[ "$AC_EVIDENCE_RESULT" == success && "$PRIVACY_SWEEP_RESULT" == success ]] || bad=1
+            [[ "$AC_EVIDENCE_RESULT" == success && "$PRIVACY_SWEEP_RESULT" == success && "$BACKLOG_FREEZE_RESULT" == success ]] || bad=1
           else
             [[ "$AC_EVIDENCE_RESULT" == success || "$AC_EVIDENCE_RESULT" == skipped ]] || bad=1
             [[ "$PRIVACY_SWEEP_RESULT" == success || "$PRIVACY_SWEEP_RESULT" == skipped ]] || bad=1
+            [[ "$BACKLOG_FREEZE_RESULT" == success || "$BACKLOG_FREEZE_RESULT" == skipped ]] || bad=1
           fi
           if [[ "$bad" != 0 ]]; then
-            echo "Required jobs must succeed: tests=${TESTS_RESULT}, identifiers=${IDENTIFIERS_RESULT}, terraform=${TERRAFORM_RESULT}, ac-evidence=${AC_EVIDENCE_RESULT}, privacy-sweep=${PRIVACY_SWEEP_RESULT} (event ${EVENT_NAME})"
+            echo "Required jobs must succeed: tests=${TESTS_RESULT}, identifiers=${IDENTIFIERS_RESULT}, terraform=${TERRAFORM_RESULT}, ac-evidence=${AC_EVIDENCE_RESULT}, privacy-sweep=${PRIVACY_SWEEP_RESULT}, backlog-freeze=${BACKLOG_FREEZE_RESULT} (event ${EVENT_NAME})"
             exit 1
           fi
           echo "ci-success - all required jobs explicitly succeeded or were skipped where allowed"

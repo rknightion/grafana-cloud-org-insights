@@ -5,6 +5,24 @@ ci-required: ci-success
 release-on-push: yes
 deploy-on-push: no
 grafana-stack: none
+tracker: github
+landing: pr
+
+Issues are public: no customer identifier, stack name, account id, hostname or home path in them.
+
+The tracker working model is `~/repos/agent-docs/docs/github-tracker.md` (maintainers only).
+
+## Queue
+
+- The queue is `just tracker queue`: open issues at Project Status Ready on the rknightion Project.
+- A charter selects by labels (`type:task`, `type:bug`, `type:feature`, `needs-owner`,
+  `needs-triage`) and Project fields (Status, Priority, Effort, Lane). Never queue a `needs-owner` or
+  `needs-triage` issue, or the Renovate Dependency Dashboard (#10).
+- Only the root writes issues and the Project, through `just tracker`; a lane returns the status and
+  AC ticks it wants.
+- A queue row names `#N`. A legacy id (`GCI-0001`) resolves with `just issue <ID>` (map:
+  `.github/tracker/id-map.json`). A bare `#N` below 143 is a pull request or #10; imported issues
+  start at #143.
 
 ## Credentials
 - `just check` needs no AWS credentials, network or live estate; run it freely.
@@ -32,9 +50,10 @@ grafana-stack: none
   explicit dispatch. An automated RC tag is not authority to publish a stable release.
 - A generated `CHANGELOG.md` can carry characters the shipped-text gate forbids: normalise it in a
   workflow step, never rewrite history or exempt the file.
-- `no-em-dashes` (part of `just check`) scans the whole tree except `codex/`, `backlog/` and `testdata/`.
-  Write fetched or research files with em dashes under `codex/` or the scratchpad, never elsewhere in
-  the repo, or the gate fails.
+- `no-em-dashes` (part of `just check`) scans the whole tree except `codex/` and `testdata/`, so the
+  moved board history under `.github/tracker/history/` is scanned too. Write fetched or research
+  files with em dashes under `codex/` or the scratchpad, never elsewhere in the repo, or the gate
+  fails.
 - Schema-validation "skipped" is unproven. One empty instant read is not an absent series; read the
   tier's real lookback window. A gap is an absent series, never a zero.
 - Promoted images are pinned by immutable digest. Consumer images are separate and unsigned; verify the
@@ -62,8 +81,6 @@ grafana-stack: none
   it; report image-publish failure or skip separately, never as one verdict.
 - Lanes write check scripts and evidence under `codex/` or the scratchpad, never `/tmp`, so the root
   can re-run the exact check.
-- Bare `backlog task edit --notes` / `--plan` replace the whole section; use `--append-notes` /
-  `--append-plan`.
 
 ## Mutexes
 - The live deployment account, its infra-state lock and its write-capable Grafana stack are one serial
