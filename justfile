@@ -60,7 +60,7 @@ no-em-dashes:
     hits=$(grep -rIn $'\342\200\224' . \
       --exclude-dir=.git --exclude-dir=testdata \
       --exclude-dir=.venv --exclude-dir=__pycache__ --exclude-dir=.terraform \
-      --exclude-dir=codex || true)
+      --exclude-dir=codex --exclude-dir=.agents --exclude-dir=.claude || true)
     if [ -n "$hits" ]; then
       echo "em dashes present, use a spaced hyphen:"
       echo "$hits"
