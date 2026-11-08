@@ -52,7 +52,7 @@ tf-validate:
 check-identifiers *args:
     bin/check-customer-identifiers --history {{ if env_var_or_default("CI", "") == "true" { "" } else { "--origin-refs" } }} {{ args }}
 
-# refuse em dashes in shipped text; private gitignored codex state is not shipped
+# refuse em dashes in shipped text; private gitignored codex state and the vended contributor-kit skills (third-party text, never edited here) are not shipped
 [group('check')]
 [script('bash')]
 no-em-dashes:
@@ -60,7 +60,7 @@ no-em-dashes:
     hits=$(grep -rIn $'\342\200\224' . \
       --exclude-dir=.git --exclude-dir=testdata \
       --exclude-dir=.venv --exclude-dir=__pycache__ --exclude-dir=.terraform \
-      --exclude-dir=codex || true)
+      --exclude-dir=codex | grep -v '^\./\.agents/skills/' || true)
     if [ -n "$hits" ]; then
       echo "em dashes present, use a spaced hyphen:"
       echo "$hits"
