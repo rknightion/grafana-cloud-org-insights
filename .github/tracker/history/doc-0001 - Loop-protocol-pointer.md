@@ -5,12 +5,12 @@ type: other
 created_date: '2026-08-24 11:58'
 updated_date: '2026-10-21T14:18:00Z'
 ---
-> **Generated pointer, not authoritative.** Rendered from `sources/loop-pointer.md` in `m7kni/agent-docs` at
+> **Generated pointer, not authoritative.** Rendered from `sources/loop-pointer.md` in `a private documentation repository` at
 > commit `0f4fd35` for `grafana-cloud-org-insights`. Do not edit it here; read the files it names.
 # Loop protocol pointer
 
-This board no longer carries the loop protocol. Its canonical files live in the agent-docs checkout
-at `~/repos/agent-docs/sources/loop/`:
+This board no longer carries the loop protocol. Its canonical files live in the private documentation checkout
+at `the private documentation repository's loop sources`:
 
 - `contract.md` - what every loop root obeys at run time, on any harness.
 - `harness-claude.md`, `harness-codex.md`, `harness-pi.md` - one per
