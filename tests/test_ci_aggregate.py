@@ -13,7 +13,9 @@ import unittest
 
 
 WORKFLOW = Path(__file__).resolve().parents[1] / ".github/workflows/ci.yml"
-REQUIRED = ("tests", "identifiers", "terraform")
+REQUIRED = ("tests", "identifiers", "terraform", "ac-evidence", "privacy-sweep")
+CORE = ("tests", "terraform")
+REPO = "owner/repo"
 
 
 def aggregate():
@@ -67,11 +69,13 @@ def aggregate():
     return leaves, parsed
 
 
-def resolve(value, leaves, results):
-    """Resolve only witnessed needs expressions; omitted results become empty."""
+def resolve(value, leaves, results, context):
+    """Resolve only witnessed needs and github context expressions; omitted results become empty."""
     joined = "${{ join(needs.*.result, ', ') }}"
     if value == joined:
         return ", ".join(results[leaf] for leaf in leaves if leaf in results)
+    if value in context:
+        return context[value]
     match = re.fullmatch(r"\$\{\{ needs\.([\w-]+)\.result \}\}", value)
     assert match is not None, f"Unsupported aggregate env expression: {value}"
     assert match[1] in leaves
@@ -94,14 +98,19 @@ def enabled(condition, results):
     return any(state in results.values() for state in states)
 
 
-def run_aggregate(results):
+def run_aggregate(results, event="pull_request", head_repo=REPO):
     leaves, steps = aggregate()
+    context = {
+        "${{ github.event_name }}": event,
+        "${{ github.event.pull_request.head.repo.full_name }}": head_repo if event == "pull_request" else "",
+        "${{ github.repository }}": REPO,
+    }
     output = []
     for condition, expressions, script in steps:
         if not enabled(condition, results):
             continue
         env = {"PATH": os.defpath, "LC_ALL": "C"}
-        env.update({key: resolve(value, leaves, results) for key, value in expressions.items()})
+        env.update({key: resolve(value, leaves, results, context) for key, value in expressions.items()})
         completed = subprocess.run(
             ["bash", "--noprofile", "--norc", "-e", "-o", "pipefail", "-c", script],
             env=env, capture_output=True, text=True, timeout=5,
@@ -112,24 +121,75 @@ def run_aggregate(results):
     return 0, "".join(output)
 
 
+BAD = ("failure", "cancelled", "skipped", "missing", "", "unknown")
+
+
+def scenario(event, **overrides):
+    """All-green results for an event: the pull request jobs are skipped off a pull request."""
+    results = dict.fromkeys(REQUIRED, "success")
+    if event != "pull_request":
+        results["ac-evidence"] = results["privacy-sweep"] = "skipped"
+    results.update(overrides)
+    return results
+
+
+def with_state(results, leaf, state):
+    results = dict(results)
+    if state == "missing":
+        del results[leaf]
+    else:
+        results[leaf] = state
+    return results
+
+
 class CIAggregateTests(unittest.TestCase):
-    def test_all_required_leaves_succeed(self):
-        code, output = run_aggregate(dict.fromkeys(REQUIRED, "success"))
+    def test_same_repository_pull_request_succeeds(self):
+        code, output = run_aggregate(scenario("pull_request"))
         self.assertEqual(code, 0, output)
         self.assertIn("ci-success", output)
 
-    def test_each_non_success_required_leaf_is_rejected(self):
+    def test_same_repository_pull_request_rejects_every_non_success(self):
         for leaf in REQUIRED:
-            for state in ("failure", "cancelled", "skipped", "missing", "", "unknown"):
+            for state in BAD:
                 with self.subTest(leaf=leaf, state=state):
-                    results = dict.fromkeys(REQUIRED, "success")
-                    if state == "missing":
-                        del results[leaf]
-                    else:
-                        results[leaf] = state
-                    code, output = run_aggregate(results)
+                    code, output = run_aggregate(with_state(scenario("pull_request"), leaf, state))
                     self.assertNotEqual(code, 0, f"Accepted {leaf}={state!r}: {output}")
 
+    def test_push_and_dispatch_accept_skipped_pull_request_checks_only(self):
+        for event in ("push", "workflow_dispatch"):
+            with self.subTest(event=event):
+                code, output = run_aggregate(scenario(event), event=event)
+                self.assertEqual(code, 0, output)
+                code, output = run_aggregate(scenario(event, **{"ac-evidence": "success", "privacy-sweep": "success"}), event=event)
+                self.assertEqual(code, 0, output)
+                for leaf in REQUIRED:
+                    for state in BAD:
+                        if leaf in ("ac-evidence", "privacy-sweep") and state == "skipped":
+                            continue
+                        with self.subTest(leaf=leaf, state=state):
+                            code, output = run_aggregate(with_state(scenario(event), leaf, state), event=event)
+                            self.assertNotEqual(code, 0, f"Accepted {event} {leaf}={state!r}: {output}")
+
+    def test_fork_pull_request_accepts_skipped_identifiers_only(self):
+        fork = "someone/fork"
+        code, output = run_aggregate(scenario("pull_request", identifiers="skipped"), head_repo=fork)
+        self.assertEqual(code, 0, output)
+        code, output = run_aggregate(scenario("pull_request"), head_repo=fork)
+        self.assertEqual(code, 0, output)
+        for leaf in REQUIRED:
+            for state in BAD:
+                if leaf == "identifiers" and state == "skipped":
+                    continue
+                with self.subTest(leaf=leaf, state=state):
+                    code, output = run_aggregate(with_state(scenario("pull_request"), leaf, state), head_repo=fork)
+                    self.assertNotEqual(code, 0, f"Accepted fork {leaf}={state!r}: {output}")
+
+    def test_deleted_fork_counts_as_a_fork(self):
+        code, output = run_aggregate(scenario("pull_request", identifiers="skipped"), head_repo="")
+        self.assertEqual(code, 0, output)
+
     def test_entire_needs_payload_missing_is_rejected(self):
-        code, output = run_aggregate({})
-        self.assertNotEqual(code, 0, f"Accepted an absent needs payload: {output}")
+        for event in ("pull_request", "push"):
+            with self.subTest(event=event):
+                code, output = run_aggregate({}, event=event)
+                self.assertNotEqual(code, 0, f"Accepted an absent needs payload: {output}")

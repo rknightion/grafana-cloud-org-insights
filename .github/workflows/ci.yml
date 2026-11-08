@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+    # `edited` re-runs CI when the pull request body changes, so the acceptance evidence check reads
+    # the new table. Every job runs on it: a job skipped by `if:` would report success to ci-success.
+    types: [opened, edited, reopened, synchronize, ready_for_review]
   workflow_dispatch:
 
 permissions:
@@ -11,7 +14,7 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   tests:
@@ -47,6 +50,10 @@ jobs:
 
   identifiers:
     name: no leaked identifiers
+    # The scan needs a repository secret, which a fork pull request never receives. It is skipped
+    # there, and ci-success accepts that skip for a fork pull request only. A maintainer re-runs the
+    # scan on a branch of this repository before merging a fork change.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
@@ -92,22 +99,63 @@ jobs:
         # `-backend=false`: this is a reusable module with no provider block and no state.
         run: just tf-validate
 
+  # A pull request that closes an issue shows evidence for each of its acceptance criteria. Checks
+  # only pull requests with a closing keyword (enforce-all-prs: false), because this repository takes
+  # outside and bot pull requests. Check run: `ac-evidence / Acceptance evidence`.
+  ac-evidence:
+    # The reusable fails on any event but pull_request; on a push to main this job is skipped.
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    uses: rknightion/.github/.github/workflows/ac-evidence.yml@8f00b7fb896191e598f12ed565395697c539add1 # v1.26.9
+
+  # The lines a pull request adds carry no identifier, email address, public address or credential
+  # shape. The reusable fails on any event but pull_request, so it runs on pull requests only.
+  # Check run: `privacy-sweep / Privacy sweep`.
+  privacy-sweep:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    uses: rknightion/.github/.github/workflows/privacy-sweep.yml@8f00b7fb896191e598f12ed565395697c539add1 # v1.26.9
+
   ci-success:
     name: ci-success
     runs-on: ubuntu-26.04
     if: always()
-    needs: [tests, identifiers, terraform]
+    needs: [tests, identifiers, terraform, ac-evidence, privacy-sweep]
     steps:
       - name: Require explicit success from every required job
         # Named results fail closed for skipped or absent leaves; filtering a
         # wildcard result list for failure/cancelled would accept those states.
+        # Accepted skips: identifiers on a fork pull request (no secret), and ac-evidence and
+        # privacy-sweep off a pull request (the reusables run on pull requests only).
         env:
           TESTS_RESULT: ${{ needs.tests.result }}
           IDENTIFIERS_RESULT: ${{ needs.identifiers.result }}
           TERRAFORM_RESULT: ${{ needs.terraform.result }}
+          AC_EVIDENCE_RESULT: ${{ needs.ac-evidence.result }}
+          PRIVACY_SWEEP_RESULT: ${{ needs.privacy-sweep.result }}
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          THIS_REPO: ${{ github.repository }}
         run: |
-          if [[ "$TESTS_RESULT" != success || "$IDENTIFIERS_RESULT" != success || "$TERRAFORM_RESULT" != success ]]; then
-            echo "Required jobs must succeed: tests=${TESTS_RESULT}, identifiers=${IDENTIFIERS_RESULT}, terraform=${TERRAFORM_RESULT}"
+          bad=0
+          [[ "$TESTS_RESULT" == success && "$TERRAFORM_RESULT" == success ]] || bad=1
+          if [[ "$EVENT_NAME" == pull_request && "$HEAD_REPO" != "$THIS_REPO" ]]; then
+            [[ "$IDENTIFIERS_RESULT" == success || "$IDENTIFIERS_RESULT" == skipped ]] || bad=1
+          else
+            [[ "$IDENTIFIERS_RESULT" == success ]] || bad=1
+          fi
+          if [[ "$EVENT_NAME" == pull_request ]]; then
+            [[ "$AC_EVIDENCE_RESULT" == success && "$PRIVACY_SWEEP_RESULT" == success ]] || bad=1
+          else
+            [[ "$AC_EVIDENCE_RESULT" == success || "$AC_EVIDENCE_RESULT" == skipped ]] || bad=1
+            [[ "$PRIVACY_SWEEP_RESULT" == success || "$PRIVACY_SWEEP_RESULT" == skipped ]] || bad=1
+          fi
+          if [[ "$bad" != 0 ]]; then
+            echo "Required jobs must succeed: tests=${TESTS_RESULT}, identifiers=${IDENTIFIERS_RESULT}, terraform=${TERRAFORM_RESULT}, ac-evidence=${AC_EVIDENCE_RESULT}, privacy-sweep=${PRIVACY_SWEEP_RESULT} (event ${EVENT_NAME})"
             exit 1
           fi
-          echo "ci-success - all required jobs explicitly succeeded"
+          echo "ci-success - all required jobs explicitly succeeded or were skipped where allowed"
