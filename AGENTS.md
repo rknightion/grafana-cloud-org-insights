@@ -438,6 +438,10 @@ metadata visible to Trivy and preserve the HIGH/CRITICAL gate and ignore policy.
 `just check` is the gate and is exactly what CI enforces. The suite runs with no AWS credentials, no
 network and no live estate, so run and rerun it freely.
 
+The `identifiers` job needs a repository secret, which a pull request from a fork never receives, so
+it is skipped there and `ci-success` accepts that skip for a fork pull request only. A maintainer runs
+`just check-identifiers` on a branch of this repository before merging a fork change.
+
 `just publish-image` is `[confirm]`-gated and pushes a real image to the configured ECR repository.
 Never pass `--yes` or `JUST_YES=1` to get past that gate.
 
