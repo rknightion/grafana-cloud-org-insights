@@ -223,7 +223,8 @@ Customer-only backfill authorization is not a generic BI runtime credential or P
 
 ## Labelling inventory (D-LBL1..12)
 
-The approved source is doc-0008 Part 1 (Labelling best-practice research and rulebook).
+The approved source is Part 1 of the labelling best-practice research and rulebook, kept at
+`.github/tracker/history/doc-0008 - Labelling-best-practice-research-and-rulebook.md`.
 
 - **D-LBL1 Retention.** The identity-bearing detail rule above governs `label_inventory`.
   Raw values are transient and never written; the existing raw-value exception is not widened.
@@ -459,6 +460,24 @@ Four kinds of test here are required because each catches a class of bug that lo
   is rendered or alerted. Exemptions need an explicit reason.
 - Fixture hygiene as a security boundary. Live compose exports go to a separate path and are
   anonymised before use; the exporter refuses to overwrite the committed fixture.
+
+## Tracking work
+
+Work is tracked in this repository's GitHub issues; they are the only queue. Do not add a checklist
+file beside them.
+
+- A pull request body says how it relates to an issue, on a line of its own: `Closes #N` with the
+  `Acceptance evidence` table from `.github/pull_request_template.md` (one row for each acceptance
+  criterion of that issue), `Refs #N` when it only relates to one, or `Task: none, <reason>`.
+- A pull request that changes `.github/workflows/` or `.github/actions/` carries no closing keyword:
+  write `Task: none, <reason>`, with `Refs #N` beside it if you like.
+- Contributors never need the project board or the tracker tooling; a maintainer handles both.
+- Issues and pull requests are public, so they carry no real identifiers: no customer or stack
+  names, account ids, email addresses, handles, hostnames, addresses or home paths. Write the shape,
+  not the instance.
+- Older commits, docs and tests cite legacy board ids such as `GCI-0001`. `just issue <ID>` prints
+  the issue each one became; `.github/tracker/id-map.json` is the map. The board's documents are
+  kept, with private identifiers redacted, under `.github/tracker/history/`.
 
 ## Deeper references
 

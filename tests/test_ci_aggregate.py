@@ -13,8 +13,8 @@ import unittest
 
 
 WORKFLOW = Path(__file__).resolve().parents[1] / ".github/workflows/ci.yml"
-REQUIRED = ("tests", "identifiers", "terraform", "ac-evidence", "privacy-sweep")
-CORE = ("tests", "terraform")
+REQUIRED = ("tests", "identifiers", "terraform", "ac-evidence", "privacy-sweep", "backlog-freeze")
+PR_ONLY = ("ac-evidence", "privacy-sweep", "backlog-freeze")
 REPO = "owner/repo"
 
 
@@ -128,7 +128,7 @@ def scenario(event, **overrides):
     """All-green results for an event: the pull request jobs are skipped off a pull request."""
     results = dict.fromkeys(REQUIRED, "success")
     if event != "pull_request":
-        results["ac-evidence"] = results["privacy-sweep"] = "skipped"
+        results.update(dict.fromkeys(PR_ONLY, "skipped"))
     results.update(overrides)
     return results
 
@@ -160,11 +160,11 @@ class CIAggregateTests(unittest.TestCase):
             with self.subTest(event=event):
                 code, output = run_aggregate(scenario(event), event=event)
                 self.assertEqual(code, 0, output)
-                code, output = run_aggregate(scenario(event, **{"ac-evidence": "success", "privacy-sweep": "success"}), event=event)
+                code, output = run_aggregate(scenario(event, **dict.fromkeys(PR_ONLY, "success")), event=event)
                 self.assertEqual(code, 0, output)
                 for leaf in REQUIRED:
                     for state in BAD:
-                        if leaf in ("ac-evidence", "privacy-sweep") and state == "skipped":
+                        if leaf in PR_ONLY and state == "skipped":
                             continue
                         with self.subTest(leaf=leaf, state=state):
                             code, output = run_aggregate(with_state(scenario(event), leaf, state), event=event)
