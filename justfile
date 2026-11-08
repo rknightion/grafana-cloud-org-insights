@@ -58,7 +58,7 @@ check-identifiers *args:
 no-em-dashes:
     set -uo pipefail
     hits=$(grep -rIn $'\342\200\224' . \
-      --exclude-dir=.git --exclude-dir=backlog --exclude-dir=testdata \
+      --exclude-dir=.git --exclude-dir=testdata \
       --exclude-dir=.venv --exclude-dir=__pycache__ --exclude-dir=.terraform \
       --exclude-dir=codex || true)
     if [ -n "$hits" ]; then
