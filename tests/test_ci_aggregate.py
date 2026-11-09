@@ -13,7 +13,7 @@ import unittest
 
 
 WORKFLOW = Path(__file__).resolve().parents[1] / ".github/workflows/ci.yml"
-REQUIRED = ("tests", "identifiers", "terraform", "ac-evidence", "privacy-sweep", "backlog-freeze")
+REQUIRED = ("tests", "identifiers", "terraform", "zizmor", "ac-evidence", "privacy-sweep", "backlog-freeze")
 PR_ONLY = ("ac-evidence", "privacy-sweep", "backlog-freeze")
 REPO = "owner/repo"
 

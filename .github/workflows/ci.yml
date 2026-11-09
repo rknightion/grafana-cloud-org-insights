@@ -158,11 +158,21 @@ jobs:
           fi
           echo "No file under backlog/ is added or changed."
 
+  # zizmor fails a pull request on any finding (enforce); push runs upload SARIF instead.
+  zizmor:
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    uses: rknightion/.github/.github/workflows/zizmor.yml@3d332ffa11827d468db8de6d323288c4a48a595f # v1.29.3
+    with:
+      enforce: true
+
   ci-success:
     name: ci-success
     runs-on: ubuntu-26.04
     if: always()
-    needs: [tests, identifiers, terraform, ac-evidence, privacy-sweep, backlog-freeze]
+    needs: [tests, identifiers, terraform, ac-evidence, privacy-sweep, backlog-freeze, zizmor]
     steps:
       - name: Require explicit success from every required job
         # Named results fail closed for skipped or absent leaves; filtering a
@@ -173,6 +183,7 @@ jobs:
           TESTS_RESULT: ${{ needs.tests.result }}
           IDENTIFIERS_RESULT: ${{ needs.identifiers.result }}
           TERRAFORM_RESULT: ${{ needs.terraform.result }}
+          ZIZMOR_RESULT: ${{ needs.zizmor.result }}
           AC_EVIDENCE_RESULT: ${{ needs.ac-evidence.result }}
           PRIVACY_SWEEP_RESULT: ${{ needs.privacy-sweep.result }}
           BACKLOG_FREEZE_RESULT: ${{ needs.backlog-freeze.result }}
@@ -181,7 +192,7 @@ jobs:
           THIS_REPO: ${{ github.repository }}
         run: |
           bad=0
-          [[ "$TESTS_RESULT" == success && "$TERRAFORM_RESULT" == success ]] || bad=1
+          [[ "$TESTS_RESULT" == success && "$TERRAFORM_RESULT" == success && "$ZIZMOR_RESULT" == success ]] || bad=1
           if [[ "$EVENT_NAME" == pull_request && "$HEAD_REPO" != "$THIS_REPO" ]]; then
             [[ "$IDENTIFIERS_RESULT" == success || "$IDENTIFIERS_RESULT" == skipped ]] || bad=1
           else
@@ -195,7 +206,7 @@ jobs:
             [[ "$BACKLOG_FREEZE_RESULT" == success || "$BACKLOG_FREEZE_RESULT" == skipped ]] || bad=1
           fi
           if [[ "$bad" != 0 ]]; then
-            echo "Required jobs must succeed: tests=${TESTS_RESULT}, identifiers=${IDENTIFIERS_RESULT}, terraform=${TERRAFORM_RESULT}, ac-evidence=${AC_EVIDENCE_RESULT}, privacy-sweep=${PRIVACY_SWEEP_RESULT}, backlog-freeze=${BACKLOG_FREEZE_RESULT} (event ${EVENT_NAME})"
+            echo "Required jobs must succeed: tests=${TESTS_RESULT}, identifiers=${IDENTIFIERS_RESULT}, terraform=${TERRAFORM_RESULT}, zizmor=${ZIZMOR_RESULT}, ac-evidence=${AC_EVIDENCE_RESULT}, privacy-sweep=${PRIVACY_SWEEP_RESULT}, backlog-freeze=${BACKLOG_FREEZE_RESULT} (event ${EVENT_NAME})"
             exit 1
           fi
           echo "ci-success - all required jobs explicitly succeeded or were skipped where allowed"
