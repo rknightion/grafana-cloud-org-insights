@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.16.1](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.16.0...v0.16.1) (2026-11-11)
+
+
+### Build and CI
+
+* fail pull requests on zizmor findings through ci-success ([#340](https://github.com/rknightion/grafana-cloud-org-insights/issues/340)) ([8621eda](https://github.com/rknightion/grafana-cloud-org-insights/commit/8621edab4a2042df2d53cb0fc7735de6a433d0e6))
+* wire GitHub issue tracker tools, acceptance-evidence and privacy-sweep checks ([e2dfa79](https://github.com/rknightion/grafana-cloud-org-insights/commit/e2dfa79d41fdfd18458724f7ee925bae3e140dc1))
+
+
+### Documentation
+
+* document the fork pull request identifier scan skip ([#332](https://github.com/rknightion/grafana-cloud-org-insights/issues/332)) ([c99dfa7](https://github.com/rknightion/grafana-cloud-org-insights/commit/c99dfa73a4dad6a5f4358d694f0cf17d7015386f))
+
+
+### Miscellaneous
+
+* **just:** the em-dash check skips agent skill files ([#338](https://github.com/rknightion/grafana-cloud-org-insights/issues/338)) ([20807b3](https://github.com/rknightion/grafana-cloud-org-insights/commit/20807b30822982b74ce1f4287c23699194935c52))
+* retire migrated CodeRabbit configuration ([1354443](https://github.com/rknightion/grafana-cloud-org-insights/commit/135444356e2e9013aae30449baad67d76d18ff59))
+* **tracker:** commit the legacy id map ([#329](https://github.com/rknightion/grafana-cloud-org-insights/issues/329)) ([767da8c](https://github.com/rknightion/grafana-cloud-org-insights/commit/767da8cb2f2216efc86e5f1ba5ea53a449e6f10e))
+* **tracker:** cut over to GitHub issues ([#330](https://github.com/rknightion/grafana-cloud-org-insights/issues/330)) ([4b3d07b](https://github.com/rknightion/grafana-cloud-org-insights/commit/4b3d07b303229a6ec9756e959ec6470023621855))
+* **tracker:** move board documents to history and remove the frozen board ([#335](https://github.com/rknightion/grafana-cloud-org-insights/issues/335)) ([0493d50](https://github.com/rknightion/grafana-cloud-org-insights/commit/0493d50fff52f64ed75c275cb452afdde566d42c))
+* **vended:** sync from rknightion/.github main ([#333](https://github.com/rknightion/grafana-cloud-org-insights/issues/333)) ([c156ded](https://github.com/rknightion/grafana-cloud-org-insights/commit/c156ded914b336643a7f0371ea5099556d17ebff))
+* **vended:** sync from rknightion/.github main ([#341](https://github.com/rknightion/grafana-cloud-org-insights/issues/341)) ([25ab50c](https://github.com/rknightion/grafana-cloud-org-insights/commit/25ab50cada90619789f5b21778387551a0a53317))
+* **vended:** sync the contributor kit ([#334](https://github.com/rknightion/grafana-cloud-org-insights/issues/334)) ([e71804e](https://github.com/rknightion/grafana-cloud-org-insights/commit/e71804e23d9c9c03b8e4bdc9d29898ea55162287))
+
 ## [0.16.0](https://github.com/rknightion/grafana-cloud-org-insights/compare/v0.15.5...v0.16.0) (2026-11-06)
 
 
