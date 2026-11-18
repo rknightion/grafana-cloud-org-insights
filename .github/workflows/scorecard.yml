@@ -1,8 +1,6 @@
 name: Scorecard
 
 on:
-  push:
-    branches: [main]
   schedule:
     - cron: "43 5 * * 1"
 
