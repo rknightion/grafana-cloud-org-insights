@@ -111,3 +111,5 @@ Deliberately not built:
 - mutation of customer dashboards, alert rules, service accounts or access policies by the collector;
 - Synthetic Monitoring result inventory, until a safe unattended read route exists;
 - dashboard duplication detection and natural-language querying.
+
+Disposable workflow path control.
