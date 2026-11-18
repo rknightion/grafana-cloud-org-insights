@@ -1,0 +1,5 @@
+# Release Please owns these complete files.
+/.release-please-manifest.json linguist-generated=true
+/CHANGELOG.md linguist-generated=true
+# python3 -m collector.emit.budget emits the checked-in catalogue.
+/BUDGET.md linguist-generated=true
