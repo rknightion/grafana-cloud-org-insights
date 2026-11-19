@@ -534,6 +534,28 @@ Four kinds of test here are required because each catches a class of bug that lo
 - Fixture hygiene as a security boundary. Live compose exports go to a separate path and are
   anonymised before use; the exporter refuses to overwrite the committed fixture.
 
+## Cursor Cloud specific instructions
+
+The pinned [environment](.cursor/environment.json) runs `just cloud-bootstrap`. It uses CI's
+Python 3.15 and the existing pytest setup. It makes checksum-verified OpenTofu and the
+Dockerfile-pinned AWS CLI available in `.venv/bin`. It initialises the module and standalone
+example with the backend disabled. The unit suite uses the AWS CLI for the gap-state fallback.
+
+From the repository root, set up the offline checks in the credential-free checkout.
+
+```sh
+export PATH="$PWD/.venv/bin:$PATH"
+export TF_PLUGIN_CACHE_DIR="$HOME/.cache/opentofu/providers"
+export AWS_EC2_METADATA_DISABLED=true AWS_CONFIG_FILE=/dev/null AWS_SHARED_CREDENTIALS_FILE=/dev/null
+```
+
+- Fast check `just fmt-check lint no-em-dashes </dev/null`.
+- Credential-free source checks `just fmt-check lint test tf-validate no-em-dashes </dev/null`.
+- Full gate `just check </dev/null` includes the identifier scan. Run it in the authorised
+  environment with the configured pattern source and the required Git history.
+
+Live collection and publication require a separate authorised environment.
+
 ## Tracking work
 
 Work is tracked in this repository's GitHub issues; they are the only queue. Do not add a checklist

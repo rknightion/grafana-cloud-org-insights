@@ -9,6 +9,21 @@ setup:
     python3 -m venv .venv
     .venv/bin/pip install --disable-pip-version-check --quiet pytest==9.1.1
 
+# Prepare the CI Python, test runner and local check tools for Cursor Cloud
+[group('dev')]
+[script('bash')]
+cloud-bootstrap:
+    set -euo pipefail
+    uv python install 3.15
+    python="$(uv python find --system --managed-python 3.15)"
+    PATH="$(dirname "$python"):$PATH" just setup
+    bash .cursor/install-opentofu.sh
+    bash .cursor/install-aws-cli.sh "$HOME/.cache/grafana-cloud-org-insights/aws-cli"
+    export TF_PLUGIN_CACHE_DIR="$HOME/.cache/opentofu/providers"
+    mkdir -p "$TF_PLUGIN_CACHE_DIR"
+    .venv/bin/tofu -chdir=terraform init -backend=false -input=false
+    .venv/bin/tofu -chdir=terraform/examples/standalone init -backend=false -input=false
+
 # format the justfile itself (this repo has no Python formatter - it ships zero third-party deps)
 [group('check')]
 fmt:
