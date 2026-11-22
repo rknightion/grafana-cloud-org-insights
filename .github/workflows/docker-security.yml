@@ -12,4 +12,4 @@ jobs:
     permissions:
       contents: read
       security-events: write # upload hadolint and Trivy results
-    uses: rknightion/.github/.github/workflows/docker-security.yml@f460d96cfd777d8e01066df655f4c157d4cf9332 # v1.31.1
+    uses: rknightion/.github/.github/workflows/docker-security.yml@51dd8bae34a71a2905a765402cf637c0a673bab8 # v1.31.3
