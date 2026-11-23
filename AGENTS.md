@@ -504,7 +504,8 @@ Wolfi installer stage for the checksum-pinned official AWS CLI v2. The final run
 shell or package manager. Collector subprocesses must invoke `aws` with argv, not shell
 pipelines. Python and AWS startup are proved on both amd64 and arm64; that is not a live
 AWS-service, full-estate workload, vendor-support or memory-bound witness. Keep package
-metadata visible to Trivy and preserve the HIGH/CRITICAL gate and ignore policy.
+metadata visible to Trivy and preserve the gate on fixable HIGH/CRITICAL findings and the ignore
+policy. Findings with no available fix do not block publication (`trivy-ignore-unfixed`).
 
 ## Task interface
 
