@@ -16,7 +16,7 @@ using its numbers.
 
 ## Requirements
 
-- Python 3.14 (the CI and container version) or a container runtime. The collector is stdlib-only - no third-party runtime dependencies.
+- Python 3.15 (the CI and container version) or a container runtime. The collector is stdlib-only - no third-party runtime dependencies.
 - A Grafana Cloud access policy token with the **org realm** and the read scopes in `collector.config.READER_SCOPES`. [Credentials and permissions](credentials.md) lists them and what each one reaches.
 - Your numeric org id.
 - Even for a dry run: one nominated write stack and its Mimir and Loki endpoints and tenant ids.
