@@ -12,4 +12,4 @@ jobs:
     permissions:
       contents: write      # enable automatic merging of the release ref
       pull-requests: write # arm auto-merge on the labelled release PR
-    uses: rknightion/.github/.github/workflows/arm-automerge.yml@b8a49e837c591099a98530180ab1050e89b29b23 # v1.31.8
+    uses: rknightion/.github/.github/workflows/arm-automerge.yml@3f83f4c8cf2a4fed80faf085c3c7bd1328d72f79 # v1.31.9
