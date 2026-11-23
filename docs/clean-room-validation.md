@@ -7,7 +7,7 @@ new deployment.
 
 ## Prerequisites and repository boundary
 
-Use Git, Python 3.14 with venv support (the repository's CI and container version), `just`, OpenTofu
+Use Git, Python 3.15 with venv support (the repository's CI and container version), `just`, OpenTofu
 >= 1.6 and a running Docker daemon with BuildKit and support for the chosen task architecture.
 Before setup and consumer commands, run `python3 --version` and `command -v python3`; make sure
 `python3` on PATH resolves to the intended interpreter. Record the exact version used; a gate
