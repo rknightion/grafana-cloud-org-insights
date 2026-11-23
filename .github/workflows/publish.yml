@@ -52,6 +52,8 @@ jobs:
     with:
       release-tag: ${{ inputs.release-tag || '' }}
       trivy-ignore-file: .trivyignore.yaml
+      # Gate only on findings that have a fix available for the scanned distribution.
+      trivy-ignore-unfixed: true
       build-args: |
         GCINSIGHT_SOURCE_URL=https://github.com/${{ github.repository }}
         GCINSIGHT_SOURCE_REVISION=${{ needs.source.outputs.revision }}
