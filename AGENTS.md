@@ -348,7 +348,7 @@ The approved source is Part 1 of the labelling best-practice research and rulebo
   override-dependent rules. No overrides implementation is granted until a readable exact
   route witness passes and the path is appended here. No scope was added or credential
   re-minted. Detailed limitations are in
-  /Users/rob/repos/grafana-cloud-org-insights/docs/traps.md. The family names are not wildcard
+  `docs/traps.md`. The family names are not wildcard
   route grants. Pyroscope is limited to the two exact
   RPC paths and `label_risk.profile_read` fence in the bounded daily label privacy risk section.
 - **D-LBL7 Customer grant.** The customer deployment may enable `label-inventory` once it
@@ -743,8 +743,6 @@ using the grafana.com Chrome profile; the earlier personal-profile login failure
 No credentials were entered or changed. A valid gcx API session published the checked source spec
 while preserving current folder metadata/resourceVersion; a raw saved builder key failed before
 writing. CLI authentication and browser authentication are separately witnessed.
-The exact receipt is machine-local at
-`/Users/rob/repos/grafana-cloud-org-insights/codex/direct-20261014/backlog-zero/release140/completion-receipt.json`.
 
 Dashboard-only releases validate the existing consumer projection against its deployed collector revision,
 then build from the separately recorded dashboard source. Load the deployment rate card explicitly
